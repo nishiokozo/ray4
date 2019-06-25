@@ -1,4 +1,5 @@
-// ver 1.1 2017/07/07 
+// 2017/07/07 ray3
+// 2019/06/25 ray4
 
 #include <stdio.h>
 #include <windows.h>
@@ -6,8 +7,21 @@
 #include "Win.h"
 
 
-//void	(*g_callbackPaint)(HDC)=0;
-//void	(*g_callbackUpdate)(Win&)=0;
+struct	WinBuf
+{
+	WNDCLASSEX		tWndClass;
+	HINSTANCE		hInstance;
+	const CHAR*		cpClassName;
+	const CHAR*		cpWindowName;
+	CHAR*			cpMenu;
+	MSG				tMsg;
+	HWND			m_hWnd;
+	//--
+	BITMAPINFO			GDI_bmpInfo;
+	BITMAPFILEHEADER	GDI_bmpFileHeader;
+	int					GDI_bpp;
+	BYTE*				GDI_bPixelBits;
+}g;
 
 
 //------------------------------------------------------------------------------
@@ -15,26 +29,26 @@ void Win::GDI_draw()
 //------------------------------------------------------------------------------
 {
 
-	HDC hdc = GetDC(m_hWnd);
+	HDC hdc = GetDC(g.m_hWnd);
 	RECT rect;
-	GetClientRect(m_hWnd, &rect);
-	StretchDIBits(hdc, 0, 0, rect.right, rect.bottom, 0, 0, m_width, m_height, GDI_bPixelBits, &GDI_bmpInfo, DIB_RGB_COLORS, SRCCOPY);
-	ReleaseDC(m_hWnd,hdc);
+	GetClientRect(g.m_hWnd, &rect);
+	StretchDIBits(hdc, 0, 0, rect.right, rect.bottom, 0, 0, m_width, m_height, g.GDI_bPixelBits, &g.GDI_bmpInfo, DIB_RGB_COLORS, SRCCOPY);
+	ReleaseDC(g.m_hWnd,hdc);
 
 }
 //------------------------------------------------------------------------------
 void Win::GDI_create(int bpp )
 //------------------------------------------------------------------------------
 {
-	GDI_bPixelBits = (BYTE*) malloc( m_width*m_height*bpp/8 );
-	GDI_bpp=bpp;
+	g.GDI_bPixelBits = (BYTE*) malloc( m_width*m_height*bpp/8 );
+	g.GDI_bpp=bpp;
 	BITMAPINFO bi;
-	BITMAPINFOHEADER &bih=GDI_bmpInfo.bmiHeader;
+	BITMAPINFOHEADER &bih=g.GDI_bmpInfo.bmiHeader;
 	bih.biSize			= sizeof(bih);
 	bih.biWidth			= m_width;
 	bih.biHeight		= m_height;
 	bih.biPlanes		= 1;
-	bih.biBitCount		= GDI_bpp;
+	bih.biBitCount		= g.GDI_bpp;
 	bih.biCompression	= BI_RGB;//BI_BITFIELDS;
 	bih.biSizeImage		= 0;
 	bih.biXPelsPerMeter	= 0;
@@ -43,12 +57,18 @@ void Win::GDI_create(int bpp )
 	bih.biClrImportant	= 0;
 
 }
+//------------------------------------------------------------------------------
+unsigned char* Win::getAddrPixels()
+//------------------------------------------------------------------------------
+{
+	return( (unsigned char*)g.GDI_bPixelBits);
+}
 
 //------------------------------------------------------------------------------
 static	LRESULT CALLBACK WinProc
 //------------------------------------------------------------------------------
 (
-	HWND	m_hWnd	// handle to window
+	HWND	hWnd	// handle to window
 	, UINT	uMsg	// message identifier
 	, WPARAM wParam // first message parameter
 	, LPARAM lParam // second message parameter
@@ -61,7 +81,7 @@ static	LRESULT CALLBACK WinProc
 		case WM_CREATE:
 
 			/* ウインドウを表示する */
-			ShowWindow( m_hWnd, SW_SHOW );
+			ShowWindow( hWnd, SW_SHOW );
 			break;
 
 		case WM_PAINT:
@@ -71,11 +91,11 @@ static	LRESULT CALLBACK WinProc
 				{
 
 					PAINTSTRUCT ps;
-					HDC hdc = BeginPaint(m_hWnd , &ps);
+					HDC hdc = BeginPaint(hWnd , &ps);
 
 //					if ( g_callbackPaint ) g_callbackPaint( hdc );
 
-					EndPaint(m_hWnd , &ps);
+					EndPaint(hWnd , &ps);
 				}
 
 
@@ -85,7 +105,7 @@ static	LRESULT CALLBACK WinProc
 				QueryPerformanceCounter(&time1);
 
 //		printf( "paint %f %d %d \n", time*1000, (int)nFreq.QuadPart, (int)(time2.QuadPart - time1.QuadPart) );
-				UpdateWindow(m_hWnd);
+				UpdateWindow(hWnd);
 
 				return 0;
 			}
@@ -106,119 +126,71 @@ static	LRESULT CALLBACK WinProc
 	}
 
 	/* デフォルト処理呼び出し */
-	return DefWindowProc( m_hWnd, uMsg, wParam, lParam );
+	return DefWindowProc( hWnd, uMsg, wParam, lParam );
 }
 
-
-/*
 //------------------------------------------------------------------------------
-void	Win::entryCallbackPaint( void(*func)(HDC) )
-//------------------------------------------------------------------------------
-{
-	g_callbackPaint = func;
-}
-//------------------------------------------------------------------------------
-void	 Win::entryCallbackUpdate( void(*func)(Win&) )
-//------------------------------------------------------------------------------
-{
-	g_callbackUpdate = func;
-}
-*/
-
-//------------------------------------------------------------------------------
-bool Win::runMessage()
+bool Win::exec()
 //------------------------------------------------------------------------------
 {
 	while(1)
 	{
-		while ( PeekMessage( &tMsg, NULL, 0, 0, PM_REMOVE) )
+		while ( PeekMessage( &g.tMsg, NULL, 0, 0, PM_REMOVE) )
 		{
-			DispatchMessage(&tMsg);
-			TranslateMessage(&tMsg);
-			if (tMsg.message == WM_QUIT) break;
+			DispatchMessage(&g.tMsg);
+			TranslateMessage(&g.tMsg);
+			if (g.tMsg.message == WM_QUIT) break;
 		}
-		if (tMsg.message == WM_QUIT) break;
-//		if ( g_callbackUpdate ) g_callbackUpdate(*this);
+		if (g.tMsg.message == WM_QUIT) break;
 
-		switch( m_render )
-		{
-		case RENDER_NONE:break;
-		case RENDER_GDI24:GDI_draw();break;
-		case RENDER_GDI32:GDI_draw();break;
-		}
+		GDI_draw();;
+
 		return true;
 	}
-//	return( tMsg.wParam );
 	return	false;
 }
-/*
-//------------------------------------------------------------------------------
-int Win::run()
-//------------------------------------------------------------------------------
-{
-	while(1)
-	{
-		while ( PeekMessage( &tMsg, NULL, 0, 0, PM_REMOVE) )
-		{
-			DispatchMessage(&tMsg);
-			TranslateMessage(&tMsg);
-			if (tMsg.message == WM_QUIT) break;
-		}
-		if (tMsg.message == WM_QUIT) break;
-		if ( g_callbackUpdate ) g_callbackUpdate(*this);
 
-		switch( m_render )
-		{
-		case RENDER_NONE:break;
-		case RENDER_GDI24:GDI_draw();break;
-		case RENDER_GDI32:GDI_draw();break;
-		}
-	}
-	return( tMsg.wParam );
-}
-*/
 //------------------------------------------------------------------------------
 Win::~Win()
 //------------------------------------------------------------------------------
 {
 }
 //------------------------------------------------------------------------------
-Win::Win( int w, int h, const char* name, RENDER render  )
+Win::Win( int w, int h, const char* name  )
 //------------------------------------------------------------------------------
 {
-	m_render=render;
 	m_width=w;
 	m_height=h;
 
 	/* アプリケーションインスタンス */
-	hInstance		= GetModuleHandle( NULL );
+	g.hInstance		= GetModuleHandle( NULL );
 
 
 	/* クラス名称 */
-	cpClassName	= "MainWindowClass";
+	g.cpClassName	= "MainWindowClass";
 
 	/* メニュー */
-	cpMenu			= MAKEINTRESOURCE( NULL );
+	g.cpMenu			= MAKEINTRESOURCE( NULL );
 
 	/* ウインドウ名称 */
-	cpWindowName = name;
+	g.cpWindowName = name;
 
 	/* ウインドウクラスパラメータセット */
-	tWndClass.cbSize		= sizeof( WNDCLASSEX );
-	tWndClass.style			= CS_HREDRAW | CS_VREDRAW;
-	tWndClass.lpfnWndProc	= WinProc;
-	tWndClass.cbClsExtra	= 0;	/* GetClassLong で取得可能なメモリ */
-	tWndClass.cbWndExtra	= 0;	/* GetWindowLong で取得可能なメモリ */
-	tWndClass.hInstance		= hInstance;
-	tWndClass.hIcon			= LoadIcon( NULL, IDI_APPLICATION );
-	tWndClass.hCursor		= LoadCursor( NULL, IDC_ARROW );
-	tWndClass.hbrBackground = (HBRUSH)( COLOR_WINDOW + 1 );
-	tWndClass.lpszMenuName	= cpMenu;
-	tWndClass.lpszClassName = cpClassName;
-	tWndClass.hIconSm		= NULL;
+	g.tWndClass.cbSize		= sizeof( WNDCLASSEX );
+	g.tWndClass.style			= CS_HREDRAW | CS_VREDRAW;
+	g.tWndClass.lpfnWndProc	= WinProc;
+	g.tWndClass.cbClsExtra	= 0;	/* GetClassLong で取得可能なメモリ */
+	g.tWndClass.cbWndExtra	= 0;	/* GetWindowLong で取得可能なメモリ */
+	g.tWndClass.hInstance		= g.hInstance;
+	g.tWndClass.hIcon			= LoadIcon( NULL, IDI_APPLICATION );
+	g.tWndClass.hCursor		= LoadCursor( NULL, IDC_ARROW );
+	g.tWndClass.hbrBackground = (HBRUSH)( COLOR_WINDOW + 1 );
+	g.tWndClass.lpszMenuName	= g.cpMenu;
+	g.tWndClass.lpszClassName = g.cpClassName;
+	g.tWndClass.hIconSm		= NULL;
 
 	/* ウインドウクラス生成 */
-	if ( 0 == RegisterClassEx( &tWndClass ) ) 
+	if ( 0 == RegisterClassEx( &g.tWndClass ) ) 
 	{
 	}
 
@@ -226,13 +198,12 @@ Win::Win( int w, int h, const char* name, RENDER render  )
 	{
 		RECT rc;
 		SetRect(&rc, 0, 0, m_width, m_height );
-//		int valWin = (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU);//
 		int valWin = WS_OVERLAPPEDWINDOW;
 		AdjustWindowRectEx(&rc, valWin, FALSE, 0);
 
-		m_hWnd = CreateWindowEx(
+		g.m_hWnd = CreateWindowEx(
 			  0
-			, tWndClass.lpszClassName//m_classname//wc.lpszClassName
+			, g.tWndClass.lpszClassName//m_classname//wc.lpszClassName
 			, name 
 			, valWin
 			, 800+rc.left   	        // horizontal position of window
@@ -241,17 +212,11 @@ Win::Win( int w, int h, const char* name, RENDER render  )
 			, rc.bottom-rc.top			// window height
 			, NULL                    // handle to parent or owner window
 			, NULL                    // handle to menu, or child-window identifier
-			, hInstance               // handle to application instance
+			, g.hInstance               // handle to application instance
 			, 0				       // pointer to window-creation data
 		);
 
 	}		
 	
-	switch( m_render )
-	{
-	case RENDER_NONE:		break;
-	case RENDER_GDI24:	GDI_create(24);	break;
-	case RENDER_GDI32:	GDI_create(32);	break;
-	}
-//	return	true;
+	GDI_create(24);
 }

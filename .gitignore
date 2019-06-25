@@ -1,4 +1,5 @@
 obj
+*.exe
 a.txt
 *.o
 *.s

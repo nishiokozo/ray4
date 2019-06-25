@@ -1,8 +1,6 @@
 // 2017/07/07 ray3
 // 2019/06/25 ray4
 
-#include <windows.h>
-
 #include <iostream>
 #include <vector>
 #include <chrono>
@@ -452,17 +450,17 @@ int main()
 //------------------------------------------------------------------------------
 {
 	#define SIZ 512
-	Win	win(SIZ,SIZ,"Ray4 " __DATE__, RENDER_GDI24);
+	Win	win(SIZ,SIZ,"Ray4 " __DATE__ );
 
 	Renderer r;
 
 	int cnt = 0;
 
-	while( win.runMessage() )
+	while( win.exec() )
 	{
 		auto a = chrono::system_clock::now();  
  
-		r.Paint( win.GDI_bPixelBits, win.m_height, win.m_width, 3 );
+		r.Paint( win.getAddrPixels(), win.m_height, win.m_width, 3 );
 
 		auto b = chrono::system_clock::now();  
 
