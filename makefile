@@ -11,6 +11,7 @@ LIBS = \
 	 -lgdi32
 
 FLGS = \
+	-g \
 	-c \
 	-m64 \
 	-std=c++17 \
