@@ -1,4 +1,5 @@
 obj
+*.exe.stackdump
 *.exe
 a.txt
 *.o
