@@ -1,8 +1,8 @@
 class	Win
 {
 private:// for GDI
-	void GDI_draw();
-	void GDI_create(int bpp );
+//	void GDI_draw();
+//	void GDI_create(int bpp );
 
 public:
 
