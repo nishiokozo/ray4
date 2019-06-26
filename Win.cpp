@@ -1,6 +1,8 @@
 // 2017/07/07 ray3
 // 2019/06/25 ray4
 
+#include <iostream>
+using namespace std;
 #include <stdio.h>
 #include <windows.h>
 
@@ -24,33 +26,45 @@ struct	//	GDI
 	{
 		BITMAPINFO	bmpInfo;
 		int			bpp;
-		BYTE*		bPixelBits;
+		BYTE*		bPixelBits;// = nullptr;
 		int			width;
 		int			height;
-	}l;
+	} m;
+
 
 	//------------------------------------------------------------------------------
-	void create(int bpp, int width, int height )
+	void ReleasePixelBits()
 	//------------------------------------------------------------------------------
 	{
-		l.bPixelBits	= (BYTE*) malloc( width * height * bpp/8 );
-		l.bpp			= bpp;
-		l.width			= width;
-		l.height		= height;
+		if ( m.bPixelBits != 0 ) 
+		{
+//			free( m.bPixelBits );
+		}
+	}
+	//------------------------------------------------------------------------------
+	void CreatePixelBits(int bpp, int width, int height )
+	//------------------------------------------------------------------------------
+	{
+		
+		m.bPixelBits	= (BYTE*) malloc( width * height * bpp/8 );
+//		m.bPixelBits	= new BYTE( width * height * bpp/8 );			//	何故かハングアップ
+		m.bpp			= bpp;
+		m.width			= width;
+		m.height		= height;
 		
 		BITMAPINFO bi;
-		BITMAPINFOHEADER &bih	= l.bmpInfo.bmiHeader;
-		bih.biSize			= sizeof(bih);
-		bih.biWidth			= width;
-		bih.biHeight		= height;
-		bih.biPlanes		= 1;
-		bih.biBitCount		= bpp;
-		bih.biCompression	= BI_RGB;//BI_BITFIELDS;
-		bih.biSizeImage		= 0;
-		bih.biXPelsPerMeter	= 0;
-		bih.biYPelsPerMeter	= 0;
-		bih.biClrUsed		= 0;
-		bih.biClrImportant	= 0;
+		BITMAPINFOHEADER &bih	= m.bmpInfo.bmiHeader;
+		bih.biSize				= sizeof(bih);
+		bih.biWidth				= width;
+		bih.biHeight			= height;
+		bih.biPlanes			= 1;
+		bih.biBitCount			= bpp;
+		bih.biCompression		= BI_RGB;//BI_BITFIELDS;
+		bih.biSizeImage			= 0;
+		bih.biXPelsPerMeter		= 0;
+		bih.biYPelsPerMeter		= 0;
+		bih.biClrUsed			= 0;
+		bih.biClrImportant		= 0;
 
 	}
 
@@ -62,9 +76,50 @@ struct	//	GDI
 		HDC hdc = GetDC( hWnd );
 		RECT rect;
 		GetClientRect( hWnd, &rect );
-		StretchDIBits( hdc, 0, 0, rect.right, rect.bottom, 0, 0, l.width, l.height, l.bPixelBits, &l.bmpInfo, DIB_RGB_COLORS, SRCCOPY );
+		StretchDIBits( hdc, 0, 0, rect.right, rect.bottom, 0, 0, m.width, m.height, m.bPixelBits, &m.bmpInfo, DIB_RGB_COLORS, SRCCOPY );
+		if (1)
+		{
+			HPEN hPen, hOldPen;
+
+			hPen = CreatePen(PS_SOLID, 1, RGB(255, 0, 0));
+			hOldPen = (HPEN)SelectObject(hdc, hPen);
+
+			MoveToEx(hdc, 50, 50, NULL);
+			LineTo(hdc, 100, 100);
+			LineTo(hdc, 50, 100);
+			SelectObject(hdc, hOldPen);
+
+			DeleteObject(hPen);
+		}
 		ReleaseDC( hWnd, hdc );
 
+
+
+	}
+
+	//------------------------------------------------------------------------------
+	void Paint( HWND hWnd )
+	//------------------------------------------------------------------------------
+	{
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint( hWnd , &ps );
+		if (0)
+		{
+			HPEN hPen, hOldPen;
+
+			hPen = CreatePen(PS_SOLID, 1, RGB(255, 0, 0));
+			hOldPen = (HPEN)SelectObject(hdc, hPen);
+
+			MoveToEx(hdc, 50, 50, NULL);
+			LineTo(hdc, 100, 100);
+			LineTo(hdc, 50, 100);
+			SelectObject(hdc, hOldPen);
+
+			DeleteObject(hPen);
+		}
+		EndPaint( hWnd , &ps);
+
+		UpdateWindow( hWnd );
 	}
 
 } gdi;
@@ -73,21 +128,19 @@ struct	//	GDI
 unsigned char* Win::getAddrPixels()
 //------------------------------------------------------------------------------
 {
-	return( (unsigned char*)gdi.l.bPixelBits);
+	return( (unsigned char*)gdi.m.bPixelBits);
 }
 
 //------------------------------------------------------------------------------
 static	LRESULT CALLBACK WinProc
 //------------------------------------------------------------------------------
 (
-	  HWND	hWnd	// handle to window
-	, UINT	uMsg	// message identifier
-	, WPARAM wParam // first message parameter
-	, LPARAM lParam // second message parameter
+	  HWND		hWnd	// handle to window
+	, UINT		uMsg	// message identifier
+	, WPARAM	wParam // first message parameter
+	, LPARAM	lParam // second message parameter
 )
 {
-
-
 	switch( uMsg ) 
 	{
 		case WM_CREATE:
@@ -98,14 +151,8 @@ static	LRESULT CALLBACK WinProc
 
 		case WM_PAINT:
 			{
-				{
-					PAINTSTRUCT ps;
-					HDC hdc = BeginPaint( hWnd , &ps );
-					//if ( g_callbackPaint ) g_callbackPaint( hdc );
-					EndPaint( hWnd , &ps);
-				}
-				UpdateWindow( hWnd );
-
+cout <<"paint" << endl;
+				gdi.Paint( hWnd );
 				return 0;
 			}
 
@@ -153,13 +200,15 @@ bool Win::exec()
 Win::~Win()
 //------------------------------------------------------------------------------
 {
+	gdi.ReleasePixelBits();
+
 }
 //------------------------------------------------------------------------------
-Win::Win( int w, int h, const char* name  )
+Win::Win( int width, int height, const char* name  )
 //------------------------------------------------------------------------------
 {
-	m_width=w;
-	m_height=h;
+	m.width		= width;
+	m.height	= height;
 
 	// アプリケーションインスタンス
 	win.hInstance		= GetModuleHandle( NULL );
@@ -196,7 +245,7 @@ Win::Win( int w, int h, const char* name  )
 	// ウインドウを生成する
 	{
 		RECT rc;
-		SetRect(&rc, 0, 0, m_width, m_height );
+		SetRect(&rc, 0, 0, width, height );
 		int valWin = WS_OVERLAPPEDWINDOW;
 		AdjustWindowRectEx(&rc, valWin, FALSE, 0);
 
@@ -217,5 +266,6 @@ Win::Win( int w, int h, const char* name  )
 
 	}
 	
-	gdi.create( 24, m_width, m_height );
+
+	gdi.CreatePixelBits( 24, width, height );
 }
