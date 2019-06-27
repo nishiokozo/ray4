@@ -3,7 +3,7 @@
 
 #include <iostream>
 using namespace std;
-#include <stdio.h>
+//#include <stdio.h>
 #include <windows.h>
 
 #include "Win.h"
@@ -38,16 +38,15 @@ struct	//	GDI
 	{
 		if ( m.bPixelBits != 0 ) 
 		{
-//			free( m.bPixelBits );
+			delete [] m.bPixelBits;
 		}
 	}
 	//------------------------------------------------------------------------------
 	void CreatePixelBits(int bpp, int width, int height )
 	//------------------------------------------------------------------------------
 	{
-		
-		m.bPixelBits	= (BYTE*) malloc( width * height * bpp/8 );
-//		m.bPixelBits	= new BYTE( width * height * bpp/8 );			//	何故かハングアップ
+		m.bPixelBits	= new BYTE[ width * height * bpp/8 ];
+
 		m.bpp			= bpp;
 		m.width			= width;
 		m.height		= height;
@@ -93,8 +92,6 @@ struct	//	GDI
 		}
 		ReleaseDC( hWnd, hdc );
 
-
-
 	}
 
 	//------------------------------------------------------------------------------
@@ -132,26 +129,29 @@ unsigned char* Win::getAddrPixels()
 }
 
 //------------------------------------------------------------------------------
+int Win::getBytePixels()
+//------------------------------------------------------------------------------
+{
+	return gdi.m.bpp/8;
+}
+
+//------------------------------------------------------------------------------
 static	LRESULT CALLBACK WinProc
 //------------------------------------------------------------------------------
 (
 	  HWND		hWnd	// handle to window
 	, UINT		uMsg	// message identifier
-	, WPARAM	wParam // first message parameter
-	, LPARAM	lParam // second message parameter
+	, WPARAM	wParam	// first message parameter
+	, LPARAM	lParam	// second message parameter
 )
 {
 	switch( uMsg ) 
 	{
-		case WM_CREATE:
-
-			// ウインドウを表示する
-			ShowWindow( hWnd, SW_SHOW );
+		case WM_CREATE:	//	CreateWindowと同時に発行される
 			break;
 
 		case WM_PAINT:
 			{
-cout <<"paint" << endl;
 				gdi.Paint( hWnd );
 				return 0;
 			}
@@ -162,10 +162,11 @@ cout <<"paint" << endl;
 				{
 					PostQuitMessage( 0 );
 				}
+				return 0;
 				break;
 			}
 
-		case WM_DESTROY:
+		case WM_DESTROY:	//[x]を押すなどしたとき
 
 			PostQuitMessage( 0 );
 			break;
@@ -204,7 +205,7 @@ Win::~Win()
 
 }
 //------------------------------------------------------------------------------
-Win::Win( int width, int height, const char* name  )
+Win::Win( const char* name, int pos_x, int pos_y, int width, int height  )
 //------------------------------------------------------------------------------
 {
 	m.width		= width;
@@ -254,8 +255,8 @@ Win::Win( int width, int height, const char* name  )
 			, win.tWndClass.lpszClassName//m_classname//wc.lpszClassName
 			, name 
 			, valWin
-			, 800+rc.left	  	// horizontal position of window
-			, 100+rc.top		// vertical position of window
+			, pos_x + rc.left	  	// horizontal position of window
+			, pos_y + rc.top		// vertical position of window
 			, rc.right-rc.left 	// window width
 			, rc.bottom-rc.top	// window height
 			, NULL			  	// handle to parent or owner window
@@ -265,7 +266,8 @@ Win::Win( int width, int height, const char* name  )
 		);
 
 	}
-	
+
+	ShowWindow( win.hWnd, SW_SHOW );
 
 	gdi.CreatePixelBits( 24, width, height );
 }

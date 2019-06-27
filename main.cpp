@@ -402,7 +402,7 @@ public:
 		return ret;
 	}
 	//------------------------------------------------------------------------------
-	void	Paint( unsigned char* to, int height, int width, int size )
+	void	Paint( unsigned char* to, int height, int width, int psize )
 	//------------------------------------------------------------------------------
 	{
 
@@ -435,9 +435,9 @@ public:
 				int g = min( 255, (int)(255*C.g) );
 				int b = min( 255, (int)(255*C.b) );
 
-				to[py*width*3 + px*3 +0] = b;
-				to[py*width*3 + px*3 +1] = r;
-				to[py*width*3 + px*3 +2] = g;
+				to[(py*width + px)*psize +0] = b;
+				to[(py*width + px)*psize +1] = r;
+				to[(py*width + px)*psize +2] = g;
 			}
 		}
 		
@@ -449,8 +449,7 @@ public:
 int main()
 //------------------------------------------------------------------------------
 {
-	#define SIZ 512
-	Win	win(SIZ,SIZ,"Ray4 " __DATE__ );
+	Win	win("Ray4 " __DATE__, 300,300,512, 512 );
 
 	Renderer r;
 
@@ -460,7 +459,7 @@ int main()
 	{
 		auto a = chrono::system_clock::now();  
  
-		r.Paint( win.getAddrPixels(), win.m.height, win.m.width, 3 );
+		r.Paint( win.getAddrPixels(), win.m.height, win.m.width, win.getBytePixels() );
 
 		auto b = chrono::system_clock::now();  
 

@@ -19,6 +19,7 @@ FLGS = \
 	-Wno-unknown-pragmas \
 	-Wno-unused-function \
 	-Wno-unused-variable \
+	-Wno-unused-but-set-variable \
 	-O3 \
 
 #	-Werror \

@@ -7,11 +7,11 @@ public:
 		int	height;
 	} m;
 	
-	unsigned char* getAddrPixels();
-
-	Win(int w, int h, const char* name );
+	Win( const char* name, int pos_x, int pos_y, int width, int height  );
 	virtual ~Win();
 
 	bool exec();
+	unsigned char* getAddrPixels();
+	int getBytePixels();
 
 };
