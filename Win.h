@@ -11,7 +11,7 @@ public:
 	virtual ~Win();
 
 	bool exec();
-	unsigned char* getAddrPixels();
-	int getBytePixels();
+	unsigned char* GetAddrPixels();
+	int GetBytePixels();
 
 };

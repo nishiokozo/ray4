@@ -459,7 +459,7 @@ int main()
 	{
 		auto a = chrono::system_clock::now();  
  
-		r.Paint( win.getAddrPixels(), win.m.height, win.m.width, win.getBytePixels() );
+		r.Paint( win.GetAddrPixels(), win.m.height, win.m.width, win.GetBytePixels() );
 
 		auto b = chrono::system_clock::now();  
 

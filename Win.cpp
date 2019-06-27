@@ -20,17 +20,16 @@ struct	//	WIN
 	HWND			hWnd;
 } win;
 
-struct	//	GDI
+struct //	GDI
 {
 	struct
 	{
 		BITMAPINFO	bmpInfo;
 		int			bpp;
-		BYTE*		bPixelBits;// = nullptr;
+		BYTE*		bPixelBits = nullptr;
 		int			width;
 		int			height;
 	} m;
-
 
 	//------------------------------------------------------------------------------
 	void ReleasePixelBits()
@@ -98,38 +97,25 @@ struct	//	GDI
 	void Paint( HWND hWnd )
 	//------------------------------------------------------------------------------
 	{
-		PAINTSTRUCT ps;
-		HDC hdc = BeginPaint( hWnd , &ps );
-		if (0)
 		{
-			HPEN hPen, hOldPen;
-
-			hPen = CreatePen(PS_SOLID, 1, RGB(255, 0, 0));
-			hOldPen = (HPEN)SelectObject(hdc, hPen);
-
-			MoveToEx(hdc, 50, 50, NULL);
-			LineTo(hdc, 100, 100);
-			LineTo(hdc, 50, 100);
-			SelectObject(hdc, hOldPen);
-
-			DeleteObject(hPen);
+			// 起動時にからであっても最低一度はBeginPaint~EndPaintをやっておかく必要がある。
+			PAINTSTRUCT ps;
+			HDC hdc = BeginPaint( hWnd , &ps );
+			EndPaint( hWnd , &ps);
 		}
-		EndPaint( hWnd , &ps);
-
-		UpdateWindow( hWnd );
 	}
 
 } gdi;
 
 //------------------------------------------------------------------------------
-unsigned char* Win::getAddrPixels()
+unsigned char* Win::GetAddrPixels()
 //------------------------------------------------------------------------------
 {
 	return( (unsigned char*)gdi.m.bPixelBits);
 }
 
 //------------------------------------------------------------------------------
-int Win::getBytePixels()
+int Win::GetBytePixels()
 //------------------------------------------------------------------------------
 {
 	return gdi.m.bpp/8;
