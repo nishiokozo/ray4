@@ -1,3 +1,12 @@
+	struct	Line
+	{
+		double	x0;
+		double	y0;
+		double	x1;
+		double	y1;
+		int		col;
+	};
+
 class	Win
 {
 public:
@@ -14,4 +23,8 @@ public:
 	unsigned char* GetAddrPixels();
 	int GetBytePixels();
 
+
+
+	void	line( double x0, double y0, double x1, double y1, int col);
+	int		rgb(double r, double g , double b );
 };

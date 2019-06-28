@@ -461,6 +461,11 @@ int main()
  
 		r.Paint( win.GetAddrPixels(), win.m.height, win.m.width, win.GetBytePixels() );
 
+		for ( int i = 0 ; i < 400 ; i++ )
+		{
+			win.line(cnt+100+i,cnt+100,cnt+200,cnt+100+i,win.rgb(0,1,1));
+		}
+		
 		auto b = chrono::system_clock::now();  
 
 		if ( cnt++ < 3 )

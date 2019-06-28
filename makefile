@@ -4,7 +4,7 @@ TAR = main.exe
 
 OBJS = \
 	obj/main.o \
-	obj/Win.o \
+	obj/win.o \
 	obj/geom.o \
 
 LIBS = \
