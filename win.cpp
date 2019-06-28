@@ -229,13 +229,14 @@ cout << "WM_PAINT " << endl;
 			{
 				if ( wParam == 27 ) // ESC
 				{
-					PostQuitMessage( 0 );
+					SendMessage(hWnd , WM_DESTROY , 0 , 0);	
 				}
 				return 0;
 				break;
 			}
 
 		case WM_DESTROY:	//[x]を押すなどしたとき
+cout << "WM_DESTROY " << endl;
 
 			PostQuitMessage( 0 );
 			break;
@@ -350,9 +351,9 @@ bool Win::exec()
 		{
 			DispatchMessage( &win.tMsg );
 			TranslateMessage( &win.tMsg );
-			if ( win.tMsg.message == WM_QUIT ) break;
+			if ( win.tMsg.message == WM_QUIT ) return false; //WM_DESTROY内のQuitによるものをひらう
 		}
-		if ( win.tMsg.message == WM_QUIT ) break;
+//		if ( win.tMsg.message == WM_QUIT ) break;
 #if 1
  #if 0
 	    gdi.paint(win.hWnd, gdi.hdcBackbuffer);
@@ -365,6 +366,6 @@ bool Win::exec()
 
 		return true;
 	}
-	return	false;
+//	return	false;
 }
 
