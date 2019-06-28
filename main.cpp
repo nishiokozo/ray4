@@ -455,18 +455,44 @@ int main()
 
 	int cnt = 0;
 
+	struct V
+	{
+		double x,y;
+	};
+	vector<V> vert={
+		{   0,100*tan(RAD(60)) -100*tan(rad(30)) },
+		{-100,  0              -100*tan(rad(30)) },
+		{ 100,  0              -100*tan(rad(30)) },
+		{   0,100*tan(RAD(60)) -100*tan(rad(30)) },
+	};
+
 	while( win.exec() )
 	{
-		auto a = chrono::system_clock::now();  
+		chrono::system_clock::time_point a = chrono::system_clock::now();  
  
 		r.Paint( win.GetAddrPixels(), win.m.height, win.m.width, win.GetBytePixels() );
 
-		for ( int i = 0 ; i < 400 ; i++ )
+		for ( unsigned int i = 0 ; i < vert.size()-1 ; i++ )
 		{
-			win.line(cnt+100+i,cnt+100,cnt+200,cnt+100+i,win.rgb(0,1,1));
+			double xa=vert[i].x;
+			double ya=vert[i].y;
+			double xb=vert[i+1].x;
+			double yb=vert[i+1].y;
+			
+			double x0=xa*cos(RAD(cnt)) - ya*sin(RAD(cnt));
+			double y0=xa*sin(RAD(cnt)) + ya*cos(RAD(cnt));
+			double x1=xb*cos(RAD(cnt)) - yb*sin(RAD(cnt));
+			double y1=xb*sin(RAD(cnt)) + yb*cos(RAD(cnt));
+
+			x0+=256;
+			y0+=256;
+			x1+=256;
+			y1+=256;
+
+			win.line(x0,y0,x1,y1,win.rgb(0,1,1));
 		}
 		
-		auto b = chrono::system_clock::now();  
+		chrono::system_clock::time_point b = chrono::system_clock::now();  
 
 		if ( cnt++ < 3 )
 		{

@@ -1,8 +1,9 @@
-// 2017/07/07 ray3
+Ôªø// 2017/07/07 ray3
 // 2019/06/25 ray4
 
 #include <iostream>
 #include <vector>
+#include <chrono>
 using namespace std;
 #include <windows.h>
 
@@ -31,7 +32,12 @@ struct //	GDI
 		int			height;
 
 		vector<Line>	tblLine;
+
+				RECT rect;
+
+
 	} m;
+HDC     hdcBackbuffer;
 
 
 	//------------------------------------------------------------------------------
@@ -70,78 +76,19 @@ struct //	GDI
 	}
 
 	//------------------------------------------------------------------------------
-	void draw( HWND hWnd )
+	void paint( HWND hWnd, HDC hdc )
 	//------------------------------------------------------------------------------
 	{
 #if 1
-		HDC hdc = GetDC( hWnd );
-		{
-			// bmp
-			{
-				RECT rect;
-				GetClientRect( hWnd, &rect );
-				StretchDIBits( hdc, 0, 0, rect.right, rect.bottom, 0, 0, m.width, m.height, m.bPixelBits, &m.bmpInfo, DIB_RGB_COLORS, SRCCOPY );
-			}
-			
-			//line
-			{
-				HPEN hPen, hOldPen;
-
-
-				for ( unsigned int i=0 ; i < m.tblLine.size() ; i++ )
-				{
-
-					int x0 = m.tblLine[i].x0;
-					int y0 = m.tblLine[i].y0;
-					int x1 = m.tblLine[i].x1;
-					int y1 = m.tblLine[i].y1;
-					int	col = m.tblLine[i].col;
-
-					hPen = CreatePen(PS_SOLID, 1, col );
-					hOldPen = (HPEN)SelectObject(hdc, hPen);
-
-					MoveToEx(hdc, x0, y0, NULL);
-					LineTo(hdc, x1, y1);
-
-//					MoveToEx(hdc, 50, 50, NULL);
-//					LineTo(hdc, 100, 100);
-//					LineTo(hdc, 50, 100);
-
-					SelectObject(hdc, hOldPen);
-					DeleteObject(hPen);
-				}
-				
-				m.tblLine.clear();
-			}
-		}
-		ReleaseDC( hWnd, hdc );
-#endif
-
-	}
-
-	//------------------------------------------------------------------------------
-	void Paint( HWND hWnd )
-	//------------------------------------------------------------------------------
-	{
-#if 1
-		{
-			// ãNìÆéûÇ…Ç©ÇÁÇ≈Ç†Ç¡ÇƒÇ‡ç≈í·àÍìxÇÕBeginPaint~EndPaintÇÇ‚Ç¡ÇƒÇ®Ç©Ç≠ïKóvÇ™Ç†ÇÈÅB
-			PAINTSTRUCT ps;
-			HDC hdc = BeginPaint( hWnd , &ps );
-			EndPaint( hWnd , &ps);
-		}
-#endif
-#if 0
-cout << "paint " << endl;
-			PAINTSTRUCT ps;
-			HDC hdc = BeginPaint( hWnd , &ps );
 //		HDC hdc = GetDC( hWnd );
 		{
 			// bmp
 			{
-				RECT rect;
-				GetClientRect( hWnd, &rect );
-				StretchDIBits( hdc, 0, 0, rect.right, rect.bottom, 0, 0, m.width, m.height, m.bPixelBits, &m.bmpInfo, DIB_RGB_COLORS, SRCCOPY );
+//				RECT rect;
+//				GetClientRect( hWnd, &m.rect );
+				StretchDIBits( hdc, 0, 0, m.rect.right, m.rect.bottom, 0, 0, m.width, m.height, m.bPixelBits, &m.bmpInfo, DIB_RGB_COLORS, SRCCOPY );
+//	    BitBlt(hdc, 0, 0, rcClient.right, rcClient.bottom, hdcBackbuffer, 0, 0, SRCCOPY);
+
 			}
 			
 			//line
@@ -164,10 +111,6 @@ cout << "paint " << endl;
 					MoveToEx(hdc, x0, y0, NULL);
 					LineTo(hdc, x1, y1);
 
-//					MoveToEx(hdc, 50, 50, NULL);
-//					LineTo(hdc, 100, 100);
-//					LineTo(hdc, 50, 100);
-
 					SelectObject(hdc, hOldPen);
 					DeleteObject(hPen);
 				}
@@ -175,54 +118,70 @@ cout << "paint " << endl;
 				m.tblLine.clear();
 			}
 		}
-			EndPaint( hWnd , &ps);
-///		ReleaseDC( hWnd, hdc );
+//		ReleaseDC( hWnd, hdc );
+#endif
 	}
+
+	//------------------------------------------------------------------------------
+	void onCreate( HWND hWnd ) 
+	//------------------------------------------------------------------------------
+	{
+	    HDC hdc = GetDC(hWnd);                      	// „Ç¶„Ç§„É≥„Éâ„Ç¶„ÅÆDC„ÇíÂèñÂæó
+//	    GetClientRect(GetDesktopWindow(), &rc);  	// „Éá„Çπ„ÇØ„Éà„ÉÉ„Éó„ÅÆ„Çµ„Ç§„Ç∫„ÇíÂèñÂæó
+				RECT rc;
+				GetClientRect( hWnd, &rc );
+
+		HBITMAP hBitmap = CreateCompatibleBitmap( hdc, rc.right, rc.bottom );
+	    hdcBackbuffer = CreateCompatibleDC( NULL );		// „Ç´„É¨„É≥„Éà„Çπ„ÇØ„É™„Éº„É≥‰∫íÊèõ
+	    SelectObject( hdcBackbuffer, hBitmap );		// MDC„Å´„Éì„ÉÉ„Éà„Éû„ÉÉ„Éó„ÇíÂâ≤„Çä‰ªò„Åë
+	}	
+
+	//------------------------------------------------------------------------------
+	void onPaint2(HWND hWnd) 
+	//------------------------------------------------------------------------------
+	{
+	    PAINTSTRUCT ps;
+	    HDC hdc = BeginPaint(hWnd, &ps);
+	    paint(hWnd, hdcBackbuffer);
+				RECT rcClient;
+				GetClientRect( hWnd, &rcClient );
+	    BitBlt(hdc, 0, 0, rcClient.right, rcClient.bottom, hdcBackbuffer, 0, 0, SRCCOPY);
+	    EndPaint(hWnd, &ps);
+	}
+
+chrono::system_clock::time_point time_a;
+chrono::system_clock::time_point time_b;
+	//------------------------------------------------------------------------------
+	void onPaint1( HWND hWnd )
+	//------------------------------------------------------------------------------
+	{
+#if 0
+		{
+			PAINTSTRUCT ps;
+			HDC hdc = BeginPaint( hWnd , &ps );
+				RECT rcClient;
+				GetClientRect( hWnd, &rcClient );
+	    BitBlt(hdc, 0, 0, rcClient.right, rcClient.bottom, hdcBackbuffer, 0, 0, SRCCOPY);
+			EndPaint( hWnd , &ps);
+		}
+#else
+		{
+			// Ëµ∑ÂãïÊôÇ„Å´„Åã„Çâ„Åß„ÅÇ„Å£„Å¶„ÇÇÊúÄ‰Ωé‰∏ÄÂ∫¶„ÅØBeginPaint~EndPaint„Çí„ÇÑ„Å£„Å¶„Åä„Åã„ÅèÂøÖË¶Å„Åå„ÅÇ„Çã„ÄÇ
+			PAINTSTRUCT ps;
+			HDC hdc = BeginPaint( hWnd , &ps );
+			EndPaint( hWnd , &ps);
+		}
 #endif
 #if 0
-cout << "paint " << endl;
-		HDC hdc = GetDC( hWnd );
+		time_b = chrono::system_clock::now();  
 		{
-			// bmp
-			{
-				RECT rect;
-				GetClientRect( hWnd, &rect );
-				StretchDIBits( hdc, 0, 0, rect.right, rect.bottom, 0, 0, m.width, m.height, m.bPixelBits, &m.bmpInfo, DIB_RGB_COLORS, SRCCOPY );
-			}
-			
-			//line
-			{
-				HPEN hPen, hOldPen;
-
-
-				for ( unsigned int i=0 ; i < m.tblLine.size() ; i++ )
-				{
-
-					int x0 = m.tblLine[i].x0;
-					int y0 = m.tblLine[i].y0;
-					int x1 = m.tblLine[i].x1;
-					int y1 = m.tblLine[i].y1;
-					int	col = m.tblLine[i].col;
-
-					hPen = CreatePen(PS_SOLID, 1, col );
-					hOldPen = (HPEN)SelectObject(hdc, hPen);
-
-					MoveToEx(hdc, x0, y0, NULL);
-					LineTo(hdc, x1, y1);
-
-//					MoveToEx(hdc, 50, 50, NULL);
-//					LineTo(hdc, 100, 100);
-//					LineTo(hdc, 50, 100);
-
-					SelectObject(hdc, hOldPen);
-					DeleteObject(hPen);
-				}
-				
-				m.tblLine.clear();
-			}
+			double f = chrono::duration_cast<chrono::microseconds>(time_b-time_a).count();
+			printf("time %fmsec\n", f/1000 );
 		}
-		ReleaseDC( hWnd, hdc );
+		time_a = chrono::system_clock::now();  
 #endif
+ 
+
 	}
 
 } gdi;
@@ -253,12 +212,16 @@ static	LRESULT CALLBACK WinProc
 {
 	switch( uMsg ) 
 	{
-		case WM_CREATE:	//	CreateWindowÇ∆ìØéûÇ…î≠çsÇ≥ÇÍÇÈ
+		case WM_CREATE:	// CreateWindow„Å®ÂêåÊôÇ„Å´Áô∫Ë°å„Åï„Çå„Çã
+				GetClientRect( hWnd, &gdi.m.rect );
+			gdi.onCreate( hWnd );
 			break;
 
-		case WM_PAINT:
+		case WM_PAINT:	// OS„Åã„Çâ„ÅÆÊèèÁîªË¶ÅÊ±Ç„ÄÇUpdateWindow()
 			{
-				gdi.Paint( hWnd );
+cout << "WM_PAINT " << endl;
+				gdi.onPaint1( hWnd );
+//				gdi.onPaint2( hWnd );
 				return 0;
 			}
 
@@ -272,13 +235,13 @@ static	LRESULT CALLBACK WinProc
 				break;
 			}
 
-		case WM_DESTROY:	//[x]ÇâüÇ∑Ç»Ç«ÇµÇΩÇ∆Ç´
+		case WM_DESTROY:	//[x]„ÇíÊäº„Åô„Å™„Å©„Åó„Åü„Å®„Åç
 
 			PostQuitMessage( 0 );
 			break;
 	}
 
-	// ÉfÉtÉHÉãÉgèàóùåƒÇ—èoÇµ
+	// „Éá„Éï„Ç©„É´„ÉàÂá¶ÁêÜÂëº„Å≥Âá∫„Åó
 	return DefWindowProc( hWnd, uMsg, wParam, lParam );
 }
 
@@ -303,28 +266,6 @@ void Win::line( double x0, double y0, double x1, double y1,int col)
 }
 
 //------------------------------------------------------------------------------
-bool Win::exec()
-//------------------------------------------------------------------------------
-{
-	while(1)
-	{
-		while ( PeekMessage( &win.tMsg, NULL, 0, 0, PM_REMOVE) )
-		{
-			DispatchMessage( &win.tMsg );
-			TranslateMessage( &win.tMsg );
-			if ( win.tMsg.message == WM_QUIT ) break;
-		}
-		if ( win.tMsg.message == WM_QUIT ) break;
-
-		gdi.draw( win.hWnd );
-//UpdateWindow(win.hWnd);
-
-		return true;
-	}
-	return	false;
-}
-
-//------------------------------------------------------------------------------
 Win::~Win()
 //------------------------------------------------------------------------------
 {
@@ -338,25 +279,25 @@ Win::Win( const char* name, int pos_x, int pos_y, int width, int height  )
 	m.width		= width;
 	m.height	= height;
 
-	// ÉAÉvÉäÉPÅ[ÉVÉáÉìÉCÉìÉXÉ^ÉìÉX
+	// „Ç¢„Éó„É™„Ç±„Éº„Ç∑„Éß„É≥„Ç§„É≥„Çπ„Çø„É≥„Çπ
 	win.hInstance		= GetModuleHandle( NULL );
 
 
-	// ÉNÉâÉXñºèÃ
+	// „ÇØ„É©„ÇπÂêçÁß∞
 	win.cpClassName	= "MainWindowClass";
 
-	// ÉÅÉjÉÖÅ[
+	// „É°„Éã„É•„Éº
 	win.cpMenu			= MAKEINTRESOURCE( NULL );
 
-	// ÉEÉCÉìÉhÉEñºèÃ
+	// „Ç¶„Ç§„É≥„Éâ„Ç¶ÂêçÁß∞
 	win.cpWindowName = name;
 
-	// ÉEÉCÉìÉhÉEÉNÉâÉXÉpÉâÉÅÅ[É^ÉZÉbÉg
+	// „Ç¶„Ç§„É≥„Éâ„Ç¶„ÇØ„É©„Çπ„Éë„É©„É°„Éº„Çø„Çª„ÉÉ„Éà
 	win.tWndClass.cbSize		= sizeof( WNDCLASSEX );
 	win.tWndClass.style			= CS_HREDRAW | CS_VREDRAW;
 	win.tWndClass.lpfnWndProc	= WinProc;
-	win.tWndClass.cbClsExtra	= 0;	// GetClassLong Ç≈éÊìæâ¬î\Ç»ÉÅÉÇÉä
-	win.tWndClass.cbWndExtra	= 0;	// GetWindowLong Ç≈éÊìæâ¬î\Ç»ÉÅÉÇÉä
+	win.tWndClass.cbClsExtra	= 0;	// GetClassLong „ÅßÂèñÂæóÂèØËÉΩ„Å™„É°„É¢„É™
+	win.tWndClass.cbWndExtra	= 0;	// GetWindowLong „ÅßÂèñÂæóÂèØËÉΩ„Å™„É°„É¢„É™
 	win.tWndClass.hInstance		= win.hInstance;
 	win.tWndClass.hIcon			= LoadIcon( NULL, IDI_APPLICATION );
 	win.tWndClass.hCursor		= LoadCursor( NULL, IDC_ARROW );
@@ -365,12 +306,12 @@ Win::Win( const char* name, int pos_x, int pos_y, int width, int height  )
 	win.tWndClass.lpszClassName = win.cpClassName;
 	win.tWndClass.hIconSm		= NULL;
 
-	// ÉEÉCÉìÉhÉEÉNÉâÉXê∂ê¨
+	// „Ç¶„Ç§„É≥„Éâ„Ç¶„ÇØ„É©„ÇπÁîüÊàê
 	if ( 0 == RegisterClassEx( &win.tWndClass ) ) 
 	{
 	}
 
-	// ÉEÉCÉìÉhÉEÇê∂ê¨Ç∑ÇÈ
+	// „Ç¶„Ç§„É≥„Éâ„Ç¶„ÇíÁîüÊàê„Åô„Çã
 	{
 		RECT rc;
 		SetRect(&rc, 0, 0, width, height );
@@ -394,7 +335,36 @@ Win::Win( const char* name, int pos_x, int pos_y, int width, int height  )
 
 	}
 
-	ShowWindow( win.hWnd, SW_SHOW );
 
 	gdi.CreatePixelBits( 24, width, height );
+	ShowWindow( win.hWnd, SW_SHOW );
 }
+
+//------------------------------------------------------------------------------
+bool Win::exec()
+//------------------------------------------------------------------------------
+{
+	while(1)
+	{
+		while ( PeekMessage( &win.tMsg, NULL, 0, 0, PM_REMOVE) )
+		{
+			DispatchMessage( &win.tMsg );
+			TranslateMessage( &win.tMsg );
+			if ( win.tMsg.message == WM_QUIT ) break;
+		}
+		if ( win.tMsg.message == WM_QUIT ) break;
+#if 1
+ #if 0
+	    gdi.paint(win.hWnd, gdi.hdcBackbuffer);
+ #else
+		HDC hdc = GetDC( win.hWnd );
+	    gdi.paint(win.hWnd, hdc);
+		ReleaseDC( win.hWnd, hdc );
+ #endif
+#endif
+
+		return true;
+	}
+	return	false;
+}
+

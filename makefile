@@ -1,5 +1,5 @@
-#簡略式makfefile for msys64 
-
+#簡略式makfefile for msys64 / GDI
+ 
 TAR = main.exe
 
 OBJS = \
