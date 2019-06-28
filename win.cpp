@@ -9,6 +9,8 @@ using namespace std;
 
 #include "Win.h"
 
+static chrono::system_clock::time_point time_a;
+static chrono::system_clock::time_point time_b;
 
 struct	//	WIN
 {
@@ -149,39 +151,18 @@ HDC     hdcBackbuffer;
 	    EndPaint(hWnd, &ps);
 	}
 
-chrono::system_clock::time_point time_a;
-chrono::system_clock::time_point time_b;
 	//------------------------------------------------------------------------------
 	void onPaint1( HWND hWnd )
 	//------------------------------------------------------------------------------
 	{
-#if 0
-		{
-			PAINTSTRUCT ps;
-			HDC hdc = BeginPaint( hWnd , &ps );
-				RECT rcClient;
-				GetClientRect( hWnd, &rcClient );
-	    BitBlt(hdc, 0, 0, rcClient.right, rcClient.bottom, hdcBackbuffer, 0, 0, SRCCOPY);
-			EndPaint( hWnd , &ps);
-		}
-#else
-		{
-			// 起動時にからであっても最低一度はBeginPaint~EndPaintをやっておかく必要がある。
+ 		{
 			PAINTSTRUCT ps;
 			HDC hdc = BeginPaint( hWnd , &ps );
 			EndPaint( hWnd , &ps);
 		}
-#endif
-#if 0
-		time_b = chrono::system_clock::now();  
-		{
-			double f = chrono::duration_cast<chrono::microseconds>(time_b-time_a).count();
-			printf("time %fmsec\n", f/1000 );
-		}
-		time_a = chrono::system_clock::now();  
-#endif
- 
-
+		HDC hdc = GetDC( win.hWnd );
+	    paint(win.hWnd, hdc);
+		ReleaseDC( win.hWnd, hdc );
 	}
 
 } gdi;
@@ -219,7 +200,6 @@ static	LRESULT CALLBACK WinProc
 
 		case WM_PAINT:	// OSからの描画要求。UpdateWindow()
 			{
-cout << "WM_PAINT " << endl;
 				gdi.onPaint1( hWnd );
 //				gdi.onPaint2( hWnd );
 				return 0;
@@ -351,21 +331,10 @@ bool Win::exec()
 		{
 			DispatchMessage( &win.tMsg );
 			TranslateMessage( &win.tMsg );
-			if ( win.tMsg.message == WM_QUIT ) return false; //WM_DESTROY内のQuitによるものをひらう
+			if ( win.tMsg.message == WM_QUIT ) return false; 
 		}
-//		if ( win.tMsg.message == WM_QUIT ) break;
-#if 1
- #if 0
-	    gdi.paint(win.hWnd, gdi.hdcBackbuffer);
- #else
-		HDC hdc = GetDC( win.hWnd );
-	    gdi.paint(win.hWnd, hdc);
-		ReleaseDC( win.hWnd, hdc );
- #endif
-#endif
-
+		SendMessage( win.hWnd , WM_PAINT , 0 , 0);	
 		return true;
 	}
-//	return	false;
 }
 

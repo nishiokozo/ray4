@@ -478,11 +478,13 @@ int main()
 			double ya=vert[i].y;
 			double xb=vert[i+1].x;
 			double yb=vert[i+1].y;
+
+			double th=rad(cnt/1);
 			
-			double x0=xa*cos(RAD(cnt)) - ya*sin(RAD(cnt));
-			double y0=xa*sin(RAD(cnt)) + ya*cos(RAD(cnt));
-			double x1=xb*cos(RAD(cnt)) - yb*sin(RAD(cnt));
-			double y1=xb*sin(RAD(cnt)) + yb*cos(RAD(cnt));
+			double x0=xa*cos(th) - ya*sin(th);
+			double y0=xa*sin(th) + ya*cos(th);
+			double x1=xb*cos(th) - yb*sin(th);
+			double y1=xb*sin(th) + yb*cos(th);
 
 			x0+=256;
 			y0+=256;
@@ -494,11 +496,12 @@ int main()
 		
 		chrono::system_clock::time_point b = chrono::system_clock::now();  
 
-		if ( cnt++ < 3 )
+		if ( cnt < 10 )
 		{
 			double f = chrono::duration_cast<chrono::microseconds>(b-a).count();
 			printf("time %fsec\n", f/1000/1000 );
 		}
+		cnt++;
 	}
 
 	return 0;
