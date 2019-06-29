@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <chrono>
+#include <thread>       // sleep_for
 using namespace std;
 #include <windows.h>
 
@@ -78,28 +79,31 @@ HDC     hdcBackbuffer;
 	}
 
 	//------------------------------------------------------------------------------
-	void paint( HWND hWnd, HDC hdc )
+	void Clear( HDC hdc )
 	//------------------------------------------------------------------------------
 	{
-#if 1
-//		HDC hdc = GetDC( hWnd );
+		// clear
+		SelectObject(hdc , GetStockObject(BLACK_BRUSH));
+		Rectangle(hdc, 0, 0, m.rect.right, m.rect.bottom);
+	}
+	
+	//------------------------------------------------------------------------------
+	void paint0( HDC hdc )
+	//------------------------------------------------------------------------------
+	{
 		{
 			// bmp
 			{
-//				RECT rect;
-//				GetClientRect( hWnd, &m.rect );
-				StretchDIBits( hdc, 0, 0, m.rect.right, m.rect.bottom, 0, 0, m.width, m.height, m.bPixelBits, &m.bmpInfo, DIB_RGB_COLORS, SRCCOPY );
-//	    BitBlt(hdc, 0, 0, rcClient.right, rcClient.bottom, hdcBackbuffer, 0, 0, SRCCOPY);
+//				StretchDIBits( hdc, 0, 0, m.rect.right, m.rect.bottom, 0, 0, m.width, m.height, m.bPixelBits, &m.bmpInfo, DIB_RGB_COLORS, SRCCOPY );
 
 			}
 			
 			//line
 			{
-				HPEN hPen, hOldPen;
-
 
 				for ( unsigned int i=0 ; i < m.tblLine.size() ; i++ )
 				{
+					HPEN hPen, hOldPen;
 
 					int x0 = m.tblLine[i].x0;
 					int y0 = m.tblLine[i].y0;
@@ -120,8 +124,6 @@ HDC     hdcBackbuffer;
 				m.tblLine.clear();
 			}
 		}
-//		ReleaseDC( hWnd, hdc );
-#endif
 	}
 
 	//------------------------------------------------------------------------------
@@ -136,6 +138,8 @@ HDC     hdcBackbuffer;
 		HBITMAP hBitmap = CreateCompatibleBitmap( hdc, rc.right, rc.bottom );
 	    hdcBackbuffer = CreateCompatibleDC( NULL );		// カレントスクリーン互換
 	    SelectObject( hdcBackbuffer, hBitmap );		// MDCにビットマップを割り付け
+		ReleaseDC( hWnd, hdc );
+
 	}	
 
 	//------------------------------------------------------------------------------
@@ -144,25 +148,11 @@ HDC     hdcBackbuffer;
 	{
 	    PAINTSTRUCT ps;
 	    HDC hdc = BeginPaint(hWnd, &ps);
-	    paint(hWnd, hdcBackbuffer);
+	    paint0( hdcBackbuffer);
 				RECT rcClient;
 				GetClientRect( hWnd, &rcClient );
 	    BitBlt(hdc, 0, 0, rcClient.right, rcClient.bottom, hdcBackbuffer, 0, 0, SRCCOPY);
 	    EndPaint(hWnd, &ps);
-	}
-
-	//------------------------------------------------------------------------------
-	void onPaint1( HWND hWnd )
-	//------------------------------------------------------------------------------
-	{
- 		{
-			PAINTSTRUCT ps;
-			HDC hdc = BeginPaint( hWnd , &ps );
-			EndPaint( hWnd , &ps);
-		}
-		HDC hdc = GetDC( win.hWnd );
-	    paint(win.hWnd, hdc);
-		ReleaseDC( win.hWnd, hdc );
 	}
 
 } gdi;
@@ -180,30 +170,33 @@ int Win::GetBytePixels()
 {
 	return gdi.m.bpp/8;
 }
-
 //------------------------------------------------------------------------------
 static	LRESULT CALLBACK WinProc
 //------------------------------------------------------------------------------
 (
-	  HWND		hWnd	// handle to window
-	, UINT		uMsg	// message identifier
-	, WPARAM	wParam	// first message parameter
-	, LPARAM	lParam	// second message parameter
+	  HWND		hWnd
+	, UINT		uMsg
+	, WPARAM	wParam	//メッセージの付加情報
+	, LPARAM	lParam	//メッセージの付加情報
 )
 {
 	switch( uMsg ) 
 	{
 		case WM_CREATE:	// CreateWindowと同時に発行される
-				GetClientRect( hWnd, &gdi.m.rect );
-			gdi.onCreate( hWnd );
+			break;
+		case WM_SIZE:	// 画面サイズが決定された時に発行される
+			GetClientRect( hWnd, &gdi.m.rect );
 			break;
 
-		case WM_PAINT:	// OSからの描画要求。UpdateWindow()
-			{
-				gdi.onPaint1( hWnd );
-//				gdi.onPaint2( hWnd );
-				return 0;
+		case WM_PAINT:	// OSからの描画要求。再描画区域情報が得られるタイミング。
+	 		{
+				PAINTSTRUCT ps;
+				HDC hdc = BeginPaint( hWnd , &ps );	//再描画区域が指定されてある。WM_PAINTメッセージを処理する
+				//gdi.paint0( hdc );
+				EndPaint( hWnd , &ps);
 			}
+			return 0;
+			break;
 
 		case WM_KEYDOWN:
 			{
@@ -211,19 +204,19 @@ static	LRESULT CALLBACK WinProc
 				{
 					SendMessage(hWnd , WM_DESTROY , 0 , 0);	
 				}
-				return 0;
-				break;
 			}
+			return 0;
+			break;
 
 		case WM_DESTROY:	//[x]を押すなどしたとき
 cout << "WM_DESTROY " << endl;
-
 			PostQuitMessage( 0 );
+			return 0;
 			break;
 	}
 
-	// デフォルト処理呼び出し
-	return DefWindowProc( hWnd, uMsg, wParam, lParam );
+	// デフォルト処理呼び出し。
+	return DefWindowProc( hWnd, uMsg, wParam, lParam );// [x] > WM_SYSCOMMAND > WM_CLOSE > WM_DESTROY
 }
 
 //------------------------------------------------------------------------------
@@ -325,6 +318,10 @@ Win::Win( const char* name, int pos_x, int pos_y, int width, int height  )
 bool Win::exec()
 //------------------------------------------------------------------------------
 {
+//		InvalidateRect(win.hWnd , NULL , TRUE);	//	WM_PAINTを発行し再描画矩形情報を渡す
+//		HDC hdc = GetDC( win.hWnd );
+//		ReleaseDC( win.hWnd, hdc );
+
 	while(1)
 	{
 		while ( PeekMessage( &win.tMsg, NULL, 0, 0, PM_REMOVE) )
@@ -333,7 +330,14 @@ bool Win::exec()
 			TranslateMessage( &win.tMsg );
 			if ( win.tMsg.message == WM_QUIT ) return false; 
 		}
-		SendMessage( win.hWnd , WM_PAINT , 0 , 0);	
+
+// this_thread::sleep_for (chrono::milliseconds(1));
+		HDC hdc = GetDC( win.hWnd );
+	    gdi.Clear( hdc );
+	    gdi.paint0( hdc );
+		ReleaseDC( win.hWnd, hdc );
+
+
 		return true;
 	}
 }
