@@ -443,7 +443,9 @@ public:
 		
 	}
 
-};	
+};
+chrono::system_clock::time_point time_a;
+chrono::system_clock::time_point time_b;
 
 //------------------------------------------------------------------------------
 int main()
@@ -468,9 +470,8 @@ int main()
 
 	while( win.exec() )
 	{
-		chrono::system_clock::time_point a = chrono::system_clock::now();  
  
-		r.Paint( win.GetAddrPixels(), win.m.height, win.m.width, win.GetBytePixels() );
+//		r.Paint( win.GetAddrPixels(), win.m.height, win.m.width, win.GetBytePixels() );
 
 		for ( unsigned int i = 0 ; i < vert.size()-1 ; i++ )
 		{
@@ -479,7 +480,7 @@ int main()
 			double xb=vert[i+1].x;
 			double yb=vert[i+1].y;
 
-			double th=rad(cnt/1);
+			double th=rad(cnt/100);
 			
 			double x0=xa*cos(th) - ya*sin(th);
 			double y0=xa*sin(th) + ya*cos(th);
@@ -494,14 +495,16 @@ int main()
 			win.line(x0,y0,x1,y1,win.rgb(0,1,1));
 		}
 		
-		chrono::system_clock::time_point b = chrono::system_clock::now();  
-
-		if ( cnt < 10 )
 		{
-			double f = chrono::duration_cast<chrono::microseconds>(b-a).count();
-			printf("time %fsec\n", f/1000/1000 );
+			time_b = chrono::system_clock::now();  
+			if ( cnt < 10 )
+			{
+				double f = chrono::duration_cast<chrono::microseconds>(time_b-time_a).count();
+				printf("time %fsec\n", f/1000/1000 );
+			}
+			cnt++;
+			time_a = chrono::system_clock::now();  
 		}
-		cnt++;
 	}
 
 	return 0;
