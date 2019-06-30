@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <thread>
 #include <chrono>
 #include <cmath>
 using namespace std;
@@ -528,7 +529,7 @@ int main()
 			double xb=vert[i+1].x;
 			double yb=vert[i+1].y;
 
-			double th=rad(cnt/1000);
+			double th=rad(cnt/1);
 			
 			double x0=xa*cos(th) - ya*sin(th);
 			double y0=xa*sin(th) + ya*cos(th);
@@ -545,6 +546,10 @@ int main()
 		
 		{
 			time_b = chrono::system_clock::now();  
+			while( chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now()-time_a).count() < 16.6667 )
+			{
+ 				this_thread::sleep_for (chrono::microseconds(100));
+			}
 			if ( cnt < 10 )
 			{
 				double f = chrono::duration_cast<chrono::microseconds>(time_b-time_a).count();

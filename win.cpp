@@ -404,7 +404,6 @@ bool Win::exec()
 		}
 
 		HDC hDc = GetDC( win.hWnd );
-//	    gdi.Clear( hDc );
 	    gdi.paint0( hDc );
 		ReleaseDC( win.hWnd, hDc );
 
