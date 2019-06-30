@@ -106,28 +106,28 @@ struct //	GDI
 */
 	
 	//------------------------------------------------------------------------------
-	void paint0( HDC hdc )
+	void paint0( HDC hDc )
 	//------------------------------------------------------------------------------
 	{
 
 		// clear background
 		if ( m.clr.bActive )
 		{
-			SelectObject(hdc , CreateSolidBrush(m.clr.col));
-			PatBlt(hdc , 0 , 0 ,m.rect.right, m.rect.bottom , PATCOPY);
-			DeleteObject(
-				SelectObject(
-					hdc , GetStockObject(WHITE_BRUSH)
-				)
-			);
+			HBRUSH hBrush;
 
-		
+			hBrush  = CreateSolidBrush(m.clr.col);
+			SelectObject( hDc , hBrush);
+
+			PatBlt( hDc , 0 , 0 ,m.rect.right, m.rect.bottom , PATCOPY);
+
+			DeleteObject( hBrush );
+	
 			m.clr.bActive = false;
 		}
 		
 		// bmp
 		{
-//				StretchDIBits( hdc, 0, 0, m.rect.right, m.rect.bottom, 0, 0, m.width, m.height, m.bPixelBits, &m.bmpInfo, DIB_RGB_COLORS, SRCCOPY );
+//				StretchDIBits( hDc, 0, 0, m.rect.right, m.rect.bottom, 0, 0, m.width, m.height, m.bPixelBits, &m.bmpInfo, DIB_RGB_COLORS, SRCCOPY );
 
 		}
 		
@@ -136,18 +136,17 @@ struct //	GDI
 
 			for ( unsigned int i=0 ; i < m.tblPset.size() ; i++ )
 			{
-				HPEN hPen, hOldPen;
+				HPEN hPen;
 
 				int x0 = m.tblPset[i].x;
 				int y0 = m.tblPset[i].y;
 				int	col = m.tblPset[i].col;
 
 				hPen = CreatePen(PS_SOLID, 1, col );
-				hOldPen = (HPEN)SelectObject(hdc, hPen);
+				SelectObject(hDc, hPen);
 
-				SetPixel( hdc, x0, y0, col );
+				SetPixel( hDc, x0, y0, col );
 
-				SelectObject(hdc, hOldPen);
 				DeleteObject(hPen);
 			}
 			
@@ -158,7 +157,7 @@ struct //	GDI
 
 			for ( unsigned int i=0 ; i < m.tblLine.size() ; i++ )
 			{
-				HPEN hPen, hOldPen;
+				HPEN hPen;
 
 				int x0 = m.tblLine[i].x0;
 				int y0 = m.tblLine[i].y0;
@@ -167,13 +166,11 @@ struct //	GDI
 				int	col = m.tblLine[i].col;
 
 				hPen = CreatePen(PS_SOLID, 1, col );
-				hOldPen = (HPEN)SelectObject(hdc, hPen);
+				SelectObject(hDc, hPen);
 
-				MoveToEx(hdc, x0, y0, NULL);
-				LineTo(hdc, x1, y1);
+				MoveToEx(hDc, x0, y0, NULL);
+				LineTo(hDc, x1, y1);
 
-//SetPixel( hdc, x1, y1, RGB(255,255,0) );
-				SelectObject(hdc, hOldPen);
 				DeleteObject(hPen);
 			}
 			m.tblLine.clear();
@@ -184,15 +181,15 @@ struct //	GDI
 	void onCreate( HWND hWnd ) 
 	//------------------------------------------------------------------------------
 	{
-	    HDC hdc = GetDC(hWnd);                      	// ウインドウのDCを取得
+	    HDC hDc = GetDC(hWnd);                      	// ウインドウのDCを取得
 //	    GetClientRect(GetDesktopWindow(), &rc);  	// デスクトップのサイズを取得
 				RECT rc;
 				GetClientRect( hWnd, &rc );
 
-		HBITMAP hBitmap = CreateCompatibleBitmap( hdc, rc.right, rc.bottom );
+		HBITMAP hBitmap = CreateCompatibleBitmap( hDc, rc.right, rc.bottom );
 	    hdcBackbuffer = CreateCompatibleDC( NULL );		// カレントスクリーン互換
 	    SelectObject( hdcBackbuffer, hBitmap );		// MDCにビットマップを割り付け
-		ReleaseDC( hWnd, hdc );
+		ReleaseDC( hWnd, hDc );
 
 	}	
 
@@ -201,11 +198,11 @@ struct //	GDI
 	//------------------------------------------------------------------------------
 	{
 	    PAINTSTRUCT ps;
-	    HDC hdc = BeginPaint(hWnd, &ps);
+	    HDC hDc = BeginPaint(hWnd, &ps);
 	    paint0( hdcBackbuffer);
 				RECT rcClient;
 				GetClientRect( hWnd, &rcClient );
-	    BitBlt(hdc, 0, 0, rcClient.right, rcClient.bottom, hdcBackbuffer, 0, 0, SRCCOPY);
+	    BitBlt(hDc, 0, 0, rcClient.right, rcClient.bottom, hdcBackbuffer, 0, 0, SRCCOPY);
 	    EndPaint(hWnd, &ps);
 	}
 
@@ -248,8 +245,8 @@ static	LRESULT CALLBACK WinProc
 		case WM_PAINT:	// OSからの描画要求。再描画区域情報（ウィンドウが重なっている際などの）が得られるタイミング。
 	 		{
 				PAINTSTRUCT ps;
-				HDC hdc = BeginPaint( hWnd , &ps );	//再描画区域が指定されてある。WM_PAINTメッセージを処理する
-//				gdi.paint0( hdc );
+				HDC hDc = BeginPaint( hWnd , &ps );	//再描画区域が指定されてある。WM_PAINTメッセージを処理する
+//				gdi.paint0( hDc );
 				EndPaint( hWnd , &ps);
 			}
 			return 0;
@@ -394,8 +391,8 @@ bool Win::exec()
 //------------------------------------------------------------------------------
 {
 //		InvalidateRect(win.hWnd , NULL , TRUE);	//	WM_PAINTを発行し再描画矩形情報を渡す
-//		HDC hdc = GetDC( win.hWnd );
-//		ReleaseDC( win.hWnd, hdc );
+//		HDC hDc = GetDC( win.hWnd );
+//		ReleaseDC( win.hWnd, hDc );
 
 	while(1)
 	{
@@ -406,10 +403,10 @@ bool Win::exec()
 			if ( win.tMsg.message == WM_QUIT ) return false; 
 		}
 
-		HDC hdc = GetDC( win.hWnd );
-//	    gdi.Clear( hdc );
-	    gdi.paint0( hdc );
-		ReleaseDC( win.hWnd, hdc );
+		HDC hDc = GetDC( win.hWnd );
+//	    gdi.Clear( hDc );
+	    gdi.paint0( hDc );
+		ReleaseDC( win.hWnd, hDc );
 
 
 		return true;
