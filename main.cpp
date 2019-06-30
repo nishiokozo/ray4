@@ -448,12 +448,53 @@ chrono::system_clock::time_point time_a;
 chrono::system_clock::time_point time_b;
 
 //------------------------------------------------------------------------------
+void	raytrace( Win& win, int py )
+//------------------------------------------------------------------------------
+{
+	Renderer ren;
+
+	{
+		int height	= win.m.height; 
+		int width	= win.m.width; 
+	
+		vect3	posScr = vect3(0,1.0,-12+8);
+		vect3	posEye = vect3(0,1.0,-17+8);
+
+		float r,s,p,e,t,rl,rr;
+		vect3	C;
+
+		int	cntMax = 0;
+		int	cntRay = 0;
+//		for( int py = 0 ; py < height ; py++ )
+		{
+			for( int px = 0 ; px < width ; px++ )
+			{
+				double x = ((double)px / width) *2.0-1.0;
+				double y = ((double)py / height) *2.0-1.0;
+				vect3	P = vect3( x, y, 0 ) + posScr;
+				vect3	I = normalize(P - posEye);
+
+				double	valRefractive = 1.0;
+
+				ren.m_cntRay = 0;
+				int	cntNext = 0;
+		 		C = ren.Raycast( P, I );
+				if ( ren.m_cntRay > cntMax ) cntMax = ren.m_cntRay;
+				cntRay+= ren.m_cntRay;
+
+				win.pset(px,height-py,win.rgb(C.r,C.g,C.b));
+			}
+		}
+		
+	}
+
+}
+//------------------------------------------------------------------------------
 int main()
 //------------------------------------------------------------------------------
 {
 	Win	win("Ray4 " __DATE__, 300,300,512, 512 );
 
-	Renderer ren;
 
 	int cnt = 0;
 
@@ -471,43 +512,13 @@ int main()
 
 	while( win.exec() )
 	{
- 
-		//raytrace
-		if (1)
-		{
-			int height	= win.m.height; 
-			int width	= win.m.width; 
+ 		static int py=0;
+
+
+		win.clr(win.rgb(0.3,0.3,0.3));
 		
-			vect3	posScr = vect3(0,1.0,-12+8);
-			vect3	posEye = vect3(0,1.0,-17+8);
-
-			float r,s,p,e,t,rl,rr;
-			vect3	C;
-
-			int	cntMax = 0;
-			int	cntRay = 0;
-			for( int py = 0 ; py < height ; py++ )
-			{
-				for( int px = 0 ; px < width ; px++ )
-				{
-					double x = ((double)px / width) *2.0-1.0;
-					double y = ((double)py / height) *2.0-1.0;
-					vect3	P = vect3( x, y, 0 ) + posScr;
-					vect3	I = normalize(P - posEye);
-
-					double	valRefractive = 1.0;
-
-					ren.m_cntRay = 0;
-					int	cntNext = 0;
-			 		C = ren.Raycast( P, I );
-					if ( ren.m_cntRay > cntMax ) cntMax = ren.m_cntRay;
-					cntRay+= ren.m_cntRay;
-
-					win.pset(px,height-py,win.rgb(C.r,C.g,C.b));
-				}
-			}
-			
-		}
+//		raytrace( win, py++ );
+		if ( py >= win.m.height ) py=0;
 
 
 		for ( unsigned int i = 0 ; i < vert.size()-1 ; i++ )
@@ -517,7 +528,7 @@ int main()
 			double xb=vert[i+1].x;
 			double yb=vert[i+1].y;
 
-			double th=rad(cnt/100);
+			double th=rad(cnt/1000);
 			
 			double x0=xa*cos(th) - ya*sin(th);
 			double y0=xa*sin(th) + ya*cos(th);

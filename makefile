@@ -31,10 +31,10 @@ $(TAR)	:	obj $(OBJS)
 	$(CC) -o $(TAR) $(OBJS) $(LIBS)
 
 obj/main.o:main.cpp
-	$(CC)  $(FLGS) $< -o $@
+	$(CC)   $< -o $@ $(FLGS)
 
 obj/%.o:%.cpp %.h
-	$(CC)  $(FLGS) $< -o $@
+	$(CC)   $< -o $@ $(FLGS)
 
 obj:
 	mkdir obj

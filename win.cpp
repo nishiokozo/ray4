@@ -39,6 +39,11 @@ struct	//	WIN
 		double	y;
 		int		col;
 	};
+	struct	PrimClr
+	{
+		bool	bActive;
+		int		col;
+	};
 struct //	GDI
 {
 	struct
@@ -51,6 +56,7 @@ struct //	GDI
 
 		vector<PrimLine>	tblLine;
 		vector<PrimPset>	tblPset;
+		PrimClr				clr;
 
 		RECT rect;
 
@@ -98,73 +104,79 @@ struct //	GDI
 
 	}
 */
-	//------------------------------------------------------------------------------
-	void Clear( HDC hdc )
-	//------------------------------------------------------------------------------
-	{
-		// clear
-		SelectObject(hdc , GetStockObject(BLACK_BRUSH));
-		Rectangle(hdc, 0, 0, m.rect.right, m.rect.bottom);
-	}
 	
 	//------------------------------------------------------------------------------
 	void paint0( HDC hdc )
 	//------------------------------------------------------------------------------
 	{
+
+		// clear background
+		if ( m.clr.bActive )
 		{
-			// bmp
-			{
+			SelectObject(hdc , CreateSolidBrush(m.clr.col));
+			PatBlt(hdc , 0 , 0 ,m.rect.right, m.rect.bottom , PATCOPY);
+			DeleteObject(
+				SelectObject(
+					hdc , GetStockObject(WHITE_BRUSH)
+				)
+			);
+
+		
+			m.clr.bActive = false;
+		}
+		
+		// bmp
+		{
 //				StretchDIBits( hdc, 0, 0, m.rect.right, m.rect.bottom, 0, 0, m.width, m.height, m.bPixelBits, &m.bmpInfo, DIB_RGB_COLORS, SRCCOPY );
 
+		}
+		
+		//pset
+		{
+
+			for ( unsigned int i=0 ; i < m.tblPset.size() ; i++ )
+			{
+				HPEN hPen, hOldPen;
+
+				int x0 = m.tblPset[i].x;
+				int y0 = m.tblPset[i].y;
+				int	col = m.tblPset[i].col;
+
+				hPen = CreatePen(PS_SOLID, 1, col );
+				hOldPen = (HPEN)SelectObject(hdc, hPen);
+
+				SetPixel( hdc, x0, y0, col );
+
+				SelectObject(hdc, hOldPen);
+				DeleteObject(hPen);
 			}
 			
-			//pset
+			m.tblPset.clear();
+		}
+		//line
+		{
+
+			for ( unsigned int i=0 ; i < m.tblLine.size() ; i++ )
 			{
+				HPEN hPen, hOldPen;
 
-				for ( unsigned int i=0 ; i < m.tblPset.size() ; i++ )
-				{
-					HPEN hPen, hOldPen;
+				int x0 = m.tblLine[i].x0;
+				int y0 = m.tblLine[i].y0;
+				int x1 = m.tblLine[i].x1;
+				int y1 = m.tblLine[i].y1;
+				int	col = m.tblLine[i].col;
 
-					int x0 = m.tblPset[i].x;
-					int y0 = m.tblPset[i].y;
-					int	col = m.tblPset[i].col;
+				hPen = CreatePen(PS_SOLID, 1, col );
+				hOldPen = (HPEN)SelectObject(hdc, hPen);
 
-					hPen = CreatePen(PS_SOLID, 1, col );
-					hOldPen = (HPEN)SelectObject(hdc, hPen);
-
-					SetPixel( hdc, x0, y0, col );
-
-					SelectObject(hdc, hOldPen);
-					DeleteObject(hPen);
-				}
-				
-				m.tblPset.clear();
-			}
-			//line
-			{
-
-				for ( unsigned int i=0 ; i < m.tblLine.size() ; i++ )
-				{
-					HPEN hPen, hOldPen;
-
-					int x0 = m.tblLine[i].x0;
-					int y0 = m.tblLine[i].y0;
-					int x1 = m.tblLine[i].x1;
-					int y1 = m.tblLine[i].y1;
-					int	col = m.tblLine[i].col;
-
-					hPen = CreatePen(PS_SOLID, 1, col );
-					hOldPen = (HPEN)SelectObject(hdc, hPen);
-
-					MoveToEx(hdc, x0, y0, NULL);
-					LineTo(hdc, x1, y1);
+				MoveToEx(hdc, x0, y0, NULL);
+				LineTo(hdc, x1, y1);
 
 //SetPixel( hdc, x1, y1, RGB(255,255,0) );
-					SelectObject(hdc, hOldPen);
-					DeleteObject(hPen);
-				}
-				m.tblLine.clear();
+				SelectObject(hdc, hOldPen);
+				DeleteObject(hPen);
 			}
+			m.tblLine.clear();
 		}
 	}
 
@@ -231,13 +243,13 @@ static	LRESULT CALLBACK WinProc
 			break;
 		case WM_SIZE:	// 画面サイズが決定された時に発行される
 			GetClientRect( hWnd, &gdi.m.rect );
-			break;
+			return 0;
 
-		case WM_PAINT:	// OSからの描画要求。再描画区域情報が得られるタイミング。
+		case WM_PAINT:	// OSからの描画要求。再描画区域情報（ウィンドウが重なっている際などの）が得られるタイミング。
 	 		{
 				PAINTSTRUCT ps;
 				HDC hdc = BeginPaint( hWnd , &ps );	//再描画区域が指定されてある。WM_PAINTメッセージを処理する
-				//gdi.paint0( hdc );
+//				gdi.paint0( hdc );
 				EndPaint( hWnd , &ps);
 			}
 			return 0;
@@ -278,31 +290,28 @@ int	Win::rgb( double r, double g , double b )
 	return col ;
 }
 
-/*
 //------------------------------------------------------------------------------
-int	Win::rgb( int ir, int ig , int ib )
+void Win::clr( int col)
 //------------------------------------------------------------------------------
 {
-	int	col = RGB(ir,ig,ib);
-	return col ;
+	gdi.m.clr.bActive = true;
+	gdi.m.clr.col = col;
 }
-*/
-
 //------------------------------------------------------------------------------
-void Win::pset( double x0, double y0, int col)
+void Win::pset( double x, double y, int col )
 //------------------------------------------------------------------------------
 {
-	PrimPset l = {x0,y0,col};
+	PrimPset a = {x,y,col};
 	
-	gdi.m.tblPset.push_back( l );
+	gdi.m.tblPset.push_back( a );
 }
 //------------------------------------------------------------------------------
 void Win::line( double x0, double y0, double x1, double y1,int col)
 //------------------------------------------------------------------------------
 {
-	PrimLine l = {x0,y0,x1,y1,col};
+	PrimLine a = {x0,y0,x1,y1,col};
 	
-	gdi.m.tblLine.push_back( l );
+	gdi.m.tblLine.push_back( a );
 }
 
 //------------------------------------------------------------------------------
@@ -397,9 +406,8 @@ bool Win::exec()
 			if ( win.tMsg.message == WM_QUIT ) return false; 
 		}
 
-// this_thread::sleep_for (chrono::milliseconds(1));
 		HDC hdc = GetDC( win.hWnd );
-	    gdi.Clear( hdc );
+//	    gdi.Clear( hdc );
 	    gdi.paint0( hdc );
 		ReleaseDC( win.hWnd, hdc );
 
@@ -407,4 +415,3 @@ bool Win::exec()
 		return true;
 	}
 }
-

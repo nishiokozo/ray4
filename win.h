@@ -19,6 +19,6 @@ public:
 
 	void	line( double x0, double y0, double x1, double y1, int col);
 	void	pset( double x0, double y0, int col);
+	void	clr( int col );
 	int 	rgb(double r, double g , double b );
-//	int		rgb( int ir, int ig , int ib );
 };
