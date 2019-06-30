@@ -112,13 +112,13 @@ struct	PrimLight
 class	Renderer 
 ////////////////////////////////////////////////////////////////////////////////
 {
-	int m_cntRay;
 	vector<PrimSphere*>	m_tblSphere;
 	vector<PrimPlate*>	m_tblPlate;
 	vector<PrimLight*>	m_tblLight;
 	vect3	A;
 
 public:
+	int m_cntRay;
 
 
 	//------------------------------------------------------------------------------
@@ -349,7 +349,7 @@ public:
 	}
 
 	//------------------------------------------------------------------------------
-	vect3 Raytrack( vect3 P, vect3 I )
+	vect3 Raycast( vect3 P, vect3 I )
 	//------------------------------------------------------------------------------g
 	{
 		vect3 ret = vect3(0,0,0);
@@ -373,7 +373,7 @@ public:
 			d	= max( 0.0, dot( sur.N, -L ) );
 			s	= (sur.valPower+2)/(8*pi)*pow( max( 0.0, dot( sur.R, -L ) ), sur.valPower );
 			r	= sur.valReflectance;
-			ret += r* (Raytrack( sur.Q, sur.R )+s) * Lc;
+			ret += r* (Raycast( sur.Q, sur.R )+s) * Lc;
 
 			if ( sur.valTransmittance == 0.0 )
 			{
@@ -387,7 +387,7 @@ public:
 
 
 				I = refract( I, sur.N, 1.0/sur.valRefractive );
-				ret += (1-r)*Raytrack( sur.Q, I );
+				ret += (1-r)*Raycast( sur.Q, I );
 			}
 
 		}
@@ -427,7 +427,7 @@ public:
 
 				m_cntRay = 0;
 				int	cntNext = 0;
-		 		C = Raytrack( P, I );
+		 		C = Raycast( P, I );
 				if ( m_cntRay > cntMax ) cntMax = m_cntRay;
 				cntRay+= m_cntRay;
 
@@ -453,7 +453,7 @@ int main()
 {
 	Win	win("Ray4 " __DATE__, 300,300,512, 512 );
 
-	Renderer r;
+	Renderer ren;
 
 	int cnt = 0;
 
@@ -461,7 +461,8 @@ int main()
 	{
 		double x,y;
 	};
-	vector<V> vert={
+	vector<V> vert=
+	{
 		{   0,100*tan(RAD(60)) -100*tan(rad(30)) },
 		{-100,  0              -100*tan(rad(30)) },
 		{ 100,  0              -100*tan(rad(30)) },
@@ -471,7 +472,43 @@ int main()
 	while( win.exec() )
 	{
  
-//		r.Paint( win.GetAddrPixels(), win.m.height, win.m.width, win.GetBytePixels() );
+		//raytrace
+		if (1)
+		{
+			int height	= win.m.height; 
+			int width	= win.m.width; 
+		
+			vect3	posScr = vect3(0,1.0,-12+8);
+			vect3	posEye = vect3(0,1.0,-17+8);
+
+			float r,s,p,e,t,rl,rr;
+			vect3	C;
+
+			int	cntMax = 0;
+			int	cntRay = 0;
+			for( int py = 0 ; py < height ; py++ )
+			{
+				for( int px = 0 ; px < width ; px++ )
+				{
+					double x = ((double)px / width) *2.0-1.0;
+					double y = ((double)py / height) *2.0-1.0;
+					vect3	P = vect3( x, y, 0 ) + posScr;
+					vect3	I = normalize(P - posEye);
+
+					double	valRefractive = 1.0;
+
+					ren.m_cntRay = 0;
+					int	cntNext = 0;
+			 		C = ren.Raycast( P, I );
+					if ( ren.m_cntRay > cntMax ) cntMax = ren.m_cntRay;
+					cntRay+= ren.m_cntRay;
+
+					win.pset(px,height-py,win.rgb(C.r,C.g,C.b));
+				}
+			}
+			
+		}
+
 
 		for ( unsigned int i = 0 ; i < vert.size()-1 ; i++ )
 		{

@@ -24,34 +24,54 @@ struct	//	WIN
 	HWND			hWnd;
 } win;
 
+
+	struct	PrimLine
+	{
+		double	x0;
+		double	y0;
+		double	x1;
+		double	y1;
+		int		col;
+	};
+	struct	PrimPset
+	{
+		double	x;
+		double	y;
+		int		col;
+	};
 struct //	GDI
 {
 	struct
 	{
-		BITMAPINFO	bmpInfo;
-		int			bpp;
-		BYTE*		bPixelBits = nullptr;
-		int			width;
-		int			height;
+//		BITMAPINFO	bmpInfo;
+//		int			bpp;
+//		BYTE*		bPixelBits = nullptr;
+//		int			width;
+//		int			height;
 
-		vector<Line>	tblLine;
+		vector<PrimLine>	tblLine;
+		vector<PrimPset>	tblPset;
 
-				RECT rect;
+		RECT rect;
 
 
 	} m;
-HDC     hdcBackbuffer;
+	HDC     hdcBackbuffer;
 
 
 	//------------------------------------------------------------------------------
 	void ReleasePixelBits()
 	//------------------------------------------------------------------------------
 	{
+/*
 		if ( m.bPixelBits != 0 ) 
 		{
 			delete [] m.bPixelBits;
 		}
+*/
+
 	}
+/*
 	//------------------------------------------------------------------------------
 	void CreatePixelBits(int bpp, int width, int height )
 	//------------------------------------------------------------------------------
@@ -77,7 +97,7 @@ HDC     hdcBackbuffer;
 		bih.biClrImportant		= 0;
 
 	}
-
+*/
 	//------------------------------------------------------------------------------
 	void Clear( HDC hdc )
 	//------------------------------------------------------------------------------
@@ -98,6 +118,28 @@ HDC     hdcBackbuffer;
 
 			}
 			
+			//pset
+			{
+
+				for ( unsigned int i=0 ; i < m.tblPset.size() ; i++ )
+				{
+					HPEN hPen, hOldPen;
+
+					int x0 = m.tblPset[i].x;
+					int y0 = m.tblPset[i].y;
+					int	col = m.tblPset[i].col;
+
+					hPen = CreatePen(PS_SOLID, 1, col );
+					hOldPen = (HPEN)SelectObject(hdc, hPen);
+
+					SetPixel( hdc, x0, y0, col );
+
+					SelectObject(hdc, hOldPen);
+					DeleteObject(hPen);
+				}
+				
+				m.tblPset.clear();
+			}
 			//line
 			{
 
@@ -117,10 +159,10 @@ HDC     hdcBackbuffer;
 					MoveToEx(hdc, x0, y0, NULL);
 					LineTo(hdc, x1, y1);
 
+//SetPixel( hdc, x1, y1, RGB(255,255,0) );
 					SelectObject(hdc, hOldPen);
 					DeleteObject(hPen);
 				}
-				
 				m.tblLine.clear();
 			}
 		}
@@ -157,6 +199,7 @@ HDC     hdcBackbuffer;
 
 } gdi;
 
+/*
 //------------------------------------------------------------------------------
 unsigned char* Win::GetAddrPixels()
 //------------------------------------------------------------------------------
@@ -170,6 +213,8 @@ int Win::GetBytePixels()
 {
 	return gdi.m.bpp/8;
 }
+*/
+
 //------------------------------------------------------------------------------
 static	LRESULT CALLBACK WinProc
 //------------------------------------------------------------------------------
@@ -223,6 +268,9 @@ cout << "WM_DESTROY " << endl;
 int	Win::rgb( double r, double g , double b )
 //------------------------------------------------------------------------------
 {
+	r = min( 1.0, r );
+	g = min( 1.0, g );
+	b = min( 1.0, b );
 	int	ir = ((int)(r*255))&0xff;
 	int	ig = ((int)(g*255))&0xff;
 	int	ib = ((int)(b*255))&0xff;
@@ -230,11 +278,29 @@ int	Win::rgb( double r, double g , double b )
 	return col ;
 }
 
+/*
+//------------------------------------------------------------------------------
+int	Win::rgb( int ir, int ig , int ib )
+//------------------------------------------------------------------------------
+{
+	int	col = RGB(ir,ig,ib);
+	return col ;
+}
+*/
+
+//------------------------------------------------------------------------------
+void Win::pset( double x0, double y0, int col)
+//------------------------------------------------------------------------------
+{
+	PrimPset l = {x0,y0,col};
+	
+	gdi.m.tblPset.push_back( l );
+}
 //------------------------------------------------------------------------------
 void Win::line( double x0, double y0, double x1, double y1,int col)
 //------------------------------------------------------------------------------
 {
-	Line l = {x0,y0,x1,y1,col};
+	PrimLine l = {x0,y0,x1,y1,col};
 	
 	gdi.m.tblLine.push_back( l );
 }
@@ -310,7 +376,7 @@ Win::Win( const char* name, int pos_x, int pos_y, int width, int height  )
 	}
 
 
-	gdi.CreatePixelBits( 24, width, height );
+//	gdi.CreatePixelBits( 24, width, height );
 	ShowWindow( win.hWnd, SW_SHOW );
 }
 
