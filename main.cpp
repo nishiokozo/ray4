@@ -511,6 +511,7 @@ int main()
 		{   0,100*tan(RAD(60)) -100*tan(rad(30)) },
 	};
 
+
 	while( win.exec() )
 	{
  		static int py=0;
@@ -548,7 +549,7 @@ int main()
 			time_b = chrono::system_clock::now();  
 			while( chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now()-time_a).count() < 16.6667 )
 			{
- 				this_thread::sleep_for (chrono::microseconds(100));
+ 				this_thread::sleep_for (chrono::milliseconds(1));
 			}
 			if ( cnt < 10 )
 			{

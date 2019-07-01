@@ -232,7 +232,7 @@ int	mat4_print( double* m )
 	return true;
 }
 //-----------------------------------------------------------------------------
-int	mat4_print( mat4& m )
+int	mat4_print( mat44& m )
 //-----------------------------------------------------------------------------
 {
 	printf("-----\n" );
@@ -245,7 +245,7 @@ int	mat4_print( mat4& m )
 
 
 //-----------------------------------------------------------------------------
-void mat4_invers( mat4& a, const mat4& y1 )
+void mat4_invers( mat44& a, const mat44& y1 )
 //-----------------------------------------------------------------------------
 {
 	mat4_invers( a.GetArray(), a.GetArray() );
@@ -344,7 +344,7 @@ void	mat4_ortho( double* m, double x1, double x2, double y1, double y2, double z
 	m[12] =   tx;	m[13] =   ty;	m[14] =   tz;	m[15] = 1.0f;
 }
 //-----------------------------------------------------------------------------
-void mat4_perspective ( mat4& m, double fovy, double aspect, double zNear, double zFar)
+void mat4_perspective ( mat44& m, double fovy, double aspect, double zNear, double zFar)
 //-----------------------------------------------------------------------------
 {
 	mat4_perspective ( m.GetArray(), fovy, aspect, zNear, zFar );
@@ -455,7 +455,7 @@ void	mat4_frustum( double* m, double x1, double x2, double y1, double y2, double
 	m[M30] = 0.0f;	m[M31] = 0.0f;	m[M32] =-1.0f;	m[M33] = 0.0f;
 }
 //-----------------------------------------------------------------------------
-void	mat4_Frustum( mat4& m, double x1, double x2, double y1, double y2, double z1, double z2 )
+void	mat4_Frustum( mat44& m, double x1, double x2, double y1, double y2, double z1, double z2 )
 //-----------------------------------------------------------------------------
 {
 	double* a = m.m_array;
@@ -483,7 +483,7 @@ w = 1.0f/2.0f;
 
 }
 //-----------------------------------------------------------------------------
-void	mat4_Ortho( mat4& m, double x1, double x2, double y1, double y2, double z1, double z2 )
+void	mat4_Ortho( mat44& m, double x1, double x2, double y1, double y2, double z1, double z2 )
 //-----------------------------------------------------------------------------
 {
 	double* a = m.m_array;
@@ -671,7 +671,7 @@ void	mat4_copy( double* m, double a[16] )
 
 }
 //-----------------------------------------------------------------------------
-void	mat4_identity( mat4& m )
+void	mat4_identity( mat44& m )
 //-----------------------------------------------------------------------------
 {
 	mat4_identity( m.GetArray() );
@@ -745,10 +745,10 @@ void	mat4_getTranslate( double* m, double x, double y, double z )
 	m[M30] =   x;	m[M31] =   y;	m[M32] =   z;	m[M33] = 1.0f;
 }
 //-----------------------------------------------------------------------------
-mat4	mat4_GetTranslate( double x, double y, double z )
+mat44	mat4_GetTranslate( double x, double y, double z )
 //-----------------------------------------------------------------------------
 {
-	return mat4(
+	return mat44(
 		1.0f,	0.0f,	0.0f,	0.0f,
 		0.0f,	1.0f,	0.0f,	0.0f,
 		0.0f,	0.0f,	1.0f,	0.0f,
@@ -772,19 +772,19 @@ void	mat4_scaling( double* m, const vect3& vecScale  )
 	mat4_multiply( m, m, a );
 }
 //-----------------------------------------------------------------------------
-void	mat4_scaling( mat4& m, const vect3& vecScale  )
+void	mat4_scaling( mat44& m, const vect3& vecScale  )
 //-----------------------------------------------------------------------------
 {
 	mat4_scaling( m.GetArray(), vecScale.x, vecScale.y, vecScale.z  );
 }
 //-----------------------------------------------------------------------------
-void	mat4_scaling( mat4& m, double sx, double sy, double sz   )
+void	mat4_scaling( mat44& m, double sx, double sy, double sz   )
 //-----------------------------------------------------------------------------
 {
 	mat4_scaling( m.GetArray(), sx, sy, sz  );
 }
 //-----------------------------------------------------------------------------
-void	mat4_translate( mat4& m, double sx, double sy, double sz   )
+void	mat4_translate( mat44& m, double sx, double sy, double sz   )
 //-----------------------------------------------------------------------------
 {
 	mat4_translate( m.GetArray(), sx, sy, sz  );
@@ -799,7 +799,7 @@ void	mat4_translate( double* m, double x, double y, double z )
 }
 
 //-----------------------------------------------------------------------------
-void	mat4_translate( mat4& m, vect3 v )
+void	mat4_translate( mat44& m, vect3 v )
 //-----------------------------------------------------------------------------
 {
 	mat4_translate( m.GetArray(), v );
@@ -813,19 +813,19 @@ void	mat4_translate( double* m, vect3 v )
 	m[M32] += v.z;
 }
 //-----------------------------------------------------------------------------
-void	mat4_rotateX( mat4& m, double th )
+void	mat4_rotateX( mat44& m, double th )
 //-----------------------------------------------------------------------------
 {
 	mat4_rotateX( m.GetArray(), th );
 }
 //-----------------------------------------------------------------------------
-void	mat4_rotateY( mat4& m, double th )
+void	mat4_rotateY( mat44& m, double th )
 //-----------------------------------------------------------------------------
 {
 	mat4_rotateY( m.GetArray(), th );
 }
 //-----------------------------------------------------------------------------
-void	mat4_rotateZ( mat4& m, double th )
+void	mat4_rotateZ( mat44& m, double th )
 //-----------------------------------------------------------------------------
 {
 	mat4_rotateZ( m.GetArray(), th );
@@ -909,13 +909,13 @@ void	mat4_getRotateZ( double* m, double th )
 	m[M30] = 0.0f;	m[M31] = 0.0f;	m[M32] = 0.0f;	m[M33] = 1.0f;
 }
 //-----------------------------------------------------------------------------
-mat4	mat4_GetRotateX( double th )
+mat44	mat4_GetRotateX( double th )
 //-----------------------------------------------------------------------------
 {
 	double	c = cos(th);
 	double	s = sin(th);
 
-	return mat4(
+	return mat44(
 		1.0f,	0.0f,	0.0f,	0.0f,
 		0.0f,	   c,	  -s,	0.0f,
 		0.0f,	   s,	   c,	0.0f,
@@ -923,13 +923,13 @@ mat4	mat4_GetRotateX( double th )
 	);
 }
 //-----------------------------------------------------------------------------
-mat4	mat4_GetRotateY( double th )
+mat44	mat4_GetRotateY( double th )
 //-----------------------------------------------------------------------------
 {
 	double	c = cos(th);
 	double	s = sin(th);
 
-	return mat4(
+	return mat44(
 		   c,	0.0f,	  -s,	0.0f,
 		0.0f,	1.0f,	0.0f,	0.0f,
 		   s,	0.0f,	   c,	0.0f,
@@ -937,13 +937,13 @@ mat4	mat4_GetRotateY( double th )
 	);
 }
 //-----------------------------------------------------------------------------
-mat4	mat4_GetRotateZ( double th )
+mat44	mat4_GetRotateZ( double th )
 //-----------------------------------------------------------------------------
 {
 	double	c = cos(th);
 	double	s = sin(th);
 
-	return mat4(
+	return mat44(
 		   c,	  -s,	0.0f,	0.0f,
 		   s,	   c,	0.0f,	0.0f,
 		0.0f,	0.0f,	1.0f,	0.0f,

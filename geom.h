@@ -1,5 +1,5 @@
 // version 20170527
-//	2019/06/25 to only vect3 & mat4
+//	2019/06/25 to only vect3 & mat44
 
 typedef	double	MAT4[4][4];
 
@@ -223,7 +223,7 @@ extern vect3	normalize( const vect3& a );
 
 
 //---
-class	mat4
+class	mat44
 {
 public:
 	union
@@ -231,7 +231,7 @@ public:
 		double	m_array[16];
 		MAT4	m;
 	};
-	mat4()
+	mat44()
 	{
 		m[0][0] = 1.0f;	m[0][1] = 0.0f;	m[0][2] = 0.0f;	m[0][3] = 0.0f;
 		m[1][0] = 0.0f;	m[1][1] = 1.0f;	m[1][2] = 0.0f;	m[1][3] = 0.0f;
@@ -239,7 +239,7 @@ public:
 		m[3][0] = 0.0f;	m[3][1] = 0.0f;	m[3][2] = 0.0f;	m[3][3] = 1.0f;
 	}
 
-	mat4(
+	mat44(
 		double m00, double m01, double m02, double m03, 
 		double m10, double m11, double m12, double m13, 
 		double m20, double m21, double m22, double m23, 
@@ -252,7 +252,7 @@ public:
 		m[3][0] = m30;	m[3][1] = m31;	m[3][2] = m32;	m[3][3] = m33;
 	}
 
-	friend	vect3 operator*( const vect3& a, const mat4& m )
+	friend	vect3 operator*( const vect3& a, const mat44& m )
 	{
 		vect3 ret;
 		ret.x = a.x*m.m[0][0] + a.y*m.m[1][0] + a.z*m.m[2][0] + 1.0*m.m[3][0] ;
@@ -272,12 +272,12 @@ public:
 		return ret;
 	}
 
-	mat4 operator*( const mat4& m ) const
+	mat44 operator*( const mat44& m ) const
 	{
 		const MAT4& a = this->m;
 		const MAT4& b = m.m;
 
-		mat4 ret(
+		mat44 ret(
 			a[0][0] * b[0][0] +  a[0][1] * b[1][0] +  a[0][2] * b[2][0] +  a[0][3] * b[3][0],
 			a[0][0] * b[0][1] +  a[0][1] * b[1][1] +  a[0][2] * b[2][1] +  a[0][3] * b[3][1],
 			a[0][0] * b[0][2] +  a[0][1] * b[1][2] +  a[0][2] * b[2][2] +  a[0][3] * b[3][2],
@@ -302,7 +302,7 @@ public:
 		return	ret;
 	}
 
-	mat4& operator*=( const mat4& a ) 
+	mat44& operator*=( const mat44& a ) 
 	{
 
 		*this = *this * a;
@@ -405,7 +405,7 @@ public:
 	{
 		double	c = cos(f);
 		double	s = sin(f);
-		*this *= mat4(
+		*this *= mat44(
 			1,  0,  0,  0,
 			0,  c, -s,  0,
 			0,  s,  c,  0,
@@ -416,7 +416,7 @@ public:
 	{
 		double	c = cos(f);
 		double	s = sin(f);
-		*this *= mat4(
+		*this *= mat44(
 			c,  0, -s,  0,
 			0,  1,  0,  0,
 			s,  0,  c,  0,
@@ -427,7 +427,7 @@ public:
 	{
 		double	c = cos(f);
 		double	s = sin(f);
-		*this *= mat4(
+		*this *= mat44(
 			c, -s,  0,  0,
 			s,	c,  0,  0,
 			0,  0,  1,  0,
@@ -462,7 +462,7 @@ public:
 
 	void Print()
 	{
-		printf("mat4:\n");
+		printf("mat44:\n");
 		printf("%9.6f %9.6f %9.6f %9.6f\n", m[0][0], m[0][1], m[0][2], m[0][3] );
 		printf("%9.6f %9.6f %9.6f %9.6f\n", m[1][0], m[1][1], m[1][2], m[1][3] );
 		printf("%9.6f %9.6f %9.6f %9.6f\n", m[2][0], m[2][1], m[2][2], m[2][3] );
@@ -470,7 +470,7 @@ public:
 	}
 	void Print( const char* str )
 	{
-		printf("mat4:%s\n", str);
+		printf("mat44:%s\n", str);
 		printf("%9.6f %9.6f %9.6f %9.6f\n", m[0][0], m[0][1], m[0][2], m[0][3] );
 		printf("%9.6f %9.6f %9.6f %9.6f\n", m[1][0], m[1][1], m[1][2], m[1][3] );
 		printf("%9.6f %9.6f %9.6f %9.6f\n", m[2][0], m[2][1], m[2][2], m[2][3] );
@@ -480,31 +480,31 @@ public:
 };
 
 
-void	mat4_Frustum( mat4& m, double l, double r, double b, double t, double n, double f );
+void	mat4_Frustum( mat44& m, double l, double r, double b, double t, double n, double f );
 void	mat4_Ortho( double* m, double l, double r, double b, double t, double n, double f );
 
-int	mat4_print( mat4& m );
+int	mat4_print( mat44& m );
 int	mat4_print( double* m );
 void	mat4_frustum( double* m, double l, double r, double b, double t, double n, double f );
-void	mat4_translate( mat4& m, double x, double y, double z );
+void	mat4_translate( mat44& m, double x, double y, double z );
 void	mat4_translate( double* m, double x, double y, double z );
 void	mat4_translate( double* m, vect3 vec );
-void	mat4_translate( mat4& m, vect3 vec );
-void	mat4_rotateX( mat4& m, double th );
-void	mat4_rotateY( mat4& m, double th );
-void	mat4_rotateZ( mat4& m, double th );
-void	mat4_scaling( mat4& m, double sx, double sy, double sz  );
+void	mat4_translate( mat44& m, vect3 vec );
+void	mat4_rotateX( mat44& m, double th );
+void	mat4_rotateY( mat44& m, double th );
+void	mat4_rotateZ( mat44& m, double th );
+void	mat4_scaling( mat44& m, double sx, double sy, double sz  );
 void	mat4_scaling( double* m, double sx, double sy, double sz  );
 void	mat4_scaling( double* m, const vect3& vecScale  );
-void	mat4_scaling( mat4& m, const vect3& vecScale  );
+void	mat4_scaling( mat44& m, const vect3& vecScale  );
 void	mat4_transpose( double* m, double a[16] );
 
 void	mat4_copy( double* m, double a[16] );
 
-void 	mat4_invers( mat4& a, const mat4& b );
+void 	mat4_invers( mat44& a, const mat44& b );
 //void	mat4_invers ( double* out, double* in );
 void	mat4_identity( double* m );
-void	mat4_identity( mat4& m );
+void	mat4_identity( mat44& m );
 
 void	mat4_getTranslate( double* m, double x, double y, double z );
 void	mat4_getRotateX( double* m, double th );
@@ -516,7 +516,7 @@ void	mat4_getScale( double* m, double sx, double sy, double sz  );
 double*	mat4_identity();
 
 void 	mat4_glFrustumf ( double* m,  double left, double right, double bottom, double top, double near, double far);
-void 	mat4_perspective ( mat4& m, double fovy, double aspect, double zNear, double zFar);
+void 	mat4_perspective ( mat44& m, double fovy, double aspect, double zNear, double zFar);
 void 	mat4_perspective (double* m, double fovy, double aspect, double zNear, double zFar);
 void 	mat4_invers ( double* m, const double* in );
 void	mat4_add( double* m, double* a, double* b );
@@ -527,8 +527,8 @@ void	mat4_div( double* m, double f );
 void mat4_ray_perspective (double* m, double fovy, double aspect );
 void	mat4_otrho( double* m, double l, double r, double b, double t, double n, double f );
 
-mat4	mat4_GetTranslate( double x, double y, double z );
-mat4	mat4_GetRotateX( double th );
-mat4	mat4_GetRotateY( double th );
-mat4	mat4_GetRotateZ( double th );
+mat44	mat4_GetTranslate( double x, double y, double z );
+mat44	mat4_GetRotateX( double th );
+mat44	mat4_GetRotateY( double th );
+mat44	mat4_GetRotateZ( double th );
 void	mat4_multiply( double* m, const double* a, const double* y1 );
