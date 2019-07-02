@@ -499,18 +499,55 @@ int main()
 
 	int cnt = 0;
 
-	struct V
+	struct V2
 	{
 		double x,y;
 	};
-	vector<V> vert=
+	vector<V2> triangle=
 	{
-		{   0,100*tan(RAD(60)) -100*tan(rad(30)) },
-		{-100,  0              -100*tan(rad(30)) },
-		{ 100,  0              -100*tan(rad(30)) },
-		{   0,100*tan(RAD(60)) -100*tan(rad(30)) },
+		{   0,100*tan(rad(60)) -100*tan(rad(30)) },
+		{-100,  0 	    	       -100*tan(rad(30)) },
+		{ 100,  0   	           -100*tan(rad(30)) },
+		{   0,100*tan(rad(60)) -100*tan(rad(30)) },
 	};
 
+	vector<vect3> boxvert=
+	{
+		{	-1,	 1,	-1	},
+		{	 1,	 1,	-1	},
+		{	-1,	-1,	-1	},
+		{	 1,	-1,	-1	},
+		{	-1,	 1,	 1	},
+		{	 1,	 1,	 1	},
+		{	-1,	-1,	 1	},
+		{	 1,	-1,	 1	},
+	};
+	vector<vect3> boxdl;
+
+	struct	E2
+	{
+		int	p,n;
+	};
+	vector<E2>	boxedge
+	{
+		{	0,	1	},
+		{	1,	3	},
+		{	3,	2	},
+		{	2,	0	},
+		{	4,	5	},
+		{	5,	7	},
+		{	7,	6	},
+		{	6,	4	},
+		{	0,	4	},
+		{	1,	5	},
+		{	2,	6	},
+		{	3,	7	},
+	};
+
+
+		double	rx = rad(0);
+		double	ry = rad(0);
+		double	rz = rad(0);
 
 	while( win.exec() )
 	{
@@ -522,13 +559,89 @@ int main()
 //		raytrace( win, py++ );
 		if ( py >= win.m.height ) py=0;
 
+		//	move
+		rx += rad(0.2);	
+		rz += rad(1);	
+		ry += rad(0.5);	
 
-		for ( unsigned int i = 0 ; i < vert.size()-1 ; i++ )
+		//calc rotate
+		boxdl.clear();
+		for ( vect3 v : boxvert )
 		{
-			double xa=vert[i].x;
-			double ya=vert[i].y;
-			double xb=vert[i+1].x;
-			double yb=vert[i+1].y;
+			double x = v.x;
+			double y = v.y;
+			double z = v.z;
+
+			double	vx,vy,vz;
+
+			//rz
+			vx=x*cos(rz) - y*sin(rz);
+			vy=x*sin(rz) + y*cos(rz);
+			vz=z;
+			x=vx;
+			y=vy;
+			z=vz;
+
+			//rx
+			vx=x;
+			vy=y*cos(rx) - z*sin(rx);
+			vz=y*sin(rx) + z*cos(rx);
+			x=vx;
+			y=vy;
+			z=vz;
+
+			//ry
+			vx=x*cos(ry) - z*sin(ry);
+			vy=y;
+			vz=x*sin(ry) + z*cos(ry);
+			x=vx;
+			y=vy;
+			z=vz;
+
+			z=z+10;
+
+			boxdl.push_back( (vect3){x,y,z} );
+
+		}
+		
+		
+
+		//calc pers 
+		for ( E2 e : boxedge )
+		{
+			vect3& p = boxdl[e.p];
+			vect3& n = boxdl[e.n];
+
+			double	x,y,z;
+			
+			double	fovy = rad(45);	//	画角
+			//画角から投影面パラメータを求める
+			double	sc = win.m.height/2;
+			double	ez = sc/tan(fovy);
+//cout << ez << endl;
+ez=2;	sc=600;
+			//pers
+			double x0 = p.x/(p.z+ez)	*sc	+256;
+			double y0 = p.y/(p.z+ez)	*sc	+256;
+			double x1 = n.x/(n.z+ez)	*sc	+256;
+			double y1 = n.y/(n.z+ez)	*sc	+256;
+
+
+		
+
+			win.line(x0,y0,x1,y1,win.rgb(0,1,1));
+
+		}
+		
+
+
+		//	V2
+		for ( unsigned int i = 0 ; i < triangle.size()-1 ; i++ )
+		{
+			double xa=triangle[i].x;
+			double ya=triangle[i].y;
+			double xb=triangle[i+1].x;
+			double yb=triangle[i+1].y;
 
 			double th=rad(cnt/1);
 			
@@ -542,7 +655,7 @@ int main()
 			x1+=256;
 			y1+=256;
 
-			win.line(x0,y0,x1,y1,win.rgb(0,1,1));
+//			win.line(x0,y0,x1,y1,win.rgb(0,1,1));
 		}
 		
 		{

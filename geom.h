@@ -200,8 +200,8 @@ extern vect3	normalizXe( const vect3& a );
 extern vect3	normalize( const vect3& a );
 
 
-#define	RAD(n)	((n)*M_PI/180.0f)
-#define	DEG(n)	((n)*180.0f/M_PI)
+//#define	RAD(n)	((n)*M_PI/180.0f)
+//#define	DEG(n)	((n)*180.0f/M_PI)
 #define	M00	0
 #define	M01	1
 #define	M02	2
@@ -219,7 +219,10 @@ extern vect3	normalize( const vect3& a );
 #define	M32	14
 #define	M33	15
 
-#define	rad(n) ((n)*M_PI/180.0f)
+//#define	rad(n)	((n)*M_PI/180.0f)
+//#define	deg(n)	((n)*180.0f/M_PI)
+extern	double rad( double n );
+extern	double deg( double n );
 
 
 //---
