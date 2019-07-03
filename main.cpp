@@ -10,6 +10,7 @@ using namespace std;
 
 #include "Win.h"
 #include "geom.h"
+#include "key.h"
 
 
 const	static	double INFINIT =  numeric_limits<double>::max();	//DBL_MAX
@@ -549,8 +550,10 @@ int main()
 		double	ry = rad(0);
 		double	rz = rad(0);
 
+	key_init();
 	while( win.exec() )
 	{
+		key_update();
  		static int py=0;
 
 
@@ -560,10 +563,11 @@ int main()
 		if ( py >= win.m.height ) py=0;
 
 		//	move
-		rx += rad(0.2);	
-		rz += rad(1);	
+//		rx += rad(0.2);	
+//		rz += rad(1);	
 		ry += rad(0.5);	
 
+double pz =4;
 		//calc rotate
 		boxdl.clear();
 		for ( vect3 v : boxvert )
@@ -598,13 +602,17 @@ int main()
 			y=vy;
 			z=vz;
 
-			z=z+10;
+			z+=pz;
 
 			boxdl.push_back( (vect3){x,y,z} );
 
 		}
 		
 		
+static	double	val=3;
+if (key.hi.q) {val--;cout << val << endl; }
+if (key.hi.a) {val++;cout << val << endl; }
+
 
 		//calc pers 
 		for ( E2 e : boxedge )
@@ -617,14 +625,15 @@ int main()
 			double	fovy = rad(45);	//	画角
 			//画角から投影面パラメータを求める
 			double	sc = win.m.height/2;
-			double	ez = sc/tan(fovy);
-//cout << ez << endl;
-ez=2;	sc=600;
+			double	sz = sc/tan(fovy);
+//cout << sz << endl;
+
+sz=val;	sc=win.m.height/2*sz;
 			//pers
-			double x0 = p.x/(p.z+ez)	*sc	+256;
-			double y0 = p.y/(p.z+ez)	*sc	+256;
-			double x1 = n.x/(n.z+ez)	*sc	+256;
-			double y1 = n.y/(n.z+ez)	*sc	+256;
+			double x0 = p.x/(p.z+sz)	*sc	+256;
+			double y0 = p.y/(p.z+sz)	*sc	+256;
+			double x1 = n.x/(n.z+sz)	*sc	+256;
+			double y1 = n.y/(n.z+sz)	*sc	+256;
 
 
 		
