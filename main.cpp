@@ -550,10 +550,14 @@ int main()
 		double	ry = rad(0);
 		double	rz = rad(0);
 
-	key_init();
+	//key_init();
+
+//	KEY_INF	key;
+//	KEY_INF	&key = akey.key_getInstance();
+
 	while( win.exec() )
 	{
-		key_update();
+		key.Update();
  		static int py=0;
 
 
