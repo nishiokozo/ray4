@@ -612,6 +612,8 @@ double pz =4;
 static	double	val=3;
 if (key.hi.q) {val--;cout << val << endl; }
 if (key.hi.a) {val++;cout << val << endl; }
+if (key.rep.w) {val-=0.1;cout << val << endl; }
+if (key.rep.s) {val+=0.1;cout << val << endl; }
 
 
 		//calc pers 
@@ -628,7 +630,7 @@ if (key.hi.a) {val++;cout << val << endl; }
 			double	sz = sc/tan(fovy);
 //cout << sz << endl;
 
-sz=val;	sc=win.m.height/2*sz;
+sz=val;	sc=win.m.height/2;//*sz;
 			//pers
 			double x0 = p.x/(p.z+sz)	*sc	+256;
 			double y0 = p.y/(p.z+sz)	*sc	+256;
