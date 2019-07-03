@@ -610,8 +610,8 @@ double pz =4;
 		
 		
 static	double	val=3;
-if (key.hi.q) {val--;cout << val << endl; }
-if (key.hi.a) {val++;cout << val << endl; }
+if (key.rep.q) {val--;cout << val << endl; }
+if (key.rep.a) {val++;cout << val << endl; }
 if (key.rep.w) {val-=0.1;cout << val << endl; }
 if (key.rep.s) {val+=0.1;cout << val << endl; }
 

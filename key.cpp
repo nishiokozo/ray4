@@ -32,12 +32,28 @@ int	key_update()
 		bool on		= ((g_state[i] & 0x80)!=0);
 		bool hi		= ( on && !prev);
 		bool lo		= (!on &&  prev);
+		bool rep	= hi;
+		int	lim	= key.tbl_lim[i];
+
+		if ( hi )
+		{
+			lim=16;
+		}
+		if ( lim-- <= 0 && on )
+		{
+			lim = 4;
+			rep = true;
+		}
 
 		key.tbl_prev[i]	= prev;
 		key.tbl_on[i]	= on;
 		key.tbl_hi[i]	= hi;
 		key.tbl_lo[i]	= lo;
+		key.tbl_rep[i]	= rep;
+		key.tbl_lim[i]	= lim;
 	}
+
+
 
 
 #if 0

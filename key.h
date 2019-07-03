@@ -256,36 +256,36 @@ typedef struct
 	bool	_FD;				// FD VK_PA1
 	bool	_FE;				// FE VK_OEM_CLEAR
 	bool	_FF;				// FF (reserved)
-} KEY_TYPE;
+} KEY_MAP;
 
 typedef struct
 {
 	int	tbl_lim[256];
-;					//
+					//
 	union 
 	{
 		bool tbl_prev[256];
-		KEY_TYPE	prev;
+		KEY_MAP	prev;
 	};
 	union 
 	{
 		bool tbl_on[256];
-		KEY_TYPE	on;
+		KEY_MAP	on;
 	};
 	union 
 	{
 		bool tbl_hi[256];
-		KEY_TYPE	hi;
+		KEY_MAP	hi;
 	};
 	union 
 	{
 		bool tbl_lo[256];
-		KEY_TYPE	lo;
+		KEY_MAP	lo;
 	};
 	union 
 	{
-		int	tbl_rep[256];
-		KEY_TYPE	rep;
+		bool	tbl_rep[256];
+		KEY_MAP	rep;
 	};
 
 } KEY_INF;
