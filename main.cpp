@@ -550,14 +550,11 @@ int main()
 		double	ry = rad(0);
 		double	rz = rad(0);
 
-	//keyboard_init();
-
-//	keyboard_INF	keyboard;
-//	keyboard_INF	&keyboard = akeyboard.keyboard_getInstance();
+	Keyboard*	keys = Keyboard::getInstance();
 
 	while( win.exec() )
 	{
-		keyboard.Update();
+		keys->Update();
  		static int py=0;
 
 
@@ -614,10 +611,10 @@ double pz =4;
 		
 		
 		static	double	val=45;
-		if (keyboard.Q.rep) {val--;cout << val <<" "<<1/tan(rad(val)) << endl; }
-		if (keyboard.A.rep) {val++;cout << val <<" "<<1/tan(rad(val)) << endl; }
-		if (keyboard.W.rep) {val-=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
-		if (keyboard.S.rep) {val+=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (keys->Q.rep) {val--;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (keys->A.rep) {val++;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (keys->W.rep) {val-=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (keys->S.rep) {val+=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
 
 
 		//calc pers 

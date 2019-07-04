@@ -1,10 +1,10 @@
 #include <iostream>
 using namespace std;
 #include <windows.h>
-//#include <stdio.h>
 #include "keyboard.h"
 
-struct
+// WinAPI由来の情報。キーボード入力は一つしか無いので固定で持つ。
+static struct G
 {
 	BYTE	state[256];
 	bool	tbl_prev[256];
@@ -13,39 +13,34 @@ struct
 	bool	tbl_lo[256];
 	bool	tbl_rep[256];
 	int		tbl_lim[256];
+
+	G()
+	{
+		cout << "G()" << endl;
+		for ( int i = 0 ; i < 255 ; i++ )
+		{
+			tbl_prev[i]	= 0;
+			tbl_on[i]	= 0;
+			tbl_hi[i]	= 0;
+			tbl_lo[i]	= 0;
+			tbl_rep[i]	= 0;
+			tbl_lim[i]	= 0;
+		}
+	}
 } g;
 
-Keyboard	keyboard;
-
-//static Keyboard	g_key;
-/*
-//-----------------------------------------------------------------------------
-Keyboard& key_getInstance()
-//-----------------------------------------------------------------------------
-{
-		cout << "key_getInstance()" << endl;
-	return	(*this);
-}
-*/
 
 //-----------------------------------------------------------------------------
-Keyboard& Keyboard::key_getInstance()
+Keyboard* Keyboard::getInstance()
 //-----------------------------------------------------------------------------
 {
-		cout << "key_getInstance()" << endl;
-	return	(*this);
+	cout << "key_getInstance()st" << endl;
+	static Keyboard	g_instance;
+	cout << "key_getInstance()en" << endl;
+	return	&g_instance;//(*this);
 }
 
-/*
-//-----------------------------------------------------------------------------
-int key_init()
-//-----------------------------------------------------------------------------
-{
-		cout << "key_init()" << endl;
-	memset( &g_key, 0, sizeof((*this))) ;
-	return	true;
-}
-*/
+
 //-----------------------------------------------------------------------------
 Keyboard::Keyboard()
 //-----------------------------------------------------------------------------
@@ -373,7 +368,7 @@ void Keyboard::Update()
 	this->SHIFT.on		= g.tbl_on[ VK_SHIFT ];			// 10
 	this->SHIFT.hi		= g.tbl_hi[ VK_SHIFT ];			// 10
 	this->SHIFT.lo		= g.tbl_lo[ VK_SHIFT ];			// 10
-	this->SHIFT.rep		= g.tbl_rep[ VK_SHIFT ];			// 10
+	this->SHIFT.rep		= g.tbl_rep[ VK_SHIFT ];		// 10
 
 	this->CTRL.on		= g.tbl_on[ VK_CONTROL ];		// 11
 	this->CTRL.hi		= g.tbl_hi[ VK_CONTROL ];		// 11
@@ -398,12 +393,12 @@ void Keyboard::Update()
 	this->SPACE.on		= g.tbl_on[ VK_SPACE ];			// 20
 	this->SPACE.hi		= g.tbl_hi[ VK_SPACE ];			// 20
 	this->SPACE.lo		= g.tbl_lo[ VK_SPACE ];			// 20
-	this->SPACE.rep		= g.tbl_rep[ VK_SPACE ];			// 20
+	this->SPACE.rep		= g.tbl_rep[ VK_SPACE ];		// 20
 
 	this->PAGEUP.on		= g.tbl_on[ VK_PRIOR ];			// 21
 	this->PAGEUP.hi		= g.tbl_hi[ VK_PRIOR ];			// 21
 	this->PAGEUP.lo		= g.tbl_lo[ VK_PRIOR ];			// 21
-	this->PAGEUP.rep	= g.tbl_rep[ VK_PRIOR ];			// 21
+	this->PAGEUP.rep	= g.tbl_rep[ VK_PRIOR ];		// 21
 
 	this->PAGEDOWN.on	= g.tbl_on[ VK_NEXT ];			// 22
 	this->PAGEDOWN.hi	= g.tbl_hi[ VK_NEXT ];			// 22

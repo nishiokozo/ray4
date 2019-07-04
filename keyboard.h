@@ -8,6 +8,14 @@ class Keyboard
 		bool	hi;
 		bool	lo;
 		bool	rep;
+		Keyobj()
+		{
+//		cout << "Keyobj()" << endl;
+			on = 0;
+			hi = 0;
+			lo = 0;
+			rep = 0;
+		};
 	};
 public:
 	Keyobj	BACKSPACE;			// 08 VK_BACK
@@ -81,12 +89,7 @@ public:
 	Keyboard();
 	void	Update();
 
-	Keyboard& key_getInstance();
+
+	static Keyboard* getInstance();
 
 } ;
-
-
-int key_init();
-Keyboard& key_getInstance();
-
-extern	Keyboard	keyboard;
