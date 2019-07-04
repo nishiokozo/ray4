@@ -1,12 +1,12 @@
-#簡略式makfefile for msys64 / GDI
- 
+# 2019/07/04   msys64 / GDI
+
 TAR = main.exe
 
-OBJS = \
-	obj/main.o \
-	obj/win.o \
-	obj/geom.o \
-	obj/keyboard.o \
+SRCS = \
+	main.cpp \
+	win.cpp \
+	geom.cpp \
+	keyboard.cpp \
 
 LIBS = \
 	 -lgdi32
@@ -17,31 +17,30 @@ FLGS = \
 	-m64 \
 	-std=c++17 \
 	-Wall \
-	-Wno-unknown-pragmas \
 	-Wno-unused-function \
 	-Wno-unused-variable \
 	-Wno-unused-but-set-variable \
-	-O3 \
 
+#	-O3 \
+#	-Wno-unknown-pragmas \
 #	-Werror \
 
 #CC	= clang++
 CC	= g++
 
-$(TAR)	:	obj $(OBJS)
-	$(CC) -o $(TAR) $(OBJS) $(LIBS)
+$(TAR)	:	$(SRCS:.cpp=.o)
+	$(CC) -o $(TAR) $(SRCS:.cpp=.o) $(LIBS)
 
-obj/main.o:main.cpp
-	$(CC)   $< -o $@ $(FLGS)
-
-obj/%.o:%.cpp %.h
-	$(CC)   $< -o $@ $(FLGS)
-
-obj:
-	mkdir obj
+%.o:%.cpp
+	$(CC)   $(FLGS) $< -o $@ 
 
 clean:
 	rm -f *.exe
-	rm -rf obj
+	rm -f *.o
+	rm -f *.*.stackdump
 
+mm:	$(SRCS)
+	$(CC)   -MM $? >mm.txt
+
+include mm.txt
 
