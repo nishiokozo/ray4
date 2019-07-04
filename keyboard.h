@@ -90,6 +90,6 @@ public:
 	void	Update();
 
 
-	static Keyboard* getInstance();
+	static Keyboard* GetInstance();
 
 } ;

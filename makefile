@@ -19,6 +19,7 @@ FLGS = \
 	-Wall \
 	-Wno-unused-function \
 	-Wno-unused-variable \
+	-Wno-unused-value \
 	-Wno-unused-but-set-variable \
 
 #	-O3 \

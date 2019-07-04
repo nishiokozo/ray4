@@ -11,14 +11,10 @@ public:
 	Win( const char* name, int pos_x, int pos_y, int width, int height  );
 	virtual ~Win();
 
-	bool exec();
-//	unsigned char* GetAddrPixels();
-//	int GetBytePixels();
+	bool Exec();
 
-
-
-	void	line( double x0, double y0, double x1, double y1, int col);
-	void	pset( double x0, double y0, int col);
-	void	clr( int col );
-	int 	rgb(double r, double g , double b );
+	void	Line( double x0, double y0, double x1, double y1, int col);
+	void	Pset( double x0, double y0, int col);
+	void	Clr( int col );
+	int 	Rgb(double r, double g , double b );
 };

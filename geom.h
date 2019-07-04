@@ -236,6 +236,7 @@ public:
 	};
 	mat44()
 	{
+		//	m[行][列]
 		m[0][0] = 1.0f;	m[0][1] = 0.0f;	m[0][2] = 0.0f;	m[0][3] = 0.0f;
 		m[1][0] = 0.0f;	m[1][1] = 1.0f;	m[1][2] = 0.0f;	m[1][3] = 0.0f;
 		m[2][0] = 0.0f;	m[2][1] = 0.0f;	m[2][2] = 1.0f;	m[2][3] = 0.0f;
@@ -249,30 +250,32 @@ public:
 		double m30, double m31, double m32, double m33 
 	)
 	{
+		//	m[行][列]
 		m[0][0] = m00;	m[0][1] = m01;	m[0][2] = m02;	m[0][3] = m03;
 		m[1][0] = m10;	m[1][1] = m11;	m[1][2] = m12;	m[1][3] = m13;
 		m[2][0] = m20;	m[2][1] = m21;	m[2][2] = m22;	m[2][3] = m23;
 		m[3][0] = m30;	m[3][1] = m31;	m[3][2] = m32;	m[3][3] = m33;
 	}
 
-	friend	vect3 operator*( const vect3& a, const mat44& m )
-	{
-		vect3 ret;
-		ret.x = a.x*m.m[0][0] + a.y*m.m[1][0] + a.z*m.m[2][0] + 1.0*m.m[3][0] ;
-		ret.y = a.x*m.m[0][1] + a.y*m.m[1][1] + a.z*m.m[2][1] + 1.0*m.m[3][1] ;
-		ret.z = a.x*m.m[0][2] + a.y*m.m[1][2] + a.z*m.m[2][2] + 1.0*m.m[3][2] ;
 
-		return ret;
+	vect3 operator*( const vect3& v ) const
+	{
+		//	m[行][列] x v[列]
+		return vect3(
+			m[0][0]*v.x + m[0][1]*v.y + m[0][2]*v.z + m[0][3] ,
+			m[1][0]*v.x + m[1][1]*v.y + m[1][2]*v.z + m[1][3] ,
+			m[2][0]*v.x + m[2][1]*v.y + m[2][2]*v.z + m[2][3] 
+		);
 	}
 
-	vect3 operator*( const vect3& a ) const
+	friend	vect3 operator*( const vect3& v, const mat44& m )
 	{
-		
-		vect3 ret;
-		ret.x = m[0][0]*a.x + m[0][1]*a.y + m[0][2]*a.z + m[0][3]*1.0 ;
-		ret.y = m[1][0]*a.x + m[1][1]*a.y + m[1][2]*a.z + m[1][3]*1.0 ;
-		ret.z = m[2][0]*a.x + m[2][1]*a.y + m[2][2]*a.z + m[2][3]*1.0 ;
-		return ret;
+		//	v[行] x m[行][列]
+		return vect3(
+			v.x*m.m[0][0] + v.y*m.m[0][1] + v.z*m.m[0][2] + 1.0*m.m[0][3] ,
+			v.x*m.m[1][0] + v.y*m.m[1][1] + v.z*m.m[1][2] + 1.0*m.m[1][3] ,
+			v.x*m.m[2][0] + v.y*m.m[2][1] + v.z*m.m[2][2] + 1.0*m.m[2][3] 
+		);
 	}
 
 	mat44 operator*( const mat44& m ) const

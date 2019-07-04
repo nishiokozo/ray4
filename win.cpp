@@ -274,7 +274,7 @@ cout << "WM_DESTROY " << endl;
 }
 
 //------------------------------------------------------------------------------
-int	Win::rgb( double r, double g , double b )
+int	Win::Rgb( double r, double g , double b )
 //------------------------------------------------------------------------------
 {
 	r = min( 1.0, r );
@@ -288,14 +288,14 @@ int	Win::rgb( double r, double g , double b )
 }
 
 //------------------------------------------------------------------------------
-void Win::clr( int col)
+void Win::Clr( int col)
 //------------------------------------------------------------------------------
 {
 	gdi.m.clr.bActive = true;
 	gdi.m.clr.col = col;
 }
 //------------------------------------------------------------------------------
-void Win::pset( double x, double y, int col )
+void Win::Pset( double x, double y, int col )
 //------------------------------------------------------------------------------
 {
 	PrimPset a = {x,y,col};
@@ -303,7 +303,7 @@ void Win::pset( double x, double y, int col )
 	gdi.m.tblPset.push_back( a );
 }
 //------------------------------------------------------------------------------
-void Win::line( double x0, double y0, double x1, double y1,int col)
+void Win::Line( double x0, double y0, double x1, double y1,int col)
 //------------------------------------------------------------------------------
 {
 	PrimLine a = {x0,y0,x1,y1,col};
@@ -387,7 +387,7 @@ Win::Win( const char* name, int pos_x, int pos_y, int width, int height  )
 }
 
 //------------------------------------------------------------------------------
-bool Win::exec()
+bool Win::Exec()
 //------------------------------------------------------------------------------
 {
 //		InvalidateRect(win.hWnd , NULL , TRUE);	//	WM_PAINTを発行し再描画矩形情報を渡す

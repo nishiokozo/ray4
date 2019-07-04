@@ -31,7 +31,7 @@ static struct G
 
 
 //-----------------------------------------------------------------------------
-Keyboard* Keyboard::getInstance()
+Keyboard* Keyboard::GetInstance()
 //-----------------------------------------------------------------------------
 {
 	cout << "key_getInstance()st" << endl;

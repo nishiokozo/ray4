@@ -484,13 +484,15 @@ void	raytrace( Win& win, int py )
 				if ( ren.m_cntRay > cntMax ) cntMax = ren.m_cntRay;
 				cntRay+= ren.m_cntRay;
 
-				win.pset(px,height-py,win.rgb(C.r,C.g,C.b));
+				win.Pset(px,height-py,win.Rgb(C.r,C.g,C.b));
 			}
 		}
 		
 	}
 
 }
+
+
 //------------------------------------------------------------------------------
 int main()
 //------------------------------------------------------------------------------
@@ -507,8 +509,8 @@ int main()
 	vector<V2> triangle=
 	{
 		{   0,100*tan(rad(60)) -100*tan(rad(30)) },
-		{-100,  0 	    	       -100*tan(rad(30)) },
-		{ 100,  0   	           -100*tan(rad(30)) },
+		{-100,  0 	    	   -100*tan(rad(30)) },
+		{ 100,  0   	       -100*tan(rad(30)) },
 		{   0,100*tan(rad(60)) -100*tan(rad(30)) },
 	};
 
@@ -550,71 +552,112 @@ int main()
 		double	ry = rad(0);
 		double	rz = rad(0);
 
-	Keyboard*	keys = Keyboard::getInstance();
+	Keyboard*	keyboard = Keyboard::GetInstance();
 
-	while( win.exec() )
+	while( win.Exec() )
 	{
-		keys->Update();
+		keyboard->Update();
  		static int py=0;
 
 
-		win.clr(win.rgb(0.3,0.3,0.3));
+		win.Clr(win.Rgb(0.3,0.3,0.3));
 		
 //		raytrace( win, py++ );
 		if ( py >= win.m.height ) py=0;
 
 		//	move
 //		rx += rad(0.2);	
-//		rz += rad(1);	
-		ry += rad(0.5);	
+		rz += rad(1);	
+//		ry += rad(0.5);	
 
 double pz =4;
+
+
+
 		//calc rotate
 		boxdl.clear();
 		for ( vect3 v : boxvert )
 		{
-			double x = v.x;
-			double y = v.y;
-			double z = v.z;
+//			double x = v.x;
+//			double y = v.y;
+//			double z = v.z;
 
-			double	vx,vy,vz;
+			double	x,y,z;
 
+struct Mat 
+{
+	double	m[4][4];
+	Mat(
+		double m00,	double m01,	double m02,	double m03,	
+		double m10,	double m11,	double m12,	double m13,	
+		double m20,	double m21,	double m22,	double m23,	
+		double m30,	double m31,	double m32,	double m33	
+	)
+	{
+		 m[0][0]=m00;	 m[0][1]=m01;	 m[0][2]=m02;	 m[0][3]=m03;	
+		 m[1][0]=m10;	 m[1][1]=m11;	 m[1][2]=m12;	 m[1][3]=m13;	
+		 m[2][0]=m20;	 m[2][1]=m21;	 m[2][2]=m22;	 m[2][3]=m23;	
+		 m[3][0]=m30;	 m[3][1]=m31;	 m[3][2]=m32;	 m[3][3]=m33;	
+	}
+	vect3	operator*( vect3 v )
+	{
+		vect3	b;
+		b.x =	m[0][0]*v.x +	 m[0][1]*v.y	+	 m[0][2]*v.z	+	 m[0][3];
+		b.y =	m[1][0]*v.x +	 m[1][1]*v.y	+	 m[1][2]*v.z	+	 m[1][3];
+		b.z =	m[2][0]*v.x + 	 m[2][1]*v.y	+	 m[2][2]*v.z	+	 m[2][3];
+
+		return b;		
+	}
+};
+
+#if 0
 			//rz
-			vx=x*cos(rz) - y*sin(rz);
-			vy=x*sin(rz) + y*cos(rz);
-			vz=z;
-			x=vx;
-			y=vy;
-			z=vz;
+			x=v.x*cos(rz) - v.y*sin(rz) + v.z *0;
+			y=v.x*sin(rz) + v.y*cos(rz) + v.z *0;
+			z=v.x* 0      + v.y*0       + v.z *1;
+			v.x=x;
+			v.y=y;
+			v.z=z;
+#else
+			mat44 m(
+				cos(rz)	,	-sin(rz)	,	0.0	,	0.0	,
+				sin(rz)	,	 cos(rz)	,	0.0	,	0.0	,
+				0.0		,	0.0			,	1.0	,	0.0	,
+				0.0		,	0.0			,	0.0	,	0.0	
+			);
+
+			v=v*m;
+			
+#endif
 
 			//rx
-			vx=x;
-			vy=y*cos(rx) - z*sin(rx);
-			vz=y*sin(rx) + z*cos(rx);
-			x=vx;
-			y=vy;
-			z=vz;
+			x=v.x;
+			y=v.y*cos(rx) - v.z*sin(rx);
+			z=v.y*sin(rx) + v.z*cos(rx);
+			v.x=x;
+			v.y=y;
+			v.z=z;
 
 			//ry
-			vx=x*cos(ry) - z*sin(ry);
-			vy=y;
-			vz=x*sin(ry) + z*cos(ry);
-			x=vx;
-			y=vy;
-			z=vz;
+			x=v.x*cos(ry) - v.z*sin(ry);
+			y=v.y;
+			z=v.x*sin(ry) + v.z*cos(ry);
+			v.x=x;
+			v.y=y;
+			v.z=z;
 
-			z+=pz;
+			v.z+=pz;
 
-			boxdl.push_back( (vect3){x,y,z} );
+			boxdl.push_back( v );
 
 		}
 		
 		
 		static	double	val=45;
-		if (keys->Q.rep) {val--;cout << val <<" "<<1/tan(rad(val)) << endl; }
-		if (keys->A.rep) {val++;cout << val <<" "<<1/tan(rad(val)) << endl; }
-		if (keys->W.rep) {val-=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
-		if (keys->S.rep) {val+=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (keyboard->Q.rep) {val--;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (keyboard->A.rep) {val++;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (keyboard->W.rep) {val-=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (keyboard->S.rep) {val+=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
 
 
 		//calc pers 
@@ -635,7 +678,7 @@ double pz =4;
 			double y0 = p.y/(p.z+sz)	*sc	+256;
 			double x1 = n.x/(n.z+sz)	*sc	+256;
 			double y1 = n.y/(n.z+sz)	*sc	+256;
-			win.line(x0,y0,x1,y1,win.rgb(0,1,1));
+			win.Line(x0,y0,x1,y1,win.Rgb(0,1,1));
 
 		}
 		
@@ -661,7 +704,7 @@ double pz =4;
 			x1+=256;
 			y1+=256;
 
-//			win.line(x0,y0,x1,y1,win.rgb(0,1,1));
+			win.Line(x0,y0,x1,y1,win.Rgb(0,1,1));
 		}
 		
 		{
