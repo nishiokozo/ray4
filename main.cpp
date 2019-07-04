@@ -566,9 +566,9 @@ int main()
 		if ( py >= win.m.height ) py=0;
 
 		//	move
-//		rx += rad(0.2);	
+		rx += rad(0.2);	
 		rz += rad(1);	
-//		ry += rad(0.5);	
+		ry += rad(0.5);	
 
 double pz =4;
 
@@ -618,17 +618,6 @@ struct Mat
 			v.x=x;
 			v.y=y;
 			v.z=z;
-#else
-			mat44 m(
-				cos(rz)	,	-sin(rz)	,	0.0	,	0.0	,
-				sin(rz)	,	 cos(rz)	,	0.0	,	0.0	,
-				0.0		,	0.0			,	1.0	,	0.0	,
-				0.0		,	0.0			,	0.0	,	0.0	
-			);
-
-			v=v*m;
-			
-#endif
 
 			//rx
 			x=v.x;
@@ -645,6 +634,32 @@ struct Mat
 			v.x=x;
 			v.y=y;
 			v.z=z;
+#else
+			mat44 rotz(
+				cos(rz)	,	-sin(rz)	,	0.0			,	0.0	,
+				sin(rz)	,	 cos(rz)	,	0.0			,	0.0	,
+				0.0		,	0.0			,	1.0			,	0.0	,
+				0.0		,	0.0			,	0.0			,	0.0	
+			);
+			v=v * rotz;
+
+			mat44 rotx(
+				1.0		,	0.0			,	0.0			,	0.0	,
+				0.0		,	 cos(rx)	,	-sin(rx)	,	0.0	,
+				0.0		,	 sin(rx)	,	 cos(rx)	,	0.0	,
+				0.0		,	0.0			,	0.0			,	0.0	
+			);
+			v=v * rotx;
+
+			mat44 roty(
+				cos(ry)	,	0.0			,	-sin(ry)	,	0.0	,
+				0.0		,	1.0			,	0.0			,	0.0	,
+				sin(ry)	,	0.0			,	 cos(ry)	,	0.0	,
+				0.0		,	0.0			,	0.0			,	0.0	
+			);
+			v=v* roty;
+			
+#endif
 
 			v.z+=pz;
 
