@@ -10,7 +10,7 @@ using namespace std;
 
 #include "Win.h"
 #include "geom.h"
-#include "key.h"
+#include "keyboard.h"
 
 
 const	static	double INFINIT =  numeric_limits<double>::max();	//DBL_MAX
@@ -550,14 +550,14 @@ int main()
 		double	ry = rad(0);
 		double	rz = rad(0);
 
-	//key_init();
+	//keyboard_init();
 
-//	KEY_INF	key;
-//	KEY_INF	&key = akey.key_getInstance();
+//	keyboard_INF	keyboard;
+//	keyboard_INF	&keyboard = akeyboard.keyboard_getInstance();
 
 	while( win.exec() )
 	{
-		key.Update();
+		keyboard.Update();
  		static int py=0;
 
 
@@ -613,11 +613,11 @@ double pz =4;
 		}
 		
 		
-static	double	val=45;
-if (key.rep.q) {val--;cout << val <<" "<<1/tan(rad(val)) << endl; }
-if (key.rep.a) {val++;cout << val <<" "<<1/tan(rad(val)) << endl; }
-if (key.rep.w) {val-=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
-if (key.rep.s) {val+=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		static	double	val=45;
+		if (keyboard.Q.rep) {val--;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (keyboard.A.rep) {val++;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (keyboard.W.rep) {val-=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (keyboard.S.rep) {val+=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
 
 
 		//calc pers 
@@ -633,16 +633,11 @@ if (key.rep.s) {val+=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
 			double	sc = win.m.height/2;
 			double	sz = 1/tan(fovy/2);
 
-//sz=val;	sc=win.m.height/2;//*sz;
 			//pers
 			double x0 = p.x/(p.z+sz)	*sc	+256;
 			double y0 = p.y/(p.z+sz)	*sc	+256;
 			double x1 = n.x/(n.z+sz)	*sc	+256;
 			double y1 = n.y/(n.z+sz)	*sc	+256;
-
-
-		
-
 			win.line(x0,y0,x1,y1,win.rgb(0,1,1));
 
 		}

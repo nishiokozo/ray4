@@ -6,7 +6,7 @@ OBJS = \
 	obj/main.o \
 	obj/win.o \
 	obj/geom.o \
-	obj/key.o \
+	obj/keyboard.o \
 
 LIBS = \
 	 -lgdi32
