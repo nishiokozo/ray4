@@ -613,11 +613,11 @@ double pz =4;
 		}
 		
 		
-static	double	val=3;
-if (key.rep.q) {val--;cout << val << endl; }
-if (key.rep.a) {val++;cout << val << endl; }
-if (key.rep.w) {val-=0.1;cout << val << endl; }
-if (key.rep.s) {val+=0.1;cout << val << endl; }
+static	double	val=45;
+if (key.rep.q) {val--;cout << val <<" "<<1/tan(rad(val)) << endl; }
+if (key.rep.a) {val++;cout << val <<" "<<1/tan(rad(val)) << endl; }
+if (key.rep.w) {val-=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
+if (key.rep.s) {val+=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
 
 
 		//calc pers 
@@ -628,13 +628,12 @@ if (key.rep.s) {val+=0.1;cout << val << endl; }
 
 			double	x,y,z;
 			
-			double	fovy = rad(45);	//	画角
+			double	fovy = rad(val);	//	画角
 			//画角から投影面パラメータを求める
 			double	sc = win.m.height/2;
-			double	sz = sc/tan(fovy);
-//cout << sz << endl;
+			double	sz = 1/tan(fovy/2);
 
-sz=val;	sc=win.m.height/2;//*sz;
+//sz=val;	sc=win.m.height/2;//*sz;
 			//pers
 			double x0 = p.x/(p.z+sz)	*sc	+256;
 			double y0 = p.y/(p.z+sz)	*sc	+256;
