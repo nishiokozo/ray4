@@ -636,20 +636,20 @@ struct Mat
 			v.z=z;
 #else
 			//	右手系座標系
-			//	左手ねじ周り
+			//	右手ねじ周り
 			//	roll	:z	奥+
 			//	pitch	:x	右+
 			//	yaw		:y	下+
 
-ry+=rad(0.1);
+//rx+=rad(0.1);
+//ry+=rad(0.2);
+rz+=rad(0.1);
 			mat44 rotx(
 				1.0			,	0.0			,	0.0			,	0.0	,
 				0.0			,	 cos(rx)	,	-sin(rx)	,	0.0	,
 				0.0			,	 sin(rx)	,	 cos(rx)	,	0.0	,
 				0.0			,	0.0			,	0.0			,	0.0	
 			);
-			v=v * rotx;
-//			v= rotx * v;
 
 			mat44 roty(
 				 cos(ry)	,	0.0			,	 sin(ry)	,	0.0	,
@@ -657,7 +657,6 @@ ry+=rad(0.1);
 				-sin(ry)	,	0.0			,	 cos(ry)	,	0.0	,
 				 0.0		,	0.0			,	0.0			,	0.0	
 			);
-			v=v* roty;
 
 			mat44 rotz(
 				 cos(rz)	,	-sin(rz)	,	0.0			,	0.0	,
@@ -665,8 +664,14 @@ ry+=rad(0.1);
 				0.0			,	0.0			,	1.0			,	0.0	,
 				0.0			,	0.0			,	0.0			,	0.0	
 			);
-			v=v * rotz;
 
+#if 1
+			v= rotx *v ;
+			v= roty *v ;
+			v= rotz *v ;
+#else
+			v= rotx * roty * rotz *v ;
+#endif
 
 
 			

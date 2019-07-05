@@ -266,7 +266,6 @@ public:
 			m[1][0]*v.x + m[1][1]*v.y + m[1][2]*v.z + m[1][3] ,
 			m[2][0]*v.x + m[2][1]*v.y + m[2][2]*v.z + m[2][3] 
 		);
-cout << "1" << endl;
 	}
 
 	friend	vect3 operator*( const vect3& v, const mat44& m )
@@ -277,7 +276,6 @@ cout << "1" << endl;
 			v.x*m.m[0][1] + v.y*m.m[1][1] + v.z*m.m[2][1] + 1.0*m.m[3][1] ,
 			v.x*m.m[0][2] + v.y*m.m[1][2] + v.z*m.m[2][2] + 1.0*m.m[3][2] 
 		);
-cout << "2" << endl;
 	}
 
 	mat44 operator*( const mat44& m ) const
@@ -285,7 +283,8 @@ cout << "2" << endl;
 		const MAT4& a = this->m;
 		const MAT4& b = m.m;
 
-		mat44 ret(
+		//	a[行][列] x b[行][列]
+		return mat44(
 			a[0][0] * b[0][0] +  a[0][1] * b[1][0] +  a[0][2] * b[2][0] +  a[0][3] * b[3][0],
 			a[0][0] * b[0][1] +  a[0][1] * b[1][1] +  a[0][2] * b[2][1] +  a[0][3] * b[3][1],
 			a[0][0] * b[0][2] +  a[0][1] * b[1][2] +  a[0][2] * b[2][2] +  a[0][3] * b[3][2],
@@ -306,8 +305,6 @@ cout << "2" << endl;
 			a[3][0] * b[0][2] +  a[3][1] * b[1][2] +  a[3][2] * b[2][2] +  a[3][3] * b[3][2],
 			a[3][0] * b[0][3] +  a[3][1] * b[1][3] +  a[3][2] * b[2][3] +  a[3][3] * b[3][3]
 		);
-
-		return	ret;
 	}
 
 	mat44& operator*=( const mat44& a ) 
