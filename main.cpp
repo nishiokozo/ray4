@@ -516,7 +516,7 @@ int main()
 
 	vector<vect3> boxvert=
 	{
-		{	-1,	 1,	-1	},
+		{	-1,	 2,	-1	},
 		{	 1,	 1,	-1	},
 		{	-1,	-1,	-1	},
 		{	 1,	-1,	-1	},
@@ -566,9 +566,9 @@ int main()
 		if ( py >= win.m.height ) py=0;
 
 		//	move
-		rx += rad(0.2);	
-		rz += rad(1);	
-		ry += rad(0.5);	
+//		rx += rad(0.2);	
+//		rz += rad(1);	
+//		ry += rad(0.5);	
 
 double pz =4;
 
@@ -635,29 +635,40 @@ struct Mat
 			v.y=y;
 			v.z=z;
 #else
+			//	右手系座標系
+			//	左手ねじ周り
+			//	roll	:z	奥+
+			//	pitch	:x	右+
+			//	yaw		:y	下+
+
+ry+=rad(0.1);
+			mat44 rotx(
+				1.0			,	0.0			,	0.0			,	0.0	,
+				0.0			,	 cos(rx)	,	-sin(rx)	,	0.0	,
+				0.0			,	 sin(rx)	,	 cos(rx)	,	0.0	,
+				0.0			,	0.0			,	0.0			,	0.0	
+			);
+			v=v * rotx;
+//			v= rotx * v;
+
+			mat44 roty(
+				 cos(ry)	,	0.0			,	 sin(ry)	,	0.0	,
+				 0.0		,	1.0			,	0.0			,	0.0	,
+				-sin(ry)	,	0.0			,	 cos(ry)	,	0.0	,
+				 0.0		,	0.0			,	0.0			,	0.0	
+			);
+			v=v* roty;
+
 			mat44 rotz(
-				cos(rz)	,	-sin(rz)	,	0.0			,	0.0	,
-				sin(rz)	,	 cos(rz)	,	0.0			,	0.0	,
-				0.0		,	0.0			,	1.0			,	0.0	,
-				0.0		,	0.0			,	0.0			,	0.0	
+				 cos(rz)	,	-sin(rz)	,	0.0			,	0.0	,
+				 sin(rz)	,	 cos(rz)	,	0.0			,	0.0	,
+				0.0			,	0.0			,	1.0			,	0.0	,
+				0.0			,	0.0			,	0.0			,	0.0	
 			);
 			v=v * rotz;
 
-			mat44 rotx(
-				1.0		,	0.0			,	0.0			,	0.0	,
-				0.0		,	 cos(rx)	,	-sin(rx)	,	0.0	,
-				0.0		,	 sin(rx)	,	 cos(rx)	,	0.0	,
-				0.0		,	0.0			,	0.0			,	0.0	
-			);
-			v=v * rotx;
 
-			mat44 roty(
-				cos(ry)	,	0.0			,	-sin(ry)	,	0.0	,
-				0.0		,	1.0			,	0.0			,	0.0	,
-				sin(ry)	,	0.0			,	 cos(ry)	,	0.0	,
-				0.0		,	0.0			,	0.0			,	0.0	
-			);
-			v=v* roty;
+
 			
 #endif
 
