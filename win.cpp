@@ -161,13 +161,13 @@ struct //	GDI
 //				StretchDIBits( hDc, 0, 0, m.rect.right, m.rect.bottom, 0, 0, m.width, m.height, m.bPixelBits, &m.bmpInfo, DIB_RGB_COLORS, SRCCOPY );
 
 		}
+
 		
 		//circle
 		{
 
 			for ( unsigned int i=0 ; i < m.tblCircle.size() ; i++ )
 			{
-				HPEN hPen;
 
 				int x0 = m.tblCircle[i].x0;
 				int y0 = m.tblCircle[i].y0;
@@ -175,13 +175,16 @@ struct //	GDI
 				int y1 = m.tblCircle[i].y1;
 				int	col = m.tblCircle[i].col;
 
-				hPen = CreatePen(PS_SOLID, 1, col );
+				HPEN hPen = CreatePen(PS_SOLID, 1, col );
+				SelectObject(hDc, hPen);
+				HBRUSH hBrush  = CreateSolidBrush(col);
 				SelectObject(hDc, hPen);
 
 //				SetPixel( hDc, x0, y0, col );
 
 				Ellipse(hDc , x0, y0, x1, y1);
 
+				DeleteObject(hBrush);
 				DeleteObject(hPen);
 			}
 			
@@ -260,6 +263,7 @@ struct //	GDI
 			m.tblTri.clear();
 		}
 
+
 		//Bezier
 		{
 			for ( unsigned int i=0 ; i < m.tblBezier.size() ; i++ )
@@ -293,6 +297,7 @@ struct //	GDI
 
 		}
 
+
 	}
 
 	//------------------------------------------------------------------------------
@@ -315,13 +320,22 @@ struct //	GDI
 	void onPaint2(HWND hWnd) 
 	//------------------------------------------------------------------------------
 	{
-	    PAINTSTRUCT ps;
-	    HDC hDc = BeginPaint(hWnd, &ps);
-	    paint0( hdcBackbuffer);
-				RECT rcClient;
-				GetClientRect( hWnd, &rcClient );
-	    BitBlt(hDc, 0, 0, rcClient.right, rcClient.bottom, hdcBackbuffer, 0, 0, SRCCOPY);
-	    EndPaint(hWnd, &ps);
+#if 1
+	 		{
+				PAINTSTRUCT ps;
+				HDC hDc = BeginPaint( hWnd , &ps );	//再描画区域が指定されてある。WM_PAINTメッセージを処理する
+				EndPaint( hWnd , &ps);
+			}
+#else
+			    paint0( hdcBackbuffer);
+
+		    PAINTSTRUCT ps;
+		    HDC hDc = BeginPaint(hWnd, &ps);
+				RECT rc;
+				GetClientRect( hWnd, &rc );
+			    BitBlt(hDc, 0, 0, rc.right, rc.bottom, hdcBackbuffer, 0, 0, SRCCOPY);
+		    EndPaint(hWnd, &ps);
+#endif
 	}
 
 } gdi;
@@ -355,20 +369,15 @@ static	LRESULT CALLBACK WinProc
 	switch( uMsg ) 
 	{
 		case WM_CREATE:	// CreateWindowと同時に発行される
+			gdi.onCreate( hWnd );
 			break;
 		case WM_SIZE:	// 画面サイズが決定された時に発行される
 			GetClientRect( hWnd, &gdi.m.rect );
 			return 0;
 
 		case WM_PAINT:	// OSからの描画要求。再描画区域情報（ウィンドウが重なっている際などの）が得られるタイミング。
-	 		{
-				PAINTSTRUCT ps;
-				HDC hDc = BeginPaint( hWnd , &ps );	//再描画区域が指定されてある。WM_PAINTメッセージを処理する
-//				gdi.paint0( hDc );
-				EndPaint( hWnd , &ps);
-			}
+	 		gdi. onPaint2( hWnd );
 			return 0;
-			break;
 
 		case WM_KEYDOWN:
 			{
@@ -378,7 +387,6 @@ static	LRESULT CALLBACK WinProc
 				}
 			}
 			return 0;
-			break;
 
 		case WM_DESTROY:	//[x]を押すなどしたとき
 cout << "WM_DESTROY " << endl;
@@ -533,8 +541,6 @@ bool Win::Exec()
 //------------------------------------------------------------------------------
 {
 //		InvalidateRect(win.hWnd , NULL , TRUE);	//	WM_PAINTを発行し再描画矩形情報を渡す
-//		HDC hDc = GetDC( win.hWnd );
-//		ReleaseDC( win.hWnd, hDc );
 
 	while(1)
 	{
@@ -544,11 +550,14 @@ bool Win::Exec()
 			TranslateMessage( &win.tMsg );
 			if ( win.tMsg.message == WM_QUIT ) return false; 
 		}
-
+#if 1
 		HDC hDc = GetDC( win.hWnd );
-	    gdi.paint0( hDc );
+		gdi.paint0( gdi.hdcBackbuffer);
+				RECT rc;
+				GetClientRect( win.hWnd, &rc );
+	    BitBlt(hDc, 0, 0, rc.right, rc.bottom, gdi.hdcBackbuffer, 0, 0, SRCCOPY);
 		ReleaseDC( win.hWnd, hDc );
-
+#endif
 
 		return true;
 	}

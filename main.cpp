@@ -721,11 +721,56 @@ rz+=rad(0.1);
 			win.Line(x0,y0,x1,y1,win.Rgb(0,1,1));
 
 		}
-
+#if 1
 			win.Tri(55,10, 10,100, 100,100,win.Rgb(1,1,0));
 double a = 40;
 			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+a+=50;
+			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+a+=50;
+			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+a+=50;
+			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+a+=50;
+			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+a+=50;
+			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+a+=50;
+			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+a+=50;
+			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+a+=50;
+			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+a+=50;
+			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+a+=50;
+			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+a+=50;
+			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+a+=50;
+			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+a+=50;
+			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+a+=50;
+			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+a+=50;
+			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+a+=50;
+			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+a+=50;
+			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+a+=50;
+			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+a+=50;
+			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+a+=50;
+			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+a+=50;
+			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+a+=50;
+			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
 
+a=40;
 double	b = 120;
 			win.Bezier(10+a,10+b, 100+a,100+b, 200+a,10+b, 300+a,100+b,win.Rgb(0,1,0));
 
@@ -736,7 +781,7 @@ double	b = 120;
 
 		
 
-
+#endif
 		//	V2
 		for ( unsigned int i = 0 ; i < triangle.size()-1 ; i++ )
 		{
@@ -764,7 +809,7 @@ double	b = 120;
 			time_b = chrono::system_clock::now();  
 			while( chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now()-time_a).count() < 16.6667 )
 			{
- 				this_thread::sleep_for (chrono::milliseconds(1));
+ 		//		this_thread::sleep_for (chrono::milliseconds(1));
 			}
 			if ( cnt < 10 )
 			{
