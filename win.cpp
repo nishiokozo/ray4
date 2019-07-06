@@ -25,6 +25,16 @@ struct	//	WIN
 } win;
 
 
+	struct	PrimTri
+	{
+		double	x0;
+		double	y0;
+		double	x1;
+		double	y1;
+		double	x2;
+		double	y2;
+		int		col;
+	};
 	struct	PrimLine
 	{
 		double	x0;
@@ -54,6 +64,7 @@ struct //	GDI
 //		int			width;
 //		int			height;
 
+		vector<PrimTri>		tblTri;
 		vector<PrimLine>	tblLine;
 		vector<PrimPset>	tblPset;
 		PrimClr				clr;
@@ -113,9 +124,7 @@ struct //	GDI
 		// clear background
 		if ( m.clr.bActive )
 		{
-			HBRUSH hBrush;
-
-			hBrush  = CreateSolidBrush(m.clr.col);
+			HBRUSH hBrush  = CreateSolidBrush(m.clr.col);
 			SelectObject( hDc , hBrush);
 
 			PatBlt( hDc , 0 , 0 ,m.rect.right, m.rect.bottom , PATCOPY);
@@ -157,7 +166,6 @@ struct //	GDI
 
 			for ( unsigned int i=0 ; i < m.tblLine.size() ; i++ )
 			{
-				HPEN hPen;
 
 				int x0 = m.tblLine[i].x0;
 				int y0 = m.tblLine[i].y0;
@@ -165,7 +173,7 @@ struct //	GDI
 				int y1 = m.tblLine[i].y1;
 				int	col = m.tblLine[i].col;
 
-				hPen = CreatePen(PS_SOLID, 1, col );
+				HPEN hPen = CreatePen(PS_SOLID, 1, col );
 				SelectObject(hDc, hPen);
 
 				MoveToEx(hDc, x0, y0, NULL);
@@ -174,6 +182,35 @@ struct //	GDI
 				DeleteObject(hPen);
 			}
 			m.tblLine.clear();
+		}
+
+		//Tri
+		{
+
+			for ( unsigned int i=0 ; i < m.tblTri.size() ; i++ )
+			{	
+				int x0 = m.tblTri[i].x0;
+				int y0 = m.tblTri[i].y0;
+				int x1 = m.tblTri[i].x1;
+				int y1 = m.tblTri[i].y1;
+				int x2 = m.tblTri[i].x2;
+				int y2 = m.tblTri[i].y2;
+				int	col = m.tblTri[i].col;
+
+				HPEN hPen = CreatePen(PS_SOLID, 1, col );
+				HBRUSH hBrush  = CreateSolidBrush(col);
+				SelectObject(hDc, hPen);
+				SelectObject(hDc, hBrush);
+
+				POINT	tblPoint[3]={{x0,y0},{x1,y1},{x2,y2}};
+				INT	tblNum[]={3};
+
+				PolyPolygon( hDc, tblPoint, tblNum, 1 );
+
+				DeleteObject(hBrush);
+				DeleteObject(hPen);
+			}
+			m.tblTri.clear();
 		}
 	}
 
@@ -309,6 +346,14 @@ void Win::Line( double x0, double y0, double x1, double y1,int col)
 	PrimLine a = {x0,y0,x1,y1,col};
 	
 	gdi.m.tblLine.push_back( a );
+}
+//------------------------------------------------------------------------------
+void Win::Tri( double x0, double y0, double x1, double y1, double x2, double y2, int col)
+//------------------------------------------------------------------------------
+{
+	PrimTri a = {x0,y0,x1,y1,x2,y2,col};
+	
+	gdi.m.tblTri.push_back( a );
 }
 
 //------------------------------------------------------------------------------

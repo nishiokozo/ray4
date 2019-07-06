@@ -644,6 +644,7 @@ struct Mat
 //rx+=rad(0.1);
 //ry+=rad(0.2);
 rz+=rad(0.1);
+/*
 			mat44 rotx(
 				1.0			,	0.0			,	0.0			,	0.0	,
 				0.0			,	 cos(rx)	,	-sin(rx)	,	0.0	,
@@ -664,6 +665,14 @@ rz+=rad(0.1);
 				0.0			,	0.0			,	1.0			,	0.0	,
 				0.0			,	0.0			,	0.0			,	0.0	
 			);
+*/
+		mat44	rotx;
+		mat44	roty;
+		mat44	rotz;
+		rotx.setRotateX(rx);
+		roty.setRotateY(ry);
+		rotz.setRotateZ(rz);
+	
 
 #if 1
 			v= rotx *v ;
@@ -712,6 +721,10 @@ rz+=rad(0.1);
 			win.Line(x0,y0,x1,y1,win.Rgb(0,1,1));
 
 		}
+
+			win.Tri(55,10, 10,100, 100,100,win.Rgb(1,1,0));
+double a = 40;
+			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
 		
 
 
