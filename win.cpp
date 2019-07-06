@@ -25,6 +25,18 @@ struct	//	WIN
 } win;
 
 
+	struct	PrimBezier
+	{
+		double	x0;
+		double	y0;
+		double	x1;
+		double	y1;
+		double	x2;
+		double	y2;
+		double	x3;
+		double	y3;
+		int		col;
+	};
 	struct	PrimTri
 	{
 		double	x0;
@@ -49,6 +61,14 @@ struct	//	WIN
 		double	y;
 		int		col;
 	};
+	struct	PrimCircle
+	{
+		double	x0;
+		double	y0;
+		double	x1;
+		double	y1;
+		int		col;
+	};
 	struct	PrimClr
 	{
 		bool	bActive;
@@ -64,9 +84,11 @@ struct //	GDI
 //		int			width;
 //		int			height;
 
+		vector<PrimBezier>	tblBezier;
 		vector<PrimTri>		tblTri;
 		vector<PrimLine>	tblLine;
 		vector<PrimPset>	tblPset;
+		vector<PrimCircle>	tblCircle;
 		PrimClr				clr;
 
 		RECT rect;
@@ -140,6 +162,32 @@ struct //	GDI
 
 		}
 		
+		//circle
+		{
+
+			for ( unsigned int i=0 ; i < m.tblCircle.size() ; i++ )
+			{
+				HPEN hPen;
+
+				int x0 = m.tblCircle[i].x0;
+				int y0 = m.tblCircle[i].y0;
+				int x1 = m.tblCircle[i].x1;
+				int y1 = m.tblCircle[i].y1;
+				int	col = m.tblCircle[i].col;
+
+				hPen = CreatePen(PS_SOLID, 1, col );
+				SelectObject(hDc, hPen);
+
+//				SetPixel( hDc, x0, y0, col );
+
+				Ellipse(hDc , x0, y0, x1, y1);
+
+				DeleteObject(hPen);
+			}
+			
+			m.tblCircle.clear();
+		}
+
 		//pset
 		{
 
@@ -186,7 +234,6 @@ struct //	GDI
 
 		//Tri
 		{
-
 			for ( unsigned int i=0 ; i < m.tblTri.size() ; i++ )
 			{	
 				int x0 = m.tblTri[i].x0;
@@ -212,6 +259,40 @@ struct //	GDI
 			}
 			m.tblTri.clear();
 		}
+
+		//Bezier
+		{
+			for ( unsigned int i=0 ; i < m.tblBezier.size() ; i++ )
+			{	
+				int x0 = m.tblBezier[i].x0;
+				int y0 = m.tblBezier[i].y0;
+				int x1 = m.tblBezier[i].x1;
+				int y1 = m.tblBezier[i].y1;
+				int x2 = m.tblBezier[i].x2;
+				int y2 = m.tblBezier[i].y2;
+				int x3 = m.tblBezier[i].x3;
+				int y3 = m.tblBezier[i].y3;
+				int	col = m.tblBezier[i].col;
+
+				HPEN hPen = CreatePen(PS_SOLID, 1, col );
+				HBRUSH hBrush  = CreateSolidBrush(col);
+				SelectObject(hDc, hPen);
+				SelectObject(hDc, hBrush);
+
+				POINT	tblPoint[3]={{x1,y1},{x2,y2},{x3,y3}};
+
+				MoveToEx(hDc , x0 , y0 , NULL);
+				PolyBezierTo(hDc , tblPoint , 3);
+
+				DeleteObject(hBrush);
+				DeleteObject(hPen);
+			}
+			m.tblBezier.clear();
+
+			static POINT pt[3];
+
+		}
+
 	}
 
 	//------------------------------------------------------------------------------
@@ -332,6 +413,14 @@ void Win::Clr( int col)
 	gdi.m.clr.col = col;
 }
 //------------------------------------------------------------------------------
+void Win::Circle( double x, double y, double r, int col )
+//------------------------------------------------------------------------------
+{
+	PrimCircle a = {x-r,y-r,x+r,y+r,col};
+	
+	gdi.m.tblCircle.push_back( a );
+}
+//------------------------------------------------------------------------------
 void Win::Pset( double x, double y, int col )
 //------------------------------------------------------------------------------
 {
@@ -354,6 +443,14 @@ void Win::Tri( double x0, double y0, double x1, double y1, double x2, double y2,
 	PrimTri a = {x0,y0,x1,y1,x2,y2,col};
 	
 	gdi.m.tblTri.push_back( a );
+}
+//------------------------------------------------------------------------------
+void Win::Bezier( double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3, int col)
+//------------------------------------------------------------------------------
+{
+	PrimBezier a = {x0,y0,x1,y1,x2,y2,x3,y3,col};
+	
+	gdi.m.tblBezier.push_back( a );
 }
 
 //------------------------------------------------------------------------------

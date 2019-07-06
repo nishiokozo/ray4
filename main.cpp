@@ -725,6 +725,15 @@ rz+=rad(0.1);
 			win.Tri(55,10, 10,100, 100,100,win.Rgb(1,1,0));
 double a = 40;
 			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+
+double	b = 120;
+			win.Bezier(10+a,10+b, 100+a,100+b, 200+a,10+b, 300+a,100+b,win.Rgb(0,1,0));
+
+			win.Circle( 10+a, 10+b, 10, win.Rgb(1,0,0));
+			win.Circle(100+a,100+b, 10, win.Rgb(1,0,0));
+			win.Circle(200+a, 10+b, 10, win.Rgb(1,0,0));
+			win.Circle(300+a,100+b, 10, win.Rgb(1,0,0));
+
 		
 
 
