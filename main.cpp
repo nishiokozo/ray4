@@ -8,7 +8,7 @@
 #include <cmath>
 using namespace std;
 
-#include "Win.h"
+#include "sys.h"
 #include "geom.h"
 #include "keyboard.h"
 
@@ -450,14 +450,14 @@ chrono::system_clock::time_point time_a;
 chrono::system_clock::time_point time_b;
 
 //------------------------------------------------------------------------------
-void	raytrace( Win& win, int py )
+void	raytrace( Sys& sys, int py )
 //------------------------------------------------------------------------------
 {
 	Renderer ren;
 
 	{
-		int height	= win.m.height; 
-		int width	= win.m.width; 
+		int height	= sys.m.height; 
+		int width	= sys.m.width; 
 	
 		vect3	posScr = vect3(0,1.0,-12+8);
 		vect3	posEye = vect3(0,1.0,-17+8);
@@ -484,7 +484,7 @@ void	raytrace( Win& win, int py )
 				if ( ren.m_cntRay > cntMax ) cntMax = ren.m_cntRay;
 				cntRay+= ren.m_cntRay;
 
-				win.Pset(px,height-py,win.Rgb(C.r,C.g,C.b));
+				sys.Pset(px,height-py,sys.Rgb(C.r,C.g,C.b));
 			}
 		}
 		
@@ -497,7 +497,7 @@ void	raytrace( Win& win, int py )
 int main()
 //------------------------------------------------------------------------------
 {
-	Win	win("Ray4 " __DATE__, 300,300,512, 512 );
+	Sys	sys("Ray4 " __DATE__, 300,300,512, 512 );
 
 
 	int cnt = 0;
@@ -554,16 +554,16 @@ int main()
 
 	Keyboard&	keyboard = Keyboard::GetInstance();
 
-	while( win.Exec() )
+	while( sys.Update() )
 	{
 		keyboard.Update();
  		static int py=0;
 
 
-		win.Clr(win.Rgb(0.3,0.3,0.3));
+		sys.Clr(sys.Rgb(0.3,0.3,0.3));
 		
-//		raytrace( win, py++ );
-		if ( py >= win.m.height ) py=0;
+//		raytrace( sys, py++ );
+		if ( py >= sys.m.height ) py=0;
 
 		//	move
 //		rx += rad(0.2);	
@@ -710,7 +710,7 @@ rz+=rad(0.1);
 			
 			double	fovy = rad(val);	//	画角
 			//画角から投影面パラメータを求める
-			double	sc = win.m.height/2;
+			double	sc = sys.m.height/2;
 			double	sz = 1/tan(fovy/2);
 
 			//pers
@@ -718,66 +718,66 @@ rz+=rad(0.1);
 			double y0 = p.y/(p.z+sz)	*sc	+256;
 			double x1 = n.x/(n.z+sz)	*sc	+256;
 			double y1 = n.y/(n.z+sz)	*sc	+256;
-			win.Line(x0,y0,x1,y1,win.Rgb(0,1,1));
+			sys.Line(x0,y0,x1,y1,sys.Rgb(0,1,1));
 
 		}
 #if 1
-			win.Tri(55,10, 10,100, 100,100,win.Rgb(1,1,0));
+			sys.Tri(55,10, 10,100, 100,100,sys.Rgb(1,1,0));
 double a = 40;
-			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
 a+=50;
-			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
 a+=50;
-			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
 a+=50;
-			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
 a+=50;
-			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
 a+=50;
-			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
 a+=50;
-			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
 a+=50;
-			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
 a+=50;
-			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
 a+=50;
-			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
 a+=50;
-			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
 a+=50;
-			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
 a+=50;
-			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
 a+=50;
-			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
 a+=50;
-			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
 a+=50;
-			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
 a+=50;
-			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
 a+=50;
-			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
 a+=50;
-			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
 a+=50;
-			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
 a+=50;
-			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
 a+=50;
-			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
 a+=50;
-			win.Tri(55+a,10, 10+a,100, 100+a,100,win.Rgb(1,1,0));
+			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
 
 a=40;
 double	b = 120;
-			win.Bezier(10+a,10+b, 100+a,100+b, 200+a,10+b, 300+a,100+b,win.Rgb(0,1,0));
+			sys.Bezier(10+a,10+b, 100+a,100+b, 200+a,10+b, 300+a,100+b,sys.Rgb(0,1,0));
 
-			win.Circle( 10+a, 10+b, 10, win.Rgb(1,0,0));
-			win.Circle(100+a,100+b, 10, win.Rgb(1,0,0));
-			win.Circle(200+a, 10+b, 10, win.Rgb(1,0,0));
-			win.Circle(300+a,100+b, 10, win.Rgb(1,0,0));
+			sys.Circle( 10+a, 10+b, 10, sys.Rgb(1,0,0));
+			sys.Circle(100+a,100+b, 10, sys.Rgb(1,0,0));
+			sys.Circle(200+a, 10+b, 10, sys.Rgb(1,0,0));
+			sys.Circle(300+a,100+b, 10, sys.Rgb(1,0,0));
 
 		
 
@@ -802,7 +802,7 @@ double	b = 120;
 			x1+=256;
 			y1+=256;
 
-			win.Line(x0,y0,x1,y1,win.Rgb(0,1,1));
+			sys.Line(x0,y0,x1,y1,sys.Rgb(0,1,1));
 		}
 		
 		{

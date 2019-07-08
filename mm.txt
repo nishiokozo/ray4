@@ -1,4 +1,3 @@
-main.o: main.cpp Win.h geom.h keyboard.h
-win.o: win.cpp Win.h
+sys.o: sys.cpp Sys.h
 geom.o: geom.cpp geom.h
 keyboard.o: keyboard.cpp keyboard.h

@@ -4,7 +4,7 @@ TAR = main.exe
 
 SRCS = \
 	main.cpp \
-	win.cpp \
+	sys.cpp \
 	geom.cpp \
 	keyboard.cpp \
 

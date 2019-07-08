@@ -8,7 +8,7 @@
 using namespace std;
 #include <windows.h>
 
-#include "Win.h"
+#include "sys.h"
 
 static chrono::system_clock::time_point time_a;
 static chrono::system_clock::time_point time_b;
@@ -342,14 +342,14 @@ struct //	GDI
 
 /*
 //------------------------------------------------------------------------------
-unsigned char* Win::GetAddrPixels()
+unsigned char* Sys::GetAddrPixels()
 //------------------------------------------------------------------------------
 {
 	return( (unsigned char*)gdi.m.bPixelBits);
 }
 
 //------------------------------------------------------------------------------
-int Win::GetBytePixels()
+int Sys::GetBytePixels()
 //------------------------------------------------------------------------------
 {
 	return gdi.m.bpp/8;
@@ -400,7 +400,7 @@ cout << "WM_DESTROY " << endl;
 }
 
 //------------------------------------------------------------------------------
-int	Win::Rgb( double r, double g , double b )
+int	Sys::Rgb( double r, double g , double b )
 //------------------------------------------------------------------------------
 {
 	r = min( 1.0, r );
@@ -414,14 +414,14 @@ int	Win::Rgb( double r, double g , double b )
 }
 
 //------------------------------------------------------------------------------
-void Win::Clr( int col)
+void Sys::Clr( int col)
 //------------------------------------------------------------------------------
 {
 	gdi.m.clr.bActive = true;
 	gdi.m.clr.col = col;
 }
 //------------------------------------------------------------------------------
-void Win::Circle( double x, double y, double r, int col )
+void Sys::Circle( double x, double y, double r, int col )
 //------------------------------------------------------------------------------
 {
 	PrimCircle a = {x-r,y-r,x+r,y+r,col};
@@ -429,7 +429,7 @@ void Win::Circle( double x, double y, double r, int col )
 	gdi.m.tblCircle.push_back( a );
 }
 //------------------------------------------------------------------------------
-void Win::Pset( double x, double y, int col )
+void Sys::Pset( double x, double y, int col )
 //------------------------------------------------------------------------------
 {
 	PrimPset a = {x,y,col};
@@ -437,7 +437,7 @@ void Win::Pset( double x, double y, int col )
 	gdi.m.tblPset.push_back( a );
 }
 //------------------------------------------------------------------------------
-void Win::Line( double x0, double y0, double x1, double y1,int col)
+void Sys::Line( double x0, double y0, double x1, double y1,int col)
 //------------------------------------------------------------------------------
 {
 	PrimLine a = {x0,y0,x1,y1,col};
@@ -445,7 +445,7 @@ void Win::Line( double x0, double y0, double x1, double y1,int col)
 	gdi.m.tblLine.push_back( a );
 }
 //------------------------------------------------------------------------------
-void Win::Tri( double x0, double y0, double x1, double y1, double x2, double y2, int col)
+void Sys::Tri( double x0, double y0, double x1, double y1, double x2, double y2, int col)
 //------------------------------------------------------------------------------
 {
 	PrimTri a = {x0,y0,x1,y1,x2,y2,col};
@@ -453,7 +453,7 @@ void Win::Tri( double x0, double y0, double x1, double y1, double x2, double y2,
 	gdi.m.tblTri.push_back( a );
 }
 //------------------------------------------------------------------------------
-void Win::Bezier( double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3, int col)
+void Sys::Bezier( double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3, int col)
 //------------------------------------------------------------------------------
 {
 	PrimBezier a = {x0,y0,x1,y1,x2,y2,x3,y3,col};
@@ -462,14 +462,14 @@ void Win::Bezier( double x0, double y0, double x1, double y1, double x2, double 
 }
 
 //------------------------------------------------------------------------------
-Win::~Win()
+Sys::~Sys()
 //------------------------------------------------------------------------------
 {
 	gdi.ReleasePixelBits();
 
 }
 //------------------------------------------------------------------------------
-Win::Win( const char* name, int pos_x, int pos_y, int width, int height  )
+Sys::Sys( const char* name, int pos_x, int pos_y, int width, int height  )
 //------------------------------------------------------------------------------
 {
 	m.width		= width;
@@ -537,7 +537,7 @@ Win::Win( const char* name, int pos_x, int pos_y, int width, int height  )
 }
 
 //------------------------------------------------------------------------------
-bool Win::Exec()
+bool Sys::Update()
 //------------------------------------------------------------------------------
 {
 //		InvalidateRect(win.hWnd , NULL , TRUE);	//	WM_PAINTを発行し再描画矩形情報を渡す
