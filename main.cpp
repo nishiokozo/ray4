@@ -447,9 +447,6 @@ public:
 	}
 
 };
-chrono::system_clock::time_point time_a;
-chrono::system_clock::time_point time_b;
-chrono::system_clock::time_point time_sec;
 
 //------------------------------------------------------------------------------
 void	raytrace( Sys& sys, int py )
@@ -502,7 +499,6 @@ int main()
 	Sys	sys("Ray4 " __DATE__, 300,300,512, 512 );
 
 
-	int cnt = 0;
 
 	struct V2
 	{
@@ -725,51 +721,7 @@ rz+=rad(0.1);
 		}
 #if 1
 			sys.Tri(55,10, 10,100, 100,100,sys.Rgb(1,1,0));
-double a = 40;
-			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
-a+=50;
-			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
-a+=50;
-			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
-a+=50;
-			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
-a+=50;
-			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
-a+=50;
-			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
-a+=50;
-			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
-a+=50;
-			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
-a+=50;
-			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
-a+=50;
-			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
-a+=50;
-			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
-a+=50;
-			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
-a+=50;
-			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
-a+=50;
-			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
-a+=50;
-			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
-a+=50;
-			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
-a+=50;
-			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
-a+=50;
-			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
-a+=50;
-			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
-a+=50;
-			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
-a+=50;
-			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
-a+=50;
-			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
-a+=50;
+double a = 80;
 			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
 
 a=40;
@@ -784,7 +736,8 @@ double	b = 120;
 		
 
 #endif
-		//	V2
+		//	triangle 
+		static int cnt = 0;
 		for ( unsigned int i = 0 ; i < triangle.size()-1 ; i++ )
 		{
 			double xa=triangle[i].x;
@@ -806,20 +759,26 @@ double	b = 120;
 
 			sys.Line(x0,y0,x1,y1,sys.Rgb(0,1,1));
 		}
+		cnt++;
 
 		{
-			time_b = chrono::system_clock::now();  
-			while( chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now()-time_a).count() < 16.6667*1000 )
+			static chrono::system_clock::time_point time_a;
+			static chrono::system_clock::time_point time_b;
+			static chrono::system_clock::time_point time_sec;
+			static chrono::system_clock::time_point time_amt;
+
+			time_b = chrono::system_clock::now(); 
+			time_amt += time_b-time_a;
+			while( chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now()-time_a).count() < 16.6667*1000 )	// 60fps同期処理
 			{
- 				this_thread::sleep_for (chrono::microseconds(1000));
+ 				this_thread::sleep_for (chrono::microseconds(100));
 			}
-			if ( cnt < 10 )
+			if (chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now()-time_sec).count() > 1*1000*1000 ) // 1sec毎表示
 			{
+				time_sec = chrono::system_clock::now();
 				double f = chrono::duration_cast<chrono::microseconds>(time_b-time_a).count();
-//				printf("time %fsec\n", f/1000/1000 );
-				cout << "time " << f/1000/1000 << "sec" << endl;
+				cout << "time " << f/1000 << " msec" << endl;
 			}
-			cnt++;
 			time_a = chrono::system_clock::now();  
 		}
 	}
