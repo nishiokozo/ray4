@@ -3,8 +3,8 @@ using namespace std;
 #include <windows.h>
 #include "keyboard.h"
 
-// WinAPI由来の情報。キーボード入力は一つしか無いので固定で持つ。
-static struct G
+// WinAPI由来の情報。表に出さないためにここで定義
+static struct Winapi_key
 {
 	BYTE	state[256];
 	bool	tbl_prev[256];
@@ -14,9 +14,8 @@ static struct G
 	bool	tbl_rep[256];
 	int		tbl_lim[256];
 
-	G()
+	Winapi_key()
 	{
-		cout << "G()" << endl;
 		for ( int i = 0 ; i < 255 ; i++ )
 		{
 			tbl_prev[i]	= 0;
@@ -31,21 +30,11 @@ static struct G
 
 
 //-----------------------------------------------------------------------------
-Keyboard* Keyboard::GetInstance()
+Keyboard& Keyboard::GetInstance()
 //-----------------------------------------------------------------------------
 {
-	cout << "key_getInstance()st" << endl;
 	static Keyboard	g_instance;
-	cout << "key_getInstance()en" << endl;
-	return	&g_instance;//(*this);
-}
-
-
-//-----------------------------------------------------------------------------
-Keyboard::Keyboard()
-//-----------------------------------------------------------------------------
-{
-	cout << "Keyboard()" << endl;
+	return	g_instance;
 }
 
 //-----------------------------------------------------------------------------

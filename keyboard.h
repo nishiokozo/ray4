@@ -2,6 +2,7 @@
 
 class Keyboard
 {
+
 	struct Keyobj
 	{
 		bool	on;
@@ -10,14 +11,21 @@ class Keyboard
 		bool	rep;
 		Keyobj()
 		{
-//		cout << "Keyobj()" << endl;
 			on = 0;
 			hi = 0;
 			lo = 0;
 			rep = 0;
 		};
 	};
+
+	Keyboard() {};	//	間違って直接生成しないようにprivateで定義しておく
+
 public:
+	static Keyboard& GetInstance();
+
+	void	Update();
+
+
 	Keyobj	BACKSPACE;			// 08 VK_BACK
 	Keyobj	TAB;				// 09 VK_TAB
 	Keyobj	ENTER;				// 0D VK_RETURN
@@ -86,10 +94,5 @@ public:
 	Keyobj	PERIOD;				// BE VK_OEM_PERIOD
 
 
-	Keyboard();
-	void	Update();
-
-
-	static Keyboard* GetInstance();
 
 } ;
