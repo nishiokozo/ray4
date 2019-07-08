@@ -96,6 +96,7 @@ struct //	GDI
 
 	} m;
 	HDC     hdcBackbuffer;
+	 BITMAP bmBitmap;
 
 
 	//------------------------------------------------------------------------------
@@ -312,6 +313,9 @@ struct //	GDI
 		HBITMAP hBitmap = CreateCompatibleBitmap( hDc, rc.right, rc.bottom );
 	    hdcBackbuffer = CreateCompatibleDC( NULL );		// カレントスクリーン互換
 	    SelectObject( hdcBackbuffer, hBitmap );		// MDCにビットマップを割り付け
+
+		GetObject(hBitmap , sizeof (BITMAP) , &bmBitmap);		
+
 		ReleaseDC( hWnd, hDc );
 
 	}	
@@ -320,21 +324,39 @@ struct //	GDI
 	void onPaint2(HWND hWnd) 
 	//------------------------------------------------------------------------------
 	{
-#if 1
+#if 0
 	 		{
 				PAINTSTRUCT ps;
 				HDC hDc = BeginPaint( hWnd , &ps );	//再描画区域が指定されてある。WM_PAINTメッセージを処理する
 				EndPaint( hWnd , &ps);
 			}
 #else
+			{
+ 				// 何故か白フラッシュが入る
 			    paint0( hdcBackbuffer);
-
-		    PAINTSTRUCT ps;
-		    HDC hDc = BeginPaint(hWnd, &ps);
+			    PAINTSTRUCT ps;
+			    HDC hDc = BeginPaint(hWnd, &ps);
+ #if 0
 				RECT rc;
 				GetClientRect( hWnd, &rc );
 			    BitBlt(hDc, 0, 0, rc.right, rc.bottom, hdcBackbuffer, 0, 0, SRCCOPY);
-		    EndPaint(hWnd, &ps);
+
+ #else
+				StretchBlt(
+					hDc ,
+					0,0,
+					bmBitmap.bmWidth / 1 , 
+					bmBitmap.bmHeight / 1 ,
+					hdcBackbuffer , 
+					0 , 
+					0 ,
+					bmBitmap.bmWidth , 
+					bmBitmap.bmHeight ,
+					SRCCOPY
+				);
+ #endif
+			    EndPaint(hWnd, &ps);
+			}
 #endif
 	}
 
@@ -376,16 +398,11 @@ static	LRESULT CALLBACK WinProc
 			return 0;
 
 		case WM_PAINT:	// OSからの描画要求。再描画区域情報（ウィンドウが重なっている際などの）が得られるタイミング。
-	 		gdi. onPaint2( hWnd );
+	 		gdi.onPaint2( hWnd );
 			return 0;
 
 		case WM_KEYDOWN:
-			{
-				if ( wParam == 27 ) // ESC
-				{
-					SendMessage(hWnd , WM_DESTROY , 0 , 0);	
-				}
-			}
+			if ( wParam == VK_ESCAPE ) SendMessage(hWnd , WM_DESTROY , 0 , 0);	
 			return 0;
 
 		case WM_DESTROY:	//[x]を押すなどしたとき
@@ -540,7 +557,7 @@ Sys::Sys( const char* name, int pos_x, int pos_y, int width, int height  )
 bool Sys::Update()
 //------------------------------------------------------------------------------
 {
-//		InvalidateRect(win.hWnd , NULL , TRUE);	//	WM_PAINTを発行し再描画矩形情報を渡す
+		InvalidateRect(win.hWnd , NULL , TRUE);	//	WM_PAINTを発行し再描画矩形情報を渡す
 
 	while(1)
 	{
@@ -550,12 +567,31 @@ bool Sys::Update()
 			TranslateMessage( &win.tMsg );
 			if ( win.tMsg.message == WM_QUIT ) return false; 
 		}
-#if 1
+#if 0
 		HDC hDc = GetDC( win.hWnd );
 		gdi.paint0( gdi.hdcBackbuffer);
 				RECT rc;
 				GetClientRect( win.hWnd, &rc );
+ #if 1
 	    BitBlt(hDc, 0, 0, rc.right, rc.bottom, gdi.hdcBackbuffer, 0, 0, SRCCOPY);
+ #else
+		RECT rect;
+		GetClientRect(win.hWnd , &rect);
+
+		StretchBlt(
+			hDc ,
+			0,0,
+			gdi.bmBitmap.bmWidth / 1 , 
+			gdi.bmBitmap.bmHeight / 1 ,
+			gdi.hdcBackbuffer , 
+			0 , 
+			0 ,
+			gdi.bmBitmap.bmWidth , 
+			gdi.bmBitmap.bmHeight ,
+			SRCCOPY
+		);
+ #endif
+
 		ReleaseDC( win.hWnd, hDc );
 #endif
 
