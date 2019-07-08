@@ -4,9 +4,9 @@ TAR = main.exe
 
 SRCS = \
 	main.cpp \
-	sys.cpp \
 	geom.cpp \
-	keyboard.cpp \
+	sys.cpp \
+	syskeys.cpp \
 
 LIBS = \
 	 -lgdi32

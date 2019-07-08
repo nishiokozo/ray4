@@ -1,7 +1,7 @@
 #include <iostream>
 using namespace std;
 #include <windows.h>
-#include "keyboard.h"
+#include "syskeys.h"
 
 // WinAPI由来の情報。表に出さないためにここで定義
 static struct Winapi_key
@@ -30,15 +30,15 @@ static struct Winapi_key
 
 
 //-----------------------------------------------------------------------------
-Keyboard& Keyboard::GetInstance()
+SysKeys& SysKeys::GetInstance()
 //-----------------------------------------------------------------------------
 {
-	static Keyboard	g_instance;
+	static SysKeys	g_instance;
 	return	g_instance;
 }
 
 //-----------------------------------------------------------------------------
-void Keyboard::Update()
+void SysKeys::Update()
 //-----------------------------------------------------------------------------
 {
 

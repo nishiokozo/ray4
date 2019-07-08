@@ -1,6 +1,6 @@
 
 
-class Keyboard
+class SysKeys
 {
 
 	struct Keyobj
@@ -18,10 +18,10 @@ class Keyboard
 		};
 	};
 
-	Keyboard() {};	//	間違って直接生成しないようにprivateで定義しておく
+	SysKeys() {};	//	間違って直接生成しないようにprivateで定義しておく
 
 public:
-	static Keyboard& GetInstance();
+	static SysKeys& GetInstance();
 
 	void	Update();
 

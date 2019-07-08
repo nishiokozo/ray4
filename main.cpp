@@ -8,9 +8,10 @@
 #include <cmath>
 using namespace std;
 
-#include "sys.h"
 #include "geom.h"
-#include "keyboard.h"
+
+#include "sys.h"
+#include "syskeys.h"
 
 
 const	static	double INFINIT =  numeric_limits<double>::max();	//DBL_MAX
@@ -448,6 +449,7 @@ public:
 };
 chrono::system_clock::time_point time_a;
 chrono::system_clock::time_point time_b;
+chrono::system_clock::time_point time_sec;
 
 //------------------------------------------------------------------------------
 void	raytrace( Sys& sys, int py )
@@ -552,11 +554,11 @@ int main()
 		double	ry = rad(0);
 		double	rz = rad(0);
 
-	Keyboard&	keyboard = Keyboard::GetInstance();
+	SysKeys&	keys = SysKeys::GetInstance();
 
 	while( sys.Update() )
 	{
-		keyboard.Update();
+		keys.Update();
  		static int py=0;
 
 
@@ -694,10 +696,10 @@ rz+=rad(0.1);
 		
 		
 		static	double	val=45;
-		if (keyboard.Q.rep) {val--;cout << val <<" "<<1/tan(rad(val)) << endl; }
-		if (keyboard.A.rep) {val++;cout << val <<" "<<1/tan(rad(val)) << endl; }
-		if (keyboard.W.rep) {val-=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
-		if (keyboard.S.rep) {val+=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (keys.Q.rep) {val--;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (keys.A.rep) {val++;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (keys.W.rep) {val-=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (keys.S.rep) {val+=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
 
 
 		//calc pers 
@@ -804,17 +806,18 @@ double	b = 120;
 
 			sys.Line(x0,y0,x1,y1,sys.Rgb(0,1,1));
 		}
-		
+
 		{
 			time_b = chrono::system_clock::now();  
-			while( chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now()-time_a).count() < 16.6667 )
+			while( chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now()-time_a).count() < 16.6667*1000 )
 			{
- 		//		this_thread::sleep_for (chrono::milliseconds(1));
+ 				this_thread::sleep_for (chrono::microseconds(1000));
 			}
 			if ( cnt < 10 )
 			{
 				double f = chrono::duration_cast<chrono::microseconds>(time_b-time_a).count();
-				printf("time %fsec\n", f/1000/1000 );
+//				printf("time %fsec\n", f/1000/1000 );
+				cout << "time " << f/1000/1000 << "sec" << endl;
 			}
 			cnt++;
 			time_a = chrono::system_clock::now();  
