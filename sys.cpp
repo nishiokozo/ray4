@@ -10,6 +10,8 @@ using namespace std;
 
 #include "sys.h"
 
+#define	USE_RIALTIME_PAINT 0
+
 static chrono::system_clock::time_point time_a;
 static chrono::system_clock::time_point time_b;
 
@@ -78,11 +80,11 @@ struct //	GDI
 {
 	struct
 	{
-//		BITMAPINFO	bmpInfo;
-//		int			bpp;
-//		BYTE*		bPixelBits = nullptr;
-//		int			width;
-//		int			height;
+		BITMAPINFO	bmpInfo;
+		int			bpp;
+		BYTE*		bPixelBits = nullptr;
+		int			width;
+		int			height;
 
 		vector<PrimBezier>	tblBezier;
 		vector<PrimTri>		tblTri;
@@ -96,22 +98,22 @@ struct //	GDI
 
 	} m;
 	HDC     hdcBackbuffer;
-	 BITMAP bmBitmap;
+//	 BITMAP bmBitmap;
 
 
 	//------------------------------------------------------------------------------
 	void ReleasePixelBits()
 	//------------------------------------------------------------------------------
 	{
-/*
+
 		if ( m.bPixelBits != 0 ) 
 		{
 			delete [] m.bPixelBits;
 		}
-*/
+
 
 	}
-/*
+
 	//------------------------------------------------------------------------------
 	void CreatePixelBits(int bpp, int width, int height )
 	//------------------------------------------------------------------------------
@@ -137,7 +139,6 @@ struct //	GDI
 		bih.biClrImportant		= 0;
 
 	}
-*/
 	
 	//------------------------------------------------------------------------------
 	void paint0( HDC hDc )
@@ -156,7 +157,7 @@ struct //	GDI
 	
 			m.clr.bActive = false;
 		}
-		
+
 		// bmp
 		{
 //				StretchDIBits( hDc, 0, 0, m.rect.right, m.rect.bottom, 0, 0, m.width, m.height, m.bPixelBits, &m.bmpInfo, DIB_RGB_COLORS, SRCCOPY );
@@ -305,17 +306,12 @@ struct //	GDI
 	void onCreate( HWND hWnd ) 
 	//------------------------------------------------------------------------------
 	{
-	    HDC hDc = GetDC(hWnd);                      	// ウインドウのDCを取得
-//	    GetClientRect(GetDesktopWindow(), &rc);  	// デスクトップのサイズを取得
-				RECT rc;
-				GetClientRect( hWnd, &rc );
-
-		HBITMAP hBitmap = CreateCompatibleBitmap( hDc, rc.right, rc.bottom );
-	    hdcBackbuffer = CreateCompatibleDC( NULL );		// カレントスクリーン互換
-	    SelectObject( hdcBackbuffer, hBitmap );		// MDCにビットマップを割り付け
-
-		GetObject(hBitmap , sizeof (BITMAP) , &bmBitmap);		
-
+	    HDC hDc = GetDC(hWnd);
+			RECT rc;
+			GetClientRect( hWnd, &rc );
+			HBITMAP hBitmap = CreateCompatibleBitmap( hDc, rc.right, rc.bottom );
+		    hdcBackbuffer = CreateCompatibleDC( NULL );
+		    SelectObject( hdcBackbuffer, hBitmap );
 		ReleaseDC( hWnd, hDc );
 
 	}	
@@ -324,7 +320,7 @@ struct //	GDI
 	void onPaint2(HWND hWnd) 
 	//------------------------------------------------------------------------------
 	{
-#if 0
+#if USE_RIALTIME_PAINT
 	 		{
 				PAINTSTRUCT ps;
 				HDC hDc = BeginPaint( hWnd , &ps );	//再描画区域が指定されてある。WM_PAINTメッセージを処理する
@@ -332,29 +328,12 @@ struct //	GDI
 			}
 #else
 			{
- 				// 何故か白フラッシュが入る
 			    paint0( hdcBackbuffer);
 			    PAINTSTRUCT ps;
 			    HDC hDc = BeginPaint(hWnd, &ps);
- #if 0
 				RECT rc;
 				GetClientRect( hWnd, &rc );
 			    BitBlt(hDc, 0, 0, rc.right, rc.bottom, hdcBackbuffer, 0, 0, SRCCOPY);
-
- #else
-				StretchBlt(
-					hDc ,
-					0,0,
-					bmBitmap.bmWidth / 1 , 
-					bmBitmap.bmHeight / 1 ,
-					hdcBackbuffer , 
-					0 , 
-					0 ,
-					bmBitmap.bmWidth , 
-					bmBitmap.bmHeight ,
-					SRCCOPY
-				);
- #endif
 			    EndPaint(hWnd, &ps);
 			}
 #endif
@@ -401,6 +380,12 @@ static	LRESULT CALLBACK WinProc
 	 		gdi.onPaint2( hWnd );
 			return 0;
 
+		case WM_ERASEBKGND:	//	BeginPaint()タイミング(WM_PAINTの中）で呼び出される。
+			// 空でも即返す
+			// WM_PAINT時に白いフラッシュが入ってしまう。
+//cout << "WM_ERASEBKGND " << endl;
+			return 0;
+
 		case WM_KEYDOWN:
 			if ( wParam == VK_ESCAPE ) SendMessage(hWnd , WM_DESTROY , 0 , 0);	
 			return 0;
@@ -409,7 +394,6 @@ static	LRESULT CALLBACK WinProc
 cout << "WM_DESTROY " << endl;
 			PostQuitMessage( 0 );
 			return 0;
-			break;
 	}
 
 	// デフォルト処理呼び出し。
@@ -557,7 +541,11 @@ Sys::Sys( const char* name, int pos_x, int pos_y, int width, int height  )
 bool Sys::Update()
 //------------------------------------------------------------------------------
 {
+//cout << "-- " << endl;
+#if USE_RIALTIME_PAINT
+#else
 		InvalidateRect(win.hWnd , NULL , TRUE);	//	WM_PAINTを発行し再描画矩形情報を渡す
+#endif
 
 	while(1)
 	{
@@ -567,31 +555,12 @@ bool Sys::Update()
 			TranslateMessage( &win.tMsg );
 			if ( win.tMsg.message == WM_QUIT ) return false; 
 		}
-#if 0
+#if USE_RIALTIME_PAINT
 		HDC hDc = GetDC( win.hWnd );
 		gdi.paint0( gdi.hdcBackbuffer);
-				RECT rc;
-				GetClientRect( win.hWnd, &rc );
- #if 1
+		RECT rc;
+		GetClientRect( win.hWnd, &rc );
 	    BitBlt(hDc, 0, 0, rc.right, rc.bottom, gdi.hdcBackbuffer, 0, 0, SRCCOPY);
- #else
-		RECT rect;
-		GetClientRect(win.hWnd , &rect);
-
-		StretchBlt(
-			hDc ,
-			0,0,
-			gdi.bmBitmap.bmWidth / 1 , 
-			gdi.bmBitmap.bmHeight / 1 ,
-			gdi.hdcBackbuffer , 
-			0 , 
-			0 ,
-			gdi.bmBitmap.bmWidth , 
-			gdi.bmBitmap.bmHeight ,
-			SRCCOPY
-		);
- #endif
-
 		ReleaseDC( win.hWnd, hDc );
 #endif
 
