@@ -491,6 +491,11 @@ void	raytrace( Sys& sys, int py )
 
 }
 
+//Catmull-Rom 曲線
+// P(t)=P0(2t^3-3t^2+1)+m0(t^3-2t^2+t)+P1(-2t^3+3t^2)+m1(t^3-t^2)
+// m0=(P1-Pminus1)
+// m1=P2-P0
+
 
 //------------------------------------------------------------------------------
 int main()
@@ -736,6 +741,101 @@ double	b = 120;
 		
 
 #endif
+		{
+			//Catmull-Rom 曲線
+			// P(t)=P0*(2t^3-3t^2+1)+m0*(t^3-2t^2+t)+P1*(-2t^3+3t^2)+m1*(t^3-t^2)
+			// m0=(P1-Pm)/2
+			// m1=(P2-P0)/2
+
+			struct vect2
+			{
+				double x,y;
+				vect2( double _x, double _y) :x(_x),y(_y){}
+				vect2() :x(0),y(0){}
+				
+				void operator=( const vect2& v )
+				{
+					x = v.x;
+					y = v.y;
+				}
+				void operator*=( const vect2& v )
+				{
+					x *= v.x;
+					y *= v.y;
+				}
+				void operator/=( const vect2& v )
+				{
+					x = v.x;
+					y = v.y;
+				}
+				void operator+=( const vect2& v )
+				{
+					x += v.x;
+					y += v.y;
+				}
+				void operator-=( const vect2& v )
+				{
+					x -= v.x;
+					y -= v.y;
+				}
+				vect2  operator*( double f ) const
+				{
+					return vect2( x*f, y*f );
+				}
+				vect2  operator/( double f ) const
+				{
+					return vect2( x/f, y/f );
+				}
+				
+				vect2 operator*( const vect2& v ) const
+				{
+					return vect2( x*v.x, y*v.y );
+				}
+				vect2 operator/( const vect2& v ) const
+				{
+					return vect2( x/v.x, y/v.y );
+				}
+				vect2 operator+( const vect2& v ) const
+				{
+					return vect2( x+v.x, y+v.y );
+				}
+				vect2 operator-( const vect2& v ) const
+				{
+					return vect2( x-v.x, y-v.y );
+				}
+
+			};
+
+			vect2	Pm={ 100,480};
+			vect2	P0={ 130,360};
+			vect2	P1={ 270,360};
+			vect2	P2={ 300,480};
+
+			sys.Circle( Pm.x, Pm.y, 10, sys.Rgb(1,0,1));
+			sys.Circle( P0.x, P0.y, 10, sys.Rgb(1,0,1));
+			sys.Circle( P1.x, P1.y, 10, sys.Rgb(1,0,1));
+			sys.Circle( P2.x, P2.y, 10, sys.Rgb(1,0,1));
+
+
+			auto catmull = [=]( double t )
+			{
+				vect2 m0 = (P1-Pm)/2.0;
+				vect2 m1 = (P2-P0)/2.0;
+				vect2 P = P0*(2*t*t*t - 3*t*t +1) + m0*( t*t*t -2*t*t +t ) + P1*( -2*t*t*t + 3*t*t ) + m1*( t*t*t - t*t );
+
+				return P;
+			};
+
+			for ( double t = 0 ; t < 1.0 ; t+=0.02 )
+			{
+				vect2 P = catmull(t);
+				sys.Pset( P.x, P.y, sys.Rgb(1,1,1));
+
+				
+			}			
+
+		}
+
 		//	triangle 
 		static int cnt = 0;
 		for ( unsigned int i = 0 ; i < triangle.size()-1 ; i++ )
