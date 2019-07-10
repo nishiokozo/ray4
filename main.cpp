@@ -746,65 +746,118 @@ double	b = 120;
 
 #endif
 
-
-		static vector<vect2>	tblP;
-
-		vect2 mpos( mouse.sx-sys.m.x, mouse.sy-sys.m.y );
-		
-
-		if ( mouse.R.hi )
-		{
-			tblP.push_back(mpos);
-		}
-
-
-		if ( mouse.L.on )
-		{
-//			sys.Circle(mouse.sx-sys.m.x,mouse.sy-sys.m.y, 8, sys.Rgb(0,1,1));
-			sys.Circle(mpos.x,mpos.y, 8, sys.Rgb(0,1,1));
-		}
-
-		for ( vect2 p : tblP )
-		{
-			sys.Circle(p.x,p.y, 8, sys.Rgb(1,0.5,0));
-		}
-
+		auto catmull = []( double t, const vect2 Pm, const vect2 P0, const vect2 P1, const vect2 P2 )
 		{
 			//Catmull-Rom 曲線
 			// P(t)=P0*(2t^3-3t^2+1)+m0*(t^3-2t^2+t)+P1*(-2t^3+3t^2)+m1*(t^3-t^2)
 			// m0=(P1-Pm)/2
 			// m1=(P2-P0)/2
 
+			vect2 m0 = (P1-Pm)/2.0;
+			vect2 m1 = (P2-P0)/2.0;
+			vect2 P = P0*(2*t*t*t - 3*t*t +1) + m0*( t*t*t -2*t*t +t ) + P1*( -2*t*t*t + 3*t*t ) + m1*( t*t*t - t*t );
 
-			vect2	Pm={ 100,480};
-			vect2	P0={ 130,360};
-			vect2	P1={ 270,360};
-			vect2	P2={ 300,480};
+			return P;
+		};
 
-			sys.Circle( Pm.x, Pm.y, 10, sys.Rgb(1,0,1));
-			sys.Circle( P0.x, P0.y, 10, sys.Rgb(1,0,1));
-			sys.Circle( P1.x, P1.y, 10, sys.Rgb(1,0,1));
-			sys.Circle( P2.x, P2.y, 10, sys.Rgb(1,0,1));
-
-
-			auto catmull = []( double t, const vect2& P0, const vect2& P1, const vect2 m0, const vect2 m1 )
+		struct Mark : vect2
+		{
+			bool bSelected;
+			Mark( bool b, vect2 v )
 			{
-//				vect2 m0 = (P1-Pm)/2.0;
-//				vect2 m1 = (P2-P0)/2.0;
-				vect2 P = P0*(2*t*t*t - 3*t*t +1) + m0*( t*t*t -2*t*t +t ) + P1*( -2*t*t*t + 3*t*t ) + m1*( t*t*t - t*t );
+				x=v.x;
+				y=v.y;
+				bSelected=b;
+			}
+		};
+		
 
-				return P;
-			};
+		static vector<Mark>	tblP =
+		{
+			Mark( false, vect2(100,480) ),
+			Mark( false, vect2(130,360) ),
+			Mark( false, vect2(270,360) ),
+			Mark( false, vect2(300,480) ),
+		};
+		
 
-			for ( double t = 0 ; t < 1.0 ; t+=0.02 )
-			{
-				vect2 P = catmull(t, P0, P1,(P1-Pm)/2.0, (P2-P0)/2.0 );
-				sys.Pset( P.x, P.y, sys.Rgb(1,1,1));
+		vect2 mpos( mouse.sx-sys.m.x, mouse.sy-sys.m.y );
+		
 
-				
-			}			
 
+		// マーカー追加
+		if ( mouse.R.hi )
+		{
+			tblP.push_back( Mark( false, mpos ) );
 		}
+
+
+		// マーカー選択解除
+		if ( mouse.L.on == false  )
+		{
+			for ( Mark& p : tblP )
+			{
+				p.bSelected = false;
+			}
+		}
+
+		// マーカー選択
+		if ( mouse.L.hi )
+		{
+			for ( Mark& p : tblP )
+			{
+				if ( (p-mpos).length() < 6.0 )
+				{
+					p.bSelected = true;
+				}
+			}
+		}
+		
+		// マーカー移動
+		if ( mouse.L.on )
+		{
+			for ( Mark& p : tblP )
+			{
+				if ( p.bSelected )
+				{
+					p.x += mouse.mx;
+					p.y += mouse.my;
+				}
+			}
+		}
+
+
+		// マーカー表示
+		for ( Mark p : tblP )
+		{
+			if ( p.bSelected )
+			{
+				sys.Circle(p.x,p.y, 6, sys.Rgb(1,0.0,0));
+			}
+			else
+			{
+				sys.Circle(p.x,p.y, 6, sys.Rgb(1,0.5,0));
+			}
+		}
+		
+		// マーカースプライン変換表示
+		if ( tblP.size() >=4 )
+		{
+			for ( unsigned int i = 0 ; i < tblP.size()-3 ; i++ )
+			{
+				double st = 0.1;
+
+				vect2 Q = catmull(0, tblP[i], tblP[i+1], tblP[i+2], tblP[i+3] );
+
+				for ( double t = st ; t < 1.0 ; t+=st)
+				{
+					vect2 P = catmull(t, tblP[i], tblP[i+1], tblP[i+2], tblP[i+3] );
+					sys.Line( P.x, P.y, Q.x, Q.y, sys.Rgb(1,1,1));
+					Q=P;
+				}			
+			}
+		}
+
 
 		//	triangle 
 		static int cnt = 0;

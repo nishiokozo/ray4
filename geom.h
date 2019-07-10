@@ -16,6 +16,11 @@ public:
 	double x,y;
 	vect2( double _x, double _y) :x(_x),y(_y){}
 	vect2() :x(0),y(0){}
+
+	double length()
+	{
+		return sqrt( x*x + y*y );
+	}
 	
 	void operator=( vect2 v )
 	{
