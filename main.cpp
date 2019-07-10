@@ -745,6 +745,12 @@ double	b = 120;
 		
 
 #endif
+		if ( mouse.L.hi ) cout << "L" << endl;
+		if ( mouse.R.hi ) cout << "R" << endl;
+		if ( mouse.M.hi ) cout << "M" << endl;
+		if ( mouse.F.hi ) cout << "F" << endl;
+		if ( mouse.B.hi ) cout << "B" << endl;
+
 		if ( mouse.L.on )
 		{
 			sys.Circle(mouse.sx-sys.m.x,mouse.sy-sys.m.y, 8, sys.Rgb(0,1,1));

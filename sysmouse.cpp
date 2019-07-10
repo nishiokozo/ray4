@@ -1,11 +1,15 @@
+#include <iostream>
+using namespace std;
+#include <windows.h>
+/*
 #define APIENTRY
 #include <stdio.h>
 #include <math.h>
 
-#include <windows.h>
 #include <stdio.h>
 #include <string.h>
 //#include "l.h"
+*/
 #include "sysmouse.h"
 //#include "font.h"
 
@@ -51,11 +55,17 @@ void SysMouse::Update()
 	int r = GetAsyncKeyState(VK_RBUTTON);
 	int m = GetAsyncKeyState(VK_MBUTTON);
 // 	int	n = GetSystemMetrics( SM_CMOUSEBUTTONS );
-// 	int	w = GetSystemMetrics( SM_XVIRTUALSCREEN );
+ //	int	w = GetSystemMetrics( SM_XVIRTUALSCREEN );
+ 	int	b = GetAsyncKeyState( VK_XBUTTON1 );
+ 	int	f = GetAsyncKeyState( VK_XBUTTON2 );
+
+//cout << l << " " << r << " " << m << " " << f << " " << b << " " << n <<" "<<w << endl;
 
 	int	on_l = (l&0x8000)!=0;
 	int	on_r = (r&0x8000)!=0;
-	int	on_m = (r&0x8000)!=0;
+	int	on_m = (m&0x8000)!=0;
+	int	on_f = (f&0x8000)!=0;
+	int	on_b = (b&0x8000)!=0;
 
 /*
 	this->hi.l = !this->on.l &&  on_l;
@@ -74,7 +84,15 @@ void SysMouse::Update()
 
 	this->M.hi = !this->M.on &&  on_m;
 	this->M.lo =  this->M.on && !on_m;
-	this->M.on = on_r;
+	this->M.on = on_m;
+
+	this->F.hi = !this->F.on &&  on_f;
+	this->F.lo =  this->F.on && !on_f;
+	this->F.on = on_f;
+
+	this->B.hi = !this->B.on &&  on_b;
+	this->B.lo =  this->B.on && !on_b;
+	this->B.on = on_b;
 
 	this->mx = (float)pos.x - this->sx;
 	this->my = (float)pos.y - this->sy;

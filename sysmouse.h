@@ -34,9 +34,11 @@ class SysMouse
 public:
 	static SysMouse& GetInstance();
 
-	Keyobj	L;
-	Keyobj	R;
-	Keyobj	M;
+	Keyobj	L;	//左ボタン
+	Keyobj	R;	//右ボタン
+	Keyobj	M;	//中ボタン
+	Keyobj	F;	//フォワードボタン
+	Keyobj	B;	//バックボタン
 
 	float	sx;	//	マウスカーソル位置
 	float	sy;
