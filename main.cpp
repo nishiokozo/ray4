@@ -6,6 +6,7 @@
 #include <thread>
 #include <chrono>
 #include <cmath>
+#include <functional>
 using namespace std;
 
 #include "geom.h"
@@ -506,21 +507,68 @@ int main()
 
 
 
-	struct V2
-	{
-		double x,y;
-	};
-	vector<V2> triangle=
+	vector<vect2> triangle=
 	{
 		{   0,100*tan(rad(60)) -100*tan(rad(30)) },
 		{-100,  0 	    	   -100*tan(rad(30)) },
 		{ 100,  0   	       -100*tan(rad(30)) },
 		{   0,100*tan(rad(60)) -100*tan(rad(30)) },
 	};
+	struct	E2
+	{
+		int	p,n;
+	};
+
+
+	struct Figure
+	{
+		vector<vect2> vert;
+		vector<E2> edge;
+		int	col;
+/*
+///		function<void(Sys,double,double,double,double,int)>	fline;
+	function<int(const Sys,int)> f1 = Sys::func;
+
+		void draw( double ofs_x, double ofs_y, double th, int col )
+		{
+//			double ofs_x = 100;
+//			double ofs_y = 130;
+//			double th = rad(45);
+			for ( E2 e : edge )
+			{
+				vect2& p = vert[e.p];
+				vect2& n = vert[e.n];
+
+				double x0=p.x*cos(th) - p.y*sin(th) + ofs_x;
+				double y0=p.x*sin(th) + p.y*cos(th) + ofs_y;
+				double x1=n.x*cos(th) - n.y*sin(th) + ofs_x;
+				double y1=n.x*sin(th) + n.y*cos(th) + ofs_y;
+
+//				sys.Line(x0,y0,x1,y1,col);
+//				line(sys,x0,y0,x1,y1,col);
+	cout << f1(sys,123) << endl;
+
+			}
+	
+		}
+*/
+
+	};
+	Figure fig;
+	fig.vert.push_back( (vect2){   0,20*tan(rad(60))	-10*tan(rad(30)) } );
+	fig.vert.push_back( (vect2){-10,  0 	    	   	-10*tan(rad(30)) } );
+	fig.vert.push_back( (vect2){ 10,  0 				-10*tan(rad(30)) } );
+	fig.edge.push_back( (E2){ 0,1 } );
+	fig.edge.push_back( (E2){ 1,2 } );
+	fig.edge.push_back( (E2){ 2,0 } );
+	fig.col = sys.Rgb(0,0.5,1);
+//	fig.line = Sys::Line;
+//	fig.line = Sys::Line;
+	
 
 	vector<vect3> boxvert=
 	{
-		{	-1,	 2,	-1	},
+		{	-1,	 1,	-1	},
 		{	 1,	 1,	-1	},
 		{	-1,	-1,	-1	},
 		{	 1,	-1,	-1	},
@@ -531,10 +579,6 @@ int main()
 	};
 	vector<vect3> boxdl;
 
-	struct	E2
-	{
-		int	p,n;
-	};
 	vector<E2>	boxedge
 	{
 		{	0,	1	},
@@ -550,6 +594,7 @@ int main()
 		{	2,	6	},
 		{	3,	7	},
 	};
+
 
 
 		double	rx = rad(0);
@@ -762,22 +807,27 @@ double	b = 120;
 
 		struct Mark : vect2
 		{
-			bool bSelected;
-			Mark( bool b, vect2 v )
+			bool 	bSelected;
+			Figure	fig;
+			double	th;
+			Mark( bool b, vect2 v, Figure _fig, double _th )
 			{
 				x=v.x;
 				y=v.y;
 				bSelected=b;
+				fig = _fig;
+				th = _th;
 			}
+			
 		};
 		
 
 		static vector<Mark>	tblP =
 		{
-			Mark( false, vect2(100,480) ),
-			Mark( false, vect2(130,360) ),
-			Mark( false, vect2(270,360) ),
-			Mark( false, vect2(300,480) ),
+			Mark( false, vect2(100,480), fig, rad(0) ),
+			Mark( false, vect2(130,360), fig, rad(0) ),
+			Mark( false, vect2(270,360), fig, rad(0) ),
+			Mark( false, vect2(300,480), fig, rad(0) ),
 		};
 		
 
@@ -786,11 +836,10 @@ double	b = 120;
 
 
 		// マーカー追加
-		if ( mouse.R.hi )
+		if ( mouse.M.hi )
 		{
-			tblP.push_back( Mark( false, mpos ) );
+			tblP.push_back( Mark( false, mpos, fig, rad(0) ) );
 		}
-
 
 		// マーカー選択解除
 		if ( mouse.L.on == false  )
@@ -806,7 +855,7 @@ double	b = 120;
 		{
 			for ( Mark& p : tblP )
 			{
-				if ( (p-mpos).length() < 6.0 )
+				if ( (p-mpos).length() < 8.0 )
 				{
 					p.bSelected = true;
 				}
@@ -826,17 +875,16 @@ double	b = 120;
 			}
 		}
 
-
 		// マーカー表示
 		for ( Mark p : tblP )
 		{
 			if ( p.bSelected )
 			{
-				sys.Circle(p.x,p.y, 6, sys.Rgb(1,0.0,0));
+				sys.Circle(p.x,p.y, 7, sys.Rgb(1,0.0,0));
 			}
 			else
 			{
-				sys.Circle(p.x,p.y, 6, sys.Rgb(1,0.5,0));
+				sys.Circle(p.x,p.y, 7, sys.Rgb(1,1,0));
 			}
 		}
 		
@@ -854,10 +902,36 @@ double	b = 120;
 					vect2 P = catmull(t, tblP[i], tblP[i+1], tblP[i+2], tblP[i+3] );
 					sys.Line( P.x, P.y, Q.x, Q.y, sys.Rgb(1,1,1));
 					Q=P;
-				}			
+				}	
+					vect2 P = catmull(1, tblP[i], tblP[i+1], tblP[i+2], tblP[i+3] );
+					sys.Line( P.x, P.y, Q.x, Q.y, sys.Rgb(1,1,1));
+					
 			}
 		}
 
+//		sys.Line( 200,200,rad(-45), sys.Rgb(1,0,0) );
+
+		//	fig
+		{
+			double ofs_x = 100;
+			double ofs_y = 130;
+			double th = rad(45);
+			for ( E2 e : fig.edge )
+			{
+				vect2& p = fig.vert[e.p];
+				vect2& n = fig.vert[e.n];
+
+				double x0=p.x*cos(th) - p.y*sin(th) + ofs_x;
+				double y0=p.x*sin(th) + p.y*cos(th) + ofs_y;
+				double x1=n.x*cos(th) - n.y*sin(th) + ofs_x;
+				double y1=n.x*sin(th) + n.y*cos(th) + ofs_y;
+
+				sys.Line(x0,y0,x1,y1,fig.col);
+
+			}
+
+	
+		}
 
 		//	triangle 
 		static int cnt = 0;
