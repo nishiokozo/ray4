@@ -9,8 +9,6 @@
 #include "sysmouse.h"
 //#include "font.h"
 
-
-
 //-----------------------------------------------------------------------------
 SysMouse& SysMouse::GetInstance()
 //-----------------------------------------------------------------------------
@@ -51,24 +49,37 @@ void SysMouse::Update()
 
 	int	l = GetAsyncKeyState(VK_LBUTTON);
 	int r = GetAsyncKeyState(VK_RBUTTON);
+	int m = GetAsyncKeyState(VK_MBUTTON);
 // 	int	n = GetSystemMetrics( SM_CMOUSEBUTTONS );
 // 	int	w = GetSystemMetrics( SM_XVIRTUALSCREEN );
 
 	int	on_l = (l&0x8000)!=0;
 	int	on_r = (r&0x8000)!=0;
+	int	on_m = (r&0x8000)!=0;
 
+/*
 	this->hi.l = !this->on.l &&  on_l;
 	this->hi.r = !this->on.r &&  on_r;
 
 	this->lo.l =  this->on.l && !on_l;
 	this->lo.r =  this->on.r && !on_r;
+*/
+	this->L.hi = !this->L.on &&  on_l;
+	this->L.lo =  this->L.on && !on_l;
+	this->L.on = on_l;
+
+	this->R.hi = !this->R.on &&  on_r;
+	this->R.lo =  this->R.on && !on_r;
+	this->R.on = on_r;
+
+	this->M.hi = !this->M.on &&  on_m;
+	this->M.lo =  this->M.on && !on_m;
+	this->M.on = on_r;
 
 	this->mx = (float)pos.x - this->sx;
 	this->my = (float)pos.y - this->sy;
 //	this->vm.x =   (float)pos.x - this->sx;
 //	this->vm.y = -((float)pos.y - this->sy);
-	this->on.l = on_l;
-	this->on.r = on_r;
 
 	this->sx = (float)pos.x;
 	this->sy = (float)pos.y;

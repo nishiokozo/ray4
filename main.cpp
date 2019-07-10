@@ -745,7 +745,7 @@ double	b = 120;
 		
 
 #endif
-		if ( mouse.on.l )
+		if ( mouse.L.on )
 		{
 			sys.Circle(mouse.sx-sys.m.x,mouse.sy-sys.m.y, 8, sys.Rgb(0,1,1));
 		}

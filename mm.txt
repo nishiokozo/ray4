@@ -1,3 +1,5 @@
-sys.o: sys.cpp Sys.h
+main.o: main.cpp geom.h sys.h syskeys.h sysmouse.h
 geom.o: geom.cpp geom.h
-keyboard.o: keyboard.cpp keyboard.h
+sys.o: sys.cpp sys.h
+syskeys.o: syskeys.cpp syskeys.h
+sysmouse.o: sysmouse.cpp sysmouse.h

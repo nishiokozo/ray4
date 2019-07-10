@@ -3,11 +3,13 @@
 //int mouse_mouse(int button, int state, int x, int y);
 //int	 mosue_resize(int w, int h);
 
+/*
 typedef struct 
 {
 	int	l;
 	int	r;
 } MOUSE_TYPE;
+*/
 
 class SysMouse
 {
@@ -55,11 +57,13 @@ public:
 	vector	vw;	//	位置
 	vector	vf;	//	位置（アンチチャタリング）
 */
+/*
 
 	MOUSE_TYPE	on;
 	MOUSE_TYPE	hi;
 	MOUSE_TYPE	lo;
 	MOUSE_TYPE	rep;
+*/
 
 /*
 	int	l;
