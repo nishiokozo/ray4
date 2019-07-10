@@ -7,6 +7,7 @@ SRCS = \
 	geom.cpp \
 	sys.cpp \
 	syskeys.cpp \
+	sysmouse.cpp \
 
 LIBS = \
 	 -lgdi32

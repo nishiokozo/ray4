@@ -4,6 +4,8 @@ class	Sys
 public:
 	struct
 	{
+		int x;
+		int	y;
 		int width;
 		int	height;
 	} m;

@@ -80,11 +80,11 @@ struct //	GDI
 {
 	struct
 	{
-		BITMAPINFO	bmpInfo;
-		int			bpp;
-		BYTE*		bPixelBits = nullptr;
-		int			width;
-		int			height;
+//		BITMAPINFO	bmpInfo;
+//		int			bpp;
+//		BYTE*		bPixelBits = nullptr;
+//		int			width;
+//		int			height;
 
 		vector<PrimBezier>	tblBezier;
 		vector<PrimTri>		tblTri;
@@ -106,9 +106,9 @@ struct //	GDI
 	//------------------------------------------------------------------------------
 	{
 
-		if ( m.bPixelBits != 0 ) 
+//		if ( m.bPixelBits != 0 ) 
 		{
-			delete [] m.bPixelBits;
+//			delete [] m.bPixelBits;
 		}
 
 
@@ -118,6 +118,7 @@ struct //	GDI
 	void CreatePixelBits(int bpp, int width, int height )
 	//------------------------------------------------------------------------------
 	{
+/*
 		m.bPixelBits	= new BYTE[ width * height * bpp/8 ];
 
 		m.bpp			= bpp;
@@ -137,7 +138,7 @@ struct //	GDI
 		bih.biYPelsPerMeter		= 0;
 		bih.biClrUsed			= 0;
 		bih.biClrImportant		= 0;
-
+*/
 	}
 	
 	//------------------------------------------------------------------------------
@@ -473,6 +474,8 @@ Sys::~Sys()
 Sys::Sys( const char* name, int pos_x, int pos_y, int width, int height  )
 //------------------------------------------------------------------------------
 {
+	m.x			= pos_x;
+	m.y			= pos_y;
 	m.width		= width;
 	m.height	= height;
 

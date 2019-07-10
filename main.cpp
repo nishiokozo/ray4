@@ -12,6 +12,7 @@ using namespace std;
 
 #include "sys.h"
 #include "syskeys.h"
+#include "sysmouse.h"
 
 
 const	static	double INFINIT =  numeric_limits<double>::max();	//DBL_MAX
@@ -557,9 +558,11 @@ int main()
 
 	SysKeys&	keys = SysKeys::GetInstance();
 
+	mouse_init();
 	while( sys.Update() )
 	{
 		keys.Update();
+		mouse_update();
  		static int py=0;
 
 
@@ -741,6 +744,11 @@ double	b = 120;
 		
 
 #endif
+		if ( mouse.on.l )
+		{
+			sys.Circle(mouse.sx-sys.m.x,mouse.sy-sys.m.y, 8, sys.Rgb(0,1,1));
+		}
+
 		{
 			//Catmull-Rom 曲線
 			// P(t)=P0*(2t^3-3t^2+1)+m0*(t^3-2t^2+t)+P1*(-2t^3+3t^2)+m1*(t^3-t^2)
