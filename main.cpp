@@ -557,12 +557,13 @@ int main()
 		double	rz = rad(0);
 
 	SysKeys&	keys = SysKeys::GetInstance();
+	SysMouse&	mouse = SysMouse::GetInstance();
 
-	mouse_init();
+	//mouse_init();
 	while( sys.Update() )
 	{
 		keys.Update();
-		mouse_update();
+		mouse.Update();
  		static int py=0;
 
 
