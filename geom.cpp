@@ -28,7 +28,7 @@ double	max( double a, double b )
 }
 
 //-----------------------------------------------------------------------------
-vect3	max( double a, const vect3& b )
+vect3	max( double a, vect3 b )
 //-----------------------------------------------------------------------------
 {
 	vect3	ret;
@@ -40,7 +40,7 @@ vect3	max( double a, const vect3& b )
 }
 
 //-----------------------------------------------------------------------------
-vect3	max( const vect3& b, double a )
+vect3	max( vect3 b, double a )
 //-----------------------------------------------------------------------------
 {
 	vect3	ret;
@@ -52,7 +52,7 @@ vect3	max( const vect3& b, double a )
 }
 
 //-----------------------------------------------------------------------------
-vect3	min( double a, const vect3& b )
+vect3	min( double a, vect3 b )
 //-----------------------------------------------------------------------------
 {
 	vect3	ret;
@@ -64,7 +64,7 @@ vect3	min( double a, const vect3& b )
 }
 
 //-----------------------------------------------------------------------------
-vect3	min( const vect3& b, double a )
+vect3	min( vect3 b, double a )
 //-----------------------------------------------------------------------------
 {
 	vect3	ret;
@@ -76,7 +76,7 @@ vect3	min( const vect3& b, double a )
 }
 
 //-----------------------------------------------------------------------------
-vect3	mix( double f, const vect3& a, const vect3& b )
+vect3	mix( double f, vect3 a, vect3 b )
 //-----------------------------------------------------------------------------
 {
 	vect3	ret;
@@ -87,7 +87,7 @@ vect3	mix( double f, const vect3& a, const vect3& b )
 }
 
 //-----------------------------------------------------------------------------
-vect3 reflect( const vect3& I, const vect3& N )
+vect3 reflect( vect3 I, vect3 N )
 //-----------------------------------------------------------------------------
 {
 	vect3	ret;
@@ -98,7 +98,7 @@ vect3 reflect( const vect3& I, const vect3& N )
 }
 
 //-----------------------------------------------------------------------------
-vect3 refract( const vect3& I, const vect3& N, double nm )
+vect3 refract( vect3 I, vect3 N, double nm )
 //-----------------------------------------------------------------------------
 {
 	vect3	V;
@@ -138,13 +138,13 @@ vect3 refract( const vect3& I, const vect3& N, double nm )
 }
 
 //-----------------------------------------------------------------------------
-double	dot( const vect3& a, const vect3& b )
+double	dot( vect3 a, vect3 b )
 //-----------------------------------------------------------------------------
 {
 	return a.x * b.x + a.y * b.y +a.z * b.z ;
 }
 //-----------------------------------------------------------------------------
-vect3	cross( const vect3& a, const vect3& b )
+vect3	cross( vect3 a, vect3 b )
 //-----------------------------------------------------------------------------
 {
 	vect3 v; 
@@ -155,14 +155,15 @@ vect3	cross( const vect3& a, const vect3& b )
 	return v;
 }
 //-----------------------------------------------------------------------------
-double	length( const vect3 a )
+double	length( vect3 a )
 //-----------------------------------------------------------------------------
 {
 //	return sqrt( a.x*a.x + a.y*a.y + a.z*a.z );
 	return sqrt(dot(a,a));
 }
+/*
 //-----------------------------------------------------------------------------
-double	length( const vect3& a )
+double	length( vect3 a )
 //-----------------------------------------------------------------------------
 {
 //	double	l = sqrt( a.x*a.x + a.y*a.y + a.z*a.z );
@@ -170,9 +171,10 @@ double	length( const vect3& a )
 
 	return	l;
 }
+*/
 
 //-----------------------------------------------------------------------------
-vect3	normalize( const vect3& a )
+vect3	normalize( vect3 a )
 //-----------------------------------------------------------------------------
 {
 	vect3 v; 
@@ -764,7 +766,7 @@ void	mat4_scaling( double* m, double sx, double sy, double sz  )
 	mat4_multiply( m, m, a );
 }
 //-----------------------------------------------------------------------------
-void	mat4_scaling( double* m, const vect3& vecScale  )
+void	mat4_scaling( double* m, vect3 vecScale  )
 //-----------------------------------------------------------------------------
 {
 	double a[16];
@@ -772,7 +774,7 @@ void	mat4_scaling( double* m, const vect3& vecScale  )
 	mat4_multiply( m, m, a );
 }
 //-----------------------------------------------------------------------------
-void	mat4_scaling( mat44& m, const vect3& vecScale  )
+void	mat4_scaling( mat44& m, vect3 vecScale  )
 //-----------------------------------------------------------------------------
 {
 	mat4_scaling( m.GetArray(), vecScale.x, vecScale.y, vecScale.z  );

@@ -33,6 +33,9 @@ CC	= g++
 $(TAR)	:	$(SRCS:.cpp=.o)
 	$(CC) -o $(TAR) $(SRCS:.cpp=.o) $(LIBS)
 
+geom.o:geom.cpp
+	$(CC)   -O1 $(FLGS) $< -o $@ 
+
 %.o:%.cpp
 	$(CC)   $(FLGS) $< -o $@ 
 

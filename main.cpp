@@ -745,15 +745,28 @@ double	b = 120;
 		
 
 #endif
-		if ( mouse.L.hi ) cout << "L" << endl;
-		if ( mouse.R.hi ) cout << "R" << endl;
-		if ( mouse.M.hi ) cout << "M" << endl;
-		if ( mouse.F.hi ) cout << "F" << endl;
-		if ( mouse.B.hi ) cout << "B" << endl;
+
+
+		static vector<vect2>	tblP;
+
+		vect2 mpos( mouse.sx-sys.m.x, mouse.sy-sys.m.y );
+		
+
+		if ( mouse.R.hi )
+		{
+			tblP.push_back(mpos);
+		}
+
 
 		if ( mouse.L.on )
 		{
-			sys.Circle(mouse.sx-sys.m.x,mouse.sy-sys.m.y, 8, sys.Rgb(0,1,1));
+//			sys.Circle(mouse.sx-sys.m.x,mouse.sy-sys.m.y, 8, sys.Rgb(0,1,1));
+			sys.Circle(mpos.x,mpos.y, 8, sys.Rgb(0,1,1));
+		}
+
+		for ( vect2 p : tblP )
+		{
+			sys.Circle(p.x,p.y, 8, sys.Rgb(1,0.5,0));
 		}
 
 		{
@@ -762,64 +775,6 @@ double	b = 120;
 			// m0=(P1-Pm)/2
 			// m1=(P2-P0)/2
 
-			struct vect2
-			{
-				double x,y;
-				vect2( double _x, double _y) :x(_x),y(_y){}
-				vect2() :x(0),y(0){}
-				
-				void operator=( const vect2& v )
-				{
-					x = v.x;
-					y = v.y;
-				}
-				void operator*=( const vect2& v )
-				{
-					x *= v.x;
-					y *= v.y;
-				}
-				void operator/=( const vect2& v )
-				{
-					x = v.x;
-					y = v.y;
-				}
-				void operator+=( const vect2& v )
-				{
-					x += v.x;
-					y += v.y;
-				}
-				void operator-=( const vect2& v )
-				{
-					x -= v.x;
-					y -= v.y;
-				}
-				vect2  operator*( double f ) const
-				{
-					return vect2( x*f, y*f );
-				}
-				vect2  operator/( double f ) const
-				{
-					return vect2( x/f, y/f );
-				}
-				
-				vect2 operator*( const vect2& v ) const
-				{
-					return vect2( x*v.x, y*v.y );
-				}
-				vect2 operator/( const vect2& v ) const
-				{
-					return vect2( x/v.x, y/v.y );
-				}
-				vect2 operator+( const vect2& v ) const
-				{
-					return vect2( x+v.x, y+v.y );
-				}
-				vect2 operator-( const vect2& v ) const
-				{
-					return vect2( x-v.x, y-v.y );
-				}
-
-			};
 
 			vect2	Pm={ 100,480};
 			vect2	P0={ 130,360};
@@ -832,10 +787,10 @@ double	b = 120;
 			sys.Circle( P2.x, P2.y, 10, sys.Rgb(1,0,1));
 
 
-			auto catmull = [=]( double t )
+			auto catmull = []( double t, const vect2& P0, const vect2& P1, const vect2 m0, const vect2 m1 )
 			{
-				vect2 m0 = (P1-Pm)/2.0;
-				vect2 m1 = (P2-P0)/2.0;
+//				vect2 m0 = (P1-Pm)/2.0;
+//				vect2 m1 = (P2-P0)/2.0;
 				vect2 P = P0*(2*t*t*t - 3*t*t +1) + m0*( t*t*t -2*t*t +t ) + P1*( -2*t*t*t + 3*t*t ) + m1*( t*t*t - t*t );
 
 				return P;
@@ -843,7 +798,7 @@ double	b = 120;
 
 			for ( double t = 0 ; t < 1.0 ; t+=0.02 )
 			{
-				vect2 P = catmull(t);
+				vect2 P = catmull(t, P0, P1,(P1-Pm)/2.0, (P2-P0)/2.0 );
 				sys.Pset( P.x, P.y, sys.Rgb(1,1,1));
 
 				
