@@ -808,7 +808,7 @@ double	b = 120;
 		};
 		
 
-		static vector<Mark>	tblP =
+		static vector<Mark>	tblMark =
 		{
 			Mark( false, vect2(100,480), fig, rad(0) ),
 			Mark( false, vect2(130,360), fig, rad(0) ),
@@ -824,72 +824,110 @@ double	b = 120;
 		// マーカー追加
 		if ( mouse.M.hi )
 		{
-			tblP.push_back( Mark( false, mpos, fig, rad(0) ) );
+			tblMark.push_back( Mark( false, mpos, fig, rad(0) ) );
 		}
 
 		// マーカー選択解除
 		if ( mouse.L.on == false  )
 		{
-			for ( Mark& p : tblP )
+			for ( Mark& m : tblMark )
 			{
-				p.bSelected = false;
+//				m.bSelected = false;
 			}
 		}
 
 		// マーカー選択
 		if ( mouse.L.hi )
 		{
-			for ( Mark& p : tblP )
+			struct
 			{
-				if ( (p-mpos).length() < 8.0 )
+				double	len;
+				Mark*	pmark;
+			} a = {99999,0};
+
+			// 最近マーカーを検索
+			for ( Mark& m : tblMark )
+			{
+				double len = (m-mpos).length();
+				if ( len < 20.0 && a.len > len )
 				{
-					p.bSelected = true;
+					a.len = len;
+					a.pmark = &m;
 				}
 			}
+
+			// マーカー全解除
+			if ( !keys.CTRL.on && !keys.SHIFT.on )
+			{
+				for ( Mark& m : tblMark )
+				{
+					m.bSelected = false;
+				}
+			}
+			
+			//	マーカー選択
+			if ( a.pmark )
+			{
+				if ( keys.CTRL.on )
+				{
+					a.pmark->bSelected = !a.pmark->bSelected;
+				}
+				else
+				{
+					a.pmark->bSelected = true;
+				}
+			}
+
 		}
 		
 		// マーカー移動
 		if ( mouse.L.on )
 		{
-			for ( Mark& p : tblP )
+			for ( Mark& m : tblMark )
 			{
-				if ( p.bSelected )
+				if ( m.bSelected )
 				{
-					p.x += mouse.mx;
-					p.y += mouse.my;
+					m.x += mouse.mx;
+					m.y += mouse.my;
 				}
 			}
 		}
 
 		// マーカー表示
-		for ( Mark p : tblP )
+		for ( Mark m : tblMark )
 		{
-			if ( p.bSelected )
+			auto func = [&]( double x0, double y0, double x1, double y1, int col)
 			{
-				sys.Circle(p.x,p.y, 7, sys.Rgb(1,0.0,0));
+				sys.Line(x0,y0,x1,y1,col);
+			};
+			if ( m.bSelected )
+			{
+//				sys.Circle(m.x,m.y, 7, sys.Rgb(1,0.0,0));
+				fig.draw( func, m.x,m.y,rad(0), sys.Rgb(1,0,0) );
 			}
 			else
 			{
-				sys.Circle(p.x,p.y, 7, sys.Rgb(1,1,0));
+//				sys.Circle(m.x,m.y, 7, sys.Rgb(1,1,0));
+				fig.draw( func, m.x,m.y,rad(0), sys.Rgb(1,1,0) );
 			}
 		}
 		
 		// マーカースプライン変換表示
-		if ( tblP.size() >=4 )
+		if ( tblMark.size() >=4 )
 		{
-			for ( unsigned int i = 0 ; i < tblP.size()-3 ; i++ )
+			for ( unsigned int i = 0 ; i < tblMark.size()-3 ; i++ )
 			{
 				double st = 0.1;
 
-				vect2 Q = catmull(0, tblP[i], tblP[i+1], tblP[i+2], tblP[i+3] );
+				vect2 Q = catmull(0, tblMark[i], tblMark[i+1], tblMark[i+2], tblMark[i+3] );
 
 				for ( double t = st ; t < 1.0 ; t+=st)
 				{
-					vect2 P = catmull(t, tblP[i], tblP[i+1], tblP[i+2], tblP[i+3] );
+					vect2 P = catmull(t, tblMark[i], tblMark[i+1], tblMark[i+2], tblMark[i+3] );
 					sys.Line( P.x, P.y, Q.x, Q.y, sys.Rgb(1,1,1));
 					Q=P;
 				}	
-					vect2 P = catmull(1, tblP[i], tblP[i+1], tblP[i+2], tblP[i+3] );
+					vect2 P = catmull(1, tblMark[i], tblMark[i+1], tblMark[i+2], tblMark[i+3] );
 					sys.Line( P.x, P.y, Q.x, Q.y, sys.Rgb(1,1,1));
 					
 			}
