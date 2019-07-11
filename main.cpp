@@ -793,14 +793,16 @@ double	b = 120;
 
 		struct Mark : vect2
 		{
+			bool 	bMouseover;
 			bool 	bSelected;
 			Figure	fig;
 			double	th;
-			Mark( bool b, vect2 v, Figure _fig, double _th )
+			Mark( vect2 v, Figure _fig, double _th )
 			{
 				x=v.x;
 				y=v.y;
-				bSelected=b;
+				bSelected=false;
+				bMouseover=false;
 				fig = _fig;
 				th = _th;
 			}
@@ -810,40 +812,37 @@ double	b = 120;
 
 		static vector<Mark>	tblMark =
 		{
-			Mark( false, vect2(100,480), fig, rad(0) ),
-			Mark( false, vect2(130,360), fig, rad(0) ),
-			Mark( false, vect2(270,360), fig, rad(0) ),
-			Mark( false, vect2(300,480), fig, rad(0) ),
+			Mark( vect2(100,480), fig, rad(0) ),
+			Mark( vect2(130,360), fig, rad(0) ),
+			Mark( vect2(270,360), fig, rad(0) ),
+			Mark( vect2(300,480), fig, rad(0) ),
 		};
 		
-
+		static vect2 drag_start(0,0);
+		static bool bDrag = false;
+	
 		vect2 mpos( mouse.sx-sys.m.x, mouse.sy-sys.m.y );
 		
+		
 
+		
 
 		// マーカー追加
 		if ( mouse.M.hi )
 		{
-			tblMark.push_back( Mark( false, mpos, fig, rad(0) ) );
+			tblMark.push_back( Mark( mpos, fig, rad(0) ) );
 		}
 
-		// マーカー選択解除
-		if ( mouse.L.on == false  )
-		{
-			for ( Mark& m : tblMark )
-			{
-//				m.bSelected = false;
-			}
-		}
 
 		// マーカー選択
-		if ( mouse.L.hi )
+		if ( mouse.L.on )
 		{
 			struct
 			{
 				double	len;
 				Mark*	pmark;
-			} a = {99999,0};
+				int		cnt;
+			} a = {99999,0,0};
 
 			// 最近マーカーを検索
 			for ( Mark& m : tblMark )
@@ -853,45 +852,111 @@ double	b = 120;
 				{
 					a.len = len;
 					a.pmark = &m;
+					a.cnt++;
 				}
 			}
 
-			// マーカー全解除
-			if ( !keys.CTRL.on && !keys.SHIFT.on )
+			// マーカー選択＆解除
+			if ( mouse.L.hi )
 			{
-				for ( Mark& m : tblMark )
+				// 矩形選択
+				if ( a.pmark == 0 ) 
 				{
-					m.bSelected = false;
+					bDrag = true;
+					drag_start = mpos;
 				}
-			}
-			
-			//	マーカー選択
-			if ( a.pmark )
-			{
-				if ( keys.CTRL.on )
-				{
-					a.pmark->bSelected = !a.pmark->bSelected;
-				}
+
+				// マーカー全解除
+				if ( keys.CTRL.on ){}
+				else
+				if ( keys.SHIFT.on ){}
+				else
+				if ( a.pmark && a.pmark->bSelected == true ){}
 				else
 				{
-					a.pmark->bSelected = true;
+					for ( Mark& m : tblMark )
+					{
+						m.bSelected = false;
+					}
+				}
+				
+				//	マーカー選択
+				if ( a.pmark )
+				{
+					if ( keys.CTRL.on )
+					{
+						a.pmark->bSelected = !a.pmark->bSelected;
+					}
+					else
+					{
+						a.pmark->bSelected = true;
+					}
 				}
 			}
+			else
+			{
+				// 矩形表示
+				if ( bDrag )
+				{
+					double x0 = min( drag_start.x, mpos.x);
+					double y0 = min( drag_start.y, mpos.y);
+					double x1 = max( drag_start.x, mpos.x);
+					double y1 = max( drag_start.y, mpos.y);
 
+					sys.Line( x0,y0,x1,y0, sys.Rgb(0,0.5,1));
+					sys.Line( x0,y1,x1,y1, sys.Rgb(0,0.5,1));
+					sys.Line( x0,y0,x0,y1, sys.Rgb(0,0.5,1));
+					sys.Line( x1,y0,x1,y1, sys.Rgb(0,0.5,1));
+
+					for ( Mark& m : tblMark )
+					{
+						m.bMouseover = false;
+					}
+
+					// 矩形内マーカーを検索
+					for ( Mark& m : tblMark )
+					{
+						double len = (m-mpos).length();
+						if ( m.x > x0 && m.x < x1 && m.y > y0 && m.y < y1 )
+						{
+		//					m.bMouseover = true;
+							if ( keys.CTRL.on )
+							{
+								m.bMouseover = !m.bSelected;
+							}
+							else
+							{
+								m.bMouseover = true;
+							}
+						}
+					}
+
+				}
+				else
+				// マーカー移動
+				for ( Mark& m : tblMark )
+				{
+					if ( m.bSelected )
+					{
+						m.x += mouse.mx;
+						m.y += mouse.my;
+					}
+				}
+			}
+		}
+		else
+		{
+			if ( bDrag )
+			{
+				bDrag = false;
+				for ( Mark& m : tblMark )
+				{
+					m.bSelected = m.bMouseover;
+					m.bMouseover = false;
+				}
+			}
 		}
 		
-		// マーカー移動
-		if ( mouse.L.on )
-		{
-			for ( Mark& m : tblMark )
-			{
-				if ( m.bSelected )
-				{
-					m.x += mouse.mx;
-					m.y += mouse.my;
-				}
-			}
-		}
 
 		// マーカー表示
 		for ( Mark m : tblMark )
@@ -900,7 +965,7 @@ double	b = 120;
 			{
 				sys.Line(x0,y0,x1,y1,col);
 			};
-			if ( m.bSelected )
+			if ( m.bSelected || m.bMouseover)
 			{
 //				sys.Circle(m.x,m.y, 7, sys.Rgb(1,0.0,0));
 				fig.draw( func, m.x,m.y,rad(0), sys.Rgb(1,0,0) );
