@@ -499,6 +499,7 @@ void	raytrace( Sys& sys, int py )
 // m1=P2-P0
 
 
+
 //------------------------------------------------------------------------------
 int main()
 //------------------------------------------------------------------------------
@@ -525,15 +526,8 @@ int main()
 		vector<vect2> vert;
 		vector<E2> edge;
 		int	col;
-/*
-///		function<void(Sys,double,double,double,double,int)>	fline;
-	function<int(const Sys,int)> f1 = Sys::func;
-
-		void draw( double ofs_x, double ofs_y, double th, int col )
+		void draw( function<void(double,double,double,double,int)> line , double ofs_x, double ofs_y, double th, int col )
 		{
-//			double ofs_x = 100;
-//			double ofs_y = 130;
-//			double th = rad(45);
 			for ( E2 e : edge )
 			{
 				vect2& p = vert[e.p];
@@ -544,15 +538,9 @@ int main()
 				double x1=n.x*cos(th) - n.y*sin(th) + ofs_x;
 				double y1=n.x*sin(th) + n.y*cos(th) + ofs_y;
 
-//				sys.Line(x0,y0,x1,y1,col);
-//				line(sys,x0,y0,x1,y1,col);
-	cout << f1(sys,123) << endl;
-
+				line(x0,y0,x1,y1,col);
 			}
-	
 		}
-*/
-
 	};
 	Figure fig;
 	fig.vert.push_back( (vect2){   0,20*tan(rad(60))	-10*tan(rad(30)) } );
@@ -562,8 +550,6 @@ int main()
 	fig.edge.push_back( (E2){ 1,2 } );
 	fig.edge.push_back( (E2){ 2,0 } );
 	fig.col = sys.Rgb(0,0.5,1);
-//	fig.line = Sys::Line;
-//	fig.line = Sys::Line;
 	
 
 	vector<vect3> boxvert=
@@ -909,30 +895,15 @@ double	b = 120;
 			}
 		}
 
-//		sys.Line( 200,200,rad(-45), sys.Rgb(1,0,0) );
-
-		//	fig
+		// fig
 		{
-			double ofs_x = 100;
-			double ofs_y = 130;
-			double th = rad(45);
-			for ( E2 e : fig.edge )
+			auto func = [&]( double x0, double y0, double x1, double y1, int col)
 			{
-				vect2& p = fig.vert[e.p];
-				vect2& n = fig.vert[e.n];
-
-				double x0=p.x*cos(th) - p.y*sin(th) + ofs_x;
-				double y0=p.x*sin(th) + p.y*cos(th) + ofs_y;
-				double x1=n.x*cos(th) - n.y*sin(th) + ofs_x;
-				double y1=n.x*sin(th) + n.y*cos(th) + ofs_y;
-
-				sys.Line(x0,y0,x1,y1,fig.col);
-
-			}
-
-	
+				sys.Line(x0,y0,x1,y1,col);
+			};
+			fig.draw( func, 200,200,rad(-45), sys.Rgb(1,0,0) );
 		}
-
+	
 		//	triangle 
 		static int cnt = 0;
 		for ( unsigned int i = 0 ; i < triangle.size()-1 ; i++ )
