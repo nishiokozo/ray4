@@ -793,6 +793,7 @@ double	b = 120;
 
 		struct Mark : vect2
 		{
+			bool 	bMouseoverSelected;
 			bool 	bMouseover;
 			bool 	bSelected;
 			Figure	fig;
@@ -803,6 +804,7 @@ double	b = 120;
 				y=v.y;
 				bSelected=false;
 				bMouseover=false;
+				bMouseoverSelected=false;
 				fig = _fig;
 				th = _th;
 			}
@@ -919,14 +921,14 @@ double	b = 120;
 						double len = (m-mpos).length();
 						if ( m.x > x0 && m.x < x1 && m.y > y0 && m.y < y1 )
 						{
-		//					m.bMouseover = true;
+							m.bMouseover = true;
 							if ( keys.CTRL.on )
 							{
-								m.bMouseover = !m.bSelected;
+								m.bMouseoverSelected = !m.bSelected;
 							}
 							else
 							{
-								m.bMouseover = true;
+								m.bMouseoverSelected = true;
 							}
 						}
 					}
@@ -951,8 +953,12 @@ double	b = 120;
 				bDrag = false;
 				for ( Mark& m : tblMark )
 				{
-					m.bSelected = m.bMouseover;
+					if ( m.bMouseover )
+					{
+						m.bSelected = m.bMouseoverSelected;
+					}
 					m.bMouseover = false;
+					m.bMouseoverSelected = false;
 				}
 			}
 		}
@@ -965,7 +971,20 @@ double	b = 120;
 			{
 				sys.Line(x0,y0,x1,y1,col);
 			};
-			if ( m.bSelected || m.bMouseover)
+
+			bool flg =  m.bSelected;
+			
+			if ( bDrag ) 
+			{
+				if ( m.bMouseover )
+				{
+					flg = m.bMouseoverSelected;
+				}
+			}
+			
+			if ( flg )			
+			
+//			if ( m.bSelected || m.bMouseover)
 			{
 //				sys.Circle(m.x,m.y, 7, sys.Rgb(1,0.0,0));
 				fig.draw( func, m.x,m.y,rad(0), sys.Rgb(1,0,0) );
