@@ -117,11 +117,11 @@ LRESULT CALLBACK SysWin::WinProc
 	switch( uMsg ) 
 	{
 		case WM_CREATE:	// CreateWindowと同時に発行される
-cout << "WM_CREATE " << endl;
-			break;
+			cout << "WM_CREATE " << endl;
+			return 0;
 
 		case WM_SHOWWINDOW:	//  ShowWindowと同時に発行される ShowWindow()  -> WM_SHOWWINDOW -> WM_ACTIVATE ->  WM_ERASEBKGND -> WM_SIZE -> WM_PAINT
-cout << "WM_SHOWWINDOW " << endl;
+			cout << "WM_SHOWWINDOW " << endl;
 			g.funcOnShowwindow();
 			return 0;
 
@@ -129,18 +129,17 @@ cout << "WM_SHOWWINDOW " << endl;
 			return 0;
 
 		case WM_ERASEBKGND:	//	WM_PAINTイベントの途中、及びWM_SHOWWINDOWのあとに発行される。 DefWindowProc()に任せると白いフラッシュが入ってしまうので、0を返す
-//cout << "WM_ERASEBKGND " << endl;
+			//cout << "WM_ERASEBKGND " << endl;
 			return 0;
 			
 		case WM_SIZE:	// 画面サイズが決定された時に発行される
-cout << "WM_SIZE " << endl;
+			//cout << "WM_SIZE " << endl;
 			g.funcOnSize();
 			return 0;
 
 		case WM_PAINT:	// OSからの描画要求。再描画区域情報（ウィンドウが重なっている際などの）が得られるタイミング。
-//cout << "WM_PAINT " << endl;
+			//cout << "WM_PAINT " << endl;
 			g.funcOnPaint();
-
 			return 0;
 
 		case WM_KEYDOWN:
@@ -149,11 +148,9 @@ cout << "WM_SIZE " << endl;
 
 		case WM_DESTROY:	//[x]を押すなどしたとき
 			g.funcOnDestroy();
-cout << "WM_DESTROY " << endl;
-			PostQuitMessage( 0 );
+			cout << "WM_DESTROY " << endl;
 			return 0;
 	}
-//			return 1;
 
 	// デフォルト処理呼び出し。
 	return DefWindowProc( hWnd, uMsg, wParam, lParam );// [x] > WM_SYSCOMMAND > WM_CLOSE > WM_DESTROY
@@ -176,13 +173,8 @@ SysWin::~SysWin()
 SysWin::SysWin()
 //------------------------------------------------------------------------------
 {
+	const char* name = "kozo:SysWin";
 
-}
-
-//------------------------------------------------------------------------------
-void SysWin::OpenWindow( const char* name, int pos_x, int pos_y, int width, int height  )
-//------------------------------------------------------------------------------
-{
 	// アプリケーションインスタンス
 	win.hInstance		= GetModuleHandle( NULL );
 
@@ -214,31 +206,16 @@ void SysWin::OpenWindow( const char* name, int pos_x, int pos_y, int width, int 
 	if ( 0 == RegisterClassEx( &win.tWndClass ) ) 
 	{
 	}
-	
-	m.x			= pos_x;
-	m.y			= pos_y;
-	m.width		= width;
-	m.height	= height;
 
-
-cout << "1 ----------------- " << endl;
-
-	// ウインドウを生成する
+	// 仮ウインドウを生成する
 	{
-		RECT rc;
-		SetRect(&rc, 0, 0, width, height );
 		int valWin = WS_OVERLAPPEDWINDOW;
-		AdjustWindowRectEx(&rc, valWin, FALSE, 0);
-
 		win.hWnd = CreateWindowEx(
 			 0
 			, win.tWndClass.lpszClassName
 			, name 
 			, valWin
-			, pos_x + rc.left	
-			, pos_y + rc.top	
-			, rc.right-rc.left 	
-			, rc.bottom-rc.top	
+			, 0,0,256,256
 			, NULL			  	// handle to parent or owner window
 			, NULL			 	// handle to menu, or child-window identifier
 			, win.hInstance	 	// handle to application instance
@@ -246,9 +223,41 @@ cout << "1 ----------------- " << endl;
 		);
 
 	}
-cout << "2 ----------------- " << endl;
+}
+
+//------------------------------------------------------------------------------
+void SysWin::OpenWindow( const char* name, int pos_x, int pos_y, int width, int height  )
+//------------------------------------------------------------------------------
+{
+
+	m.x			= pos_x;
+	m.y			= pos_y;
+	m.width		= width;
+	m.height	= height;
+
+	// ウィンドウ名を変える
+	SetWindowText(win.hWnd , name );
+
+
+	// ウィンドウ位置サイズを変える
+	{
+		RECT rc;
+		SetRect(&rc, 0, 0, width, height );
+		AdjustWindowRectEx(&rc, WS_OVERLAPPEDWINDOW, FALSE, 0);
+
+		SetWindowPos(
+			  win.hWnd 
+			, HWND_TOPMOST	// 最前面ウィンドウ
+			, pos_x + rc.left	
+			, pos_y + rc.top	
+			, rc.right-rc.left 	
+			, rc.bottom-rc.top	
+			,0
+		);
+	}
+	
+	// ウィンドウを表示する
 	ShowWindow( win.hWnd, SW_SHOW );
-cout << "3 ----------------- " << endl;
 
 }
 
@@ -257,7 +266,7 @@ bool SysWin::Update()
 //------------------------------------------------------------------------------
 {
 //cout << "-- " << endl;
-		InvalidateRect(win.hWnd , NULL , TRUE);	//	WM_PAINTを発行し再描画矩形情報を渡す
+	InvalidateRect(win.hWnd , NULL , TRUE);	//	WM_PAINTを発行し再描画矩形情報を渡す
 
 	while(1)
 	{

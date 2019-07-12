@@ -13,7 +13,6 @@ using namespace std;
 
 #include	"syswin.h"
 
-static 	SysWin&	win= SysWin::GetInstance();
 
 //------------------------------------------------------------------------------
 Plat::Plat( const char* name, int pos_x, int pos_y, int width, int height  )
@@ -23,6 +22,8 @@ Plat::Plat( const char* name, int pos_x, int pos_y, int width, int height  )
 	m.y			= pos_y;
 	m.width		= width;
 	m.height	= height;
+
+	SysWin&	win= SysWin::GetInstance();
 
 	// コールバック登録
 	{
@@ -62,9 +63,10 @@ Plat::Plat( const char* name, int pos_x, int pos_y, int width, int height  )
 bool	Plat::Update()
 //------------------------------------------------------------------------------
 {
+	SysWin&	win= SysWin::GetInstance();
 	bool b = win.Update();
-		keys.Update();
-		mouse.Update();
+	keys.Update();
+	mouse.Update();
 
 	return b;
 }

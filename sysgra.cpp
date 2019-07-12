@@ -15,10 +15,18 @@ using namespace std;
 #include <functional>
 #include "SysWin.h"
 
-static struct 
+static struct G
 {
+	bool flgActive;
 	RECT rect;
 	HDC  hdcBackbuffer;
+	HBITMAP hBitmap;
+
+	G()
+	{
+		flgActive = false;
+	}
+
 } g;
 
 
@@ -74,12 +82,41 @@ void  SysGra::CreatePixelBits(int bpp, int width, int height )
 
 
 //------------------------------------------------------------------------------
+void  SysGra::OnShowwindow() 
+//------------------------------------------------------------------------------
+{
+	HWND hWnd = SysWin::GetInstance().win.hWnd;
+    HDC hDc = GetDC(hWnd);
+	{
+		RECT rc;
+		GetClientRect( hWnd, &rc );
+		HBITMAP hBitmap = CreateCompatibleBitmap( hDc, rc.right, rc.bottom );
+	    g.hdcBackbuffer = CreateCompatibleDC( NULL );
+	    SelectObject( g.hdcBackbuffer, hBitmap );
+	}
+	ReleaseDC( hWnd, hDc );
+}	
+
+//------------------------------------------------------------------------------
 void  SysGra::OnSize() 
 //------------------------------------------------------------------------------
 {
 	HWND hWnd = SysWin::GetInstance().win.hWnd;
+    HDC hDc = GetDC(hWnd);
+    {
+		if ( g.flgActive == false )
+		{
+			g.flgActive = true;
+			DeleteDC(g.hdcBackbuffer);
+			DeleteObject(g.hBitmap);
+		}
 
-	GetClientRect( hWnd, &g.rect );
+		GetClientRect( hWnd, &g.rect );
+		g.hBitmap = CreateCompatibleBitmap( hDc, g.rect.right, g.rect.bottom );
+	    g.hdcBackbuffer = CreateCompatibleDC( NULL );
+	    SelectObject( g.hdcBackbuffer, g.hBitmap );
+	}
+	ReleaseDC( hWnd, hDc );
 }
 
 //------------------------------------------------------------------------------
@@ -87,22 +124,12 @@ void  SysGra::OnDestroy()
 //------------------------------------------------------------------------------
 {
 	HWND hWnd = SysWin::GetInstance().win.hWnd;
+
+	DeleteDC(g.hdcBackbuffer);
+	DeleteObject(g.hBitmap);
+
+	PostQuitMessage( 0 );
 }
-
-//------------------------------------------------------------------------------
-void  SysGra::OnShowwindow() 
-//------------------------------------------------------------------------------
-{
-	HWND hWnd = SysWin::GetInstance().win.hWnd;
-    HDC hDc = GetDC(hWnd);
-		RECT rc;
-		GetClientRect( hWnd, &rc );
-		HBITMAP hBitmap = CreateCompatibleBitmap( hDc, rc.right, rc.bottom );
-	    g.hdcBackbuffer = CreateCompatibleDC( NULL );
-	    SelectObject( g.hdcBackbuffer, hBitmap );
-	ReleaseDC( hWnd, hDc );
-
-}	
 
 //------------------------------------------------------------------------------
 void  SysGra::OnPaint()
@@ -275,11 +302,13 @@ void  SysGra::OnPaint()
 //	    paint0( g.hdcBackbuffer);
 	    PAINTSTRUCT ps;
 	    HDC hDc = BeginPaint(hWnd, &ps);
-		RECT rc;
-		GetClientRect( hWnd, &rc );
-	    BitBlt(hDc, 0, 0, rc.right, rc.bottom, g.hdcBackbuffer, 0, 0, SRCCOPY);
+//		RECT rc;
+//		GetClientRect( hWnd, &rc );
+//	    BitBlt(hDc, 0, 0, rc.right, rc.bottom, g.hdcBackbuffer, 0, 0, SRCCOPY);
+	    BitBlt(hDc, 0, 0, g.rect.right, g.rect.bottom, g.hdcBackbuffer, 0, 0, SRCCOPY);
 	    EndPaint(hWnd, &ps);
 	}
+
 }
 
 
