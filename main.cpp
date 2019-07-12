@@ -11,7 +11,6 @@ using namespace std;
 
 #include "geom.h"
 
-#include "plat.h"
 
 #include "syskeys.h"
 #include "sysmouse.h"
@@ -20,6 +19,8 @@ using namespace std;
 
 #include "sysgdi.h"
 #include "syswin.h"
+
+#include "plat.h"
 
 
 
@@ -499,7 +500,7 @@ void	raytrace( SysWin& win, int py )
 				if ( ren.m_cntRay > cntMax ) cntMax = ren.m_cntRay;
 				cntRay+= ren.m_cntRay;
 
-				win.gdi.Pset(px,height-py,win.gdi.Rgb(C.r,C.g,C.b));
+				plat.win.(*this).Pset(px,height-py,plat.win.gdi.Rgb(C.r,C.g,C.b));
 			}
 		}
 		
@@ -556,7 +557,7 @@ int main()
 	fig.edge.push_back( (E2){ 0,1 } );
 	fig.edge.push_back( (E2){ 1,2 } );
 	fig.edge.push_back( (E2){ 2,0 } );
-	fig.col = win.gdi.Rgb(0,0.5,1);
+	fig.col = plat.win.gdi.Rgb(0,0.5,1);
 	
 
 	vector<vect3> boxvert=
@@ -594,18 +595,18 @@ int main()
 		double	ry = rad(0);
 		double	rz = rad(0);
 
-	SysKeys&	keys = SysKeys::GetInstance();
-	SysMouse&	mouse = SysMouse::GetInstance();
+//	SysKeys&	keys = SysKeys::GetInstance();
+//	SysMouse&	mouse = SysMouse::GetInstance();
 
 	//mouse_init();
 	while( plat.Update() )
 	{
-		keys.Update();
-		mouse.Update();
+		plat.keys.Update();
+		plat.mouse.Update();
  		static int py=0;
 
 
-		win.gdi.Clr(win.gdi.Rgb(0.3,0.3,0.3));
+		plat.win.gdi.Clr(plat.win.gdi.Rgb(0.3,0.3,0.3));
 		
 //		raytrace( win, py++ );
 		if ( py >= plat.m.height ) py=0;
@@ -739,10 +740,10 @@ struct Mat
 		
 		
 		static	double	val=45;
-		if (keys.Q.rep) {val--;cout << val <<" "<<1/tan(rad(val)) << endl; }
-		if (keys.A.rep) {val++;cout << val <<" "<<1/tan(rad(val)) << endl; }
-		if (keys.W.rep) {val-=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
-		if (keys.S.rep) {val+=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (plat.keys.Q.rep) {val--;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (plat.keys.A.rep) {val++;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (plat.keys.W.rep) {val-=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (plat.keys.S.rep) {val+=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
 
 
 		//calc pers 
@@ -763,24 +764,24 @@ struct Mat
 			double y0 = p.y/(p.z+sz)	*sc	+256;
 			double x1 = n.x/(n.z+sz)	*sc	+256;
 			double y1 = n.y/(n.z+sz)	*sc	+256;
-			win.gdi.Line(x0,y0,x1,y1,win.gdi.Rgb(0,1,1));
+			plat.win.gdi.Line(x0,y0,x1,y1,plat.win.gdi.Rgb(0,1,1));
 
 		}
 #if 1
-			win.gdi.Tri(55,10, 10,100, 100,100,win.gdi.Rgb(1,1,0));
+			plat.win.gdi.Tri(55,10, 10,100, 100,100,plat.win.gdi.Rgb(1,1,0));
 
-			win.gdi.Tri(55,10, 10,100, 100,100,win.gdi.Rgb(1,1,0));
+			plat.win.gdi.Tri(55,10, 10,100, 100,100,plat.win.gdi.Rgb(1,1,0));
 double a = 80;
-			win.gdi.Tri(55+a,10, 10+a,100, 100+a,100,win.gdi.Rgb(1,1,0));
+			plat.win.gdi.Tri(55+a,10, 10+a,100, 100+a,100,plat.win.gdi.Rgb(1,1,0));
 
 a=40;
 double	b = 120;
-			win.gdi.Bezier(10+a,10+b, 100+a,100+b, 200+a,10+b, 300+a,100+b,win.gdi.Rgb(0,1,0));
+			plat.win.gdi.Bezier(10+a,10+b, 100+a,100+b, 200+a,10+b, 300+a,100+b,plat.win.gdi.Rgb(0,1,0));
 
-			win.gdi.Circle( 10+a, 10+b, 10, win.gdi.Rgb(1,0,0));
-			win.gdi.Circle(100+a,100+b, 10, win.gdi.Rgb(1,0,0));
-			win.gdi.Circle(200+a, 10+b, 10, win.gdi.Rgb(1,0,0));
-			win.gdi.Circle(300+a,100+b, 10, win.gdi.Rgb(1,0,0));
+			plat.win.gdi.Circle( 10+a, 10+b, 10, plat.win.gdi.Rgb(1,0,0));
+			plat.win.gdi.Circle(100+a,100+b, 10, plat.win.gdi.Rgb(1,0,0));
+			plat.win.gdi.Circle(200+a, 10+b, 10, plat.win.gdi.Rgb(1,0,0));
+			plat.win.gdi.Circle(300+a,100+b, 10, plat.win.gdi.Rgb(1,0,0));
 
 		
 
@@ -832,21 +833,21 @@ double	b = 120;
 		static vect2 drag_start(0,0);
 		static bool bDrag = false;
 	
-		vect2 mpos( mouse.sx-plat.m.x, mouse.sy-plat.m.y );
+		vect2 mpos( plat.mouse.sx-plat.m.x, plat.mouse.sy-plat.m.y );
 		
 		
 
 		
 
 		// マーカー追加
-		if ( mouse.M.hi )
+		if ( plat.mouse.M.hi )
 		{
 			tblMark.push_back( Mark( mpos, fig, rad(0) ) );
 		}
 
 
 		// マーカー選択
-		if ( mouse.L.on )
+		if ( plat.mouse.L.on )
 		{
 			struct
 			{
@@ -868,7 +869,7 @@ double	b = 120;
 			}
 
 			// マーカー選択＆解除
-			if ( mouse.L.hi )
+			if ( plat.mouse.L.hi )
 			{
 				// 矩形選択
 				if ( a.pmark == 0 ) 
@@ -878,9 +879,9 @@ double	b = 120;
 				}
 
 				// マーカー全解除
-				if ( keys.CTRL.on ){}
+				if ( plat.keys.CTRL.on ){}
 				else
-				if ( keys.SHIFT.on ){}
+				if ( plat.keys.SHIFT.on ){}
 				else
 				if ( a.pmark && a.pmark->bSelected == true ){}
 				else
@@ -894,7 +895,7 @@ double	b = 120;
 				//	マーカー選択
 				if ( a.pmark )
 				{
-					if ( keys.CTRL.on )
+					if ( plat.keys.CTRL.on )
 					{
 						a.pmark->bSelected = !a.pmark->bSelected;
 					}
@@ -914,10 +915,10 @@ double	b = 120;
 					double x1 = max( drag_start.x, mpos.x);
 					double y1 = max( drag_start.y, mpos.y);
 
-					win.gdi.Line( x0,y0,x1,y0, win.gdi.Rgb(0,0.5,1));
-					win.gdi.Line( x0,y1,x1,y1, win.gdi.Rgb(0,0.5,1));
-					win.gdi.Line( x0,y0,x0,y1, win.gdi.Rgb(0,0.5,1));
-					win.gdi.Line( x1,y0,x1,y1, win.gdi.Rgb(0,0.5,1));
+					plat.win.gdi.Line( x0,y0,x1,y0, plat.win.gdi.Rgb(0,0.5,1));
+					plat.win.gdi.Line( x0,y1,x1,y1, plat.win.gdi.Rgb(0,0.5,1));
+					plat.win.gdi.Line( x0,y0,x0,y1, plat.win.gdi.Rgb(0,0.5,1));
+					plat.win.gdi.Line( x1,y0,x1,y1, plat.win.gdi.Rgb(0,0.5,1));
 
 					for ( Mark& m : tblMark )
 					{
@@ -931,7 +932,7 @@ double	b = 120;
 						if ( m.x > x0 && m.x < x1 && m.y > y0 && m.y < y1 )
 						{
 							m.bMouseover = true;
-							if ( keys.CTRL.on )
+							if ( plat.keys.CTRL.on )
 							{
 								m.bMouseoverSelected = !m.bSelected;
 							}
@@ -949,8 +950,8 @@ double	b = 120;
 				{
 					if ( m.bSelected )
 					{
-						m.x += mouse.mx;
-						m.y += mouse.my;
+						m.x += plat.mouse.mx;
+						m.y += plat.mouse.my;
 					}
 				}
 			}
@@ -978,7 +979,7 @@ double	b = 120;
 		{
 			auto func = [&]( double x0, double y0, double x1, double y1, int col)
 			{
-				win.gdi.Line(x0,y0,x1,y1,col);
+				plat.win.gdi.Line(x0,y0,x1,y1,col);
 			};
 
 			bool flg =  m.bSelected;
@@ -995,13 +996,13 @@ double	b = 120;
 			
 //			if ( m.bSelected || m.bMouseover)
 			{
-//				win.gdi.Circle(m.x,m.y, 7, win.gdi.Rgb(1,0.0,0));
-				fig.draw( func, m.x,m.y,rad(0), win.gdi.Rgb(1,0,0) );
+//				plat.win.gdi.Circle(m.x,m.y, 7, plat.win.gdi.Rgb(1,0.0,0));
+				fig.draw( func, m.x,m.y,rad(0), plat.win.gdi.Rgb(1,0,0) );
 			}
 			else
 			{
-//				win.gdi.Circle(m.x,m.y, 7, win.gdi.Rgb(1,1,0));
-				fig.draw( func, m.x,m.y,rad(0), win.gdi.Rgb(1,1,0) );
+//				plat.win.gdi.Circle(m.x,m.y, 7, plat.win.gdi.Rgb(1,1,0));
+				fig.draw( func, m.x,m.y,rad(0), plat.win.gdi.Rgb(1,1,0) );
 			}
 		}
 		
@@ -1017,11 +1018,11 @@ double	b = 120;
 				for ( double t = st ; t < 1.0 ; t+=st)
 				{
 					vect2 P = catmull(t, tblMark[i], tblMark[i+1], tblMark[i+2], tblMark[i+3] );
-					win.gdi.Line( P.x, P.y, Q.x, Q.y, win.gdi.Rgb(1,1,1));
+					plat.win.gdi.Line( P.x, P.y, Q.x, Q.y, plat.win.gdi.Rgb(1,1,1));
 					Q=P;
 				}	
 					vect2 P = catmull(1, tblMark[i], tblMark[i+1], tblMark[i+2], tblMark[i+3] );
-					win.gdi.Line( P.x, P.y, Q.x, Q.y, win.gdi.Rgb(1,1,1));
+					plat.win.gdi.Line( P.x, P.y, Q.x, Q.y, plat.win.gdi.Rgb(1,1,1));
 					
 			}
 		}
@@ -1030,9 +1031,9 @@ double	b = 120;
 		{
 			auto func = [&]( double x0, double y0, double x1, double y1, int col)
 			{
-				win.gdi.Line(x0,y0,x1,y1,col);
+				plat.win.gdi.Line(x0,y0,x1,y1,col);
 			};
-			fig.draw( func, 200,200,rad(-45), win.gdi.Rgb(1,0,0) );
+			fig.draw( func, 200,200,rad(-45), plat.win.gdi.Rgb(1,0,0) );
 		}
 	
 		//	triangle 
@@ -1056,7 +1057,7 @@ double	b = 120;
 			x1+=256;
 			y1+=256;
 
-			win.gdi.Line(x0,y0,x1,y1,win.gdi.Rgb(0,1,1));
+			plat.win.gdi.Line(x0,y0,x1,y1,plat.win.gdi.Rgb(0,1,1));
 		}
 		cnt++;
 

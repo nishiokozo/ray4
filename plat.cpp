@@ -2,14 +2,16 @@
 #include <functional>
 using namespace std;
 
-#include	"plat.h"
+#include	"syskeys.h"
+#include	"sysmouse.h"
 
 #include <windows.h>
 
 #include	"sysgdi.h"
 #include	"syswin.h"
 
-	SysWin	win;
+#include	"plat.h"
+
 //------------------------------------------------------------------------------
 Plat::Plat( const char* name, int pos_x, int pos_y, int width, int height  )
 //------------------------------------------------------------------------------
