@@ -11,10 +11,18 @@ using namespace std;
 
 #include "geom.h"
 
-#include "syswin.h"
-#include "sysgdi.h"
+#include "plat.h"
+
 #include "syskeys.h"
 #include "sysmouse.h"
+
+#include <windows.h>
+
+#include "syswin.h"
+#include "sysgdi.h"
+
+SysGdi gdi;
+
 
 
 extern void win_OnShowwindow( HWND hWnd );
@@ -456,6 +464,7 @@ public:
 
 };
 
+#if 0
 //------------------------------------------------------------------------------
 void	raytrace( SysWin& win, int py )
 //------------------------------------------------------------------------------
@@ -463,8 +472,8 @@ void	raytrace( SysWin& win, int py )
 	Renderer ren;
 
 	{
-		int height	= win.m.height; 
-		int width	= win.m.width; 
+		int height	= plat.m.height; 
+		int width	= plat.m.width; 
 	
 		vect3	posScr = vect3(0,1.0,-12+8);
 		vect3	posEye = vect3(0,1.0,-17+8);
@@ -498,53 +507,14 @@ void	raytrace( SysWin& win, int py )
 	}
 
 }
-
-//Catmull-Rom 曲線
-// P(t)=P0(2t^3-3t^2+1)+m0(t^3-2t^2+t)+P1(-2t^3+3t^2)+m1(t^3-t^2)
-// m0=(P1-Pminus1)
-// m1=P2-P0
-
+#endif
 
 
 //------------------------------------------------------------------------------
 int main()
 //------------------------------------------------------------------------------
 {
-	SysWin	win;
-
-	// コールバック登録
-	{
-
-		auto func = [&]( HWND hWnd )
-		{
-			gdi.OnShowwindow( hWnd );
-		};
-		win.SetOnShowwindow( func );
-	}
-	{
-		auto func = [&]( HWND hWnd )
-		{
-			gdi.OnSize( hWnd );
-		};
-		win.SetOnSize( func );
-	}
-	{
-		auto func = [&]( HWND hWnd )
-		{
-			gdi.OnPaint( hWnd );
-		};
-		win.SetOnPaint( func );
-	}
-	{
-		auto func = [&]( HWND hWnd )
-		{
-			gdi.OnDestroy( hWnd );
-		};
-		win.SetOnDestroy( func );
-	}
-
-	win.OpenWindow("Ray4 " __DATE__, 300,300,512, 512 );
-
+	Plat	plat("Ray4 " __DATE__, 300,300,512, 512 );
 
 	vector<vect2> triangle=
 	{
@@ -629,7 +599,7 @@ int main()
 	SysMouse&	mouse = SysMouse::GetInstance();
 
 	//mouse_init();
-	while( win.Update() )
+	while( plat.Update() )
 	{
 		keys.Update();
 		mouse.Update();
@@ -639,7 +609,7 @@ int main()
 		gdi.Clr(gdi.Rgb(0.3,0.3,0.3));
 		
 //		raytrace( win, py++ );
-		if ( py >= win.m.height ) py=0;
+		if ( py >= plat.m.height ) py=0;
 
 		//	move
 //		rx += rad(0.2);	
@@ -786,7 +756,7 @@ struct Mat
 			
 			double	fovy = rad(val);	//	画角
 			//画角から投影面パラメータを求める
-			double	sc = win.m.height/2;
+			double	sc = plat.m.height/2;
 			double	sz = 1/tan(fovy/2);
 
 			//pers
@@ -863,7 +833,7 @@ double	b = 120;
 		static vect2 drag_start(0,0);
 		static bool bDrag = false;
 	
-		vect2 mpos( mouse.sx-win.m.x, mouse.sy-win.m.y );
+		vect2 mpos( mouse.sx-plat.m.x, mouse.sy-plat.m.y );
 		
 		
 

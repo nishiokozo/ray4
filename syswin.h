@@ -1,10 +1,3 @@
-#include <windows.h>
-
-#include <functional>
-
-
-
-
 class	SysWin
 {
 public:

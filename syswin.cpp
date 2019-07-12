@@ -5,7 +5,9 @@
 #include <vector>
 #include <chrono>
 #include <thread>       // sleep_for
+#include <functional>
 using namespace std;
+
 #include <windows.h>
 
 #include "syswin.h"

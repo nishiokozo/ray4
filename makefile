@@ -5,6 +5,7 @@ TAR = main.exe
 SRCS = \
 	main.cpp \
 	geom.cpp \
+	plat.cpp \
 	syswin.cpp \
 	sysgdi.cpp \
 	syskeys.cpp \

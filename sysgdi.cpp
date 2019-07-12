@@ -12,7 +12,6 @@ using namespace std;
 
 #define	USE_RIALTIME_PAINT 0
 
-SysGdi gdi;
 
 
 
