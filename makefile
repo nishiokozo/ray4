@@ -47,6 +47,7 @@ clean:
 	rm -f *.*.stackdump
 	rm mm.txt
 	touch mm.txt
+	make mm
 
 mm:	$(SRCS)
 	$(CC)   -MM $? >mm.txt
