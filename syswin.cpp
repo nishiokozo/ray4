@@ -10,11 +10,9 @@ using namespace std;
 
 #include <windows.h>
 
-#include "sysgra.h"
+#include "SysGdi.h"
 #include "syswin.h"
 
-
-#define	USE_RIALTIME_PAINT 0
 
 static chrono::system_clock::time_point time_a;
 static chrono::system_clock::time_point time_b;
@@ -165,7 +163,6 @@ cout << "WM_DESTROY " << endl;
 SysWin::~SysWin()
 //------------------------------------------------------------------------------
 {
-//	gra.ReleasePixelBits();
 
 }
 
@@ -254,10 +251,7 @@ bool SysWin::Update()
 //------------------------------------------------------------------------------
 {
 //cout << "-- " << endl;
-#if USE_RIALTIME_PAINT
-#else
 		InvalidateRect(win.hWnd , NULL , TRUE);	//	WM_PAINTを発行し再描画矩形情報を渡す
-#endif
 
 	while(1)
 	{
@@ -267,14 +261,6 @@ bool SysWin::Update()
 			TranslateMessage( &win.tMsg );
 			if ( win.tMsg.message == WM_QUIT ) return false; 
 		}
-#if USE_RIALTIME_PAINT
-		HDC hDc = GetDC( win.hWnd );
-		gra.paint0( gra.hdcBackbuffer);
-		RECT rc;
-		GetClientRect( win.hWnd, &rc );
-	    BitBlt(hDc, 0, 0, rc.right, rc.bottom, gra.hdcBackbuffer, 0, 0, SRCCOPY);
-		ReleaseDC( win.hWnd, hDc );
-#endif
 
 		return true;
 	}

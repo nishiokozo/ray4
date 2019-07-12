@@ -12,7 +12,7 @@ public:
 	Plat( const char* name, int pos_x, int pos_y, int width, int height  );
 	bool	Update();
 
-	SysGra gra;
+	SysGdi gdi;
 	SysWin	win;
 
 	SysDraw		draw;
