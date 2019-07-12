@@ -88,6 +88,8 @@ struct SysGra
 	void	Clr( int col );
 	int 	Rgb(double r, double g , double b );
 
+	void	Draw();
+
 	SysGra();
 	~SysGra();
 

@@ -10,7 +10,6 @@ using namespace std;
 
 #include <windows.h>
 
-#include "SysGdi.h"
 #include "syswin.h"
 
 
@@ -158,6 +157,13 @@ cout << "WM_DESTROY " << endl;
 
 	// デフォルト処理呼び出し。
 	return DefWindowProc( hWnd, uMsg, wParam, lParam );// [x] > WM_SYSCOMMAND > WM_CLOSE > WM_DESTROY
+}
+//------------------------------------------------------------------------------
+SysWin&	SysWin::GetInstance()
+//------------------------------------------------------------------------------
+{
+	static SysWin	instance;
+	return instance;
 }
 //------------------------------------------------------------------------------
 SysWin::~SysWin()

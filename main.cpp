@@ -19,7 +19,7 @@ using namespace std;
 #include <windows.h>
 
 #include "SysGdi.h"
-#include "syswin.h"
+//#include "syswin.h"
 
 #include "plat.h"
 

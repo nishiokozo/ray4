@@ -13,7 +13,6 @@ public:
 	bool	Update();
 
 	SysGdi gdi;
-	SysWin	win;
 
 	SysGra		draw;
 	SysKeys&	keys = SysKeys::GetInstance();

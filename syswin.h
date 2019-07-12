@@ -1,5 +1,8 @@
 class	SysWin
 {
+	SysWin();
+	virtual ~SysWin();
+
 public:
 	struct	//	WIN
 	{
@@ -21,9 +24,8 @@ public:
 		int	height;
 	} m;
 
-
-	SysWin();
-	virtual ~SysWin();
+	static SysWin&	GetInstance();
+	
 
 	bool	Update();
 

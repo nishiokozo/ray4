@@ -9,9 +9,12 @@ using namespace std;
 #include <windows.h>
 
 #include	"SysGdi.h"
-#include	"syswin.h"
 
 #include	"plat.h"
+
+#include	"syswin.h"
+
+static 	SysWin&	win= SysWin::GetInstance();
 
 //------------------------------------------------------------------------------
 Plat::Plat( const char* name, int pos_x, int pos_y, int width, int height  )
