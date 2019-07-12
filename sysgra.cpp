@@ -8,7 +8,7 @@
 using namespace std;
 #include <windows.h>
 
-#include "SysDraw.h"
+#include "SysGra.h"
 
 #define	USE_RIALTIME_PAINT 0
 
@@ -16,17 +16,17 @@ using namespace std;
 
 
 //------------------------------------------------------------------------------
-SysDraw::~SysDraw()
+SysGra::~SysGra()
 //------------------------------------------------------------------------------
 {
 }
 //------------------------------------------------------------------------------
-SysDraw::SysDraw()
+SysGra::SysGra()
 //------------------------------------------------------------------------------
 {
 }
 //------------------------------------------------------------------------------
-void  SysDraw::ReleasePixelBits()
+void  SysGra::ReleasePixelBits()
 //------------------------------------------------------------------------------
 {
 
@@ -39,7 +39,7 @@ void  SysDraw::ReleasePixelBits()
 }
 
 //------------------------------------------------------------------------------
-void  SysDraw::CreatePixelBits(int bpp, int width, int height )
+void  SysGra::CreatePixelBits(int bpp, int width, int height )
 //------------------------------------------------------------------------------
 {
 /*
@@ -67,7 +67,7 @@ void  SysDraw::CreatePixelBits(int bpp, int width, int height )
 
 /*
 //------------------------------------------------------------------------------
-void  SysDraw::paint0( HDC hDc )
+void  SysGra::paint0( HDC hDc )
 //------------------------------------------------------------------------------
 {
 
@@ -232,20 +232,20 @@ void  SysDraw::paint0( HDC hDc )
 /*
 
 //------------------------------------------------------------------------------
-void  SysDraw::OnSize( HWND hWnd ) 
+void  SysGra::OnSize( HWND hWnd ) 
 //------------------------------------------------------------------------------
 {
 	GetClientRect( hWnd, &m.rect );
 }
 
 //------------------------------------------------------------------------------
-void  SysDraw::OnDestroy( HWND hWnd ) 
+void  SysGra::OnDestroy( HWND hWnd ) 
 //------------------------------------------------------------------------------
 {
 }
 
 //------------------------------------------------------------------------------
-void  SysDraw::OnShowwindow( HWND hWnd ) 
+void  SysGra::OnShowwindow( HWND hWnd ) 
 //------------------------------------------------------------------------------
 {
     HDC hDc = GetDC(hWnd);
@@ -259,7 +259,7 @@ void  SysDraw::OnShowwindow( HWND hWnd )
 }	
 
 //------------------------------------------------------------------------------
-void  SysDraw::OnPaint(HWND hWnd) 
+void  SysGra::OnPaint(HWND hWnd) 
 //------------------------------------------------------------------------------
 {
 #if USE_RIALTIME_PAINT
@@ -302,7 +302,7 @@ int Sys::GetBytePixels()
 
 
 //------------------------------------------------------------------------------
-int	SysDraw::Rgb( double r, double g , double b )
+int	SysGra::Rgb( double r, double g , double b )
 //------------------------------------------------------------------------------
 {
 	r = min( 1.0, r );
@@ -317,14 +317,14 @@ int	SysDraw::Rgb( double r, double g , double b )
 }
 
 //------------------------------------------------------------------------------
-void SysDraw::Clr( int col)
+void SysGra::Clr( int col)
 //------------------------------------------------------------------------------
 {
 	(*this).m.clr.bActive = true;
 	(*this).m.clr.col = col;
 }
 //------------------------------------------------------------------------------
-void SysDraw::Circle( double x, double y, double r, int col )
+void SysGra::Circle( double x, double y, double r, int col )
 //------------------------------------------------------------------------------
 {
 	PrimCircle a = {x-r,y-r,x+r,y+r,col};
@@ -332,7 +332,7 @@ void SysDraw::Circle( double x, double y, double r, int col )
 	(*this).m.tblCircle.push_back( a );
 }
 //------------------------------------------------------------------------------
-void SysDraw::Pset( double x, double y, int col )
+void SysGra::Pset( double x, double y, int col )
 //------------------------------------------------------------------------------
 {
 	PrimPset a = {x,y,col};
@@ -340,7 +340,7 @@ void SysDraw::Pset( double x, double y, int col )
 	(*this).m.tblPset.push_back( a );
 }
 //------------------------------------------------------------------------------
-void SysDraw::Line( double x0, double y0, double x1, double y1,int col)
+void SysGra::Line( double x0, double y0, double x1, double y1,int col)
 //------------------------------------------------------------------------------
 {
 	PrimLine a = {x0,y0,x1,y1,col};
@@ -348,7 +348,7 @@ void SysDraw::Line( double x0, double y0, double x1, double y1,int col)
 	(*this).m.tblLine.push_back( a );
 }
 //------------------------------------------------------------------------------
-void SysDraw::Tri( double x0, double y0, double x1, double y1, double x2, double y2, int col)
+void SysGra::Tri( double x0, double y0, double x1, double y1, double x2, double y2, int col)
 //------------------------------------------------------------------------------
 {
 	PrimTri a = {x0,y0,x1,y1,x2,y2,col};
@@ -356,7 +356,7 @@ void SysDraw::Tri( double x0, double y0, double x1, double y1, double x2, double
 	(*this).m.tblTri.push_back( a );
 }
 //------------------------------------------------------------------------------
-void SysDraw::Bezier( double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3, int col)
+void SysGra::Bezier( double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3, int col)
 //------------------------------------------------------------------------------
 {
 	PrimBezier a = {x0,y0,x1,y1,x2,y2,x3,y3,col};

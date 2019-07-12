@@ -1,4 +1,4 @@
-struct SysDraw
+struct SysGra
 {
 	struct	PrimBezier
 	{
@@ -88,7 +88,7 @@ struct SysDraw
 	void	Clr( int col );
 	int 	Rgb(double r, double g , double b );
 
-	SysDraw();
-	~SysDraw();
+	SysGra();
+	~SysGra();
 
 };

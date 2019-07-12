@@ -4,7 +4,7 @@ using namespace std;
 
 #include	"syskeys.h"
 #include	"sysmouse.h"
-#include	"sysdraw.h"
+#include	"SysGra.h"
 
 #include <windows.h>
 

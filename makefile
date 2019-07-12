@@ -8,7 +8,7 @@ SRCS = \
 	plat.cpp \
 	syswin.cpp \
 	sysgdi.cpp \
-	sysdraw.cpp \
+	sysgra.cpp \
 	syskeys.cpp \
 	sysmouse.cpp \
 
