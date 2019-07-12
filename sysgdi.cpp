@@ -6,13 +6,18 @@
 #include <chrono>
 #include <thread>       // sleep_for
 using namespace std;
-#include <windows.h>
 
 #include "SysGdi.h"
+
+#include <windows.h>
+
 
 #include <functional>
 #include "SysWin.h"
 
+
+static RECT g_rect;
+static HDC     g_hdcBackbuffer;
 
 
 //------------------------------------------------------------------------------
@@ -65,167 +70,6 @@ void  SysGdi::CreatePixelBits(int bpp, int width, int height )
 */
 }
 
-//------------------------------------------------------------------------------
-void  SysGdi::paint0( HDC hDc )
-//------------------------------------------------------------------------------
-{
-
-	// clear background
-	if ( m.clr.bActive )
-	{
-		HBRUSH hBrush  = CreateSolidBrush(m.clr.col);
-		SelectObject( hDc , hBrush);
-
-		PatBlt( hDc , 0 , 0 ,m.rect.right, m.rect.bottom , PATCOPY);
-
-		DeleteObject( hBrush );
-
-		m.clr.bActive = false;
-	}
-
-	// bmp
-	{
-//				StretchDIBits( hDc, 0, 0, m.rect.right, m.rect.bottom, 0, 0, m.width, m.height, m.bPixelBits, &m.bmpInfo, DIB_RGB_COLORS, SRCCOPY );
-
-	}
-
-	
-	//circle
-	{
-
-		for ( unsigned int i=0 ; i < m.tblCircle.size() ; i++ )
-		{
-
-			int x0 = m.tblCircle[i].x0;
-			int y0 = m.tblCircle[i].y0;
-			int x1 = m.tblCircle[i].x1;
-			int y1 = m.tblCircle[i].y1;
-			int	col = m.tblCircle[i].col;
-
-			HPEN hPen = CreatePen(PS_SOLID, 1, col );
-			SelectObject(hDc, hPen);
-			HBRUSH hBrush  = CreateSolidBrush(col);
-			SelectObject(hDc, hPen);
-
-//				SetPixel( hDc, x0, y0, col );
-
-			Ellipse(hDc , x0, y0, x1, y1);
-
-			DeleteObject(hBrush);
-			DeleteObject(hPen);
-		}
-		
-		m.tblCircle.clear();
-	}
-
-	//pset
-	{
-
-		for ( unsigned int i=0 ; i < m.tblPset.size() ; i++ )
-		{
-			HPEN hPen;
-
-			int x0 = m.tblPset[i].x;
-			int y0 = m.tblPset[i].y;
-			int	col = m.tblPset[i].col;
-
-			hPen = CreatePen(PS_SOLID, 1, col );
-			SelectObject(hDc, hPen);
-
-			SetPixel( hDc, x0, y0, col );
-
-			DeleteObject(hPen);
-		}
-		
-		m.tblPset.clear();
-	}
-	//line
-	{
-
-		for ( unsigned int i=0 ; i < m.tblLine.size() ; i++ )
-		{
-
-			int x0 = m.tblLine[i].x0;
-			int y0 = m.tblLine[i].y0;
-			int x1 = m.tblLine[i].x1;
-			int y1 = m.tblLine[i].y1;
-			int	col = m.tblLine[i].col;
-
-			HPEN hPen = CreatePen(PS_SOLID, 1, col );
-			SelectObject(hDc, hPen);
-
-			MoveToEx(hDc, x0, y0, NULL);
-			LineTo(hDc, x1, y1);
-
-			DeleteObject(hPen);
-		}
-		m.tblLine.clear();
-	}
-
-	//Tri
-	{
-		for ( unsigned int i=0 ; i < m.tblTri.size() ; i++ )
-		{	
-			int x0 = m.tblTri[i].x0;
-			int y0 = m.tblTri[i].y0;
-			int x1 = m.tblTri[i].x1;
-			int y1 = m.tblTri[i].y1;
-			int x2 = m.tblTri[i].x2;
-			int y2 = m.tblTri[i].y2;
-			int	col = m.tblTri[i].col;
-
-			HPEN hPen = CreatePen(PS_SOLID, 1, col );
-			HBRUSH hBrush  = CreateSolidBrush(col);
-			SelectObject(hDc, hPen);
-			SelectObject(hDc, hBrush);
-
-			POINT	tblPoint[3]={{x0,y0},{x1,y1},{x2,y2}};
-			INT	tblNum[]={3};
-
-			PolyPolygon( hDc, tblPoint, tblNum, 1 );
-
-			DeleteObject(hBrush);
-			DeleteObject(hPen);
-		}
-		m.tblTri.clear();
-	}
-
-
-	//Bezier
-	{
-		for ( unsigned int i=0 ; i < m.tblBezier.size() ; i++ )
-		{	
-			int x0 = m.tblBezier[i].x0;
-			int y0 = m.tblBezier[i].y0;
-			int x1 = m.tblBezier[i].x1;
-			int y1 = m.tblBezier[i].y1;
-			int x2 = m.tblBezier[i].x2;
-			int y2 = m.tblBezier[i].y2;
-			int x3 = m.tblBezier[i].x3;
-			int y3 = m.tblBezier[i].y3;
-			int	col = m.tblBezier[i].col;
-
-			HPEN hPen = CreatePen(PS_SOLID, 1, col );
-			HBRUSH hBrush  = CreateSolidBrush(col);
-			SelectObject(hDc, hPen);
-			SelectObject(hDc, hBrush);
-
-			POINT	tblPoint[3]={{x1,y1},{x2,y2},{x3,y3}};
-
-			MoveToEx(hDc , x0 , y0 , NULL);
-			PolyBezierTo(hDc , tblPoint , 3);
-
-			DeleteObject(hBrush);
-			DeleteObject(hPen);
-		}
-		m.tblBezier.clear();
-
-		static POINT pt[3];
-
-	}
-
-
-}
 
 //------------------------------------------------------------------------------
 void  SysGdi::OnSize() 
@@ -233,7 +77,7 @@ void  SysGdi::OnSize()
 {
 	HWND hWnd = SysWin::GetInstance().win.hWnd;
 
-	GetClientRect( hWnd, &m.rect );
+	GetClientRect( hWnd, &g_rect );
 }
 
 //------------------------------------------------------------------------------
@@ -252,8 +96,8 @@ void  SysGdi::OnShowwindow()
 		RECT rc;
 		GetClientRect( hWnd, &rc );
 		HBITMAP hBitmap = CreateCompatibleBitmap( hDc, rc.right, rc.bottom );
-	    hdcBackbuffer = CreateCompatibleDC( NULL );
-	    SelectObject( hdcBackbuffer, hBitmap );
+	    g_hdcBackbuffer = CreateCompatibleDC( NULL );
+	    SelectObject( g_hdcBackbuffer, hBitmap );
 	ReleaseDC( hWnd, hDc );
 
 }	
@@ -263,13 +107,175 @@ void  SysGdi::OnPaint()
 //------------------------------------------------------------------------------
 {
 	HWND hWnd = SysWin::GetInstance().win.hWnd;
+
 	{
-	    paint0( hdcBackbuffer);
+		HDC hDc = g_hdcBackbuffer;
+
+		// clear background
+		if ( m.clr.bActive )
+		{
+			HBRUSH hBrush  = CreateSolidBrush(m.clr.col);
+			SelectObject( hDc , hBrush);
+
+			PatBlt( hDc , 0 , 0 ,g_rect.right, g_rect.bottom , PATCOPY);
+
+			DeleteObject( hBrush );
+
+			m.clr.bActive = false;
+		}
+
+		// bmp
+		{
+	//				StretchDIBits( hDc, 0, 0, g_rect.right, g_rect.bottom, 0, 0, m.width, m.height, m.bPixelBits, &m.bmpInfo, DIB_RGB_COLORS, SRCCOPY );
+
+		}
+
+		
+		//circle
+		{
+
+			for ( unsigned int i=0 ; i < m.tblCircle.size() ; i++ )
+			{
+
+				int x0 = m.tblCircle[i].x0;
+				int y0 = m.tblCircle[i].y0;
+				int x1 = m.tblCircle[i].x1;
+				int y1 = m.tblCircle[i].y1;
+				int	col = m.tblCircle[i].col;
+
+				HPEN hPen = CreatePen(PS_SOLID, 1, col );
+				SelectObject(hDc, hPen);
+				HBRUSH hBrush  = CreateSolidBrush(col);
+				SelectObject(hDc, hPen);
+
+	//				SetPixel( hDc, x0, y0, col );
+
+				Ellipse(hDc , x0, y0, x1, y1);
+
+				DeleteObject(hBrush);
+				DeleteObject(hPen);
+			}
+			
+			m.tblCircle.clear();
+		}
+
+		//pset
+		{
+
+			for ( unsigned int i=0 ; i < m.tblPset.size() ; i++ )
+			{
+				HPEN hPen;
+
+				int x0 = m.tblPset[i].x;
+				int y0 = m.tblPset[i].y;
+				int	col = m.tblPset[i].col;
+
+				hPen = CreatePen(PS_SOLID, 1, col );
+				SelectObject(hDc, hPen);
+
+				SetPixel( hDc, x0, y0, col );
+
+				DeleteObject(hPen);
+			}
+			
+			m.tblPset.clear();
+		}
+		//line
+		{
+
+			for ( unsigned int i=0 ; i < m.tblLine.size() ; i++ )
+			{
+
+				int x0 = m.tblLine[i].x0;
+				int y0 = m.tblLine[i].y0;
+				int x1 = m.tblLine[i].x1;
+				int y1 = m.tblLine[i].y1;
+				int	col = m.tblLine[i].col;
+
+				HPEN hPen = CreatePen(PS_SOLID, 1, col );
+				SelectObject(hDc, hPen);
+
+				MoveToEx(hDc, x0, y0, NULL);
+				LineTo(hDc, x1, y1);
+
+				DeleteObject(hPen);
+			}
+			m.tblLine.clear();
+		}
+
+		//Tri
+		{
+			for ( unsigned int i=0 ; i < m.tblTri.size() ; i++ )
+			{	
+				int x0 = m.tblTri[i].x0;
+				int y0 = m.tblTri[i].y0;
+				int x1 = m.tblTri[i].x1;
+				int y1 = m.tblTri[i].y1;
+				int x2 = m.tblTri[i].x2;
+				int y2 = m.tblTri[i].y2;
+				int	col = m.tblTri[i].col;
+
+				HPEN hPen = CreatePen(PS_SOLID, 1, col );
+				HBRUSH hBrush  = CreateSolidBrush(col);
+				SelectObject(hDc, hPen);
+				SelectObject(hDc, hBrush);
+
+				POINT	tblPoint[3]={{x0,y0},{x1,y1},{x2,y2}};
+				INT	tblNum[]={3};
+
+				PolyPolygon( hDc, tblPoint, tblNum, 1 );
+
+				DeleteObject(hBrush);
+				DeleteObject(hPen);
+			}
+			m.tblTri.clear();
+		}
+
+
+		//Bezier
+		{
+			for ( unsigned int i=0 ; i < m.tblBezier.size() ; i++ )
+			{	
+				int x0 = m.tblBezier[i].x0;
+				int y0 = m.tblBezier[i].y0;
+				int x1 = m.tblBezier[i].x1;
+				int y1 = m.tblBezier[i].y1;
+				int x2 = m.tblBezier[i].x2;
+				int y2 = m.tblBezier[i].y2;
+				int x3 = m.tblBezier[i].x3;
+				int y3 = m.tblBezier[i].y3;
+				int	col = m.tblBezier[i].col;
+
+				HPEN hPen = CreatePen(PS_SOLID, 1, col );
+				HBRUSH hBrush  = CreateSolidBrush(col);
+				SelectObject(hDc, hPen);
+				SelectObject(hDc, hBrush);
+
+				POINT	tblPoint[3]={{x1,y1},{x2,y2},{x3,y3}};
+
+				MoveToEx(hDc , x0 , y0 , NULL);
+				PolyBezierTo(hDc , tblPoint , 3);
+
+				DeleteObject(hBrush);
+				DeleteObject(hPen);
+			}
+			m.tblBezier.clear();
+
+			static POINT pt[3];
+
+		}
+
+
+	}
+
+
+	{
+//	    paint0( g_hdcBackbuffer);
 	    PAINTSTRUCT ps;
 	    HDC hDc = BeginPaint(hWnd, &ps);
 		RECT rc;
 		GetClientRect( hWnd, &rc );
-	    BitBlt(hDc, 0, 0, rc.right, rc.bottom, hdcBackbuffer, 0, 0, SRCCOPY);
+	    BitBlt(hDc, 0, 0, rc.right, rc.bottom, g_hdcBackbuffer, 0, 0, SRCCOPY);
 	    EndPaint(hWnd, &ps);
 	}
 }

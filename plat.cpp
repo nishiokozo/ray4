@@ -4,11 +4,10 @@ using namespace std;
 
 #include	"syskeys.h"
 #include	"sysmouse.h"
-#include	"SysGra.h"
+#include	"SysGdi.h"
 
 #include <windows.h>
 
-#include	"SysGdi.h"
 
 #include	"plat.h"
 

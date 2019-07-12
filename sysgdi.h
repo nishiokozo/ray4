@@ -64,17 +64,15 @@ struct SysGdi
 		vector<PrimCircle>	tblCircle;
 		PrimClr				clr;
 
-		RECT rect;
 
 
 	} m;
-	HDC     hdcBackbuffer;
 //	 BITMAP bmBitmap;
 
 
 	void ReleasePixelBits();
 	void CreatePixelBits(int bpp, int width, int height );
-	void paint0( HDC hDc );
+//	void paint0( HDC hDc );
 	void OnSize() ;
 	void OnDestroy() ;
 	void OnShowwindow() ;
