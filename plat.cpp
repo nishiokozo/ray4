@@ -60,6 +60,9 @@ Plat::Plat( const char* name, int pos_x, int pos_y, int width, int height  )
 bool	Plat::Update()
 //------------------------------------------------------------------------------
 {
-	return win.Update();
-}
+	bool b = win.Update();
+		keys.Update();
+		mouse.Update();
 
+	return b;
+}

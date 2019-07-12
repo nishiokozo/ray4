@@ -10,8 +10,6 @@ using namespace std;
 
 #include "SysGdi.h"
 
-#define	USE_RIALTIME_PAINT 0
-
 
 
 
@@ -258,13 +256,6 @@ void  SysGdi::OnShowwindow( HWND hWnd )
 void  SysGdi::OnPaint(HWND hWnd) 
 //------------------------------------------------------------------------------
 {
-#if USE_RIALTIME_PAINT
-	{
-		PAINTSTRUCT ps;
-		HDC hDc = BeginPaint( hWnd , &ps );	//再描画区域が指定されてある。WM_PAINTメッセージを処理する
-		EndPaint( hWnd , &ps);
-	}
-#else
 	{
 	    paint0( hdcBackbuffer);
 	    PAINTSTRUCT ps;
@@ -274,7 +265,6 @@ void  SysGdi::OnPaint(HWND hWnd)
 	    BitBlt(hDc, 0, 0, rc.right, rc.bottom, hdcBackbuffer, 0, 0, SRCCOPY);
 	    EndPaint(hWnd, &ps);
 	}
-#endif
 }
 
 

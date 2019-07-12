@@ -602,8 +602,6 @@ int main()
 	//mouse_init();
 	while( plat.Update() )
 	{
-		plat.keys.Update();
-		plat.mouse.Update();
  		static int py=0;
 
 

@@ -46,4 +46,4 @@ public:
 
 };
 
-extern SysWin win;
+//extern SysWin win;
