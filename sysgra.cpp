@@ -8,7 +8,7 @@
 using namespace std;
 #include <windows.h>
 
-#include "sysgdi.h"
+#include "sysgra.h"
 
 #define	USE_RIALTIME_PAINT 0
 

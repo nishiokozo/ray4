@@ -17,7 +17,7 @@ using namespace std;
 
 #include <windows.h>
 
-#include "sysgdi.h"
+#include "sysgra.h"
 #include "syswin.h"
 
 #include "plat.h"
