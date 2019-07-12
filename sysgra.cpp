@@ -16,17 +16,17 @@ using namespace std;
 
 
 //------------------------------------------------------------------------------
-SysGdi::~SysGdi()
+SysGra::~SysGra()
 //------------------------------------------------------------------------------
 {
 }
 //------------------------------------------------------------------------------
-SysGdi::SysGdi()
+SysGra::SysGra()
 //------------------------------------------------------------------------------
 {
 }
 //------------------------------------------------------------------------------
-void  SysGdi::ReleasePixelBits()
+void  SysGra::ReleasePixelBits()
 //------------------------------------------------------------------------------
 {
 
@@ -39,7 +39,7 @@ void  SysGdi::ReleasePixelBits()
 }
 
 //------------------------------------------------------------------------------
-void  SysGdi::CreatePixelBits(int bpp, int width, int height )
+void  SysGra::CreatePixelBits(int bpp, int width, int height )
 //------------------------------------------------------------------------------
 {
 /*
@@ -66,7 +66,7 @@ void  SysGdi::CreatePixelBits(int bpp, int width, int height )
 }
 
 //------------------------------------------------------------------------------
-void  SysGdi::paint0( HDC hDc )
+void  SysGra::paint0( HDC hDc )
 //------------------------------------------------------------------------------
 {
 
@@ -228,20 +228,20 @@ void  SysGdi::paint0( HDC hDc )
 }
 
 //------------------------------------------------------------------------------
-void  SysGdi::OnSize( HWND hWnd ) 
+void  SysGra::OnSize( HWND hWnd ) 
 //------------------------------------------------------------------------------
 {
 	GetClientRect( hWnd, &m.rect );
 }
 
 //------------------------------------------------------------------------------
-void  SysGdi::OnDestroy( HWND hWnd ) 
+void  SysGra::OnDestroy( HWND hWnd ) 
 //------------------------------------------------------------------------------
 {
 }
 
 //------------------------------------------------------------------------------
-void  SysGdi::OnShowwindow( HWND hWnd ) 
+void  SysGra::OnShowwindow( HWND hWnd ) 
 //------------------------------------------------------------------------------
 {
     HDC hDc = GetDC(hWnd);
@@ -255,7 +255,7 @@ void  SysGdi::OnShowwindow( HWND hWnd )
 }	
 
 //------------------------------------------------------------------------------
-void  SysGdi::OnPaint(HWND hWnd) 
+void  SysGra::OnPaint(HWND hWnd) 
 //------------------------------------------------------------------------------
 {
 #if USE_RIALTIME_PAINT
@@ -298,7 +298,7 @@ int Sys::GetBytePixels()
 
 
 //------------------------------------------------------------------------------
-int	SysGdi::Rgb( double r, double g , double b )
+int	SysGra::Rgb( double r, double g , double b )
 //------------------------------------------------------------------------------
 {
 	r = min( 1.0, r );
@@ -312,14 +312,14 @@ int	SysGdi::Rgb( double r, double g , double b )
 }
 
 //------------------------------------------------------------------------------
-void SysGdi::Clr( int col)
+void SysGra::Clr( int col)
 //------------------------------------------------------------------------------
 {
 	(*this).m.clr.bActive = true;
 	(*this).m.clr.col = col;
 }
 //------------------------------------------------------------------------------
-void SysGdi::Circle( double x, double y, double r, int col )
+void SysGra::Circle( double x, double y, double r, int col )
 //------------------------------------------------------------------------------
 {
 	PrimCircle a = {x-r,y-r,x+r,y+r,col};
@@ -327,7 +327,7 @@ void SysGdi::Circle( double x, double y, double r, int col )
 	(*this).m.tblCircle.push_back( a );
 }
 //------------------------------------------------------------------------------
-void SysGdi::Pset( double x, double y, int col )
+void SysGra::Pset( double x, double y, int col )
 //------------------------------------------------------------------------------
 {
 	PrimPset a = {x,y,col};
@@ -335,7 +335,7 @@ void SysGdi::Pset( double x, double y, int col )
 	(*this).m.tblPset.push_back( a );
 }
 //------------------------------------------------------------------------------
-void SysGdi::Line( double x0, double y0, double x1, double y1,int col)
+void SysGra::Line( double x0, double y0, double x1, double y1,int col)
 //------------------------------------------------------------------------------
 {
 	PrimLine a = {x0,y0,x1,y1,col};
@@ -343,7 +343,7 @@ void SysGdi::Line( double x0, double y0, double x1, double y1,int col)
 	(*this).m.tblLine.push_back( a );
 }
 //------------------------------------------------------------------------------
-void SysGdi::Tri( double x0, double y0, double x1, double y1, double x2, double y2, int col)
+void SysGra::Tri( double x0, double y0, double x1, double y1, double x2, double y2, int col)
 //------------------------------------------------------------------------------
 {
 	PrimTri a = {x0,y0,x1,y1,x2,y2,col};
@@ -351,7 +351,7 @@ void SysGdi::Tri( double x0, double y0, double x1, double y1, double x2, double 
 	(*this).m.tblTri.push_back( a );
 }
 //------------------------------------------------------------------------------
-void SysGdi::Bezier( double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3, int col)
+void SysGra::Bezier( double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3, int col)
 //------------------------------------------------------------------------------
 {
 	PrimBezier a = {x0,y0,x1,y1,x2,y2,x3,y3,col};

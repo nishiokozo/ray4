@@ -19,8 +19,6 @@ using namespace std;
 static chrono::system_clock::time_point time_a;
 static chrono::system_clock::time_point time_b;
 
-//extern SysGdi gdi;
-
 
 
 static 	function<void(HWND)> g_funcOnShowwindow;
@@ -167,7 +165,7 @@ cout << "WM_DESTROY " << endl;
 SysWin::~SysWin()
 //------------------------------------------------------------------------------
 {
-//	gdi.ReleasePixelBits();
+//	gra.ReleasePixelBits();
 
 }
 
@@ -271,10 +269,10 @@ bool SysWin::Update()
 		}
 #if USE_RIALTIME_PAINT
 		HDC hDc = GetDC( win.hWnd );
-		gdi.paint0( gdi.hdcBackbuffer);
+		gra.paint0( gra.hdcBackbuffer);
 		RECT rc;
 		GetClientRect( win.hWnd, &rc );
-	    BitBlt(hDc, 0, 0, rc.right, rc.bottom, gdi.hdcBackbuffer, 0, 0, SRCCOPY);
+	    BitBlt(hDc, 0, 0, rc.right, rc.bottom, gra.hdcBackbuffer, 0, 0, SRCCOPY);
 		ReleaseDC( win.hWnd, hDc );
 #endif
 

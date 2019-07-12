@@ -26,28 +26,28 @@ Plat::Plat( const char* name, int pos_x, int pos_y, int width, int height  )
 
 		auto func = [&]( HWND hWnd )
 		{
-			win.gdi.OnShowwindow( hWnd );
+			win.gra.OnShowwindow( hWnd );
 		};
 		win.SetOnShowwindow( func );
 	}
 	{
 		auto func = [&]( HWND hWnd )
 		{
-			win.gdi.OnSize( hWnd );
+			win.gra.OnSize( hWnd );
 		};
 		win.SetOnSize( func );
 	}
 	{
 		auto func = [&]( HWND hWnd )
 		{
-			win.gdi.OnPaint( hWnd );
+			win.gra.OnPaint( hWnd );
 		};
 		win.SetOnPaint( func );
 	}
 	{
 		auto func = [&]( HWND hWnd )
 		{
-			win.gdi.OnDestroy( hWnd );
+			win.gra.OnDestroy( hWnd );
 		};
 		win.SetOnDestroy( func );
 	}

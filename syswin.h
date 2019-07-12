@@ -43,7 +43,7 @@ public:
 		, LPARAM	lParam	//メッセージの付加情報
 	);
 
-	SysGdi gdi;
+	SysGra gra;
 
 };
 
