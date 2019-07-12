@@ -1,7 +1,7 @@
-main.o: main.cpp geom.h plat.h syskeys.h sysmouse.h syswin.h sysgdi.h
+main.o: main.cpp geom.h plat.h syskeys.h sysmouse.h sysgdi.h syswin.h
 geom.o: geom.cpp geom.h
-plat.o: plat.cpp plat.h syswin.h sysgdi.h
-syswin.o: syswin.cpp syswin.h
+plat.o: plat.cpp plat.h sysgdi.h syswin.h
+syswin.o: syswin.cpp sysgdi.h syswin.h
 sysgdi.o: sysgdi.cpp sysgdi.h
 syskeys.o: syskeys.cpp syskeys.h
 sysmouse.o: sysmouse.cpp sysmouse.h

@@ -283,14 +283,14 @@ void  SysGdi::OnPaint(HWND hWnd)
 unsigned char* Sys::GetAddrPixels()
 //------------------------------------------------------------------------------
 {
-	return( (unsigned char*)gdi.m.bPixelBits);
+	return( (unsigned char*)(*this).m.bPixelBits);
 }
 
 //------------------------------------------------------------------------------
 int Sys::GetBytePixels()
 //------------------------------------------------------------------------------
 {
-	return gdi.m.bpp/8;
+	return (*this).m.bpp/8;
 }
 */
 
@@ -315,8 +315,8 @@ int	SysGdi::Rgb( double r, double g , double b )
 void SysGdi::Clr( int col)
 //------------------------------------------------------------------------------
 {
-	gdi.m.clr.bActive = true;
-	gdi.m.clr.col = col;
+	(*this).m.clr.bActive = true;
+	(*this).m.clr.col = col;
 }
 //------------------------------------------------------------------------------
 void SysGdi::Circle( double x, double y, double r, int col )
@@ -324,7 +324,7 @@ void SysGdi::Circle( double x, double y, double r, int col )
 {
 	PrimCircle a = {x-r,y-r,x+r,y+r,col};
 	
-	gdi.m.tblCircle.push_back( a );
+	(*this).m.tblCircle.push_back( a );
 }
 //------------------------------------------------------------------------------
 void SysGdi::Pset( double x, double y, int col )
@@ -332,7 +332,7 @@ void SysGdi::Pset( double x, double y, int col )
 {
 	PrimPset a = {x,y,col};
 	
-	gdi.m.tblPset.push_back( a );
+	(*this).m.tblPset.push_back( a );
 }
 //------------------------------------------------------------------------------
 void SysGdi::Line( double x0, double y0, double x1, double y1,int col)
@@ -340,7 +340,7 @@ void SysGdi::Line( double x0, double y0, double x1, double y1,int col)
 {
 	PrimLine a = {x0,y0,x1,y1,col};
 	
-	gdi.m.tblLine.push_back( a );
+	(*this).m.tblLine.push_back( a );
 }
 //------------------------------------------------------------------------------
 void SysGdi::Tri( double x0, double y0, double x1, double y1, double x2, double y2, int col)
@@ -348,7 +348,7 @@ void SysGdi::Tri( double x0, double y0, double x1, double y1, double x2, double 
 {
 	PrimTri a = {x0,y0,x1,y1,x2,y2,col};
 	
-	gdi.m.tblTri.push_back( a );
+	(*this).m.tblTri.push_back( a );
 }
 //------------------------------------------------------------------------------
 void SysGdi::Bezier( double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3, int col)
@@ -356,6 +356,6 @@ void SysGdi::Bezier( double x0, double y0, double x1, double y1, double x2, doub
 {
 	PrimBezier a = {x0,y0,x1,y1,x2,y2,x3,y3,col};
 	
-	gdi.m.tblBezier.push_back( a );
+	(*this).m.tblBezier.push_back( a );
 }
 

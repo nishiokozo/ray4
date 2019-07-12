@@ -10,9 +10,9 @@ using namespace std;
 
 #include <windows.h>
 
+#include "sysgdi.h"
 #include "syswin.h"
 
-//#include "sysgdi.h"
 
 #define	USE_RIALTIME_PAINT 0
 

@@ -18,10 +18,9 @@ using namespace std;
 
 #include <windows.h>
 
-#include "syswin.h"
 #include "sysgdi.h"
+#include "syswin.h"
 
-SysGdi gdi;
 
 
 
@@ -500,7 +499,7 @@ void	raytrace( SysWin& win, int py )
 				if ( ren.m_cntRay > cntMax ) cntMax = ren.m_cntRay;
 				cntRay+= ren.m_cntRay;
 
-				gdi.Pset(px,height-py,gdi.Rgb(C.r,C.g,C.b));
+				win.gdi.Pset(px,height-py,win.gdi.Rgb(C.r,C.g,C.b));
 			}
 		}
 		
@@ -557,7 +556,7 @@ int main()
 	fig.edge.push_back( (E2){ 0,1 } );
 	fig.edge.push_back( (E2){ 1,2 } );
 	fig.edge.push_back( (E2){ 2,0 } );
-	fig.col = gdi.Rgb(0,0.5,1);
+	fig.col = win.gdi.Rgb(0,0.5,1);
 	
 
 	vector<vect3> boxvert=
@@ -606,7 +605,7 @@ int main()
  		static int py=0;
 
 
-		gdi.Clr(gdi.Rgb(0.3,0.3,0.3));
+		win.gdi.Clr(win.gdi.Rgb(0.3,0.3,0.3));
 		
 //		raytrace( win, py++ );
 		if ( py >= plat.m.height ) py=0;
@@ -764,24 +763,24 @@ struct Mat
 			double y0 = p.y/(p.z+sz)	*sc	+256;
 			double x1 = n.x/(n.z+sz)	*sc	+256;
 			double y1 = n.y/(n.z+sz)	*sc	+256;
-			gdi.Line(x0,y0,x1,y1,gdi.Rgb(0,1,1));
+			win.gdi.Line(x0,y0,x1,y1,win.gdi.Rgb(0,1,1));
 
 		}
 #if 1
-			gdi.Tri(55,10, 10,100, 100,100,gdi.Rgb(1,1,0));
+			win.gdi.Tri(55,10, 10,100, 100,100,win.gdi.Rgb(1,1,0));
 
-			gdi.Tri(55,10, 10,100, 100,100,gdi.Rgb(1,1,0));
+			win.gdi.Tri(55,10, 10,100, 100,100,win.gdi.Rgb(1,1,0));
 double a = 80;
-			gdi.Tri(55+a,10, 10+a,100, 100+a,100,gdi.Rgb(1,1,0));
+			win.gdi.Tri(55+a,10, 10+a,100, 100+a,100,win.gdi.Rgb(1,1,0));
 
 a=40;
 double	b = 120;
-			gdi.Bezier(10+a,10+b, 100+a,100+b, 200+a,10+b, 300+a,100+b,gdi.Rgb(0,1,0));
+			win.gdi.Bezier(10+a,10+b, 100+a,100+b, 200+a,10+b, 300+a,100+b,win.gdi.Rgb(0,1,0));
 
-			gdi.Circle( 10+a, 10+b, 10, gdi.Rgb(1,0,0));
-			gdi.Circle(100+a,100+b, 10, gdi.Rgb(1,0,0));
-			gdi.Circle(200+a, 10+b, 10, gdi.Rgb(1,0,0));
-			gdi.Circle(300+a,100+b, 10, gdi.Rgb(1,0,0));
+			win.gdi.Circle( 10+a, 10+b, 10, win.gdi.Rgb(1,0,0));
+			win.gdi.Circle(100+a,100+b, 10, win.gdi.Rgb(1,0,0));
+			win.gdi.Circle(200+a, 10+b, 10, win.gdi.Rgb(1,0,0));
+			win.gdi.Circle(300+a,100+b, 10, win.gdi.Rgb(1,0,0));
 
 		
 
@@ -915,10 +914,10 @@ double	b = 120;
 					double x1 = max( drag_start.x, mpos.x);
 					double y1 = max( drag_start.y, mpos.y);
 
-					gdi.Line( x0,y0,x1,y0, gdi.Rgb(0,0.5,1));
-					gdi.Line( x0,y1,x1,y1, gdi.Rgb(0,0.5,1));
-					gdi.Line( x0,y0,x0,y1, gdi.Rgb(0,0.5,1));
-					gdi.Line( x1,y0,x1,y1, gdi.Rgb(0,0.5,1));
+					win.gdi.Line( x0,y0,x1,y0, win.gdi.Rgb(0,0.5,1));
+					win.gdi.Line( x0,y1,x1,y1, win.gdi.Rgb(0,0.5,1));
+					win.gdi.Line( x0,y0,x0,y1, win.gdi.Rgb(0,0.5,1));
+					win.gdi.Line( x1,y0,x1,y1, win.gdi.Rgb(0,0.5,1));
 
 					for ( Mark& m : tblMark )
 					{
@@ -979,7 +978,7 @@ double	b = 120;
 		{
 			auto func = [&]( double x0, double y0, double x1, double y1, int col)
 			{
-				gdi.Line(x0,y0,x1,y1,col);
+				win.gdi.Line(x0,y0,x1,y1,col);
 			};
 
 			bool flg =  m.bSelected;
@@ -996,13 +995,13 @@ double	b = 120;
 			
 //			if ( m.bSelected || m.bMouseover)
 			{
-//				gdi.Circle(m.x,m.y, 7, gdi.Rgb(1,0.0,0));
-				fig.draw( func, m.x,m.y,rad(0), gdi.Rgb(1,0,0) );
+//				win.gdi.Circle(m.x,m.y, 7, win.gdi.Rgb(1,0.0,0));
+				fig.draw( func, m.x,m.y,rad(0), win.gdi.Rgb(1,0,0) );
 			}
 			else
 			{
-//				gdi.Circle(m.x,m.y, 7, gdi.Rgb(1,1,0));
-				fig.draw( func, m.x,m.y,rad(0), gdi.Rgb(1,1,0) );
+//				win.gdi.Circle(m.x,m.y, 7, win.gdi.Rgb(1,1,0));
+				fig.draw( func, m.x,m.y,rad(0), win.gdi.Rgb(1,1,0) );
 			}
 		}
 		
@@ -1018,11 +1017,11 @@ double	b = 120;
 				for ( double t = st ; t < 1.0 ; t+=st)
 				{
 					vect2 P = catmull(t, tblMark[i], tblMark[i+1], tblMark[i+2], tblMark[i+3] );
-					gdi.Line( P.x, P.y, Q.x, Q.y, gdi.Rgb(1,1,1));
+					win.gdi.Line( P.x, P.y, Q.x, Q.y, win.gdi.Rgb(1,1,1));
 					Q=P;
 				}	
 					vect2 P = catmull(1, tblMark[i], tblMark[i+1], tblMark[i+2], tblMark[i+3] );
-					gdi.Line( P.x, P.y, Q.x, Q.y, gdi.Rgb(1,1,1));
+					win.gdi.Line( P.x, P.y, Q.x, Q.y, win.gdi.Rgb(1,1,1));
 					
 			}
 		}
@@ -1031,9 +1030,9 @@ double	b = 120;
 		{
 			auto func = [&]( double x0, double y0, double x1, double y1, int col)
 			{
-				gdi.Line(x0,y0,x1,y1,col);
+				win.gdi.Line(x0,y0,x1,y1,col);
 			};
-			fig.draw( func, 200,200,rad(-45), gdi.Rgb(1,0,0) );
+			fig.draw( func, 200,200,rad(-45), win.gdi.Rgb(1,0,0) );
 		}
 	
 		//	triangle 
@@ -1057,7 +1056,7 @@ double	b = 120;
 			x1+=256;
 			y1+=256;
 
-			gdi.Line(x0,y0,x1,y1,gdi.Rgb(0,1,1));
+			win.gdi.Line(x0,y0,x1,y1,win.gdi.Rgb(0,1,1));
 		}
 		cnt++;
 

@@ -6,8 +6,8 @@ using namespace std;
 
 #include <windows.h>
 
-#include	"syswin.h"
 #include	"sysgdi.h"
+#include	"syswin.h"
 
 	SysWin	win;
 //------------------------------------------------------------------------------
@@ -24,28 +24,28 @@ Plat::Plat( const char* name, int pos_x, int pos_y, int width, int height  )
 
 		auto func = [&]( HWND hWnd )
 		{
-			gdi.OnShowwindow( hWnd );
+			win.gdi.OnShowwindow( hWnd );
 		};
 		win.SetOnShowwindow( func );
 	}
 	{
 		auto func = [&]( HWND hWnd )
 		{
-			gdi.OnSize( hWnd );
+			win.gdi.OnSize( hWnd );
 		};
 		win.SetOnSize( func );
 	}
 	{
 		auto func = [&]( HWND hWnd )
 		{
-			gdi.OnPaint( hWnd );
+			win.gdi.OnPaint( hWnd );
 		};
 		win.SetOnPaint( func );
 	}
 	{
 		auto func = [&]( HWND hWnd )
 		{
-			gdi.OnDestroy( hWnd );
+			win.gdi.OnDestroy( hWnd );
 		};
 		win.SetOnDestroy( func );
 	}
