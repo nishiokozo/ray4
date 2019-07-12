@@ -3,5 +3,6 @@ geom.o: geom.cpp geom.h
 plat.o: plat.cpp syskeys.h sysmouse.h sysgra.h syswin.h plat.h
 syswin.o: syswin.cpp sysgra.h syswin.h
 sysgra.o: sysgra.cpp sysgra.h
+sysdraw.o: sysdraw.cpp SysDraw.h
 syskeys.o: syskeys.cpp syskeys.h
 sysmouse.o: sysmouse.cpp sysmouse.h

@@ -4,6 +4,7 @@ using namespace std;
 
 #include	"syskeys.h"
 #include	"sysmouse.h"
+#include	"sysdraw.h"
 
 #include <windows.h>
 
@@ -26,28 +27,28 @@ Plat::Plat( const char* name, int pos_x, int pos_y, int width, int height  )
 
 		auto func = [&]( HWND hWnd )
 		{
-			win.gra.OnShowwindow( hWnd );
+			gra.OnShowwindow( hWnd );
 		};
 		win.SetOnShowwindow( func );
 	}
 	{
 		auto func = [&]( HWND hWnd )
 		{
-			win.gra.OnSize( hWnd );
+			gra.OnSize( hWnd );
 		};
 		win.SetOnSize( func );
 	}
 	{
 		auto func = [&]( HWND hWnd )
 		{
-			win.gra.OnPaint( hWnd );
+			gra.OnPaint( hWnd );
 		};
 		win.SetOnPaint( func );
 	}
 	{
 		auto func = [&]( HWND hWnd )
 		{
-			win.gra.OnDestroy( hWnd );
+			gra.OnDestroy( hWnd );
 		};
 		win.SetOnDestroy( func );
 	}
