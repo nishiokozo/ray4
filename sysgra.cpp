@@ -7,7 +7,7 @@
 #include <thread>       // sleep_for
 using namespace std;
 
-#include "SysGdi.h"
+#include "SysGra.h"
 
 #include <windows.h>
 
@@ -15,23 +15,25 @@ using namespace std;
 #include <functional>
 #include "SysWin.h"
 
-
-static RECT g_rect;
-static HDC     g_hdcBackbuffer;
+static struct 
+{
+	RECT rect;
+	HDC  hdcBackbuffer;
+} g;
 
 
 //------------------------------------------------------------------------------
-SysGdi::~SysGdi()
+SysGra::~SysGra()
 //------------------------------------------------------------------------------
 {
 }
 //------------------------------------------------------------------------------
-SysGdi::SysGdi()
+SysGra::SysGra()
 //------------------------------------------------------------------------------
 {
 }
 //------------------------------------------------------------------------------
-void  SysGdi::ReleasePixelBits()
+void  SysGra::ReleasePixelBits()
 //------------------------------------------------------------------------------
 {
 
@@ -44,7 +46,7 @@ void  SysGdi::ReleasePixelBits()
 }
 
 //------------------------------------------------------------------------------
-void  SysGdi::CreatePixelBits(int bpp, int width, int height )
+void  SysGra::CreatePixelBits(int bpp, int width, int height )
 //------------------------------------------------------------------------------
 {
 /*
@@ -72,23 +74,23 @@ void  SysGdi::CreatePixelBits(int bpp, int width, int height )
 
 
 //------------------------------------------------------------------------------
-void  SysGdi::OnSize() 
+void  SysGra::OnSize() 
 //------------------------------------------------------------------------------
 {
 	HWND hWnd = SysWin::GetInstance().win.hWnd;
 
-	GetClientRect( hWnd, &g_rect );
+	GetClientRect( hWnd, &g.rect );
 }
 
 //------------------------------------------------------------------------------
-void  SysGdi::OnDestroy() 
+void  SysGra::OnDestroy() 
 //------------------------------------------------------------------------------
 {
 	HWND hWnd = SysWin::GetInstance().win.hWnd;
 }
 
 //------------------------------------------------------------------------------
-void  SysGdi::OnShowwindow() 
+void  SysGra::OnShowwindow() 
 //------------------------------------------------------------------------------
 {
 	HWND hWnd = SysWin::GetInstance().win.hWnd;
@@ -96,20 +98,20 @@ void  SysGdi::OnShowwindow()
 		RECT rc;
 		GetClientRect( hWnd, &rc );
 		HBITMAP hBitmap = CreateCompatibleBitmap( hDc, rc.right, rc.bottom );
-	    g_hdcBackbuffer = CreateCompatibleDC( NULL );
-	    SelectObject( g_hdcBackbuffer, hBitmap );
+	    g.hdcBackbuffer = CreateCompatibleDC( NULL );
+	    SelectObject( g.hdcBackbuffer, hBitmap );
 	ReleaseDC( hWnd, hDc );
 
 }	
 
 //------------------------------------------------------------------------------
-void  SysGdi::OnPaint()
+void  SysGra::OnPaint()
 //------------------------------------------------------------------------------
 {
 	HWND hWnd = SysWin::GetInstance().win.hWnd;
 
 	{
-		HDC hDc = g_hdcBackbuffer;
+		HDC hDc = g.hdcBackbuffer;
 
 		// clear background
 		if ( m.clr.bActive )
@@ -117,7 +119,7 @@ void  SysGdi::OnPaint()
 			HBRUSH hBrush  = CreateSolidBrush(m.clr.col);
 			SelectObject( hDc , hBrush);
 
-			PatBlt( hDc , 0 , 0 ,g_rect.right, g_rect.bottom , PATCOPY);
+			PatBlt( hDc , 0 , 0 ,g.rect.right, g.rect.bottom , PATCOPY);
 
 			DeleteObject( hBrush );
 
@@ -126,7 +128,7 @@ void  SysGdi::OnPaint()
 
 		// bmp
 		{
-	//				StretchDIBits( hDc, 0, 0, g_rect.right, g_rect.bottom, 0, 0, m.width, m.height, m.bPixelBits, &m.bmpInfo, DIB_RGB_COLORS, SRCCOPY );
+	//				StretchDIBits( hDc, 0, 0, g.rect.right, g.rect.bottom, 0, 0, m.width, m.height, m.bPixelBits, &m.bmpInfo, DIB_RGB_COLORS, SRCCOPY );
 
 		}
 
@@ -270,12 +272,12 @@ void  SysGdi::OnPaint()
 
 
 	{
-//	    paint0( g_hdcBackbuffer);
+//	    paint0( g.hdcBackbuffer);
 	    PAINTSTRUCT ps;
 	    HDC hDc = BeginPaint(hWnd, &ps);
 		RECT rc;
 		GetClientRect( hWnd, &rc );
-	    BitBlt(hDc, 0, 0, rc.right, rc.bottom, g_hdcBackbuffer, 0, 0, SRCCOPY);
+	    BitBlt(hDc, 0, 0, rc.right, rc.bottom, g.hdcBackbuffer, 0, 0, SRCCOPY);
 	    EndPaint(hWnd, &ps);
 	}
 }
@@ -301,7 +303,7 @@ int Sys::GetBytePixels()
 
 
 //------------------------------------------------------------------------------
-int	SysGdi::Rgb( double r, double g , double b )
+int	SysGra::Rgb( double r, double g , double b )
 //------------------------------------------------------------------------------
 {
 	r = min( 1.0, r );
@@ -315,14 +317,14 @@ int	SysGdi::Rgb( double r, double g , double b )
 }
 
 //------------------------------------------------------------------------------
-void SysGdi::Clr( int col)
+void SysGra::Clr( int col)
 //------------------------------------------------------------------------------
 {
 	(*this).m.clr.bActive = true;
 	(*this).m.clr.col = col;
 }
 //------------------------------------------------------------------------------
-void SysGdi::Circle( double x, double y, double r, int col )
+void SysGra::Circle( double x, double y, double r, int col )
 //------------------------------------------------------------------------------
 {
 	PrimCircle a = {x-r,y-r,x+r,y+r,col};
@@ -330,7 +332,7 @@ void SysGdi::Circle( double x, double y, double r, int col )
 	(*this).m.tblCircle.push_back( a );
 }
 //------------------------------------------------------------------------------
-void SysGdi::Pset( double x, double y, int col )
+void SysGra::Pset( double x, double y, int col )
 //------------------------------------------------------------------------------
 {
 	PrimPset a = {x,y,col};
@@ -338,7 +340,7 @@ void SysGdi::Pset( double x, double y, int col )
 	(*this).m.tblPset.push_back( a );
 }
 //------------------------------------------------------------------------------
-void SysGdi::Line( double x0, double y0, double x1, double y1,int col)
+void SysGra::Line( double x0, double y0, double x1, double y1,int col)
 //------------------------------------------------------------------------------
 {
 	PrimLine a = {x0,y0,x1,y1,col};
@@ -346,7 +348,7 @@ void SysGdi::Line( double x0, double y0, double x1, double y1,int col)
 	(*this).m.tblLine.push_back( a );
 }
 //------------------------------------------------------------------------------
-void SysGdi::Tri( double x0, double y0, double x1, double y1, double x2, double y2, int col)
+void SysGra::Tri( double x0, double y0, double x1, double y1, double x2, double y2, int col)
 //------------------------------------------------------------------------------
 {
 	PrimTri a = {x0,y0,x1,y1,x2,y2,col};
@@ -354,7 +356,7 @@ void SysGdi::Tri( double x0, double y0, double x1, double y1, double x2, double 
 	(*this).m.tblTri.push_back( a );
 }
 //------------------------------------------------------------------------------
-void SysGdi::Bezier( double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3, int col)
+void SysGra::Bezier( double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3, int col)
 //------------------------------------------------------------------------------
 {
 	PrimBezier a = {x0,y0,x1,y1,x2,y2,x3,y3,col};

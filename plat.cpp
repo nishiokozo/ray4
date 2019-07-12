@@ -4,12 +4,12 @@ using namespace std;
 
 #include	"syskeys.h"
 #include	"sysmouse.h"
-#include	"SysGdi.h"
+#include	"SysGra.h"
+#include	"plat.h"
 
 #include <windows.h>
 
 
-#include	"plat.h"
 
 #include	"syswin.h"
 
@@ -29,28 +29,28 @@ Plat::Plat( const char* name, int pos_x, int pos_y, int width, int height  )
 
 		auto func = [&]()
 		{
-			gdi.OnShowwindow();
+			gra.OnShowwindow();
 		};
 		win.SetOnShowwindow( func );
 	}
 	{
 		auto func = [&]()
 		{
-			gdi.OnSize();
+			gra.OnSize();
 		};
 		win.SetOnSize( func );
 	}
 	{
 		auto func = [&]()
 		{
-			gdi.OnPaint();
+			gra.OnPaint();
 		};
 		win.SetOnPaint( func );
 	}
 	{
 		auto func = [&]()
 		{
-			gdi.OnDestroy();
+			gra.OnDestroy();
 		};
 		win.SetOnDestroy( func );
 	}

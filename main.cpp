@@ -14,13 +14,14 @@ using namespace std;
 
 #include "syskeys.h"
 #include "sysmouse.h"
-#include "SysGdi.h"
+#include "SysGra.h"
+
+#include "plat.h"
 
 #include <windows.h>
 
 //#include "syswin.h"
 
-#include "plat.h"
 
 
 
@@ -500,7 +501,7 @@ void	raytrace( SysWin& win, int py )
 				if ( ren.m_cntRay > cntMax ) cntMax = ren.m_cntRay;
 				cntRay+= ren.m_cntRay;
 
-				plat.win.(*this).Pset(px,height-py,plat.gdi.Rgb(C.r,C.g,C.b));
+				plat.win.(*this).Pset(px,height-py,plat.gra.Rgb(C.r,C.g,C.b));
 			}
 		}
 		
@@ -557,7 +558,7 @@ int main()
 	fig.edge.push_back( (E2){ 0,1 } );
 	fig.edge.push_back( (E2){ 1,2 } );
 	fig.edge.push_back( (E2){ 2,0 } );
-	fig.col = plat.gdi.Rgb(0,0.5,1);
+	fig.col = plat.gra.Rgb(0,0.5,1);
 	
 
 	vector<vect3> boxvert=
@@ -604,7 +605,7 @@ int main()
  		static int py=0;
 
 
-		plat.gdi.Clr(plat.gdi.Rgb(0.3,0.3,0.3));
+		plat.gra.Clr(plat.gra.Rgb(0.3,0.3,0.3));
 		
 //		raytrace( win, py++ );
 		if ( py >= plat.m.height ) py=0;
@@ -762,24 +763,24 @@ struct Mat
 			double y0 = p.y/(p.z+sz)	*sc	+256;
 			double x1 = n.x/(n.z+sz)	*sc	+256;
 			double y1 = n.y/(n.z+sz)	*sc	+256;
-			plat.gdi.Line(x0,y0,x1,y1,plat.gdi.Rgb(0,1,1));
+			plat.gra.Line(x0,y0,x1,y1,plat.gra.Rgb(0,1,1));
 
 		}
 #if 1
-			plat.gdi.Tri(55,10, 10,100, 100,100,plat.gdi.Rgb(1,1,0));
+			plat.gra.Tri(55,10, 10,100, 100,100,plat.gra.Rgb(1,1,0));
 
-			plat.gdi.Tri(55,10, 10,100, 100,100,plat.gdi.Rgb(1,1,0));
+			plat.gra.Tri(55,10, 10,100, 100,100,plat.gra.Rgb(1,1,0));
 double a = 80;
-			plat.gdi.Tri(55+a,10, 10+a,100, 100+a,100,plat.gdi.Rgb(1,1,0));
+			plat.gra.Tri(55+a,10, 10+a,100, 100+a,100,plat.gra.Rgb(1,1,0));
 
 a=40;
 double	b = 120;
-			plat.gdi.Bezier(10+a,10+b, 100+a,100+b, 200+a,10+b, 300+a,100+b,plat.gdi.Rgb(0,1,0));
+			plat.gra.Bezier(10+a,10+b, 100+a,100+b, 200+a,10+b, 300+a,100+b,plat.gra.Rgb(0,1,0));
 
-			plat.gdi.Circle( 10+a, 10+b, 10, plat.gdi.Rgb(1,0,0));
-			plat.gdi.Circle(100+a,100+b, 10, plat.gdi.Rgb(1,0,0));
-			plat.gdi.Circle(200+a, 10+b, 10, plat.gdi.Rgb(1,0,0));
-			plat.gdi.Circle(300+a,100+b, 10, plat.gdi.Rgb(1,0,0));
+			plat.gra.Circle( 10+a, 10+b, 10, plat.gra.Rgb(1,0,0));
+			plat.gra.Circle(100+a,100+b, 10, plat.gra.Rgb(1,0,0));
+			plat.gra.Circle(200+a, 10+b, 10, plat.gra.Rgb(1,0,0));
+			plat.gra.Circle(300+a,100+b, 10, plat.gra.Rgb(1,0,0));
 
 		
 
@@ -913,10 +914,10 @@ double	b = 120;
 					double x1 = max( drag_start.x, mpos.x);
 					double y1 = max( drag_start.y, mpos.y);
 
-					plat.gdi.Line( x0,y0,x1,y0, plat.gdi.Rgb(0,0.5,1));
-					plat.gdi.Line( x0,y1,x1,y1, plat.gdi.Rgb(0,0.5,1));
-					plat.gdi.Line( x0,y0,x0,y1, plat.gdi.Rgb(0,0.5,1));
-					plat.gdi.Line( x1,y0,x1,y1, plat.gdi.Rgb(0,0.5,1));
+					plat.gra.Line( x0,y0,x1,y0, plat.gra.Rgb(0,0.5,1));
+					plat.gra.Line( x0,y1,x1,y1, plat.gra.Rgb(0,0.5,1));
+					plat.gra.Line( x0,y0,x0,y1, plat.gra.Rgb(0,0.5,1));
+					plat.gra.Line( x1,y0,x1,y1, plat.gra.Rgb(0,0.5,1));
 
 					for ( Mark& m : tblMark )
 					{
@@ -977,7 +978,7 @@ double	b = 120;
 		{
 			auto func = [&]( double x0, double y0, double x1, double y1, int col)
 			{
-				plat.gdi.Line(x0,y0,x1,y1,col);
+				plat.gra.Line(x0,y0,x1,y1,col);
 			};
 
 			bool flg =  m.bSelected;
@@ -994,13 +995,13 @@ double	b = 120;
 			
 //			if ( m.bSelected || m.bMouseover)
 			{
-//				plat.gdi.Circle(m.x,m.y, 7, plat.gdi.Rgb(1,0.0,0));
-				fig.draw( func, m.x,m.y,rad(0), plat.gdi.Rgb(1,0,0) );
+//				plat.gra.Circle(m.x,m.y, 7, plat.gra.Rgb(1,0.0,0));
+				fig.draw( func, m.x,m.y,rad(0), plat.gra.Rgb(1,0,0) );
 			}
 			else
 			{
-//				plat.gdi.Circle(m.x,m.y, 7, plat.gdi.Rgb(1,1,0));
-				fig.draw( func, m.x,m.y,rad(0), plat.gdi.Rgb(1,1,0) );
+//				plat.gra.Circle(m.x,m.y, 7, plat.gra.Rgb(1,1,0));
+				fig.draw( func, m.x,m.y,rad(0), plat.gra.Rgb(1,1,0) );
 			}
 		}
 		
@@ -1016,11 +1017,11 @@ double	b = 120;
 				for ( double t = st ; t < 1.0 ; t+=st)
 				{
 					vect2 P = catmull(t, tblMark[i], tblMark[i+1], tblMark[i+2], tblMark[i+3] );
-					plat.gdi.Line( P.x, P.y, Q.x, Q.y, plat.gdi.Rgb(1,1,1));
+					plat.gra.Line( P.x, P.y, Q.x, Q.y, plat.gra.Rgb(1,1,1));
 					Q=P;
 				}	
 					vect2 P = catmull(1, tblMark[i], tblMark[i+1], tblMark[i+2], tblMark[i+3] );
-					plat.gdi.Line( P.x, P.y, Q.x, Q.y, plat.gdi.Rgb(1,1,1));
+					plat.gra.Line( P.x, P.y, Q.x, Q.y, plat.gra.Rgb(1,1,1));
 					
 			}
 		}
@@ -1029,9 +1030,9 @@ double	b = 120;
 		{
 			auto func = [&]( double x0, double y0, double x1, double y1, int col)
 			{
-				plat.gdi.Line(x0,y0,x1,y1,col);
+				plat.gra.Line(x0,y0,x1,y1,col);
 			};
-			fig.draw( func, 200,200,rad(-45), plat.gdi.Rgb(1,0,0) );
+			fig.draw( func, 200,200,rad(-45), plat.gra.Rgb(1,0,0) );
 		}
 	
 		//	triangle 
@@ -1055,7 +1056,7 @@ double	b = 120;
 			x1+=256;
 			y1+=256;
 
-			plat.gdi.Line(x0,y0,x1,y1,plat.gdi.Rgb(0,1,1));
+			plat.gra.Line(x0,y0,x1,y1,plat.gra.Rgb(0,1,1));
 		}
 		cnt++;
 

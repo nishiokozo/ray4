@@ -7,7 +7,7 @@ SRCS = \
 	geom.cpp \
 	plat.cpp \
 	syswin.cpp \
-	sysgdi.cpp \
+	sysgra.cpp \
 	syskeys.cpp \
 	sysmouse.cpp \
 
