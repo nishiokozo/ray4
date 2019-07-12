@@ -14,7 +14,6 @@ public:
 
 	SysGdi gdi;
 
-	SysGra		draw;
 	SysKeys&	keys = SysKeys::GetInstance();
 	SysMouse&	mouse = SysMouse::GetInstance();
 

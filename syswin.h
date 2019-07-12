@@ -31,10 +31,10 @@ public:
 
 	void OpenWindow( const char* name, int pos_x, int pos_y, int width, int height  );
 
-	void SetOnSize( function<void(HWND)> func );
-	void SetOnDestroy( function<void(HWND)> func );
-	void SetOnShowwindow( function<void(HWND)> func );
-	void SetOnPaint( function<void(HWND)> func );
+	void SetOnSize( function<void()> func );
+	void SetOnDestroy( function<void()> func );
+	void SetOnShowwindow( function<void()> func );
+	void SetOnPaint( function<void()> func );
 
 
 	static LRESULT CALLBACK WinProc

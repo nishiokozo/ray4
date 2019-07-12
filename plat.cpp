@@ -28,30 +28,30 @@ Plat::Plat( const char* name, int pos_x, int pos_y, int width, int height  )
 	// コールバック登録
 	{
 
-		auto func = [&]( HWND hWnd )
+		auto func = [&]()
 		{
-			gdi.OnShowwindow( hWnd );
+			gdi.OnShowwindow();
 		};
 		win.SetOnShowwindow( func );
 	}
 	{
-		auto func = [&]( HWND hWnd )
+		auto func = [&]()
 		{
-			gdi.OnSize( hWnd );
+			gdi.OnSize();
 		};
 		win.SetOnSize( func );
 	}
 	{
-		auto func = [&]( HWND hWnd )
+		auto func = [&]()
 		{
-			gdi.OnPaint( hWnd );
+			gdi.OnPaint();
 		};
 		win.SetOnPaint( func );
 	}
 	{
-		auto func = [&]( HWND hWnd )
+		auto func = [&]()
 		{
-			gdi.OnDestroy( hWnd );
+			gdi.OnDestroy();
 		};
 		win.SetOnDestroy( func );
 	}

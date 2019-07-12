@@ -18,33 +18,33 @@ static chrono::system_clock::time_point time_b;
 
 
 
-static 	function<void(HWND)> g_funcOnShowwindow;
-static 	function<void(HWND)> g_funcOnSize;
-static 	function<void(HWND)> g_funcOnPaint;
-static 	function<void(HWND)> g_funcOnDestroy;
+static 	function<void()> g_funcOnShowwindow;
+static 	function<void()> g_funcOnSize;
+static 	function<void()> g_funcOnPaint;
+static 	function<void()> g_funcOnDestroy;
 
 //------------------------------------------------------------------------------
-void SysWin::SetOnPaint( function<void(HWND)> func )
+void SysWin::SetOnPaint( function<void()> func )
 //------------------------------------------------------------------------------
 {
 	g_funcOnPaint = func;
 }
 //------------------------------------------------------------------------------
-void SysWin::SetOnSize( function<void(HWND)> func )
+void SysWin::SetOnSize( function<void()> func )
 //------------------------------------------------------------------------------
 {
 	g_funcOnSize = func;
 }
 
 //------------------------------------------------------------------------------
-void SysWin::SetOnDestroy( function<void(HWND)> func )
+void SysWin::SetOnDestroy( function<void()> func )
 //------------------------------------------------------------------------------
 {
 	g_funcOnDestroy = func;
 }
 
 //------------------------------------------------------------------------------
-void SysWin::SetOnShowwindow( function<void(HWND)> func )
+void SysWin::SetOnShowwindow( function<void()> func )
 //------------------------------------------------------------------------------
 {
 	g_funcOnShowwindow = func;
@@ -122,7 +122,7 @@ cout << "WM_CREATE " << endl;
 
 		case WM_SHOWWINDOW:	//  ShowWindowと同時に発行される ShowWindow()  -> WM_SHOWWINDOW -> WM_ACTIVATE ->  WM_ERASEBKGND -> WM_SIZE -> WM_PAINT
 cout << "WM_SHOWWINDOW " << endl;
-			g_funcOnShowwindow( hWnd );
+			g_funcOnShowwindow();
 			return 0;
 
 		case WM_ACTIVATE:
@@ -134,12 +134,12 @@ cout << "WM_SHOWWINDOW " << endl;
 			
 		case WM_SIZE:	// 画面サイズが決定された時に発行される
 cout << "WM_SIZE " << endl;
-			g_funcOnSize( hWnd);
+			g_funcOnSize();
 			return 0;
 
 		case WM_PAINT:	// OSからの描画要求。再描画区域情報（ウィンドウが重なっている際などの）が得られるタイミング。
 //cout << "WM_PAINT " << endl;
-			g_funcOnPaint( hWnd );
+			g_funcOnPaint();
 
 			return 0;
 
@@ -148,7 +148,7 @@ cout << "WM_SIZE " << endl;
 			return 0;
 
 		case WM_DESTROY:	//[x]を押すなどしたとき
-			g_funcOnDestroy( hWnd );
+			g_funcOnDestroy();
 cout << "WM_DESTROY " << endl;
 			PostQuitMessage( 0 );
 			return 0;

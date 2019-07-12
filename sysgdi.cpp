@@ -10,6 +10,8 @@ using namespace std;
 
 #include "SysGdi.h"
 
+#include <functional>
+#include "SysWin.h"
 
 
 
@@ -226,22 +228,26 @@ void  SysGdi::paint0( HDC hDc )
 }
 
 //------------------------------------------------------------------------------
-void  SysGdi::OnSize( HWND hWnd ) 
+void  SysGdi::OnSize() 
 //------------------------------------------------------------------------------
 {
+	HWND hWnd = SysWin::GetInstance().win.hWnd;
+
 	GetClientRect( hWnd, &m.rect );
 }
 
 //------------------------------------------------------------------------------
-void  SysGdi::OnDestroy( HWND hWnd ) 
+void  SysGdi::OnDestroy() 
 //------------------------------------------------------------------------------
 {
+	HWND hWnd = SysWin::GetInstance().win.hWnd;
 }
 
 //------------------------------------------------------------------------------
-void  SysGdi::OnShowwindow( HWND hWnd ) 
+void  SysGdi::OnShowwindow() 
 //------------------------------------------------------------------------------
 {
+	HWND hWnd = SysWin::GetInstance().win.hWnd;
     HDC hDc = GetDC(hWnd);
 		RECT rc;
 		GetClientRect( hWnd, &rc );
@@ -253,9 +259,10 @@ void  SysGdi::OnShowwindow( HWND hWnd )
 }	
 
 //------------------------------------------------------------------------------
-void  SysGdi::OnPaint(HWND hWnd) 
+void  SysGdi::OnPaint()
 //------------------------------------------------------------------------------
 {
+	HWND hWnd = SysWin::GetInstance().win.hWnd;
 	{
 	    paint0( hdcBackbuffer);
 	    PAINTSTRUCT ps;
