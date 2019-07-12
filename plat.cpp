@@ -25,15 +25,17 @@ Plat::Plat( const char* name, int pos_x, int pos_y, int width, int height  )
 
 	SysWin&	win= SysWin::GetInstance();
 
-	// コールバック登録
-	{
 
+	//	ウィンドウ生成関数
+	{
 		auto func = [&]()
 		{
 			gra.OnShowwindow();
 		};
 		win.SetOnShowwindow( func );
 	}
+
+	// ウィンドウサイズ変更関数
 	{
 		auto func = [&]()
 		{
@@ -41,6 +43,8 @@ Plat::Plat( const char* name, int pos_x, int pos_y, int width, int height  )
 		};
 		win.SetOnSize( func );
 	}
+
+	// ウィンドウペイント関数
 	{
 		auto func = [&]()
 		{
@@ -48,6 +52,8 @@ Plat::Plat( const char* name, int pos_x, int pos_y, int width, int height  )
 		};
 		win.SetOnPaint( func );
 	}
+
+	// ウィンドウ破棄関数
 	{
 		auto func = [&]()
 		{

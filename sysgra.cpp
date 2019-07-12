@@ -85,6 +85,7 @@ void  SysGra::CreatePixelBits(int bpp, int width, int height )
 void  SysGra::OnShowwindow() 
 //------------------------------------------------------------------------------
 {
+/*
 	HWND hWnd = SysWin::GetInstance().win.hWnd;
     HDC hDc = GetDC(hWnd);
 	{
@@ -95,6 +96,8 @@ void  SysGra::OnShowwindow()
 	    SelectObject( g.hdcBackbuffer, hBitmap );
 	}
 	ReleaseDC( hWnd, hDc );
+*/
+//	OnSize();
 }	
 
 //------------------------------------------------------------------------------
@@ -104,9 +107,8 @@ void  SysGra::OnSize()
 	HWND hWnd = SysWin::GetInstance().win.hWnd;
     HDC hDc = GetDC(hWnd);
     {
-		if ( g.flgActive == false )
+		if ( g.flgActive == true )
 		{
-			g.flgActive = true;
 			DeleteDC(g.hdcBackbuffer);
 			DeleteObject(g.hBitmap);
 		}
@@ -115,6 +117,7 @@ void  SysGra::OnSize()
 		g.hBitmap = CreateCompatibleBitmap( hDc, g.rect.right, g.rect.bottom );
 	    g.hdcBackbuffer = CreateCompatibleDC( NULL );
 	    SelectObject( g.hdcBackbuffer, g.hBitmap );
+		g.flgActive=true;
 	}
 	ReleaseDC( hWnd, hDc );
 }

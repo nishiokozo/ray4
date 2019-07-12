@@ -60,60 +60,60 @@ LRESULT CALLBACK SysWin::WinProc
 	, LPARAM	lParam	//メッセージの付加情報
 )
 {
-//		■CreateWindowEx() シーケンス
-//		-- 0x24		>	WM_GETMINMAXINFO
-//		-- 0x81			WM_NCCREATE
-//		-- 0x83			WM_NCCALCSIZE
-//		-- 0x1		>	WM_CREATE
-//	
-//		■ShowWindow() シーケンス
-//		-- 0x18		>	WM_SHOWWINDOW
-//		-- 0x46			WM_WINDOWPOSCHANGING
-//		-- 0x46			WM_WINDOWPOSCHANGING
-//		-- 0x1c			WM_ACTIVATEAPP
-//		-- 0x86			WM_NCACTIVATE
-//		-- 0x7f			WM_GETICON
-//		-- 0x7f			WM_GETICON
-//		-- 0x7f			WM_GETICON
-//		-- 0x6		>	WM_ACTIVATE
-//		-- 0x282		WM_IME_NOTIFY
-//		-- 0xc053		???
-//		-- 0x281		WM_IME_SETCONTEXT
-//		-- 0x282		WM_IME_NOTIFY
-//		-- 0x7			WM_SETFOCUS
-//		-- 0x85			WM_NCPAINT
-//		-- 0x14		>	WM_ERASEBKGND
-//		-- 0x47			WM_WINDOWPOSCHANGED
-//		-- 0x5		>	WM_SIZE
-//		-- 0x3		>	WM_MOVE
-//	
-//		■SendMessage(WM_DESTROY)シーケンス
-//		-- 0x2		>	WM_DESTROY
-//		-- 0x102		WM_CHAR
-//	
-//		■[x]クリックシーケンス
-//		:
-//		-- 0x14		>	WM_ERASEBKGND
-//		-- 0x20			WM_SETCURSOR
-//		-- 0xa1			WM_NCLBUTTONDOWN
-//		-- 0x7f			WM_GETICON
-//		-- 0x7f			WM_GETICON
-//		-- 0x215		WM_CAPTURECHANGED
-//		-- 0x112		WM_SYSCOMMAND
-//		-- 0x10		>	WM_CLOSE
-//		-- 0x90			??
-//		-- 0x46			WM_WINDOWPOSCHANGING
-//		-- 0x47			WM_WINDOWPOSCHANGED
-//		-- 0x86			WM_NCACTIVATE
-//		-- 0x6		>	WM_ACTIVATE
-//		-- 0x1c			WM_ACTIVATEAPP
-//		-- 0x8			WM_KILLFOCUS
-//		-- 0x281		WM_IME_SETCONTEXT
-//		-- 0x282		WM_IME_NOTIFY
-//		-- 0x2		>	WM_DESTROY
-//		-- 0x82			WM_NCDESTROY
+	//		■CreateWindowEx() シーケンス
+	//		-- 0x24		>	WM_GETMINMAXINFO
+	//		-- 0x81			WM_NCCREATE
+	//		-- 0x83			WM_NCCALCSIZE
+	//		-- 0x1		>	WM_CREATE
+	//	
+	//		■ShowWindow() シーケンス
+	//		-- 0x18		>	WM_SHOWWINDOW
+	//		-- 0x46			WM_WINDOWPOSCHANGING
+	//		-- 0x46			WM_WINDOWPOSCHANGING
+	//		-- 0x1c			WM_ACTIVATEAPP
+	//		-- 0x86			WM_NCACTIVATE
+	//		-- 0x7f			WM_GETICON
+	//		-- 0x7f			WM_GETICON
+	//		-- 0x7f			WM_GETICON
+	//		-- 0x6		>	WM_ACTIVATE
+	//		-- 0x282		WM_IME_NOTIFY
+	//		-- 0xc053		???
+	//		-- 0x281		WM_IME_SETCONTEXT
+	//		-- 0x282		WM_IME_NOTIFY
+	//		-- 0x7			WM_SETFOCUS
+	//		-- 0x85			WM_NCPAINT
+	//		-- 0x14		>	WM_ERASEBKGND
+	//		-- 0x47			WM_WINDOWPOSCHANGED
+	//		-- 0x5		>	WM_SIZE
+	//		-- 0x3		>	WM_MOVE
+	//	
+	//		■SendMessage(WM_DESTROY)シーケンス
+	//		-- 0x2		>	WM_DESTROY
+	//		-- 0x102		WM_CHAR
+	//	
+	//		■[x]クリックシーケンス
+	//		:
+	//		-- 0x14		>	WM_ERASEBKGND
+	//		-- 0x20			WM_SETCURSOR
+	//		-- 0xa1			WM_NCLBUTTONDOWN
+	//		-- 0x7f			WM_GETICON
+	//		-- 0x7f			WM_GETICON
+	//		-- 0x215		WM_CAPTURECHANGED
+	//		-- 0x112		WM_SYSCOMMAND
+	//		-- 0x10		>	WM_CLOSE
+	//		-- 0x90			??
+	//		-- 0x46			WM_WINDOWPOSCHANGING
+	//		-- 0x47			WM_WINDOWPOSCHANGED
+	//		-- 0x86			WM_NCACTIVATE
+	//		-- 0x6		>	WM_ACTIVATE
+	//		-- 0x1c			WM_ACTIVATEAPP
+	//		-- 0x8			WM_KILLFOCUS
+	//		-- 0x281		WM_IME_SETCONTEXT
+	//		-- 0x282		WM_IME_NOTIFY
+	//		-- 0x2		>	WM_DESTROY
+	//		-- 0x82			WM_NCDESTROY
 
-//cout << hex << "-- 0x" << uMsg << endl;
+	//cout << hex << "-- 0x" << uMsg << endl;
 	switch( uMsg ) 
 	{
 		case WM_CREATE:	// CreateWindowと同時に発行される
@@ -122,7 +122,7 @@ LRESULT CALLBACK SysWin::WinProc
 
 		case WM_SHOWWINDOW:	//  ShowWindowと同時に発行される ShowWindow()  -> WM_SHOWWINDOW -> WM_ACTIVATE ->  WM_ERASEBKGND -> WM_SIZE -> WM_PAINT
 			cout << "WM_SHOWWINDOW " << endl;
-			g.funcOnShowwindow();
+//			g.funcOnShowwindow();
 			return 0;
 
 		case WM_ACTIVATE:
