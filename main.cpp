@@ -11,10 +11,16 @@ using namespace std;
 
 #include "geom.h"
 
-#include "sys.h"
+#include "syswin.h"
+#include "sysgdi.h"
 #include "syskeys.h"
 #include "sysmouse.h"
 
+
+extern void win_OnShowwindow( HWND hWnd );
+extern void win_OnSize( HWND hWnd );
+extern void win_OnPaint( HWND hWnd );
+extern void win_OnDestroy( HWND hWnd );
 
 const	static	double INFINIT =  numeric_limits<double>::max();	//DBL_MAX
 
@@ -451,14 +457,14 @@ public:
 };
 
 //------------------------------------------------------------------------------
-void	raytrace( Sys& sys, int py )
+void	raytrace( SysWin& win, int py )
 //------------------------------------------------------------------------------
 {
 	Renderer ren;
 
 	{
-		int height	= sys.m.height; 
-		int width	= sys.m.width; 
+		int height	= win.m.height; 
+		int width	= win.m.width; 
 	
 		vect3	posScr = vect3(0,1.0,-12+8);
 		vect3	posEye = vect3(0,1.0,-17+8);
@@ -485,7 +491,7 @@ void	raytrace( Sys& sys, int py )
 				if ( ren.m_cntRay > cntMax ) cntMax = ren.m_cntRay;
 				cntRay+= ren.m_cntRay;
 
-				sys.Pset(px,height-py,sys.Rgb(C.r,C.g,C.b));
+				gdi.Pset(px,height-py,gdi.Rgb(C.r,C.g,C.b));
 			}
 		}
 		
@@ -504,8 +510,40 @@ void	raytrace( Sys& sys, int py )
 int main()
 //------------------------------------------------------------------------------
 {
-	Sys	sys("Ray4 " __DATE__, 300,300,512, 512 );
+	SysWin	win;
 
+	// コールバック登録
+	{
+
+		auto func = [&]( HWND hWnd )
+		{
+			gdi.OnShowwindow( hWnd );
+		};
+		win.SetOnShowwindow( func );
+	}
+	{
+		auto func = [&]( HWND hWnd )
+		{
+			gdi.OnSize( hWnd );
+		};
+		win.SetOnSize( func );
+	}
+	{
+		auto func = [&]( HWND hWnd )
+		{
+			gdi.OnPaint( hWnd );
+		};
+		win.SetOnPaint( func );
+	}
+	{
+		auto func = [&]( HWND hWnd )
+		{
+			gdi.OnDestroy( hWnd );
+		};
+		win.SetOnDestroy( func );
+	}
+
+	win.OpenWindow("Ray4 " __DATE__, 300,300,512, 512 );
 
 
 	vector<vect2> triangle=
@@ -549,7 +587,7 @@ int main()
 	fig.edge.push_back( (E2){ 0,1 } );
 	fig.edge.push_back( (E2){ 1,2 } );
 	fig.edge.push_back( (E2){ 2,0 } );
-	fig.col = sys.Rgb(0,0.5,1);
+	fig.col = gdi.Rgb(0,0.5,1);
 	
 
 	vector<vect3> boxvert=
@@ -591,17 +629,17 @@ int main()
 	SysMouse&	mouse = SysMouse::GetInstance();
 
 	//mouse_init();
-	while( sys.Update() )
+	while( win.Update() )
 	{
 		keys.Update();
 		mouse.Update();
  		static int py=0;
 
 
-		sys.Clr(sys.Rgb(0.3,0.3,0.3));
+		gdi.Clr(gdi.Rgb(0.3,0.3,0.3));
 		
-//		raytrace( sys, py++ );
-		if ( py >= sys.m.height ) py=0;
+//		raytrace( win, py++ );
+		if ( py >= win.m.height ) py=0;
 
 		//	move
 //		rx += rad(0.2);	
@@ -679,9 +717,9 @@ struct Mat
 			//	pitch	:x	右+
 			//	yaw		:y	下+
 
-//rx+=rad(0.1);
-//ry+=rad(0.2);
-rz+=rad(0.1);
+			rx+=rad(0.03);
+			ry+=rad(0.05);
+			rz+=rad(0.1);
 /*
 			mat44 rotx(
 				1.0			,	0.0			,	0.0			,	0.0	,
@@ -748,7 +786,7 @@ rz+=rad(0.1);
 			
 			double	fovy = rad(val);	//	画角
 			//画角から投影面パラメータを求める
-			double	sc = sys.m.height/2;
+			double	sc = win.m.height/2;
 			double	sz = 1/tan(fovy/2);
 
 			//pers
@@ -756,22 +794,24 @@ rz+=rad(0.1);
 			double y0 = p.y/(p.z+sz)	*sc	+256;
 			double x1 = n.x/(n.z+sz)	*sc	+256;
 			double y1 = n.y/(n.z+sz)	*sc	+256;
-			sys.Line(x0,y0,x1,y1,sys.Rgb(0,1,1));
+			gdi.Line(x0,y0,x1,y1,gdi.Rgb(0,1,1));
 
 		}
 #if 1
-			sys.Tri(55,10, 10,100, 100,100,sys.Rgb(1,1,0));
+			gdi.Tri(55,10, 10,100, 100,100,gdi.Rgb(1,1,0));
+
+			gdi.Tri(55,10, 10,100, 100,100,gdi.Rgb(1,1,0));
 double a = 80;
-			sys.Tri(55+a,10, 10+a,100, 100+a,100,sys.Rgb(1,1,0));
+			gdi.Tri(55+a,10, 10+a,100, 100+a,100,gdi.Rgb(1,1,0));
 
 a=40;
 double	b = 120;
-			sys.Bezier(10+a,10+b, 100+a,100+b, 200+a,10+b, 300+a,100+b,sys.Rgb(0,1,0));
+			gdi.Bezier(10+a,10+b, 100+a,100+b, 200+a,10+b, 300+a,100+b,gdi.Rgb(0,1,0));
 
-			sys.Circle( 10+a, 10+b, 10, sys.Rgb(1,0,0));
-			sys.Circle(100+a,100+b, 10, sys.Rgb(1,0,0));
-			sys.Circle(200+a, 10+b, 10, sys.Rgb(1,0,0));
-			sys.Circle(300+a,100+b, 10, sys.Rgb(1,0,0));
+			gdi.Circle( 10+a, 10+b, 10, gdi.Rgb(1,0,0));
+			gdi.Circle(100+a,100+b, 10, gdi.Rgb(1,0,0));
+			gdi.Circle(200+a, 10+b, 10, gdi.Rgb(1,0,0));
+			gdi.Circle(300+a,100+b, 10, gdi.Rgb(1,0,0));
 
 		
 
@@ -823,7 +863,7 @@ double	b = 120;
 		static vect2 drag_start(0,0);
 		static bool bDrag = false;
 	
-		vect2 mpos( mouse.sx-sys.m.x, mouse.sy-sys.m.y );
+		vect2 mpos( mouse.sx-win.m.x, mouse.sy-win.m.y );
 		
 		
 
@@ -905,10 +945,10 @@ double	b = 120;
 					double x1 = max( drag_start.x, mpos.x);
 					double y1 = max( drag_start.y, mpos.y);
 
-					sys.Line( x0,y0,x1,y0, sys.Rgb(0,0.5,1));
-					sys.Line( x0,y1,x1,y1, sys.Rgb(0,0.5,1));
-					sys.Line( x0,y0,x0,y1, sys.Rgb(0,0.5,1));
-					sys.Line( x1,y0,x1,y1, sys.Rgb(0,0.5,1));
+					gdi.Line( x0,y0,x1,y0, gdi.Rgb(0,0.5,1));
+					gdi.Line( x0,y1,x1,y1, gdi.Rgb(0,0.5,1));
+					gdi.Line( x0,y0,x0,y1, gdi.Rgb(0,0.5,1));
+					gdi.Line( x1,y0,x1,y1, gdi.Rgb(0,0.5,1));
 
 					for ( Mark& m : tblMark )
 					{
@@ -969,7 +1009,7 @@ double	b = 120;
 		{
 			auto func = [&]( double x0, double y0, double x1, double y1, int col)
 			{
-				sys.Line(x0,y0,x1,y1,col);
+				gdi.Line(x0,y0,x1,y1,col);
 			};
 
 			bool flg =  m.bSelected;
@@ -986,13 +1026,13 @@ double	b = 120;
 			
 //			if ( m.bSelected || m.bMouseover)
 			{
-//				sys.Circle(m.x,m.y, 7, sys.Rgb(1,0.0,0));
-				fig.draw( func, m.x,m.y,rad(0), sys.Rgb(1,0,0) );
+//				gdi.Circle(m.x,m.y, 7, gdi.Rgb(1,0.0,0));
+				fig.draw( func, m.x,m.y,rad(0), gdi.Rgb(1,0,0) );
 			}
 			else
 			{
-//				sys.Circle(m.x,m.y, 7, sys.Rgb(1,1,0));
-				fig.draw( func, m.x,m.y,rad(0), sys.Rgb(1,1,0) );
+//				gdi.Circle(m.x,m.y, 7, gdi.Rgb(1,1,0));
+				fig.draw( func, m.x,m.y,rad(0), gdi.Rgb(1,1,0) );
 			}
 		}
 		
@@ -1008,11 +1048,11 @@ double	b = 120;
 				for ( double t = st ; t < 1.0 ; t+=st)
 				{
 					vect2 P = catmull(t, tblMark[i], tblMark[i+1], tblMark[i+2], tblMark[i+3] );
-					sys.Line( P.x, P.y, Q.x, Q.y, sys.Rgb(1,1,1));
+					gdi.Line( P.x, P.y, Q.x, Q.y, gdi.Rgb(1,1,1));
 					Q=P;
 				}	
 					vect2 P = catmull(1, tblMark[i], tblMark[i+1], tblMark[i+2], tblMark[i+3] );
-					sys.Line( P.x, P.y, Q.x, Q.y, sys.Rgb(1,1,1));
+					gdi.Line( P.x, P.y, Q.x, Q.y, gdi.Rgb(1,1,1));
 					
 			}
 		}
@@ -1021,9 +1061,9 @@ double	b = 120;
 		{
 			auto func = [&]( double x0, double y0, double x1, double y1, int col)
 			{
-				sys.Line(x0,y0,x1,y1,col);
+				gdi.Line(x0,y0,x1,y1,col);
 			};
-			fig.draw( func, 200,200,rad(-45), sys.Rgb(1,0,0) );
+			fig.draw( func, 200,200,rad(-45), gdi.Rgb(1,0,0) );
 		}
 	
 		//	triangle 
@@ -1047,7 +1087,7 @@ double	b = 120;
 			x1+=256;
 			y1+=256;
 
-			sys.Line(x0,y0,x1,y1,sys.Rgb(0,1,1));
+			gdi.Line(x0,y0,x1,y1,gdi.Rgb(0,1,1));
 		}
 		cnt++;
 

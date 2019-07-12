@@ -5,7 +5,8 @@ TAR = main.exe
 SRCS = \
 	main.cpp \
 	geom.cpp \
-	sys.cpp \
+	syswin.cpp \
+	sysgdi.cpp \
 	syskeys.cpp \
 	sysmouse.cpp \
 
@@ -43,6 +44,8 @@ clean:
 	rm -f *.exe
 	rm -f *.o
 	rm -f *.*.stackdump
+	rm mm.txt
+	touch mm.txt
 
 mm:	$(SRCS)
 	$(CC)   -MM $? >mm.txt

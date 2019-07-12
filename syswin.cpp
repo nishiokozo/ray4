@@ -1,4 +1,4 @@
-// 2017/07/07 ray3
+﻿// 2017/07/07 ray3
 // 2019/06/25 ray4
 
 #include <iostream>
@@ -10,356 +10,51 @@ using namespace std;
 
 #include "syswin.h"
 
+//#include "sysgdi.h"
+
 #define	USE_RIALTIME_PAINT 0
 
 static chrono::system_clock::time_point time_a;
 static chrono::system_clock::time_point time_b;
 
-struct	//	WIN
-{
-	WNDCLASSEX		tWndClass;
-	HINSTANCE		hInstance;
-	const CHAR*		cpClassName;
-	const CHAR*		cpWindowName;
-	CHAR*			cpMenu;
-	MSG				tMsg;
-	HWND			hWnd;
-} win;
+//extern SysGdi gdi;
 
 
-	struct	PrimBezier
-	{
-		double	x0;
-		double	y0;
-		double	x1;
-		double	y1;
-		double	x2;
-		double	y2;
-		double	x3;
-		double	y3;
-		int		col;
-	};
-	struct	PrimTri
-	{
-		double	x0;
-		double	y0;
-		double	x1;
-		double	y1;
-		double	x2;
-		double	y2;
-		int		col;
-	};
-	struct	PrimLine
-	{
-		double	x0;
-		double	y0;
-		double	x1;
-		double	y1;
-		int		col;
-	};
-	struct	PrimPset
-	{
-		double	x;
-		double	y;
-		int		col;
-	};
-	struct	PrimCircle
-	{
-		double	x0;
-		double	y0;
-		double	x1;
-		double	y1;
-		int		col;
-	};
-	struct	PrimClr
-	{
-		bool	bActive;
-		int		col;
-	};
-struct //	GDI
-{
-	struct
-	{
-//		BITMAPINFO	bmpInfo;
-//		int			bpp;
-//		BYTE*		bPixelBits = nullptr;
-//		int			width;
-//		int			height;
 
-		vector<PrimBezier>	tblBezier;
-		vector<PrimTri>		tblTri;
-		vector<PrimLine>	tblLine;
-		vector<PrimPset>	tblPset;
-		vector<PrimCircle>	tblCircle;
-		PrimClr				clr;
+static 	function<void(HWND)> g_funcOnShowwindow;
+static 	function<void(HWND)> g_funcOnSize;
+static 	function<void(HWND)> g_funcOnPaint;
+static 	function<void(HWND)> g_funcOnDestroy;
 
-		RECT rect;
-
-
-	} m;
-	HDC     hdcBackbuffer;
-//	 BITMAP bmBitmap;
-
-
-	//------------------------------------------------------------------------------
-	void ReleasePixelBits()
-	//------------------------------------------------------------------------------
-	{
-
-//		if ( m.bPixelBits != 0 ) 
-		{
-//			delete [] m.bPixelBits;
-		}
-
-
-	}
-
-	//------------------------------------------------------------------------------
-	void CreatePixelBits(int bpp, int width, int height )
-	//------------------------------------------------------------------------------
-	{
-/*
-		m.bPixelBits	= new BYTE[ width * height * bpp/8 ];
-
-		m.bpp			= bpp;
-		m.width			= width;
-		m.height		= height;
-		
-		BITMAPINFO bi;
-		BITMAPINFOHEADER &bih	= m.bmpInfo.bmiHeader;
-		bih.biSize				= sizeof(bih);
-		bih.biWidth				= width;
-		bih.biHeight			= height;
-		bih.biPlanes			= 1;
-		bih.biBitCount			= bpp;
-		bih.biCompression		= BI_RGB;//BI_BITFIELDS;
-		bih.biSizeImage			= 0;
-		bih.biXPelsPerMeter		= 0;
-		bih.biYPelsPerMeter		= 0;
-		bih.biClrUsed			= 0;
-		bih.biClrImportant		= 0;
-*/
-	}
-	
-	//------------------------------------------------------------------------------
-	void paint0( HDC hDc )
-	//------------------------------------------------------------------------------
-	{
-
-		// clear background
-		if ( m.clr.bActive )
-		{
-			HBRUSH hBrush  = CreateSolidBrush(m.clr.col);
-			SelectObject( hDc , hBrush);
-
-			PatBlt( hDc , 0 , 0 ,m.rect.right, m.rect.bottom , PATCOPY);
-
-			DeleteObject( hBrush );
-	
-			m.clr.bActive = false;
-		}
-
-		// bmp
-		{
-//				StretchDIBits( hDc, 0, 0, m.rect.right, m.rect.bottom, 0, 0, m.width, m.height, m.bPixelBits, &m.bmpInfo, DIB_RGB_COLORS, SRCCOPY );
-
-		}
-
-		
-		//circle
-		{
-
-			for ( unsigned int i=0 ; i < m.tblCircle.size() ; i++ )
-			{
-
-				int x0 = m.tblCircle[i].x0;
-				int y0 = m.tblCircle[i].y0;
-				int x1 = m.tblCircle[i].x1;
-				int y1 = m.tblCircle[i].y1;
-				int	col = m.tblCircle[i].col;
-
-				HPEN hPen = CreatePen(PS_SOLID, 1, col );
-				SelectObject(hDc, hPen);
-				HBRUSH hBrush  = CreateSolidBrush(col);
-				SelectObject(hDc, hPen);
-
-//				SetPixel( hDc, x0, y0, col );
-
-				Ellipse(hDc , x0, y0, x1, y1);
-
-				DeleteObject(hBrush);
-				DeleteObject(hPen);
-			}
-			
-			m.tblCircle.clear();
-		}
-
-		//pset
-		{
-
-			for ( unsigned int i=0 ; i < m.tblPset.size() ; i++ )
-			{
-				HPEN hPen;
-
-				int x0 = m.tblPset[i].x;
-				int y0 = m.tblPset[i].y;
-				int	col = m.tblPset[i].col;
-
-				hPen = CreatePen(PS_SOLID, 1, col );
-				SelectObject(hDc, hPen);
-
-				SetPixel( hDc, x0, y0, col );
-
-				DeleteObject(hPen);
-			}
-			
-			m.tblPset.clear();
-		}
-		//line
-		{
-
-			for ( unsigned int i=0 ; i < m.tblLine.size() ; i++ )
-			{
-
-				int x0 = m.tblLine[i].x0;
-				int y0 = m.tblLine[i].y0;
-				int x1 = m.tblLine[i].x1;
-				int y1 = m.tblLine[i].y1;
-				int	col = m.tblLine[i].col;
-
-				HPEN hPen = CreatePen(PS_SOLID, 1, col );
-				SelectObject(hDc, hPen);
-
-				MoveToEx(hDc, x0, y0, NULL);
-				LineTo(hDc, x1, y1);
-
-				DeleteObject(hPen);
-			}
-			m.tblLine.clear();
-		}
-
-		//Tri
-		{
-			for ( unsigned int i=0 ; i < m.tblTri.size() ; i++ )
-			{	
-				int x0 = m.tblTri[i].x0;
-				int y0 = m.tblTri[i].y0;
-				int x1 = m.tblTri[i].x1;
-				int y1 = m.tblTri[i].y1;
-				int x2 = m.tblTri[i].x2;
-				int y2 = m.tblTri[i].y2;
-				int	col = m.tblTri[i].col;
-
-				HPEN hPen = CreatePen(PS_SOLID, 1, col );
-				HBRUSH hBrush  = CreateSolidBrush(col);
-				SelectObject(hDc, hPen);
-				SelectObject(hDc, hBrush);
-
-				POINT	tblPoint[3]={{x0,y0},{x1,y1},{x2,y2}};
-				INT	tblNum[]={3};
-
-				PolyPolygon( hDc, tblPoint, tblNum, 1 );
-
-				DeleteObject(hBrush);
-				DeleteObject(hPen);
-			}
-			m.tblTri.clear();
-		}
-
-
-		//Bezier
-		{
-			for ( unsigned int i=0 ; i < m.tblBezier.size() ; i++ )
-			{	
-				int x0 = m.tblBezier[i].x0;
-				int y0 = m.tblBezier[i].y0;
-				int x1 = m.tblBezier[i].x1;
-				int y1 = m.tblBezier[i].y1;
-				int x2 = m.tblBezier[i].x2;
-				int y2 = m.tblBezier[i].y2;
-				int x3 = m.tblBezier[i].x3;
-				int y3 = m.tblBezier[i].y3;
-				int	col = m.tblBezier[i].col;
-
-				HPEN hPen = CreatePen(PS_SOLID, 1, col );
-				HBRUSH hBrush  = CreateSolidBrush(col);
-				SelectObject(hDc, hPen);
-				SelectObject(hDc, hBrush);
-
-				POINT	tblPoint[3]={{x1,y1},{x2,y2},{x3,y3}};
-
-				MoveToEx(hDc , x0 , y0 , NULL);
-				PolyBezierTo(hDc , tblPoint , 3);
-
-				DeleteObject(hBrush);
-				DeleteObject(hPen);
-			}
-			m.tblBezier.clear();
-
-			static POINT pt[3];
-
-		}
-
-
-	}
-
-	//------------------------------------------------------------------------------
-	void onCreate( HWND hWnd ) 
-	//------------------------------------------------------------------------------
-	{
-	    HDC hDc = GetDC(hWnd);
-			RECT rc;
-			GetClientRect( hWnd, &rc );
-			HBITMAP hBitmap = CreateCompatibleBitmap( hDc, rc.right, rc.bottom );
-		    hdcBackbuffer = CreateCompatibleDC( NULL );
-		    SelectObject( hdcBackbuffer, hBitmap );
-		ReleaseDC( hWnd, hDc );
-
-	}	
-
-	//------------------------------------------------------------------------------
-	void onPaint2(HWND hWnd) 
-	//------------------------------------------------------------------------------
-	{
-#if USE_RIALTIME_PAINT
-	 		{
-				PAINTSTRUCT ps;
-				HDC hDc = BeginPaint( hWnd , &ps );	//再描画区域が指定されてある。WM_PAINTメッセージを処理する
-				EndPaint( hWnd , &ps);
-			}
-#else
-			{
-			    paint0( hdcBackbuffer);
-			    PAINTSTRUCT ps;
-			    HDC hDc = BeginPaint(hWnd, &ps);
-				RECT rc;
-				GetClientRect( hWnd, &rc );
-			    BitBlt(hDc, 0, 0, rc.right, rc.bottom, hdcBackbuffer, 0, 0, SRCCOPY);
-			    EndPaint(hWnd, &ps);
-			}
-#endif
-	}
-
-} gdi;
-
-/*
 //------------------------------------------------------------------------------
-unsigned char* SysWin::GetAddrPixels()
+void SysWin::SetOnPaint( function<void(HWND)> func )
 //------------------------------------------------------------------------------
 {
-	return( (unsigned char*)gdi.m.bPixelBits);
+	g_funcOnPaint = func;
+}
+//------------------------------------------------------------------------------
+void SysWin::SetOnSize( function<void(HWND)> func )
+//------------------------------------------------------------------------------
+{
+	g_funcOnSize = func;
 }
 
 //------------------------------------------------------------------------------
-int SysWin::GetBytePixels()
+void SysWin::SetOnDestroy( function<void(HWND)> func )
 //------------------------------------------------------------------------------
 {
-	return gdi.m.bpp/8;
+	g_funcOnDestroy = func;
 }
-*/
 
 //------------------------------------------------------------------------------
-static	LRESULT CALLBACK WinProc
+void SysWin::SetOnShowwindow( function<void(HWND)> func )
+//------------------------------------------------------------------------------
+{
+	g_funcOnShowwindow = func;
+}
+
+///------------------------------------------------------------------------------
+LRESULT CALLBACK SysWin::WinProc
 //------------------------------------------------------------------------------
 (
 	  HWND		hWnd
@@ -368,23 +63,87 @@ static	LRESULT CALLBACK WinProc
 	, LPARAM	lParam	//メッセージの付加情報
 )
 {
+//		■CreateWindowEx() シーケンス
+//		-- 0x24		>	WM_GETMINMAXINFO
+//		-- 0x81			WM_NCCREATE
+//		-- 0x83			WM_NCCALCSIZE
+//		-- 0x1		>	WM_CREATE
+//	
+//		■ShowWindow() シーケンス
+//		-- 0x18		>	WM_SHOWWINDOW
+//		-- 0x46			WM_WINDOWPOSCHANGING
+//		-- 0x46			WM_WINDOWPOSCHANGING
+//		-- 0x1c			WM_ACTIVATEAPP
+//		-- 0x86			WM_NCACTIVATE
+//		-- 0x7f			WM_GETICON
+//		-- 0x7f			WM_GETICON
+//		-- 0x7f			WM_GETICON
+//		-- 0x6		>	WM_ACTIVATE
+//		-- 0x282		WM_IME_NOTIFY
+//		-- 0xc053		???
+//		-- 0x281		WM_IME_SETCONTEXT
+//		-- 0x282		WM_IME_NOTIFY
+//		-- 0x7			WM_SETFOCUS
+//		-- 0x85			WM_NCPAINT
+//		-- 0x14		>	WM_ERASEBKGND
+//		-- 0x47			WM_WINDOWPOSCHANGED
+//		-- 0x5		>	WM_SIZE
+//		-- 0x3		>	WM_MOVE
+//	
+//		■SendMessage(WM_DESTROY)シーケンス
+//		-- 0x2		>	WM_DESTROY
+//		-- 0x102		WM_CHAR
+//	
+//		■[x]クリックシーケンス
+//		:
+//		-- 0x14		>	WM_ERASEBKGND
+//		-- 0x20			WM_SETCURSOR
+//		-- 0xa1			WM_NCLBUTTONDOWN
+//		-- 0x7f			WM_GETICON
+//		-- 0x7f			WM_GETICON
+//		-- 0x215		WM_CAPTURECHANGED
+//		-- 0x112		WM_SYSCOMMAND
+//		-- 0x10		>	WM_CLOSE
+//		-- 0x90			??
+//		-- 0x46			WM_WINDOWPOSCHANGING
+//		-- 0x47			WM_WINDOWPOSCHANGED
+//		-- 0x86			WM_NCACTIVATE
+//		-- 0x6		>	WM_ACTIVATE
+//		-- 0x1c			WM_ACTIVATEAPP
+//		-- 0x8			WM_KILLFOCUS
+//		-- 0x281		WM_IME_SETCONTEXT
+//		-- 0x282		WM_IME_NOTIFY
+//		-- 0x2		>	WM_DESTROY
+//		-- 0x82			WM_NCDESTROY
+
+//cout << hex << "-- 0x" << uMsg << endl;
 	switch( uMsg ) 
 	{
 		case WM_CREATE:	// CreateWindowと同時に発行される
-			gdi.onCreate( hWnd );
+cout << "WM_CREATE " << endl;
 			break;
+
+		case WM_SHOWWINDOW:	//  ShowWindowと同時に発行される ShowWindow()  -> WM_SHOWWINDOW -> WM_ACTIVATE ->  WM_ERASEBKGND -> WM_SIZE -> WM_PAINT
+cout << "WM_SHOWWINDOW " << endl;
+			g_funcOnShowwindow( hWnd );
+			return 0;
+
+		case WM_ACTIVATE:
+			return 0;
+
+		case WM_ERASEBKGND:	//	WM_PAINTイベントの途中、及びWM_SHOWWINDOWのあとに発行される。 DefWindowProc()に任せると白いフラッシュが入ってしまうので、0を返す
+//cout << "WM_ERASEBKGND " << endl;
+			return 0;
+			
 		case WM_SIZE:	// 画面サイズが決定された時に発行される
-			GetClientRect( hWnd, &gdi.m.rect );
+cout << "WM_SIZE " << endl;
+			g_funcOnSize( hWnd);
 			return 0;
 
 		case WM_PAINT:	// OSからの描画要求。再描画区域情報（ウィンドウが重なっている際などの）が得られるタイミング。
-	 		gdi.onPaint2( hWnd );
-			return 0;
+//cout << "WM_PAINT " << endl;
+			g_funcOnPaint( hWnd );
 
-		case WM_ERASEBKGND:	//	BeginPaint()タイミング(WM_PAINTの中）で呼び出される。
-			// 空でも即返す
-			// WM_PAINT時に白いフラッシュが入ってしまう。
-//cout << "WM_ERASEBKGND " << endl;
 			return 0;
 
 		case WM_KEYDOWN:
@@ -392,93 +151,35 @@ static	LRESULT CALLBACK WinProc
 			return 0;
 
 		case WM_DESTROY:	//[x]を押すなどしたとき
+			g_funcOnDestroy( hWnd );
 cout << "WM_DESTROY " << endl;
 			PostQuitMessage( 0 );
 			return 0;
 	}
+//			return 1;
 
 	// デフォルト処理呼び出し。
 	return DefWindowProc( hWnd, uMsg, wParam, lParam );// [x] > WM_SYSCOMMAND > WM_CLOSE > WM_DESTROY
 }
-
-//------------------------------------------------------------------------------
-int	SysWin::Rgb( double r, double g , double b )
-//------------------------------------------------------------------------------
-{
-	r = min( 1.0, r );
-	g = min( 1.0, g );
-	b = min( 1.0, b );
-	int	ir = ((int)(r*255))&0xff;
-	int	ig = ((int)(g*255))&0xff;
-	int	ib = ((int)(b*255))&0xff;
-	int	col = RGB(ir,ig,ib);
-	return col ;
-}
-
-//------------------------------------------------------------------------------
-void SysWin::Clr( int col)
-//------------------------------------------------------------------------------
-{
-	gdi.m.clr.bActive = true;
-	gdi.m.clr.col = col;
-}
-//------------------------------------------------------------------------------
-void SysWin::Circle( double x, double y, double r, int col )
-//------------------------------------------------------------------------------
-{
-	PrimCircle a = {x-r,y-r,x+r,y+r,col};
-	
-	gdi.m.tblCircle.push_back( a );
-}
-//------------------------------------------------------------------------------
-void SysWin::Pset( double x, double y, int col )
-//------------------------------------------------------------------------------
-{
-	PrimPset a = {x,y,col};
-	
-	gdi.m.tblPset.push_back( a );
-}
-//------------------------------------------------------------------------------
-void SysWin::Line( double x0, double y0, double x1, double y1,int col)
-//------------------------------------------------------------------------------
-{
-	PrimLine a = {x0,y0,x1,y1,col};
-	
-	gdi.m.tblLine.push_back( a );
-}
-//------------------------------------------------------------------------------
-void SysWin::Tri( double x0, double y0, double x1, double y1, double x2, double y2, int col)
-//------------------------------------------------------------------------------
-{
-	PrimTri a = {x0,y0,x1,y1,x2,y2,col};
-	
-	gdi.m.tblTri.push_back( a );
-}
-//------------------------------------------------------------------------------
-void SysWin::Bezier( double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3, int col)
-//------------------------------------------------------------------------------
-{
-	PrimBezier a = {x0,y0,x1,y1,x2,y2,x3,y3,col};
-	
-	gdi.m.tblBezier.push_back( a );
-}
-
 //------------------------------------------------------------------------------
 SysWin::~SysWin()
 //------------------------------------------------------------------------------
 {
-	gdi.ReleasePixelBits();
+//	gdi.ReleasePixelBits();
 
 }
+
 //------------------------------------------------------------------------------
-SysWin::SysWin( const char* name, int pos_x, int pos_y, int width, int height  )
+SysWin::SysWin()
 //------------------------------------------------------------------------------
 {
-	m.x			= pos_x;
-	m.y			= pos_y;
-	m.width		= width;
-	m.height	= height;
 
+}
+
+//------------------------------------------------------------------------------
+void SysWin::OpenWindow( const char* name, int pos_x, int pos_y, int width, int height  )
+//------------------------------------------------------------------------------
+{
 	// アプリケーションインスタンス
 	win.hInstance		= GetModuleHandle( NULL );
 
@@ -510,6 +211,14 @@ SysWin::SysWin( const char* name, int pos_x, int pos_y, int width, int height  )
 	if ( 0 == RegisterClassEx( &win.tWndClass ) ) 
 	{
 	}
+	
+	m.x			= pos_x;
+	m.y			= pos_y;
+	m.width		= width;
+	m.height	= height;
+
+
+cout << "1 ----------------- " << endl;
 
 	// ウインドウを生成する
 	{
@@ -520,13 +229,13 @@ SysWin::SysWin( const char* name, int pos_x, int pos_y, int width, int height  )
 
 		win.hWnd = CreateWindowEx(
 			 0
-			, win.tWndClass.lpszClassName//m_classname//wc.lpszClassName
+			, win.tWndClass.lpszClassName
 			, name 
 			, valWin
-			, pos_x + rc.left	  	// horizontal position of window
-			, pos_y + rc.top		// vertical position of window
-			, rc.right-rc.left 	// window width
-			, rc.bottom-rc.top	// window height
+			, pos_x + rc.left	
+			, pos_y + rc.top	
+			, rc.right-rc.left 	
+			, rc.bottom-rc.top	
 			, NULL			  	// handle to parent or owner window
 			, NULL			 	// handle to menu, or child-window identifier
 			, win.hInstance	 	// handle to application instance
@@ -534,10 +243,10 @@ SysWin::SysWin( const char* name, int pos_x, int pos_y, int width, int height  )
 		);
 
 	}
-
-
-//	gdi.CreatePixelBits( 24, width, height );
+cout << "2 ----------------- " << endl;
 	ShowWindow( win.hWnd, SW_SHOW );
+cout << "3 ----------------- " << endl;
+
 }
 
 //------------------------------------------------------------------------------

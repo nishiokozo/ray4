@@ -1,7 +1,25 @@
+#include <windows.h>
+
+#include <functional>
+
+
+
 
 class	Sys
 {
 public:
+	struct	//	WIN
+	{
+		WNDCLASSEX		tWndClass;
+		HINSTANCE		hInstance;
+		const CHAR*		cpClassName;
+		const CHAR*		cpWindowName;
+		CHAR*			cpMenu;
+		MSG				tMsg;
+		HWND			hWnd;
+	} win;
+
+
 	struct
 	{
 		int x;
@@ -9,23 +27,27 @@ public:
 		int width;
 		int	height;
 	} m;
-	
-	Sys( const char* name, int pos_x, int pos_y, int width, int height  );
+
+
+	Sys();
 	virtual ~Sys();
 
 	bool	Update();
 
-	void	Bezier( double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3, int col);
-	void	Tri( double x0, double y0, double x1, double y1, double x2, double y2, int col);
-	void	Line( double x0, double y0, double x1, double y1, int col);
-	void	Pset( double x0, double y0, int col);
-	void	Circle( double x, double y, double r, int col );
-	void	Clr( int col );
-	int 	Rgb(double r, double g , double b );
+	void OpenWindow( const char* name, int pos_x, int pos_y, int width, int height  );
 
-	void 	func() 
-	{
-		cout << "sys-func" << endl;
-	}
+	void SetOnSize( function<void(HWND)> func );
+	void SetOnDestroy( function<void(HWND)> func );
+	void SetOnShowwindow( function<void(HWND)> func );
+	void SetOnPaint( function<void(HWND)> func );
+
+
+	static LRESULT CALLBACK WinProc
+	(
+		  HWND		hWnd
+		, UINT		uMsg
+		, WPARAM	wParam	//メッセージの付加情報
+		, LPARAM	lParam	//メッセージの付加情報
+	);
 
 };
