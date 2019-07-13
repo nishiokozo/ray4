@@ -11,6 +11,14 @@ void	mat4_rotateZ( double* m, double th );
 //#define	pi	3.141592654
 const static double pi = 3.141592654;
 
+struct	ivect2
+{
+	int	p,n;
+	ivect2(int _p, int _n ) :p(_p),n(_n){}
+	ivect2() :p(0),n(0){}
+	
+};
+
 class vect2
 {
 public:

@@ -517,27 +517,14 @@ int main()
 {
 	Plat	plat("Ray4 " __DATE__, 300,300,512, 512 );
 
-	vector<vect2> triangle=
-	{
-		{   0,100*tan(rad(60)) -100*tan(rad(30)) },
-		{-100,  0 	    	   -100*tan(rad(30)) },
-		{ 100,  0   	       -100*tan(rad(30)) },
-		{   0,100*tan(rad(60)) -100*tan(rad(30)) },
-	};
-	struct	E2
-	{
-		int	p,n;
-	};
-
-
 	struct Figure
 	{
 		vector<vect2> vert;
-		vector<E2> edge;
+		vector<ivect2> edge;
 		int	col;
 		void draw( function<void(double,double,double,double,int)> line , double ofs_x, double ofs_y, double th, int col )
 		{
-			for ( E2 e : edge )
+			for ( ivect2 e : edge )
 			{
 				vect2& p = vert[e.p];
 				vect2& n = vert[e.n];
@@ -551,16 +538,37 @@ int main()
 			}
 		}
 	};
+
+
+//	vector<vect2> triangle=
+//	{
+//		{   0,100*tan(rad(60)) -100*tan(rad(30)) },
+//		{-100,  0 	    	   -100*tan(rad(30)) },
+//		{ 100,  0   	       -100*tan(rad(30)) },
+//		{   0,100*tan(rad(60)) -100*tan(rad(30)) },
+//	};
+
+	Figure triangle;
+	triangle.vert.push_back( (vect2){   0,100*tan(rad(60))	-100*tan(rad(30)) } );
+	triangle.vert.push_back( (vect2){-100,  0 	    	   	-100*tan(rad(30)) } );
+	triangle.vert.push_back( (vect2){ 100,  0 				-100*tan(rad(30)) } );
+	triangle.edge.push_back( (ivect2){ 0,1 } );
+	triangle.edge.push_back( (ivect2){ 1,2 } );
+	triangle.edge.push_back( (ivect2){ 2,0 } );
+	triangle.col = plat.gra.Rgb(0,1,1);
+
+
 	Figure fig;
 	fig.vert.push_back( (vect2){   0,20*tan(rad(60))	-10*tan(rad(30)) } );
 	fig.vert.push_back( (vect2){-10,  0 	    	   	-10*tan(rad(30)) } );
 	fig.vert.push_back( (vect2){ 10,  0 				-10*tan(rad(30)) } );
-	fig.edge.push_back( (E2){ 0,1 } );
-	fig.edge.push_back( (E2){ 1,2 } );
-	fig.edge.push_back( (E2){ 2,0 } );
+	fig.edge.push_back( (ivect2){ 0,1 } );
+	fig.edge.push_back( (ivect2){ 1,2 } );
+	fig.edge.push_back( (ivect2){ 2,0 } );
 	fig.col = plat.gra.Rgb(0,0.5,1);
 	
 
+	
 	vector<vect3> boxvert=
 	{
 		{	-1,	 1,	-1	},
@@ -574,7 +582,7 @@ int main()
 	};
 	vector<vect3> boxdl;
 
-	vector<E2>	boxedge
+	vector<ivect2>	boxedge
 	{
 		{	0,	1	},
 		{	1,	3	},
@@ -746,7 +754,7 @@ struct Mat
 
 
 		//calc pers 
-		for ( E2 e : boxedge )
+		for ( ivect2 e : boxedge )
 		{
 			vect3& p = boxdl[e.p];
 			vect3& n = boxdl[e.n];
@@ -1034,31 +1042,42 @@ double	b = 120;
 			};
 			fig.draw( func, 200,200,rad(-45), plat.gra.Rgb(1,0,0) );
 		}
+
+		// triangle
+		{
+			static int cnt = 0;
+			auto func = [&]( double x0, double y0, double x1, double y1, int col)
+			{
+				plat.gra.Line(x0,y0,x1,y1,col);
+			};
+			triangle.draw( func, 256,256,rad(cnt), plat.gra.Rgb(0,1,1) );
+			cnt++;
+		}
 	
 		//	triangle 
-		static int cnt = 0;
-		for ( unsigned int i = 0 ; i < triangle.size()-1 ; i++ )
-		{
-			double xa=triangle[i].x;
-			double ya=triangle[i].y;
-			double xb=triangle[i+1].x;
-			double yb=triangle[i+1].y;
-
-			double th=rad(cnt/1);
-			
-			double x0=xa*cos(th) - ya*sin(th);
-			double y0=xa*sin(th) + ya*cos(th);
-			double x1=xb*cos(th) - yb*sin(th);
-			double y1=xb*sin(th) + yb*cos(th);
-
-			x0+=256;
-			y0+=256;
-			x1+=256;
-			y1+=256;
-
-			plat.gra.Line(x0,y0,x1,y1,plat.gra.Rgb(0,1,1));
-		}
-		cnt++;
+//		static int cnt = 0;
+//		for ( unsigned int i = 0 ; i < triangle.size()-1 ; i++ )
+//		{
+//			double xa=triangle[i].x;
+//			double ya=triangle[i].y;
+//			double xb=triangle[i+1].x;
+//			double yb=triangle[i+1].y;
+//
+//			double th=rad(cnt/1);
+//			
+//			double x0=xa*cos(th) - ya*sin(th);
+//			double y0=xa*sin(th) + ya*cos(th);
+//			double x1=xb*cos(th) - yb*sin(th);
+//			double y1=xb*sin(th) + yb*cos(th);
+//
+//			x0+=256;
+//			y0+=256;
+//			x1+=256;
+//			y1+=256;
+//
+//			plat.gra.Line(x0,y0,x1,y1,plat.gra.Rgb(0,1,1));
+//		}
+//		cnt++;
 
 		{
 			static chrono::system_clock::time_point time_a;
