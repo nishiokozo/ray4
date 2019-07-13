@@ -10,8 +10,6 @@ using namespace std;
 #include "SysGra.h"
 
 #include <windows.h>
-
-
 #include <functional>
 #include "SysWin.h"
 

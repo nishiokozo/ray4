@@ -12,24 +12,13 @@ using namespace std;
 #include "geom.h"
 
 
-#include "syskeys.h"
-#include "sysmouse.h"
+#include "SysKeys.h"
+#include "SysMouse.h"
 #include "SysGra.h"
-
-#include "plat.h"
-
-#include <windows.h>
-
-//#include "syswin.h"
+#include "Sys.h"
 
 
 
-
-
-extern void win_OnShowwindow( HWND hWnd );
-extern void win_OnSize( HWND hWnd );
-extern void win_OnPaint( HWND hWnd );
-extern void win_OnDestroy( HWND hWnd );
 
 const	static	double INFINIT =  numeric_limits<double>::max();	//DBL_MAX
 
@@ -473,8 +462,8 @@ void	raytrace( SysWin& win, int py )
 	Renderer ren;
 
 	{
-		int height	= plat.m.height; 
-		int width	= plat.m.width; 
+		int height	= sys.m.height; 
+		int width	= sys.m.width; 
 	
 		vect3	posScr = vect3(0,1.0,-12+8);
 		vect3	posEye = vect3(0,1.0,-17+8);
@@ -501,7 +490,7 @@ void	raytrace( SysWin& win, int py )
 				if ( ren.m_cntRay > cntMax ) cntMax = ren.m_cntRay;
 				cntRay+= ren.m_cntRay;
 
-				plat.win.(*this).Pset(px,height-py,plat.gra.Rgb(C.r,C.g,C.b));
+				sys.win.(*this).Pset(px,height-py,sys.gra.Rgb(C.r,C.g,C.b));
 			}
 		}
 		
@@ -515,7 +504,7 @@ void	raytrace( SysWin& win, int py )
 int main()
 //------------------------------------------------------------------------------
 {
-	Plat	plat("Ray4 " __DATE__, 300,300,512, 512 );
+	Sys	sys("Ray4 " __DATE__, 300,300,512, 512 );
 
 	struct Figure
 	{
@@ -555,7 +544,7 @@ int main()
 	triangle.edge.push_back( (ivect2){ 0,1 } );
 	triangle.edge.push_back( (ivect2){ 1,2 } );
 	triangle.edge.push_back( (ivect2){ 2,0 } );
-	triangle.col = plat.gra.Rgb(0,1,1);
+	triangle.col = sys.gra.Rgb(0,1,1);
 
 
 	Figure fig;
@@ -565,7 +554,7 @@ int main()
 	fig.edge.push_back( (ivect2){ 0,1 } );
 	fig.edge.push_back( (ivect2){ 1,2 } );
 	fig.edge.push_back( (ivect2){ 2,0 } );
-	fig.col = plat.gra.Rgb(0,0.5,1);
+	fig.col = sys.gra.Rgb(0,0.5,1);
 	
 
 	
@@ -608,15 +597,15 @@ int main()
 //	SysMouse&	mouse = SysMouse::GetInstance();
 
 	//mouse_init();
-	while( plat.Update() )
+	while( sys.Update() )
 	{
  		static int py=0;
 
 
-		plat.gra.Clr(plat.gra.Rgb(0.3,0.3,0.3));
+		sys.gra.Clr(sys.gra.Rgb(0.3,0.3,0.3));
 		
 //		raytrace( win, py++ );
-		if ( py >= plat.m.height ) py=0;
+		if ( py >= sys.m.height ) py=0;
 
 		//	move
 //		rx += rad(0.2);	
@@ -747,10 +736,10 @@ struct Mat
 		
 		
 		static	double	val=45;
-		if (plat.keys.Q.rep) {val--;cout << val <<" "<<1/tan(rad(val)) << endl; }
-		if (plat.keys.A.rep) {val++;cout << val <<" "<<1/tan(rad(val)) << endl; }
-		if (plat.keys.W.rep) {val-=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
-		if (plat.keys.S.rep) {val+=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (sys.keys.Q.rep) {val--;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (sys.keys.A.rep) {val++;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (sys.keys.W.rep) {val-=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (sys.keys.S.rep) {val+=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
 
 
 		//calc pers 
@@ -763,7 +752,7 @@ struct Mat
 			
 			double	fovy = rad(val);	//	画角
 			//画角から投影面パラメータを求める
-			double	sc = plat.m.height/2;
+			double	sc = sys.m.height/2;
 			double	sz = 1/tan(fovy/2);
 
 			//pers
@@ -771,24 +760,24 @@ struct Mat
 			double y0 = p.y/(p.z+sz)	*sc	+256;
 			double x1 = n.x/(n.z+sz)	*sc	+256;
 			double y1 = n.y/(n.z+sz)	*sc	+256;
-			plat.gra.Line(x0,y0,x1,y1,plat.gra.Rgb(0,1,1));
+			sys.gra.Line(x0,y0,x1,y1,sys.gra.Rgb(0,1,1));
 
 		}
 #if 1
-			plat.gra.Tri(55,10, 10,100, 100,100,plat.gra.Rgb(1,1,0));
+			sys.gra.Tri(55,10, 10,100, 100,100,sys.gra.Rgb(1,1,0));
 
-			plat.gra.Tri(55,10, 10,100, 100,100,plat.gra.Rgb(1,1,0));
+			sys.gra.Tri(55,10, 10,100, 100,100,sys.gra.Rgb(1,1,0));
 double a = 80;
-			plat.gra.Tri(55+a,10, 10+a,100, 100+a,100,plat.gra.Rgb(1,1,0));
+			sys.gra.Tri(55+a,10, 10+a,100, 100+a,100,sys.gra.Rgb(1,1,0));
 
 a=40;
 double	b = 120;
-			plat.gra.Bezier(10+a,10+b, 100+a,100+b, 200+a,10+b, 300+a,100+b,plat.gra.Rgb(0,1,0));
+			sys.gra.Bezier(10+a,10+b, 100+a,100+b, 200+a,10+b, 300+a,100+b,sys.gra.Rgb(0,1,0));
 
-			plat.gra.Circle( 10+a, 10+b, 10, plat.gra.Rgb(1,0,0));
-			plat.gra.Circle(100+a,100+b, 10, plat.gra.Rgb(1,0,0));
-			plat.gra.Circle(200+a, 10+b, 10, plat.gra.Rgb(1,0,0));
-			plat.gra.Circle(300+a,100+b, 10, plat.gra.Rgb(1,0,0));
+			sys.gra.Circle( 10+a, 10+b, 10, sys.gra.Rgb(1,0,0));
+			sys.gra.Circle(100+a,100+b, 10, sys.gra.Rgb(1,0,0));
+			sys.gra.Circle(200+a, 10+b, 10, sys.gra.Rgb(1,0,0));
+			sys.gra.Circle(300+a,100+b, 10, sys.gra.Rgb(1,0,0));
 
 		
 
@@ -840,21 +829,21 @@ double	b = 120;
 		static vect2 drag_start(0,0);
 		static bool bDrag = false;
 	
-		vect2 mpos( plat.mouse.sx-plat.m.x, plat.mouse.sy-plat.m.y );
+		vect2 mpos( sys.mouse.sx-sys.m.x, sys.mouse.sy-sys.m.y );
 		
 		
 
 		
 
 		// マーカー追加
-		if ( plat.mouse.M.hi )
+		if ( sys.mouse.M.hi )
 		{
 			tblMark.push_back( Mark( mpos, fig, rad(0) ) );
 		}
 
 
 		// マーカー選択
-		if ( plat.mouse.L.on )
+		if ( sys.mouse.L.on )
 		{
 			struct
 			{
@@ -876,7 +865,7 @@ double	b = 120;
 			}
 
 			// マーカー選択＆解除
-			if ( plat.mouse.L.hi )
+			if ( sys.mouse.L.hi )
 			{
 				// 矩形選択
 				if ( a.pmark == 0 ) 
@@ -886,9 +875,9 @@ double	b = 120;
 				}
 
 				// マーカー全解除
-				if ( plat.keys.CTRL.on ){}
+				if ( sys.keys.CTRL.on ){}
 				else
-				if ( plat.keys.SHIFT.on ){}
+				if ( sys.keys.SHIFT.on ){}
 				else
 				if ( a.pmark && a.pmark->bSelected == true ){}
 				else
@@ -902,7 +891,7 @@ double	b = 120;
 				//	マーカー選択
 				if ( a.pmark )
 				{
-					if ( plat.keys.CTRL.on )
+					if ( sys.keys.CTRL.on )
 					{
 						a.pmark->bSelected = !a.pmark->bSelected;
 					}
@@ -922,10 +911,10 @@ double	b = 120;
 					double x1 = max( drag_start.x, mpos.x);
 					double y1 = max( drag_start.y, mpos.y);
 
-					plat.gra.Line( x0,y0,x1,y0, plat.gra.Rgb(0,0.5,1));
-					plat.gra.Line( x0,y1,x1,y1, plat.gra.Rgb(0,0.5,1));
-					plat.gra.Line( x0,y0,x0,y1, plat.gra.Rgb(0,0.5,1));
-					plat.gra.Line( x1,y0,x1,y1, plat.gra.Rgb(0,0.5,1));
+					sys.gra.Line( x0,y0,x1,y0, sys.gra.Rgb(0,0.5,1));
+					sys.gra.Line( x0,y1,x1,y1, sys.gra.Rgb(0,0.5,1));
+					sys.gra.Line( x0,y0,x0,y1, sys.gra.Rgb(0,0.5,1));
+					sys.gra.Line( x1,y0,x1,y1, sys.gra.Rgb(0,0.5,1));
 
 					for ( Mark& m : tblMark )
 					{
@@ -939,7 +928,7 @@ double	b = 120;
 						if ( m.x > x0 && m.x < x1 && m.y > y0 && m.y < y1 )
 						{
 							m.bMouseover = true;
-							if ( plat.keys.CTRL.on )
+							if ( sys.keys.CTRL.on )
 							{
 								m.bMouseoverSelected = !m.bSelected;
 							}
@@ -957,8 +946,8 @@ double	b = 120;
 				{
 					if ( m.bSelected )
 					{
-						m.x += plat.mouse.mx;
-						m.y += plat.mouse.my;
+						m.x += sys.mouse.mx;
+						m.y += sys.mouse.my;
 					}
 				}
 			}
@@ -986,7 +975,7 @@ double	b = 120;
 		{
 			auto func = [&]( double x0, double y0, double x1, double y1, int col)
 			{
-				plat.gra.Line(x0,y0,x1,y1,col);
+				sys.gra.Line(x0,y0,x1,y1,col);
 			};
 
 			bool flg =  m.bSelected;
@@ -1003,13 +992,13 @@ double	b = 120;
 			
 //			if ( m.bSelected || m.bMouseover)
 			{
-//				plat.gra.Circle(m.x,m.y, 7, plat.gra.Rgb(1,0.0,0));
-				fig.draw( func, m.x,m.y,rad(0), plat.gra.Rgb(1,0,0) );
+//				sys.gra.Circle(m.x,m.y, 7, sys.gra.Rgb(1,0.0,0));
+				fig.draw( func, m.x,m.y,rad(0), sys.gra.Rgb(1,0,0) );
 			}
 			else
 			{
-//				plat.gra.Circle(m.x,m.y, 7, plat.gra.Rgb(1,1,0));
-				fig.draw( func, m.x,m.y,rad(0), plat.gra.Rgb(1,1,0) );
+//				sys.gra.Circle(m.x,m.y, 7, sys.gra.Rgb(1,1,0));
+				fig.draw( func, m.x,m.y,rad(0), sys.gra.Rgb(1,1,0) );
 			}
 		}
 		
@@ -1025,11 +1014,11 @@ double	b = 120;
 				for ( double t = st ; t < 1.0 ; t+=st)
 				{
 					vect2 P = catmull(t, tblMark[i], tblMark[i+1], tblMark[i+2], tblMark[i+3] );
-					plat.gra.Line( P.x, P.y, Q.x, Q.y, plat.gra.Rgb(1,1,1));
+					sys.gra.Line( P.x, P.y, Q.x, Q.y, sys.gra.Rgb(1,1,1));
 					Q=P;
 				}	
 					vect2 P = catmull(1, tblMark[i], tblMark[i+1], tblMark[i+2], tblMark[i+3] );
-					plat.gra.Line( P.x, P.y, Q.x, Q.y, plat.gra.Rgb(1,1,1));
+					sys.gra.Line( P.x, P.y, Q.x, Q.y, sys.gra.Rgb(1,1,1));
 					
 			}
 		}
@@ -1038,9 +1027,9 @@ double	b = 120;
 		{
 			auto func = [&]( double x0, double y0, double x1, double y1, int col)
 			{
-				plat.gra.Line(x0,y0,x1,y1,col);
+				sys.gra.Line(x0,y0,x1,y1,col);
 			};
-			fig.draw( func, 200,200,rad(-45), plat.gra.Rgb(1,0,0) );
+			fig.draw( func, 200,200,rad(-45), sys.gra.Rgb(1,0,0) );
 		}
 
 		// triangle
@@ -1048,9 +1037,9 @@ double	b = 120;
 			static int cnt = 0;
 			auto func = [&]( double x0, double y0, double x1, double y1, int col)
 			{
-				plat.gra.Line(x0,y0,x1,y1,col);
+				sys.gra.Line(x0,y0,x1,y1,col);
 			};
-			triangle.draw( func, 256,256,rad(cnt), plat.gra.Rgb(0,1,1) );
+			triangle.draw( func, 256,256,rad(cnt), sys.gra.Rgb(0,1,1) );
 			cnt++;
 		}
 	
@@ -1075,7 +1064,7 @@ double	b = 120;
 //			x1+=256;
 //			y1+=256;
 //
-//			plat.gra.Line(x0,y0,x1,y1,plat.gra.Rgb(0,1,1));
+//			sys.gra.Line(x0,y0,x1,y1,sys.gra.Rgb(0,1,1));
 //		}
 //		cnt++;
 

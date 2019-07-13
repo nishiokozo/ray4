@@ -5,11 +5,11 @@ TAR = main.exe
 SRCS = \
 	main.cpp \
 	geom.cpp \
-	plat.cpp \
-	syswin.cpp \
-	sysgra.cpp \
-	syskeys.cpp \
-	sysmouse.cpp \
+	Sys.cpp \
+	Syswin.cpp \
+	SysGra.cpp \
+	SysKeys.cpp \
+	SysMouse.cpp \
 
 LIBS = \
 	 -lgdi32
@@ -45,12 +45,12 @@ clean:
 	rm -f *.exe
 	rm -f *.o
 	rm -f *.*.stackdump
-	rm mm.txt
-	touch mm.txt
+	rm mm.mk
+	touch mm.mk
 	make mm
 
 mm:	$(SRCS)
-	$(CC)   -MM $? >mm.txt
+	$(CC)   -MM $? >mm.mk
 
-include mm.txt
+include mm.mk
 

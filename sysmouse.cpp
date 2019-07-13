@@ -10,7 +10,7 @@ using namespace std;
 #include <string.h>
 //#include "l.h"
 */
-#include "sysmouse.h"
+#include "SysMouse.h"
 //#include "font.h"
 
 //-----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-class Plat
+class Sys
 {
 public:
 	struct
@@ -9,7 +9,7 @@ public:
 		int	height;
 	} m;
 
-	Plat( const char* name, int pos_x, int pos_y, int width, int height  );
+	Sys( const char* name, int pos_x, int pos_y, int width, int height  );
 	bool	Update();
 
 	SysGra gra;

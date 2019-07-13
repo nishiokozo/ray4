@@ -2,20 +2,17 @@
 #include <functional>
 using namespace std;
 
-#include	"syskeys.h"
-#include	"sysmouse.h"
-#include	"SysGra.h"
-#include	"plat.h"
+#include "SysKeys.h"
+#include "SysMouse.h"
+#include "SysGra.h"
+#include "Sys.h"
 
 #include <windows.h>
-
-
-
-#include	"syswin.h"
+#include "SysWin.h"
 
 
 //------------------------------------------------------------------------------
-Plat::Plat( const char* name, int pos_x, int pos_y, int width, int height  )
+Sys::Sys( const char* name, int pos_x, int pos_y, int width, int height  )
 //------------------------------------------------------------------------------
 {
 	m.x			= pos_x;
@@ -66,7 +63,7 @@ Plat::Plat( const char* name, int pos_x, int pos_y, int width, int height  )
 
 }
 //------------------------------------------------------------------------------
-bool	Plat::Update()
+bool	Sys::Update()
 //------------------------------------------------------------------------------
 {
 	SysWin&	win= SysWin::GetInstance();
