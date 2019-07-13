@@ -122,7 +122,7 @@ LRESULT CALLBACK SysWin::WinProc
 
 		case WM_SHOWWINDOW:	//  ShowWindowと同時に発行される ShowWindow()  -> WM_SHOWWINDOW -> WM_ACTIVATE ->  WM_ERASEBKGND -> WM_SIZE -> WM_PAINT
 			cout << "WM_SHOWWINDOW " << endl;
-//			g.funcOnShowwindow();
+			//g.funcOnShowwindow();
 			return 0;
 
 		case WM_ACTIVATE:
@@ -265,7 +265,6 @@ void SysWin::OpenWindow( const char* name, int pos_x, int pos_y, int width, int 
 bool SysWin::Update()
 //------------------------------------------------------------------------------
 {
-//cout << "-- " << endl;
 	InvalidateRect(win.hWnd , NULL , TRUE);	//	WM_PAINTを発行し再描画矩形情報を渡す
 
 	while(1)

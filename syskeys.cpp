@@ -86,271 +86,269 @@ void SysKeys::Update()
 		g.tbl_lim[i]	= lim;
 	}
 
-	// Windows-APIの仕様を上に挙げないように一つ一つアサインする
-
-/*
-	// 標準で使えるキー（US配列、日本語配列、コンパクトキーボード等、大抵のキーボードで対応しているキーのみアサイン
 
 
-	使用		:	VKキーマップ
-----------------+-----------------------------------------
-	-			:	00 
-	-			:	01 VK_LBUTTON
-	-			:	02 VK_RBUTTON
-	-			:	03 VK_CANCEL
-	-			:	04 VK_MBUTTON
-	-			:	05 VK_XBUTTON1
-	-			:	06 VK_XBUTTON2
-	-			:	07 
-	BACKSPACE	:	08 VK_BACK
-	TAB			:	09 VK_TAB
-	-			:	0A 
-	-			:	0B 
-	-			:	0C VK_CLEAR
-	ENTER		:	0D VK_RETURN
-	-			:	0E 
-	-			:	0F 
-	SHIFT		:	10 VK_SHIFT
-	CTRL		:	11 VK_CONTROL
-	ALT			:	12 VK_MENU
-	-			:	13 VK_PAUSE
-	CAPSLOCK	:	14 VK_CAPITAL
-	-			:	15 VK_KANA
-	-			:	16 
-	-			:	17 VK_JUNJA
-	-			:	18 VK_FINAL
-	-			:	19 VK_KANJI 何故か常時0X80が入る
-	-			:	1A 
-	ESC			:	1B VK_ESCAPE
-	-			:	1C VK_CONVERT
-	-			:	1D VK_NONCONVERT
-	-			:	1E VK_ACCEPT
-	-			:	1F VK_MODECHANGE
-	SPACE		:	20 VK_SPACE
-	PAGEUP		:	21 VK_PRIOR
-	PAGEDOWN	:	22 VK_NEXT
-	END			:	23 VK_END
-	HOME		:	24 VK_HOME
-	LEFT		:	25 VK_LEFT
-	UP			:	26 VK_UP
-	RIGHT		:	27 VK_RIGHT
-	DOWN		:	28 VK_DOWN
-	-			:	29 VK_SELECT
-	-			:	2A VK_PRINT
-	-			:	2B VK_EXECUTE
-	-			:	2C VK_SNAPSHOT
-	-			:	2D VK_INSERT
-	-			:	2E VK_DELETE
-	-			:	2F VK_HELP
-	_0			:	30 "0"
-	_1			:	31 "1"
-	_2			:	32 "2"
-	_3			:	33 "3"
-	_4			:	34 "4"
-	_5			:	35 "5"
-	_6			:	36 "6"
-	_7			:	37 "7"
-	_8			:	38 "8"
-	_9			:	39 "9"
-	-			:	3A VK_COLON
-	-			:	3B VK_SEMICOLON
-	-			:	3C VK_COMMMA
-	-			:	3D VK_PERIOD
-	-			:	3E 
-	-			:	3F 
-	-			:	40 
-	A			:	41 'A'
-	B			:	42 'B'
-	C			:	43 'C'
-	D			:	44 'D'
-	E			:	45 'E'
-	F			:	46 'F'
-	G			:	47 'G'
-	H			:	48 'H'
-	I			:	49 'I'
-	J			:	4A 'J'
-	K			:	4B 'K'
-	L			:	4C 'L'
-	M			:	4D 'M'
-	N			:	4E 'N'
-	O			:	4F 'O'
-	P			:	50 'P'
-	Q			:	51 'Q'
-	R			:	52 'R'
-	S			:	53 'S'
-	T			:	54 'T'
-	U			:	55 'U'
-	V			:	56 'V'
-	W			:	57 'W'
-	X			:	58 'X'
-	Y			:	59 'Y'
-	Z			:	5A 'Z'
-	-			:	5B VK_LWIN
-	-			:	5C VK_RWIN
-	-			:	5D VK_APPS
-	-			:	5E 
-	-			:	5F VK_SLEEP
-	-			:	60 VK_NUMPAD0
-	-			:	61 VK_NUMPAD1
-	-			:	62 VK_NUMPAD2
-	-			:	63 VK_NUMPAD3
-	-			:	64 VK_NUMPAD4
-	-			:	65 VK_NUMPAD5
-	-			:	66 VK_NUMPAD6
-	-			:	67 VK_NUMPAD7
-	-			:	68 VK_NUMPAD8
-	-			:	69 VK_NUMPAD9
-	-			:	6A VK_MULTIPLY
-	-			:	6B VK_ADD
-	-			:	6C VK_SEPARATOR
-	-			:	6D VK_SUBTRACT
-	-			:	6E VK_DECIMAL
-	-			:	6F VK_DIVIDE
-	F1			:	70 VK_F1
-	F2			:	71 VK_F2
-	F3			:	72 VK_F3
-	F4			:	73 VK_F4
-	F5			:	74 VK_F5
-	F6			:	75 VK_F6
-	F7			:	76 VK_F7
-	F8			:	77 VK_F8
-	F9			:	78 VK_F9
-	F10			:	79 VK_F10
-	-			:	7A VK_F11
-	-			:	7B VK_F12
-	-			:	7C VK_F13
-	-			:	7D VK_F14
-	-			:	7E VK_F15
-	-			:	7F VK_F16
-	-			:	80 VK_F17
-	-			:	81 VK_F18
-	-			:	82 VK_F19
-	-			:	83 VK_F20
-	-			:	84 VK_F21
-	-			:	85 VK_F22
-	-			:	86 VK_F23
-	-			:	87 VK_F24
-	-			:	88 
-	-			:	89 
-	-			:	8A 
-	-			:	8B 
-	-			:	8C 
-	-			:	8D 
-	-			:	8E 
-	-			:	8F 
-	-			:	90 VK_NUMLOCK
-	-			:	91 VK_SCROLL
-	-			:	92 VK_OEM_FJ_JISHO
-	-			:	93 VK_OEM_FJ_MASSHOU
-	-			:	94 VK_OEM_FJ_TOUROKU
-	-			:	95 VK_OEM_FJ_LOYA
-	-			:	96 VK_OEM_FJ_ROYA
-	-			:	97 
-	-			:	98 
-	-			:	99 
-	-			:	9A 
-	-			:	9B 
-	-			:	9C 
-	-			:	9D 
-	-			:	9E 
-	-			:	9F 
-	-			:	A0 VK_LSHIFT
-	-			:	A1 VK_RSHIFT
-	-			:	A2 VK_LCONTROL
-	-			:	A3 VK_RCONTROL
-	-			:	A4 VK_LMENU
-	-			:	A5 VK_RMENU
-	-			:	A6 VK_BROWSER_BACK
-	-			:	A7 VK_BROWSER_FORWARD
-	-			:	A8 VK_BROWSER_REFRESH
-	-			:	A9 VK_BROWSER_STOP
-	-			:	AA VK_BROWSER_SEARCH
-	-			:	AB VK_BROWSER_FAVORITES
-	-			:	AC VK_BROWSER_HOME
-	-			:	AD VK_VOLUME_MUTE
-	-			:	AE VK_VOLUME_DOWN
-	-			:	AF VK_VOLUME_UP
-	-			:	B0 VK_MEDIA_NEXT_TRACK
-	-			:	B1 VK_MEDIA_PREV_TRACK
-	-			:	B2 VK_MEDIA_STOP
-	-			:	B3 VK_MEDIA_PLAY_PAUSE
-	-			:	B4 VK_LAUNCH_MAIL
-	-			:	B5 VK_LAUNCH_MEDIA_SELECT
-	-			:	B6 VK_LAUNCH_APP1
-	-			:	B7 VK_LAUNCH_APP2
-	-			:	B8 
-	-			:	B9 
-	SEMICOLON	:	BA VK_OEM_1
-	-			:	BB VK_OEM_PLUS
-	COMMA		:	BC VK_OEM_COMMA
-	-			:	BD VK_OEM_MINUS
-	PERIOD		:	BE VK_OEM_PERIOD
-	-			:	BF VK_OEM_2
-	-			:	C0 VK_OEM_3
-	-			:	C1 
-	-			:	C2 
-	-			:	C3 
-	-			:	C4 
-	-			:	C5 
-	-			:	C6 
-	-			:	C7 
-	-			:	C8 
-	-			:	C9 
-	-			:	CA 
-	-			:	CB 
-	-			:	CC 
-	-			:	CD 
-	-			:	CE 
-	-			:	CF 
-	-			:	D0 
-	-			:	D1 
-	-			:	D2 
-	-			:	D3 
-	-			:	D4 
-	-			:	D5 
-	-			:	D6 
-	-			:	D7 
-	-			:	D8 
-	-			:	D9 
-	-			:	DA 
-	-			:	DB VK_OEM_4
-	-			:	DC VK_OEM_5
-	-			:	DD VK_OEM_6
-	-			:	DE VK_OEM_7
-	-			:	DF VK_OEM_8
-	-			:	E0 
-	-			:	E1 VK_OEM_AX
-	-			:	E2 VK_OEM_102
-	-			:	E3 VK_ICO_HELP
-	-			:	E4 VK_ICO_00
-	-			:	E5 VK_PROCESSKEY
-	-			:	E6 VK_ICO_CLEAR
-	-			:	E7 VK_PACKET
-	-			:	E8 
-	-			:	E9 VK_OEM_RESET
-	-			:	EA VK_OEM_JUMP
-	-			:	EB VK_OEM_PA1
-	-			:	EC VK_OEM_PA2
-	-			:	ED VK_OEM_PA3
-	-			:	EE VK_OEM_WSCTRL
-	-			:	EF VK_OEM_CUSEL
-	-			:	F0 VK_OEM_ATTN 何故か常時0X80が入る
-	-			:	F1 VK_OEM_FINISH
-	-			:	F2 VK_OEM_COPY
-	-			:	F3 VK_OEM_AUTO 何故か常時0X80が入る
-	-			:	F4 VK_OEM_ENLW
-	-			:	F5 VK_OEM_BACKTAB
-	-			:	F6 VK_ATTN 何故か常時0X80が入る
-	-			:	F7 VK_CRSEL
-	-			:	F8 VK_EXSEL
-	-			:	F9 VK_EREOF
-	-			:	FA VK_PLAY
-	-			:	FB VK_ZOOM 何故か常時0X80が入る
-	-			:	FC VK_NONAME
-	-			:	FD VK_PA1
-	-			:	FE VK_OEM_CLEAR
-	-			:	FF 
-*/
+	//	 標準で使えるキー（US配列、日本語配列、コンパクトキーボード等、大抵のキーボードで対応しているキーのみアサイン
+	//	
+	//	
+	//		使用		:	VKキーマップ
+	//	----------------+-----------------------------------------
+	//		-			:	00 
+	//		-			:	01 VK_LBUTTON
+	//		-			:	02 VK_RBUTTON
+	//		-			:	03 VK_CANCEL
+	//		-			:	04 VK_MBUTTON
+	//		-			:	05 VK_XBUTTON1
+	//		-			:	06 VK_XBUTTON2
+	//		-			:	07 
+	//		BACKSPACE	:	08 VK_BACK
+	//		TAB			:	09 VK_TAB
+	//		-			:	0A 
+	//		-			:	0B 
+	//		-			:	0C VK_CLEAR
+	//		ENTER		:	0D VK_RETURN
+	//		-			:	0E 
+	//		-			:	0F 
+	//		SHIFT		:	10 VK_SHIFT
+	//		CTRL		:	11 VK_CONTROL
+	//		ALT			:	12 VK_MENU
+	//		-			:	13 VK_PAUSE
+	//		CAPSLOCK	:	14 VK_CAPITAL
+	//		-			:	15 VK_KANA
+	//		-			:	16 
+	//		-			:	17 VK_JUNJA
+	//		-			:	18 VK_FINAL
+	//		-			:	19 VK_KANJI 何故か常時0X80が入る
+	//		-			:	1A 
+	//		ESC			:	1B VK_ESCAPE
+	//		-			:	1C VK_CONVERT
+	//		-			:	1D VK_NONCONVERT
+	//		-			:	1E VK_ACCEPT
+	//		-			:	1F VK_MODECHANGE
+	//		SPACE		:	20 VK_SPACE
+	//		PAGEUP		:	21 VK_PRIOR
+	//		PAGEDOWN	:	22 VK_NEXT
+	//		END			:	23 VK_END
+	//		HOME		:	24 VK_HOME
+	//		LEFT		:	25 VK_LEFT
+	//		UP			:	26 VK_UP
+	//		RIGHT		:	27 VK_RIGHT
+	//		DOWN		:	28 VK_DOWN
+	//		-			:	29 VK_SELECT
+	//		-			:	2A VK_PRINT
+	//		-			:	2B VK_EXECUTE
+	//		-			:	2C VK_SNAPSHOT
+	//		-			:	2D VK_INSERT
+	//		-			:	2E VK_DELETE
+	//		-			:	2F VK_HELP
+	//		_0			:	30 "0"
+	//		_1			:	31 "1"
+	//		_2			:	32 "2"
+	//		_3			:	33 "3"
+	//		_4			:	34 "4"
+	//		_5			:	35 "5"
+	//		_6			:	36 "6"
+	//		_7			:	37 "7"
+	//		_8			:	38 "8"
+	//		_9			:	39 "9"
+	//		-			:	3A VK_COLON
+	//		-			:	3B VK_SEMICOLON
+	//		-			:	3C VK_COMMMA
+	//		-			:	3D VK_PERIOD
+	//		-			:	3E 
+	//		-			:	3F 
+	//		-			:	40 
+	//		A			:	41 'A'
+	//		B			:	42 'B'
+	//		C			:	43 'C'
+	//		D			:	44 'D'
+	//		E			:	45 'E'
+	//		F			:	46 'F'
+	//		G			:	47 'G'
+	//		H			:	48 'H'
+	//		I			:	49 'I'
+	//		J			:	4A 'J'
+	//		K			:	4B 'K'
+	//		L			:	4C 'L'
+	//		M			:	4D 'M'
+	//		N			:	4E 'N'
+	//		O			:	4F 'O'
+	//		P			:	50 'P'
+	//		Q			:	51 'Q'
+	//		R			:	52 'R'
+	//		S			:	53 'S'
+	//		T			:	54 'T'
+	//		U			:	55 'U'
+	//		V			:	56 'V'
+	//		W			:	57 'W'
+	//		X			:	58 'X'
+	//		Y			:	59 'Y'
+	//		Z			:	5A 'Z'
+	//		-			:	5B VK_LWIN
+	//		-			:	5C VK_RWIN
+	//		-			:	5D VK_APPS
+	//		-			:	5E 
+	//		-			:	5F VK_SLEEP
+	//		-			:	60 VK_NUMPAD0
+	//		-			:	61 VK_NUMPAD1
+	//		-			:	62 VK_NUMPAD2
+	//		-			:	63 VK_NUMPAD3
+	//		-			:	64 VK_NUMPAD4
+	//		-			:	65 VK_NUMPAD5
+	//		-			:	66 VK_NUMPAD6
+	//		-			:	67 VK_NUMPAD7
+	//		-			:	68 VK_NUMPAD8
+	//		-			:	69 VK_NUMPAD9
+	//		-			:	6A VK_MULTIPLY
+	//		-			:	6B VK_ADD
+	//		-			:	6C VK_SEPARATOR
+	//		-			:	6D VK_SUBTRACT
+	//		-			:	6E VK_DECIMAL
+	//		-			:	6F VK_DIVIDE
+	//		F1			:	70 VK_F1
+	//		F2			:	71 VK_F2
+	//		F3			:	72 VK_F3
+	//		F4			:	73 VK_F4
+	//		F5			:	74 VK_F5
+	//		F6			:	75 VK_F6
+	//		F7			:	76 VK_F7
+	//		F8			:	77 VK_F8
+	//		F9			:	78 VK_F9
+	//		F10			:	79 VK_F10
+	//		-			:	7A VK_F11
+	//		-			:	7B VK_F12
+	//		-			:	7C VK_F13
+	//		-			:	7D VK_F14
+	//		-			:	7E VK_F15
+	//		-			:	7F VK_F16
+	//		-			:	80 VK_F17
+	//		-			:	81 VK_F18
+	//		-			:	82 VK_F19
+	//		-			:	83 VK_F20
+	//		-			:	84 VK_F21
+	//		-			:	85 VK_F22
+	//		-			:	86 VK_F23
+	//		-			:	87 VK_F24
+	//		-			:	88 
+	//		-			:	89 
+	//		-			:	8A 
+	//		-			:	8B 
+	//		-			:	8C 
+	//		-			:	8D 
+	//		-			:	8E 
+	//		-			:	8F 
+	//		-			:	90 VK_NUMLOCK
+	//		-			:	91 VK_SCROLL
+	//		-			:	92 VK_OEM_FJ_JISHO
+	//		-			:	93 VK_OEM_FJ_MASSHOU
+	//		-			:	94 VK_OEM_FJ_TOUROKU
+	//		-			:	95 VK_OEM_FJ_LOYA
+	//		-			:	96 VK_OEM_FJ_ROYA
+	//		-			:	97 
+	//		-			:	98 
+	//		-			:	99 
+	//		-			:	9A 
+	//		-			:	9B 
+	//		-			:	9C 
+	//		-			:	9D 
+	//		-			:	9E 
+	//		-			:	9F 
+	//		-			:	A0 VK_LSHIFT
+	//		-			:	A1 VK_RSHIFT
+	//		-			:	A2 VK_LCONTROL
+	//		-			:	A3 VK_RCONTROL
+	//		-			:	A4 VK_LMENU
+	//		-			:	A5 VK_RMENU
+	//		-			:	A6 VK_BROWSER_BACK
+	//		-			:	A7 VK_BROWSER_FORWARD
+	//		-			:	A8 VK_BROWSER_REFRESH
+	//		-			:	A9 VK_BROWSER_STOP
+	//		-			:	AA VK_BROWSER_SEARCH
+	//		-			:	AB VK_BROWSER_FAVORITES
+	//		-			:	AC VK_BROWSER_HOME
+	//		-			:	AD VK_VOLUME_MUTE
+	//		-			:	AE VK_VOLUME_DOWN
+	//		-			:	AF VK_VOLUME_UP
+	//		-			:	B0 VK_MEDIA_NEXT_TRACK
+	//		-			:	B1 VK_MEDIA_PREV_TRACK
+	//		-			:	B2 VK_MEDIA_STOP
+	//		-			:	B3 VK_MEDIA_PLAY_PAUSE
+	//		-			:	B4 VK_LAUNCH_MAIL
+	//		-			:	B5 VK_LAUNCH_MEDIA_SELECT
+	//		-			:	B6 VK_LAUNCH_APP1
+	//		-			:	B7 VK_LAUNCH_APP2
+	//		-			:	B8 
+	//		-			:	B9 
+	//		SEMICOLON	:	BA VK_OEM_1
+	//		-			:	BB VK_OEM_PLUS
+	//		COMMA		:	BC VK_OEM_COMMA
+	//		-			:	BD VK_OEM_MINUS
+	//		PERIOD		:	BE VK_OEM_PERIOD
+	//		-			:	BF VK_OEM_2
+	//		-			:	C0 VK_OEM_3
+	//		-			:	C1 
+	//		-			:	C2 
+	//		-			:	C3 
+	//		-			:	C4 
+	//		-			:	C5 
+	//		-			:	C6 
+	//		-			:	C7 
+	//		-			:	C8 
+	//		-			:	C9 
+	//		-			:	CA 
+	//		-			:	CB 
+	//		-			:	CC 
+	//		-			:	CD 
+	//		-			:	CE 
+	//		-			:	CF 
+	//		-			:	D0 
+	//		-			:	D1 
+	//		-			:	D2 
+	//		-			:	D3 
+	//		-			:	D4 
+	//		-			:	D5 
+	//		-			:	D6 
+	//		-			:	D7 
+	//		-			:	D8 
+	//		-			:	D9 
+	//		-			:	DA 
+	//		-			:	DB VK_OEM_4
+	//		-			:	DC VK_OEM_5
+	//		-			:	DD VK_OEM_6
+	//		-			:	DE VK_OEM_7
+	//		-			:	DF VK_OEM_8
+	//		-			:	E0 
+	//		-			:	E1 VK_OEM_AX
+	//		-			:	E2 VK_OEM_102
+	//		-			:	E3 VK_ICO_HELP
+	//		-			:	E4 VK_ICO_00
+	//		-			:	E5 VK_PROCESSKEY
+	//		-			:	E6 VK_ICO_CLEAR
+	//		-			:	E7 VK_PACKET
+	//		-			:	E8 
+	//		-			:	E9 VK_OEM_RESET
+	//		-			:	EA VK_OEM_JUMP
+	//		-			:	EB VK_OEM_PA1
+	//		-			:	EC VK_OEM_PA2
+	//		-			:	ED VK_OEM_PA3
+	//		-			:	EE VK_OEM_WSCTRL
+	//		-			:	EF VK_OEM_CUSEL
+	//		-			:	F0 VK_OEM_ATTN 何故か常時0X80が入る
+	//		-			:	F1 VK_OEM_FINISH
+	//		-			:	F2 VK_OEM_COPY
+	//		-			:	F3 VK_OEM_AUTO 何故か常時0X80が入る
+	//		-			:	F4 VK_OEM_ENLW
+	//		-			:	F5 VK_OEM_BACKTAB
+	//		-			:	F6 VK_ATTN 何故か常時0X80が入る
+	//		-			:	F7 VK_CRSEL
+	//		-			:	F8 VK_EXSEL
+	//		-			:	F9 VK_EREOF
+	//		-			:	FA VK_PLAY
+	//		-			:	FB VK_ZOOM 何故か常時0X80が入る
+	//		-			:	FC VK_NONAME
+	//		-			:	FD VK_PA1
+	//		-			:	FE VK_OEM_CLEAR
+	//		-			:	FF 
 	
 	this->BACKSPACE.on	= g.tbl_on[ VK_BACK ];			// 08
 	this->BACKSPACE.hi	= g.tbl_hi[ VK_BACK ];			// 08
