@@ -1,8 +1,11 @@
 #include <iostream>
 using namespace std;
 
-#include <windows.h>
 #include "SysMouse.h"
+
+#include <windows.h>
+#include <functional>
+#include "SysWin.h"
 
 //-----------------------------------------------------------------------------
 SysMouse& SysMouse::GetInstance()
@@ -26,13 +29,34 @@ SysMouse::SysMouse()
 
 	GetCursorPos( &pos );
 
-	this->sx = (float)pos.x;
-	this->sy = (float)pos.y;
+	SysWin& win = SysWin::GetInstance();
+
+	this->sx = pos.x - win.GetPosX();
+	this->sy = pos.y - win.GetPosY();
 
 	this->mx = 0;
 	this->my = 0;
+
+
 }
 
+/*
+//-----------------------------------------------------------------------------
+void SysMouse::OnSize( int width, int height )
+//-----------------------------------------------------------------------------
+{
+	m.width = width;
+	m.height = height;
+}
+
+//-----------------------------------------------------------------------------
+void SysMouse::OnMove( int pos_x, int pos_y )
+//-----------------------------------------------------------------------------
+{
+	m.pos_x = pos_x;
+	m.pos_y = pos_y;
+}
+*/
 
 //-----------------------------------------------------------------------------
 void SysMouse::Update()
@@ -41,6 +65,9 @@ void SysMouse::Update()
 	POINT pos;
 
 	GetCursorPos( &pos );
+	SysWin& win = SysWin::GetInstance();
+	pos.x -= win.GetPosX();
+	pos.y -= win.GetPosY();
 
 	int	l = GetAsyncKeyState(VK_LBUTTON);
 	int r = GetAsyncKeyState(VK_RBUTTON);
@@ -74,10 +101,10 @@ void SysMouse::Update()
 	this->B.lo =  this->B.on && !on_b;
 	this->B.on = on_b;
 
-	this->mx = (float)pos.x - this->sx;
-	this->my = (float)pos.y - this->sy;
+	this->mx = pos.x - this->sx;
+	this->my = pos.y - this->sy;
 
-	this->sx = (float)pos.x;
-	this->sy = (float)pos.y;
+	this->sx = pos.x;
+	this->sy = pos.y;
 }
 

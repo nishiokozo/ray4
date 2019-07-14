@@ -10,25 +10,23 @@ public:
 	} win;
 
 
-	struct
-	{
-		int x;
-		int	y;
-		int width;
-		int	height;
-	} m;
 
 	static SysWin&	GetInstance();
 	
+	int GetPosX();
+	int GetPosY();
+	int GetWidth();
+	int GetHeigit();
 
 	bool	Update();
 
 	void OpenWindow( const char* name, int pos_x, int pos_y, int width, int height  );
 
-	void SetOnSize( function<void()> func );
-	void SetOnDestroy( function<void()> func );
 	void SetOnCreate( function<void()> func );
+	void SetOnSize( function<void( int width, int height )> func );
+	void SetOnMove( function<void( int pos_x, int pos_y )> func );
 	void SetOnPaint( function<void()> func );
+	void SetOnDestroy( function<void()> func );
 
 
 };

@@ -17,47 +17,26 @@ using namespace std;
 static struct
 {
 	function<void()> funcOnCreate;
-	function<void()> funcOnSize;
+	function<void( int width, int height)> funcOnSize;
+	function<void( int width, int height)> funcOnMove;
 	function<void()> funcOnPaint;
 	function<void()> funcOnDestroy;
 
-	WNDCLASSEX		tWndClass;
+	WNDCLASSEX		wndclass;
 	HINSTANCE		hInstance;
-	const CHAR*		cpClassName;
-	const CHAR*		cpWindowName;
-	CHAR*			cpMenu;
-	MSG				tMsg;
+	const CHAR*		nameClass;
+	const CHAR*		nameWindow;
+	CHAR*			strMenu;
+	MSG				msg;
+
+	RECT rect;
+
+	int pos_x;
+	int	pos_y;
+	int width;
+	int	height;
 
 } g;
-
-
-//------------------------------------------------------------------------------
-void SysWin::SetOnPaint( function<void()> func )
-//------------------------------------------------------------------------------
-{
-	g.funcOnPaint = func;
-}
-
-//------------------------------------------------------------------------------
-void SysWin::SetOnSize( function<void()> func )
-//------------------------------------------------------------------------------
-{
-	g.funcOnSize = func;
-}
-
-//------------------------------------------------------------------------------
-void SysWin::SetOnDestroy( function<void()> func )
-//------------------------------------------------------------------------------
-{
-	g.funcOnDestroy = func;
-}
-
-//------------------------------------------------------------------------------
-void SysWin::SetOnCreate( function<void()> func )
-//------------------------------------------------------------------------------
-{
-	g.funcOnCreate = func;
-}
 
 ///------------------------------------------------------------------------------
 static LRESULT CALLBACK WinProc
@@ -122,6 +101,7 @@ static LRESULT CALLBACK WinProc
 	//		-- 0x2		>	WM_DESTROY
 	//		-- 0x82			WM_NCDESTROY
 
+
 	//cout << hex << "-- 0x" << uMsg << endl;
 	switch( uMsg ) 
 	{
@@ -130,21 +110,42 @@ static LRESULT CALLBACK WinProc
 			g.funcOnCreate();
 			return 0;
 
-//		case WM_SHOWWINDOW:	//  ShowWindowと同時に発行される ShowWindow()  -> WM_SHOWWINDOW -> WM_ACTIVATE ->  WM_ERASEBKGND -> WM_SIZE -> WM_PAINT
-//			cout << "WM_SHOWWINDOW " << endl;
-//			return 0;
-//
-//		case WM_ACTIVATE:
-//			return 0;
+
 
 		case WM_ERASEBKGND:	//	WM_PAINTイベントの途中、及びWM_SHOWWINDOWのあとに発行される。 DefWindowProc()に任せると白いフラッシュが入ってしまうので、0を返す
 			//cout << "WM_ERASEBKGND " << endl;
 			return 0;
 			
-		case WM_SIZE:	// 画面サイズが決定された時に発行される
-			//cout << "WM_SIZE " << endl;
-			g.funcOnSize();
+		case WM_SIZE:	// 画面サイズが決定された時に発行される（初期表示含む）
+			cout << "WM_SIZE " << endl;
+			GetClientRect( hWnd, &g.rect );
+cout << "1onsize " << g.rect.right << " " << g.rect.bottom << endl;
+
+			g.funcOnSize( g.rect.right, g.rect.bottom );
 			return 0;
+
+		case WM_MOVE:	// 画面位置が決定された時に発行される（初期表示含む）
+			cout << "WM_MOVE " << endl;
+			{
+				RECT	r;
+				SetRect(&r, 0, 0, 0, 0 );
+				AdjustWindowRectEx(&r, WS_OVERLAPPEDWINDOW, FALSE, 0);
+//	cout << r.left << " "  << r.top << " " << endl;
+
+				GetWindowRect( hWnd, &g.rect );
+//	cout << g.rect.left << " "  << g.rect.top << " " << endl;
+//	cout << g.rect.left - r.left << " "  << g.rect.top - r.top << " " << endl;
+
+				int x = g.rect.left - r.left;	//	描画区域の左上原点座標
+				int y = g.rect.top - r.top;		//	描画区域の左上原点座標
+
+				g.pos_x = x;
+				g.pos_y = y;
+
+				g.funcOnMove( x, y );
+			}
+			return 0;
+		
 
 		case WM_PAINT:	// OSからの描画要求。再描画区域情報（ウィンドウが重なっている際などの）が得られるタイミング。
 			//cout << "WM_PAINT " << endl;
@@ -164,6 +165,66 @@ static LRESULT CALLBACK WinProc
 
 	// デフォルト処理呼び出し。
 	return DefWindowProc( hWnd, uMsg, wParam, lParam );// [x] > WM_SYSCOMMAND > WM_CLOSE > WM_DESTROY
+}
+
+//------------------------------------------------------------------------------
+void SysWin::SetOnPaint( function<void()> func )
+//------------------------------------------------------------------------------
+{
+	g.funcOnPaint = func;
+}
+
+//------------------------------------------------------------------------------
+void SysWin::SetOnSize( function<void( int width, int height )> func )
+//------------------------------------------------------------------------------
+{
+	g.funcOnSize = func;
+}
+
+//------------------------------------------------------------------------------
+void SysWin::SetOnMove( function<void( int pos_x, int pos_y )> func )
+//------------------------------------------------------------------------------
+{
+	g.funcOnMove = func;
+}
+
+//------------------------------------------------------------------------------
+void SysWin::SetOnDestroy( function<void()> func )
+//------------------------------------------------------------------------------
+{
+	g.funcOnDestroy = func;
+}
+
+//------------------------------------------------------------------------------
+void SysWin::SetOnCreate( function<void()> func )
+//------------------------------------------------------------------------------
+{
+	g.funcOnCreate = func;
+}
+
+//------------------------------------------------------------------------------
+int SysWin::GetPosX()
+//------------------------------------------------------------------------------
+{
+	return g.pos_x;
+}
+//------------------------------------------------------------------------------
+int SysWin::GetPosY()
+//------------------------------------------------------------------------------
+{
+	return g.pos_y;
+}
+//------------------------------------------------------------------------------
+int SysWin::GetWidth()
+//------------------------------------------------------------------------------
+{
+	return g.width;
+}
+//------------------------------------------------------------------------------
+int SysWin::GetHeigit()
+//------------------------------------------------------------------------------
+{
+	return g.height;
 }
 //------------------------------------------------------------------------------
 SysWin&	SysWin::GetInstance()
@@ -195,30 +256,30 @@ void SysWin::OpenWindow( const char* windowname, int pos_x, int pos_y, int width
 
 
 	// クラス名称
-	g.cpClassName	= "MainWindowClass";
+	g.nameClass	= "MainWindowClass";
 
 	// メニュー
-	g.cpMenu			= MAKEINTRESOURCE( NULL );
+	g.strMenu			= MAKEINTRESOURCE( NULL );
 
 	// ウインドウ名称
-	g.cpWindowName = name;
+	g.nameWindow = name;
 
 	// ウインドウクラスパラメータセット
-	g.tWndClass.cbSize		= sizeof( WNDCLASSEX );
-	g.tWndClass.style			= CS_HREDRAW | CS_VREDRAW;
-	g.tWndClass.lpfnWndProc	= WinProc;
-	g.tWndClass.cbClsExtra	= 0;	// GetClassLong で取得可能なメモリ
-	g.tWndClass.cbWndExtra	= 0;	// GetWindowLong で取得可能なメモリ
-	g.tWndClass.hInstance		= g.hInstance;
-	g.tWndClass.hIcon			= LoadIcon( NULL, IDI_APPLICATION );
-	g.tWndClass.hCursor		= LoadCursor( NULL, IDC_ARROW );
-	g.tWndClass.hbrBackground = (HBRUSH)( COLOR_WINDOW + 1 );
-	g.tWndClass.lpszMenuName	= g.cpMenu;
-	g.tWndClass.lpszClassName = g.cpClassName;
-	g.tWndClass.hIconSm		= NULL;
+	g.wndclass.cbSize			= sizeof( WNDCLASSEX );
+	g.wndclass.style			= CS_HREDRAW | CS_VREDRAW;
+	g.wndclass.lpfnWndProc		= WinProc;
+	g.wndclass.cbClsExtra		= 0;	// GetClassLong で取得可能なメモリ
+	g.wndclass.cbWndExtra		= 0;	// GetWindowLong で取得可能なメモリ
+	g.wndclass.hInstance		= g.hInstance;
+	g.wndclass.hIcon			= LoadIcon( NULL, IDI_APPLICATION );
+	g.wndclass.hCursor			= LoadCursor( NULL, IDC_ARROW );
+	g.wndclass.hbrBackground	= (HBRUSH)( COLOR_WINDOW + 1 );
+	g.wndclass.lpszMenuName		= g.strMenu;
+	g.wndclass.lpszClassName	= g.nameClass;
+	g.wndclass.hIconSm			= NULL;
 
 	// ウインドウクラス生成
-	if ( 0 == RegisterClassEx( &g.tWndClass ) ) 
+	if ( 0 == RegisterClassEx( &g.wndclass ) ) 
 	{
 	}
 
@@ -227,7 +288,7 @@ void SysWin::OpenWindow( const char* windowname, int pos_x, int pos_y, int width
 		int valWin = WS_OVERLAPPEDWINDOW;
 		win.hWnd = CreateWindowEx(
 			 0
-			, g.tWndClass.lpszClassName
+			, g.wndclass.lpszClassName
 			, name 
 			, valWin
 			, 0,0,256,256
@@ -239,10 +300,10 @@ void SysWin::OpenWindow( const char* windowname, int pos_x, int pos_y, int width
 
 	}
 
-	m.x			= pos_x;
-	m.y			= pos_y;
-	m.width		= width;
-	m.height	= height;
+	g.pos_x		= pos_x;
+	g.pos_y		= pos_y;
+	g.width		= width;
+	g.height	= height;
 
 	// ウィンドウ名を変える
 	SetWindowText(win.hWnd , windowname );
@@ -250,17 +311,17 @@ void SysWin::OpenWindow( const char* windowname, int pos_x, int pos_y, int width
 
 	// ウィンドウ位置サイズを変える
 	{
-		RECT rc;
-		SetRect(&rc, 0, 0, width, height );
-		AdjustWindowRectEx(&rc, WS_OVERLAPPEDWINDOW, FALSE, 0);
+		RECT rect;
+		SetRect(&rect, 0, 0, width, height );
+		AdjustWindowRectEx(&rect, WS_OVERLAPPEDWINDOW, FALSE, 0);
 
 		SetWindowPos(
 			  win.hWnd 
 			, HWND_TOPMOST	// 最前面ウィンドウ
-			, pos_x + rc.left	
-			, pos_y + rc.top	
-			, rc.right-rc.left 	
-			, rc.bottom-rc.top	
+			, pos_x + rect.left	
+			, pos_y + rect.top	
+			, rect.right-rect.left 	
+			, rect.bottom-rect.top	
 			,0
 		);
 	}
@@ -278,11 +339,11 @@ bool SysWin::Update()
 
 	while(1)
 	{
-		while ( PeekMessage( &g.tMsg, NULL, 0, 0, PM_REMOVE) )
+		while ( PeekMessage( &g.msg, NULL, 0, 0, PM_REMOVE) )
 		{
-			DispatchMessage( &g.tMsg );
-			TranslateMessage( &g.tMsg );
-			if ( g.tMsg.message == WM_QUIT ) return false; 
+			DispatchMessage( &g.msg );
+			TranslateMessage( &g.msg );
+			if ( g.msg.message == WM_QUIT ) return false; 
 		}
 
 		return true;

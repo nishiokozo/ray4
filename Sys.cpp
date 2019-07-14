@@ -15,8 +15,8 @@ using namespace std;
 Sys::Sys( const char* name, int pos_x, int pos_y, int width, int height  )
 //------------------------------------------------------------------------------
 {
-	m.x			= pos_x;
-	m.y			= pos_y;
+	m.x		= pos_x;
+	m.y		= pos_y;
 	m.width		= width;
 	m.height	= height;
 
@@ -36,11 +36,21 @@ Sys::Sys( const char* name, int pos_x, int pos_y, int width, int height  )
 
 	// ウィンドウサイズ変更関数
 	{
-		auto func = [&]()
+		auto func = [&]( int width, int height )
 		{
-			gra.OnSize();
+			gra.OnSize( width, height );
 		};
 		win.SetOnSize( func );
+	}
+
+	// ウィンドウ位置変更関数
+	{
+		auto func = [&]( int pos_x, int pos_y )
+		{
+			gra.OnMove( pos_x, pos_y );
+//			mouse.OnMove( pos_x, pos_y );
+		};
+		win.SetOnMove( func );
 	}
 
 	// ウィンドウペイント関数
@@ -61,7 +71,7 @@ Sys::Sys( const char* name, int pos_x, int pos_y, int width, int height  )
 		win.SetOnDestroy( func );
 	}
 
-	win.OpenWindow("Ray4 " __DATE__, 300,300,512, 512 );
+	win.OpenWindow("Ray4 " __DATE__, pos_x,pos_y,width, height );
 
 }
 //------------------------------------------------------------------------------

@@ -27,12 +27,24 @@ public:
 	Keyobj	F;	//フォワードボタン
 	Keyobj	B;	//バックボタン
 
-	float	sx;	//	マウスカーソル位置
-	float	sy;
-	float	mx;	//	マウスカーソル移動量
-	float	my;
+	int	sx;	//	マウスカーソル位置
+	int	sy;
+	int	mx;	//	マウスカーソル移動量
+	int	my;
 
+/*
+	struct 
+	{
+		int	pos_x;	//画面左上座標	
+		int	pos_y;	//画面左上座標
+		int	width;
+		int	height;
+	} m;
+*/
 	void Update();
+
+//	void OnSize( int width, int height );
+//	void OnMove( int pos_x, int pos_y );
 
 };
 

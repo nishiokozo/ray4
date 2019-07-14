@@ -16,9 +16,14 @@ using namespace std;
 static struct G
 {
 	bool flgActive;
-	RECT rect;
+//	RECT rect;
 	HDC  hdcBackbuffer;
 	HBITMAP hBitmap;
+
+	int pos_x;
+	int pos_y;
+	int	width;
+	int height;
 
 	G()
 	{
@@ -86,9 +91,14 @@ void  SysGra::OnCreate()
 }	
 
 //------------------------------------------------------------------------------
-void  SysGra::OnSize() 
+void  SysGra::OnSize( int width, int height ) 
 //------------------------------------------------------------------------------
 {
+	g.width = width;
+	g.height = height;
+
+cout << "onsize " << g.width << " " << g.height << endl;
+
 	HWND hWnd = SysWin::GetInstance().win.hWnd;
     HDC hDc = GetDC(hWnd);
     {
@@ -98,13 +108,38 @@ void  SysGra::OnSize()
 			DeleteObject(g.hBitmap);
 		}
 
-		GetClientRect( hWnd, &g.rect );
-		g.hBitmap = CreateCompatibleBitmap( hDc, g.rect.right, g.rect.bottom );
+
+		g.hBitmap = CreateCompatibleBitmap( hDc, width, height );
+
 	    g.hdcBackbuffer = CreateCompatibleDC( NULL );
 	    SelectObject( g.hdcBackbuffer, g.hBitmap );
 		g.flgActive=true;
 	}
 	ReleaseDC( hWnd, hDc );
+}
+
+//------------------------------------------------------------------------------
+void  SysGra::OnMove( int pos_x, int pos_y ) 
+//------------------------------------------------------------------------------
+{
+	g.pos_x = pos_x;
+	g.pos_y = pos_y;
+
+	{
+		HWND hWnd = SysWin::GetInstance().win.hWnd;
+		RECT rect;
+		SetRect(&rect, 0, 0, g.width, g.height );
+		AdjustWindowRectEx(&rect, WS_OVERLAPPEDWINDOW, FALSE, 0);
+//cout << "a" << endl;
+//cout << pos_x << " " << pos_y << endl;
+//cout << g.width << " " << g.height << endl;
+//
+//cout << "b" << endl;
+//cout << pos_x + rect.left << " " << pos_y + rect.top << endl;
+//cout << rect.right-rect.left << " " << rect.bottom-rect.top << endl;
+	}
+
+
 }
 
 //------------------------------------------------------------------------------
@@ -122,7 +157,8 @@ void  SysGra::OnPaint()
 			HBRUSH hBrush  = CreateSolidBrush(m.clr.col);
 			SelectObject( hDc , hBrush);
 
-			PatBlt( hDc , 0 , 0 ,g.rect.right, g.rect.bottom , PATCOPY);
+//			PatBlt( hDc , 0 , 0 ,g.rect.right, g.rect.bottom , PATCOPY);
+			PatBlt( hDc , 0 , 0 ,g.width, g.height , PATCOPY);
 
 			DeleteObject( hBrush );
 
@@ -278,7 +314,8 @@ void  SysGra::OnPaint()
 	{
 	    PAINTSTRUCT ps;
 	    HDC hDc = BeginPaint(hWnd, &ps);
-	    BitBlt(hDc, 0, 0, g.rect.right, g.rect.bottom, g.hdcBackbuffer, 0, 0, SRCCOPY);
+//	    BitBlt(hDc, 0, 0, g.rect.right, g.rect.bottom, g.hdcBackbuffer, 0, 0, SRCCOPY);
+	    BitBlt(hDc, 0, 0, g.width, g.height, g.hdcBackbuffer, 0, 0, SRCCOPY);
 	    EndPaint(hWnd, &ps);
 	}
 

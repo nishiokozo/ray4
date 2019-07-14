@@ -504,7 +504,7 @@ void	raytrace( SysWin& win, int py )
 int main()
 //------------------------------------------------------------------------------
 {
-	Sys	sys("Ray4 " __DATE__, 300,300,512, 512 );
+	Sys	sys("Ray4 " __DATE__, 300,300,768, 512 );
 
 	struct Figure
 	{
@@ -829,7 +829,8 @@ double	b = 120;
 		static vect2 drag_start(0,0);
 		static bool bDrag = false;
 	
-		vect2 mpos( sys.mouse.sx-sys.m.x, sys.mouse.sy-sys.m.y );
+//		vect2 mpos( sys.mouse.sx-sys.m.x, sys.mouse.sy-sys.m.y );
+		vect2 mpos( sys.mouse.sx, sys.mouse.sy );
 		
 		
 

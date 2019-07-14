@@ -72,10 +72,11 @@ struct SysGra
 
 	void ReleasePixelBits();
 	void CreatePixelBits(int bpp, int width, int height );
-	void OnSize() ;
-	void OnDestroy() ;
-	void OnCreate() ;
-	void OnPaint() ;
+	void OnSize( int width, int height );
+	void OnMove( int pos_x, int pos_y );
+	void OnDestroy();
+	void OnCreate();
+	void OnPaint();
 
 	void Update() ;
 
