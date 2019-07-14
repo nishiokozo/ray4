@@ -97,7 +97,7 @@ void  SysGra::OnSize( int width, int height )
 	g.width = width;
 	g.height = height;
 
-cout << "onsize " << g.width << " " << g.height << endl;
+//cout << "onsize " << g.width << " " << g.height << endl;
 
 	HWND hWnd = SysWin::GetInstance().win.hWnd;
     HDC hDc = GetDC(hWnd);

@@ -124,8 +124,8 @@ static LRESULT CALLBACK WinProc
 			g.funcOnSize( g.rect.right, g.rect.bottom );
 			return 0;
 
-//		case WM_MOVE:	// 画面位置が決定された時に発行される（初期表示含む）
-			cout << "WM_MOVE " << endl;
+		case WM_MOVE:	// 画面位置が決定された時に発行される（初期表示含む）
+//			cout << "WM_MOVE " << endl;
 			{
 				RECT	r;
 				SetRect(&r, 0, 0, 0, 0 );

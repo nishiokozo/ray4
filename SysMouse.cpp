@@ -65,9 +65,11 @@ void SysMouse::Update()
 	POINT pos;
 
 	GetCursorPos( &pos );
-	SysWin& win = SysWin::GetInstance();
-	pos.x -= win.GetPosX();
-	pos.y -= win.GetPosY();
+	{
+		SysWin& win = SysWin::GetInstance();
+		pos.x -= win.GetPosX();
+		pos.y -= win.GetPosY();
+	}
 
 	int	l = GetAsyncKeyState(VK_LBUTTON);
 	int r = GetAsyncKeyState(VK_RBUTTON);
