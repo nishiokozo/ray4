@@ -20,16 +20,18 @@ Sys::Sys( const char* name, int pos_x, int pos_y, int width, int height  )
 	m.width		= width;
 	m.height	= height;
 
-	SysWin&	win= SysWin::GetInstance();
+
+	SysWin&	win = SysWin::GetInstance();
+
 
 
 	//	ウィンドウ生成関数
 	{
 		auto func = [&]()
 		{
-			gra.OnShowwindow();
+			gra.OnCreate();
 		};
-		win.SetOnShowwindow( func );
+		win.SetOnCreate( func );
 	}
 
 	// ウィンドウサイズ変更関数
@@ -70,6 +72,7 @@ bool	Sys::Update()
 	bool b = win.Update();
 	keys.Update();
 	mouse.Update();
-
+	gra.Update();
+	
 	return b;
 }

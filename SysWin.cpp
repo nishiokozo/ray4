@@ -10,16 +10,24 @@ using namespace std;
 
 #include <windows.h>
 
-#include "syswin.h"
+#include "SysWin.h"
 
 
 
 static struct
 {
-	function<void()> funcOnShowwindow;
+	function<void()> funcOnCreate;
 	function<void()> funcOnSize;
 	function<void()> funcOnPaint;
 	function<void()> funcOnDestroy;
+
+	WNDCLASSEX		tWndClass;
+	HINSTANCE		hInstance;
+	const CHAR*		cpClassName;
+	const CHAR*		cpWindowName;
+	CHAR*			cpMenu;
+	MSG				tMsg;
+
 } g;
 
 
@@ -29,6 +37,7 @@ void SysWin::SetOnPaint( function<void()> func )
 {
 	g.funcOnPaint = func;
 }
+
 //------------------------------------------------------------------------------
 void SysWin::SetOnSize( function<void()> func )
 //------------------------------------------------------------------------------
@@ -44,14 +53,14 @@ void SysWin::SetOnDestroy( function<void()> func )
 }
 
 //------------------------------------------------------------------------------
-void SysWin::SetOnShowwindow( function<void()> func )
+void SysWin::SetOnCreate( function<void()> func )
 //------------------------------------------------------------------------------
 {
-	g.funcOnShowwindow = func;
+	g.funcOnCreate = func;
 }
 
 ///------------------------------------------------------------------------------
-LRESULT CALLBACK SysWin::WinProc
+static LRESULT CALLBACK WinProc
 //------------------------------------------------------------------------------
 (
 	  HWND		hWnd
@@ -118,15 +127,15 @@ LRESULT CALLBACK SysWin::WinProc
 	{
 		case WM_CREATE:	// CreateWindowと同時に発行される
 			cout << "WM_CREATE " << endl;
+			g.funcOnCreate();
 			return 0;
 
-		case WM_SHOWWINDOW:	//  ShowWindowと同時に発行される ShowWindow()  -> WM_SHOWWINDOW -> WM_ACTIVATE ->  WM_ERASEBKGND -> WM_SIZE -> WM_PAINT
-			cout << "WM_SHOWWINDOW " << endl;
-			//g.funcOnShowwindow();
-			return 0;
-
-		case WM_ACTIVATE:
-			return 0;
+//		case WM_SHOWWINDOW:	//  ShowWindowと同時に発行される ShowWindow()  -> WM_SHOWWINDOW -> WM_ACTIVATE ->  WM_ERASEBKGND -> WM_SIZE -> WM_PAINT
+//			cout << "WM_SHOWWINDOW " << endl;
+//			return 0;
+//
+//		case WM_ACTIVATE:
+//			return 0;
 
 		case WM_ERASEBKGND:	//	WM_PAINTイベントの途中、及びWM_SHOWWINDOWのあとに発行される。 DefWindowProc()に任せると白いフラッシュが入ってしまうので、0を返す
 			//cout << "WM_ERASEBKGND " << endl;
@@ -140,6 +149,7 @@ LRESULT CALLBACK SysWin::WinProc
 		case WM_PAINT:	// OSからの描画要求。再描画区域情報（ウィンドウが重なっている際などの）が得られるタイミング。
 			//cout << "WM_PAINT " << endl;
 			g.funcOnPaint();
+
 			return 0;
 
 		case WM_KEYDOWN:
@@ -166,44 +176,49 @@ SysWin&	SysWin::GetInstance()
 SysWin::~SysWin()
 //------------------------------------------------------------------------------
 {
-
 }
 
 //------------------------------------------------------------------------------
 SysWin::SysWin()
 //------------------------------------------------------------------------------
 {
+}
+
+//------------------------------------------------------------------------------
+void SysWin::OpenWindow( const char* windowname, int pos_x, int pos_y, int width, int height  )
+//------------------------------------------------------------------------------
+{
 	const char* name = "kozo:SysWin";
 
 	// アプリケーションインスタンス
-	win.hInstance		= GetModuleHandle( NULL );
+	g.hInstance		= GetModuleHandle( NULL );
 
 
 	// クラス名称
-	win.cpClassName	= "MainWindowClass";
+	g.cpClassName	= "MainWindowClass";
 
 	// メニュー
-	win.cpMenu			= MAKEINTRESOURCE( NULL );
+	g.cpMenu			= MAKEINTRESOURCE( NULL );
 
 	// ウインドウ名称
-	win.cpWindowName = name;
+	g.cpWindowName = name;
 
 	// ウインドウクラスパラメータセット
-	win.tWndClass.cbSize		= sizeof( WNDCLASSEX );
-	win.tWndClass.style			= CS_HREDRAW | CS_VREDRAW;
-	win.tWndClass.lpfnWndProc	= WinProc;
-	win.tWndClass.cbClsExtra	= 0;	// GetClassLong で取得可能なメモリ
-	win.tWndClass.cbWndExtra	= 0;	// GetWindowLong で取得可能なメモリ
-	win.tWndClass.hInstance		= win.hInstance;
-	win.tWndClass.hIcon			= LoadIcon( NULL, IDI_APPLICATION );
-	win.tWndClass.hCursor		= LoadCursor( NULL, IDC_ARROW );
-	win.tWndClass.hbrBackground = (HBRUSH)( COLOR_WINDOW + 1 );
-	win.tWndClass.lpszMenuName	= win.cpMenu;
-	win.tWndClass.lpszClassName = win.cpClassName;
-	win.tWndClass.hIconSm		= NULL;
+	g.tWndClass.cbSize		= sizeof( WNDCLASSEX );
+	g.tWndClass.style			= CS_HREDRAW | CS_VREDRAW;
+	g.tWndClass.lpfnWndProc	= WinProc;
+	g.tWndClass.cbClsExtra	= 0;	// GetClassLong で取得可能なメモリ
+	g.tWndClass.cbWndExtra	= 0;	// GetWindowLong で取得可能なメモリ
+	g.tWndClass.hInstance		= g.hInstance;
+	g.tWndClass.hIcon			= LoadIcon( NULL, IDI_APPLICATION );
+	g.tWndClass.hCursor		= LoadCursor( NULL, IDC_ARROW );
+	g.tWndClass.hbrBackground = (HBRUSH)( COLOR_WINDOW + 1 );
+	g.tWndClass.lpszMenuName	= g.cpMenu;
+	g.tWndClass.lpszClassName = g.cpClassName;
+	g.tWndClass.hIconSm		= NULL;
 
 	// ウインドウクラス生成
-	if ( 0 == RegisterClassEx( &win.tWndClass ) ) 
+	if ( 0 == RegisterClassEx( &g.tWndClass ) ) 
 	{
 	}
 
@@ -212,23 +227,17 @@ SysWin::SysWin()
 		int valWin = WS_OVERLAPPEDWINDOW;
 		win.hWnd = CreateWindowEx(
 			 0
-			, win.tWndClass.lpszClassName
+			, g.tWndClass.lpszClassName
 			, name 
 			, valWin
 			, 0,0,256,256
 			, NULL			  	// handle to parent or owner window
 			, NULL			 	// handle to menu, or child-window identifier
-			, win.hInstance	 	// handle to application instance
+			, g.hInstance	 	// handle to application instance
 			, 0					// pointer to window-creation data
 		);
 
 	}
-}
-
-//------------------------------------------------------------------------------
-void SysWin::OpenWindow( const char* name, int pos_x, int pos_y, int width, int height  )
-//------------------------------------------------------------------------------
-{
 
 	m.x			= pos_x;
 	m.y			= pos_y;
@@ -236,7 +245,7 @@ void SysWin::OpenWindow( const char* name, int pos_x, int pos_y, int width, int 
 	m.height	= height;
 
 	// ウィンドウ名を変える
-	SetWindowText(win.hWnd , name );
+	SetWindowText(win.hWnd , windowname );
 
 
 	// ウィンドウ位置サイズを変える
@@ -269,11 +278,11 @@ bool SysWin::Update()
 
 	while(1)
 	{
-		while ( PeekMessage( &win.tMsg, NULL, 0, 0, PM_REMOVE) )
+		while ( PeekMessage( &g.tMsg, NULL, 0, 0, PM_REMOVE) )
 		{
-			DispatchMessage( &win.tMsg );
-			TranslateMessage( &win.tMsg );
-			if ( win.tMsg.message == WM_QUIT ) return false; 
+			DispatchMessage( &g.tMsg );
+			TranslateMessage( &g.tMsg );
+			if ( g.tMsg.message == WM_QUIT ) return false; 
 		}
 
 		return true;

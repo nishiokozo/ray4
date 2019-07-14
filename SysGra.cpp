@@ -78,24 +78,11 @@ void  SysGra::CreatePixelBits(int bpp, int width, int height )
 */
 }
 
-
 //------------------------------------------------------------------------------
-void  SysGra::OnShowwindow() 
+void  SysGra::OnCreate() 
 //------------------------------------------------------------------------------
 {
-/*
 	HWND hWnd = SysWin::GetInstance().win.hWnd;
-    HDC hDc = GetDC(hWnd);
-	{
-		RECT rc;
-		GetClientRect( hWnd, &rc );
-		HBITMAP hBitmap = CreateCompatibleBitmap( hDc, rc.right, rc.bottom );
-	    g.hdcBackbuffer = CreateCompatibleDC( NULL );
-	    SelectObject( g.hdcBackbuffer, hBitmap );
-	}
-	ReleaseDC( hWnd, hDc );
-*/
-//	OnSize();
 }	
 
 //------------------------------------------------------------------------------
@@ -121,18 +108,6 @@ void  SysGra::OnSize()
 }
 
 //------------------------------------------------------------------------------
-void  SysGra::OnDestroy() 
-//------------------------------------------------------------------------------
-{
-	HWND hWnd = SysWin::GetInstance().win.hWnd;
-
-	DeleteDC(g.hdcBackbuffer);
-	DeleteObject(g.hBitmap);
-
-	PostQuitMessage( 0 );
-}
-
-//------------------------------------------------------------------------------
 void  SysGra::OnPaint()
 //------------------------------------------------------------------------------
 {
@@ -151,7 +126,7 @@ void  SysGra::OnPaint()
 
 			DeleteObject( hBrush );
 
-			m.clr.bActive = false;
+//			m.clr.bActive = false;
 		}
 
 		// bmp
@@ -186,7 +161,7 @@ void  SysGra::OnPaint()
 				DeleteObject(hPen);
 			}
 			
-			m.tblCircle.clear();
+//			m.tblCircle.clear();
 		}
 
 		//pset
@@ -208,7 +183,7 @@ void  SysGra::OnPaint()
 				DeleteObject(hPen);
 			}
 			
-			m.tblPset.clear();
+//			m.tblPset.clear();
 		}
 		//line
 		{
@@ -230,7 +205,7 @@ void  SysGra::OnPaint()
 
 				DeleteObject(hPen);
 			}
-			m.tblLine.clear();
+//			m.tblLine.clear();
 		}
 
 		//Tri
@@ -258,7 +233,7 @@ void  SysGra::OnPaint()
 				DeleteObject(hBrush);
 				DeleteObject(hPen);
 			}
-			m.tblTri.clear();
+//			m.tblTri.clear();
 		}
 
 
@@ -289,7 +264,7 @@ void  SysGra::OnPaint()
 				DeleteObject(hBrush);
 				DeleteObject(hPen);
 			}
-			m.tblBezier.clear();
+//			m.tblBezier.clear();
 
 			static POINT pt[3];
 
@@ -299,17 +274,25 @@ void  SysGra::OnPaint()
 	}
 
 
+
 	{
-//	    paint0( g.hdcBackbuffer);
 	    PAINTSTRUCT ps;
 	    HDC hDc = BeginPaint(hWnd, &ps);
-//		RECT rc;
-//		GetClientRect( hWnd, &rc );
-//	    BitBlt(hDc, 0, 0, rc.right, rc.bottom, g.hdcBackbuffer, 0, 0, SRCCOPY);
 	    BitBlt(hDc, 0, 0, g.rect.right, g.rect.bottom, g.hdcBackbuffer, 0, 0, SRCCOPY);
 	    EndPaint(hWnd, &ps);
 	}
 
+}
+//------------------------------------------------------------------------------
+void  SysGra::OnDestroy() 
+//------------------------------------------------------------------------------
+{
+	HWND hWnd = SysWin::GetInstance().win.hWnd;
+
+	DeleteDC(g.hdcBackbuffer);
+	DeleteObject(g.hBitmap);
+
+	PostQuitMessage( 0 );
 }
 
 
@@ -346,6 +329,17 @@ int	SysGra::Rgb( double r, double g , double b )
 	return col ;
 }
 
+//------------------------------------------------------------------------------
+void SysGra::Update()
+//------------------------------------------------------------------------------
+{
+		m.tblBezier.clear();
+		m.tblTri.clear();
+		m.tblLine.clear();
+		m.tblPset.clear();
+		m.tblCircle.clear();
+		m.clr.bActive = false;
+}
 //------------------------------------------------------------------------------
 void SysGra::Clr( int col)
 //------------------------------------------------------------------------------

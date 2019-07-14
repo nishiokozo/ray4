@@ -778,7 +778,7 @@ double	b = 120;
 			sys.gra.Circle(100+a,100+b, 10, sys.gra.Rgb(1,0,0));
 			sys.gra.Circle(200+a, 10+b, 10, sys.gra.Rgb(1,0,0));
 			sys.gra.Circle(300+a,100+b, 10, sys.gra.Rgb(1,0,0));
-
+//cout << "circle " << sys.gra.m.tblCircle.size() << endl;
 		
 
 #endif
@@ -992,12 +992,10 @@ double	b = 120;
 			
 //			if ( m.bSelected || m.bMouseover)
 			{
-//				sys.gra.Circle(m.x,m.y, 7, sys.gra.Rgb(1,0.0,0));
 				fig.draw( func, m.x,m.y,rad(0), sys.gra.Rgb(1,0,0) );
 			}
 			else
 			{
-//				sys.gra.Circle(m.x,m.y, 7, sys.gra.Rgb(1,1,0));
 				fig.draw( func, m.x,m.y,rad(0), sys.gra.Rgb(1,1,0) );
 			}
 		}

@@ -6,12 +6,6 @@ class	SysWin
 public:
 	struct	//	WIN
 	{
-		WNDCLASSEX		tWndClass;
-		HINSTANCE		hInstance;
-		const CHAR*		cpClassName;
-		const CHAR*		cpWindowName;
-		CHAR*			cpMenu;
-		MSG				tMsg;
 		HWND			hWnd;
 	} win;
 
@@ -33,17 +27,8 @@ public:
 
 	void SetOnSize( function<void()> func );
 	void SetOnDestroy( function<void()> func );
-	void SetOnShowwindow( function<void()> func );
+	void SetOnCreate( function<void()> func );
 	void SetOnPaint( function<void()> func );
-
-
-	static LRESULT CALLBACK WinProc
-	(
-		  HWND		hWnd
-		, UINT		uMsg
-		, WPARAM	wParam	//メッセージの付加情報
-		, LPARAM	lParam	//メッセージの付加情報
-	);
 
 
 };

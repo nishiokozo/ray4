@@ -72,11 +72,12 @@ struct SysGra
 
 	void ReleasePixelBits();
 	void CreatePixelBits(int bpp, int width, int height );
-//	void paint0( HDC hDc );
 	void OnSize() ;
 	void OnDestroy() ;
-	void OnShowwindow() ;
+	void OnCreate() ;
 	void OnPaint() ;
+
+	void Update() ;
 
 	void	Bezier( double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3, int col);
 	void	Tri( double x0, double y0, double x1, double y1, double x2, double y2, int col);
