@@ -3,8 +3,8 @@ class Sys
 public:
 	struct
 	{
-		int x;
-		int	y;
+		int pos_x;
+		int	pos_y;
 		int width;
 		int	height;
 	} m;
