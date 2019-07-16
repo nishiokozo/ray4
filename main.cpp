@@ -525,21 +525,7 @@ Apr::main()
 		vector<ivect2> edge;
 		int	col;
 		Figure( SysGra& _gra ) : gra(_gra) {}
-//		void draw( function<void(double,double,double,double,int)> line , double ofs_x, double ofs_y, double th, int col )
-//		{
-//			for ( ivect2 e : edge )
-//			{
-//				vect2& p = vert[e.p];
-//				vect2& n = vert[e.n];
-//
-//				double x0=p.x*cos(th) - p.y*sin(th) + ofs_x;
-//				double y0=p.x*sin(th) + p.y*cos(th) + ofs_y;
-//				double x1=n.x*cos(th) - n.y*sin(th) + ofs_x;
-//				double y1=n.x*sin(th) + n.y*cos(th) + ofs_y;
-//
-//				line(x0,y0,x1,y1,col);
-//			}
-//		}
+
 		void draw( double ofs_x, double ofs_y, double th, int col )
 		{
 			for ( ivect2 e : edge )
@@ -567,7 +553,6 @@ Apr::main()
 	triangle.edge.push_back( (ivect2){ 2,0 } );
 	triangle.col = gra.Rgb(0,1,1);
 
-#if 1
 	Figure fig(gra);
 	fig.vert.push_back( (vect2){   0,20*tan(rad(60))	-10*tan(rad(30)) } );
 	fig.vert.push_back( (vect2){-10,  0 	    	   	-10*tan(rad(30)) } );
@@ -576,7 +561,6 @@ Apr::main()
 	fig.edge.push_back( (ivect2){ 1,2 } );
 	fig.edge.push_back( (ivect2){ 2,0 } );
 	fig.col = gra.Rgb(0,0.5,1);
-#endif	
 
 	
 	vector<vect3> boxvert=
@@ -792,13 +776,16 @@ Apr::main()
 
 		struct Mark : vect2
 		{
-			SysGra&	gra;
-			Figure&	fig;
+			SysGra*	gra;
+			Figure*	fig;
 			bool 	bMouseoverSelected;
 			bool 	bMouseover;
 			bool 	bSelected;
+			bool 	bAffectable;
 			double	th;
-			Mark( SysGra& _gra, Figure& _fig, vect2 v, double _th ) : gra(_gra), fig(_fig)
+//			Mark( SysGra& _gra, Figure& _fig, vect2 v, double _th ) : gra(_gra), fig(_fig)
+			Mark( SysGra* _gra, Figure* _fig, vect2 v, double _th ) : gra(_gra), fig(_fig)
+//			Mark( SysGra* _gra, Figure* _fig, vect2 v, double _th ) 
 			{
 				x=v.x;
 				y=v.y;
@@ -806,10 +793,12 @@ Apr::main()
 				bMouseover=false;
 				bMouseoverSelected=false;
 				th = _th;
+				bAffectable = false;
 			}
 			
 			void draw( bool bDrag )
 			{
+/*
 				bool flg =  bSelected;
 				
 				if ( bDrag ) 
@@ -822,14 +811,14 @@ Apr::main()
 				
 				if ( flg )			
 				{
-	//				fig.draw( func, m.x,m.y,m.th, gra.Rgb(1,0,0) );
-					fig.draw( x,y,th, gra.Rgb(1,0,0) );
+					fig->draw( x,y,th, gra->Rgb(1,0,0) );
 				}
 				else
 				{
-	//				fig.draw( func, m.x,m.y,m.th, gra.Rgb(1,1,0) );
-					fig.draw( x,y,th, gra.Rgb(1,1,0) );
+					fig->draw( x,y,th, gra->Rgb(1,1,0) );
 				}
+*/
+					fig->draw( x,y,th, gra->Rgb(1,1,0) );
 			
 			}
 			
@@ -839,11 +828,11 @@ Apr::main()
 
 		static vector<Mark>	tblMark =
 		{
-			Mark( gra, fig, vect2(500,200  +0), rad(-90) ),
-			Mark( gra, fig, vect2(500,200+ 20), rad(-90) ),
-			Mark( gra, fig, vect2(550,200+100), rad(-90) ),
-			Mark( gra, fig, vect2(500,200+180), rad(-90) ),
-			Mark( gra, fig, vect2(500,200+200), rad(-90) ),
+			Mark( &gra, &fig, vect2(500,200  +0), rad(-90) ),
+			Mark( &gra, &fig, vect2(500,200+ 20), rad(-90) ),
+			Mark( &gra, &fig, vect2(550,200+100), rad(-90) ),
+			Mark( &gra, &fig, vect2(500,200+180), rad(-90) ),
+			Mark( &gra, &fig, vect2(500,200+200), rad(-90) ),
 		};
 		
 		static vect2 drag_start(0,0);
@@ -855,9 +844,32 @@ Apr::main()
 		// マーカー追加
 		if ( mouse.M.hi )
 		{
-			tblMark.push_back( Mark( gra, fig, mpos, rad(0) ) );
+			tblMark.push_back( Mark( &gra, &fig, mpos, rad(0) ) );
 		}
 
+
+		// マーカー削除
+		if  ( keys.CTRL.on && keys.C.hi )
+		{
+			for ( Mark& m : tblMark )
+			{
+				if ( m.bSelected )
+				{
+					m.bAffectable = true;
+				}
+			}
+
+			for ( int i = tblMark.size()-1 ; i >= 0 ; i-- )
+			{
+				if ( tblMark[i].bAffectable )
+				{
+				   tblMark.erase(tblMark.begin() +i);	
+				}
+			}
+
+			
+		}
+		
 		// マーカー選択
 		if ( mouse.L.on )
 		{
@@ -919,7 +931,7 @@ Apr::main()
 			}
 			else
 			{
-				// 矩形表示
+				// 矩形カーソル表示
 				if ( bDrag )
 				{
 					double x0 = min( drag_start.x, mpos.x);
