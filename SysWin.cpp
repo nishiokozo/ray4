@@ -113,7 +113,9 @@ static LRESULT CALLBACK WinProc
 			g.funcOnCreate();
 			return 0;
 
-
+		case WM_TOUCH:
+			cout << "WM_TOUCH " << endl;
+			return 0;
 
 		case WM_ERASEBKGND:	//	WM_PAINTイベントの途中、及びWM_SHOWWINDOWのあとに発行される。 DefWindowProc()に任せると白いフラッシュが入ってしまうので、0を返す
 			//cout << "WM_ERASEBKGND " << endl;

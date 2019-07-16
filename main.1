@@ -462,8 +462,8 @@ void	raytrace( SysWin& win, int py )
 	Renderer ren;
 
 	{
-		int height	= m.height; 
-		int width	= m.width; 
+		int height	= sys.m.height; 
+		int width	= sys.m.width; 
 	
 		vect3	posScr = vect3(0,1.0,-12+8);
 		vect3	posEye = vect3(0,1.0,-17+8);
@@ -490,7 +490,7 @@ void	raytrace( SysWin& win, int py )
 				if ( ren.m_cntRay > cntMax ) cntMax = ren.m_cntRay;
 				cntRay+= ren.m_cntRay;
 
-				win.(*this).Pset(px,height-py,gra.Rgb(C.r,C.g,C.b));
+				sys.win.(*this).Pset(px,height-py,sys.gra.Rgb(C.r,C.g,C.b));
 			}
 		}
 		
@@ -499,48 +499,20 @@ void	raytrace( SysWin& win, int py )
 }
 #endif
 
-struct Apr : public Sys
-{
-	Apr( const char* name, int pos_x, int pos_y, int width, int height ) : Sys( name, pos_x, pos_y, width, height ) 
-	{}
-	int main();
-} ;
+class Apr : Sys;
 
 //------------------------------------------------------------------------------
 int main()
 //------------------------------------------------------------------------------
 {
-	Apr	apr("Ray4 " __DATE__, 300,300,768, 512 );
-	return apr.main();
-}
+	Sys	sys("Ray4 " __DATE__, 300,300,768, 512 );
 
-//------------------------------------------------------------------------------
-Apr::main()
-//------------------------------------------------------------------------------
-{
 	struct Figure
 	{
-		SysGra&	gra;
 		vector<vect2> vert;
 		vector<ivect2> edge;
 		int	col;
-		Figure( SysGra& _gra ) : gra(_gra) {}
-//		void draw( function<void(double,double,double,double,int)> line , double ofs_x, double ofs_y, double th, int col )
-//		{
-//			for ( ivect2 e : edge )
-//			{
-//				vect2& p = vert[e.p];
-//				vect2& n = vert[e.n];
-//
-//				double x0=p.x*cos(th) - p.y*sin(th) + ofs_x;
-//				double y0=p.x*sin(th) + p.y*cos(th) + ofs_y;
-//				double x1=n.x*cos(th) - n.y*sin(th) + ofs_x;
-//				double y1=n.x*sin(th) + n.y*cos(th) + ofs_y;
-//
-//				line(x0,y0,x1,y1,col);
-//			}
-//		}
-		void draw( double ofs_x, double ofs_y, double th, int col )
+		void draw( function<void(double,double,double,double,int)> line , double ofs_x, double ofs_y, double th, int col )
 		{
 			for ( ivect2 e : edge )
 			{
@@ -552,31 +524,39 @@ Apr::main()
 				double x1=n.x*cos(th) - n.y*sin(th) + ofs_x;
 				double y1=n.x*sin(th) + n.y*cos(th) + ofs_y;
 
-				gra.Line(x0,y0,x1,y1,col);
+				line(x0,y0,x1,y1,col);
 			}
 		}
-
 	};
 
-	Figure triangle(gra);
+
+//	vector<vect2> triangle=
+//	{
+//		{   0,100*tan(rad(60)) -100*tan(rad(30)) },
+//		{-100,  0 	    	   -100*tan(rad(30)) },
+//		{ 100,  0   	       -100*tan(rad(30)) },
+//		{   0,100*tan(rad(60)) -100*tan(rad(30)) },
+//	};
+
+	Figure triangle;
 	triangle.vert.push_back( (vect2){   0,100*tan(rad(60))	-100*tan(rad(30)) } );
 	triangle.vert.push_back( (vect2){-100,  0 	    	   	-100*tan(rad(30)) } );
 	triangle.vert.push_back( (vect2){ 100,  0 				-100*tan(rad(30)) } );
 	triangle.edge.push_back( (ivect2){ 0,1 } );
 	triangle.edge.push_back( (ivect2){ 1,2 } );
 	triangle.edge.push_back( (ivect2){ 2,0 } );
-	triangle.col = gra.Rgb(0,1,1);
+	triangle.col = sys.gra.Rgb(0,1,1);
 
-#if 1
-	Figure fig(gra);
+
+	Figure fig;
 	fig.vert.push_back( (vect2){   0,20*tan(rad(60))	-10*tan(rad(30)) } );
 	fig.vert.push_back( (vect2){-10,  0 	    	   	-10*tan(rad(30)) } );
 	fig.vert.push_back( (vect2){ 10,  0 				-10*tan(rad(30)) } );
 	fig.edge.push_back( (ivect2){ 0,1 } );
 	fig.edge.push_back( (ivect2){ 1,2 } );
 	fig.edge.push_back( (ivect2){ 2,0 } );
-	fig.col = gra.Rgb(0,0.5,1);
-#endif	
+	fig.col = sys.gra.Rgb(0,0.5,1);
+	
 
 	
 	vector<vect3> boxvert=
@@ -610,26 +590,31 @@ Apr::main()
 
 
 
-	double	rx = rad(0);
-	double	ry = rad(0);
-	double	rz = rad(0);
+		double	rx = rad(0);
+		double	ry = rad(0);
+		double	rz = rad(0);
 
-	while( Update() )
+//	SysKeys&	keys = SysKeys::GetInstance();
+//	SysMouse&	mouse = SysMouse::GetInstance();
+
+	//mouse_init();
+	while( sys.Update() )
 	{
  		static int py=0;
 
 
-		gra.Clr(gra.Rgb(0.3,0.3,0.3));
+		sys.gra.Clr(sys.gra.Rgb(0.3,0.3,0.3));
 		
 //		raytrace( win, py++ );
-		if ( py >= m.height ) py=0;
+		if ( py >= sys.m.height ) py=0;
 
 		//	move
 //		rx += rad(0.2);	
 //		rz += rad(1);	
 //		ry += rad(0.5);	
 
-		double pz =4;
+double pz =4;
+
 
 
 		//calc rotate
@@ -642,6 +627,31 @@ Apr::main()
 
 			double	x,y,z;
 
+struct Mat 
+{
+	double	m[4][4];
+	Mat(
+		double m00,	double m01,	double m02,	double m03,	
+		double m10,	double m11,	double m12,	double m13,	
+		double m20,	double m21,	double m22,	double m23,	
+		double m30,	double m31,	double m32,	double m33	
+	)
+	{
+		 m[0][0]=m00;	 m[0][1]=m01;	 m[0][2]=m02;	 m[0][3]=m03;	
+		 m[1][0]=m10;	 m[1][1]=m11;	 m[1][2]=m12;	 m[1][3]=m13;	
+		 m[2][0]=m20;	 m[2][1]=m21;	 m[2][2]=m22;	 m[2][3]=m23;	
+		 m[3][0]=m30;	 m[3][1]=m31;	 m[3][2]=m32;	 m[3][3]=m33;	
+	}
+	vect3	operator*( vect3 v )
+	{
+		vect3	b;
+		b.x =	m[0][0]*v.x +	 m[0][1]*v.y	+	 m[0][2]*v.z	+	 m[0][3];
+		b.y =	m[1][0]*v.x +	 m[1][1]*v.y	+	 m[1][2]*v.z	+	 m[1][3];
+		b.z =	m[2][0]*v.x + 	 m[2][1]*v.y	+	 m[2][2]*v.z	+	 m[2][3];
+
+		return b;		
+	}
+};
 
 #if 0
 			//rz
@@ -699,12 +709,12 @@ Apr::main()
 				0.0			,	0.0			,	0.0			,	0.0	
 			);
 */
-			mat44	rotx;
-			mat44	roty;
-			mat44	rotz;
-			rotx.setRotateX(rx);
-			roty.setRotateY(ry);
-			rotz.setRotateZ(rz);
+		mat44	rotx;
+		mat44	roty;
+		mat44	rotz;
+		rotx.setRotateX(rx);
+		roty.setRotateY(ry);
+		rotz.setRotateZ(rz);
 	
 
 #if 1
@@ -727,13 +737,13 @@ Apr::main()
 		
 		
 		static	double	val=45;
-		if (keys.Q.rep) {val--;cout << val <<" "<<1/tan(rad(val)) << endl; }
-		if (keys.A.rep) {val++;cout << val <<" "<<1/tan(rad(val)) << endl; }
-		if (keys.W.rep) {val-=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
-		if (keys.S.rep) {val+=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (sys.keys.Q.rep) {val--;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (sys.keys.A.rep) {val++;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (sys.keys.W.rep) {val-=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
+		if (sys.keys.S.rep) {val+=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
 
-		val += mouse.wheel/30;
-//cout << mouse.wheel << endl;
+		val += sys.mouse.wheel/30;
+//cout << sys.mouse.wheel << endl;
 		//calc pers 
 		for ( ivect2 e : boxedge )
 		{
@@ -744,7 +754,7 @@ Apr::main()
 			
 			double	fovy = rad(val);	//	画角
 			//画角から投影面パラメータを求める
-			double	sc = m.height/2;
+			double	sc = sys.m.height/2;
 			double	sz = 1/tan(fovy/2);
 
 			//pers
@@ -752,26 +762,25 @@ Apr::main()
 			double y0 = p.y/(p.z+sz)	*sc	+256;
 			double x1 = n.x/(n.z+sz)	*sc	+256;
 			double y1 = n.y/(n.z+sz)	*sc	+256;
-			gra.Line(x0,y0,x1,y1,gra.Rgb(0,1,1));
+			sys.gra.Line(x0,y0,x1,y1,sys.gra.Rgb(0,1,1));
 
 		}
 #if 1
-			gra.Tri(55,10, 10,100, 100,100,gra.Rgb(1,1,0));
+			sys.gra.Tri(55,10, 10,100, 100,100,sys.gra.Rgb(1,1,0));
 
-			gra.Tri(55,10, 10,100, 100,100,gra.Rgb(1,1,0));
+			sys.gra.Tri(55,10, 10,100, 100,100,sys.gra.Rgb(1,1,0));
+double a = 80;
+			sys.gra.Tri(55+a,10, 10+a,100, 100+a,100,sys.gra.Rgb(1,1,0));
 
-			double a = 80;
-			gra.Tri(55+a,10, 10+a,100, 100+a,100,gra.Rgb(1,1,0));
+a=40;
+double	b = 120;
+			sys.gra.Bezier(10+a,10+b, 100+a,100+b, 200+a,10+b, 300+a,100+b,sys.gra.Rgb(0,1,0));
 
-			a=40;
-			double	b = 120;
-			gra.Bezier(10+a,10+b, 100+a,100+b, 200+a,10+b, 300+a,100+b,gra.Rgb(0,1,0));
-
-			gra.Circle( 10+a, 10+b, 10, gra.Rgb(1,0,0));
-			gra.Circle(100+a,100+b, 10, gra.Rgb(1,0,0));
-			gra.Circle(200+a, 10+b, 10, gra.Rgb(1,0,0));
-			gra.Circle(300+a,100+b, 10, gra.Rgb(1,0,0));
-//cout << "circle " << gra.m.tblCircle.size() << endl;
+			sys.gra.Circle( 10+a, 10+b, 10, sys.gra.Rgb(1,0,0));
+			sys.gra.Circle(100+a,100+b, 10, sys.gra.Rgb(1,0,0));
+			sys.gra.Circle(200+a, 10+b, 10, sys.gra.Rgb(1,0,0));
+			sys.gra.Circle(300+a,100+b, 10, sys.gra.Rgb(1,0,0));
+//cout << "circle " << sys.gra.m.tblCircle.size() << endl;
 		
 
 #endif
@@ -792,23 +801,23 @@ Apr::main()
 
 		struct Mark : vect2
 		{
-			SysGra&	gra;
-			Figure&	fig;
 			bool 	bMouseoverSelected;
 			bool 	bMouseover;
 			bool 	bSelected;
+			Figure	fig;
 			double	th;
-			Mark( SysGra& _gra, Figure& _fig, vect2 v, double _th ) : gra(_gra), fig(_fig)
+			Mark( vect2 v, Figure _fig, double _th )
 			{
 				x=v.x;
 				y=v.y;
 				bSelected=false;
 				bMouseover=false;
 				bMouseoverSelected=false;
+				fig = _fig;
 				th = _th;
 			}
 			
-			void draw( bool bDrag )
+/*			void draw( function<void(double,double,double,double,int)> func, bool bDrag )
 			{
 				bool flg =  bSelected;
 				
@@ -822,44 +831,46 @@ Apr::main()
 				
 				if ( flg )			
 				{
-	//				fig.draw( func, m.x,m.y,m.th, gra.Rgb(1,0,0) );
-					fig.draw( x,y,th, gra.Rgb(1,0,0) );
+					fig.draw( func, x,y,rad(0), sys.gra.Rgb(1,0,0) );
 				}
 				else
 				{
-	//				fig.draw( func, m.x,m.y,m.th, gra.Rgb(1,1,0) );
-					fig.draw( x,y,th, gra.Rgb(1,1,0) );
+					fig.draw( func, x,y,rad(0), sys.gra.Rgb(1,1,0) );
 				}
-			
 			}
-			
+*/
 
 		};
 		
 
 		static vector<Mark>	tblMark =
 		{
-			Mark( gra, fig, vect2(500,200  +0), rad(-90) ),
-			Mark( gra, fig, vect2(500,200+ 20), rad(-90) ),
-			Mark( gra, fig, vect2(550,200+100), rad(-90) ),
-			Mark( gra, fig, vect2(500,200+180), rad(-90) ),
-			Mark( gra, fig, vect2(500,200+200), rad(-90) ),
+			Mark( vect2(500,200  +0), fig, rad(-90) ),
+			Mark( vect2(500,200+ 20), fig, rad(-90) ),
+			Mark( vect2(550,200+100), fig, rad(-90) ),
+			Mark( vect2(500,200+180), fig, rad(-90) ),
+			Mark( vect2(500,200+200), fig, rad(-90) ),
 		};
 		
 		static vect2 drag_start(0,0);
 		static bool bDrag = false;
 	
-		vect2 mpos( mouse.sx, mouse.sy );
+//		vect2 mpos( sys.mouse.sx-sys.m.x, sys.mouse.sy-sys.m.y );
+		vect2 mpos( sys.mouse.sx, sys.mouse.sy );
+		
+		
 
+		
 
 		// マーカー追加
-		if ( mouse.M.hi )
+		if ( sys.mouse.M.hi )
 		{
-			tblMark.push_back( Mark( gra, fig, mpos, rad(0) ) );
+			tblMark.push_back( Mark( mpos, fig, rad(0) ) );
 		}
 
+
 		// マーカー選択
-		if ( mouse.L.on )
+		if ( sys.mouse.L.on )
 		{
 			struct
 			{
@@ -881,7 +892,7 @@ Apr::main()
 			}
 
 			// マーカー選択＆解除
-			if ( mouse.L.hi )
+			if ( sys.mouse.L.hi )
 			{
 				// 矩形選択
 				if ( a.pmark == 0 ) 
@@ -891,9 +902,9 @@ Apr::main()
 				}
 
 				// マーカー全解除
-				if ( keys.CTRL.on ){}
+				if ( sys.keys.CTRL.on ){}
 				else
-				if ( keys.SHIFT.on ){}
+				if ( sys.keys.SHIFT.on ){}
 				else
 				if ( a.pmark && a.pmark->bSelected == true ){}
 				else
@@ -907,7 +918,7 @@ Apr::main()
 				//	マーカー選択
 				if ( a.pmark )
 				{
-					if ( keys.CTRL.on )
+					if ( sys.keys.CTRL.on )
 					{
 						a.pmark->bSelected = !a.pmark->bSelected;
 					}
@@ -927,10 +938,10 @@ Apr::main()
 					double x1 = max( drag_start.x, mpos.x);
 					double y1 = max( drag_start.y, mpos.y);
 
-					gra.Line( x0,y0,x1,y0, gra.Rgb(0,0.5,1));
-					gra.Line( x0,y1,x1,y1, gra.Rgb(0,0.5,1));
-					gra.Line( x0,y0,x0,y1, gra.Rgb(0,0.5,1));
-					gra.Line( x1,y0,x1,y1, gra.Rgb(0,0.5,1));
+					sys.gra.Line( x0,y0,x1,y0, sys.gra.Rgb(0,0.5,1));
+					sys.gra.Line( x0,y1,x1,y1, sys.gra.Rgb(0,0.5,1));
+					sys.gra.Line( x0,y0,x0,y1, sys.gra.Rgb(0,0.5,1));
+					sys.gra.Line( x1,y0,x1,y1, sys.gra.Rgb(0,0.5,1));
 
 					for ( Mark& m : tblMark )
 					{
@@ -944,7 +955,7 @@ Apr::main()
 						if ( m.x > x0 && m.x < x1 && m.y > y0 && m.y < y1 )
 						{
 							m.bMouseover = true;
-							if ( keys.CTRL.on )
+							if ( sys.keys.CTRL.on )
 							{
 								m.bMouseoverSelected = !m.bSelected;
 							}
@@ -962,8 +973,8 @@ Apr::main()
 				{
 					if ( m.bSelected )
 					{
-						m.x += mouse.mx;
-						m.y += mouse.my;
+						m.x += sys.mouse.mx;
+						m.y += sys.mouse.my;
 					}
 				}
 			}
@@ -985,13 +996,15 @@ Apr::main()
 			}
 		}
 		
+
 		// マーカー表示
 		for ( Mark m : tblMark )
 		{
-//			auto func = [&]( double x0, double y0, double x1, double y1, int col)
-//			{
-//				gra.Line(x0,y0,x1,y1,col);
-//			};
+			auto func = [&]( double x0, double y0, double x1, double y1, int col)
+			{
+				sys.gra.Line(x0,y0,x1,y1,col);
+			};
+//			m.draw( func, bDrag );
 
 			bool flg =  m.bSelected;
 			
@@ -1005,13 +1018,11 @@ Apr::main()
 			
 			if ( flg )			
 			{
-//				fig.draw( func, m.x,m.y,m.th, gra.Rgb(1,0,0) );
-				fig.draw( m.x,m.y,m.th, gra.Rgb(1,0,0) );
+				m.fig.draw( func, m.x,m.y,m.th, sys.gra.Rgb(1,0,0) );
 			}
 			else
 			{
-//				fig.draw( func, m.x,m.y,m.th, gra.Rgb(1,1,0) );
-				fig.draw( m.x,m.y,m.th, gra.Rgb(1,1,0) );
+				m.fig.draw( func, m.x,m.y,m.th, sys.gra.Rgb(1,1,0) );
 			}
 		}
 		
@@ -1027,39 +1038,60 @@ Apr::main()
 				for ( double t = st ; t < 1.0 ; t+=st)
 				{
 					vect2 P = catmull(t, tblMark[i], tblMark[i+1], tblMark[i+2], tblMark[i+3] );
-					gra.Line( P.x, P.y, Q.x, Q.y, gra.Rgb(1,1,1));
+					sys.gra.Line( P.x, P.y, Q.x, Q.y, sys.gra.Rgb(1,1,1));
 					Q=P;
 				}	
 					vect2 P = catmull(1, tblMark[i], tblMark[i+1], tblMark[i+2], tblMark[i+3] );
-					gra.Line( P.x, P.y, Q.x, Q.y, gra.Rgb(1,1,1));
+					sys.gra.Line( P.x, P.y, Q.x, Q.y, sys.gra.Rgb(1,1,1));
 					
 			}
 		}
 
 		// fig
 		{
-//			auto func = [&]( double x0, double y0, double x1, double y1, int col)
-//			{
-//				gra.Line(x0,y0,x1,y1,col);
-//			};
-			fig.draw( 200,200,rad(-45), gra.Rgb(1,0,0) );
+			auto func = [&]( double x0, double y0, double x1, double y1, int col)
+			{
+				sys.gra.Line(x0,y0,x1,y1,col);
+			};
+			fig.draw( func, 200,200,rad(-45), sys.gra.Rgb(1,0,0) );
 		}
 
 		// triangle
 		{
 			static int cnt = 0;
-#if 0
 			auto func = [&]( double x0, double y0, double x1, double y1, int col)
 			{
-				gra.Line(x0,y0,x1,y1,col);
+				sys.gra.Line(x0,y0,x1,y1,col);
 			};
-			triangle.draw( func, 256,256,rad(cnt), gra.Rgb(0,1,1) );
-#else
-			triangle.draw( 256,256,rad(cnt), gra.Rgb(0,1,1) );
-#endif
+			triangle.draw( func, 256,256,rad(cnt), sys.gra.Rgb(0,1,1) );
 			cnt++;
 		}
 	
+		//	triangle 
+//		static int cnt = 0;
+//		for ( unsigned int i = 0 ; i < triangle.size()-1 ; i++ )
+//		{
+//			double xa=triangle[i].x;
+//			double ya=triangle[i].y;
+//			double xb=triangle[i+1].x;
+//			double yb=triangle[i+1].y;
+//
+//			double th=rad(cnt/1);
+//			
+//			double x0=xa*cos(th) - ya*sin(th);
+//			double y0=xa*sin(th) + ya*cos(th);
+//			double x1=xb*cos(th) - yb*sin(th);
+//			double y1=xb*sin(th) + yb*cos(th);
+//
+//			x0+=256;
+//			y0+=256;
+//			x1+=256;
+//			y1+=256;
+//
+//			sys.gra.Line(x0,y0,x1,y1,sys.gra.Rgb(0,1,1));
+//		}
+//		cnt++;
+
 		{
 			static chrono::system_clock::time_point time_a;
 			static chrono::system_clock::time_point time_b;
@@ -1081,7 +1113,7 @@ Apr::main()
 			time_a = chrono::system_clock::now();  
 		}
 	}
-	return 0;
-}
-	
 
+	return 0;
+
+}
