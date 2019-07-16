@@ -111,11 +111,12 @@ static LRESULT CALLBACK WinProc
 		case WM_CREATE:	// CreateWindowと同時に発行される
 			cout << "WM_CREATE " << endl;
 			g.funcOnCreate();
+			RegisterTouchWindow( hWnd, TWF_WANTPALM );//WM_TOUCH有効、迅速反応、1回タッチで1マウスクリック相当に是正される。必須。
 			return 0;
 
-		case WM_TOUCH:
-			cout << "WM_TOUCH " << endl;
-			return 0;
+//		case WM_TOUCH:
+//			cout << "WM_TOUCH " << endl;
+//			return 0;
 
 		case WM_ERASEBKGND:	//	WM_PAINTイベントの途中、及びWM_SHOWWINDOWのあとに発行される。 DefWindowProc()に任せると白いフラッシュが入ってしまうので、0を返す
 			//cout << "WM_ERASEBKGND " << endl;
