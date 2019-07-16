@@ -17,6 +17,7 @@ public:
 	int GetPosY();
 	int GetWidth();
 	int GetHeigit();
+	int GetWheel();
 
 	bool	Update();
 

@@ -741,7 +741,8 @@ struct Mat
 		if (sys.keys.W.rep) {val-=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
 		if (sys.keys.S.rep) {val+=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
 
-
+		val += sys.mouse.wheel/30;
+//cout << sys.mouse.wheel << endl;
 		//calc pers 
 		for ( ivect2 e : boxedge )
 		{

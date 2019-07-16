@@ -37,6 +37,7 @@ SysMouse::SysMouse()
 	this->mx = 0;
 	this->my = 0;
 
+	this->wheel = 0;
 
 }
 
@@ -64,9 +65,9 @@ void SysMouse::Update()
 {
 	POINT pos;
 
+	SysWin& win = SysWin::GetInstance();
 	GetCursorPos( &pos );
 	{
-		SysWin& win = SysWin::GetInstance();
 		pos.x -= win.GetPosX();
 		pos.y -= win.GetPosY();
 	}
@@ -108,5 +109,10 @@ void SysMouse::Update()
 
 	this->sx = pos.x;
 	this->sy = pos.y;
+
+	this->wheel = win.GetWheel();
+
+//cout << wheel << endl;
+
 }
 

@@ -35,6 +35,9 @@ static struct
 	int	pos_y;
 	int width;
 	int	height;
+	
+	int	wheelAccum;	//	蓄積用
+	int	wheelResult;	//	結果出力用
 
 } g;
 
@@ -146,6 +149,19 @@ static LRESULT CALLBACK WinProc
 			}
 			return 0;
 		
+		case WM_MOUSEWHEEL:
+			{
+				int fwKeys = GET_KEYSTATE_WPARAM(wParam);
+				int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+//				if ( fwKeys & MK_SHIFT ) cout << "shift" ;
+//				if ( fwKeys & MK_CONTROL ) cout << "ctrl" ;
+				//fwkeys:4 = shift
+				//fwkeys:8 = ctrl
+//				cout <<" zDelta" <<  zDelta << endl;
+				g.wheelAccum += zDelta;
+
+			}
+			return 0;
 
 		case WM_PAINT:	// OSからの描画要求。再描画区域情報（ウィンドウが重なっている際などの）が得られるタイミング。
 			//cout << "WM_PAINT " << endl;
@@ -202,6 +218,12 @@ void SysWin::SetOnCreate( function<void()> func )
 	g.funcOnCreate = func;
 }
 
+//------------------------------------------------------------------------------
+int SysWin::GetWheel()
+//------------------------------------------------------------------------------
+{
+	return g.wheelResult;
+}
 //------------------------------------------------------------------------------
 int SysWin::GetPosX()
 //------------------------------------------------------------------------------
@@ -346,6 +368,11 @@ bool SysWin::Update()
 			if ( g.msg.message == WM_QUIT ) return false; 
 		}
 
+		g.wheelResult = g.wheelAccum;
+		g.wheelAccum = 0;
+
 		return true;
 	}
+
+
 }
