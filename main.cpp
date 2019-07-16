@@ -716,7 +716,7 @@ Apr::main()
 		if (keys.W.rep) {val-=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
 		if (keys.S.rep) {val+=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
 
-		val += mouse.wheel/30;
+		val += -mouse.wheel/30;
 //cout << mouse.wheel << endl;
 		//calc pers 
 		for ( ivect2 e : boxedge )
