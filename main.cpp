@@ -1084,7 +1084,7 @@ Apr::main()
 			{
  				this_thread::sleep_for (chrono::microseconds(100));
 			}
-			if (chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now()-time_sec).count() > 1*1000*1000 ) // 1sec毎表示
+			if (chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now()-time_sec).count() > 3*1000*1000 ) // n sec毎表示
 			{
 				time_sec = chrono::system_clock::now();
 				double f = chrono::duration_cast<chrono::microseconds>(time_b-time_a).count();
