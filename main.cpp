@@ -526,12 +526,12 @@ Apr::main()
 		int	col;
 		Figure( SysGra& _gra ) : gra(_gra) {}
 
-		void draw( double ofs_x, double ofs_y, double th, int col )
+		void draw( double ofs_x, double ofs_y, double th, int col ) const 
 		{
 			for ( ivect2 e : edge )
 			{
-				vect2& p = vert[e.p];
-				vect2& n = vert[e.n];
+				const vect2& p = vert[e.p];
+				const vect2& n = vert[e.n];
 
 				double x0=p.x*cos(th) - p.y*sin(th) + ofs_x;
 				double y0=p.x*sin(th) + p.y*cos(th) + ofs_y;
@@ -774,51 +774,47 @@ Apr::main()
 			return P;
 		};
 
-		struct Mark : vect2
+		struct Marker : vect2
 		{
-			SysGra*	gra;
-			Figure*	fig;
-			bool 	bMouseoverSelected;
-			bool 	bMouseover;
-			bool 	bSelected;
-			bool 	bAffectable;
+			const SysGra*	pgra;
+			const Figure*	pfig;
+			bool 	bRectSelected;		//	矩形選択中、選択＆非選択
+			bool 	bRectIn;			//	矩形選択中、矩形選択対象
+			bool 	bSelected;			//	選択
+			bool 	bAffectable;		//	削除対象
 			double	th;
-//			Mark( SysGra& _gra, Figure& _fig, vect2 v, double _th ) : gra(_gra), fig(_fig)
-			Mark( SysGra* _gra, Figure* _fig, vect2 v, double _th ) : gra(_gra), fig(_fig)
-//			Mark( SysGra* _gra, Figure* _fig, vect2 v, double _th ) 
+			int		colNormal;
+			int		colSelected;
+			Marker( SysGra* _gra, Figure* _fig, vect2 v, double _th, int _colNormal, int _colSelected ) : pgra(_gra), pfig(_fig)
 			{
 				x=v.x;
 				y=v.y;
 				bSelected=false;
-				bMouseover=false;
-				bMouseoverSelected=false;
-				th = _th;
+				bRectIn=false;
+				bRectSelected=false;
 				bAffectable = false;
+				th = _th;
+				colNormal = _colNormal;
+				colSelected = _colSelected;
 			}
 			
-			void draw( bool bDrag )
+			void draw()
 			{
-/*
 				bool flg =  bSelected;
 				
-				if ( bDrag ) 
+				if ( bRectIn )
 				{
-					if ( bMouseover )
-					{
-						flg = bMouseoverSelected;
-					}
+					flg = bRectSelected;
 				}
 				
 				if ( flg )			
 				{
-					fig->draw( x,y,th, gra->Rgb(1,0,0) );
+					pfig->draw( x,y,th, colSelected );
 				}
 				else
 				{
-					fig->draw( x,y,th, gra->Rgb(1,1,0) );
+					pfig->draw( x,y,th, colNormal );
 				}
-*/
-					fig->draw( x,y,th, gra->Rgb(1,1,0) );
 			
 			}
 			
@@ -826,13 +822,13 @@ Apr::main()
 		};
 		
 
-		static vector<Mark>	tblMark =
+		static vector<Marker>	tblMarker =
 		{
-			Mark( &gra, &fig, vect2(500,200  +0), rad(-90) ),
-			Mark( &gra, &fig, vect2(500,200+ 20), rad(-90) ),
-			Mark( &gra, &fig, vect2(550,200+100), rad(-90) ),
-			Mark( &gra, &fig, vect2(500,200+180), rad(-90) ),
-			Mark( &gra, &fig, vect2(500,200+200), rad(-90) ),
+			Marker( &gra, &fig, vect2(500,200  +0), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+			Marker( &gra, &fig, vect2(500,200+ 20), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+			Marker( &gra, &fig, vect2(550,200+100), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+			Marker( &gra, &fig, vect2(500,200+180), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+			Marker( &gra, &fig, vect2(500,200+200), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
 		};
 		
 		static vect2 drag_start(0,0);
@@ -844,14 +840,14 @@ Apr::main()
 		// マーカー追加
 		if ( mouse.M.hi )
 		{
-			tblMark.push_back( Mark( &gra, &fig, mpos, rad(0) ) );
+			tblMarker.push_back( Marker( &gra, &fig, mpos, rad(0), gra.Rgb(1,0,0), gra.Rgb(1,1,0) ) );
 		}
 
 
 		// マーカー削除
 		if  ( keys.CTRL.on && keys.C.hi )
 		{
-			for ( Mark& m : tblMark )
+			for ( Marker& m : tblMarker )
 			{
 				if ( m.bSelected )
 				{
@@ -859,11 +855,11 @@ Apr::main()
 				}
 			}
 
-			for ( int i = tblMark.size()-1 ; i >= 0 ; i-- )
+			for ( int i = tblMarker.size()-1 ; i >= 0 ; i-- )
 			{
-				if ( tblMark[i].bAffectable )
+				if ( tblMarker[i].bAffectable )
 				{
-				   tblMark.erase(tblMark.begin() +i);	
+				   tblMarker.erase(tblMarker.begin() +i);	
 				}
 			}
 
@@ -876,12 +872,12 @@ Apr::main()
 			struct
 			{
 				double	len;
-				Mark*	pmark;
+				Marker*	pmark;
 				int		cnt;
 			} a = {99999,0,0};
 
 			// 最近マーカーを検索
-			for ( Mark& m : tblMark )
+			for ( Marker& m : tblMarker )
 			{
 				double len = (m-mpos).length();
 				if ( len < 20.0 && a.len > len )
@@ -910,7 +906,7 @@ Apr::main()
 				if ( a.pmark && a.pmark->bSelected == true ){}
 				else
 				{
-					for ( Mark& m : tblMark )
+					for ( Marker& m : tblMarker )
 					{
 						m.bSelected = false;
 					}
@@ -944,25 +940,25 @@ Apr::main()
 					gra.Line( x0,y0,x0,y1, gra.Rgb(0,0.5,1));
 					gra.Line( x1,y0,x1,y1, gra.Rgb(0,0.5,1));
 
-					for ( Mark& m : tblMark )
+					for ( Marker& m : tblMarker )
 					{
-						m.bMouseover = false;
+						m.bRectIn = false;
 					}
 
 					// 矩形内マーカーを検索
-					for ( Mark& m : tblMark )
+					for ( Marker& m : tblMarker )
 					{
 						double len = (m-mpos).length();
 						if ( m.x > x0 && m.x < x1 && m.y > y0 && m.y < y1 )
 						{
-							m.bMouseover = true;
+							m.bRectIn = true;
 							if ( keys.CTRL.on )
 							{
-								m.bMouseoverSelected = !m.bSelected;
+								m.bRectSelected = !m.bSelected;
 							}
 							else
 							{
-								m.bMouseoverSelected = true;
+								m.bRectSelected = true;
 							}
 						}
 					}
@@ -970,7 +966,7 @@ Apr::main()
 				}
 				else
 				// マーカー移動
-				for ( Mark& m : tblMark )
+				for ( Marker& m : tblMarker )
 				{
 					if ( m.bSelected )
 					{
@@ -985,64 +981,40 @@ Apr::main()
 			if ( bDrag )
 			{
 				bDrag = false;
-				for ( Mark& m : tblMark )
+				for ( Marker& m : tblMarker )
 				{
-					if ( m.bMouseover )
+					if ( m.bRectIn )
 					{
-						m.bSelected = m.bMouseoverSelected;
+						m.bSelected = m.bRectSelected;
 					}
-					m.bMouseover = false;
-					m.bMouseoverSelected = false;
+					m.bRectIn = false;
+					m.bRectSelected = false;
 				}
 			}
 		}
 		
 		// マーカー表示
-		for ( Mark m : tblMark )
+		for ( Marker m : tblMarker )
 		{
-//			auto func = [&]( double x0, double y0, double x1, double y1, int col)
-//			{
-//				gra.Line(x0,y0,x1,y1,col);
-//			};
-
-			bool flg =  m.bSelected;
-			
-			if ( bDrag ) 
-			{
-				if ( m.bMouseover )
-				{
-					flg = m.bMouseoverSelected;
-				}
-			}
-			
-			if ( flg )			
-			{
-//				fig.draw( func, m.x,m.y,m.th, gra.Rgb(1,0,0) );
-				fig.draw( m.x,m.y,m.th, gra.Rgb(1,0,0) );
-			}
-			else
-			{
-//				fig.draw( func, m.x,m.y,m.th, gra.Rgb(1,1,0) );
-				fig.draw( m.x,m.y,m.th, gra.Rgb(1,1,0) );
-			}
+			m.draw();
 		}
 		
 		// マーカースプライン変換表示
-		if ( tblMark.size() >=4 )
+		if ( tblMarker.size() >=4 )
 		{
-			for ( unsigned int i = 0 ; i < tblMark.size()-3 ; i++ )
+			for ( unsigned int i = 0 ; i < tblMarker.size()-3 ; i++ )
 			{
 				double st = 0.1;
 
-				vect2 Q = catmull(0, tblMark[i], tblMark[i+1], tblMark[i+2], tblMark[i+3] );
+				vect2 Q = catmull(0, tblMarker[i], tblMarker[i+1], tblMarker[i+2], tblMarker[i+3] );
 
 				for ( double t = st ; t < 1.0 ; t+=st)
 				{
-					vect2 P = catmull(t, tblMark[i], tblMark[i+1], tblMark[i+2], tblMark[i+3] );
+					vect2 P = catmull(t, tblMarker[i], tblMarker[i+1], tblMarker[i+2], tblMarker[i+3] );
 					gra.Line( P.x, P.y, Q.x, Q.y, gra.Rgb(1,1,1));
 					Q=P;
 				}	
-					vect2 P = catmull(1, tblMark[i], tblMark[i+1], tblMark[i+2], tblMark[i+3] );
+					vect2 P = catmull(1, tblMarker[i], tblMarker[i+1], tblMarker[i+2], tblMarker[i+3] );
 					gra.Line( P.x, P.y, Q.x, Q.y, gra.Rgb(1,1,1));
 					
 			}
