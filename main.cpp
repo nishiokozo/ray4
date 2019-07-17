@@ -526,17 +526,17 @@ Apr::main()
 		int	col;
 		Figure( SysGra& _gra ) : gra(_gra) {}
 
-		void draw( double ofs_x, double ofs_y, double th, int col ) const 
+		void draw( vect2 ofs, double th, int col ) const 
 		{
 			for ( ivect2 e : edge )
 			{
 				const vect2& p = vert[e.p];
 				const vect2& n = vert[e.n];
 
-				double x0=p.x*cos(th) - p.y*sin(th) + ofs_x;
-				double y0=p.x*sin(th) + p.y*cos(th) + ofs_y;
-				double x1=n.x*cos(th) - n.y*sin(th) + ofs_x;
-				double y1=n.x*sin(th) + n.y*cos(th) + ofs_y;
+				double x0=p.x*cos(th) - p.y*sin(th) + ofs.x;
+				double y0=p.x*sin(th) + p.y*cos(th) + ofs.y;
+				double x1=n.x*cos(th) - n.y*sin(th) + ofs.x;
+				double y1=n.x*sin(th) + n.y*cos(th) + ofs.y;
 
 				gra.Line(x0,y0,x1,y1,col);
 			}
@@ -809,11 +809,11 @@ Apr::main()
 				
 				if ( flg )			
 				{
-					pfig->draw( x,y,th, colSelected );
+					pfig->draw( vect2(x,y),th, colSelected );
 				}
 				else
 				{
-					pfig->draw( x,y,th, colNormal );
+					pfig->draw( vect2(x,y),th, colNormal );
 				}
 			
 			}
@@ -1020,13 +1020,18 @@ Apr::main()
 			}
 		}
 
+
+
+		vector<vect2> tblBone =
+		{
+			vect2(100,150),
+			vect2(200,100),
+			vect2(300,150),
+		};
+
 		// fig
 		{
-//			auto func = [&]( double x0, double y0, double x1, double y1, int col)
-//			{
-//				gra.Line(x0,y0,x1,y1,col);
-//			};
-			fig.draw( 200,200,rad(-45), gra.Rgb(1,0,0) );
+			fig.draw( vect2(200,200), rad(-45), gra.Rgb(1,0,0) );
 		}
 
 		// triangle
@@ -1039,7 +1044,7 @@ Apr::main()
 			};
 			triangle.draw( func, 256,256,rad(cnt), gra.Rgb(0,1,1) );
 #else
-			triangle.draw( 256,256,rad(cnt), gra.Rgb(0,1,1) );
+			triangle.draw( vect2(256,256),rad(cnt), gra.Rgb(0,1,1) );
 #endif
 			cnt++;
 		}
