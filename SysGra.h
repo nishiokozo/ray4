@@ -30,6 +30,16 @@ struct SysGra
 //		double	y2;
 		int		col;
 	};
+	struct	PrimBox
+	{
+		vect2	v0;
+		vect2	v1;
+//		double	x0;
+//		double	y0;
+//		double	x1;
+//		double	y1;
+		int		col;
+	};
 	struct	PrimLine
 	{
 		vect2	v0;
@@ -72,6 +82,7 @@ struct SysGra
 
 		vector<PrimBezier>	tblBezier;
 		vector<PrimTri>		tblTri;
+		vector<PrimBox>		tblBox;
 		vector<PrimLine>	tblLine;
 		vector<PrimPset>	tblPset;
 		vector<PrimCircle>	tblCircle;
@@ -105,6 +116,7 @@ struct SysGra
 
 	void	Bezier( vect2 v0, vect2 v1, vect2 v2, vect2 v3, int col);
 	void	Tri( vect2 v0, vect2 v1, vect2 v2, int col);
+	void	Box( vect2 v0, vect2 v1, int col);
 	void	Line( vect2 v0, vect2 v1, int col);
 	void	Pset( vect2 v0, int col);
 	void	Circle( vect2 v, double r, int col );

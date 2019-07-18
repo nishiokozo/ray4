@@ -937,18 +937,20 @@ Apr::main()
 				// 矩形カーソル表示
 				if ( bDrag )
 				{
+#if 0
 					double x0 = min( drag_start.x, mouse.pos.x);
 					double y0 = min( drag_start.y, mouse.pos.y);
 					double x1 = max( drag_start.x, mouse.pos.x);
 					double y1 = max( drag_start.y, mouse.pos.y);
-
-					vect2 v0 = min( drag_start, mouse.pos);
-					vect2 v1 = max( drag_start, mouse.pos);
-
 					gra.Line( vect2(x0,y0), vect2(x1,y0), gra.Rgb(0,0.5,1));
 					gra.Line( vect2(x0,y1), vect2(x1,y1), gra.Rgb(0,0.5,1));
 					gra.Line( vect2(x0,y0), vect2(x0,y1), gra.Rgb(0,0.5,1));
 					gra.Line( vect2(x1,y0), vect2(x1,y1), gra.Rgb(0,0.5,1));
+#else
+					vect2 v0 = min( drag_start, mouse.pos);
+					vect2 v1 = max( drag_start, mouse.pos);
+					gra.Box( v0,v1, gra.Rgb(0,0.5,1));
+#endif
 
 					for ( Marker& m : tblMarker )
 					{
@@ -959,7 +961,8 @@ Apr::main()
 					for ( Marker& m : tblMarker )
 					{
 						double len = (m-mouse.pos).length();
-						if ( m.x > x0 && m.x < x1 && m.y > y0 && m.y < y1 )
+					if ( m.x > v0.x && m.x < v1.x && m.y > v0.y && m.y < v1.y )
+//					if ( m.x > x0   && m.x < x1   && m.y > y0   && m.y < y1 )
 						{
 							m.bRectIn = true;
 							if ( keys.CTRL.on )

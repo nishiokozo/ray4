@@ -239,6 +239,32 @@ void  SysGra::OnPaint()
 			
 //			m.tblPset.clear();
 		}
+
+		//box
+		{
+
+			for ( unsigned int i=0 ; i < m.tblBox.size() ; i++ )
+			{
+
+				int x0 = m.tblBox[i].v0.x;
+				int y0 = m.tblBox[i].v0.y;
+				int x1 = m.tblBox[i].v1.x;
+				int y1 = m.tblBox[i].v1.y;
+				int	col = m.tblBox[i].col;
+
+				HPEN hPen = CreatePen(PS_SOLID, 1, col );
+				SelectObject(hDc, hPen);
+
+				MoveToEx(hDc, x0, y0, NULL);
+				LineTo(hDc, x1, y0);
+				LineTo(hDc, x1, y1);
+				LineTo(hDc, x0, y1);
+				LineTo(hDc, x0, y0);
+
+				DeleteObject(hPen);
+			}
+		}
+
 		//line
 		{
 
@@ -390,6 +416,7 @@ void SysGra::Update()
 {
 		m.tblBezier.clear();
 		m.tblTri.clear();
+		m.tblBox.clear();
 		m.tblLine.clear();
 		m.tblPset.clear();
 		m.tblCircle.clear();
@@ -417,6 +444,14 @@ void SysGra::Pset( vect2 v, int col )
 	PrimPset a = {v,col};
 	
 	(*this).m.tblPset.push_back( a );
+}
+//------------------------------------------------------------------------------
+void SysGra::Box( vect2 v0, vect2 v1,int col)
+//------------------------------------------------------------------------------
+{
+	PrimBox a = {v0,v1,col};
+	
+	(*this).m.tblBox.push_back( a );
 }
 //------------------------------------------------------------------------------
 void SysGra::Line( vect2 v0, vect2 v1,int col)

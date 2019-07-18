@@ -30,7 +30,7 @@ double	max( double a, double b )
 vect2	max( vect2 a, vect2 b )
 //-----------------------------------------------------------------------------
 {
-	vect2	ret;
+	vect2	ret=b;
 	if ( a.x > b.x ) ret.x = a.x;
 	if ( a.y > b.y ) ret.y = a.y;
 	return	ret;
@@ -39,7 +39,7 @@ vect2	max( vect2 a, vect2 b )
 vect2	min( vect2 a, vect2 b )
 //-----------------------------------------------------------------------------
 {
-	vect2	ret;
+	vect2	ret=b;
 	if ( a.x < b.x ) ret.x = a.x;
 	if ( a.y < b.y ) ret.y = a.y;
 	return	ret;
@@ -48,7 +48,7 @@ vect2	min( vect2 a, vect2 b )
 vect3	max( vect3 a, vect3 b )
 //-----------------------------------------------------------------------------
 {
-	vect3	ret;
+	vect3	ret=b;
 	if ( a.x > b.x ) ret.x = a.x;
 	if ( a.y > b.y ) ret.y = a.y;
 	if ( a.z > b.z ) ret.z = a.z;
@@ -58,7 +58,7 @@ vect3	max( vect3 a, vect3 b )
 vect3	min( vect3 a, vect3 b )
 //-----------------------------------------------------------------------------
 {
-	vect3	ret;
+	vect3	ret=b;
 	if ( a.x < b.x ) ret.x = a.x;
 	if ( a.y < b.y ) ret.y = a.y;
 	if ( a.z < b.z ) ret.z = a.z;
