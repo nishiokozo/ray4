@@ -31,11 +31,15 @@ SysMouse::SysMouse()
 
 	SysWin& win = SysWin::GetInstance();
 
-	this->sx = pos.x - win.GetPosX();
-	this->sy = pos.y - win.GetPosY();
+//	this->sx = pos.x - win.GetPosX();
+//	this->sy = pos.y - win.GetPosY();
+	this->pos.x = pos.x - win.GetPosX();
+	this->pos.y = pos.y - win.GetPosY();
 
-	this->mx = 0;
-	this->my = 0;
+//	this->mx = 0;
+//	this->my = 0;
+	this->mov.x = 0;
+	this->mov.y = 0;
 
 	this->wheel = 0;
 
@@ -104,11 +108,16 @@ void SysMouse::Update()
 	this->B.lo =  this->B.on && !on_b;
 	this->B.on = on_b;
 
-	this->mx = pos.x - this->sx;
-	this->my = pos.y - this->sy;
+//	this->mx = pos.x - this->sx;
+//	this->my = pos.y - this->sy;
+//
+//	this->sx = pos.x;
+//	this->sy = pos.y;
 
-	this->sx = pos.x;
-	this->sy = pos.y;
+	this->mov.x = pos.x - this->pos.x;
+	this->mov.y = pos.y - this->pos.y;
+	this->pos.x = pos.x;
+	this->pos.y = pos.y;
 
 	this->wheel = win.GetWheel();
 

@@ -544,23 +544,24 @@ Apr::main()
 
 	};
 
-	Figure triangle(gra);
-	triangle.vert.push_back( (vect2){   0,100*tan(rad(60))	-100*tan(rad(30)) } );
-	triangle.vert.push_back( (vect2){-100,  0 	    	   	-100*tan(rad(30)) } );
-	triangle.vert.push_back( (vect2){ 100,  0 				-100*tan(rad(30)) } );
-	triangle.edge.push_back( (ivect2){ 0,1 } );
-	triangle.edge.push_back( (ivect2){ 1,2 } );
-	triangle.edge.push_back( (ivect2){ 2,0 } );
-	triangle.col = gra.Rgb(0,1,1);
+	Figure figTriangle(gra);
+	figTriangle.vert.push_back( (vect2){   0,100*tan(rad(60))	-100*tan(rad(30)) } );
+	figTriangle.vert.push_back( (vect2){-100,  0 	    	   	-100*tan(rad(30)) } );
+	figTriangle.vert.push_back( (vect2){ 100,  0 				-100*tan(rad(30)) } );
+	figTriangle.edge.push_back( (ivect2){ 0,1 } );
+	figTriangle.edge.push_back( (ivect2){ 1,2 } );
+	figTriangle.edge.push_back( (ivect2){ 2,0 } );
+	figTriangle.col = gra.Rgb(0,1,1);
 
-	Figure fig(gra);
-	fig.vert.push_back( (vect2){   0,20*tan(rad(60))	-10*tan(rad(30)) } );
-	fig.vert.push_back( (vect2){-10,  0 	    	   	-10*tan(rad(30)) } );
-	fig.vert.push_back( (vect2){ 10,  0 				-10*tan(rad(30)) } );
-	fig.edge.push_back( (ivect2){ 0,1 } );
-	fig.edge.push_back( (ivect2){ 1,2 } );
-	fig.edge.push_back( (ivect2){ 2,0 } );
-	fig.col = gra.Rgb(0,0.5,1);
+	Figure figArrow(gra);
+	figArrow.vert.push_back( (vect2){   0,20*tan(rad(60))	-10*tan(rad(30)) } );
+	figArrow.vert.push_back( (vect2){-10,  0 	    	   	-10*tan(rad(30)) } );
+	figArrow.vert.push_back( (vect2){ 10,  0 				-10*tan(rad(30)) } );
+	figArrow.edge.push_back( (ivect2){ 0,1 } );
+	figArrow.edge.push_back( (ivect2){ 1,2 } );
+	figArrow.edge.push_back( (ivect2){ 2,0 } );
+	figArrow.col = gra.Rgb(0,0.5,1);
+
 
 	
 	vector<vect3> boxvert=
@@ -789,6 +790,7 @@ Apr::main()
 			double	th;
 			int		colNormal;
 			int		colSelected;
+
 			Marker( SysGra* _gra, Figure* _fig, vect2 v, double _th, int _colNormal, int _colSelected ) : pgra(_gra), pfig(_fig)
 			{
 				x=v.x;
@@ -828,23 +830,23 @@ Apr::main()
 
 		static vector<Marker>	tblMarker =
 		{
-			Marker( &gra, &fig, vect2(500,200  +0), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-			Marker( &gra, &fig, vect2(500,200+ 20), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-			Marker( &gra, &fig, vect2(550,200+100), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-			Marker( &gra, &fig, vect2(500,200+180), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-			Marker( &gra, &fig, vect2(500,200+200), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+			Marker( &gra, &figArrow, vect2(500,200  +0), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+			Marker( &gra, &figArrow, vect2(500,200+ 20), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+			Marker( &gra, &figArrow, vect2(550,200+100), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+			Marker( &gra, &figArrow, vect2(500,200+180), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+			Marker( &gra, &figArrow, vect2(500,200+200), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
 		};
 		
 		static vect2 drag_start(0,0);
 		static bool bDrag = false;
 	
-		vect2 mpos( mouse.sx, mouse.sy );
+		vect2 mpos( mouse.pos.x, mouse.pos.y );
 
 
 		// マーカー追加
 		if ( mouse.M.hi )
 		{
-			tblMarker.push_back( Marker( &gra, &fig, mpos, rad(0), gra.Rgb(1,0,0), gra.Rgb(1,1,0) ) );
+			tblMarker.push_back( Marker( &gra, &figArrow, mpos, rad(0), gra.Rgb(1,0,0), gra.Rgb(1,1,0) ) );
 		}
 
 
@@ -974,8 +976,8 @@ Apr::main()
 				{
 					if ( m.bSelected )
 					{
-						m.x += mouse.mx;
-						m.y += mouse.my;
+						m.x += mouse.mov.x;
+						m.y += mouse.mov.y;
 					}
 				}
 			}
@@ -1025,6 +1027,32 @@ Apr::main()
 		}
 
 
+
+		Figure figCircle(gra);
+		{
+			int s=0;
+			for ( int i = 0 ; i < 360 ; i+=45 )
+			{
+				double th = i*pi/180.0;
+				double r = 7;
+				vect2 v( r*cos(th), r*sin(th) );
+				figCircle.vert.push_back( v );
+				s++;
+			}
+			for ( int i = 0 ; i < s-1 ; i++ )
+			{
+				figCircle.edge.push_back( (ivect2){ i,i+1 } );
+			}
+			figCircle.edge.push_back( (ivect2){ s-1,0 } );
+		}
+		static vector<Marker>	tblMarkerBone =
+		{
+			Marker( &gra, &figCircle, vect2(200,400), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+			Marker( &gra, &figCircle, vect2(300,350), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+			Marker( &gra, &figCircle, vect2(400,400), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+		};
+
+		// 関節
 		vector<vect2> tblJoint =
 		{
 			vect2(100+100,150+250),
@@ -1041,6 +1069,7 @@ Apr::main()
 			
 		};
 		
+
 		
 		for ( ivect2 v : tblBone )
 		{
@@ -1051,16 +1080,17 @@ Apr::main()
 		
 		for ( vect2 v : tblJoint )
 		{
-			gra.Circle( v, 5, gra.Rgb( 0.5 ,1, 0.0 ) );
+			//gra.Circle( v+vect2(0,10), 5, gra.Rgb( 0.5 ,1, 0.0 ) );
+			figCircle.draw( v, rad(0), gra.Rgb(0.5,1,0) );
 		}
 		
 
-		// fig
+		// figArrow
 		{
-			fig.draw( vect2(200,200), rad(-45), gra.Rgb(1,0,0) );
+			figArrow.draw( vect2(200,200), rad(-45), gra.Rgb(1,0,0) );
 		}
 
-		// triangle
+		// figTriangle
 		{
 			static int cnt = 0;
 #if 0
@@ -1068,9 +1098,9 @@ Apr::main()
 			{
 				gra.Line(x0,y0,x1,y1,col);
 			};
-			triangle.draw( func, 256,256,rad(cnt), gra.Rgb(0,1,1) );
+			figTriangle.draw( func, 256,256,rad(cnt), gra.Rgb(0,1,1) );
 #else
-			triangle.draw( vect2(256,256),rad(cnt), gra.Rgb(0,1,1) );
+			figTriangle.draw( vect2(256,256),rad(cnt), gra.Rgb(0,1,1) );
 #endif
 			cnt++;
 		}

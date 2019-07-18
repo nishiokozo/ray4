@@ -1,3 +1,4 @@
+#include	"geom.h"
 class SysMouse
 {
 	struct Keyobj
@@ -27,10 +28,13 @@ public:
 	Keyobj	F;	//フォワードボタン
 	Keyobj	B;	//バックボタン
 
-	int	sx;	//	マウスカーソル位置
-	int	sy;
-	int	mx;	//	マウスカーソル移動量
-	int	my;
+	vect2	pos;	//	マウスカーソル位置
+	vect2	mov;	//	マウスカーソル移動量
+
+//	int	sx;	//	マウスカーソル位置
+//	int	sy;
+//	int	mx;	//	マウスカーソル移動量
+//	int	my;
 
 	int	wheel;
 /*
