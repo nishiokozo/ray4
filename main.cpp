@@ -501,23 +501,6 @@ void	raytrace( SysGra& gra, int py )
 
 struct Apr : public Sys
 {
-	Apr( const char* name, int pos_x, int pos_y, int width, int height ) : Sys( name, pos_x, pos_y, width, height ) 
-	{}
-	int main();
-} ;
-
-//------------------------------------------------------------------------------
-int main()
-//------------------------------------------------------------------------------
-{
-	Apr	apr("Ray4 " __DATE__, 300,300,768, 512 );
-	return apr.main();
-}
-
-//------------------------------------------------------------------------------
-Apr::main()
-//------------------------------------------------------------------------------
-{
 	struct Figure
 	{
 		SysGra&	gra;
@@ -544,597 +527,629 @@ Apr::main()
 
 	};
 
-	Figure figTriangle(gra);
-	figTriangle.vert.push_back( (vect2){   0,100*tan(rad(60))	-100*tan(rad(30)) } );
-	figTriangle.vert.push_back( (vect2){-100,  0 	    	   	-100*tan(rad(30)) } );
-	figTriangle.vert.push_back( (vect2){ 100,  0 				-100*tan(rad(30)) } );
-	figTriangle.edge.push_back( (ivect2){ 0,1 } );
-	figTriangle.edge.push_back( (ivect2){ 1,2 } );
-	figTriangle.edge.push_back( (ivect2){ 2,0 } );
-	figTriangle.col = gra.Rgb(0,1,1);
-
-	Figure figArrow(gra);
-	figArrow.vert.push_back( (vect2){   0,20*tan(rad(60))	-10*tan(rad(30)) } );
-	figArrow.vert.push_back( (vect2){-10,  0 	    	   	-10*tan(rad(30)) } );
-	figArrow.vert.push_back( (vect2){ 10,  0 				-10*tan(rad(30)) } );
-	figArrow.edge.push_back( (ivect2){ 0,1 } );
-	figArrow.edge.push_back( (ivect2){ 1,2 } );
-	figArrow.edge.push_back( (ivect2){ 2,0 } );
-	figArrow.col = gra.Rgb(0,0.5,1);
-
-
-	
-	vector<vect3> boxvert=
+	struct Marker : vect2
 	{
-		{	-1,	 1,	-1	},
-		{	 1,	 1,	-1	},
-		{	-1,	-1,	-1	},
-		{	 1,	-1,	-1	},
-		{	-1,	 1,	 1	},
-		{	 1,	 1,	 1	},
-		{	-1,	-1,	 1	},
-		{	 1,	-1,	 1	},
-	};
-	vector<vect3> boxdl;
+		const SysGra*	pgra;
+		const Figure*	pfig;
+		bool 	bRectSelected;		//	矩形選択中、選択＆非選択
+		bool 	bRectIn;			//	矩形選択中、矩形選択対象
+		bool 	bSelected;			//	選択
+		bool 	bAffectable;		//	削除対象
+		double	th;
+		int		colNormal;
+		int		colSelected;
 
-	vector<ivect2>	boxedge
-	{
-		{	0,	1	},
-		{	1,	3	},
-		{	3,	2	},
-		{	2,	0	},
-		{	4,	5	},
-		{	5,	7	},
-		{	7,	6	},
-		{	6,	4	},
-		{	0,	4	},
-		{	1,	5	},
-		{	2,	6	},
-		{	3,	7	},
-	};
-
-
-
-	double	rx = rad(0);
-	double	ry = rad(0);
-	double	rz = rad(0);
-
-	while( Update() )
-	{
- 		static int py=0;
-
-
-		gra.Clr(gra.Rgb(0.3,0.3,0.3));
-		
-		//raytrace( gra, py++ );
-		if ( py >= m.height ) py=0;
-
-		//	move
-//		rx += rad(0.2);	
-//		rz += rad(1);	
-//		ry += rad(0.5);	
-
-		double pz =4;
-
-
-		//calc rotate
-		boxdl.clear();
-		for ( vect3 v : boxvert )
+		Marker( SysGra* _gra, Figure* _fig, vect2 v, double _th, int _colNormal, int _colSelected ) : pgra(_gra), pfig(_fig)
 		{
-//			double x = v.x;
-//			double y = v.y;
-//			double z = v.z;
-
-			double	x,y,z;
-
-
-#if 0
-			//rz
-			x=v.x*cos(rz) - v.y*sin(rz) + v.z *0;
-			y=v.x*sin(rz) + v.y*cos(rz) + v.z *0;
-			z=v.x* 0      + v.y*0       + v.z *1;
-			v.x=x;
-			v.y=y;
-			v.z=z;
-
-			//rx
 			x=v.x;
-			y=v.y*cos(rx) - v.z*sin(rx);
-			z=v.y*sin(rx) + v.z*cos(rx);
-			v.x=x;
-			v.y=y;
-			v.z=z;
-
-			//ry
-			x=v.x*cos(ry) - v.z*sin(ry);
 			y=v.y;
-			z=v.x*sin(ry) + v.z*cos(ry);
-			v.x=x;
-			v.y=y;
-			v.z=z;
-#else
-			//	右手系座標系
-			//	右手ねじ周り
-			//	roll	:z	奥+
-			//	pitch	:x	右+
-			//	yaw		:y	下+
-
-			rx+=rad(0.03);
-			ry+=rad(0.05);
-			rz+=rad(0.1);
-/*
-			mat44 rotx(
-				1.0			,	0.0			,	0.0			,	0.0	,
-				0.0			,	 cos(rx)	,	-sin(rx)	,	0.0	,
-				0.0			,	 sin(rx)	,	 cos(rx)	,	0.0	,
-				0.0			,	0.0			,	0.0			,	0.0	
-			);
-
-			mat44 roty(
-				 cos(ry)	,	0.0			,	 sin(ry)	,	0.0	,
-				 0.0		,	1.0			,	0.0			,	0.0	,
-				-sin(ry)	,	0.0			,	 cos(ry)	,	0.0	,
-				 0.0		,	0.0			,	0.0			,	0.0	
-			);
-
-			mat44 rotz(
-				 cos(rz)	,	-sin(rz)	,	0.0			,	0.0	,
-				 sin(rz)	,	 cos(rz)	,	0.0			,	0.0	,
-				0.0			,	0.0			,	1.0			,	0.0	,
-				0.0			,	0.0			,	0.0			,	0.0	
-			);
-*/
-			mat44	rotx;
-			mat44	roty;
-			mat44	rotz;
-			rotx.setRotateX(rx);
-			roty.setRotateY(ry);
-			rotz.setRotateZ(rz);
-	
-
-#if 1
-			v= rotx *v ;
-			v= roty *v ;
-			v= rotz *v ;
-#else
-			v= rotx * roty * rotz *v ;
-#endif
-
-
-			
-#endif
-
-			v.z+=pz;
-
-			boxdl.push_back( v );
-
+			bSelected=false;
+			bRectIn=false;
+			bRectSelected=false;
+			bAffectable = false;
+			th = _th;
+			colNormal = _colNormal;
+			colSelected = _colSelected;
 		}
 		
-		
-		static	double	val=45;
-		if (keys.Q.rep) {val--;cout << val <<" "<<1/tan(rad(val)) << endl; }
-		if (keys.A.rep) {val++;cout << val <<" "<<1/tan(rad(val)) << endl; }
-		if (keys.W.rep) {val-=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
-		if (keys.S.rep) {val+=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
-
-		val += -mouse.wheel/30;
-//cout << mouse.wheel << endl;
-		//calc pers 
-
-
-		gra.Pset(vect2(10,10),gra.Rgb(1,1,1));
-
-		for ( ivect2 e : boxedge )
+		void draw()
 		{
-			vect3& p = boxdl[e.p];
-			vect3& n = boxdl[e.n];
-
-			double	x,y,z;
+			bool flg =  bSelected;
 			
-			double	fovy = rad(val);	//	画角
-			//画角から投影面パラメータを求める
-			double	sc = m.height/2;
-			double	sz = 1/tan(fovy/2);
-
-			//pers
-			double x0 = p.x/(p.z+sz)	*sc	+256;
-			double y0 = p.y/(p.z+sz)	*sc	+256;
-			double x1 = n.x/(n.z+sz)	*sc	+256;
-			double y1 = n.y/(n.z+sz)	*sc	+256;
-			gra.Line( vect2(x0,y0), vect2(x1,y1),gra.Rgb(0,1,1));
-
-		}
-#if 1
-			gra.Tri( vect2(55,10), vect2(10,100), vect2(100,100),gra.Rgb(1,1,0));
-
-			gra.Tri( vect2(55,10), vect2(10,100), vect2(100,100),gra.Rgb(1,1,0));
-
-			double a = 80;
-			gra.Tri( vect2(55+a,10), vect2(10+a,100), vect2(100+a,100),gra.Rgb(1,1,0));
-
-			a=40;
-			double	b = 120;
-			gra.Bezier(vect2(10+a,10+b), vect2(100+a,100+b), vect2(200+a,10+b), vect2(300+a,100+b),gra.Rgb(0,1,0));
-
-			gra.Circle( vect2( 10+a, 10+b), 10, gra.Rgb(1,0,0));
-			gra.Circle( vect2(100+a,100+b), 10, gra.Rgb(1,0,0));
-			gra.Circle( vect2(200+a, 10+b), 10, gra.Rgb(1,0,0));
-			gra.Circle( vect2(300+a,100+b), 10, gra.Rgb(1,0,0));
-//cout << "circle " << gra.m.tblCircle.size() << endl;
-		
-
-#endif
-
-		auto catmull = []( double t, const vect2 Pm, const vect2 P0, const vect2 P1, const vect2 P2 )
-		{
-			//Catmull-Rom 曲線
-			// P(t)=P0*(2t^3-3t^2+1)+m0*(t^3-2t^2+t)+P1*(-2t^3+3t^2)+m1*(t^3-t^2)
-			// m0=(P1-Pm)/2
-			// m1=(P2-P0)/2
-
-			vect2 m0 = (P1-Pm)/2.0;
-			vect2 m1 = (P2-P0)/2.0;
-			vect2 P = P0*(2*t*t*t - 3*t*t +1) + m0*( t*t*t -2*t*t +t ) + P1*( -2*t*t*t + 3*t*t ) + m1*( t*t*t - t*t );
-
-			return P;
-		};
-
-		struct Marker : vect2
-		{
-			const SysGra*	pgra;
-			const Figure*	pfig;
-			bool 	bRectSelected;		//	矩形選択中、選択＆非選択
-			bool 	bRectIn;			//	矩形選択中、矩形選択対象
-			bool 	bSelected;			//	選択
-			bool 	bAffectable;		//	削除対象
-			double	th;
-			int		colNormal;
-			int		colSelected;
-
-			Marker( SysGra* _gra, Figure* _fig, vect2 v, double _th, int _colNormal, int _colSelected ) : pgra(_gra), pfig(_fig)
+			if ( bRectIn )
 			{
-				x=v.x;
-				y=v.y;
-				bSelected=false;
-				bRectIn=false;
-				bRectSelected=false;
-				bAffectable = false;
-				th = _th;
-				colNormal = _colNormal;
-				colSelected = _colSelected;
+				flg = bRectSelected;
 			}
 			
-			void draw()
+			if ( flg )			
 			{
-				bool flg =  bSelected;
-				
-				if ( bRectIn )
-				{
-					flg = bRectSelected;
-				}
-				
-				if ( flg )			
-				{
-					pfig->draw( vect2(x,y),th, colSelected );
-				}
-				else
-				{
-					pfig->draw( vect2(x,y),th, colNormal );
-				}
-			
-			}
-			
-
-		};
-		
-
-		static vector<Marker>	tblMarker =
-		{
-			Marker( &gra, &figArrow, vect2(500,200  +0), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-			Marker( &gra, &figArrow, vect2(500,200+ 20), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-			Marker( &gra, &figArrow, vect2(550,200+100), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-			Marker( &gra, &figArrow, vect2(500,200+180), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-			Marker( &gra, &figArrow, vect2(500,200+200), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-		};
-		
-		static vect2 drag_start(0,0);
-		static bool bDrag = false;
-
-	
-//		vect2 mouse.pos( mouse.pos.x, mouse.pos.y );
-
-
-		// マーカー追加
-		if ( mouse.M.hi )
-		{
-			tblMarker.push_back( Marker( &gra, &figArrow, mouse.pos, rad(0), gra.Rgb(1,0,0), gra.Rgb(1,1,0) ) );
-		}
-
-
-		// マーカー削除
-		if  ( keys.CTRL.on && keys.C.hi )
-		{
-			for ( Marker& m : tblMarker )
-			{
-				if ( m.bSelected )
-				{
-					m.bAffectable = true;
-				}
-			}
-
-			for ( int i = tblMarker.size()-1 ; i >= 0 ; i-- )
-			{
-				if ( tblMarker[i].bAffectable )
-				{
-				   tblMarker.erase(tblMarker.begin() +i);	
-				}
-			}
-
-			
-		}
-		
-		// マーカー選択
-		if ( mouse.L.on )
-		{
-			struct
-			{
-				double	len;
-				Marker*	pmark;
-				int		cnt;
-			} a = {99999,0,0};
-
-			// 最近マーカーを検索
-			for ( Marker& m : tblMarker )
-			{
-				double len = (m-mouse.pos).length();
-				if ( len < 20.0 && a.len > len )
-				{
-					a.len = len;
-					a.pmark = &m;
-					a.cnt++;
-				}
-			}
-
-			// マーカー選択＆解除
-			if ( mouse.L.hi )
-			{
-				// 矩形選択
-				if ( a.pmark == 0 ) 
-				{
-					bDrag = true;
-					drag_start = mouse.pos;
-				}
-
-				// マーカー全解除
-				if ( keys.CTRL.on ){}
-				else
-				if ( keys.SHIFT.on ){}
-				else
-				if ( a.pmark && a.pmark->bSelected == true ){}
-				else
-				{
-					for ( Marker& m : tblMarker )
-					{
-						m.bSelected = false;
-					}
-				}
-				
-				//	マーカー選択
-				if ( a.pmark )
-				{
-					if ( keys.CTRL.on )
-					{
-						a.pmark->bSelected = !a.pmark->bSelected;
-					}
-					else
-					{
-						a.pmark->bSelected = true;
-					}
-				}
+				pfig->draw( vect2(x,y),th, colSelected );
 			}
 			else
 			{
-				// 矩形カーソル表示
-				if ( bDrag )
-				{
-#if 0
-					double x0 = min( drag_start.x, mouse.pos.x);
-					double y0 = min( drag_start.y, mouse.pos.y);
-					double x1 = max( drag_start.x, mouse.pos.x);
-					double y1 = max( drag_start.y, mouse.pos.y);
-					gra.Line( vect2(x0,y0), vect2(x1,y0), gra.Rgb(0,0.5,1));
-					gra.Line( vect2(x0,y1), vect2(x1,y1), gra.Rgb(0,0.5,1));
-					gra.Line( vect2(x0,y0), vect2(x0,y1), gra.Rgb(0,0.5,1));
-					gra.Line( vect2(x1,y0), vect2(x1,y1), gra.Rgb(0,0.5,1));
-#else
-					vect2 v0 = min( drag_start, mouse.pos);
-					vect2 v1 = max( drag_start, mouse.pos);
-					gra.Box( v0,v1, gra.Rgb(0,0.5,1));
-#endif
+				pfig->draw( vect2(x,y),th, colNormal );
+			}
+		
+		}
+	};
+	Figure* pfigArrow;
 
-					for ( Marker& m : tblMarker )
+	Apr( const char* name, int pos_x, int pos_y, int width, int height ) : Sys( name, pos_x, pos_y, width, height )
+	{
+		pfigArrow  = new Figure(gra);
+	}
+	~Apr()
+	{
+		delete	pfigArrow;
+	}
+
+			struct MarkerController
+			{
+			//	vector<Marker>	tblMarker;
+
+				//------------------------------------------------------------------------------
+				void funcMarkerController( vector<Marker>& tblMarker, Figure* pFigAdder, SysMouse& mouse, SysKeys& keys, SysGra& gra )
+				//------------------------------------------------------------------------------
+				{
+					static vect2 drag_start(0,0);
+					static bool bDrag = false;
+
+
+					// マーカー追加
+					if ( mouse.M.hi )
 					{
-						m.bRectIn = false;
+						tblMarker.push_back( Marker( &gra, pFigAdder, mouse.pos, rad(0), gra.Rgb(1,0,0), gra.Rgb(1,1,0) ) );
 					}
 
-					// 矩形内マーカーを検索
-					for ( Marker& m : tblMarker )
+
+					// マーカー削除
+					if  ( keys.CTRL.on && keys.X.hi )
 					{
-						double len = (m-mouse.pos).length();
-					if ( m.x > v0.x && m.x < v1.x && m.y > v0.y && m.y < v1.y )
-//					if ( m.x > x0   && m.x < x1   && m.y > y0   && m.y < y1 )
+						for ( Marker& m : tblMarker )
 						{
-							m.bRectIn = true;
-							if ( keys.CTRL.on )
+							if ( m.bSelected )
 							{
-								m.bRectSelected = !m.bSelected;
+								m.bAffectable = true;
 							}
-							else
+						}
+
+						for ( int i = tblMarker.size()-1 ; i >= 0 ; i-- )
+						{
+							if ( tblMarker[i].bAffectable )
 							{
-								m.bRectSelected = true;
+							   tblMarker.erase(tblMarker.begin() +i);	
 							}
 						}
 					}
-
-				}
-				else
-				// マーカー移動
-				for ( Marker& m : tblMarker )
-				{
-					if ( m.bSelected )
-					{
-//						m.x += mouse.mov.x;
-//						m.y += mouse.mov.y;
-						m += mouse.mov;
-					}
-				}
-			}
-		}
-		else
-		{
-			if ( bDrag )
-			{
-				bDrag = false;
-				for ( Marker& m : tblMarker )
-				{
-					if ( m.bRectIn )
-					{
-						m.bSelected = m.bRectSelected;
-					}
-					m.bRectIn = false;
-					m.bRectSelected = false;
-				}
-			}
-		}
-		
-		// マーカー表示
-		for ( Marker m : tblMarker )
-		{
-			m.draw();
-		}
-		
-		// マーカースプライン変換表示
-		if ( tblMarker.size() >=4 )
-		{
-			for ( unsigned int i = 0 ; i < tblMarker.size()-3 ; i++ )
-			{
-				double st = 0.1;
-
-				vect2 Q = catmull(0, tblMarker[i], tblMarker[i+1], tblMarker[i+2], tblMarker[i+3] );
-
-				for ( double t = st ; t < 1.0 ; t+=st)
-				{
-					vect2 P = catmull(t, tblMarker[i], tblMarker[i+1], tblMarker[i+2], tblMarker[i+3] );
-					gra.Line( P, Q, gra.Rgb(1,1,1));
-					Q=P;
-				}	
-					vect2 P = catmull(1, tblMarker[i], tblMarker[i+1], tblMarker[i+2], tblMarker[i+3] );
-					gra.Line( P, Q, gra.Rgb(1,1,1));
 					
-			}
-		}
+					// マーカー選択
+					if ( mouse.L.on )
+					{
+						struct
+						{
+							double	len;
+							Marker*	pmark;
+							int		cnt;
+						} a = {99999,0,0};
 
+						// 最近マーカーを検索
+						for ( Marker& m : tblMarker )
+						{
+							double len = (m-mouse.pos).length();
+							if ( len < 20.0 && a.len > len )
+							{
+								a.len = len;
+								a.pmark = &m;
+								a.cnt++;
+							}
+						}
 
+						// マーカー選択＆解除
+						if ( mouse.L.hi )
+						{
+							// 矩形選択
+							if ( a.pmark == 0 ) 
+							{
+								bDrag = true;
+								drag_start = mouse.pos;
+							}
 
-		Figure figCircle(gra);
-		{
-			int s=0;
-			for ( int i = 0 ; i < 360 ; i+=45 )
-			{
-				double th = i*pi/180.0;
-				double r = 7;
-				vect2 v( r*cos(th), r*sin(th) );
-				figCircle.vert.push_back( v );
-				s++;
-			}
-			for ( int i = 0 ; i < s-1 ; i++ )
-			{
-				figCircle.edge.push_back( (ivect2){ i,i+1 } );
-			}
-			figCircle.edge.push_back( (ivect2){ s-1,0 } );
-		}
-		static vector<Marker>	tblMarkerBone =
-		{
-			Marker( &gra, &figCircle, vect2(200,400), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-			Marker( &gra, &figCircle, vect2(300,350), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-			Marker( &gra, &figCircle, vect2(400,400), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-		};
+							// マーカー全解除
+							if ( keys.CTRL.on ){}
+							else
+							if ( keys.SHIFT.on ){}
+							else
+							if ( a.pmark && a.pmark->bSelected == true ){}
+							else
+							{
+								for ( Marker& m : tblMarker )
+								{
+									m.bSelected = false;
+								}
+							}
+							
+							//	マーカー選択
+							if ( a.pmark )
+							{
+								if ( keys.CTRL.on )
+								{
+									a.pmark->bSelected = !a.pmark->bSelected;
+								}
+								else
+								{
+									a.pmark->bSelected = true;
+								}
+							}
+						}
+						else
+						{
+							if ( bDrag )
+							{
+								// 矩形カーソル表示
+								vect2 v0 = min( drag_start, mouse.pos );
+								vect2 v1 = max( drag_start, mouse.pos );
+								gra.Box( v0,v1, gra.Rgb(0,0.5,1));
 
-		// 関節
-		vector<vect2> tblJoint =
-		{
-			vect2(100+100,150+250),
-			vect2(200+100,100+250),
-			vect2(300+100,150+250),
-		};
-		vector<ivect2>	tblBone
-		{
-			ivect2(0,1),
-			ivect2(1,2),
-		};
-		struct Bone
-		{
+								for ( Marker& m : tblMarker )
+								{
+									m.bRectIn = false;
+								}
+
+								// 矩形内マーカーを検索
+								for ( Marker& m : tblMarker )
+								{
+									double len = (m-mouse.pos).length();
+									if ( m.x > v0.x && m.x < v1.x && m.y > v0.y && m.y < v1.y )
+									{
+										m.bRectIn = true;
+										if ( keys.CTRL.on )
+										{
+											m.bRectSelected = !m.bSelected;
+										}
+										else
+										{
+											m.bRectSelected = true;
+										}
+									}
+								}
+
+							}
+							else
+							// マーカー移動
+							for ( Marker& m : tblMarker )
+							{
+								if ( m.bSelected )
+								{
+									m += mouse.mov;
+								}
+							}
+						}
+					}
+					else
+					{
+						if ( bDrag )
+						{
+							bDrag = false;
+							for ( Marker& m : tblMarker )
+							{
+								if ( m.bRectIn )
+								{
+									m.bSelected = m.bRectSelected;
+								}
+								m.bRectIn = false;
+								m.bRectSelected = false;
+							}
+						}
+					}
+					
+					// マーカー表示
+					for ( Marker m : tblMarker )
+					{
+						m.draw();
+					}
+
+					
+				}
+
 			
+			} mc;
+
+	//------------------------------------------------------------------------------
+	main()
+	//------------------------------------------------------------------------------
+	{
+	//	Figure pfigArrow->(gra);
+		pfigArrow->vert.push_back( (vect2){   0,20*tan(rad(60))	-10*tan(rad(30)) } );
+		pfigArrow->vert.push_back( (vect2){-10,  0 	    	   	-10*tan(rad(30)) } );
+		pfigArrow->vert.push_back( (vect2){ 10,  0 				-10*tan(rad(30)) } );
+		pfigArrow->edge.push_back( (ivect2){ 0,1 } );
+		pfigArrow->edge.push_back( (ivect2){ 1,2 } );
+		pfigArrow->edge.push_back( (ivect2){ 2,0 } );
+		pfigArrow->col = gra.Rgb(0,0.5,1);
+
+
+		Figure figTriangle(gra);
+		figTriangle.vert.push_back( (vect2){   0,100*tan(rad(60))	-100*tan(rad(30)) } );
+		figTriangle.vert.push_back( (vect2){-100,  0 	    	   	-100*tan(rad(30)) } );
+		figTriangle.vert.push_back( (vect2){ 100,  0 				-100*tan(rad(30)) } );
+		figTriangle.edge.push_back( (ivect2){ 0,1 } );
+		figTriangle.edge.push_back( (ivect2){ 1,2 } );
+		figTriangle.edge.push_back( (ivect2){ 2,0 } );
+		figTriangle.col = gra.Rgb(0,1,1);
+
+
+
+		
+		vector<vect3> boxvert=
+		{
+			{	-1,	 1,	-1	},
+			{	 1,	 1,	-1	},
+			{	-1,	-1,	-1	},
+			{	 1,	-1,	-1	},
+			{	-1,	 1,	 1	},
+			{	 1,	 1,	 1	},
+			{	-1,	-1,	 1	},
+			{	 1,	-1,	 1	},
 		};
-		
+		vector<vect3> boxdl;
 
-		
-		for ( ivect2 v : tblBone )
+		vector<ivect2>	boxedge
 		{
-			vect2 v0 = tblJoint[v.p];
-			vect2 v1 = tblJoint[v.n];
-			gra.Line( v0, v1, gra.Rgb( 1,1,1 ) );
-		}
-		
-		for ( vect2 v : tblJoint )
-		{
-			//gra.Circle( v+vect2(0,10), 5, gra.Rgb( 0.5 ,1, 0.0 ) );
-			figCircle.draw( v, rad(0), gra.Rgb(0.5,1,0) );
-		}
-		
+			{	0,	1	},
+			{	1,	3	},
+			{	3,	2	},
+			{	2,	0	},
+			{	4,	5	},
+			{	5,	7	},
+			{	7,	6	},
+			{	6,	4	},
+			{	0,	4	},
+			{	1,	5	},
+			{	2,	6	},
+			{	3,	7	},
+		};
 
-		// figArrow
-		{
-			figArrow.draw( vect2(200,200), rad(-45), gra.Rgb(1,0,0) );
-		}
 
-		// figTriangle
+
+		double	rx = rad(0);
+		double	ry = rad(0);
+		double	rz = rad(0);
+
+		while( Update() )
 		{
-			static int cnt = 0;
-#if 0
-			auto func = [&]( double x0, double y0, double x1, double y1, int col)
+	 		static int py=0;
+
+
+			gra.Clr(gra.Rgb(0.3,0.3,0.3));
+			
+			//raytrace( gra, py++ );
+			if ( py >= m.height ) py=0;
+
+			//	move
+	//		rx += rad(0.2);	
+	//		rz += rad(1);	
+	//		ry += rad(0.5);	
+
+			double pz =4;
+
+
+			//calc rotate
+			boxdl.clear();
+			for ( vect3 v : boxvert )
 			{
-				gra.Line(x0,y0,x1,y1,col);
+	//			double x = v.x;
+	//			double y = v.y;
+	//			double z = v.z;
+
+				double	x,y,z;
+
+
+	#if 0
+				//rz
+				x=v.x*cos(rz) - v.y*sin(rz) + v.z *0;
+				y=v.x*sin(rz) + v.y*cos(rz) + v.z *0;
+				z=v.x* 0      + v.y*0       + v.z *1;
+				v.x=x;
+				v.y=y;
+				v.z=z;
+
+				//rx
+				x=v.x;
+				y=v.y*cos(rx) - v.z*sin(rx);
+				z=v.y*sin(rx) + v.z*cos(rx);
+				v.x=x;
+				v.y=y;
+				v.z=z;
+
+				//ry
+				x=v.x*cos(ry) - v.z*sin(ry);
+				y=v.y;
+				z=v.x*sin(ry) + v.z*cos(ry);
+				v.x=x;
+				v.y=y;
+				v.z=z;
+	#else
+				//	右手系座標系
+				//	右手ねじ周り
+				//	roll	:z	奥+
+				//	pitch	:x	右+
+				//	yaw		:y	下+
+
+				rx+=rad(0.03);
+				ry+=rad(0.05);
+				rz+=rad(0.1);
+	/*
+				mat44 rotx(
+					1.0			,	0.0			,	0.0			,	0.0	,
+					0.0			,	 cos(rx)	,	-sin(rx)	,	0.0	,
+					0.0			,	 sin(rx)	,	 cos(rx)	,	0.0	,
+					0.0			,	0.0			,	0.0			,	0.0	
+				);
+
+				mat44 roty(
+					 cos(ry)	,	0.0			,	 sin(ry)	,	0.0	,
+					 0.0		,	1.0			,	0.0			,	0.0	,
+					-sin(ry)	,	0.0			,	 cos(ry)	,	0.0	,
+					 0.0		,	0.0			,	0.0			,	0.0	
+				);
+
+				mat44 rotz(
+					 cos(rz)	,	-sin(rz)	,	0.0			,	0.0	,
+					 sin(rz)	,	 cos(rz)	,	0.0			,	0.0	,
+					0.0			,	0.0			,	1.0			,	0.0	,
+					0.0			,	0.0			,	0.0			,	0.0	
+				);
+	*/
+				mat44	rotx;
+				mat44	roty;
+				mat44	rotz;
+				rotx.setRotateX(rx);
+				roty.setRotateY(ry);
+				rotz.setRotateZ(rz);
+		
+
+	#if 1
+				v= rotx *v ;
+				v= roty *v ;
+				v= rotz *v ;
+	#else
+				v= rotx * roty * rotz *v ;
+	#endif
+
+
+				
+	#endif
+
+				v.z+=pz;
+
+				boxdl.push_back( v );
+
+			}
+			
+			
+			static	double	val=45;
+			if (keys.Q.rep) {val--;cout << val <<" "<<1/tan(rad(val)) << endl; }
+			if (keys.A.rep) {val++;cout << val <<" "<<1/tan(rad(val)) << endl; }
+			if (keys.W.rep) {val-=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
+			if (keys.S.rep) {val+=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
+
+			val += -mouse.wheel/30;
+	//cout << mouse.wheel << endl;
+			//calc pers 
+
+
+			gra.Pset(vect2(10,10),gra.Rgb(1,1,1));
+
+			for ( ivect2 e : boxedge )
+			{
+				vect3& p = boxdl[e.p];
+				vect3& n = boxdl[e.n];
+
+				double	x,y,z;
+				
+				double	fovy = rad(val);	//	画角
+				//画角から投影面パラメータを求める
+				double	sc = m.height/2;
+				double	sz = 1/tan(fovy/2);
+
+				//pers
+				double x0 = p.x/(p.z+sz)	*sc	+256;
+				double y0 = p.y/(p.z+sz)	*sc	+256;
+				double x1 = n.x/(n.z+sz)	*sc	+256;
+				double y1 = n.y/(n.z+sz)	*sc	+256;
+				gra.Line( vect2(x0,y0), vect2(x1,y1),gra.Rgb(0,1,1));
+
+			}
+	#if 1
+				gra.Tri( vect2(55,10), vect2(10,100), vect2(100,100),gra.Rgb(1,1,0));
+
+				gra.Tri( vect2(55,10), vect2(10,100), vect2(100,100),gra.Rgb(1,1,0));
+
+				double a = 80;
+				gra.Tri( vect2(55+a,10), vect2(10+a,100), vect2(100+a,100),gra.Rgb(1,1,0));
+
+				a=40;
+				double	b = 120;
+				gra.Bezier(vect2(10+a,10+b), vect2(100+a,100+b), vect2(200+a,10+b), vect2(300+a,100+b),gra.Rgb(0,1,0));
+
+				gra.Circle( vect2( 10+a, 10+b), 10, gra.Rgb(1,0,0));
+				gra.Circle( vect2(100+a,100+b), 10, gra.Rgb(1,0,0));
+				gra.Circle( vect2(200+a, 10+b), 10, gra.Rgb(1,0,0));
+				gra.Circle( vect2(300+a,100+b), 10, gra.Rgb(1,0,0));
+	//cout << "circle " << gra.m.tblCircle.size() << endl;
+			
+
+	#endif
+
+
+
+			static vector<Marker>	tblMarker =
+			{
+				Marker( &gra, pfigArrow, vect2(500,200  +0), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+				Marker( &gra, pfigArrow, vect2(500,200+ 20), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+				Marker( &gra, pfigArrow, vect2(550,200+100), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+				Marker( &gra, pfigArrow, vect2(500,200+180), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+				Marker( &gra, pfigArrow, vect2(500,200+200), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
 			};
-			figTriangle.draw( func, 256,256,rad(cnt), gra.Rgb(0,1,1) );
-#else
-			figTriangle.draw( vect2(256,256),rad(cnt), gra.Rgb(0,1,1) );
-#endif
-			cnt++;
-		}
-	
-		{
-			static chrono::system_clock::time_point time_a;
-			static chrono::system_clock::time_point time_b;
-			static chrono::system_clock::time_point time_sec;
-			static chrono::system_clock::time_point time_amt;
+/*
 
-			time_b = chrono::system_clock::now(); 
-			time_amt += time_b-time_a;
-			while( chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now()-time_a).count() < 16.6667*1000 )	// 60fps同期処理
+			mc.tblMarker.push_back( Marker( &gra, pfigArrow, vect2(500,200  +0), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ) );
+			mc.tblMarker.push_back( Marker( &gra, pfigArrow, vect2(500,200+ 20), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ) );
+			mc.tblMarker.push_back( Marker( &gra, pfigArrow, vect2(550,200+100), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ) );
+			mc.tblMarker.push_back( Marker( &gra, pfigArrow, vect2(500,200+180), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ) );
+			mc.tblMarker.push_back( Marker( &gra, pfigArrow, vect2(500,200+200), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ) );
+*/
+					
+			
+
+			// ベジェー用マーカー操作	
+			mc.funcMarkerController( tblMarker, pfigArrow, mouse, keys, gra );
+			static auto catmull = []( double t, const vect2 Pm, const vect2 P0, const vect2 P1, const vect2 P2 )
 			{
- 				this_thread::sleep_for (chrono::microseconds(100));
-			}
-			if (chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now()-time_sec).count() > 3*1000*1000 ) // n sec毎表示
+				//Catmull-Rom 曲線
+				// P(t)=P0*(2t^3-3t^2+1)+m0*(t^3-2t^2+t)+P1*(-2t^3+3t^2)+m1*(t^3-t^2)
+				// m0=(P1-Pm)/2
+				// m1=(P2-P0)/2
+
+				vect2 m0 = (P1-Pm)/2.0;
+				vect2 m1 = (P2-P0)/2.0;
+				vect2 P = P0*(2*t*t*t - 3*t*t +1) + m0*( t*t*t -2*t*t +t ) + P1*( -2*t*t*t + 3*t*t ) + m1*( t*t*t - t*t );
+
+				return P;
+			};
+
+			// マーカースプライン変換表示
+			if ( tblMarker.size() >=4 )
 			{
-				time_sec = chrono::system_clock::now();
-				double f = chrono::duration_cast<chrono::microseconds>(time_b-time_a).count();
-				cout << "time " << f/1000 << " msec" << endl;
+				for ( unsigned int i = 0 ; i < tblMarker.size()-3 ; i++ )
+				{
+					double st = 0.1;
+
+					vect2 Q = catmull(0, tblMarker[i], tblMarker[i+1], tblMarker[i+2], tblMarker[i+3] );
+
+					for ( double t = st ; t < 1.0 ; t+=st)
+					{
+						vect2 P = catmull(t, tblMarker[i], tblMarker[i+1], tblMarker[i+2], tblMarker[i+3] );
+						gra.Line( P, Q, gra.Rgb(1,1,1));
+						Q=P;
+					}	
+						vect2 P = catmull(1, tblMarker[i], tblMarker[i+1], tblMarker[i+2], tblMarker[i+3] );
+						gra.Line( P, Q, gra.Rgb(1,1,1));
+						
+				}
 			}
-			time_a = chrono::system_clock::now();  
+			//
+			static Figure figCircle(gra);
+			{
+				int s=0;
+				for ( int i = 0 ; i < 360 ; i+=45 )
+				{
+					double th = i*pi/180.0;
+					double r = 7;
+					vect2 v( r*cos(th), r*sin(th) );
+					figCircle.vert.push_back( v );
+					s++;
+				}
+				for ( int i = 0 ; i < s-1 ; i++ )
+				{
+					figCircle.edge.push_back( (ivect2){ i,i+1 } );
+				}
+				figCircle.edge.push_back( (ivect2){ s-1,0 } );
+			}
+			static vector<Marker>	tblMarkerBone =
+			{
+				Marker( &gra, &figCircle, vect2(200,400), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+				Marker( &gra, &figCircle, vect2(300,350), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+				Marker( &gra, &figCircle, vect2(400,400), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+			};
+
+
+			// ベジェー用マーカー操作	
+//			mc.funcMarkerController( tblMarkerBone, &figCircle, mouse, keys, gra );
+
+			// 関節
+			vector<vect2> tblJoint =
+			{
+				vect2(100+100,150+250),
+				vect2(200+100,100+250),
+				vect2(300+100,150+250),
+			};
+			vector<ivect2>	tblBone
+			{
+				ivect2(0,1),
+				ivect2(1,2),
+			};
+			struct Bone
+			{
+				
+			};
+			
+
+			
+			for ( ivect2 v : tblBone )
+			{
+				vect2 v0 = tblJoint[v.p];
+				vect2 v1 = tblJoint[v.n];
+				gra.Line( v0, v1, gra.Rgb( 1,1,1 ) );
+			}
+			
+			for ( vect2 v : tblJoint )
+			{
+//				figCircle.draw( v, rad(0), gra.Rgb(0.5,1,0) );		// 何故かどんどん重くなる
+			}
+
+			// figTriangle
+			{
+				static int cnt = 0;
+	#if 0
+				auto func = [&]( double x0, double y0, double x1, double y1, int col)
+				{
+					gra.Line(x0,y0,x1,y1,col);
+				};
+				figTriangle.draw( func, 256,256,rad(cnt), gra.Rgb(0,1,1) );
+	#else
+				figTriangle.draw( vect2(256,256),rad(cnt), gra.Rgb(0,1,1) );
+	#endif
+				cnt++;
+			}
+			{
+				static chrono::system_clock::time_point time_a;
+				static chrono::system_clock::time_point time_b;
+				static chrono::system_clock::time_point time_sec;
+				static chrono::system_clock::time_point time_amt;
+
+				time_b = chrono::system_clock::now(); 
+				time_amt += time_b-time_a;
+				while( chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now()-time_a).count() < 16.6667*1000 )	// 60fps同期処理
+				{
+	 				this_thread::sleep_for (chrono::microseconds(100));
+				}
+				if (chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now()-time_sec).count() > 1*1000*1000 ) // n sec毎表示
+				{
+					time_sec = chrono::system_clock::now();
+					double f = chrono::duration_cast<chrono::microseconds>(time_b-time_a).count();
+					cout << "time " << f/1000 << " msec" << endl;
+				}
+				time_a = chrono::system_clock::now();  
+			}
 		}
+		return 0;
 	}
-	return 0;
+
+
+} ;
+
+
+//------------------------------------------------------------------------------
+int main()
+//------------------------------------------------------------------------------
+{
+	Apr	apr("Ray4 " __DATE__, 300,300,768, 512 );
+	return apr.main();
 }
+
+
+
+
 	
 
