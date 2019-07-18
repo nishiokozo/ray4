@@ -196,10 +196,10 @@ void  SysGra::OnPaint()
 			for ( unsigned int i=0 ; i < m.tblCircle.size() ; i++ )
 			{
 
-				int x0 = m.tblCircle[i].x0;
-				int y0 = m.tblCircle[i].y0;
-				int x1 = m.tblCircle[i].x1;
-				int y1 = m.tblCircle[i].y1;
+				int x0 = m.tblCircle[i].v0.x;
+				int y0 = m.tblCircle[i].v0.y;
+				int x1 = m.tblCircle[i].v1.x;
+				int y1 = m.tblCircle[i].v1.y;
 				int	col = m.tblCircle[i].col;
 
 				HPEN hPen = CreatePen(PS_SOLID, 1, col );
@@ -225,8 +225,8 @@ void  SysGra::OnPaint()
 			{
 				HPEN hPen;
 
-				int x0 = m.tblPset[i].x;
-				int y0 = m.tblPset[i].y;
+				int x0 = m.tblPset[i].v.x;
+				int y0 = m.tblPset[i].v.y;
 				int	col = m.tblPset[i].col;
 
 				hPen = CreatePen(PS_SOLID, 1, col );
@@ -245,10 +245,10 @@ void  SysGra::OnPaint()
 			for ( unsigned int i=0 ; i < m.tblLine.size() ; i++ )
 			{
 
-				int x0 = m.tblLine[i].x0;
-				int y0 = m.tblLine[i].y0;
-				int x1 = m.tblLine[i].x1;
-				int y1 = m.tblLine[i].y1;
+				int x0 = m.tblLine[i].v0.x;
+				int y0 = m.tblLine[i].v0.y;
+				int x1 = m.tblLine[i].v1.x;
+				int y1 = m.tblLine[i].v1.y;
 				int	col = m.tblLine[i].col;
 
 				HPEN hPen = CreatePen(PS_SOLID, 1, col );
@@ -266,12 +266,12 @@ void  SysGra::OnPaint()
 		{
 			for ( unsigned int i=0 ; i < m.tblTri.size() ; i++ )
 			{	
-				int x0 = m.tblTri[i].x0;
-				int y0 = m.tblTri[i].y0;
-				int x1 = m.tblTri[i].x1;
-				int y1 = m.tblTri[i].y1;
-				int x2 = m.tblTri[i].x2;
-				int y2 = m.tblTri[i].y2;
+				int x0 = m.tblTri[i].v0.x;
+				int y0 = m.tblTri[i].v0.y;
+				int x1 = m.tblTri[i].v1.x;
+				int y1 = m.tblTri[i].v1.y;
+				int x2 = m.tblTri[i].v2.x;
+				int y2 = m.tblTri[i].v2.y;
 				int	col = m.tblTri[i].col;
 
 				HPEN hPen = CreatePen(PS_SOLID, 1, col );
@@ -295,14 +295,14 @@ void  SysGra::OnPaint()
 		{
 			for ( unsigned int i=0 ; i < m.tblBezier.size() ; i++ )
 			{	
-				int x0 = m.tblBezier[i].x0;
-				int y0 = m.tblBezier[i].y0;
-				int x1 = m.tblBezier[i].x1;
-				int y1 = m.tblBezier[i].y1;
-				int x2 = m.tblBezier[i].x2;
-				int y2 = m.tblBezier[i].y2;
-				int x3 = m.tblBezier[i].x3;
-				int y3 = m.tblBezier[i].y3;
+				int x0 = m.tblBezier[i].v0.x;
+				int y0 = m.tblBezier[i].v0.y;
+				int x1 = m.tblBezier[i].v1.x;
+				int y1 = m.tblBezier[i].v1.y;
+				int x2 = m.tblBezier[i].v2.x;
+				int y2 = m.tblBezier[i].v2.y;
+				int x3 = m.tblBezier[i].v3.x;
+				int y3 = m.tblBezier[i].v3.y;
 				int	col = m.tblBezier[i].col;
 
 				HPEN hPen = CreatePen(PS_SOLID, 1, col );
@@ -403,42 +403,42 @@ void SysGra::Clr( int col)
 	(*this).m.clr.col = col;
 }
 //------------------------------------------------------------------------------
-void SysGra::Circle( double x, double y, double r, int col )
+void SysGra::Circle( vect2 v, double r, int col )
 //------------------------------------------------------------------------------
 {
-	PrimCircle a = {x-r,y-r,x+r,y+r,col};
+	PrimCircle a = {vect2(v.x-r, v.y-r), vect2(v.x+r, v.y+r),col};
 	
 	(*this).m.tblCircle.push_back( a );
 }
 //------------------------------------------------------------------------------
-void SysGra::Pset( double x, double y, int col )
+void SysGra::Pset( vect2 v, int col )
 //------------------------------------------------------------------------------
 {
-	PrimPset a = {x,y,col};
+	PrimPset a = {v,col};
 	
 	(*this).m.tblPset.push_back( a );
 }
 //------------------------------------------------------------------------------
-void SysGra::Line( double x0, double y0, double x1, double y1,int col)
+void SysGra::Line( vect2 v0, vect2 v1,int col)
 //------------------------------------------------------------------------------
 {
-	PrimLine a = {x0,y0,x1,y1,col};
+	PrimLine a = {v0,v1,col};
 	
 	(*this).m.tblLine.push_back( a );
 }
 //------------------------------------------------------------------------------
-void SysGra::Tri( double x0, double y0, double x1, double y1, double x2, double y2, int col)
+void SysGra::Tri( vect2 v0, vect2 v1, vect2 v2, int col)
 //------------------------------------------------------------------------------
 {
-	PrimTri a = {x0,y0,x1,y1,x2,y2,col};
+	PrimTri a = {v0,v1,v2,col};
 	
 	(*this).m.tblTri.push_back( a );
 }
 //------------------------------------------------------------------------------
-void SysGra::Bezier( double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3, int col)
+void SysGra::Bezier( vect2 v0, vect2 v1, vect2 v2, vect2 v3, int col)
 //------------------------------------------------------------------------------
 {
-	PrimBezier a = {x0,y0,x1,y1,x2,y2,x3,y3,col};
+	PrimBezier a = {v0,v1,v2,v3,col};
 	
 	(*this).m.tblBezier.push_back( a );
 }

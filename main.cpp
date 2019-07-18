@@ -490,7 +490,7 @@ void	raytrace( SysGra& gra, int py )
 				if ( ren.m_cntRay > cntMax ) cntMax = ren.m_cntRay;
 				cntRay+= ren.m_cntRay;
 
-				gra.Pset(px,height-py,gra.Rgb(C.r,C.g,C.b));
+				gra.Pset( vect2(px,height-py) ,gra.Rgb(C.r,C.g,C.b));
 			}
 		}
 		
@@ -538,7 +538,7 @@ Apr::main()
 				double x1=n.x*cos(th) - n.y*sin(th) + ofs.x;
 				double y1=n.x*sin(th) + n.y*cos(th) + ofs.y;
 
-				gra.Line(x0,y0,x1,y1,col);
+				gra.Line(vect2(x0,y0), vect2(x1,y1),col);
 			}
 		}
 
@@ -719,6 +719,10 @@ Apr::main()
 		val += -mouse.wheel/30;
 //cout << mouse.wheel << endl;
 		//calc pers 
+
+
+		gra.Pset(vect2(10,10),gra.Rgb(1,1,1));
+
 		for ( ivect2 e : boxedge )
 		{
 			vect3& p = boxdl[e.p];
@@ -736,25 +740,25 @@ Apr::main()
 			double y0 = p.y/(p.z+sz)	*sc	+256;
 			double x1 = n.x/(n.z+sz)	*sc	+256;
 			double y1 = n.y/(n.z+sz)	*sc	+256;
-			gra.Line(x0,y0,x1,y1,gra.Rgb(0,1,1));
+			gra.Line( vect2(x0,y0), vect2(x1,y1),gra.Rgb(0,1,1));
 
 		}
 #if 1
-			gra.Tri(55,10, 10,100, 100,100,gra.Rgb(1,1,0));
+			gra.Tri( vect2(55,10), vect2(10,100), vect2(100,100),gra.Rgb(1,1,0));
 
-			gra.Tri(55,10, 10,100, 100,100,gra.Rgb(1,1,0));
+			gra.Tri( vect2(55,10), vect2(10,100), vect2(100,100),gra.Rgb(1,1,0));
 
 			double a = 80;
-			gra.Tri(55+a,10, 10+a,100, 100+a,100,gra.Rgb(1,1,0));
+			gra.Tri( vect2(55+a,10), vect2(10+a,100), vect2(100+a,100),gra.Rgb(1,1,0));
 
 			a=40;
 			double	b = 120;
-			gra.Bezier(10+a,10+b, 100+a,100+b, 200+a,10+b, 300+a,100+b,gra.Rgb(0,1,0));
+			gra.Bezier(vect2(10+a,10+b), vect2(100+a,100+b), vect2(200+a,10+b), vect2(300+a,100+b),gra.Rgb(0,1,0));
 
-			gra.Circle( 10+a, 10+b, 10, gra.Rgb(1,0,0));
-			gra.Circle(100+a,100+b, 10, gra.Rgb(1,0,0));
-			gra.Circle(200+a, 10+b, 10, gra.Rgb(1,0,0));
-			gra.Circle(300+a,100+b, 10, gra.Rgb(1,0,0));
+			gra.Circle( vect2( 10+a, 10+b), 10, gra.Rgb(1,0,0));
+			gra.Circle( vect2(100+a,100+b), 10, gra.Rgb(1,0,0));
+			gra.Circle( vect2(200+a, 10+b), 10, gra.Rgb(1,0,0));
+			gra.Circle( vect2(300+a,100+b), 10, gra.Rgb(1,0,0));
 //cout << "circle " << gra.m.tblCircle.size() << endl;
 		
 
@@ -935,10 +939,10 @@ Apr::main()
 					double x1 = max( drag_start.x, mpos.x);
 					double y1 = max( drag_start.y, mpos.y);
 
-					gra.Line( x0,y0,x1,y0, gra.Rgb(0,0.5,1));
-					gra.Line( x0,y1,x1,y1, gra.Rgb(0,0.5,1));
-					gra.Line( x0,y0,x0,y1, gra.Rgb(0,0.5,1));
-					gra.Line( x1,y0,x1,y1, gra.Rgb(0,0.5,1));
+					gra.Line( vect2(x0,y0), vect2(x1,y0), gra.Rgb(0,0.5,1));
+					gra.Line( vect2(x0,y1), vect2(x1,y1), gra.Rgb(0,0.5,1));
+					gra.Line( vect2(x0,y0), vect2(x0,y1), gra.Rgb(0,0.5,1));
+					gra.Line( vect2(x1,y0), vect2(x1,y1), gra.Rgb(0,0.5,1));
 
 					for ( Marker& m : tblMarker )
 					{
@@ -1011,23 +1015,45 @@ Apr::main()
 				for ( double t = st ; t < 1.0 ; t+=st)
 				{
 					vect2 P = catmull(t, tblMarker[i], tblMarker[i+1], tblMarker[i+2], tblMarker[i+3] );
-					gra.Line( P.x, P.y, Q.x, Q.y, gra.Rgb(1,1,1));
+					gra.Line( P, Q, gra.Rgb(1,1,1));
 					Q=P;
 				}	
 					vect2 P = catmull(1, tblMarker[i], tblMarker[i+1], tblMarker[i+2], tblMarker[i+3] );
-					gra.Line( P.x, P.y, Q.x, Q.y, gra.Rgb(1,1,1));
+					gra.Line( P, Q, gra.Rgb(1,1,1));
 					
 			}
 		}
 
 
-
-		vector<vect2> tblBone =
+		vector<vect2> tblJoint =
 		{
-			vect2(100,150),
-			vect2(200,100),
-			vect2(300,150),
+			vect2(100+100,150+250),
+			vect2(200+100,100+250),
+			vect2(300+100,150+250),
 		};
+		vector<ivect2>	tblBone
+		{
+			ivect2(0,1),
+			ivect2(1,2),
+		};
+		struct Bone
+		{
+			
+		};
+		
+		
+		for ( ivect2 v : tblBone )
+		{
+			vect2 v0 = tblJoint[v.p];
+			vect2 v1 = tblJoint[v.n];
+			gra.Line( v0, v1, gra.Rgb( 1,1,1 ) );
+		}
+		
+		for ( vect2 v : tblJoint )
+		{
+			gra.Circle( v, 5, gra.Rgb( 0.5 ,1, 0.0 ) );
+		}
+		
 
 		// fig
 		{

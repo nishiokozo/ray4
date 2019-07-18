@@ -1,6 +1,8 @@
 // version 20170527
 //	2019/06/25 to only vect3 & mat44
-
+#include <cmath>
+#ifndef GEOM_H
+#define	GEOM_H
 typedef	double	MAT4[4][4];
 
 void	mat4_rotateX( double* m, double th );
@@ -11,11 +13,70 @@ void	mat4_rotateZ( double* m, double th );
 //#define	pi	3.141592654
 const static double pi = 3.141592654;
 
-struct	ivect2
+struct	I2
 {
-	int	p,n;
-	ivect2(int _p, int _n ) :p(_p),n(_n){}
-	ivect2() :p(0),n(0){}
+	union { int x;	int p; };
+	union { int y;	int n; };
+	I2(){};
+	I2( int _x, int _y ) : x(_x), y(_y){}
+};
+
+struct	I3
+{
+	union { int x;	int r; };
+	union { int y;	int g; };
+	union { int z;	int b; };
+	I3(){};
+	I3( int _x, int _y, int _z ) : x(_x), y(_y), z(_z){}
+};
+
+struct	I4
+{
+	union { int x;	int r; };
+	union { int y;	int g; };
+	union { int z;	int b; };
+	union { int w;	int a; };
+	I4(){};
+	I4( int _x, int _y, int _z , int _w ) : x(_x), y(_y), z(_z), w(_w){}
+};
+
+struct	D2
+{
+	union { double x;	double u; };
+	union { double y;	double v; };
+	D2( double _x, double _y ) : x(_x), y(_y){}
+};
+
+struct	D3
+{
+	union { double x;	double r; };
+	union { double y;	double g; };
+	union { double z;	double b; };
+	D3(){};
+	D3( D2 v, double _z ) : x(v.x), y(v.y), z(_z){}
+	D3( double _x, double _y, double _z ) : x(_x), y(_y), z(_z){}
+};
+
+struct	D4
+{
+	union { double x;	double u;	double r; };
+	union { double y;	double v;	double g; };
+	union { double z;	double s;	double b; };
+	union { double w;	double t;	double a; };
+	D4(){};
+	D4( double _x, double _y, double _z, double _w ) : x(_x), y(_y), z(_z), w(_w){}
+	D4( D2 v, double _z, double _w ) : x(v.x), y(v.y), z(_z), w(_w){}
+	D4( D3 v, double _w ) : x(v.x), y(v.y), z(v.z), w(_w){}
+};
+
+struct	ivect2 : public I2
+{
+//	int	p,n;
+	ivect2( int _p, int _n ) 
+	{
+		x=_p;
+		y=_n;
+	}
 	
 };
 
@@ -639,3 +700,4 @@ mat44	mat4_GetRotateX( double th );
 mat44	mat4_GetRotateY( double th );
 mat44	mat4_GetRotateZ( double th );
 void	mat4_multiply( double* m, const double* a, const double* y1 );
+#endif
