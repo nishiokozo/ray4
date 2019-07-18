@@ -454,16 +454,16 @@ public:
 
 };
 
-#if 0
+#if 1
 //------------------------------------------------------------------------------
-void	raytrace( SysWin& win, int py )
+void	raytrace( SysGra& gra, int py )
 //------------------------------------------------------------------------------
 {
 	Renderer ren;
 
 	{
-		int height	= m.height; 
-		int width	= m.width; 
+		int width	= gra.GetWidth(); 
+		int height	= gra.GetHeight(); 
 	
 		vect3	posScr = vect3(0,1.0,-12+8);
 		vect3	posEye = vect3(0,1.0,-17+8);
@@ -490,7 +490,7 @@ void	raytrace( SysWin& win, int py )
 				if ( ren.m_cntRay > cntMax ) cntMax = ren.m_cntRay;
 				cntRay+= ren.m_cntRay;
 
-				win.(*this).Pset(px,height-py,gra.Rgb(C.r,C.g,C.b));
+				gra.Pset(px,height-py,gra.Rgb(C.r,C.g,C.b));
 			}
 		}
 		
@@ -605,7 +605,7 @@ Apr::main()
 
 		gra.Clr(gra.Rgb(0.3,0.3,0.3));
 		
-//		raytrace( win, py++ );
+		//raytrace( gra, py++ );
 		if ( py >= m.height ) py=0;
 
 		//	move

@@ -69,6 +69,8 @@ struct SysGra
 	} m;
 //	 BITMAP bmBitmap;
 
+	int GetWidth();
+	int GetHeight();
 
 	void ReleasePixelBits();
 	void CreatePixelBits(int bpp, int width, int height );
