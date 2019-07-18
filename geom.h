@@ -320,6 +320,11 @@ extern vect3 refract( vect3 a, vect3 b, double n );
 extern vect3 reflect( vect3 I, vect3 N );
 
 
+extern vect2		min( vect2 a, vect2 b );
+extern vect2		max( vect2 a, vect2 b );
+extern vect3		min( vect3 a, vect3 b );
+extern vect3		max( vect3 a, vect3 b );
+
 extern double	max( double a, double b );
 extern vect3		max( const double a, vect3 b );
 extern vect3		max( vect3 b, double a );

@@ -839,14 +839,15 @@ Apr::main()
 		
 		static vect2 drag_start(0,0);
 		static bool bDrag = false;
+
 	
-		vect2 mpos( mouse.pos.x, mouse.pos.y );
+//		vect2 mouse.pos( mouse.pos.x, mouse.pos.y );
 
 
 		// マーカー追加
 		if ( mouse.M.hi )
 		{
-			tblMarker.push_back( Marker( &gra, &figArrow, mpos, rad(0), gra.Rgb(1,0,0), gra.Rgb(1,1,0) ) );
+			tblMarker.push_back( Marker( &gra, &figArrow, mouse.pos, rad(0), gra.Rgb(1,0,0), gra.Rgb(1,1,0) ) );
 		}
 
 
@@ -885,7 +886,7 @@ Apr::main()
 			// 最近マーカーを検索
 			for ( Marker& m : tblMarker )
 			{
-				double len = (m-mpos).length();
+				double len = (m-mouse.pos).length();
 				if ( len < 20.0 && a.len > len )
 				{
 					a.len = len;
@@ -901,7 +902,7 @@ Apr::main()
 				if ( a.pmark == 0 ) 
 				{
 					bDrag = true;
-					drag_start = mpos;
+					drag_start = mouse.pos;
 				}
 
 				// マーカー全解除
@@ -936,10 +937,13 @@ Apr::main()
 				// 矩形カーソル表示
 				if ( bDrag )
 				{
-					double x0 = min( drag_start.x, mpos.x);
-					double y0 = min( drag_start.y, mpos.y);
-					double x1 = max( drag_start.x, mpos.x);
-					double y1 = max( drag_start.y, mpos.y);
+					double x0 = min( drag_start.x, mouse.pos.x);
+					double y0 = min( drag_start.y, mouse.pos.y);
+					double x1 = max( drag_start.x, mouse.pos.x);
+					double y1 = max( drag_start.y, mouse.pos.y);
+
+					vect2 v0 = min( drag_start, mouse.pos);
+					vect2 v1 = max( drag_start, mouse.pos);
 
 					gra.Line( vect2(x0,y0), vect2(x1,y0), gra.Rgb(0,0.5,1));
 					gra.Line( vect2(x0,y1), vect2(x1,y1), gra.Rgb(0,0.5,1));
@@ -954,7 +958,7 @@ Apr::main()
 					// 矩形内マーカーを検索
 					for ( Marker& m : tblMarker )
 					{
-						double len = (m-mpos).length();
+						double len = (m-mouse.pos).length();
 						if ( m.x > x0 && m.x < x1 && m.y > y0 && m.y < y1 )
 						{
 							m.bRectIn = true;
@@ -976,8 +980,9 @@ Apr::main()
 				{
 					if ( m.bSelected )
 					{
-						m.x += mouse.mov.x;
-						m.y += mouse.mov.y;
+//						m.x += mouse.mov.x;
+//						m.y += mouse.mov.y;
+						m += mouse.mov;
 					}
 				}
 			}
