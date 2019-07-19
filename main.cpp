@@ -777,6 +777,24 @@ struct Apr : public Sys
 		figTriangle.edge.push_back( (ivect2){ 2,0 } );
 		figTriangle.col = gra.Rgb(0,1,1);
 
+			static Figure figCircle(gra);
+			{
+				int s=0;
+				for ( int i = 0 ; i < 360 ; i+=45 )
+				{
+					double th = i*pi/180.0;
+					double r = 7;
+					vect2 v( r*cos(th), r*sin(th) );
+					figCircle.vert.push_back( v );
+					s++;
+				}
+				for ( int i = 0 ; i < s-1 ; i++ )
+				{
+					figCircle.edge.push_back( (ivect2){ i,i+1 } );
+				}
+				figCircle.edge.push_back( (ivect2){ s-1,0 } );
+			}
+
 
 
 		
@@ -1039,23 +1057,6 @@ struct Apr : public Sys
 				}
 			}
 			//
-			static Figure figCircle(gra);
-			{
-				int s=0;
-				for ( int i = 0 ; i < 360 ; i+=45 )
-				{
-					double th = i*pi/180.0;
-					double r = 7;
-					vect2 v( r*cos(th), r*sin(th) );
-					figCircle.vert.push_back( v );
-					s++;
-				}
-				for ( int i = 0 ; i < s-1 ; i++ )
-				{
-					figCircle.edge.push_back( (ivect2){ i,i+1 } );
-				}
-				figCircle.edge.push_back( (ivect2){ s-1,0 } );
-			}
 			static vector<Marker>	tblMarkerBone =
 			{
 				Marker( &gra, &figCircle, vect2(200,400), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
@@ -1095,7 +1096,7 @@ struct Apr : public Sys
 			
 			for ( vect2 v : tblJoint )
 			{
-//				figCircle.draw( v, rad(0), gra.Rgb(0.5,1,0) );		// 何故かどんどん重くなる
+				figCircle.draw( v, rad(0), gra.Rgb(0.5,1,0) );		// 何故かどんどん重くなる
 			}
 
 			// figTriangle
