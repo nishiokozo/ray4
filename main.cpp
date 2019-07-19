@@ -572,15 +572,12 @@ struct Apr : public Sys
 		
 		}
 	};
-	Figure* pfigArrow;
 
 	Apr( const char* name, int pos_x, int pos_y, int width, int height ) : Sys( name, pos_x, pos_y, width, height )
 	{
-		pfigArrow  = new Figure(gra);
 	}
 	~Apr()
 	{
-		delete	pfigArrow;
 	}
 
 			struct MarkerController
@@ -758,14 +755,14 @@ struct Apr : public Sys
 	main()
 	//------------------------------------------------------------------------------
 	{
-	//	Figure pfigArrow->(gra);
-		pfigArrow->vert.push_back( (vect2){   0,20*tan(rad(60))	-10*tan(rad(30)) } );
-		pfigArrow->vert.push_back( (vect2){-10,  0 	    	   	-10*tan(rad(30)) } );
-		pfigArrow->vert.push_back( (vect2){ 10,  0 				-10*tan(rad(30)) } );
-		pfigArrow->edge.push_back( (ivect2){ 0,1 } );
-		pfigArrow->edge.push_back( (ivect2){ 1,2 } );
-		pfigArrow->edge.push_back( (ivect2){ 2,0 } );
-		pfigArrow->col = gra.Rgb(0,0.5,1);
+		Figure figArrow(gra);
+		figArrow.vert.push_back( (vect2){   0,20*tan(rad(60))	-10*tan(rad(30)) } );
+		figArrow.vert.push_back( (vect2){-10,  0 	    	   	-10*tan(rad(30)) } );
+		figArrow.vert.push_back( (vect2){ 10,  0 				-10*tan(rad(30)) } );
+		figArrow.edge.push_back( (ivect2){ 0,1 } );
+		figArrow.edge.push_back( (ivect2){ 1,2 } );
+		figArrow.edge.push_back( (ivect2){ 2,0 } );
+		figArrow.col = gra.Rgb(0,0.5,1);
 
 
 		Figure figTriangle(gra);
@@ -777,115 +774,68 @@ struct Apr : public Sys
 		figTriangle.edge.push_back( (ivect2){ 2,0 } );
 		figTriangle.col = gra.Rgb(0,1,1);
 
-			static Figure figCircle(gra);
+		Figure figCircle(gra);
+		{
+			int s=0;
+			for ( int i = 0 ; i < 360 ; i+=45 )
 			{
-				int s=0;
-				for ( int i = 0 ; i < 360 ; i+=45 )
-				{
-					double th = i*pi/180.0;
-					double r = 7;
-					vect2 v( r*cos(th), r*sin(th) );
-					figCircle.vert.push_back( v );
-					s++;
-				}
-				for ( int i = 0 ; i < s-1 ; i++ )
-				{
-					figCircle.edge.push_back( (ivect2){ i,i+1 } );
-				}
-				figCircle.edge.push_back( (ivect2){ s-1,0 } );
+				double th = i*pi/180.0;
+				double r = 7;
+				vect2 v( r*cos(th), r*sin(th) );
+				figCircle.vert.push_back( v );
+				s++;
 			}
-
-			// 関節
-			static vector<vect2> catmul_tblVert =
+			for ( int i = 0 ; i < s-1 ; i++ )
 			{
-				vect2(500,200  +0),
-				vect2(500,200+ 20),
-				vect2(550,200+100),
-				vect2(500,200+180),
-				vect2(500,200+200),
-			};
-			static vector<int>	catmul_tblConnect
-			{
-				0,1,2,3,4
-			};
-
-
-#if 0
-			static vector<Marker>	tblMarker =
-			{
-				Marker( &gra, pfigArrow, vect2(500,200  +0), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-				Marker( &gra, pfigArrow, vect2(500,200+ 20), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-				Marker( &gra, pfigArrow, vect2(550,200+100), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-				Marker( &gra, pfigArrow, vect2(500,200+180), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-				Marker( &gra, pfigArrow, vect2(500,200+200), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-			};
-#else
-			{
-//				static bool flgFirst = true;
-//				if ( flgFirst )
-				{
-//					flgFirst = false;
-					//
-					vector<vect2>& 	tblVert = catmul_tblVert;
-					vector<int>&	tblConnect = catmul_tblConnect;
-					//
-					{
-						int ofs = mc.tblMarker.size();
-						for ( unsigned int i = 0 ; i < tblVert.size() ; i++ )
-						{
-							mc.tblMarker.push_back( Marker( &gra, pfigArrow, tblVert[i], rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ) );
-						}
-						for ( int& c : tblConnect )
-						{
-							c += ofs;
-						}
-					}
-				}
+				figCircle.edge.push_back( (ivect2){ i,i+1 } );
 			}
-#endif
-			
-			// 関節
-			static vector<vect2> joint_tblVert =
+			figCircle.edge.push_back( (ivect2){ s-1,0 } );
+		}
+
+		// 関節
+		int ofs = 0;
+
+		vector<vect2> catmul_tblVert =
+		{
+			vect2(500,200  +0),
+			vect2(500,200+ 20),
+			vect2(550,200+100),
+			vect2(500,200+180),
+			vect2(500,200+200),
+		};
+
+		ofs = mc.tblMarker.size();
+		{
+			vector<vect2>& 	tblVert = catmul_tblVert;
+			for ( unsigned int i = 0 ; i < tblVert.size() ; i++ )
 			{
-				vect2(100+100,150+250),
-				vect2(200+100,100+250),
-				vect2(300+100,150+250),
-			};
-			static vector<int>	joint_tblConnect
-			{
-				0,1,2,
-			};
-			
-#if 0
-			static vector<Marker>	tblMarkerBone =
-			{
-				Marker( &gra, &figCircle, vect2(200,400), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-				Marker( &gra, &figCircle, vect2(300,350), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-				Marker( &gra, &figCircle, vect2(400,400), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-			};
-#else
-			{
-//				static bool flgFirst = true;
-//				if ( flgFirst )
-				{
-//					flgFirst = false;
-					vector<vect2>& 	tblVert = joint_tblVert;
-					vector<int>&	tblConnect = joint_tblConnect;
-					//
-					{
-						int ofs = mc.tblMarker.size();
-						for ( unsigned int i = 0 ; i < tblVert.size() ; i++ )
-						{
-							mc.tblMarker.push_back( Marker( &gra, &figCircle, tblVert[i], rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ) );
-						}
-						for ( int& c : tblConnect )
-						{
-							c += ofs;
-						}
-					}
-				}
+				mc.tblMarker.push_back( Marker( &gra, &figArrow, tblVert[i], rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ) );
 			}
-#endif
+		}
+		vector<int>	catmul_tblConnect
+		{
+			ofs+0, ofs+1, ofs+2, ofs+3, ofs+4
+		};
+		
+		//
+		vector<vect2> joint_tblVert =
+		{
+			vect2(100+100,150+250),
+			vect2(200+100,100+250),
+			vect2(300+100,150+250),
+		};
+		ofs = mc.tblMarker.size();
+		{
+			vector<vect2>& 	tblVert = joint_tblVert;
+			for ( unsigned int i = 0 ; i < tblVert.size() ; i++ )
+			{
+				mc.tblMarker.push_back( Marker( &gra, &figCircle, tblVert[i], rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ) );
+			}
+		}
+		vector<int>	joint_tblConnect
+		{
+			ofs+0, ofs+1, ofs+2,
+		};
 
 
 		
@@ -1125,14 +1075,10 @@ struct Apr : public Sys
 				}
 			}
 
-			//
-
 
 			// マーカー操作	
 			mc.funcMarkerController(  &figCircle, mouse, keys, gra );
 
-#if 1
-			
 			{
 				vect2 v0 = mc.tblMarker[joint_tblConnect[0]];
 				for ( unsigned int i=0  ; i < joint_tblConnect.size()-1 ; i++ )
@@ -1141,11 +1087,6 @@ struct Apr : public Sys
 					gra.Line( v0, v1, gra.Rgb( 1,1,1 ) );
 					v0 = v1;
 				}
-			}
-			
-			for ( vect2 v : joint_tblVert )
-			{
-//				figCircle.draw( v, rad(0), gra.Rgb(0.5,1,0) );		// 何故かどんどん重くなる
 			}
 
 			// figTriangle
@@ -1182,7 +1123,7 @@ struct Apr : public Sys
 				}
 				time_a = chrono::system_clock::now();  
 			}
-#endif
+
 		}
 		return 0;
 	}
