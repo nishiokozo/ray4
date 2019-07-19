@@ -15,27 +15,27 @@ const static double pi = M_PI;//3.141592654;
 
 struct	I2
 {
-	union { int x;	int p; };
-	union { int y;	int n; };
+	union { int x; int n0;	int p; };
+	union { int y; int n1;	int n; };
 	I2(){};
 	I2( int _x, int _y ) : x(_x), y(_y){}
 };
 
 struct	I3
 {
-	union { int x;	int r; };
-	union { int y;	int g; };
-	union { int z;	int b; };
+	union { int x; int n0;	int r; };
+	union { int y; int n1;	int g; };
+	union { int z; int n2;	int b; };
 	I3(){};
 	I3( int _x, int _y, int _z ) : x(_x), y(_y), z(_z){}
 };
 
 struct	I4
 {
-	union { int x;	int r; };
-	union { int y;	int g; };
-	union { int z;	int b; };
-	union { int w;	int a; };
+	union { int x; int n0;	int r; };
+	union { int y; int n1;	int g; };
+	union { int z; int n2;	int b; };
+	union { int w; int n3;	int a; };
 	I4(){};
 	I4( int _x, int _y, int _z , int _w ) : x(_x), y(_y), z(_z), w(_w){}
 };
