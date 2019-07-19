@@ -588,7 +588,7 @@ struct Apr : public Sys
 				vector<Marker>	tblMarker;
 
 				//------------------------------------------------------------------------------
-				void funcMarkerController( vector<Marker>& tblMarker, Figure* pFigAdder, SysMouse& mouse, SysKeys& keys, SysGra& gra )
+				void funcMarkerController( Figure* pFigAdder, SysMouse& mouse, SysKeys& keys, SysGra& gra )
 				//------------------------------------------------------------------------------
 				{
 					static vect2 drag_start(0,0);
@@ -795,6 +795,97 @@ struct Apr : public Sys
 				figCircle.edge.push_back( (ivect2){ s-1,0 } );
 			}
 
+			// 関節
+			static vector<vect2> catmul_tblVert =
+			{
+				vect2(500,200  +0),
+				vect2(500,200+ 20),
+				vect2(550,200+100),
+				vect2(500,200+180),
+				vect2(500,200+200),
+			};
+			static vector<int>	catmul_tblConnect
+			{
+				0,1,2,3,4
+			};
+
+
+#if 0
+			static vector<Marker>	tblMarker =
+			{
+				Marker( &gra, pfigArrow, vect2(500,200  +0), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+				Marker( &gra, pfigArrow, vect2(500,200+ 20), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+				Marker( &gra, pfigArrow, vect2(550,200+100), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+				Marker( &gra, pfigArrow, vect2(500,200+180), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+				Marker( &gra, pfigArrow, vect2(500,200+200), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+			};
+#else
+			{
+//				static bool flgFirst = true;
+//				if ( flgFirst )
+				{
+//					flgFirst = false;
+					//
+					vector<vect2>& 	tblVert = catmul_tblVert;
+					vector<int>&	tblConnect = catmul_tblConnect;
+					//
+					{
+						int ofs = mc.tblMarker.size();
+						for ( unsigned int i = 0 ; i < tblVert.size() ; i++ )
+						{
+							mc.tblMarker.push_back( Marker( &gra, pfigArrow, tblVert[i], rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ) );
+						}
+						for ( int& c : tblConnect )
+						{
+							c += ofs;
+						}
+					}
+				}
+			}
+#endif
+			
+			// 関節
+			static vector<vect2> joint_tblVert =
+			{
+				vect2(100+100,150+250),
+				vect2(200+100,100+250),
+				vect2(300+100,150+250),
+			};
+			static vector<int>	joint_tblConnect
+			{
+				0,1,2,
+			};
+			
+#if 0
+			static vector<Marker>	tblMarkerBone =
+			{
+				Marker( &gra, &figCircle, vect2(200,400), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+				Marker( &gra, &figCircle, vect2(300,350), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+				Marker( &gra, &figCircle, vect2(400,400), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
+			};
+#else
+			{
+//				static bool flgFirst = true;
+//				if ( flgFirst )
+				{
+//					flgFirst = false;
+					vector<vect2>& 	tblVert = joint_tblVert;
+					vector<int>&	tblConnect = joint_tblConnect;
+					//
+					{
+						int ofs = mc.tblMarker.size();
+						for ( unsigned int i = 0 ; i < tblVert.size() ; i++ )
+						{
+							mc.tblMarker.push_back( Marker( &gra, &figCircle, tblVert[i], rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ) );
+						}
+						for ( int& c : tblConnect )
+						{
+							c += ofs;
+						}
+					}
+				}
+			}
+#endif
 
 
 		
@@ -952,12 +1043,13 @@ struct Apr : public Sys
 			if (keys.S.rep) {val+=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
 
 			val += -mouse.wheel/30;
-	//cout << mouse.wheel << endl;
+
 			//calc pers 
 
-
+			// 点
 			gra.Pset(vect2(10,10),gra.Rgb(1,1,1));
 
+			// 箱
 			for ( ivect2 e : boxedge )
 			{
 				vect3& p = boxdl[e.p];
@@ -978,80 +1070,25 @@ struct Apr : public Sys
 				gra.Line( vect2(x0,y0), vect2(x1,y1),gra.Rgb(0,1,1));
 
 			}
-	#if 1
-				gra.Tri( vect2(55,10), vect2(10,100), vect2(100,100),gra.Rgb(1,1,0));
 
-				gra.Tri( vect2(55,10), vect2(10,100), vect2(100,100),gra.Rgb(1,1,0));
+			gra.Tri( vect2(55,10), vect2(10,100), vect2(100,100),gra.Rgb(1,1,0));
 
-				double a = 80;
-				gra.Tri( vect2(55+a,10), vect2(10+a,100), vect2(100+a,100),gra.Rgb(1,1,0));
+			gra.Tri( vect2(55,10), vect2(10,100), vect2(100,100),gra.Rgb(1,1,0));
 
-				a=40;
-				double	b = 120;
-				gra.Bezier(vect2(10+a,10+b), vect2(100+a,100+b), vect2(200+a,10+b), vect2(300+a,100+b),gra.Rgb(0,1,0));
+			double a = 80;
+			gra.Tri( vect2(55+a,10), vect2(10+a,100), vect2(100+a,100),gra.Rgb(1,1,0));
 
-				gra.Circle( vect2( 10+a, 10+b), 10, gra.Rgb(1,0,0));
-				gra.Circle( vect2(100+a,100+b), 10, gra.Rgb(1,0,0));
-				gra.Circle( vect2(200+a, 10+b), 10, gra.Rgb(1,0,0));
-				gra.Circle( vect2(300+a,100+b), 10, gra.Rgb(1,0,0));
-	//cout << "circle " << gra.m.tblCircle.size() << endl;
+			a=40;
+			double	b = 120;
+			gra.Bezier(vect2(10+a,10+b), vect2(100+a,100+b), vect2(200+a,10+b), vect2(300+a,100+b),gra.Rgb(0,1,0));
+
+			gra.Circle( vect2( 10+a, 10+b), 10, gra.Rgb(1,0,0));
+			gra.Circle( vect2(100+a,100+b), 10, gra.Rgb(1,0,0));
+			gra.Circle( vect2(200+a, 10+b), 10, gra.Rgb(1,0,0));
+			gra.Circle( vect2(300+a,100+b), 10, gra.Rgb(1,0,0));
+	
 			
-
-	#endif
-
-			// 関節
-			static vector<vect2> catmul_tblVert =
-			{
-				vect2(500,200  +0),
-				vect2(500,200+ 20),
-				vect2(550,200+100),
-				vect2(500,200+180),
-				vect2(500,200+200),
-			};
-			static vector<int>	catmul_tblConnect
-			{
-				0,1,2,3,4
-			};
-
-
-#if 0
-			static vector<Marker>	tblMarker =
-			{
-				Marker( &gra, pfigArrow, vect2(500,200  +0), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-				Marker( &gra, pfigArrow, vect2(500,200+ 20), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-				Marker( &gra, pfigArrow, vect2(550,200+100), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-				Marker( &gra, pfigArrow, vect2(500,200+180), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-				Marker( &gra, pfigArrow, vect2(500,200+200), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-			};
-#else
-			{
-				static bool flgFirst = true;
-				if ( flgFirst )
-				{
-					flgFirst = false;
-					//
-					vector<vect2>& 	tblVert = catmul_tblVert;
-					vector<int>&	tblConnect = catmul_tblConnect;
-					//
-					{
-						int ofs = mc.tblMarker.size();
-						for ( unsigned int i = 0 ; i < tblVert.size() ; i++ )
-						{
-							mc.tblMarker.push_back( Marker( &gra, pfigArrow, tblVert[i], rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ) );
-						}
-						for ( int& c : tblConnect )
-						{
-							c += ofs;
-						}
-					}
-				}
-			}
-#endif
-					
-			
-
-			// ベジェー用マーカー操作	
-//			mc.funcMarkerController( mc.tblMarker, pfigArrow, mouse, keys, gra );
+			// カトマル
 			static auto catmull = []( double t, const vect2 Pm, const vect2 P0, const vect2 P1, const vect2 P2 )
 			{
 				//Catmull-Rom 曲線
@@ -1089,52 +1126,10 @@ struct Apr : public Sys
 			}
 
 			//
-			// 関節
-			static vector<vect2> joint_tblVert =
-			{
-				vect2(100+100,150+250),
-				vect2(200+100,100+250),
-				vect2(300+100,150+250),
-			};
-			static vector<int>	joint_tblConnect
-			{
-				0,1,2,
-			};
-			
-#if 0
-			static vector<Marker>	tblMarkerBone =
-			{
-				Marker( &gra, &figCircle, vect2(200,400), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-				Marker( &gra, &figCircle, vect2(300,350), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-				Marker( &gra, &figCircle, vect2(400,400), rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ),
-			};
-#else
-			{
-				static bool flgFirst = true;
-				if ( flgFirst )
-				{
-					flgFirst = false;
-					vector<vect2>& 	tblVert = joint_tblVert;
-					vector<int>&	tblConnect = joint_tblConnect;
-					//
-					{
-						int ofs = mc.tblMarker.size();
-						for ( unsigned int i = 0 ; i < tblVert.size() ; i++ )
-						{
-							mc.tblMarker.push_back( Marker( &gra, &figCircle, tblVert[i], rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ) );
-						}
-						for ( int& c : tblConnect )
-						{
-							c += ofs;
-						}
-					}
-				}
-			}
-#endif
 
 
 			// マーカー操作	
-			mc.funcMarkerController( mc.tblMarker, &figCircle, mouse, keys, gra );
+			mc.funcMarkerController(  &figCircle, mouse, keys, gra );
 
 #if 1
 			
