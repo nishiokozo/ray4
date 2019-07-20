@@ -11,8 +11,8 @@ void	mat4_rotateZ( double* m, double th );
 
 
 //#define	pi	3.141592654
-const static double pi = M_PI;//3.141592654;
-
+//const static double pi = 3.141592654;
+const static double pi = 3.1415926535897932384626433832795;
 struct	I2
 {
 	union { int x; int n0;	int p; };

@@ -15,15 +15,16 @@ LIBS = \
 	 -lgdi32
 
 FLGS = \
-	-g \
 	-c \
-	-m64 \
-	-std=c++17 \
+	-std=c++14 \
 	-Wall \
-	-Wno-unused-function \
 	-Wno-unused-variable \
+	-Wno-unused-function \
 	-Wno-unused-value \
 	-Wno-unused-but-set-variable \
+
+#	-g \
+#	-m64 \
 
 #	-O3 \
 #	-Wno-unknown-pragmas \
@@ -36,10 +37,10 @@ $(TAR)	:	$(SRCS:.cpp=.o)
 	$(CC) -o $(TAR) $(SRCS:.cpp=.o) $(LIBS)
 
 geom.o:geom.cpp
-	$(CC)   -O1 $(FLGS) $< -o $@ 
+	$(CC) -o $@ $< $(FLGS) -O1
 
 %.o:%.cpp
-	$(CC)   $(FLGS) $< -o $@ 
+	$(CC) -o $@ $< $(FLGS) 
 
 clean:
 	rm -f *.exe
