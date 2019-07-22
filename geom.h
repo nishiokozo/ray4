@@ -87,210 +87,70 @@ public:
 	vect2( double _x, double _y) :x(_x),y(_y){}
 	vect2() :x(0),y(0){}
 
-	double length()
-	{
-		return sqrt( x*x + y*y );
-	}
-	
-	void operator=( vect2 v )
-	{
-		x = v.x;
-		y = v.y;
-	}
-	void operator*=( vect2 v )
-	{
-		x *= v.x;
-		y *= v.y;
-	}
-	void operator/=( vect2 v )
-	{
-		x = v.x;
-		y = v.y;
-	}
-	void operator+=( vect2 v )
-	{
-		x += v.x;
-		y += v.y;
-	}
-	void operator-=( vect2 v )
-	{
-		x -= v.x;
-		y -= v.y;
-	}
-	vect2  operator*( double f ) const
-	{
-		return vect2( x*f, y*f );
-	}
-	vect2  operator/( double f ) const
-	{
-		return vect2( x/f, y/f );
-	}
-	
-	vect2 operator*( vect2 v ) const
-	{
-		return vect2( x*v.x, y*v.y );
-	}
-	vect2 operator/( vect2 v ) const
-	{
-		return vect2( x/v.x, y/v.y );
-	}
-	vect2 operator+( vect2 v ) const
-	{
-		return vect2( x+v.x, y+v.y );
-	}
-	vect2 operator-( vect2 v ) const
-	{
-		return vect2( x-v.x, y-v.y );
-	}
+	double length() { return sqrt( x*x + y*y ); }
+
+	void operator= ( vect2 v )  { x =  v.x; y =  v.y; }
+	void operator= ( double f ) { x =  f  ; y =  f  ; }
+
+	void operator*=( vect2 v )  { x *= v.x; y *= v.y; }
+	void operator/=( vect2 v )  { x =  v.x; y =  v.y; }
+	void operator+=( vect2 v )  { x += v.x; y += v.y; }
+	void operator-=( vect2 v )  { x -= v.x; y -= v.y; }
+
+	vect2 operator*( vect2 v ) const { return vect2( x*v.x, y*v.y ); }
+	vect2 operator/( vect2 v ) const { return vect2( x/v.x, y/v.y ); }
+	vect2 operator+( vect2 v ) const { return vect2( x+v.x, y+v.y ); }
+	vect2 operator-( vect2 v ) const { return vect2( x-v.x, y-v.y ); }
+
+	vect2 operator-() const { return vect2( -x, -y ); } 
+	vect2 operator+() const { return vect2(  x,  y ); } 
+
+	void operator*=( double f ) { x *= f  ; y *= f  ; }
+	void operator/=( double f ) { x /= f  ; y /= f  ; }
+	void operator+=( double f ) { x += f  ; y += f  ; }
+	void operator-=( double f ) { x -= f  ; y -= f  ; }
+
+	vect2 operator*( double f ) const { return vect2( x*f, y*f ); } 
+	vect2 operator/( double f ) const { return vect2( x/f, y/f ); } 
+	vect2 operator+( double f ) const { return vect2( x+f, y+f ); } 
+	vect2 operator=( double f ) const { return vect2( x-f, y-f ); } 
+
+	friend	vect2 operator*( double f, vect2 v )  { return vect2( f * v.x, f * v.y ); }
+	friend	vect2 operator/( double f, vect2 v )  { return vect2( f / v.x, f / v.y ); }
+	friend	vect2 operator+( double f, vect2 v )  { return vect2( f + v.x, f + v.y ); }
+	friend	vect2 operator-( double f, vect2 v )  { return vect2( f - v.x, f - v.y ); }
 
 };
 
 class vect3
 {
 public:
-	union
-	{
-		double	x;	
-		double	r;	
-	};
-	union
-	{
-		double	y;	
-		double	g;	
-	};
-	union	{	double	z,b; };
+	union { double	x;	 double	r;	 };
+	union { double	y;	 double	g;	 }; 
+	union {	double	z,b; };
 
 	vect3(){};
-	vect3( double a )
-	{
-		x = a;
-		y = a;
-		z = a;
-	};
+	vect3( double a ) { x = a; y = a; z = a; };
+	vect3( double _x, double _y, double _z ) { x = _x; y = _y; z = _z; };
 
-	vect3( double _x, double _y, double _z )
-	{
-		x = _x;
-		y = _y;
-		z = _z;
-	};
+	vect3 operator*=( vect3 v ) { x *= v.x; y *= v.y; z *= v.z;  return *this; }
+	vect3 operator/=( vect3 v ) { x /= v.x; y /= v.y; z /= v.z;  return *this; }
+	vect3 operator+=( vect3 v ) { x += v.x; y += v.y; z += v.z;  return *this; }
+	vect3 operator-=( vect3 v ) { x -= v.x; y -= v.y; z -= v.z;  return *this; }
 
-	vect3 operator*=( vect3 v ) 
-	{
-		x *= v.x;
-		y *= v.y;
-		z *= v.z;
-		
-		return *this;
-	}
+	vect3 operator*( vect3 v ) const { vect3	ret; ret.x = x * v.x; ret.y = y * v.y; ret.z = z * v.z; return ret; }
+	vect3 operator/( vect3 v ) const { vect3	ret; ret.x = x / v.x; ret.y = y / v.y; ret.z = z / v.z; return ret; }
+	vect3 operator-( vect3 v ) const { vect3	ret; ret.x = x - v.x; ret.y = y - v.y; ret.z = z - v.z; return ret; }
+	vect3 operator+( vect3 v ) const { vect3	ret; ret.x = x + v.x; ret.y = y + v.y; ret.z = z + v.z; return ret; }
 
-	vect3 operator/=( vect3 v ) 
-	{
-		x /= v.x;
-		y /= v.y;
-		z /= v.z;
-		
-		return *this;
-	}
-	vect3 operator+=( vect3 v ) 
-	{
-		x += v.x;
-		y += v.y;
-		z += v.z;
-		
-		return *this;
-	}
+	vect3 operator-() const { vect3	ret; ret.x = -x; ret.y = -y; ret.z = -z; return ret; }
+	vect3 operator+() const { vect3	ret; ret.x =  x; ret.y =  y; ret.z =  z; return ret; }
 
-	vect3 operator-=( vect3 v ) 
-	{
-		x -= v.x;
-		y -= v.y;
-		z -= v.z;
-		
-		return *this;
-	}
+	vect3 operator*( double f ) const { vect3	ret; ret.x = x * f; ret.y = y * f; ret.z = z * f; return ret; }
+	vect3 operator/( double f ) const { double a = 1.0f / f; vect3	ret; ret.x = x * a; ret.y = y * a; ret.z = z * a; return ret; }
 
-	vect3 operator-() const
-	{
-		vect3	ret;
-		ret.x = -x;
-		ret.y = -y;
-		ret.z = -z;
-		return ret;
-	}
-	vect3 operator+() const
-	{
-		vect3	ret;
-		ret.x = x;
-		ret.y = y;
-		ret.z = z;
-		return ret;
-	}
-	vect3 operator*( double f ) const
-	{
-		vect3	ret;
-		ret.x = x * f;
-		ret.y = y * f;
-		ret.z = z * f;
-		return ret;
-	}
-
-	vect3 operator/( const double f ) const
-	{
-		double a = 1.0f / f;
-		vect3	ret;
-		ret.x = x * a;
-		ret.y = y * a;
-		ret.z = z * a;
-		return ret;
-	}
-
-	vect3 operator*( vect3 v ) const
-	{
-		vect3	ret;
-		ret.x = x * v.x;
-		ret.y = y * v.y;
-		ret.z = z * v.z;
-		return ret;
-	}
-
-	vect3 operator-( vect3 v ) const
-	{
-		vect3	ret;
-		ret.x = x - v.x;
-		ret.y = y - v.y;
-		ret.z = z - v.z;
-		return ret;
-	}
-
-	vect3 operator+( vect3 v ) const
-	{
-		vect3	ret;
-		ret.x = x + v.x;
-		ret.y = y + v.y;
-		ret.z = z + v.z;
-		return ret;
-	}
-
-	friend	vect3 operator*( double f, vect3 v ) 
-	{
-		vect3	ret;
-		ret.x = f * v.x;
-		ret.y = f * v.y;
-		ret.z = f * v.z;
-		
-		return ret;
-	}
-
-	friend	vect3 operator+( const double f, vect3 v ) 
-	{
-		vect3	ret;
-		ret.x = f + v.x;
-		ret.y = f + v.y;
-		ret.z = f + v.z;
-		
-		return ret;
-	}
+	friend	vect3 operator*( double f, vect3 v )  { vect3	ret; ret.x = f * v.x; ret.y = f * v.y; ret.z = f * v.z;  return ret; }
+	friend	vect3 operator+( double f, vect3 v )  { vect3	ret; ret.x = f + v.x; ret.y = f + v.y; ret.z = f + v.z;  return ret; }
 
 
 	void Print()
