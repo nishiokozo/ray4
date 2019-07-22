@@ -84,14 +84,14 @@ class vect2
 {
 public:
 	double x,y;
-	vect2( double _x, double _y) :x(_x),y(_y){}
+
 	vect2() :x(0),y(0){}
+	vect2( double f ) :x(f),y(f){}
+	vect2( double _x, double _y) :x(_x),y(_y){}
 
 	double length() { return sqrt( x*x + y*y ); }
 
 	void operator= ( vect2 v )  { x =  v.x; y =  v.y; }
-	void operator= ( double f ) { x =  f  ; y =  f  ; }
-
 	void operator*=( vect2 v )  { x *= v.x; y *= v.y; }
 	void operator/=( vect2 v )  { x =  v.x; y =  v.y; }
 	void operator+=( vect2 v )  { x += v.x; y += v.y; }
@@ -105,6 +105,7 @@ public:
 	vect2 operator-() const { return vect2( -x, -y ); } 
 	vect2 operator+() const { return vect2(  x,  y ); } 
 
+	void operator= ( double f ) { x =  f  ; y =  f  ; }
 	void operator*=( double f ) { x *= f  ; y *= f  ; }
 	void operator/=( double f ) { x /= f  ; y /= f  ; }
 	void operator+=( double f ) { x += f  ; y += f  ; }
@@ -125,9 +126,9 @@ public:
 class vect3
 {
 public:
-	union { double	x;	 double	r;	 };
-	union { double	y;	 double	g;	 }; 
-	union {	double	z,b; };
+	union { double	x;	double	r;	 };
+	union { double	y;	double	g;	 }; 
+	union {	double	z;	double  b;   };
 
 	vect3(){};
 	vect3( double a ) { x = a; y = a; z = a; };
