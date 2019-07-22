@@ -17,7 +17,7 @@ LIBS = \
 FLGS = \
 	-c \
 	-std=c++14 \
-	-Wall \
+	-Wall -Werror\
 	-Wno-unused-variable \
 	-Wno-unused-function \
 	-Wno-unused-value \

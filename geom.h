@@ -1,6 +1,7 @@
 // version 20170527
 //	2019/06/25 to only vect3 & mat44
 #include <cmath>
+#include <cmath>
 #ifndef GEOM_H
 #define	GEOM_H
 typedef	double	MAT4[4][4];
@@ -8,6 +9,8 @@ typedef	double	MAT4[4][4];
 void	mat4_rotateX( double* m, double th );
 void	mat4_rotateY( double* m, double th );
 void	mat4_rotateZ( double* m, double th );
+
+extern int	rgb( double r, double g , double b );
 
 
 //#define	pi	3.141592654
@@ -89,6 +92,8 @@ public:
 	vect2( double f ) :x(f),y(f){}
 	vect2( double _x, double _y) :x(_x),y(_y){}
 
+	vect2 abs() { return vect2( std::abs(x) , std::abs(y) ); }
+	vect2 normalize() { return (*this)/length(); }
 	double length() { return sqrt( x*x + y*y ); }
 
 	void operator= ( vect2 v )  { x =  v.x; y =  v.y; }
@@ -97,10 +102,10 @@ public:
 	void operator+=( vect2 v )  { x += v.x; y += v.y; }
 	void operator-=( vect2 v )  { x -= v.x; y -= v.y; }
 
-	vect2 operator*( vect2 v ) const { return vect2( x*v.x, y*v.y ); }
-	vect2 operator/( vect2 v ) const { return vect2( x/v.x, y/v.y ); }
-	vect2 operator+( vect2 v ) const { return vect2( x+v.x, y+v.y ); }
-	vect2 operator-( vect2 v ) const { return vect2( x-v.x, y-v.y ); }
+	vect2 operator*( vect2 v ) const { return vect2( x * v.x, y * v.y ); }
+	vect2 operator/( vect2 v ) const { return vect2( x / v.x, y / v.y ); }
+	vect2 operator+( vect2 v ) const { return vect2( x + v.x, y + v.y ); }
+	vect2 operator-( vect2 v ) const { return vect2( x - v.x, y-  v.y ); }
 
 	vect2 operator-() const { return vect2( -x, -y ); } 
 	vect2 operator+() const { return vect2(  x,  y ); } 
@@ -111,15 +116,20 @@ public:
 	void operator+=( double f ) { x += f  ; y += f  ; }
 	void operator-=( double f ) { x -= f  ; y -= f  ; }
 
-	vect2 operator*( double f ) const { return vect2( x*f, y*f ); } 
-	vect2 operator/( double f ) const { return vect2( x/f, y/f ); } 
-	vect2 operator+( double f ) const { return vect2( x+f, y+f ); } 
-	vect2 operator=( double f ) const { return vect2( x-f, y-f ); } 
+	vect2 operator*( double f ) const { return vect2( x * f, y * f ); } 
+	vect2 operator/( double f ) const { return vect2( x / f, y / f ); } 
+	vect2 operator+( double f ) const { return vect2( x + f, y + f ); } 
+	vect2 operator=( double f ) const { return vect2( x - f, y - f ); } 
 
 	friend	vect2 operator*( double f, vect2 v )  { return vect2( f * v.x, f * v.y ); }
 	friend	vect2 operator/( double f, vect2 v )  { return vect2( f / v.x, f / v.y ); }
 	friend	vect2 operator+( double f, vect2 v )  { return vect2( f + v.x, f + v.y ); }
 	friend	vect2 operator-( double f, vect2 v )  { return vect2( f - v.x, f - v.y ); }
+
+	void dump()
+	{
+		printf("(vect2)%9.6f %9.6f\n", x, y );
+	}
 
 };
 

@@ -815,31 +815,42 @@ struct Apr : public Sys
 		{
 			vect2 pos;
 			vect2 accell;
+			vect2 mov;
+			vect2 prev;
+			double len;
+			Joint( vect2 v )
+			{
+				pos = v;
+				accell = 0;
+				prev = v;
+				len = 0;
+			}
 		};
-		vector<Joint> joint_tbl =
+		vector<Joint> joint_tblJoint =
 		{
-			{vect2(100+100,150+250),vect2(0,0)},
-			{vect2(200+100,100+250),vect2(0,0)},
-			{vect2(300+100,150+250),vect2(0,0)},
+			Joint( vect2(100+100,150+250) ),
+			Joint( vect2(200+100,100+250) ),
+			Joint( vect2(300+100,150+250) ),
 		};
 		struct Bone
 		{
-			int	n0;
-			int	n1;
+			Joint& j0;
+			Joint& j1;
 			double length;
 		};
 		vector<Bone> joint_tblBone
 		{
-			{0, 1},
-			{1, 2},
+			{joint_tblJoint[0],joint_tblJoint[1] },
+			{joint_tblJoint[1],joint_tblJoint[2]},
 		};
 		for ( Bone& b : joint_tblBone )
 		{
-			vect2 v0 = joint_tbl[b.n0].pos;
-			vect2 v2 = joint_tbl[b.n1].pos;
+			vect2 v0 = b.j0.pos;
+			vect2 v2 = b.j1.pos;
+			
 			b.length = (v2-v0).length();
 		}
-		for ( Joint& j : joint_tbl )	//マーカー対象に位置を登録
+		for ( Joint& j : joint_tblJoint )	//マーカー対象に位置を登録
 		{
 			mc.tblMarker.push_back( Marker( &gra, &figCircle, j.pos, rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ) );
 		}
@@ -1087,11 +1098,53 @@ struct Apr : public Sys
 			mc.funcMarkerController( &figCircle, mouse, keys, gra );
 
 
+			// 骨初速度
+			for ( Joint& a : joint_tblJoint )
+			{
+				a.mov = ( a.pos - a.prev );
+				a.prev = a.pos;
+//				a.mov.dump();
+			}
+
+			// 骨コリジョン
+			for ( Bone b : joint_tblBone )
+			{
+				Joint& j0 = b.j0;
+				Joint& j1 = b.j1;
+				vect2 v = j1.pos - j0.pos;
+				double l = v.length() - b.length;
+				v = v.normalize()*l;
+
+
+//				double f = j0.mov.length() / (j0.mov.length() + j1.mov.length() );
+double f = 0.5;
+				j0.accell += v*f;
+//cout << j0.mov.length() << " " << j1.mov.length() << endl;;
+//cout << f <<endl;
+				j1.accell -= v*(1.0-f);
+			}
+
+
+			// 骨移動
+			for ( Bone b : joint_tblBone )
+			{
+				Joint& j0 = b.j0;
+				Joint& j1 = b.j1;
+
+				j0.pos += j0.accell;
+				j1.pos += j1.accell;
+
+				 j0.accell*=0.95;
+				 j1.accell*=0.95;
+
+			}
+
 			// 骨描画
 			for ( Bone b : joint_tblBone )
 			{
-				vect2& v0 = joint_tbl[b.n0].pos;
-				vect2& v1 = joint_tbl[b.n1].pos;
+				vect2 v0 = b.j0.pos;
+				vect2 v1 = b.j1.pos;
+
 				gra.Line( v0, v1, gra.Rgb( 1,1,1 ) );
 			}
 	
