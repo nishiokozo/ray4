@@ -527,10 +527,11 @@ struct Apr : public Sys
 
 	};
 
-	struct Marker : vect2
+	struct Marker// : vect2
 	{
 		const SysGra*	pgra;
 		const Figure*	pfig;
+		vect2&	pos;
 		bool 	bRectSelected;		//	矩形選択中、選択＆非選択
 		bool 	bRectIn;			//	矩形選択中、矩形選択対象
 		bool 	bSelected;			//	選択
@@ -539,10 +540,10 @@ struct Apr : public Sys
 		int		colNormal;
 		int		colSelected;
 
-		Marker( SysGra* _gra, Figure* _fig, vect2 v, double _th, int _colNormal, int _colSelected ) : pgra(_gra), pfig(_fig)
+		Marker( SysGra* _gra, Figure* _fig, vect2& v, double _th, int _colNormal, int _colSelected ) : pgra(_gra), pfig(_fig), pos(v)
 		{
-			x=v.x;
-			y=v.y;
+//			x=v.x;
+//			y=v.y;
 			bSelected=false;
 			bRectIn=false;
 			bRectSelected=false;
@@ -563,11 +564,11 @@ struct Apr : public Sys
 			
 			if ( flg )			
 			{
-				pfig->draw( vect2(x,y),th, colSelected );
+				pfig->draw( pos,th, colSelected );
 			}
 			else
 			{
-				pfig->draw( vect2(x,y),th, colNormal );
+				pfig->draw( pos,th, colNormal );
 			}
 		
 		}
@@ -614,7 +615,7 @@ struct Apr : public Sys
 						{
 							if ( tblMarker[i].bAffectable )
 							{
-							   tblMarker.erase(tblMarker.begin() +i);	
+//							   tblMarker.erase(tblMarker.begin() +i);	
 							}
 						}
 					}
@@ -632,7 +633,7 @@ struct Apr : public Sys
 						// 最近マーカーを検索
 						for ( Marker& m : tblMarker )
 						{
-							double len = (m-mouse.pos).length();
+							double len = (m.pos-mouse.pos).length();
 							if ( len < 20.0 && a.len > len )
 							{
 								a.len = len;
@@ -695,8 +696,8 @@ struct Apr : public Sys
 								// 矩形内マーカーを検索
 								for ( Marker& m : tblMarker )
 								{
-									double len = (m-mouse.pos).length();
-									if ( m.x > v0.x && m.x < v1.x && m.y > v0.y && m.y < v1.y )
+									double len = (m.pos-mouse.pos).length();
+									if ( m.pos.x > v0.x && m.pos.x < v1.x && m.pos.y > v0.y && m.pos.y < v1.y )
 									{
 										m.bRectIn = true;
 										if ( keys.CTRL.on )
@@ -717,7 +718,7 @@ struct Apr : public Sys
 							{
 								if ( m.bSelected )
 								{
-									m += mouse.mov;
+									m.pos += mouse.mov;
 								}
 							}
 						}
@@ -792,7 +793,7 @@ struct Apr : public Sys
 			figCircle.edge.push_back( (ivect2){ s-1,0 } );
 		}
 
-		// 関節
+		// カトマル曲線
 		int ofs = 0;
 
 		vector<vect2> catmul_tblVert =
@@ -804,7 +805,6 @@ struct Apr : public Sys
 			vect2(500,200+200),
 		};
 
-		ofs = mc.tblMarker.size();
 		{
 			vector<vect2>& 	tblVert = catmul_tblVert;
 			for ( unsigned int i = 0 ; i < tblVert.size() ; i++ )
@@ -812,19 +812,19 @@ struct Apr : public Sys
 				mc.tblMarker.push_back( Marker( &gra, &figArrow, tblVert[i], rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ) );
 			}
 		}
+		ofs = 0;
 		vector<int>	catmul_tblConnect
 		{
-			ofs+0, ofs+1, ofs+2, ofs+3, ofs+4
+			0, 1, 2, 3, 4
 		};
 		
-		//
+		//骨
 		vector<vect2> joint_tblVert =
 		{
 			vect2(100+100,150+250),
 			vect2(200+100,100+250),
 			vect2(300+100,150+250),
 		};
-		ofs = mc.tblMarker.size();
 		{
 			vector<vect2>& 	tblVert = joint_tblVert;
 			for ( unsigned int i = 0 ; i < tblVert.size() ; i++ )
@@ -832,10 +832,24 @@ struct Apr : public Sys
 				mc.tblMarker.push_back( Marker( &gra, &figCircle, tblVert[i], rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ) );
 			}
 		}
-		vector<int>	joint_tblConnect
+		struct Bone
 		{
-			ofs+0, ofs+1, ofs+2,
+			int	n0;
+			int	n1;
+			double length;
 		};
+		vector<Bone>	joint_tblBone
+		{
+			{0, 1},
+			{1, 2},
+		};
+		for ( Bone& b : joint_tblBone )
+		{
+			vect2 v0 = catmul_tblVert[b.n0];
+			vect2 v2 = catmul_tblVert[b.n1];
+			b.length = (v2-v0).length();
+		}
+
 
 
 		
@@ -1061,15 +1075,15 @@ struct Apr : public Sys
 					double st = 0.1;
 
 					int n = catmul_tblConnect[i];
-					vect2 Q = catmull(0, mc.tblMarker[n], mc.tblMarker[n+1], mc.tblMarker[n+2], mc.tblMarker[n+3] );
+					vect2 Q = catmull(0, catmul_tblVert[n], catmul_tblVert[n+1], catmul_tblVert[n+2], catmul_tblVert[n+3] );
 
 					for ( double t = st ; t < 1.0 ; t+=st)
 					{
-						vect2 P = catmull(t, mc.tblMarker[n], mc.tblMarker[n+1], mc.tblMarker[n+2], mc.tblMarker[n+3] );
+						vect2 P = catmull(t, catmul_tblVert[n], catmul_tblVert[n+1], catmul_tblVert[n+2], catmul_tblVert[n+3] );
 						gra.Line( P, Q, gra.Rgb(1,1,1));
 						Q=P;
 					}	
-						vect2 P = catmull(1, mc.tblMarker[n], mc.tblMarker[n+1], mc.tblMarker[n+2], mc.tblMarker[n+3] );
+						vect2 P = catmull(1, catmul_tblVert[n], catmul_tblVert[n+1], catmul_tblVert[n+2], catmul_tblVert[n+3] );
 						gra.Line( P, Q, gra.Rgb(1,1,1));
 						
 				}
@@ -1079,14 +1093,20 @@ struct Apr : public Sys
 			// マーカー操作	
 			mc.funcMarkerController(  &figCircle, mouse, keys, gra );
 
+
+			// 骨
 			{
-				vect2 v0 = mc.tblMarker[joint_tblConnect[0]];
-				for ( unsigned int i=0  ; i < joint_tblConnect.size()-1 ; i++ )
+				for ( Bone b : joint_tblBone )
 				{
-					vect2 v1 = mc.tblMarker[joint_tblConnect[i+1]];
+				
+//					vect2 v0 = catmul_tblVert[b.n0].pos;
+//					vect2 v1 = catmul_tblVert[b.n1].pos;
+					vect2 v0 = joint_tblVert[b.n0];
+					vect2 v1 = joint_tblVert[b.n1];
 					gra.Line( v0, v1, gra.Rgb( 1,1,1 ) );
-					v0 = v1;
 				}
+				
+					
 			}
 
 			// figTriangle
