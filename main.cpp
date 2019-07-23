@@ -835,9 +835,15 @@ struct Apr : public Sys
 		};
 		vector<Joint> joint_tblJoint =
 		{
-			Joint( vect2(100+100,150+250), 100 ),
-			Joint( vect2(200+100,100+250), 1 ),
-			Joint( vect2(300+100,150+250), 1 ),
+			#define R 40
+			Joint( vect2(300+0, 400+R*tan(rad(60))	-R*tan(rad(30))) ,1 ),
+			Joint( vect2(300-R, 400+  	    	   	-R*tan(rad(30))) ,1 ),
+			Joint( vect2(300+R, 400+  				-R*tan(rad(30))) ,1 ),
+			#undef R
+	
+	///		Joint( vect2(100+100,220+250), 100 ),
+	//		Joint( vect2(180+100,100+250), 1 ),
+	//		Joint( vect2(260+100,220+250), 1 ),
 		};
 		struct Bone
 		{
@@ -849,13 +855,11 @@ struct Apr : public Sys
 		{
 			{joint_tblJoint[0],joint_tblJoint[1] },
 			{joint_tblJoint[1],joint_tblJoint[2]},
+			{joint_tblJoint[2],joint_tblJoint[0]},
 		};
 		for ( Bone& b : joint_tblBone )
 		{
-			vect2 v0 = b.j0.pos;
-			vect2 v2 = b.j1.pos;
-			
-			b.length = (v2-v0).length();
+			b.length = (b.j1.pos - b.j0.pos).length();
 		}
 		for ( Joint& j : joint_tblJoint )	//マーカー対象に位置を登録
 		{
@@ -1116,34 +1120,37 @@ struct Apr : public Sys
 			// 関節速度
 			for ( Joint& j : joint_tblJoint )
 			{
-				j.mov = ( j.pos - j.prev );
+//				j.mov = ( j.pos - j.prev );
 			}
 
-			// 骨コリジョン 張力計算
-			for ( Bone b : joint_tblBone )
+			for ( int i = 0 ; i < 3 ; i++ )
 			{
-				vect2 v = b.j1.pos - b.j0.pos;
-				double l = v.length() - b.length;
-				double w = 0;
-//				w = b.j0.waitht / ( b.j0.waitht + b.j1.waitht);
-				//cout << w << endl;
-				vect2 va  =	v.normalize()*l;
-				b.j0.tension += va/2;
-				b.j1.tension -= va/2;
-			}
+				// 骨コリジョン 張力計算
+				for ( Bone b : joint_tblBone )
+				{
+					vect2 v = b.j1.pos - b.j0.pos;
+					double l = v.length() - b.length;
+					double w = 0;
+	//				w = b.j0.waitht / ( b.j0.waitht + b.j1.waitht);
+					//cout << w << endl;
+					vect2 va  =	v.normalize()*l;
+					b.j0.tension += va/2;
+					b.j1.tension -= va/2;
+				}
 
-			// 張力解消
-			for ( Joint& a : joint_tblJoint )
-			{
-				a.pos += a.tension;
-				a.accell += a.tension;
-				a.tension=0;
+				// 張力解消
+				for ( Joint& a : joint_tblJoint )
+				{
+					a.pos += a.tension;
+					a.accell += a.tension;
+					a.tension=0;
+				}
 			}
 
 			// 保管	
 			for ( Joint& a : joint_tblJoint )
 			{
-				a.prev = a.pos;
+//				a.prev = a.pos;
 			}
 
 			// 骨描画
