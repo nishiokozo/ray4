@@ -851,78 +851,46 @@ struct Apr : public Sys
 			tblBone.push_back( Bone(tblJoint[1],tblJoint[2]) );
 			tblBone.push_back( Bone(tblJoint[2],tblJoint[0]) );
 		}
+static int cnt = 0;
 		if(1)
 		{	//	三角形メッシュ
-#if 0
-			
-			function<void(Joint,Joint,Joint,int)> func = [&]( Joint v0,  Joint v1,  Joint v2, int n )
+			function<void(int,int,int,int,int)> func = [&]( int idx, int v0, int v1, int v2, int n )
 			{ 
-				int idx = tblJoint.size();
-
-				tblJoint.push_back(  v0 );
-				tblJoint.push_back(  v1 );
-				tblJoint.push_back(  v2 );
-
-				tblJoint.push_back( Joint((v0.pos+v1.pos)/2 ) );
-				tblJoint.push_back( Joint((v1.pos+v2.pos)/2 ) );
-				tblJoint.push_back( Joint((v2.pos+v0.pos)/2 ) );
-cout << n << endl;
 				if ( n > 0 )
 				{
-					func( tblJoint[0],tblJoint[3],tblJoint[5], n-1 );
-					func( tblJoint[1],tblJoint[4],tblJoint[3], n-1 );
-					func( tblJoint[4],tblJoint[2],tblJoint[5], n-1 );
+					int ix = tblJoint.size();
+					Joint j0( vect2( (tblJoint[idx+v0].pos + tblJoint[idx+v1].pos )/2 ) );
+					Joint j1( vect2( (tblJoint[idx+v1].pos + tblJoint[idx+v2].pos )/2 ) );
+					Joint j2( vect2( (tblJoint[idx+v2].pos + tblJoint[idx+v0].pos )/2 ) );
+					
+					tblJoint.push_back( j0 );
+					tblJoint.push_back( j1 );
+					tblJoint.push_back( j2 );
+
+					func( idx, idx+v0, ix+0, ix+2, n-1 );
+					func( idx, idx+v1, ix+1, ix+0, n-1 );
+					func( idx, idx+v2, ix+2, ix+1, n-1 );
 				}
 				else
 				{
-cout << "a1" << endl;
-					tblBone.push_back( Bone(tblJoint[0],tblJoint[3]) );
-					tblBone.push_back( Bone(tblJoint[3],tblJoint[5]) );
-					tblBone.push_back( Bone(tblJoint[5],tblJoint[0]) );
-
-					tblBone.push_back( Bone(tblJoint[1],tblJoint[4]) );
-					tblBone.push_back( Bone(tblJoint[4],tblJoint[3]) );
-					tblBone.push_back( Bone(tblJoint[3],tblJoint[1]) );
-					
-					tblBone.push_back( Bone(tblJoint[4],tblJoint[2]) );
-					tblBone.push_back( Bone(tblJoint[2],tblJoint[5]) );
-					tblBone.push_back( Bone(tblJoint[5],tblJoint[4]) );
-cout << "a2" << endl;
+					tblBone.push_back( Bone(tblJoint[idx+v0],tblJoint[idx+v1]) );
+					tblBone.push_back( Bone(tblJoint[idx+v1],tblJoint[idx+v2]) );
+					tblBone.push_back( Bone(tblJoint[idx+v2],tblJoint[idx+v0]) );
+cout << cnt++ << endl;
 				}
-cout << "a3" << endl;
-				
 			};
 
-			double R=60;
+			double R=80;
 			Joint j0( vect2(300+0, 400+R*tan(rad(60))	-R*tan(rad(30)) ));
 			Joint j1( vect2(300-R, 400+  	    	   	-R*tan(rad(30))) );
 			Joint j2( vect2(300+R, 400+  				-R*tan(rad(30))) );
 
-			func( j0, j1, j2, 1 );
-#else
-			double R=80;
-			vect2 v0(300+0, 400+R*tan(rad(60))	-R*tan(rad(30)));
-			vect2 v1(300-R, 400+  	    	   	-R*tan(rad(30)));
-			vect2 v2(300+R, 400+  				-R*tan(rad(30)));
+			int idx = tblJoint.size();
+			tblJoint.push_back( j0 );
+			tblJoint.push_back( j1 );
+			tblJoint.push_back( j2 );
 
-			tblJoint.push_back( Joint( v0 ) );
-			tblJoint.push_back( Joint( v1 ) );
-			tblJoint.push_back( Joint( v2 ) );
-
-			tblJoint.push_back( Joint( (v0+v1)/2 ) );
-			tblJoint.push_back( Joint( (v1+v2)/2 ) );
-			tblJoint.push_back( Joint( (v2+v0)/2 ) );
-
-			tblBone.push_back( Bone(tblJoint[0],tblJoint[3]) );
-			tblBone.push_back( Bone(tblJoint[3],tblJoint[1]) );
-			tblBone.push_back( Bone(tblJoint[1],tblJoint[4]) );
-			tblBone.push_back( Bone(tblJoint[4],tblJoint[2]) );
-			tblBone.push_back( Bone(tblJoint[2],tblJoint[5]) );
-			tblBone.push_back( Bone(tblJoint[5],tblJoint[0]) );
-			tblBone.push_back( Bone(tblJoint[3],tblJoint[4]) );
-			tblBone.push_back( Bone(tblJoint[4],tblJoint[5]) );
-			tblBone.push_back( Bone(tblJoint[5],tblJoint[3]) );
-#endif
+			func( idx, 0, 1, 2, 1 );
 
 		}
 		for ( Bone& b : tblBone )
