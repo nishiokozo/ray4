@@ -586,6 +586,15 @@ struct Apr : public Sys
 		vector<Marker>	tblMarker;
 
 		//------------------------------------------------------------------------------
+		void funcMarkerDraw()
+		//------------------------------------------------------------------------------
+		{
+			for ( Marker m : tblMarker )
+			{
+				m.draw();
+			}
+		}
+		//------------------------------------------------------------------------------
 		void funcMarkerController( Figure* pFigAdder, SysMouse& mouse, SysKeys& keys, SysGra& gra )
 		//------------------------------------------------------------------------------
 		{
@@ -740,11 +749,6 @@ struct Apr : public Sys
 				}
 			}
 			
-			// マーカー表示
-			for ( Marker m : tblMarker )
-			{
-				m.draw();
-			}
 
 		}
 
@@ -814,23 +818,26 @@ struct Apr : public Sys
 		struct Joint
 		{
 			vect2 pos;
+			vect2 tension;
 			vect2 accell;
 			vect2 mov;
 			vect2 prev;
 			double len;
-			Joint( vect2 v )
+			double weight;
+			Joint( vect2 v, double w )
 			{
 				pos = v;
-				accell = 0;
+				tension = 0;
 				prev = v;
 				len = 0;
+				weight = w;
 			}
 		};
 		vector<Joint> joint_tblJoint =
 		{
-			Joint( vect2(100+100,150+250) ),
-			Joint( vect2(200+100,100+250) ),
-			Joint( vect2(300+100,150+250) ),
+			Joint( vect2(100+100,150+250), 100 ),
+			Joint( vect2(200+100,100+250), 1 ),
+			Joint( vect2(300+100,150+250), 1 ),
 		};
 		struct Bone
 		{
@@ -1094,49 +1101,49 @@ struct Apr : public Sys
 			}
 
 
+			// 入力
+
+			// 慣性移動
+			for ( Joint& a : joint_tblJoint )
+			{
+//				a.pos += a.accell;
+//				a.accell*=0.90;
+			}
+
 			// マーカー操作	
 			mc.funcMarkerController( &figCircle, mouse, keys, gra );
 
+			// 関節速度
+			for ( Joint& j : joint_tblJoint )
+			{
+				j.mov = ( j.pos - j.prev );
+			}
 
-			// 骨初速度
+			// 骨コリジョン 張力計算
+			for ( Bone b : joint_tblBone )
+			{
+				vect2 v = b.j1.pos - b.j0.pos;
+				double l = v.length() - b.length;
+				double w = 0;
+//				w = b.j0.waitht / ( b.j0.waitht + b.j1.waitht);
+				//cout << w << endl;
+				vect2 va  =	v.normalize()*l;
+				b.j0.tension += va/2;
+				b.j1.tension -= va/2;
+			}
+
+			// 張力解消
 			for ( Joint& a : joint_tblJoint )
 			{
-				a.mov = ( a.pos - a.prev );
+				a.pos += a.tension;
+				a.accell += a.tension;
+				a.tension=0;
+			}
+
+			// 保管	
+			for ( Joint& a : joint_tblJoint )
+			{
 				a.prev = a.pos;
-//				a.mov.dump();
-			}
-
-			// 骨コリジョン
-			for ( Bone b : joint_tblBone )
-			{
-				Joint& j0 = b.j0;
-				Joint& j1 = b.j1;
-				vect2 v = j1.pos - j0.pos;
-				double l = v.length() - b.length;
-				v = v.normalize()*l;
-
-
-//				double f = j0.mov.length() / (j0.mov.length() + j1.mov.length() );
-double f = 0.5;
-				j0.accell += v*f;
-//cout << j0.mov.length() << " " << j1.mov.length() << endl;;
-//cout << f <<endl;
-				j1.accell -= v*(1.0-f);
-			}
-
-
-			// 骨移動
-			for ( Bone b : joint_tblBone )
-			{
-				Joint& j0 = b.j0;
-				Joint& j1 = b.j1;
-
-				j0.pos += j0.accell;
-				j1.pos += j1.accell;
-
-				 j0.accell*=0.95;
-				 j1.accell*=0.95;
-
 			}
 
 			// 骨描画
@@ -1147,7 +1154,11 @@ double f = 0.5;
 
 				gra.Line( v0, v1, gra.Rgb( 1,1,1 ) );
 			}
-	
+
+			// マーカー表示
+			mc.funcMarkerDraw();
+
+
 			// figTriangle
 			{
 				static int cnt = 0;
