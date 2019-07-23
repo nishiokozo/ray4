@@ -823,45 +823,113 @@ struct Apr : public Sys
 			vect2 mov;
 			vect2 prev;
 			double len;
-			double weight;
-			Joint( vect2 v, double w )
+			Joint( vect2 v )
 			{
 				pos = v;
 				tension = 0;
 				prev = v;
 				len = 0;
-				weight = w;
 			}
-		};
-		vector<Joint> joint_tblJoint =
-		{
-			#define R 40
-			Joint( vect2(300+0, 400+R*tan(rad(60))	-R*tan(rad(30))) ,1 ),
-			Joint( vect2(300-R, 400+  	    	   	-R*tan(rad(30))) ,1 ),
-			Joint( vect2(300+R, 400+  				-R*tan(rad(30))) ,1 ),
-			#undef R
-	
-	///		Joint( vect2(100+100,220+250), 100 ),
-	//		Joint( vect2(180+100,100+250), 1 ),
-	//		Joint( vect2(260+100,220+250), 1 ),
 		};
 		struct Bone
 		{
 			Joint& j0;
 			Joint& j1;
 			double length;
+			Bone( Joint& _j0, Joint& _j1 ) :j0(_j0), j1(_j1){}
 		};
-		vector<Bone> joint_tblBone
-		{
-			{joint_tblJoint[0],joint_tblJoint[1] },
-			{joint_tblJoint[1],joint_tblJoint[2]},
-			{joint_tblJoint[2],joint_tblJoint[0]},
-		};
-		for ( Bone& b : joint_tblBone )
+		vector<Joint> tblJoint;
+		vector<Bone> tblBone;
+		if(0)
+		{	//	三角形
+			double R=40;
+			tblJoint.push_back( Joint( vect2(300+0, 400+R*tan(rad(60))	-R*tan(rad(30))) ) );
+			tblJoint.push_back( Joint( vect2(300-R, 400+  	    	   	-R*tan(rad(30))) ) );
+			tblJoint.push_back( Joint( vect2(300+R, 400+  				-R*tan(rad(30))) ) );
+
+			tblBone.push_back( Bone(tblJoint[0],tblJoint[1]) );
+			tblBone.push_back( Bone(tblJoint[1],tblJoint[2]) );
+			tblBone.push_back( Bone(tblJoint[2],tblJoint[0]) );
+		}
+		if(1)
+		{	//	三角形メッシュ
+#if 0
+			
+			function<void(Joint,Joint,Joint,int)> func = [&]( Joint v0,  Joint v1,  Joint v2, int n )
+			{ 
+				int idx = tblJoint.size();
+
+				tblJoint.push_back(  v0 );
+				tblJoint.push_back(  v1 );
+				tblJoint.push_back(  v2 );
+
+				tblJoint.push_back( Joint((v0.pos+v1.pos)/2 ) );
+				tblJoint.push_back( Joint((v1.pos+v2.pos)/2 ) );
+				tblJoint.push_back( Joint((v2.pos+v0.pos)/2 ) );
+cout << n << endl;
+				if ( n > 0 )
+				{
+					func( tblJoint[0],tblJoint[3],tblJoint[5], n-1 );
+					func( tblJoint[1],tblJoint[4],tblJoint[3], n-1 );
+					func( tblJoint[4],tblJoint[2],tblJoint[5], n-1 );
+				}
+				else
+				{
+cout << "a1" << endl;
+					tblBone.push_back( Bone(tblJoint[0],tblJoint[3]) );
+					tblBone.push_back( Bone(tblJoint[3],tblJoint[5]) );
+					tblBone.push_back( Bone(tblJoint[5],tblJoint[0]) );
+
+					tblBone.push_back( Bone(tblJoint[1],tblJoint[4]) );
+					tblBone.push_back( Bone(tblJoint[4],tblJoint[3]) );
+					tblBone.push_back( Bone(tblJoint[3],tblJoint[1]) );
+					
+					tblBone.push_back( Bone(tblJoint[4],tblJoint[2]) );
+					tblBone.push_back( Bone(tblJoint[2],tblJoint[5]) );
+					tblBone.push_back( Bone(tblJoint[5],tblJoint[4]) );
+cout << "a2" << endl;
+				}
+cout << "a3" << endl;
+				
+			};
+
+			double R=60;
+			Joint j0( vect2(300+0, 400+R*tan(rad(60))	-R*tan(rad(30)) ));
+			Joint j1( vect2(300-R, 400+  	    	   	-R*tan(rad(30))) );
+			Joint j2( vect2(300+R, 400+  				-R*tan(rad(30))) );
+
+			func( j0, j1, j2, 1 );
+#else
+			double R=80;
+			vect2 v0(300+0, 400+R*tan(rad(60))	-R*tan(rad(30)));
+			vect2 v1(300-R, 400+  	    	   	-R*tan(rad(30)));
+			vect2 v2(300+R, 400+  				-R*tan(rad(30)));
+
+			tblJoint.push_back( Joint( v0 ) );
+			tblJoint.push_back( Joint( v1 ) );
+			tblJoint.push_back( Joint( v2 ) );
+
+			tblJoint.push_back( Joint( (v0+v1)/2 ) );
+			tblJoint.push_back( Joint( (v1+v2)/2 ) );
+			tblJoint.push_back( Joint( (v2+v0)/2 ) );
+
+			tblBone.push_back( Bone(tblJoint[0],tblJoint[3]) );
+			tblBone.push_back( Bone(tblJoint[3],tblJoint[1]) );
+			tblBone.push_back( Bone(tblJoint[1],tblJoint[4]) );
+			tblBone.push_back( Bone(tblJoint[4],tblJoint[2]) );
+			tblBone.push_back( Bone(tblJoint[2],tblJoint[5]) );
+			tblBone.push_back( Bone(tblJoint[5],tblJoint[0]) );
+			tblBone.push_back( Bone(tblJoint[3],tblJoint[4]) );
+			tblBone.push_back( Bone(tblJoint[4],tblJoint[5]) );
+			tblBone.push_back( Bone(tblJoint[5],tblJoint[3]) );
+#endif
+
+		}
+		for ( Bone& b : tblBone )
 		{
 			b.length = (b.j1.pos - b.j0.pos).length();
 		}
-		for ( Joint& j : joint_tblJoint )	//マーカー対象に位置を登録
+		for ( Joint& j : tblJoint )	//マーカー対象に位置を登録
 		{
 			mc.tblMarker.push_back( Marker( &gra, &figCircle, j.pos, rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ) );
 		}
@@ -1108,7 +1176,7 @@ struct Apr : public Sys
 			// 入力
 
 			// 慣性移動
-			for ( Joint& a : joint_tblJoint )
+			for ( Joint& a : tblJoint )
 			{
 //				a.pos += a.accell;
 //				a.accell*=0.90;
@@ -1118,7 +1186,7 @@ struct Apr : public Sys
 			mc.funcMarkerController( &figCircle, mouse, keys, gra );
 
 			// 関節速度
-			for ( Joint& j : joint_tblJoint )
+			for ( Joint& j : tblJoint )
 			{
 //				j.mov = ( j.pos - j.prev );
 			}
@@ -1126,7 +1194,7 @@ struct Apr : public Sys
 			for ( int i = 0 ; i < 3 ; i++ )
 			{
 				// 骨コリジョン 張力計算
-				for ( Bone b : joint_tblBone )
+				for ( Bone b : tblBone )
 				{
 					vect2 v = b.j1.pos - b.j0.pos;
 					double l = v.length() - b.length;
@@ -1139,7 +1207,7 @@ struct Apr : public Sys
 				}
 
 				// 張力解消
-				for ( Joint& a : joint_tblJoint )
+				for ( Joint& a : tblJoint )
 				{
 					a.pos += a.tension;
 					a.accell += a.tension;
@@ -1148,13 +1216,13 @@ struct Apr : public Sys
 			}
 
 			// 保管	
-			for ( Joint& a : joint_tblJoint )
+			for ( Joint& a : tblJoint )
 			{
 //				a.prev = a.pos;
 			}
 
 			// 骨描画
-			for ( Bone b : joint_tblBone )
+			for ( Bone b : tblBone )
 			{
 				vect2 v0 = b.j0.pos;
 				vect2 v1 = b.j1.pos;
