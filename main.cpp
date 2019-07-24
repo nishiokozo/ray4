@@ -263,7 +263,7 @@ public:
 	void	Entry( PrimSphere* a )
 	//------------------------------------------------------------------------------
 	{
-		m_tblSphere.push_back( a );
+		m_tblSphere.emplace_back( a );
 
 	}
 
@@ -271,14 +271,14 @@ public:
 	void	Entry( PrimPlate* a )
 	//------------------------------------------------------------------------------
 	{
-		m_tblPlate.push_back( a );
+		m_tblPlate.emplace_back( a );
 	}
 
 	//------------------------------------------------------------------------------
 	void	Entry( PrimLight* a )
 	//------------------------------------------------------------------------------
 	{
-		m_tblLight.push_back( a );
+		m_tblLight.emplace_back( a );
 	}
 
 	//------------------------------------------------------------------------------
@@ -605,7 +605,7 @@ struct Apr : public Sys
 			// マーカー追加
 			if ( mouse.M.hi )
 			{
-				tblMarker.push_back( Marker( &gra, pFigAdder, mouse.pos, rad(0), gra.Rgb(1,0,0), gra.Rgb(1,1,0) ) );
+				tblMarker.emplace_back( Marker( &gra, pFigAdder, mouse.pos, rad(0), gra.Rgb(1,0,0), gra.Rgb(1,1,0) ) );
 			}
 
 
@@ -759,22 +759,22 @@ struct Apr : public Sys
 	//------------------------------------------------------------------------------
 	{
 		Figure figArrow(gra);
-		figArrow.vert.push_back( (vect2){   0,20*tan(rad(60))	-10*tan(rad(30)) } );
-		figArrow.vert.push_back( (vect2){-10,  0 	    	   	-10*tan(rad(30)) } );
-		figArrow.vert.push_back( (vect2){ 10,  0 				-10*tan(rad(30)) } );
-		figArrow.edge.push_back( (ivect2){ 0,1 } );
-		figArrow.edge.push_back( (ivect2){ 1,2 } );
-		figArrow.edge.push_back( (ivect2){ 2,0 } );
+		figArrow.vert.emplace_back( (vect2){   0,20*tan(rad(60))	-10*tan(rad(30)) } );
+		figArrow.vert.emplace_back( (vect2){-10,  0 	    	   	-10*tan(rad(30)) } );
+		figArrow.vert.emplace_back( (vect2){ 10,  0 				-10*tan(rad(30)) } );
+		figArrow.edge.emplace_back( (ivect2){ 0,1 } );
+		figArrow.edge.emplace_back( (ivect2){ 1,2 } );
+		figArrow.edge.emplace_back( (ivect2){ 2,0 } );
 		figArrow.col = gra.Rgb(0,0.5,1);
 
 
 		Figure figTriangle(gra);
-		figTriangle.vert.push_back( (vect2){   0,100*tan(rad(60))	-100*tan(rad(30)) } );
-		figTriangle.vert.push_back( (vect2){-100,  0 	    	   	-100*tan(rad(30)) } );
-		figTriangle.vert.push_back( (vect2){ 100,  0 				-100*tan(rad(30)) } );
-		figTriangle.edge.push_back( (ivect2){ 0,1 } );
-		figTriangle.edge.push_back( (ivect2){ 1,2 } );
-		figTriangle.edge.push_back( (ivect2){ 2,0 } );
+		figTriangle.vert.emplace_back( (vect2){   0,100*tan(rad(60))	-100*tan(rad(30)) } );
+		figTriangle.vert.emplace_back( (vect2){-100,  0 	    	   	-100*tan(rad(30)) } );
+		figTriangle.vert.emplace_back( (vect2){ 100,  0 				-100*tan(rad(30)) } );
+		figTriangle.edge.emplace_back( (ivect2){ 0,1 } );
+		figTriangle.edge.emplace_back( (ivect2){ 1,2 } );
+		figTriangle.edge.emplace_back( (ivect2){ 2,0 } );
 		figTriangle.col = gra.Rgb(0,1,1);
 
 		Figure figCircle(gra);
@@ -785,14 +785,14 @@ struct Apr : public Sys
 				double th = i*pi/180.0;
 				double r = 7;
 				vect2 v( r*cos(th), r*sin(th) );
-				figCircle.vert.push_back( v );
+				figCircle.vert.emplace_back( v );
 				s++;
 			}
 			for ( int i = 0 ; i < s-1 ; i++ )
 			{
-				figCircle.edge.push_back( (ivect2){ i,i+1 } );
+				figCircle.edge.emplace_back( (ivect2){ i,i+1 } );
 			}
-			figCircle.edge.push_back( (ivect2){ s-1,0 } );
+			figCircle.edge.emplace_back( (ivect2){ s-1,0 } );
 		}
 
 		// カトマル曲線
@@ -810,7 +810,7 @@ struct Apr : public Sys
 		};
 		for ( vect2& v : catmul_tblVert )	// マーカー対象に位置を登録
 		{
-			mc.tblMarker.push_back( Marker( &gra, &figArrow, v, rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ) );
+			mc.tblMarker.emplace_back( Marker( &gra, &figArrow, v, rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ) );
 		}
 
 		
@@ -843,13 +843,13 @@ struct Apr : public Sys
 		if(0)
 		{	//	三角形
 			double R=40;
-			tblJoint.push_back( Joint( vect2(300+0, 400+R*tan(rad(60))	-R*tan(rad(30))) ) );
-			tblJoint.push_back( Joint( vect2(300-R, 400+  	    	   	-R*tan(rad(30))) ) );
-			tblJoint.push_back( Joint( vect2(300+R, 400+  				-R*tan(rad(30))) ) );
+			tblJoint.emplace_back( Joint( vect2(300+0, 400+R*tan(rad(60))	-R*tan(rad(30))) ) );
+			tblJoint.emplace_back( Joint( vect2(300-R, 400+  	    	   	-R*tan(rad(30))) ) );
+			tblJoint.emplace_back( Joint( vect2(300+R, 400+  				-R*tan(rad(30))) ) );
 
-			tblBone.push_back( Bone(tblJoint[0],tblJoint[1]) );
-			tblBone.push_back( Bone(tblJoint[1],tblJoint[2]) );
-			tblBone.push_back( Bone(tblJoint[2],tblJoint[0]) );
+			tblBone.emplace_back( Bone(tblJoint[0],tblJoint[1]) );
+			tblBone.emplace_back( Bone(tblJoint[1],tblJoint[2]) );
+			tblBone.emplace_back( Bone(tblJoint[2],tblJoint[0]) );
 		}
 static int cnt = 0;
 		if(1)
@@ -859,38 +859,29 @@ static int cnt = 0;
 				if ( n > 0 )
 				{
 					int ix = tblJoint.size();
-					Joint j0( vect2( (tblJoint[idx+v0].pos + tblJoint[idx+v1].pos )/2 ) );
-					Joint j1( vect2( (tblJoint[idx+v1].pos + tblJoint[idx+v2].pos )/2 ) );
-					Joint j2( vect2( (tblJoint[idx+v2].pos + tblJoint[idx+v0].pos )/2 ) );
+					tblJoint.emplace_back( vect2( (tblJoint[idx+v0].pos + tblJoint[idx+v1].pos )/2 ) );
+					tblJoint.emplace_back( vect2( (tblJoint[idx+v1].pos + tblJoint[idx+v2].pos )/2 ) );
+					tblJoint.emplace_back( vect2( (tblJoint[idx+v2].pos + tblJoint[idx+v0].pos )/2 ) );
 					
-					tblJoint.push_back( j0 );
-					tblJoint.push_back( j1 );
-					tblJoint.push_back( j2 );
-
 					func( idx, idx+v0, ix+0, ix+2, n-1 );
 					func( idx, idx+v1, ix+1, ix+0, n-1 );
 					func( idx, idx+v2, ix+2, ix+1, n-1 );
 				}
 				else
 				{
-					tblBone.push_back( Bone(tblJoint[idx+v0],tblJoint[idx+v1]) );
-					tblBone.push_back( Bone(tblJoint[idx+v1],tblJoint[idx+v2]) );
-					tblBone.push_back( Bone(tblJoint[idx+v2],tblJoint[idx+v0]) );
+					tblBone.emplace_back( tblJoint[idx+v0], tblJoint[idx+v1] );
+					tblBone.emplace_back( tblJoint[idx+v1], tblJoint[idx+v2] );
+					tblBone.emplace_back( tblJoint[idx+v2], tblJoint[idx+v0] );
 cout << cnt++ << endl;
 				}
 			};
 
 			double R=80;
-			Joint j0( vect2(300+0, 400+R*tan(rad(60))	-R*tan(rad(30)) ));
-			Joint j1( vect2(300-R, 400+  	    	   	-R*tan(rad(30))) );
-			Joint j2( vect2(300+R, 400+  				-R*tan(rad(30))) );
+			tblJoint.emplace_back( vect2(300+0, 400+R*tan(rad(60))	-R*tan(rad(30)) ));
+			tblJoint.emplace_back( vect2(300-R, 400+  	    	   	-R*tan(rad(30))) );
+			tblJoint.emplace_back( vect2(300+R, 400+  				-R*tan(rad(30))) );
 
-			int idx = tblJoint.size();
-			tblJoint.push_back( j0 );
-			tblJoint.push_back( j1 );
-			tblJoint.push_back( j2 );
-
-			func( idx, 0, 1, 2, 1 );
+			func( 0, 0, 1, 2, 3 );
 
 		}
 		for ( Bone& b : tblBone )
@@ -899,7 +890,7 @@ cout << cnt++ << endl;
 		}
 		for ( Joint& j : tblJoint )	//マーカー対象に位置を登録
 		{
-			mc.tblMarker.push_back( Marker( &gra, &figCircle, j.pos, rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ) );
+			mc.tblMarker.emplace_back( Marker( &gra, &figCircle, j.pos, rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ) );
 		}
 
 
@@ -1046,7 +1037,7 @@ cout << cnt++ << endl;
 
 				v.z+=pz;
 
-				boxdl.push_back( v );
+				boxdl.emplace_back( v );
 
 			}
 			
@@ -1170,8 +1161,8 @@ cout << cnt++ << endl;
 	//				w = b.j0.waitht / ( b.j0.waitht + b.j1.waitht);
 					//cout << w << endl;
 					vect2 va  =	v.normalize()*l;
-					b.j0.tension += va/2;
-					b.j1.tension -= va/2;
+//					b.j0.tension += va/2;
+//					b.j1.tension -= va/2;
 				}
 
 				// 張力解消
