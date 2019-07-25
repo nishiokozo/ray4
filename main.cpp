@@ -490,7 +490,7 @@ void	raytrace( SysGra& gra, int py )
 				if ( ren.m_cntRay > cntMax ) cntMax = ren.m_cntRay;
 				cntRay+= ren.m_cntRay;
 
-				gra.Pset( vect2(px,height-py) ,gra.Rgb(C.r,C.g,C.b));
+				gra.Pset( vect2(px,height-py) ,rgb(C.r,C.g,C.b));
 			}
 		}
 		
@@ -605,7 +605,7 @@ struct Apr : public Sys
 			// マーカー追加
 			if ( mouse.M.hi )
 			{
-				tblMarker.emplace_back( Marker( &gra, pFigAdder, mouse.pos, rad(0), gra.Rgb(1,0,0), gra.Rgb(1,1,0) ) );
+				tblMarker.emplace_back( Marker( &gra, pFigAdder, mouse.pos, rad(0), rgb(1,0,0), rgb(1,1,0) ) );
 			}
 
 
@@ -695,7 +695,7 @@ struct Apr : public Sys
 						// 矩形カーソル表示
 						vect2 v0 = min( drag_start, mouse.pos );
 						vect2 v1 = max( drag_start, mouse.pos );
-						gra.Box( v0,v1, gra.Rgb(0,0.5,1));
+						gra.Box( v0,v1, rgb(0,0.5,1));
 
 						for ( Marker& m : tblMarker )
 						{
@@ -765,7 +765,7 @@ struct Apr : public Sys
 		figArrow.edge.emplace_back( (ivect2){ 0,1 } );
 		figArrow.edge.emplace_back( (ivect2){ 1,2 } );
 		figArrow.edge.emplace_back( (ivect2){ 2,0 } );
-		figArrow.col = gra.Rgb(0,0.5,1);
+		figArrow.col = rgb(0,0.5,1);
 
 
 		Figure figTriangle(gra);
@@ -775,7 +775,7 @@ struct Apr : public Sys
 		figTriangle.edge.emplace_back( (ivect2){ 0,1 } );
 		figTriangle.edge.emplace_back( (ivect2){ 1,2 } );
 		figTriangle.edge.emplace_back( (ivect2){ 2,0 } );
-		figTriangle.col = gra.Rgb(0,1,1);
+		figTriangle.col = rgb(0,1,1);
 
 		Figure figCircle(gra);
 		{
@@ -795,6 +795,23 @@ struct Apr : public Sys
 			figCircle.edge.emplace_back( (ivect2){ s-1,0 } );
 		}
 
+		// ベジェ
+		vector<vect2> bezier_pos=
+		{
+			#define X 40
+			#define Y 120
+			vect2( 10+X, 10+Y),
+			vect2(100+X,100+Y),
+			vect2(200+X, 10+Y),
+			vect2(300+X,100+Y),
+			#undef X
+			#undef Y
+		};
+		for ( vect2& v : bezier_pos )	// マーカー対象に位置を登録
+		{
+			mc.tblMarker.emplace_back( Marker( &gra, &figCircle, v, rad(-90), rgb(1,1,0), rgb(1,0,0) ) );
+		}
+
 		// カトマル曲線
 		vector<vect2> catmul_tblVert =
 		{
@@ -810,7 +827,7 @@ struct Apr : public Sys
 		};
 		for ( vect2& v : catmul_tblVert )	// マーカー対象に位置を登録
 		{
-			mc.tblMarker.emplace_back( Marker( &gra, &figArrow, v, rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ) );
+			mc.tblMarker.emplace_back( Marker( &gra, &figArrow, v, rad(-90), rgb(1,1,0), rgb(1,0,0) ) );
 		}
 
 		
@@ -868,7 +885,7 @@ struct Apr : public Sys
 			tblJoint.emplace_back( vect2(300-R, 400+  	    	   	-R*tan(rad(30))) );
 			tblJoint.emplace_back( vect2(300+R, 400+  				-R*tan(rad(30))) );
 
-			func( 0, 0, 1, 2, 2 );
+			func( 0, 0, 1, 2, 1 );
 		}
 cout << tblJoint.size() << endl;
 		for ( Bone& b : tblBone )
@@ -877,12 +894,12 @@ cout << tblJoint.size() << endl;
 		}
 		for ( Joint& j : tblJoint )	//マーカー対象に位置を登録
 		{
-			mc.tblMarker.emplace_back( Marker( &gra, &figCircle, j.pos, rad(-90), gra.Rgb(1,1,0), gra.Rgb(1,0,0) ) );
+			mc.tblMarker.emplace_back( Marker( &gra, &figCircle, j.pos, rad(-90), rgb(1,1,0), rgb(1,0,0) ) );
 		}
 
 
 		// 箱
-		vector<vect3> boxvert=
+		vector<vect3> box_vert=
 		{
 			{	-1,	 1,	-1	},
 			{	 1,	 1,	-1	},
@@ -893,9 +910,9 @@ cout << tblJoint.size() << endl;
 			{	-1,	-1,	 1	},
 			{	 1,	-1,	 1	},
 		};
-		vector<vect3> boxdl;
+		vector<vect3> box_disp;
 
-		vector<ivect2>	boxedge
+		vector<ivect2>	box_edge
 		{
 			{	0,	1	},
 			{	1,	3	},
@@ -922,7 +939,7 @@ cout << tblJoint.size() << endl;
 	 		static int py=0;
 
 
-			gra.Clr(gra.Rgb(0.3,0.3,0.3));
+			gra.Clr(rgb(0.3,0.3,0.3));
 			
 			//raytrace( gra, py++ );
 			if ( py >= m.height ) py=0;
@@ -936,8 +953,8 @@ cout << tblJoint.size() << endl;
 
 
 			//calc rotate
-			boxdl.clear();
-			for ( vect3 v : boxvert )
+			box_disp.clear();
+			for ( vect3 v : box_vert )
 			{
 	//			double x = v.x;
 	//			double y = v.y;
@@ -1024,7 +1041,7 @@ cout << tblJoint.size() << endl;
 
 				v.z+=pz;
 
-				boxdl.emplace_back( v );
+				box_disp.emplace_back( v );
 
 			}
 			
@@ -1040,13 +1057,13 @@ cout << tblJoint.size() << endl;
 			//calc pers 
 
 			// 点
-			gra.Pset(vect2(10,10),gra.Rgb(1,1,1));
+			gra.Pset(vect2(10,10),rgb(1,1,1));
 
 			// 箱
-			for ( ivect2 e : boxedge )
+			for ( ivect2 e : box_edge )
 			{
-				vect3& p = boxdl[e.p];
-				vect3& n = boxdl[e.n];
+				vect3& p = box_disp[e.p];
+				vect3& n = box_disp[e.n];
 
 				double	x,y,z;
 				
@@ -1056,29 +1073,30 @@ cout << tblJoint.size() << endl;
 				double	sz = 1/tan(fovy/2);
 
 				//pers
-				double x0 = p.x/(p.z+sz)	*sc	+256;
-				double y0 = p.y/(p.z+sz)	*sc	+256;
-				double x1 = n.x/(n.z+sz)	*sc	+256;
-				double y1 = n.y/(n.z+sz)	*sc	+256;
-				gra.Line( vect2(x0,y0), vect2(x1,y1),gra.Rgb(0,1,1));
+				double x0 = p.x/(p.z+sz)	*sc	+384;
+				double y0 = p.y/(p.z+sz)	*sc	+128;
+				double x1 = n.x/(n.z+sz)	*sc	+384;
+				double y1 = n.y/(n.z+sz)	*sc	+128;
+				gra.Line( vect2(x0,y0), vect2(x1,y1),rgb(0,1,1));
 
 			}
 
-			gra.Tri( vect2(55,10), vect2(10,100), vect2(100,100),gra.Rgb(1,1,0));
+			gra.Tri( vect2(55,10), vect2(10,100), vect2(100,100),rgb(1,1,0));
 
-			gra.Tri( vect2(55,10), vect2(10,100), vect2(100,100),gra.Rgb(1,1,0));
+			gra.Tri( vect2(55,10), vect2(10,100), vect2(100,100),rgb(1,1,0));
 
 			double a = 80;
-			gra.Tri( vect2(55+a,10), vect2(10+a,100), vect2(100+a,100),gra.Rgb(1,1,0));
+			gra.Tri( vect2(55+a,10), vect2(10+a,100), vect2(100+a,100),rgb(1,1,0));
 
-			a=40;
-			double	b = 120;
-			gra.Bezier(vect2(10+a,10+b), vect2(100+a,100+b), vect2(200+a,10+b), vect2(300+a,100+b),gra.Rgb(0,1,0));
-
-			gra.Circle( vect2( 10+a, 10+b), 10, gra.Rgb(1,0,0));
-			gra.Circle( vect2(100+a,100+b), 10, gra.Rgb(1,0,0));
-			gra.Circle( vect2(200+a, 10+b), 10, gra.Rgb(1,0,0));
-			gra.Circle( vect2(300+a,100+b), 10, gra.Rgb(1,0,0));
+			//ベジェ
+			gra.Bezier(bezier_pos[0],bezier_pos[1],bezier_pos[2],bezier_pos[3],rgb(1,1,1));
+			vect2 v0 = bezier_pos[0];
+			for ( unsigned int i = 1 ; i < bezier_pos.size() ; i++ )
+			{
+				vect2 v1 = bezier_pos[i];
+				gra.Line(v1,v0,rgb(0,1,0));
+				v0=v1;
+			}
 	
 			
 			// カトマル
@@ -1109,11 +1127,11 @@ cout << tblJoint.size() << endl;
 					for ( double t = st ; t < 1.0 ; t+=st)
 					{
 						vect2 P = catmull(t, catmul_tblVert[n], catmul_tblVert[n+1], catmul_tblVert[n+2], catmul_tblVert[n+3] );
-						gra.Line( P, Q, gra.Rgb(1,1,1));
+						gra.Line( P, Q, rgb(1,1,1));
 						Q=P;
 					}	
 						vect2 P = catmull(1, catmul_tblVert[n], catmul_tblVert[n+1], catmul_tblVert[n+2], catmul_tblVert[n+3] );
-						gra.Line( P, Q, gra.Rgb(1,1,1));
+						gra.Line( P, Q, rgb(1,1,1));
 						
 				}
 			}
@@ -1137,7 +1155,7 @@ cout << tblJoint.size() << endl;
 //				j.mov = ( j.pos - j.prev );
 			}
 
-			for ( int i = 0 ; i < 3 ; i++ )
+			for ( int i = 0 ; i < 1 ; i++ )
 			{
 				// 骨コリジョン 張力計算
 				for ( Bone b : tblBone )
@@ -1148,8 +1166,8 @@ cout << tblJoint.size() << endl;
 	//				w = b.j0.waitht / ( b.j0.waitht + b.j1.waitht);
 					//cout << w << endl;
 					vect2 va  =	v.normalize()*l;
-					b.j0.tension += va/2;
-					b.j1.tension -= va/2;
+					b.j0.tension += va/3;
+					b.j1.tension -= va/3;
 				}
 
 				// 張力解消
@@ -1173,7 +1191,7 @@ cout << tblJoint.size() << endl;
 				vect2 v0 = b.j0.pos;
 				vect2 v1 = b.j1.pos;
 
-				gra.Line( v0, v1, gra.Rgb( 1,1,1 ) );
+				gra.Line( v0, v1, rgb( 1,1,1 ) );
 			}
 
 			// マーカー表示
@@ -1188,9 +1206,9 @@ cout << tblJoint.size() << endl;
 				{
 					gra.Line(x0,y0,x1,y1,col);
 				};
-				figTriangle.draw( func, 256,256,rad(cnt), gra.Rgb(0,1,1) );
+				figTriangle.draw( func, 256,256,rad(cnt), rgb(0,1,1) );
 	#else
-				figTriangle.draw( vect2(256,256),rad(cnt), gra.Rgb(0,1,1) );
+				figTriangle.draw( vect2(384,128),rad(cnt), rgb(0,1,1) );
 	#endif
 				cnt++;
 			}
