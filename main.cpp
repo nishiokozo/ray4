@@ -839,20 +839,8 @@ struct Apr : public Sys
 			Bone( Joint& _j0, Joint& _j1 ) :j0(_j0), j1(_j1){}
 		};
 		vector<Joint> tblJoint;
+		tblJoint.reserve(1000);
 		vector<Bone> tblBone;
-		if(0)
-		{	//	三角形
-			double R=40;
-			tblJoint.emplace_back( Joint( vect2(300+0, 400+R*tan(rad(60))	-R*tan(rad(30))) ) );
-			tblJoint.emplace_back( Joint( vect2(300-R, 400+  	    	   	-R*tan(rad(30))) ) );
-			tblJoint.emplace_back( Joint( vect2(300+R, 400+  				-R*tan(rad(30))) ) );
-
-			tblBone.emplace_back( Bone(tblJoint[0],tblJoint[1]) );
-			tblBone.emplace_back( Bone(tblJoint[1],tblJoint[2]) );
-			tblBone.emplace_back( Bone(tblJoint[2],tblJoint[0]) );
-		}
-static int cnt = 0;
-		if(1)
 		{	//	三角形メッシュ
 			function<void(int,int,int,int,int)> func = [&]( int idx, int v0, int v1, int v2, int n )
 			{ 
@@ -872,7 +860,6 @@ static int cnt = 0;
 					tblBone.emplace_back( tblJoint[idx+v0], tblJoint[idx+v1] );
 					tblBone.emplace_back( tblJoint[idx+v1], tblJoint[idx+v2] );
 					tblBone.emplace_back( tblJoint[idx+v2], tblJoint[idx+v0] );
-cout << cnt++ << endl;
 				}
 			};
 
@@ -881,9 +868,9 @@ cout << cnt++ << endl;
 			tblJoint.emplace_back( vect2(300-R, 400+  	    	   	-R*tan(rad(30))) );
 			tblJoint.emplace_back( vect2(300+R, 400+  				-R*tan(rad(30))) );
 
-			func( 0, 0, 1, 2, 3 );
-
+			func( 0, 0, 1, 2, 2 );
 		}
+cout << tblJoint.size() << endl;
 		for ( Bone& b : tblBone )
 		{
 			b.length = (b.j1.pos - b.j0.pos).length();
@@ -1161,8 +1148,8 @@ cout << cnt++ << endl;
 	//				w = b.j0.waitht / ( b.j0.waitht + b.j1.waitht);
 					//cout << w << endl;
 					vect2 va  =	v.normalize()*l;
-//					b.j0.tension += va/2;
-//					b.j1.tension -= va/2;
+					b.j0.tension += va/2;
+					b.j1.tension -= va/2;
 				}
 
 				// 張力解消
