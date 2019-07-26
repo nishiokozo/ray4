@@ -813,7 +813,7 @@ struct Apr : public Sys
 		};
 		for ( vect2& v : bezier_pos )	// マーカー対象に位置を登録
 		{
-			mc.tblMarker.emplace_back( Marker( &gra, &figCircle, v, rad(-90) ) );
+			mc.tblMarker.emplace_back( &gra, &figCircle, v, rad(-90) );
 		}
 
 		// カトマル曲線
@@ -831,7 +831,7 @@ struct Apr : public Sys
 		};
 		for ( vect2& v : catmul_tblVert )	// マーカー対象に位置を登録
 		{
-			mc.tblMarker.emplace_back( Marker( &gra, &figArrow, v, rad(-90) ) );
+			mc.tblMarker.emplace_back( &gra, &figArrow, v, rad(-90) );
 		}
 
 		
@@ -944,7 +944,7 @@ struct Apr : public Sys
 		}
 		for ( Joint& j : tblJoint )	//マーカー対象に位置を登録
 		{
-			mc.tblMarker.emplace_back( Marker( &gra, &figCircle, j.pos, rad(-90) ) );
+			mc.tblMarker.emplace_back( &gra, &figCircle, j.pos, rad(-90) );
 		}
 
 
