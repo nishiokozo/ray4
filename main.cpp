@@ -537,22 +537,30 @@ struct Apr : public Sys
 		bool 	bSelected;			//	選択
 		bool 	bAffectable;		//	削除対象
 		double	th;
-		int		colNormal;
-		int		colSelected;
+		int		colNormal = rgb(1,1,0);
+		int		colSelected = rgb(1,0,0);
 
-		Marker( SysGra* _gra, Figure* _fig, vect2& v, double _th, int _colNormal, int _colSelected ) : pgra(_gra), pfig(_fig), pos(v)
+		Marker( SysGra* _gra, Figure* _fig, vect2& v, double _th ) : pgra(_gra), pfig(_fig), pos(v)
 		{
-//			x=v.x;
-//			y=v.y;
-			bSelected=false;
-			bRectIn=false;
-			bRectSelected=false;
-			bAffectable = false;
-			th = _th;
-			colNormal = _colNormal;
-			colSelected = _colSelected;
+			bSelected		= false;
+			bRectIn			= false;
+			bRectSelected	= false;
+			bAffectable		= false;
+			th				= _th;
+//			colNormal		= _colNormal;
+//			colSelected		= _colSelected;
 		}
-		
+		Marker(const Marker& a) :pgra(a.pgra), pfig(a.pfig), pos(a.pos)
+		{
+			bSelected		= a.bSelected;
+			bRectIn			= a.bRectIn;
+			bRectSelected	= a.bRectSelected;
+			bAffectable 	= a.bAffectable;
+			th 				= a.th;
+//			colNormal		= a.colNormal;
+//			colSelected		= a.colSelected;
+		}	
+		const Marker&	operator=(Marker&& a){return a;}	
 		void draw()
 		{
 			bool flg =  bSelected;
@@ -605,7 +613,7 @@ struct Apr : public Sys
 			// マーカー追加
 			if ( mouse.M.hi )
 			{
-				tblMarker.emplace_back( Marker( &gra, pFigAdder, mouse.pos, rad(0), rgb(1,0,0), rgb(1,1,0) ) );
+				tblMarker.emplace_back( &gra, pFigAdder, mouse.pos, rad(0) );
 			}
 
 
@@ -624,7 +632,7 @@ struct Apr : public Sys
 				{
 					if ( tblMarker[i].bAffectable )
 					{
-//							   tblMarker.erase(tblMarker.begin() +i);	
+							   tblMarker.erase(tblMarker.begin() +i);	
 					}
 				}
 			}
@@ -809,7 +817,7 @@ struct Apr : public Sys
 		};
 		for ( vect2& v : bezier_pos )	// マーカー対象に位置を登録
 		{
-			mc.tblMarker.emplace_back( Marker( &gra, &figCircle, v, rad(-90), rgb(1,1,0), rgb(1,0,0) ) );
+			mc.tblMarker.emplace_back( Marker( &gra, &figCircle, v, rad(-90) ) );
 		}
 
 		// カトマル曲線
@@ -827,7 +835,7 @@ struct Apr : public Sys
 		};
 		for ( vect2& v : catmul_tblVert )	// マーカー対象に位置を登録
 		{
-			mc.tblMarker.emplace_back( Marker( &gra, &figArrow, v, rad(-90), rgb(1,1,0), rgb(1,0,0) ) );
+			mc.tblMarker.emplace_back( Marker( &gra, &figArrow, v, rad(-90) ) );
 		}
 
 		
@@ -854,21 +862,38 @@ struct Apr : public Sys
 			Joint& j1;
 			double length;
 			Bone( Joint& _j0, Joint& _j1 ) :j0(_j0), j1(_j1){}
+			Bone( Joint&& _j0, Joint&& _j1 ) :j0(_j0), j1(_j1){}
 		};
 		vector<Joint> tblJoint;
 		tblJoint.reserve(1000);
 		vector<Bone> tblBone;
 		if(1)
+		{	//	対△
+			int ox=200,oy=300;
+
+			tblJoint.emplace_back( vect2( ox,oy) );
+			tblJoint.emplace_back( vect2( ox-30,oy+80) );
+			tblJoint.emplace_back( vect2( ox+30,oy+80) );
+			tblJoint.emplace_back( vect2( ox+0 ,oy+160) );
+
+			tblBone.emplace_back( tblJoint[0], tblJoint[1] );
+			tblBone.emplace_back( tblJoint[0], tblJoint[2] );
+			tblBone.emplace_back( tblJoint[1], tblJoint[2] );
+			tblBone.emplace_back( tblJoint[1], tblJoint[3] );
+			tblBone.emplace_back( tblJoint[2], tblJoint[3] );
+		}
+		if(0)
 		{	//	四角格子メッシュ
 			int ox=200,oy=300;
-			const int  R=40;
-			const int  X=4;
-			const int  Y=5;
+			const int  W=40;
+			const int  H=80;
+			const int  X=2;
+			const int  Y=3;
 			for ( int x = 0 ; x < X ; x++ )
 			{
 				for ( int y = 0 ; y < Y ; y++ )
 				{
-					tblJoint.emplace_back( vect2( x*R+ox,y*R+oy) );
+					tblJoint.emplace_back( vect2( x*W+ox,y*H+oy) );
 				}
 			}
 			for ( int y=0 ; y < Y-1 ; y++ )
@@ -923,7 +948,7 @@ struct Apr : public Sys
 		}
 		for ( Joint& j : tblJoint )	//マーカー対象に位置を登録
 		{
-			mc.tblMarker.emplace_back( Marker( &gra, &figCircle, j.pos, rad(-90), rgb(1,1,0), rgb(1,0,0) ) );
+			mc.tblMarker.emplace_back( Marker( &gra, &figCircle, j.pos, rad(-90) ) );
 		}
 
 
