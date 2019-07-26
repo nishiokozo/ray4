@@ -858,36 +858,65 @@ struct Apr : public Sys
 		vector<Joint> tblJoint;
 		tblJoint.reserve(1000);
 		vector<Bone> tblBone;
+		if(1)
+		{	//	四角格子メッシュ
+			int ox=200,oy=300;
+			const int  R=40;
+			const int  X=4;
+			const int  Y=5;
+			for ( int x = 0 ; x < X ; x++ )
+			{
+				for ( int y = 0 ; y < Y ; y++ )
+				{
+					tblJoint.emplace_back( vect2( x*R+ox,y*R+oy) );
+				}
+			}
+			for ( int y=0 ; y < Y-1 ; y++ )
+			{
+				for ( int x=0 ; x < X ; x++ )
+				{
+					tblBone.emplace_back( tblJoint[x*Y+y], tblJoint[x*Y+y+1] );
+				}
+			}
+			for ( int y=0 ; y < Y ; y++ )
+			{
+				for ( int x=0 ; x < X-1 ; x++ )
+				{
+					tblBone.emplace_back( tblJoint[x*Y+y], tblJoint[(x+1)*Y+y] );
+				}
+			}
+		}
+		if(0)
 		{	//	三角形メッシュ
-			function<void(int,int,int,int,int)> func = [&]( int idx, int v0, int v1, int v2, int n )
+			function<void(int,int,int,int)> func = [&]( int v0, int v1, int v2, int n )
 			{ 
 				if ( n > 0 )
 				{
 					int ix = tblJoint.size();
-					tblJoint.emplace_back( vect2( (tblJoint[idx+v0].pos + tblJoint[idx+v1].pos )/2 ) );
-					tblJoint.emplace_back( vect2( (tblJoint[idx+v1].pos + tblJoint[idx+v2].pos )/2 ) );
-					tblJoint.emplace_back( vect2( (tblJoint[idx+v2].pos + tblJoint[idx+v0].pos )/2 ) );
+					tblJoint.emplace_back( vect2( (tblJoint[v0].pos + tblJoint[v1].pos )/2 ) );
+					tblJoint.emplace_back( vect2( (tblJoint[v1].pos + tblJoint[v2].pos )/2 ) );
+					tblJoint.emplace_back( vect2( (tblJoint[v2].pos + tblJoint[v0].pos )/2 ) );
 					
-					func( idx, idx+v0, ix+0, ix+2, n-1 );
-					func( idx, idx+v1, ix+1, ix+0, n-1 );
-					func( idx, idx+v2, ix+2, ix+1, n-1 );
+					func( v0, ix+0, ix+2, n-1 );
+					func( v1, ix+1, ix+0, n-1 );
+					func( v2, ix+2, ix+1, n-1 );
 				}
 				else
 				{
-					tblBone.emplace_back( tblJoint[idx+v0], tblJoint[idx+v1] );
-					tblBone.emplace_back( tblJoint[idx+v1], tblJoint[idx+v2] );
-					tblBone.emplace_back( tblJoint[idx+v2], tblJoint[idx+v0] );
+					tblBone.emplace_back( tblJoint[v0], tblJoint[v1] );
+					tblBone.emplace_back( tblJoint[v1], tblJoint[v2] );
+					tblBone.emplace_back( tblJoint[v2], tblJoint[v0] );
 				}
 			};
 
 			double R=80;
-			tblJoint.emplace_back( vect2(300+0, 400+R*tan(rad(60))	-R*tan(rad(30)) ));
-			tblJoint.emplace_back( vect2(300-R, 400+  	    	   	-R*tan(rad(30))) );
-			tblJoint.emplace_back( vect2(300+R, 400+  				-R*tan(rad(30))) );
+			tblJoint.emplace_back( vect2(200+0, 500-R*tan(rad(60))	-R*tan(rad(30)) ));
+			tblJoint.emplace_back( vect2(200-R, 500+  	    	   	-R*tan(rad(30))) );
+			tblJoint.emplace_back( vect2(200+R, 500+  				-R*tan(rad(30))) );
 
-			func( 0, 0, 1, 2, 1 );
+			func( 0, 1, 2, 3 );
+			cout << tblJoint.size() << endl;
 		}
-cout << tblJoint.size() << endl;
 		for ( Bone& b : tblBone )
 		{
 			b.length = (b.j1.pos - b.j0.pos).length();
@@ -1196,6 +1225,7 @@ cout << tblJoint.size() << endl;
 
 			// マーカー表示
 			mc.funcMarkerDraw();
+//			for ( Joint j : tblJoint ) gra.Circle( j.pos, 4, rgb(0,1,0));
 
 
 			// figTriangle
