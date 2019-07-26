@@ -547,8 +547,6 @@ struct Apr : public Sys
 			bRectSelected	= false;
 			bAffectable		= false;
 			th				= _th;
-//			colNormal		= _colNormal;
-//			colSelected		= _colSelected;
 		}
 		Marker(const Marker& a) :pgra(a.pgra), pfig(a.pfig), pos(a.pos)
 		{
@@ -557,8 +555,6 @@ struct Apr : public Sys
 			bRectSelected	= a.bRectSelected;
 			bAffectable 	= a.bAffectable;
 			th 				= a.th;
-//			colNormal		= a.colNormal;
-//			colSelected		= a.colSelected;
 		}	
 		const Marker&	operator=(Marker&& a){return a;}	
 		void draw()
@@ -1191,6 +1187,33 @@ struct Apr : public Sys
 			}
 
 
+
+			struct Keyframe
+			{
+				vect2 pos;
+				Keyframe( vect2 _pos )
+				{
+					pos = _pos;
+				}
+			};
+			static vector<Keyframe> tblKeyframe;
+
+
+Joint& tar = tblJoint[0];
+			// キーフレーム追加
+			if (keys.K.hi) 
+			{
+				tblKeyframe.emplace_back( mouse.pos );
+			}
+			for ( Keyframe k : tblKeyframe )
+			{
+				gra.Circle( k.pos, 5, rgb(0,1,1));
+			}
+			if (keys.SPACE.hi) 
+			{
+				tar.pos = tblKeyframe[0].pos;
+			}
+
 			// 入力
 
 			// 慣性移動
@@ -1220,8 +1243,21 @@ struct Apr : public Sys
 	//				w = b.j0.waitht / ( b.j0.waitht + b.j1.waitht);
 					//cout << w << endl;
 					vect2 va  =	v.normalize()*l;
+if ( &tar == &b.j0 )
+{
+					b.j1.tension -= va/3;
+}
+else
+if ( &tar == &b.j1 )
+{
+					b.j0.tension -= va/3;
+}
+else
+{
 					b.j0.tension += va/3;
 					b.j1.tension -= va/3;
+}
+
 				}
 
 				// 張力解消
