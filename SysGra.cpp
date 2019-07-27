@@ -10,6 +10,7 @@ using namespace std;
 #include "SysGra.h"
 
 #include <windows.h>
+#include <windowsx.h>
 #include <functional>
 #include "SysWin.h"
 
@@ -265,6 +266,48 @@ void  SysGra::OnPaint()
 			}
 		}
 
+		//fill
+		{
+
+			for ( unsigned int i=0 ; i < m.tblFill.size() ; i++ )
+			{
+
+				int x0 = m.tblFill[i].v0.x;
+				int y0 = m.tblFill[i].v0.y;
+				int x1 = m.tblFill[i].v1.x;
+				int y1 = m.tblFill[i].v1.y;
+				int	col = m.tblFill[i].col;
+/*
+				HPEN hPen = CreatePen(PS_SOLID, 1, col );
+				SelectObject(hDc, hPen);
+				HBRUSH hBrush  = CreateSolidBrush(col);
+
+//				MoveToEx(hDc, x0, y0, NULL);
+//				LineTo(hDc, x1, y0);
+//				LineTo(hDc, x1, y1);
+//				LineTo(hDc, x0, y1);
+//				LineTo(hDc, x0, y0);
+				Rectangle(hDc , x0, y0, x1, y1);
+				DeleteObject(hBrush);
+
+				DeleteObject(hPen);
+*/
+				HPEN hPen = CreatePen(PS_SOLID, 2, col);
+				HPEN hOldPen = SelectPen(hDc, hPen);
+
+				HBRUSH hBrush = CreateSolidBrush( col );
+				HBRUSH hOldBrush = SelectBrush(hDc, hBrush);
+
+				Rectangle(hDc , x0, y0, x1, y1);
+
+				SelectBrush(hDc, hOldBrush);
+				DeleteObject(hBrush);
+
+				SelectPen(hDc, hOldPen);
+				DeleteObject(hPen);
+			}
+		}
+
 		//line
 		{
 
@@ -317,7 +360,7 @@ void  SysGra::OnPaint()
 		}
 
 
-		//Bezier
+/*		//Bezier
 		{
 			for ( unsigned int i=0 ; i < m.tblBezier.size() ; i++ )
 			{	
@@ -349,7 +392,7 @@ void  SysGra::OnPaint()
 			static POINT pt[3];
 
 		}
-
+*/
 
 	}
 
@@ -414,9 +457,10 @@ int	SysGra::Rgb( double r, double g , double b )
 void SysGra::Update()
 //------------------------------------------------------------------------------
 {
-		m.tblBezier.clear();
+//		m.tblBezier.clear();
 		m.tblTri.clear();
 		m.tblBox.clear();
+		m.tblFill.clear();
 		m.tblLine.clear();
 		m.tblPset.clear();
 		m.tblCircle.clear();
@@ -454,6 +498,14 @@ void SysGra::Box( vect2 v0, vect2 v1,int col)
 	(*this).m.tblBox.push_back( a );
 }
 //------------------------------------------------------------------------------
+void SysGra::Fill( vect2 v0, vect2 v1,int col)
+//------------------------------------------------------------------------------
+{
+	PrimFill a = {v0,v1,col};
+	
+	(*this).m.tblFill.push_back( a );
+}
+//------------------------------------------------------------------------------
 void SysGra::Line( vect2 v0, vect2 v1,int col)
 //------------------------------------------------------------------------------
 {
@@ -469,6 +521,7 @@ void SysGra::Tri( vect2 v0, vect2 v1, vect2 v2, int col)
 	
 	(*this).m.tblTri.push_back( a );
 }
+/*
 //------------------------------------------------------------------------------
 void SysGra::Bezier( vect2 v0, vect2 v1, vect2 v2, vect2 v3, int col)
 //------------------------------------------------------------------------------
@@ -477,4 +530,5 @@ void SysGra::Bezier( vect2 v0, vect2 v1, vect2 v2, vect2 v3, int col)
 	
 	(*this).m.tblBezier.push_back( a );
 }
+*/
 

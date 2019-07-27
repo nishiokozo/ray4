@@ -799,6 +799,7 @@ struct Apr : public Sys
 			figCircle.edge.emplace_back( (ivect2){ s-1,0 } );
 		}
 
+/*
 		// ベジェ
 		vector<vect2> bezier_pos=
 		{
@@ -815,17 +816,22 @@ struct Apr : public Sys
 		{
 			mc.tblMarker.emplace_back( &gra, &figCircle, v, rad(-90) );
 		}
+*/
 
 		// カトマル曲線
 		vector<vect2> catmul_tblVert =
 		{
-			vect2(500,200  +0),
-			vect2(500,200+ 20),
-			vect2(550,200+100),
-			vect2(500,200+180),
-			vect2(500,200+200),
+			#define X 600
+			#define Y 50
+			vect2(X+ 0,Y  +0),
+			vect2(X+ 0,Y+ 20),
+			vect2(X+50,Y+100),
+			vect2(X+ 0,Y+180),
+			vect2(X+ 0,Y+200),
+			#undef X
+			#undef Y
 		};
-		vector<int>	catmul_tblConnect
+		vector<int>	catmull_tblConnect
 		{
 			0, 1, 2, 3, 4
 		};
@@ -833,6 +839,24 @@ struct Apr : public Sys
 		{
 			mc.tblMarker.emplace_back( &gra, &figCircle, v, rad(-90) );
 		}
+		
+		//3字曲線
+		vector<vect2> bezier_tbl =
+		{
+			#define X 400
+			#define Y 350
+				vect2(X+ 00,Y+90),
+				vect2(X+ 00,Y+20),
+				vect2(X+200,Y+90),
+				vect2(X+200,Y+20),
+			#undef X
+			#undef Y
+		};
+		for ( vect2& v : bezier_tbl )	// マーカー対象に位置を登録
+		{
+			mc.tblMarker.emplace_back( &gra, &figCircle, v, rad(-90) );
+		}
+
 
 		
 		//骨
@@ -990,6 +1014,7 @@ struct Apr : public Sys
 
 
 			gra.Clr(rgb(0.3,0.3,0.3));
+//			gra.Fill(vect2(0,0),vect2(m.width,m.height),rgb(0.3,0.3,0.3));
 			
 			//raytrace( gra, py++ );
 			if ( py >= m.height ) py=0;
@@ -1138,7 +1163,7 @@ struct Apr : public Sys
 			double a = 80;
 			gra.Tri( vect2(55+a,10), vect2(10+a,100), vect2(100+a,100),rgb(1,1,0));
 
-			//ベジェ
+/*			//ベジェ
 			gra.Bezier(bezier_pos[0],bezier_pos[1],bezier_pos[2],bezier_pos[3],rgb(1,1,1));
 			vect2 v0 = bezier_pos[0];
 			for ( unsigned int i = 1 ; i < bezier_pos.size() ; i++ )
@@ -1147,47 +1172,118 @@ struct Apr : public Sys
 				if ( i==1 || i==3 ) gra.Line(v1,v0,rgb(0,1,0));
 				v0=v1;
 			}
+*/
 	
 			
 			// カトマル
-			static auto catmull = []( double t, const vect2 Pm, const vect2 P0, const vect2 P1, const vect2 P2 )
 			{
-				//Catmull-Rom 曲線
-				// P(t)=P0*(2t^3-3t^2+1)+m0*(t^3-2t^2+t)+P1*(-2t^3+3t^2)+m1*(t^3-t^2)
-				// m0=(P1-Pm)/2
-				// m1=(P2-P0)/2
-
-				vect2 m0 = (P1-Pm)/2.0;
-				vect2 m1 = (P2-P0)/2.0;
-				vect2 P = P0*(2*t*t*t - 3*t*t +1) + m0*( t*t*t -2*t*t +t ) + P1*( -2*t*t*t + 3*t*t ) + m1*( t*t*t - t*t );
-
-				return P;
-			};
-
-			// マーカースプライン変換表示
-			if ( catmul_tblConnect.size() >=4 )
-			{
-				for ( unsigned int i = 0 ; i < catmul_tblConnect.size()-3 ; i++ )
+				auto catmull = []( double t, const vect2 Pm, const vect2 P0, const vect2 P1, const vect2 P2 )
 				{
-					double st = 0.1;
+					//Catmull-Rom 曲線
+					// P(t)=P0*(2t^3-3t^2+1)+m0*(t^3-2t^2+t)+P1*(-2t^3+3t^2)+m1*(t^3-t^2)
+					// m0=(P1-Pm)/2
+					// m1=(P2-P0)/2
 
-					int n = catmul_tblConnect[i];
-					vect2 Q = catmull(0, catmul_tblVert[n], catmul_tblVert[n+1], catmul_tblVert[n+2], catmul_tblVert[n+3] );
+					vect2 m0 = (P1-Pm)/2.0;
+					vect2 m1 = (P2-P0)/2.0;
+					vect2 P = P0*(2*t*t*t - 3*t*t +1) + m0*( t*t*t -2*t*t +t ) + P1*( -2*t*t*t + 3*t*t ) + m1*( t*t*t - t*t );
 
-					for ( double t = st ; t < 1.0 ; t+=st)
+					return P;
+				};
+
+				// マーカースプライン変換表示
+				if ( catmull_tblConnect.size() >=4 )
+				{
+					for ( unsigned int i = 0 ; i < catmull_tblConnect.size()-3 ; i++ )
 					{
-						vect2 P = catmull(t, catmul_tblVert[n], catmul_tblVert[n+1], catmul_tblVert[n+2], catmul_tblVert[n+3] );
-						gra.Line( P, Q, rgb(1,1,1));
-						Q=P;
-					}	
-						vect2 P = catmull(1, catmul_tblVert[n], catmul_tblVert[n+1], catmul_tblVert[n+2], catmul_tblVert[n+3] );
-						gra.Line( P, Q, rgb(1,1,1));
-						
+						double st = 0.1;
+
+						int n = catmull_tblConnect[i];
+						vect2 Q = catmull(0, catmul_tblVert[n], catmul_tblVert[n+1], catmul_tblVert[n+2], catmul_tblVert[n+3] );
+
+						for ( double t = st ; t < 1.0 ; t+=st)
+						{
+							vect2 P = catmull(t, catmul_tblVert[n], catmul_tblVert[n+1], catmul_tblVert[n+2], catmul_tblVert[n+3] );
+							gra.Line( P, Q, rgb(1,1,1));
+							Q=P;
+						}	
+							vect2 P = catmull(1, catmul_tblVert[n], catmul_tblVert[n+1], catmul_tblVert[n+2], catmul_tblVert[n+3] );
+							gra.Line( P, Q, rgb(1,1,1));
+							
+					}
 				}
 			}
 
+		// ベジェ２
+		{
+			auto bezier_func = [] ( vect2 P0, vect2 P1, vect2 P2, vect2 P3, double t )
+			{
+				vect2 L0=(P1-P0)*t+P0;
+				vect2 L1=(P2-P1)*t+P1;
+				vect2 L2=(P3-P2)*t+P2;
+
+				vect2 M0=(L1-L0)*t+L0;
+				vect2 M1=(L2-L1)*t+L1;
+
+				vect2 Q=(M1-M0)*t+M0;
+	
+				return Q;
+			};
+		
+		
+
+			double lp = 20;
+			double st = 1/lp;
+			double t = st;
+			vect2 v0 = bezier_tbl[0];
+			for ( int i = 1 ; i <= lp ; i++ )
+			{
+				vect2 v1 = bezier_func( bezier_tbl[0], bezier_tbl[1], bezier_tbl[2], bezier_tbl[3], t );
+				gra.Line( v0,v1, rgb(1,1,1));
+				v0=v1;
+				t+=st;
+				
+			}
+
+		
+/*
+			static	double t = 0;
+			static	bool	dir = true;
+
+			if ( dir ) t+=0.01; else t-=0.01;
+
+			if ( t >= 1.0 ) dir = !dir;
+			if ( t <= 0.0 ) dir = !dir;
+			
+			vect2 L0=(P1-P0)*t+P0;
+			vect2 L1=(P2-P1)*t+P1;
+			vect2 L2=(P3-P2)*t+P2;
+
+			vect2 M0=(L1-L0)*t+L0;
+			vect2 M1=(L2-L1)*t+L1;
+
+			vect2 Q=(M1-M0)*t+M0;
+
+			gra.Circle( L0, 2, rgb(0,1,1));
+			gra.Circle( L1, 2, rgb(0,1,1));
+			gra.Circle( L2, 2, rgb(0,1,1));
+
+			gra.Circle( M0, 3, rgb(0,0,1));
+			gra.Circle( M1, 3, rgb(0,0,1));
+
+			gra.Circle( Q, 4, rgb(1,0,0));
+
+			gra.Line( L0,L1, rgb(0,1,0));
+			gra.Line( L1,L2, rgb(0,1,0));
+*/
+			gra.Line( bezier_tbl[0],bezier_tbl[1], rgb(0,1,0));
+//			gra.Line( P1,P2, rgb(0,1,0));
+			gra.Line( bezier_tbl[2],bezier_tbl[3], rgb(0,1,0));
+
+		}
 
 
+			// キーフレーム
 			struct Keyframe
 			{
 				vect2 pos;
@@ -1291,6 +1387,13 @@ else
 
 			// figTriangle
 			{
+				int ox=384,oy=128;
+				int sx =ox-128;
+				int sy =oy-128;
+				int ex =ox+128;
+				int ey =oy+128;
+//				gra.Fill(vect2(sx,sy),vect2(ex,ey),rgb(0.3,0.3,0.3));
+
 				static int cnt = 0;
 	#if 0
 				auto func = [&]( double x0, double y0, double x1, double y1, int col)
@@ -1299,7 +1402,7 @@ else
 				};
 				figTriangle.draw( func, 256,256,rad(cnt), rgb(0,1,1) );
 	#else
-				figTriangle.draw( vect2(384,128),rad(cnt), rgb(0,1,1) );
+				figTriangle.draw( vect2(ox,oy),rad(cnt), rgb(0,1,1) );
 	#endif
 				cnt++;
 			}
