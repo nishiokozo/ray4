@@ -12,7 +12,9 @@ struct SysGra
 		int		col;
 	};
 */
-	struct	PrimTri
+
+/*
+	struct	PrimTri 
 	{
 		int	col;
 		vect2	v0;
@@ -53,6 +55,22 @@ struct SysGra
 		int	col;
 		bool	bActive;
 	};
+
+*/
+
+
+	enum EnumType
+	{
+		TypeClr,
+		TypeCircle,
+		TypePset,
+		TypeLine,
+		TypeFill,
+		TypeBox,
+		TypeTri,
+	};
+
+
 	struct
 	{
 //		BITMAPINFO	bmpInfo;
@@ -62,15 +80,15 @@ struct SysGra
 //		int			height;
 
 //		vector<PrimBezier>	tblBezier;
-		vector<PrimTri>		tblTri;
-		vector<PrimBox>		tblBox;
-		vector<PrimFill>	tblFill;
-		vector<PrimLine>	tblLine;
-		vector<PrimPset>	tblPset;
-		vector<PrimCircle>	tblCircle;
-		PrimClr				clr;
+//		vector<PrimTri>		tblTri;
+//		vector<PrimBox>		tblBox;
+	//	vector<PrimFill>	tblFill;
+	//	vector<PrimLine>	tblLine;
+//		vector<PrimPset>	tblPset;
+//		vector<PrimCircle>	tblCircle;
+//		PrimClr				clr;
 
-//		vector<PrimVect2>	tblVect2;
+		vector<vect2>		tblVect2;
 
 
 

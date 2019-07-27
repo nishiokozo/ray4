@@ -171,6 +171,8 @@ void  SysGra::OnPaint()
 		HDC hDc = g.hdcBackbuffer;
 
 		// clear background
+/*
+if(0)
 		if ( m.clr.bActive )
 		{
 			HBRUSH hBrush  = CreateSolidBrush(m.clr.col);
@@ -183,6 +185,7 @@ void  SysGra::OnPaint()
 
 //			m.clr.bActive = false;
 		}
+*/
 
 		// bmp
 		{
@@ -191,208 +194,87 @@ void  SysGra::OnPaint()
 		}
 
 		
-		//circle
+		for ( unsigned int i=0 ; i < m.tblVect2.size() ; )
 		{
+			vect2 attr = m.tblVect2[i++];
+			EnumType	type	= (EnumType)attr.x;
+			int			col		= attr.y;
 
-			for ( unsigned int i=0 ; i < m.tblCircle.size() ; i++ )
+			HPEN hPen = CreatePen(PS_SOLID, 1, col);
+			HPEN hOldPen = SelectPen(hDc, hPen);
+			HBRUSH hBrush = CreateSolidBrush( col );
+			HBRUSH hOldBrush = SelectBrush(hDc, hBrush);
+
+			switch ( type )
 			{
+				case TypeClr:
+					PatBlt( hDc , 0 , 0 ,g.width, g.height , PATCOPY);
+					break;
 
-				int x0 = m.tblCircle[i].v0.x;
-				int y0 = m.tblCircle[i].v0.y;
-				int x1 = m.tblCircle[i].v1.x;
-				int y1 = m.tblCircle[i].v1.y;
-				int	col = m.tblCircle[i].col;
+				case TypeCircle:
+					{
+						vect2 v0 = m.tblVect2[i++];
+						vect2 v1 = m.tblVect2[i++];
+						Ellipse(hDc , v0.x, v0.y, v1.x, v1.y);
+					}
+					break;
 
-				HPEN hPen = CreatePen(PS_SOLID, 1, col );
-				SelectObject(hDc, hPen);
-				HBRUSH hBrush  = CreateSolidBrush(col);
-				SelectObject(hDc, hPen);
+				case TypePset:
+					{
+						vect2 v0 = m.tblVect2[i++];
+						SetPixel( hDc, v0.x, v0.y, col );
+					}
+					break;
 
-	//				SetPixel( hDc, x0, y0, col );
+				case TypeFill:
+					{
+						vect2 v0 = m.tblVect2[i++];
+						vect2 v1 = m.tblVect2[i++];
+						Rectangle(hDc , v0.x, v0.y, v1.x, v1.y); 
+					}
+					break;
+				
+				case TypeLine: 
+					{
+						vect2 v0 = m.tblVect2[i++];
+						vect2 v1 = m.tblVect2[i++];
+						MoveToEx(hDc, v0.x, v0.y, NULL); 
+						LineTo(hDc, v1.x, v1.y); 
+					}
+					break;
 
-				Ellipse(hDc , x0, y0, x1, y1);
+				case TypeBox:
+					{
+						vect2 v0 = m.tblVect2[i++];
+						vect2 v1 = m.tblVect2[i++];
+						MoveToEx(hDc, v0.x, v0.y, NULL);
+						LineTo(hDc, v1.x, v0.y);
+						LineTo(hDc, v1.x, v1.y);
+						LineTo(hDc, v0.x, v1.y);
+						LineTo(hDc, v0.x, v0.y);
+					}
+					break;
 
-				DeleteObject(hBrush);
-				DeleteObject(hPen);
+				case TypeTri:
+					{	
+						vect2 v0 = m.tblVect2[i++];
+						vect2 v1 = m.tblVect2[i++];
+						vect2 v2 = m.tblVect2[i++];
+						POINT	tblPoint[3]={{(int)v0.x,(int)v0.y} , {(int)v1.x,(int)v1.y} , {(int)v2.x,(int)v2.y} };
+						INT	tblNum[]={3};
+						PolyPolygon( hDc, tblPoint, tblNum, 1 );;
+					}
+					break;
+
 			}
-			
-//			m.tblCircle.clear();
+
+			SelectBrush(hDc, hOldBrush);
+			DeleteObject(hBrush);
+
+			SelectPen(hDc, hOldPen);
+			DeleteObject(hPen);
 		}
 
-		//pset
-		{
-
-			for ( unsigned int i=0 ; i < m.tblPset.size() ; i++ )
-			{
-				HPEN hPen;
-
-				int x0 = m.tblPset[i].v.x;
-				int y0 = m.tblPset[i].v.y;
-				int	col = m.tblPset[i].col;
-
-				hPen = CreatePen(PS_SOLID, 1, col );
-				SelectObject(hDc, hPen);
-
-				SetPixel( hDc, x0, y0, col );
-
-				DeleteObject(hPen);
-			}
-			
-//			m.tblPset.clear();
-		}
-
-		//box
-		{
-
-			for ( unsigned int i=0 ; i < m.tblBox.size() ; i++ )
-			{
-
-				int x0 = m.tblBox[i].v0.x;
-				int y0 = m.tblBox[i].v0.y;
-				int x1 = m.tblBox[i].v1.x;
-				int y1 = m.tblBox[i].v1.y;
-				int	col = m.tblBox[i].col;
-
-				HPEN hPen = CreatePen(PS_SOLID, 1, col );
-				SelectObject(hDc, hPen);
-
-				MoveToEx(hDc, x0, y0, NULL);
-				LineTo(hDc, x1, y0);
-				LineTo(hDc, x1, y1);
-				LineTo(hDc, x0, y1);
-				LineTo(hDc, x0, y0);
-
-				DeleteObject(hPen);
-			}
-		}
-
-		//fill
-		{
-
-			for ( unsigned int i=0 ; i < m.tblFill.size() ; i++ )
-			{
-
-				int x0 = m.tblFill[i].v0.x;
-				int y0 = m.tblFill[i].v0.y;
-				int x1 = m.tblFill[i].v1.x;
-				int y1 = m.tblFill[i].v1.y;
-				int	col = m.tblFill[i].col;
-/*
-				HPEN hPen = CreatePen(PS_SOLID, 1, col );
-				SelectObject(hDc, hPen);
-				HBRUSH hBrush  = CreateSolidBrush(col);
-
-//				MoveToEx(hDc, x0, y0, NULL);
-//				LineTo(hDc, x1, y0);
-//				LineTo(hDc, x1, y1);
-//				LineTo(hDc, x0, y1);
-//				LineTo(hDc, x0, y0);
-				Rectangle(hDc , x0, y0, x1, y1);
-				DeleteObject(hBrush);
-
-				DeleteObject(hPen);
-*/
-				HPEN hPen = CreatePen(PS_SOLID, 2, col);
-				HPEN hOldPen = SelectPen(hDc, hPen);
-
-				HBRUSH hBrush = CreateSolidBrush( col );
-				HBRUSH hOldBrush = SelectBrush(hDc, hBrush);
-
-				Rectangle(hDc , x0, y0, x1, y1);
-
-				SelectBrush(hDc, hOldBrush);
-				DeleteObject(hBrush);
-
-				SelectPen(hDc, hOldPen);
-				DeleteObject(hPen);
-			}
-		}
-
-		//line
-		{
-
-			for ( unsigned int i=0 ; i < m.tblLine.size() ; i++ )
-			{
-
-				int x0 = m.tblLine[i].v0.x;
-				int y0 = m.tblLine[i].v0.y;
-				int x1 = m.tblLine[i].v1.x;
-				int y1 = m.tblLine[i].v1.y;
-				int	col = m.tblLine[i].col;
-
-				HPEN hPen = CreatePen(PS_SOLID, 1, col );
-				SelectObject(hDc, hPen);
-
-				MoveToEx(hDc, x0, y0, NULL);
-				LineTo(hDc, x1, y1);
-
-				DeleteObject(hPen);
-			}
-//			m.tblLine.clear();
-		}
-
-		//Tri
-		{
-			for ( unsigned int i=0 ; i < m.tblTri.size() ; i++ )
-			{	
-				int x0 = m.tblTri[i].v0.x;
-				int y0 = m.tblTri[i].v0.y;
-				int x1 = m.tblTri[i].v1.x;
-				int y1 = m.tblTri[i].v1.y;
-				int x2 = m.tblTri[i].v2.x;
-				int y2 = m.tblTri[i].v2.y;
-				int	col = m.tblTri[i].col;
-
-				HPEN hPen = CreatePen(PS_SOLID, 1, col );
-				HBRUSH hBrush  = CreateSolidBrush(col);
-				SelectObject(hDc, hPen);
-				SelectObject(hDc, hBrush);
-
-				POINT	tblPoint[3]={{x0,y0},{x1,y1},{x2,y2}};
-				INT	tblNum[]={3};
-
-				PolyPolygon( hDc, tblPoint, tblNum, 1 );
-
-				DeleteObject(hBrush);
-				DeleteObject(hPen);
-			}
-//			m.tblTri.clear();
-		}
-
-
-/*		//Bezier
-		{
-			for ( unsigned int i=0 ; i < m.tblBezier.size() ; i++ )
-			{	
-				int x0 = m.tblBezier[i].v0.x;
-				int y0 = m.tblBezier[i].v0.y;
-				int x1 = m.tblBezier[i].v1.x;
-				int y1 = m.tblBezier[i].v1.y;
-				int x2 = m.tblBezier[i].v2.x;
-				int y2 = m.tblBezier[i].v2.y;
-				int x3 = m.tblBezier[i].v3.x;
-				int y3 = m.tblBezier[i].v3.y;
-				int	col = m.tblBezier[i].col;
-
-				HPEN hPen = CreatePen(PS_SOLID, 1, col );
-				HBRUSH hBrush  = CreateSolidBrush(col);
-				SelectObject(hDc, hPen);
-				SelectObject(hDc, hBrush);
-
-				POINT	tblPoint[3]={{x1,y1},{x2,y2},{x3,y3}};
-
-				MoveToEx(hDc , x0 , y0 , NULL);
-				PolyBezierTo(hDc , tblPoint , 3);
-
-				DeleteObject(hBrush);
-				DeleteObject(hPen);
-			}
-//			m.tblBezier.clear();
-
-			static POINT pt[3];
-
-		}
-*/
 
 	}
 
@@ -458,68 +340,90 @@ void SysGra::Update()
 //------------------------------------------------------------------------------
 {
 //		m.tblBezier.clear();
-		m.tblTri.clear();
-		m.tblBox.clear();
-		m.tblFill.clear();
-		m.tblLine.clear();
-		m.tblPset.clear();
-		m.tblCircle.clear();
-		m.clr.bActive = false;
+//		m.tblTri.clear();
+//		m.tblBox.clear();
+//		m.tblFill.clear();
+//		m.tblLine.clear();
+//		m.tblPset.clear();
+//		m.tblCircle.clear();
+//		m.clr.bActive = false;
+
+		m.tblVect2.clear();
 }
 //------------------------------------------------------------------------------
 void SysGra::Clr( int col)
 //------------------------------------------------------------------------------
 {
-	(*this).m.clr.bActive = true;
-	(*this).m.clr.col = col;
+//	(*this).m.clr.bActive = true;
+//	(*this).m.clr.col = col;
+
+	m.tblVect2.emplace_back( TypeClr, col );
 }
 //------------------------------------------------------------------------------
 void SysGra::Circle( vect2 v, double r, int col )
 //------------------------------------------------------------------------------
 {
-	PrimCircle a = {col,vect2(v.x-r, v.y-r), vect2(v.x+r, v.y+r)};
-	
-	(*this).m.tblCircle.push_back( a );
+//	PrimCircle a = {col,vect2(v.x-r, v.y-r), vect2(v.x+r, v.y+r)};
+//	(*this).m.tblCircle.push_back( a );
+	m.tblVect2.emplace_back( TypeCircle, col );
+	m.tblVect2.emplace_back( v.x-r, v.y-r );
+	m.tblVect2.emplace_back( v.x+r, v.y+r );
+
 }
 //------------------------------------------------------------------------------
-void SysGra::Pset( vect2 v, int col )
+void SysGra::Pset( vect2 v0, int col )
 //------------------------------------------------------------------------------
 {
-	PrimPset a = {col,v};
-	
-	(*this).m.tblPset.push_back( a );
+//	PrimPset a = {col,v};
+//	(*this).m.tblPset.push_back( a );
+
+	m.tblVect2.emplace_back( TypePset, col );
+	m.tblVect2.emplace_back( v0 );
 }
 //------------------------------------------------------------------------------
 void SysGra::Box( vect2 v0, vect2 v1,int col)
 //------------------------------------------------------------------------------
 {
-	PrimBox a = {col,v0,v1};
-	
-	(*this).m.tblBox.push_back( a );
+//	PrimBox a = {col,v0,v1};
+//	(*this).m.tblBox.push_back( a );
+	m.tblVect2.emplace_back( TypeBox, col );
+	m.tblVect2.emplace_back( v0 );
+	m.tblVect2.emplace_back( v1 );
 }
 //------------------------------------------------------------------------------
 void SysGra::Fill( vect2 v0, vect2 v1,int col)
 //------------------------------------------------------------------------------
 {
-	PrimFill a = {col,v0,v1};
-	
-	(*this).m.tblFill.push_back( a );
+//	PrimFill a = {col,v0,v1};
+//	(*this).m.tblFill.push_back( a );
+
+	m.tblVect2.emplace_back( TypeFill, col );
+	m.tblVect2.emplace_back( v0 );
+	m.tblVect2.emplace_back( v1 );
 }
 //------------------------------------------------------------------------------
 void SysGra::Line( vect2 v0, vect2 v1,int col)
 //------------------------------------------------------------------------------
 {
-	PrimLine a = {col,v0,v1};
-	
-	(*this).m.tblLine.push_back( a );
+//	PrimLine a = {col,v0,v1};
+//	(*this).m.tblLine.push_back( a );
+
+	m.tblVect2.emplace_back( TypeLine, col );
+	m.tblVect2.emplace_back( v0 );
+	m.tblVect2.emplace_back( v1 );
+
 }
 //------------------------------------------------------------------------------
 void SysGra::Tri( vect2 v0, vect2 v1, vect2 v2, int col)
 //------------------------------------------------------------------------------
 {
-	PrimTri a = {col,v0,v1,v2};
-	
-	(*this).m.tblTri.push_back( a );
+//	PrimTri a = {col,v0,v1,v2};
+//		(*this).m.tblTri.push_back( a );
+	m.tblVect2.emplace_back( TypeTri, col );
+	m.tblVect2.emplace_back( v0 );
+	m.tblVect2.emplace_back( v1 );
+	m.tblVect2.emplace_back( v2 );
+
 }
 /*
 //------------------------------------------------------------------------------
