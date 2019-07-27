@@ -17,41 +17,41 @@ struct SysGra
 		vect2	v0;
 		vect2	v1;
 		vect2	v2;
-		int		col;
+		vect2	col;
 	};
 	struct	PrimBox
 	{
 		vect2	v0;
 		vect2	v1;
-		int		col;
+		vect2	col;
 	};
 	struct	PrimFill
 	{
 		vect2	v0;
 		vect2	v1;
-		int		col;
+		vect2	col;
 	};
 	struct	PrimLine
 	{
 		vect2	v0;
 		vect2	v1;
-		int		col;
+		vect2	col;
 	};
 	struct	PrimPset
 	{
 		vect2	v;
-		int		col;
+		vect2	col;
 	};
 	struct	PrimCircle
 	{
 		vect2	v0;
 		vect2	v1;
-		int		col;
+		vect2	col;
 	};
 	struct	PrimClr
 	{
 		bool	bActive;
-		int		col;
+		vect2	col;
 	};
 	struct
 	{

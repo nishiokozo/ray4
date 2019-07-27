@@ -18,43 +18,43 @@ extern int	rgb( double r, double g , double b );
 const static double pi = 3.1415926535897932384626433832795;
 struct	I2
 {
-	union { int x; int n0;	int p; };
-	union { int y; int n1;	int n; };
+	union { int x, n0, p; };
+	union { int y, n1, n; };
 	I2(){};
 	I2( int _x, int _y ) : x(_x), y(_y){}
 };
 
 struct	I3
 {
-	union { int x; int n0;	int r; };
-	union { int y; int n1;	int g; };
-	union { int z; int n2;	int b; };
+	union { int x, n0, r; };
+	union { int y, n1, g; };
+	union { int z, n2, b; };
 	I3(){};
 	I3( int _x, int _y, int _z ) : x(_x), y(_y), z(_z){}
 };
 
 struct	I4
 {
-	union { int x; int n0;	int r; };
-	union { int y; int n1;	int g; };
-	union { int z; int n2;	int b; };
-	union { int w; int n3;	int a; };
+	union { int x, n0, r; };
+	union { int y, n1, g; };
+	union { int z, n2, b; };
+	union { int w, n3, a; };
 	I4(){};
 	I4( int _x, int _y, int _z , int _w ) : x(_x), y(_y), z(_z), w(_w){}
 };
 
 struct	D2
 {
-	union { double x;	double u; };
-	union { double y;	double v; };
+	union { double x,u; };
+	union { double y,v; };
 	D2( double _x, double _y ) : x(_x), y(_y){}
 };
 
 struct	D3
 {
-	union { double x;	double r; };
-	union { double y;	double g; };
-	union { double z;	double b; };
+	union { double x,r;	};
+	union { double y,g;	};
+	union { double z,b;	};
 	D3(){};
 	D3( D2 v, double _z ) : x(v.x), y(v.y), z(_z){}
 	D3( double _x, double _y, double _z ) : x(_x), y(_y), z(_z){}
@@ -62,10 +62,10 @@ struct	D3
 
 struct	D4
 {
-	union { double x;	double u;	double r; };
-	union { double y;	double v;	double g; };
-	union { double z;	double s;	double b; };
-	union { double w;	double t;	double a; };
+	union { double x, u, r; };
+	union { double y, v, g; };
+	union { double z, s, b; };
+	union { double w, t, a; };
 	D4(){};
 	D4( double _x, double _y, double _z, double _w ) : x(_x), y(_y), z(_z), w(_w){}
 	D4( D2 v, double _z, double _w ) : x(v.x), y(v.y), z(_z), w(_w){}
@@ -87,8 +87,8 @@ class vect2
 {
 public:
 //	double x,y;
-	union { double x;	int32_t ix[2];};
-	union { double y;	int32_t iy[2];};
+	union { double x,h;};
+	union { double y,l;};
 
 	vect2() :x(0),y(0){}
 	vect2( double f ) :x(f),y(f){}

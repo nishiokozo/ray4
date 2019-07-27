@@ -173,7 +173,7 @@ void  SysGra::OnPaint()
 		// clear background
 		if ( m.clr.bActive )
 		{
-			HBRUSH hBrush  = CreateSolidBrush(m.clr.col);
+			HBRUSH hBrush  = CreateSolidBrush(m.clr.col.l);
 			SelectObject( hDc , hBrush);
 
 //			PatBlt( hDc , 0 , 0 ,g.rect.right, g.rect.bottom , PATCOPY);
@@ -201,7 +201,7 @@ void  SysGra::OnPaint()
 				int y0 = m.tblCircle[i].v0.y;
 				int x1 = m.tblCircle[i].v1.x;
 				int y1 = m.tblCircle[i].v1.y;
-				int	col = m.tblCircle[i].col;
+				int	col = m.tblCircle[i].col.l;
 
 				HPEN hPen = CreatePen(PS_SOLID, 1, col );
 				SelectObject(hDc, hPen);
@@ -228,7 +228,7 @@ void  SysGra::OnPaint()
 
 				int x0 = m.tblPset[i].v.x;
 				int y0 = m.tblPset[i].v.y;
-				int	col = m.tblPset[i].col;
+				int	col = m.tblPset[i].col.l;
 
 				hPen = CreatePen(PS_SOLID, 1, col );
 				SelectObject(hDc, hPen);
@@ -251,7 +251,7 @@ void  SysGra::OnPaint()
 				int y0 = m.tblBox[i].v0.y;
 				int x1 = m.tblBox[i].v1.x;
 				int y1 = m.tblBox[i].v1.y;
-				int	col = m.tblBox[i].col;
+				int	col = m.tblBox[i].col.l;
 
 				HPEN hPen = CreatePen(PS_SOLID, 1, col );
 				SelectObject(hDc, hPen);
@@ -276,7 +276,7 @@ void  SysGra::OnPaint()
 				int y0 = m.tblFill[i].v0.y;
 				int x1 = m.tblFill[i].v1.x;
 				int y1 = m.tblFill[i].v1.y;
-				int	col = m.tblFill[i].col;
+				int	col = m.tblFill[i].col.l;
 /*
 				HPEN hPen = CreatePen(PS_SOLID, 1, col );
 				SelectObject(hDc, hPen);
@@ -318,7 +318,7 @@ void  SysGra::OnPaint()
 				int y0 = m.tblLine[i].v0.y;
 				int x1 = m.tblLine[i].v1.x;
 				int y1 = m.tblLine[i].v1.y;
-				int	col = m.tblLine[i].col;
+				int	col = m.tblLine[i].col.l;
 
 				HPEN hPen = CreatePen(PS_SOLID, 1, col );
 				SelectObject(hDc, hPen);
@@ -341,7 +341,7 @@ void  SysGra::OnPaint()
 				int y1 = m.tblTri[i].v1.y;
 				int x2 = m.tblTri[i].v2.x;
 				int y2 = m.tblTri[i].v2.y;
-				int	col = m.tblTri[i].col;
+				int	col = m.tblTri[i].col.l;
 
 				HPEN hPen = CreatePen(PS_SOLID, 1, col );
 				HBRUSH hBrush  = CreateSolidBrush(col);
@@ -471,13 +471,13 @@ void SysGra::Clr( int col)
 //------------------------------------------------------------------------------
 {
 	(*this).m.clr.bActive = true;
-	(*this).m.clr.col = col;
+	(*this).m.clr.col = vect2(0,col);
 }
 //------------------------------------------------------------------------------
 void SysGra::Circle( vect2 v, double r, int col )
 //------------------------------------------------------------------------------
 {
-	PrimCircle a = {vect2(v.x-r, v.y-r), vect2(v.x+r, v.y+r),col};
+	PrimCircle a = {vect2(v.x-r, v.y-r), vect2(v.x+r, v.y+r),vect2(0,col)};
 	
 	(*this).m.tblCircle.push_back( a );
 }
@@ -485,7 +485,7 @@ void SysGra::Circle( vect2 v, double r, int col )
 void SysGra::Pset( vect2 v, int col )
 //------------------------------------------------------------------------------
 {
-	PrimPset a = {v,col};
+	PrimPset a = {v,vect2(0,col)};
 	
 	(*this).m.tblPset.push_back( a );
 }
@@ -493,7 +493,7 @@ void SysGra::Pset( vect2 v, int col )
 void SysGra::Box( vect2 v0, vect2 v1,int col)
 //------------------------------------------------------------------------------
 {
-	PrimBox a = {v0,v1,col};
+	PrimBox a = {v0,v1,vect2(0,col)};
 	
 	(*this).m.tblBox.push_back( a );
 }
@@ -501,7 +501,7 @@ void SysGra::Box( vect2 v0, vect2 v1,int col)
 void SysGra::Fill( vect2 v0, vect2 v1,int col)
 //------------------------------------------------------------------------------
 {
-	PrimFill a = {v0,v1,col};
+	PrimFill a = {v0,v1,vect2(0,col)};
 	
 	(*this).m.tblFill.push_back( a );
 }
@@ -509,7 +509,7 @@ void SysGra::Fill( vect2 v0, vect2 v1,int col)
 void SysGra::Line( vect2 v0, vect2 v1,int col)
 //------------------------------------------------------------------------------
 {
-	PrimLine a = {v0,v1,col};
+	PrimLine a = {v0,v1,vect2(0,col)};
 	
 	(*this).m.tblLine.push_back( a );
 }
@@ -517,7 +517,7 @@ void SysGra::Line( vect2 v0, vect2 v1,int col)
 void SysGra::Tri( vect2 v0, vect2 v1, vect2 v2, int col)
 //------------------------------------------------------------------------------
 {
-	PrimTri a = {v0,v1,v2,col};
+	PrimTri a = {v0,v1,v2,vect2(0,col)};
 	
 	(*this).m.tblTri.push_back( a );
 }
