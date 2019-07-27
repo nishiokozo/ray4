@@ -4,18 +4,18 @@
 #include <cmath>
 #ifndef GEOM_H
 #define	GEOM_H
-typedef	float	MAT4[4][4];
+typedef	double	MAT4[4][4];
 
-void	mat4_rotateX( float* m, float th );
-void	mat4_rotateY( float* m, float th );
-void	mat4_rotateZ( float* m, float th );
+void	mat4_rotateX( double* m, double th );
+void	mat4_rotateY( double* m, double th );
+void	mat4_rotateZ( double* m, double th );
 
-extern int	rgb( float r, float g , float b );
+extern int	rgb( double r, double g , double b );
 
 
 //#define	pi	3.141592654
-//const static float pi = 3.141592654;
-const static float pi = 3.1415926535897932384626433832795;
+//const static double pi = 3.141592654;
+const static double pi = 3.1415926535897932384626433832795;
 struct	I2
 {
 	union { int x, n0, p; };
@@ -45,31 +45,31 @@ struct	I4
 
 struct	D2
 {
-	union { float x,u; };
-	union { float y,v; };
-	D2( float _x, float _y ) : x(_x), y(_y){}
+	union { double x,u; };
+	union { double y,v; };
+	D2( double _x, double _y ) : x(_x), y(_y){}
 };
 
 struct	D3
 {
-	union { float x,r;	};
-	union { float y,g;	};
-	union { float z,b;	};
+	union { double x,r;	};
+	union { double y,g;	};
+	union { double z,b;	};
 	D3(){};
-	D3( D2 v, float _z ) : x(v.x), y(v.y), z(_z){}
-	D3( float _x, float _y, float _z ) : x(_x), y(_y), z(_z){}
+	D3( D2 v, double _z ) : x(v.x), y(v.y), z(_z){}
+	D3( double _x, double _y, double _z ) : x(_x), y(_y), z(_z){}
 };
 
 struct	D4
 {
-	union { float x, u, r; };
-	union { float y, v, g; };
-	union { float z, s, b; };
-	union { float w, t, a; };
+	union { double x, u, r; };
+	union { double y, v, g; };
+	union { double z, s, b; };
+	union { double w, t, a; };
 	D4(){};
-	D4( float _x, float _y, float _z, float _w ) : x(_x), y(_y), z(_z), w(_w){}
-	D4( D2 v, float _z, float _w ) : x(v.x), y(v.y), z(_z), w(_w){}
-	D4( D3 v, float _w ) : x(v.x), y(v.y), z(v.z), w(_w){}
+	D4( double _x, double _y, double _z, double _w ) : x(_x), y(_y), z(_z), w(_w){}
+	D4( D2 v, double _z, double _w ) : x(v.x), y(v.y), z(_z), w(_w){}
+	D4( D3 v, double _w ) : x(v.x), y(v.y), z(v.z), w(_w){}
 };
 
 struct	ivect2 : public I2
@@ -86,17 +86,17 @@ struct	ivect2 : public I2
 class vect2
 {
 public:
-//	float x,y;
-	union { float x,h;};
-	union { float y,l;};
+//	double x,y;
+	union { double x,h;};
+	union { double y,l;};
 
 	vect2() :x(0),y(0){}
-	vect2( float f ) :x(f),y(f){}
-	vect2( float _x, float _y) :x(_x),y(_y){}
+	vect2( double f ) :x(f),y(f){}
+	vect2( double _x, double _y) :x(_x),y(_y){}
 
 	vect2 abs() { return vect2( std::abs(x) , std::abs(y) ); }
 	vect2 normalize() { return (*this)/length(); }
-	float length() { return sqrt( x*x + y*y ); }
+	double length() { return sqrt( x*x + y*y ); }
 
 	void operator= ( vect2 v )  { x =  v.x; y =  v.y; }
 	void operator*=( vect2 v )  { x *= v.x; y *= v.y; }
@@ -112,21 +112,21 @@ public:
 	vect2 operator-() const { return vect2( -x, -y ); } 
 	vect2 operator+() const { return vect2(  x,  y ); } 
 
-	void operator= ( float f ) { x =  f  ; y =  f  ; }
-	void operator*=( float f ) { x *= f  ; y *= f  ; }
-	void operator/=( float f ) { x /= f  ; y /= f  ; }
-	void operator+=( float f ) { x += f  ; y += f  ; }
-	void operator-=( float f ) { x -= f  ; y -= f  ; }
+	void operator= ( double f ) { x =  f  ; y =  f  ; }
+	void operator*=( double f ) { x *= f  ; y *= f  ; }
+	void operator/=( double f ) { x /= f  ; y /= f  ; }
+	void operator+=( double f ) { x += f  ; y += f  ; }
+	void operator-=( double f ) { x -= f  ; y -= f  ; }
 
-	vect2 operator*( float f ) const { return vect2( x * f, y * f ); } 
-	vect2 operator/( float f ) const { return vect2( x / f, y / f ); } 
-	vect2 operator+( float f ) const { return vect2( x + f, y + f ); } 
-	vect2 operator=( float f ) const { return vect2( x - f, y - f ); } 
+	vect2 operator*( double f ) const { return vect2( x * f, y * f ); } 
+	vect2 operator/( double f ) const { return vect2( x / f, y / f ); } 
+	vect2 operator+( double f ) const { return vect2( x + f, y + f ); } 
+	vect2 operator=( double f ) const { return vect2( x - f, y - f ); } 
 
-	friend	vect2 operator*( float f, vect2 v )  { return vect2( f * v.x, f * v.y ); }
-	friend	vect2 operator/( float f, vect2 v )  { return vect2( f / v.x, f / v.y ); }
-	friend	vect2 operator+( float f, vect2 v )  { return vect2( f + v.x, f + v.y ); }
-	friend	vect2 operator-( float f, vect2 v )  { return vect2( f - v.x, f - v.y ); }
+	friend	vect2 operator*( double f, vect2 v )  { return vect2( f * v.x, f * v.y ); }
+	friend	vect2 operator/( double f, vect2 v )  { return vect2( f / v.x, f / v.y ); }
+	friend	vect2 operator+( double f, vect2 v )  { return vect2( f + v.x, f + v.y ); }
+	friend	vect2 operator-( double f, vect2 v )  { return vect2( f - v.x, f - v.y ); }
 
 	void dump()
 	{
@@ -138,13 +138,13 @@ public:
 class vect3
 {
 public:
-	union { float	x;	float	r;	 };
-	union { float	y;	float	g;	 }; 
-	union {	float	z;	float  b;   };
+	union { double	x;	double	r;	 };
+	union { double	y;	double	g;	 }; 
+	union {	double	z;	double  b;   };
 
 	vect3(){};
-	vect3( float a ) { x = a; y = a; z = a; };
-	vect3( float _x, float _y, float _z ) { x = _x; y = _y; z = _z; };
+	vect3( double a ) { x = a; y = a; z = a; };
+	vect3( double _x, double _y, double _z ) { x = _x; y = _y; z = _z; };
 
 	vect3 operator*=( vect3 v ) { x *= v.x; y *= v.y; z *= v.z;  return *this; }
 	vect3 operator/=( vect3 v ) { x /= v.x; y /= v.y; z /= v.z;  return *this; }
@@ -159,11 +159,11 @@ public:
 	vect3 operator-() const { vect3	ret; ret.x = -x; ret.y = -y; ret.z = -z; return ret; }
 	vect3 operator+() const { vect3	ret; ret.x =  x; ret.y =  y; ret.z =  z; return ret; }
 
-	vect3 operator*( float f ) const { vect3	ret; ret.x = x * f; ret.y = y * f; ret.z = z * f; return ret; }
-	vect3 operator/( float f ) const { float a = 1.0f / f; vect3	ret; ret.x = x * a; ret.y = y * a; ret.z = z * a; return ret; }
+	vect3 operator*( double f ) const { vect3	ret; ret.x = x * f; ret.y = y * f; ret.z = z * f; return ret; }
+	vect3 operator/( double f ) const { double a = 1.0f / f; vect3	ret; ret.x = x * a; ret.y = y * a; ret.z = z * a; return ret; }
 
-	friend	vect3 operator*( float f, vect3 v )  { vect3	ret; ret.x = f * v.x; ret.y = f * v.y; ret.z = f * v.z;  return ret; }
-	friend	vect3 operator+( float f, vect3 v )  { vect3	ret; ret.x = f + v.x; ret.y = f + v.y; ret.z = f + v.z;  return ret; }
+	friend	vect3 operator*( double f, vect3 v )  { vect3	ret; ret.x = f * v.x; ret.y = f * v.y; ret.z = f * v.z;  return ret; }
+	friend	vect3 operator+( double f, vect3 v )  { vect3	ret; ret.x = f + v.x; ret.y = f + v.y; ret.z = f + v.z;  return ret; }
 
 
 	void Print()
@@ -180,16 +180,16 @@ public:
 
 
 
-extern float	vect3_dotproduct( float a[3], float b[3] );
-extern void		vect3_crossproduct( float v[3], float a[3], float b[3] );
+extern double	vect3_dotproduct( double a[3], double b[3] );
+extern void		vect3_crossproduct( double v[3], double a[3], double b[3] );
 extern vect3	       cross( vect3 a, vect3 b );
-extern void		vect3_normalize( float v[3] );
+extern void		vect3_normalize( double v[3] );
 extern void		vect3_normalize( vect3* v );
-extern float	vect3_length( float v[3] );
-extern void		vec4_multiplyMatrix( float v[4], float m[16], float a[4] );
-extern float	dot( vect3 a, vect3 b );
+extern double	vect3_length( double v[3] );
+extern void		vec4_multiplyMatrix( double v[4], double m[16], double a[4] );
+extern double	dot( vect3 a, vect3 b );
 
-extern vect3 refract( vect3 a, vect3 b, float n );
+extern vect3 refract( vect3 a, vect3 b, double n );
 extern vect3 reflect( vect3 I, vect3 N );
 
 
@@ -198,17 +198,17 @@ extern vect2		max( vect2 a, vect2 b );
 extern vect3		min( vect3 a, vect3 b );
 extern vect3		max( vect3 a, vect3 b );
 
-extern float	max( float a, float b );
-extern vect3		max( const float a, vect3 b );
-extern vect3		max( vect3 b, float a );
-extern float	min( float a, float b );
-extern vect3		min( float a, vect3 b );
-extern vect3		min( vect3 b, float a );
+extern double	max( double a, double b );
+extern vect3		max( const double a, vect3 b );
+extern vect3		max( vect3 b, double a );
+extern double	min( double a, double b );
+extern vect3		min( double a, vect3 b );
+extern vect3		min( vect3 b, double a );
 ///
-extern vect3	mix( float f, vect3 a, vect3 b );
-extern float	mod( float a, float b );
-extern float	length( vect3 a );
-extern float	length( vect3 a, vect3 b );
+extern vect3	mix( double f, vect3 a, vect3 b );
+extern double	mod( double a, double b );
+extern double	length( vect3 a );
+extern double	length( vect3 a, vect3 b );
 extern vect3	normalizXe( vect3 a );
 extern vect3	normalize( vect3 a );
 
@@ -234,8 +234,8 @@ extern vect3	normalize( vect3 a );
 
 //#define	rad(n)	((n)*M_PI/180.0f)
 //#define	deg(n)	((n)*180.0f/M_PI)
-extern	float rad( float n );
-extern	float deg( float n );
+extern	double rad( double n );
+extern	double deg( double n );
 
 
 //---
@@ -244,7 +244,7 @@ class	mat44
 public:
 	union
 	{
-		float	m_array[16];
+		double	m_array[16];
 		MAT4	m;
 	};
 	mat44()
@@ -257,10 +257,10 @@ public:
 	}
 
 	mat44(
-		float m00, float m01, float m02, float m03, 
-		float m10, float m11, float m12, float m13, 
-		float m20, float m21, float m22, float m23, 
-		float m30, float m31, float m32, float m33 
+		double m00, double m01, double m02, double m03, 
+		double m10, double m11, double m12, double m13, 
+		double m20, double m21, double m22, double m23, 
+		double m30, double m31, double m32, double m33 
 	)
 	{
 		//	m[行][列]
@@ -328,7 +328,7 @@ public:
 		return *this;
 	}
 
-	float* GetArray(){ return m_array; };
+	double* GetArray(){ return m_array; };
 
 	void identity()
 	{
@@ -338,28 +338,28 @@ public:
 		m[3][0] = 0.0f;	m[3][1] = 0.0f;	m[3][2] = 0.0f;	m[3][3] = 1.0f;
 	}
 
-	void setRotateX( float rx )
+	void setRotateX( double rx )
 	{
-		float c=cos(rx);
-		float s=sin(rx);
+		double c=cos(rx);
+		double s=sin(rx);
 		m[0][0] = 1.0f;	m[0][1] = 0.0f;	m[0][2] = 0.0f;	m[0][3] = 0.0f;
 		m[1][0] = 0.0f;	m[1][1] = c;	m[1][2] = -s;	m[1][3] = 0.0f;
 		m[2][0] = 0.0f;	m[2][1] = s;	m[2][2] = c;	m[2][3] = 0.0f;
 		m[3][0] = 0.0f;	m[3][1] = 0.0f;	m[3][2] = 0.0f;	m[3][3] = 1.0f;
 	}
-	void setRotateY( float ry )
+	void setRotateY( double ry )
 	{
-		float c=cos(ry);
-		float s=sin(ry);
+		double c=cos(ry);
+		double s=sin(ry);
 		m[0][0] = c;	m[0][1] = 0.0f;	m[0][2] = s;	m[0][3] = 0.0f;
 		m[1][0] = 0.0f;	m[1][1] = 1.0f;	m[1][2] = 0.0;	m[1][3] = 0.0f;
 		m[2][0] = -s;	m[2][1] = 0.0;	m[2][2] = c;	m[2][3] = 0.0f;
 		m[3][0] = 0.0f;	m[3][1] = 0.0f;	m[3][2] = 0.0f;	m[3][3] = 1.0f;
 	}
-	void setRotateZ( float rz )
+	void setRotateZ( double rz )
 	{
-		float c=cos(rz);
-		float s=sin(rz);
+		double c=cos(rz);
+		double s=sin(rz);
 		m[0][0] = c;	m[0][1] = -s;	m[0][2] = 0.0f;	m[0][3] = 0.0f;
 		m[1][0] = s;	m[1][1] =  c;	m[1][2] = 0.0f;	m[1][3] = 0.0f;
 		m[2][0] = 0.0f;	m[2][1] = 0.0f;	m[2][2] = 1.0f;	m[2][3] = 0.0f;
@@ -372,7 +372,7 @@ public:
 		m[3][1] = pos.y;
 		m[3][2] = pos.z;
 	}
-	void SetTranslate( float x, float y, float z )
+	void SetTranslate( double x, double y, double z )
 	{
 		m[3][0] = x;
 		m[3][1] = y;
@@ -447,10 +447,10 @@ public:
 		this->RotateY( rot.y );
 		this->RotateZ( rot.z );
 	}
-	void RotateX( float f)
+	void RotateX( double f)
 	{
-		float	c = cos(f);
-		float	s = sin(f);
+		double	c = cos(f);
+		double	s = sin(f);
 		*this *= mat44(
 			1,  0,  0,  0,
 			0,  c, -s,  0,
@@ -458,10 +458,10 @@ public:
 			0,  0,  0,  1
 		);
 	}
-	void RotateY( float f)
+	void RotateY( double f)
 	{
-		float	c = cos(f);
-		float	s = sin(f);
+		double	c = cos(f);
+		double	s = sin(f);
 		*this *= mat44(
 			c,  0, -s,  0,
 			0,  1,  0,  0,
@@ -469,10 +469,10 @@ public:
 			0,  0,  0,  1
 		);
 	}
-	void RotateZ( float f)
+	void RotateZ( double f)
 	{
-		float	c = cos(f);
-		float	s = sin(f);
+		double	c = cos(f);
+		double	s = sin(f);
 		*this *= mat44(
 			c, -s,  0,  0,
 			s,	c,  0,  0,
@@ -486,14 +486,14 @@ public:
 		m[3][1] += vec.y;
 		m[3][2] += vec.z;
 	}
-	void Tlanslate( float x, float y, float z )
+	void Tlanslate( double x, double y, double z )
 	{
 		m[3][0] += x;
 		m[3][1] += y;
 		m[3][2] += z;
 	}
 	
-	void Scale( float x, float y, float z )
+	void Scale( double x, double y, double z )
 	{
 		m[0][0] *= x;
 		m[1][1] *= y;
@@ -526,56 +526,56 @@ public:
 };
 
 
-void	mat4_Frustum( mat44 m, float l, float r, float b, float t, float n, float f );
-void	mat4_Ortho( float* m, float l, float r, float b, float t, float n, float f );
+void	mat4_Frustum( mat44 m, double l, double r, double b, double t, double n, double f );
+void	mat4_Ortho( double* m, double l, double r, double b, double t, double n, double f );
 
 int	mat4_print( mat44 m );
-int	mat4_print( float* m );
-void	mat4_frustum( float* m, float l, float r, float b, float t, float n, float f );
-void	mat4_translate( mat44 m, float x, float y, float z );
-void	mat4_translate( float* m, float x, float y, float z );
-void	mat4_translate( float* m, vect3 vec );
+int	mat4_print( double* m );
+void	mat4_frustum( double* m, double l, double r, double b, double t, double n, double f );
+void	mat4_translate( mat44 m, double x, double y, double z );
+void	mat4_translate( double* m, double x, double y, double z );
+void	mat4_translate( double* m, vect3 vec );
 void	mat4_translate( mat44 m, vect3 vec );
-void	mat4_rotateX( mat44 m, float th );
-void	mat4_rotateY( mat44 m, float th );
-void	mat4_rotateZ( mat44 m, float th );
-void	mat4_scaling( mat44 m, float sx, float sy, float sz  );
-void	mat4_scaling( float* m, float sx, float sy, float sz  );
-void	mat4_scaling( float* m, vect3 vecScale  );
+void	mat4_rotateX( mat44 m, double th );
+void	mat4_rotateY( mat44 m, double th );
+void	mat4_rotateZ( mat44 m, double th );
+void	mat4_scaling( mat44 m, double sx, double sy, double sz  );
+void	mat4_scaling( double* m, double sx, double sy, double sz  );
+void	mat4_scaling( double* m, vect3 vecScale  );
 void	mat4_scaling( mat44 m, vect3 vecScale  );
-void	mat4_transpose( float* m, float a[16] );
+void	mat4_transpose( double* m, double a[16] );
 
-void	mat4_copy( float* m, float a[16] );
+void	mat4_copy( double* m, double a[16] );
 
 void 	mat4_invers( mat44 a, const mat44 b );
-//void	mat4_invers ( float* out, float* in );
-void	mat4_identity( float* m );
+//void	mat4_invers ( double* out, double* in );
+void	mat4_identity( double* m );
 void	mat4_identity( mat44 m );
 
-void	mat4_getTranslate( float* m, float x, float y, float z );
-void	mat4_getRotateX( float* m, float th );
-void	mat4_getRotateY( float* m, float th );
-void	mat4_getRotateZ( float* m, float th );
-void	mat4_getScale( float* m, float sx, float sy, float sz  );
+void	mat4_getTranslate( double* m, double x, double y, double z );
+void	mat4_getRotateX( double* m, double th );
+void	mat4_getRotateY( double* m, double th );
+void	mat4_getRotateZ( double* m, double th );
+void	mat4_getScale( double* m, double sx, double sy, double sz  );
 
 
-float*	mat4_identity();
+double*	mat4_identity();
 
-void 	mat4_glFrustumf ( float* m,  float left, float right, float bottom, float top, float near, float far);
-void 	mat4_perspective ( mat44 m, float fovy, float aspect, float zNear, float zFar);
-void 	mat4_perspective (float* m, float fovy, float aspect, float zNear, float zFar);
-void 	mat4_invers ( float* m, const float* in );
-void	mat4_add( float* m, float* a, float* b );
-void	mat4_sub( float* m, float* a, float* b );
-void	mat4_div( float* m, float f );
+void 	mat4_glFrustumf ( double* m,  double left, double right, double bottom, double top, double near, double far);
+void 	mat4_perspective ( mat44 m, double fovy, double aspect, double zNear, double zFar);
+void 	mat4_perspective (double* m, double fovy, double aspect, double zNear, double zFar);
+void 	mat4_invers ( double* m, const double* in );
+void	mat4_add( double* m, double* a, double* b );
+void	mat4_sub( double* m, double* a, double* b );
+void	mat4_div( double* m, double f );
 
 // for raytrace
-void mat4_ray_perspective (float* m, float fovy, float aspect );
-void	mat4_otrho( float* m, float l, float r, float b, float t, float n, float f );
+void mat4_ray_perspective (double* m, double fovy, double aspect );
+void	mat4_otrho( double* m, double l, double r, double b, double t, double n, double f );
 
-mat44	mat4_GetTranslate( float x, float y, float z );
-mat44	mat4_GetRotateX( float th );
-mat44	mat4_GetRotateY( float th );
-mat44	mat4_GetRotateZ( float th );
-void	mat4_multiply( float* m, const float* a, const float* y1 );
+mat44	mat4_GetTranslate( double x, double y, double z );
+mat44	mat4_GetRotateX( double th );
+mat44	mat4_GetRotateY( double th );
+mat44	mat4_GetRotateZ( double th );
+void	mat4_multiply( double* m, const double* a, const double* y1 );
 #endif
