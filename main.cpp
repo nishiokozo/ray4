@@ -804,10 +804,10 @@ struct Apr : public Sys
 		{
 			#define X 40
 			#define Y 120
-			vect2( 10+X, 10+Y),
-			vect2(100+X,100+Y),
+			vect2( 10+X, 10+50+Y),
+			vect2( 10+X,100+50+Y),
 			vect2(200+X, 10+Y),
-			vect2(300+X,100+Y),
+			vect2(200+X,100+Y),
 			#undef X
 			#undef Y
 		};
@@ -831,7 +831,7 @@ struct Apr : public Sys
 		};
 		for ( vect2& v : catmul_tblVert )	// マーカー対象に位置を登録
 		{
-			mc.tblMarker.emplace_back( &gra, &figArrow, v, rad(-90) );
+			mc.tblMarker.emplace_back( &gra, &figCircle, v, rad(-90) );
 		}
 
 		
@@ -863,7 +863,7 @@ struct Apr : public Sys
 		vector<Joint> tblJoint;
 		tblJoint.reserve(1000);
 		vector<Bone> tblBone;
-		if(1)
+		if(0)
 		{	//	対△
 			int ox=200,oy=300;
 
@@ -878,7 +878,7 @@ struct Apr : public Sys
 			tblBone.emplace_back( tblJoint[1], tblJoint[3] );
 			tblBone.emplace_back( tblJoint[2], tblJoint[3] );
 		}
-		if(0)
+		if(1)
 		{	//	四角格子メッシュ
 			int ox=200,oy=300;
 			const int  W=40;
@@ -1144,7 +1144,7 @@ struct Apr : public Sys
 			for ( unsigned int i = 1 ; i < bezier_pos.size() ; i++ )
 			{
 				vect2 v1 = bezier_pos[i];
-				gra.Line(v1,v0,rgb(0,1,0));
+				if ( i==1 || i==3 ) gra.Line(v1,v0,rgb(0,1,0));
 				v0=v1;
 			}
 	
