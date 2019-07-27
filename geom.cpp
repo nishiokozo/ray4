@@ -5,14 +5,14 @@ using namespace std;
 #include "geom.h"
 
 //-----------------------------------------------------------------------------
-double	mod( double a, double b )
+float	mod( float a, float b )
 //-----------------------------------------------------------------------------
 {
 	return fmod(a,b);
 }
 
 //-----------------------------------------------------------------------------
-double	min( double a, double b )
+float	min( float a, float b )
 //-----------------------------------------------------------------------------
 {
 	if ( a < b ) return a;
@@ -20,7 +20,7 @@ double	min( double a, double b )
 }
 
 //-----------------------------------------------------------------------------
-double	max( double a, double b )
+float	max( float a, float b )
 //-----------------------------------------------------------------------------
 {
 	if ( a > b ) return a;
@@ -67,7 +67,7 @@ vect3	min( vect3 a, vect3 b )
 
 
 //-----------------------------------------------------------------------------
-vect3	max( double a, vect3 b )
+vect3	max( float a, vect3 b )
 //-----------------------------------------------------------------------------
 {
 	vect3	ret;
@@ -79,7 +79,7 @@ vect3	max( double a, vect3 b )
 }
 
 //-----------------------------------------------------------------------------
-vect3	max( vect3 b, double a )
+vect3	max( vect3 b, float a )
 //-----------------------------------------------------------------------------
 {
 	vect3	ret;
@@ -91,7 +91,7 @@ vect3	max( vect3 b, double a )
 }
 
 //-----------------------------------------------------------------------------
-vect3	min( double a, vect3 b )
+vect3	min( float a, vect3 b )
 //-----------------------------------------------------------------------------
 {
 	vect3	ret;
@@ -103,7 +103,7 @@ vect3	min( double a, vect3 b )
 }
 
 //-----------------------------------------------------------------------------
-vect3	min( vect3 b, double a )
+vect3	min( vect3 b, float a )
 //-----------------------------------------------------------------------------
 {
 	vect3	ret;
@@ -115,7 +115,7 @@ vect3	min( vect3 b, double a )
 }
 
 //-----------------------------------------------------------------------------
-vect3	mix( double f, vect3 a, vect3 b )
+vect3	mix( float f, vect3 a, vect3 b )
 //-----------------------------------------------------------------------------
 {
 	vect3	ret;
@@ -137,32 +137,32 @@ vect3 reflect( vect3 I, vect3 N )
 }
 
 //-----------------------------------------------------------------------------
-vect3 refract( vect3 I, vect3 N, double nm )
+vect3 refract( vect3 I, vect3 N, float nm )
 //-----------------------------------------------------------------------------
 {
 	vect3	V;
 
 #if 1
-	double	n1 = 1.0;
-	double	n2 = nm;
-	double	d = dot(-I,N);
+	float	n1 = 1.0;
+	float	n2 = nm;
+	float	d = dot(-I,N);
 
 	V = (n1/n2)*(I-N*(sqrt((n2/n1)*(n2/n1)-1+d*d)-d));
 #else
 
  #if 0
 //V = (n*I*cosθ + n*N - m*N)/(m*cosφ)
-	double	n = 1.0;
-	double	m = nm;
-	double	d = dot(I,-N); // cosθ
+	float	n = 1.0;
+	float	m = nm;
+	float	d = dot(I,-N); // cosθ
 
 
 	V = (n*I*d + n*N - m*N)/(m*d);
  #else
 //V = (n*N*cosθ + n*I - m*N*cosφ)/m
-	double	n = 1.0;
-	double	m = nm;
-	double	d = dot(I,-N); // cosθ
+	float	n = 1.0;
+	float	m = nm;
+	float	d = dot(I,-N); // cosθ
 
 	V = (n*N*d + n*I - m*N*d)/m
 
@@ -177,7 +177,7 @@ vect3 refract( vect3 I, vect3 N, double nm )
 }
 
 //-----------------------------------------------------------------------------
-double	dot( vect3 a, vect3 b )
+float	dot( vect3 a, vect3 b )
 //-----------------------------------------------------------------------------
 {
 	return a.x * b.x + a.y * b.y +a.z * b.z ;
@@ -194,7 +194,7 @@ vect3	cross( vect3 a, vect3 b )
 	return v;
 }
 //-----------------------------------------------------------------------------
-double	length( vect3 a )
+float	length( vect3 a )
 //-----------------------------------------------------------------------------
 {
 //	return sqrt( a.x*a.x + a.y*a.y + a.z*a.z );
@@ -202,11 +202,11 @@ double	length( vect3 a )
 }
 /*
 //-----------------------------------------------------------------------------
-double	length( vect3 a )
+float	length( vect3 a )
 //-----------------------------------------------------------------------------
 {
-//	double	l = sqrt( a.x*a.x + a.y*a.y + a.z*a.z );
-	double	l = sqrt( dot(a,a) );
+//	float	l = sqrt( a.x*a.x + a.y*a.y + a.z*a.z );
+	float	l = sqrt( dot(a,a) );
 
 	return	l;
 }
@@ -217,7 +217,7 @@ vect3	normalize( vect3 a )
 //-----------------------------------------------------------------------------
 {
 	vect3 v; 
-	double	l = 1.0f / sqrt( a.x*a.x + a.y*a.y + a.z*a.z );
+	float	l = 1.0f / sqrt( a.x*a.x + a.y*a.y + a.z*a.z );
 	
 	v.x = a.x * l;
 	v.y = a.y * l;
@@ -226,31 +226,31 @@ vect3	normalize( vect3 a )
 	return	v;
 }
 //-----------------------------------------------------------------------------
-void	vec4_multiplyMatrix( double v[4], double m[16], double a[4] )
+void	vec4_multiplyMatrix( float v[4], float m[16], float a[4] )
 //-----------------------------------------------------------------------------
 {
 
-	double	m00 = m[ 0];
-	double	m01 = m[ 1];
-	double	m02 = m[ 2];
-	double	m03 = m[ 3];
-	double	m10 = m[ 4];
-	double	m11 = m[ 5];
-	double	m12 = m[ 6];
-	double	m13 = m[ 7];
-	double	m20 = m[ 8];
-	double	m21 = m[ 9];
-	double	m22 = m[10];
-	double	m23 = m[11];
-	double	m30 = m[12];
-	double	m31 = m[13];
-	double	m32 = m[14];
-	double	m33 = m[15];
+	float	m00 = m[ 0];
+	float	m01 = m[ 1];
+	float	m02 = m[ 2];
+	float	m03 = m[ 3];
+	float	m10 = m[ 4];
+	float	m11 = m[ 5];
+	float	m12 = m[ 6];
+	float	m13 = m[ 7];
+	float	m20 = m[ 8];
+	float	m21 = m[ 9];
+	float	m22 = m[10];
+	float	m23 = m[11];
+	float	m30 = m[12];
+	float	m31 = m[13];
+	float	m32 = m[14];
+	float	m33 = m[15];
 
-	double	a0 = a[0];
-	double	a1 = a[1];
-	double	a2 = a[2];
-	double	a3 = a[3];
+	float	a0 = a[0];
+	float	a1 = a[1];
+	float	a2 = a[2];
+	float	a3 = a[3];
 
 	v[0] = m00 * a0 +  m01 * a1 +  m02 * a2 +  m03 * a3;
 	v[1] = m10 * a0 +  m11 * a1 +  m12 * a2 +  m13 * a3;
@@ -262,7 +262,7 @@ void	vec4_multiplyMatrix( double v[4], double m[16], double a[4] )
 
 
 //-----------------------------------------------------------------------------
-int	mat4_print( double* m )
+int	mat4_print( float* m )
 //-----------------------------------------------------------------------------
 {
 	printf("-----\n" );
@@ -292,12 +292,12 @@ void mat4_invers( mat44& a, const mat44& y1 )
 	mat4_invers( a.GetArray(), a.GetArray() );
 }
 //-----------------------------------------------------------------------------
-void mat4_invers( double* m, const double* in )
+void mat4_invers( float* m, const float* in )
 //-----------------------------------------------------------------------------
 {
-//	double a[4][4]={{1,2,0,-1},{-1,1,2,0},{2,0,1,1},{1,-2,-1,1}}; //入力用の配列
-	double a[4][4];
-//memcpy( a, in, sizeof(double[16] ) );
+//	float a[4][4]={{1,2,0,-1},{-1,1,2,0},{2,0,1,1},{1,-2,-1,1}}; //入力用の配列
+	float a[4][4];
+//memcpy( a, in, sizeof(float[16] ) );
 	a[0][0] = in[0];
 	a[0][1] = in[1]; 
 	a[0][2] = in[2]; 
@@ -317,8 +317,8 @@ void mat4_invers( double* m, const double* in )
 
 
 
-	double inv_a[4][4]; //ここに逆行列が入る
-	double buf; //一時的なデータを蓄える
+	float inv_a[4][4]; //ここに逆行列が入る
+	float buf; //一時的なデータを蓄える
 	int i,j,k; //カウンタ
 	int z1=4;  //配列の次数
 
@@ -368,15 +368,15 @@ void mat4_invers( double* m, const double* in )
 }
 
 //-----------------------------------------------------------------------------
-void	mat4_ortho( double* m, double x1, double x2, double y1, double y2, double z1, double z2 )
+void	mat4_ortho( float* m, float x1, float x2, float y1, float y2, float z1, float z2 )
 //-----------------------------------------------------------------------------
 {
-	double sx =  (2.0     )/( x2 - x1 );
-	double sy =  (2.0     )/( y2 - y1 );
-	double sz = -(2.0     )/( z2 - z1 );
-	double tx =  -(x2+x1)/(x2-x1);
-	double ty =  -(y2+y1)/(y2-y1);
-	double tz =  -(z2+z1)/(z2-z1);
+	float sx =  (2.0     )/( x2 - x1 );
+	float sy =  (2.0     )/( y2 - y1 );
+	float sz = -(2.0     )/( z2 - z1 );
+	float tx =  -(x2+x1)/(x2-x1);
+	float ty =  -(y2+y1)/(y2-y1);
+	float tz =  -(z2+z1)/(z2-z1);
 
 
 	m[ 0] =   sx;	m[ 1] = 0.0f;	m[ 2] = 0.0f;	m[ 3] = 0.0f;
@@ -385,16 +385,16 @@ void	mat4_ortho( double* m, double x1, double x2, double y1, double y2, double z
 	m[12] =   tx;	m[13] =   ty;	m[14] =   tz;	m[15] = 1.0f;
 }
 //-----------------------------------------------------------------------------
-void mat4_perspective ( mat44& m, double fovy, double aspect, double zNear, double zFar)
+void mat4_perspective ( mat44& m, float fovy, float aspect, float zNear, float zFar)
 //-----------------------------------------------------------------------------
 {
 	mat4_perspective ( m.GetArray(), fovy, aspect, zNear, zFar );
 }
 //-----------------------------------------------------------------------------
-void mat4_perspective (double* m, double fovy, double aspect, double zNear, double zFar)
+void mat4_perspective (float* m, float fovy, float aspect, float zNear, float zFar)
 //-----------------------------------------------------------------------------
 {
-        double p = 1.0f / tanf(fovy * (pi/360.0));
+        float p = 1.0f / tanf(fovy * (pi/360.0));
 
 /*
         m[0] = z2 / aspect;
@@ -419,7 +419,7 @@ void mat4_perspective (double* m, double fovy, double aspect, double zNear, doub
 */
 
 /*
-	double	p = {
+	float	p = {
         z2 / aspect,	0.0,	0.0,									 0.0,
         0.0,		z2,		0.0,									 0.0,
         0.0,        0.0,    (zFar + zNear) / (zNear - zFar),        -1.0,
@@ -428,8 +428,8 @@ void mat4_perspective (double* m, double fovy, double aspect, double zNear, doub
 
 	mat4_copy( m, p );
 */
-	double	z2 = zFar;
-	double	z1 = zNear;
+	float	z2 = zFar;
+	float	z1 = zNear;
 
 
         m[ 0] = p / aspect; m[ 1] = 0.0;	m[ 2] = 0.0;        			m[ 3] =  0.0;
@@ -439,10 +439,10 @@ void mat4_perspective (double* m, double fovy, double aspect, double zNear, doub
 
 
 /*
-double w = z2 / aspect;
-double h = z2;
-double c = (zFar + zNear) / (zNear - zFar);
-double d = 2.0 * zFar * zNear / (zNear - zFar);
+float w = z2 / aspect;
+float h = z2;
+float c = (zFar + zNear) / (zNear - zFar);
+float d = 2.0 * zFar * zNear / (zNear - zFar);
           w,	0.0,	 0.0,	 0.0,
         0.0,	  h,	 0.0,	 0.0,
         0.0,    0.0,       c,      d,
@@ -454,13 +454,13 @@ double d = 2.0 * zFar * zNear / (zNear - zFar);
 
 }
 //-----------------------------------------------------------------------------
-void mat4_ray_perspective (double* m, double fovy, double aspect )
+void mat4_ray_perspective (float* m, float fovy, float aspect )
 //-----------------------------------------------------------------------------
 {
-        double	p = 1.0f / tanf(fovy * (pi/360.0));
-		double	ofs_x = 0.0;	//x	offset-x
-		double	ofs_y = 0.0;	//y	offset-y
-		double	ofs_z = -p;		//z	offset-z
+        float	p = 1.0f / tanf(fovy * (pi/360.0));
+		float	ofs_x = 0.0;	//x	offset-x
+		float	ofs_y = 0.0;	//y	offset-y
+		float	ofs_z = -p;		//z	offset-z
 
 
         m[ 0] = 1.0* aspect;m[ 1] = 0.0;    m[ 2] = 0.0;    m[ 3] = 0.0;
@@ -471,7 +471,7 @@ void mat4_ray_perspective (double* m, double fovy, double aspect )
 }
 
 //-----------------------------------------------------------------------------
-void mat4_glFrustumf ( double* m,  double x1, double x2, double y1, double y2, double z1, double z2)
+void mat4_glFrustumf ( float* m,  float x1, float x2, float y1, float y2, float z1, float z2)
 //-----------------------------------------------------------------------------
 {
     m[ 0] = (2*z1) / (x2-x1);	m[ 1] = 0.0;         	m[ 2] = 0.0;        		m[ 3] = 0.0;
@@ -481,35 +481,35 @@ void mat4_glFrustumf ( double* m,  double x1, double x2, double y1, double y2, d
 
 }
 //-----------------------------------------------------------------------------
-void	mat4_frustum( double* m, double x1, double x2, double y1, double y2, double z1, double z2 )
+void	mat4_frustum( float* m, float x1, float x2, float y1, float y2, float z1, float z2 )
 //-----------------------------------------------------------------------------
 {
-	double sx =       (2.0f * z1) / (x2-x1);
-	double sy =       (2.0f * z1) / (y2-y1);
-	double mx =           (x2+x1) / (x2-x1);
-	double my =           (y2+y1) / (y2-y1);
-	double sz =          -(z2+z1) / (z2-z1);
-	double w  = -(2.0 * z2 * z1 ) / (z2-z1);
+	float sx =       (2.0f * z1) / (x2-x1);
+	float sy =       (2.0f * z1) / (y2-y1);
+	float mx =           (x2+x1) / (x2-x1);
+	float my =           (y2+y1) / (y2-y1);
+	float sz =          -(z2+z1) / (z2-z1);
+	float w  = -(2.0 * z2 * z1 ) / (z2-z1);
 	m[M00] =   sx;	m[M01] = 0.0f;	m[M02] =  mx;	m[M03] = 0.0f;
 	m[M10] = 0.0f;	m[M11] =   sy;	m[M12] =  my;	m[M13] = 0.0f;
 	m[M20] = 0.0f;	m[M21] = 0.0f;	m[M22] =  sz;	m[M23] =    w;
 	m[M30] = 0.0f;	m[M31] = 0.0f;	m[M32] =-1.0f;	m[M33] = 0.0f;
 }
 //-----------------------------------------------------------------------------
-void	mat4_Frustum( mat44& m, double x1, double x2, double y1, double y2, double z1, double z2 )
+void	mat4_Frustum( mat44& m, float x1, float x2, float y1, float y2, float z1, float z2 )
 //-----------------------------------------------------------------------------
 {
-	double* a = m.m_array;
+	float* a = m.m_array;
 
 
-	double sx =    2.0f / (x2-x1);
-	double sy =    2.0f / (y2-y1);
-	double sz =    2.0f / (z2-z1);
-//	double tx = (x2+x1) / (x2-x1);
-//	double ty = (y2+y1) / (y2-y1);
-//	double tz = (z2+z1) / (z2-z1);
+	float sx =    2.0f / (x2-x1);
+	float sy =    2.0f / (y2-y1);
+	float sz =    2.0f / (z2-z1);
+//	float tx = (x2+x1) / (x2-x1);
+//	float ty = (y2+y1) / (y2-y1);
+//	float tz = (z2+z1) / (z2-z1);
 	
-	double w = 1.0f/z1;
+	float w = 1.0f/z1;
 	
 sx = 1.0f;
 sy = 1.0f;
@@ -524,33 +524,33 @@ w = 1.0f/2.0f;
 
 }
 //-----------------------------------------------------------------------------
-void	mat4_Ortho( mat44& m, double x1, double x2, double y1, double y2, double z1, double z2 )
+void	mat4_Ortho( mat44& m, float x1, float x2, float y1, float y2, float z1, float z2 )
 //-----------------------------------------------------------------------------
 {
-	double* a = m.m_array;
+	float* a = m.m_array;
 
-	double sx =    2.0f / (x2-x1);
-	double sy =    2.0f / (y2-y1);
-	double sz =    2.0f / (z2-z1);
-	double tx = (x2+x1) / (x2-x1);
-	double ty = (y2+y1) / (y2-y1);
-	double tz = (z2+z1) / (z2-z1);
+	float sx =    2.0f / (x2-x1);
+	float sy =    2.0f / (y2-y1);
+	float sz =    2.0f / (z2-z1);
+	float tx = (x2+x1) / (x2-x1);
+	float ty = (y2+y1) / (y2-y1);
+	float tz = (z2+z1) / (z2-z1);
 	a[M00] =   sx;	a[M01] = 0.0f;	a[M02] = 0.0f;	a[M03] = 0.0f;
 	a[M10] = 0.0f;	a[M11] =   sy;	a[M12] = 0.0f;	a[M13] = 0.0f;
 	a[M20] = 0.0f;	a[M21] = 0.0f;	a[M22] =   sz;	a[M23] = 0.0f;
 	a[M30] =   tx;	a[M31] =   ty;	a[M32] =   tz;	a[M33] = 1.0f;
 }
 //-----------------------------------------------------------------------------
-void	mat4_Ortho( double* m, double x1, double x2, double y1, double y2, double z1, double z2 )
+void	mat4_Ortho( float* m, float x1, float x2, float y1, float y2, float z1, float z2 )
 //-----------------------------------------------------------------------------
 {
 
-	double sx =    2.0f / (x2-x1);
-	double sy =    2.0f / (y2-y1);
-	double sz =    2.0f / (z2-z1);
-	double tx = (x2+x1) / (x2-x1);
-	double ty = (y2+y1) / (y2-y1);
-	double tz = (z2+z1) / (z2-z1);
+	float sx =    2.0f / (x2-x1);
+	float sy =    2.0f / (y2-y1);
+	float sz =    2.0f / (z2-z1);
+	float tx = (x2+x1) / (x2-x1);
+	float ty = (y2+y1) / (y2-y1);
+	float tz = (z2+z1) / (z2-z1);
 	m[M00] =   sx;	m[M01] = 0.0f;	m[M02] = 0.0f;	m[M03] = 0.0f;
 	m[M10] = 0.0f;	m[M11] =   sy;	m[M12] = 0.0f;	m[M13] = 0.0f;
 	m[M20] = 0.0f;	m[M21] = 0.0f;	m[M22] =   sz;	m[M23] = 0.0f;
@@ -558,43 +558,43 @@ void	mat4_Ortho( double* m, double x1, double x2, double y1, double y2, double z
 }
 
 //-----------------------------------------------------------------------------
-void	mat4_multiply( double* m, const double* a, const double* y1 )
+void	mat4_multiply( float* m, const float* a, const float* y1 )
 //-----------------------------------------------------------------------------
 {
 
-	double	a00 = a[M00];
-	double	a01 = a[M01];
-	double	a02 = a[M02];
-	double	a03 = a[M03];
-	double	a10 = a[M10];
-	double	a11 = a[M11];
-	double	a12 = a[M12];
-	double	a13 = a[M13];
-	double	a20 = a[M20];
-	double	a21 = a[M21];
-	double	a22 = a[M22];
-	double	a23 = a[M23];
-	double	a30 = a[M30];
-	double	a31 = a[M31];
-	double	a32 = a[M32];
-	double	a33 = a[M33];
+	float	a00 = a[M00];
+	float	a01 = a[M01];
+	float	a02 = a[M02];
+	float	a03 = a[M03];
+	float	a10 = a[M10];
+	float	a11 = a[M11];
+	float	a12 = a[M12];
+	float	a13 = a[M13];
+	float	a20 = a[M20];
+	float	a21 = a[M21];
+	float	a22 = a[M22];
+	float	a23 = a[M23];
+	float	a30 = a[M30];
+	float	a31 = a[M31];
+	float	a32 = a[M32];
+	float	a33 = a[M33];
 
-	double	b00 = y1[M00];
-	double	b01 = y1[M01];
-	double	b02 = y1[M02];
-	double	b03 = y1[M03];
-	double	b10 = y1[M10];
-	double	b11 = y1[M11];
-	double	b12 = y1[M12];
-	double	b13 = y1[M13];
-	double	b20 = y1[M20];
-	double	b21 = y1[M21];
-	double	b22 = y1[M22];
-	double	b23 = y1[M23];
-	double	b30 = y1[M30];
-	double	b31 = y1[M31];
-	double	b32 = y1[M32];
-	double	b33 = y1[M33];
+	float	b00 = y1[M00];
+	float	b01 = y1[M01];
+	float	b02 = y1[M02];
+	float	b03 = y1[M03];
+	float	b10 = y1[M10];
+	float	b11 = y1[M11];
+	float	b12 = y1[M12];
+	float	b13 = y1[M13];
+	float	b20 = y1[M20];
+	float	b21 = y1[M21];
+	float	b22 = y1[M22];
+	float	b23 = y1[M23];
+	float	b30 = y1[M30];
+	float	b31 = y1[M31];
+	float	b32 = y1[M32];
+	float	b33 = y1[M33];
 
 	m[M00] = a00 * b00 +  a01 * b10 +  a02 * b20 +  a03 * b30;
 	m[M01] = a00 * b01 +  a01 * b11 +  a02 * b21 +  a03 * b31;
@@ -617,7 +617,7 @@ void	mat4_multiply( double* m, const double* a, const double* y1 )
 	m[M33] = a30 * b03 +  a31 * b13 +  a32 * b23 +  a33 * b33;
 }
 //-----------------------------------------------------------------------------
-void	mat4_sub( double* m, double* a, double* y1 )
+void	mat4_sub( float* m, float* a, float* y1 )
 //-----------------------------------------------------------------------------
 {
 	m[M00] = a[M00]-y1[M00];
@@ -641,7 +641,7 @@ void	mat4_sub( double* m, double* a, double* y1 )
 	m[M33] = a[M33]-y1[M33];
 }
 //-----------------------------------------------------------------------------
-void	mat4_add( double* m, double* a, double* y1 )
+void	mat4_add( float* m, float* a, float* y1 )
 //-----------------------------------------------------------------------------
 {
 	m[M00] = a[M00]+y1[M00];
@@ -665,7 +665,7 @@ void	mat4_add( double* m, double* a, double* y1 )
 	m[M33] = a[M33]+y1[M33];
 }
 //-----------------------------------------------------------------------------
-void	mat4_div( double* m, double z2 )
+void	mat4_div( float* m, float z2 )
 //-----------------------------------------------------------------------------
 {
 	m[M00] /= z2;
@@ -689,10 +689,10 @@ void	mat4_div( double* m, double z2 )
 	m[M33] /= z2;
 }
 //-----------------------------------------------------------------------------
-void	mat4_copy( double* m, double a[16] )
+void	mat4_copy( float* m, float a[16] )
 //-----------------------------------------------------------------------------
 {
-//	memcpy( m, a, sizeof(double[16]) );
+//	memcpy( m, a, sizeof(float[16]) );
 	m[0] = a[0];
 	m[1] = a[1]; 
 	m[2] = a[2]; 
@@ -718,7 +718,7 @@ void	mat4_identity( mat44& m )
 	mat4_identity( m.GetArray() );
 }
 //-----------------------------------------------------------------------------
-void	mat4_identity( double* m )
+void	mat4_identity( float* m )
 //-----------------------------------------------------------------------------
 {
 	m[M00] = 1.0f;	m[M01] = 0.0f;	m[M02] = 0.0f;	m[M03] = 0.0f;
@@ -727,25 +727,25 @@ void	mat4_identity( double* m )
 	m[M30] = 0.0f;	m[M31] = 0.0f;	m[M32] = 0.0f;	m[M33] = 1.0f;
 }
 //-----------------------------------------------------------------------------
-void	mat4_transpose( double* m, double a[16] )
+void	mat4_transpose( float* m, float a[16] )
 //-----------------------------------------------------------------------------
 {
-	double	a00 = a[M00];
-	double	a01 = a[M01];
-	double	a02 = a[M02];
-	double	a03 = a[M03];
-	double	a10 = a[M10];
-	double	a11 = a[M11];
-	double	a12 = a[M12];
-	double	a13 = a[M13];
-	double	a20 = a[M20];
-	double	a21 = a[M21];
-	double	a22 = a[M22];
-	double	a23 = a[M23];
-	double	a30 = a[M30];
-	double	a31 = a[M31];
-	double	a32 = a[M32];
-	double	a33 = a[M33];
+	float	a00 = a[M00];
+	float	a01 = a[M01];
+	float	a02 = a[M02];
+	float	a03 = a[M03];
+	float	a10 = a[M10];
+	float	a11 = a[M11];
+	float	a12 = a[M12];
+	float	a13 = a[M13];
+	float	a20 = a[M20];
+	float	a21 = a[M21];
+	float	a22 = a[M22];
+	float	a23 = a[M23];
+	float	a30 = a[M30];
+	float	a31 = a[M31];
+	float	a32 = a[M32];
+	float	a33 = a[M33];
 
 	m[M00] = a00;
 	m[M01] = a10;
@@ -768,7 +768,7 @@ void	mat4_transpose( double* m, double a[16] )
 	m[M33] = a33;
 }
 //-----------------------------------------------------------------------------
-void	mat4_getScale( double* m, double sx, double sy, double sz  )
+void	mat4_getScale( float* m, float sx, float sy, float sz  )
 //-----------------------------------------------------------------------------
 {
 	m[M00] =   sx;	m[M01] = 0.0f;	m[M02] = 0.0f;	m[M03] = 0.0f;
@@ -777,7 +777,7 @@ void	mat4_getScale( double* m, double sx, double sy, double sz  )
 	m[M30] = 0.0f;	m[M31] = 0.0f;	m[M32] = 0.0f;	m[M33] = 1.0f;
 }
 //-----------------------------------------------------------------------------
-void	mat4_getTranslate( double* m, double x, double y, double z )
+void	mat4_getTranslate( float* m, float x, float y, float z )
 //-----------------------------------------------------------------------------
 {
 	m[M00] = 1.0f;	m[M01] = 0.0f;	m[M02] = 0.0f;	m[M03] = 0.0f;
@@ -786,7 +786,7 @@ void	mat4_getTranslate( double* m, double x, double y, double z )
 	m[M30] =   x;	m[M31] =   y;	m[M32] =   z;	m[M33] = 1.0f;
 }
 //-----------------------------------------------------------------------------
-mat44	mat4_GetTranslate( double x, double y, double z )
+mat44	mat4_GetTranslate( float x, float y, float z )
 //-----------------------------------------------------------------------------
 {
 	return mat44(
@@ -797,18 +797,18 @@ mat44	mat4_GetTranslate( double x, double y, double z )
 	);
 }
 //-----------------------------------------------------------------------------
-void	mat4_scaling( double* m, double sx, double sy, double sz  )
+void	mat4_scaling( float* m, float sx, float sy, float sz  )
 //-----------------------------------------------------------------------------
 {
-	double a[16];
+	float a[16];
 	mat4_getScale( a, sx, sy, sz  );
 	mat4_multiply( m, m, a );
 }
 //-----------------------------------------------------------------------------
-void	mat4_scaling( double* m, vect3 vecScale  )
+void	mat4_scaling( float* m, vect3 vecScale  )
 //-----------------------------------------------------------------------------
 {
-	double a[16];
+	float a[16];
 	mat4_getScale( a, vecScale.x, vecScale.y, vecScale.z  );
 	mat4_multiply( m, m, a );
 }
@@ -819,19 +819,19 @@ void	mat4_scaling( mat44& m, vect3 vecScale  )
 	mat4_scaling( m.GetArray(), vecScale.x, vecScale.y, vecScale.z  );
 }
 //-----------------------------------------------------------------------------
-void	mat4_scaling( mat44& m, double sx, double sy, double sz   )
+void	mat4_scaling( mat44& m, float sx, float sy, float sz   )
 //-----------------------------------------------------------------------------
 {
 	mat4_scaling( m.GetArray(), sx, sy, sz  );
 }
 //-----------------------------------------------------------------------------
-void	mat4_translate( mat44& m, double sx, double sy, double sz   )
+void	mat4_translate( mat44& m, float sx, float sy, float sz   )
 //-----------------------------------------------------------------------------
 {
 	mat4_translate( m.GetArray(), sx, sy, sz  );
 }
 //-----------------------------------------------------------------------------
-void	mat4_translate( double* m, double x, double y, double z )
+void	mat4_translate( float* m, float x, float y, float z )
 //-----------------------------------------------------------------------------
 {
 	m[M30] += x;
@@ -846,7 +846,7 @@ void	mat4_translate( mat44& m, vect3 v )
 	mat4_translate( m.GetArray(), v );
 }
 //-----------------------------------------------------------------------------
-void	mat4_translate( double* m, vect3 v )
+void	mat4_translate( float* m, vect3 v )
 //-----------------------------------------------------------------------------
 {
 	m[M30] += v.x;
@@ -854,56 +854,56 @@ void	mat4_translate( double* m, vect3 v )
 	m[M32] += v.z;
 }
 //-----------------------------------------------------------------------------
-void	mat4_rotateX( mat44& m, double th )
+void	mat4_rotateX( mat44& m, float th )
 //-----------------------------------------------------------------------------
 {
 	mat4_rotateX( m.GetArray(), th );
 }
 //-----------------------------------------------------------------------------
-void	mat4_rotateY( mat44& m, double th )
+void	mat4_rotateY( mat44& m, float th )
 //-----------------------------------------------------------------------------
 {
 	mat4_rotateY( m.GetArray(), th );
 }
 //-----------------------------------------------------------------------------
-void	mat4_rotateZ( mat44& m, double th )
+void	mat4_rotateZ( mat44& m, float th )
 //-----------------------------------------------------------------------------
 {
 	mat4_rotateZ( m.GetArray(), th );
 }
 //-----------------------------------------------------------------------------
-void	mat4_rotateX( double* m, double th )
+void	mat4_rotateX( float* m, float th )
 //-----------------------------------------------------------------------------
 {
-	double a[16];
+	float a[16];
 	mat4_getRotateX(a,th);
 
 	mat4_multiply( m, m, a );
 }
 //-----------------------------------------------------------------------------
-void	mat4_rotateY( double* m, double th )
+void	mat4_rotateY( float* m, float th )
 //-----------------------------------------------------------------------------
 {
-	double a[16];
+	float a[16];
 	mat4_getRotateY(a,th);
 
 	mat4_multiply( m, m, a );
 }
 //-----------------------------------------------------------------------------
-void	mat4_rotateZ( double* m, double th )
+void	mat4_rotateZ( float* m, float th )
 //-----------------------------------------------------------------------------
 {
-	double a[16];
+	float a[16];
 	mat4_getRotateZ(a,th);
 
 	mat4_multiply( m, m, a );
 }
 //-----------------------------------------------------------------------------
-void	mat4_rotateZ( double* m, double a[16], double th )
+void	mat4_rotateZ( float* m, float a[16], float th )
 //-----------------------------------------------------------------------------
 {
-	double	c = cos(th);
-	double	s = sin(th);
+	float	c = cos(th);
+	float	s = sin(th);
 
 	m[M00] =   c;	m[M01] =   -s;	m[M02] = 0.0f;	m[M03] = 0.0f;
 	m[M10] =   s;	m[M11] =    c;	m[M12] = 0.0f;	m[M13] = 0.0f;
@@ -914,11 +914,11 @@ void	mat4_rotateZ( double* m, double a[16], double th )
 }
 
 //-----------------------------------------------------------------------------
-void	mat4_getRotateX( double* m, double th )
+void	mat4_getRotateX( float* m, float th )
 //-----------------------------------------------------------------------------
 {
-	double	c = cos(th);
-	double	s = sin(th);
+	float	c = cos(th);
+	float	s = sin(th);
 
 	m[M00] = 1.0f;	m[M01] = 0.0f;	m[M02] = 0.0f;	m[M03] = 0.0f;
 	m[M10] = 0.0f;	m[M11] =   c;	m[M12] =  -s;	m[M13] = 0.0f;
@@ -926,11 +926,11 @@ void	mat4_getRotateX( double* m, double th )
 	m[M30] = 0.0f;	m[M31] = 0.0f;	m[M32] = 0.0f;	m[M33] = 1.0f;
 }
 //-----------------------------------------------------------------------------
-void	mat4_getRotateY( double* m, double th )
+void	mat4_getRotateY( float* m, float th )
 //-----------------------------------------------------------------------------
 {
-	double	c = cos(th);
-	double	s = sin(th);
+	float	c = cos(th);
+	float	s = sin(th);
 
 	m[M00] =   c;	m[M01] = 0.0f;	m[M02] =  -s;	m[M03] = 0.0f;
 	m[M10] = 0.0f;	m[M11] = 1.0f;	m[M12] = 0.0f;	m[M13] = 0.0f;
@@ -938,11 +938,11 @@ void	mat4_getRotateY( double* m, double th )
 	m[M30] = 0.0f;	m[M31] = 0.0f;	m[M32] = 0.0f;	m[M33] = 1.0f;
 }
 //-----------------------------------------------------------------------------
-void	mat4_getRotateZ( double* m, double th )
+void	mat4_getRotateZ( float* m, float th )
 //-----------------------------------------------------------------------------
 {
-	double	c = cos(th);
-	double	s = sin(th);
+	float	c = cos(th);
+	float	s = sin(th);
 
 	m[M00] =   c;	m[M01] =   -s;	m[M02] = 0.0f;	m[M03] = 0.0f;
 	m[M10] =   s;	m[M11] =    c;	m[M12] = 0.0f;	m[M13] = 0.0f;
@@ -950,11 +950,11 @@ void	mat4_getRotateZ( double* m, double th )
 	m[M30] = 0.0f;	m[M31] = 0.0f;	m[M32] = 0.0f;	m[M33] = 1.0f;
 }
 //-----------------------------------------------------------------------------
-mat44	mat4_GetRotateX( double th )
+mat44	mat4_GetRotateX( float th )
 //-----------------------------------------------------------------------------
 {
-	double	c = cos(th);
-	double	s = sin(th);
+	float	c = cos(th);
+	float	s = sin(th);
 
 	return mat44(
 		1.0f,	0.0f,	0.0f,	0.0f,
@@ -964,11 +964,11 @@ mat44	mat4_GetRotateX( double th )
 	);
 }
 //-----------------------------------------------------------------------------
-mat44	mat4_GetRotateY( double th )
+mat44	mat4_GetRotateY( float th )
 //-----------------------------------------------------------------------------
 {
-	double	c = cos(th);
-	double	s = sin(th);
+	float	c = cos(th);
+	float	s = sin(th);
 
 	return mat44(
 		   c,	0.0f,	  -s,	0.0f,
@@ -978,11 +978,11 @@ mat44	mat4_GetRotateY( double th )
 	);
 }
 //-----------------------------------------------------------------------------
-mat44	mat4_GetRotateZ( double th )
+mat44	mat4_GetRotateZ( float th )
 //-----------------------------------------------------------------------------
 {
-	double	c = cos(th);
-	double	s = sin(th);
+	float	c = cos(th);
+	float	s = sin(th);
 
 	return mat44(
 		   c,	  -s,	0.0f,	0.0f,
@@ -993,7 +993,7 @@ mat44	mat4_GetRotateZ( double th )
 }
 
 //-----------------------------------------------------------------------------
-void	mat4_copyMatrix( double* m, double* a )
+void	mat4_copyMatrix( float* m, float* a )
 //-----------------------------------------------------------------------------
 {
 	m[M00] = a[M00];
@@ -1016,21 +1016,21 @@ void	mat4_copyMatrix( double* m, double* a )
 }
 
 //-----------------------------------------------------------------------------
-double rad( double n )
+float rad( float n )
 //-----------------------------------------------------------------------------
 {
 	return	((n)*pi/180.0f);
 }
 
 //-----------------------------------------------------------------------------
-double	deg( double n)
+float	deg( float n)
 //-----------------------------------------------------------------------------
 {
 	return ((n)*180.0f/pi);
 }
 
 //------------------------------------------------------------------------------
-int	rgb( double r, double g , double b )
+int	rgb( float r, float g , float b )
 //------------------------------------------------------------------------------
 {
 	r = min( 1.0, r );
