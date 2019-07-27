@@ -847,8 +847,14 @@ struct Apr : public Sys
 			#define Y 350
 				vect2(X+ 00,Y+90),
 				vect2(X+ 00,Y+20),
-				vect2(X+200,Y+90),
+				vect2(X+100,Y+90),
+				vect2(X+100,Y+20),
+				vect2(X+100,Y-20),
 				vect2(X+200,Y+20),
+				vect2(X+200,Y+90),
+				vect2(X+200,Y+120),
+				vect2(X+300,Y+20),
+				vect2(X+300,Y+90),
 			#undef X
 			#undef Y
 		};
@@ -1177,16 +1183,16 @@ struct Apr : public Sys
 			
 			// カトマル
 			{
-				auto catmull = []( double t, const vect2 Pm, const vect2 P0, const vect2 P1, const vect2 P2 )
+				auto catmull = []( double t, const vect2 P0, const vect2 P1, const vect2 P2, const vect2 P3 )
 				{
 					//Catmull-Rom 曲線
-					// P(t)=P0*(2t^3-3t^2+1)+m0*(t^3-2t^2+t)+P1*(-2t^3+3t^2)+m1*(t^3-t^2)
-					// m0=(P1-Pm)/2
-					// m1=(P2-P0)/2
+					// P(t)=P1*(2t^3-3t^2+1)+m0*(t^3-2t^2+t)+P2*(-2t^3+3t^2)+m1*(t^3-t^2)
+					// m0=(P2-P0)/2
+					// m1=(P3-P1)/2
 
-					vect2 m0 = (P1-Pm)/2.0;
-					vect2 m1 = (P2-P0)/2.0;
-					vect2 P = P0*(2*t*t*t - 3*t*t +1) + m0*( t*t*t -2*t*t +t ) + P1*( -2*t*t*t + 3*t*t ) + m1*( t*t*t - t*t );
+					vect2 m0 = (P2-P0)/2.0;
+					vect2 m1 = (P3-P1)/2.0;
+					vect2 P = P1*(2*t*t*t - 3*t*t +1) + m0*( t*t*t -2*t*t +t ) + P2*( -2*t*t*t + 3*t*t ) + m1*( t*t*t - t*t );
 
 					return P;
 				};
@@ -1214,73 +1220,76 @@ struct Apr : public Sys
 				}
 			}
 
-		// ベジェ２
-		{
-			auto bezier_func = [] ( vect2 P0, vect2 P1, vect2 P2, vect2 P3, double t )
+			// ベジェ 酸字曲線
 			{
-				vect2 L0=(P1-P0)*t+P0;
-				vect2 L1=(P2-P1)*t+P1;
-				vect2 L2=(P3-P2)*t+P2;
+				auto bezier_func = [] ( vect2 P0, vect2 P1, vect2 P2, vect2 P3, double t )
+				{
+					vect2 L0=(P1-P0)*t+P0;
+					vect2 L1=(P2-P1)*t+P1;
+					vect2 L2=(P3-P2)*t+P2;
 
-				vect2 M0=(L1-L0)*t+L0;
-				vect2 M1=(L2-L1)*t+L1;
+					vect2 M0=(L1-L0)*t+L0;
+					vect2 M1=(L2-L1)*t+L1;
 
-				vect2 Q=(M1-M0)*t+M0;
-	
-				return Q;
-			};
+					vect2 Q=(M1-M0)*t+M0;
 		
-		
+					return Q;
+				};
+			
+				{
+					double lp = 20;
+					double st = 1/lp;
+					double t;
+					int n;
+					vect2 v0;
 
-			double lp = 20;
-			double st = 1/lp;
-			double t = st;
-			vect2 v0 = bezier_tbl[0];
-			for ( int i = 1 ; i <= lp ; i++ )
-			{
-				vect2 v1 = bezier_func( bezier_tbl[0], bezier_tbl[1], bezier_tbl[2], bezier_tbl[3], t );
-				gra.Line( v0,v1, rgb(1,1,1));
-				v0=v1;
-				t+=st;
-				
+					for ( unsigned int n = 0 ; n < bezier_tbl.size()-3 ; n+=3 )
+					{
+						t  = st;
+						v0 = bezier_tbl[n+0];
+						for ( int i = 1 ; i <= lp ; i++ )
+						{
+							vect2 v1 = bezier_func( bezier_tbl[n+0], bezier_tbl[n+1], bezier_tbl[n+2], bezier_tbl[n+3], t );
+							gra.Line( v0,v1, rgb(1,1,1));
+							gra.Fill( v1-1,v1+3, rgb(1,1,1));
+							v0=v1;
+							t+=st;
+						}
+					}
+
+				}
+
+				{
+					int cnt = 0;
+					vect2 v0 = bezier_tbl[0];
+					for ( unsigned int i = 1 ; i < bezier_tbl.size() ; i++ )
+					{ 
+						vect2 v1 = bezier_tbl[i];
+						if ( cnt == 1 ) 
+						{
+							gra.Line( v0, v1, rgb(0.5,0.5,0.5));
+						}
+						else
+						{
+							gra.Line( v0, v1, rgb(0,1,0));
+						}
+						v0 = v1;
+						cnt = (cnt+1)%3;
+					}
+				}
+
 			}
 
+			{
 		
-/*
-			static	double t = 0;
-			static	bool	dir = true;
+				static	double t = 0;
+				static	bool	dir = true;
 
-			if ( dir ) t+=0.01; else t-=0.01;
+				if ( dir ) t+=0.01; else t-=0.01;
 
-			if ( t >= 1.0 ) dir = !dir;
-			if ( t <= 0.0 ) dir = !dir;
-			
-			vect2 L0=(P1-P0)*t+P0;
-			vect2 L1=(P2-P1)*t+P1;
-			vect2 L2=(P3-P2)*t+P2;
-
-			vect2 M0=(L1-L0)*t+L0;
-			vect2 M1=(L2-L1)*t+L1;
-
-			vect2 Q=(M1-M0)*t+M0;
-
-			gra.Circle( L0, 2, rgb(0,1,1));
-			gra.Circle( L1, 2, rgb(0,1,1));
-			gra.Circle( L2, 2, rgb(0,1,1));
-
-			gra.Circle( M0, 3, rgb(0,0,1));
-			gra.Circle( M1, 3, rgb(0,0,1));
-
-			gra.Circle( Q, 4, rgb(1,0,0));
-
-			gra.Line( L0,L1, rgb(0,1,0));
-			gra.Line( L1,L2, rgb(0,1,0));
-*/
-			gra.Line( bezier_tbl[0],bezier_tbl[1], rgb(0,1,0));
-//			gra.Line( P1,P2, rgb(0,1,0));
-			gra.Line( bezier_tbl[2],bezier_tbl[3], rgb(0,1,0));
-
-		}
+				if ( t >= 1.0 ) dir = !dir;
+				if ( t <= 0.0 ) dir = !dir;
+			}
 
 
 			// キーフレーム
