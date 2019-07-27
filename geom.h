@@ -86,7 +86,9 @@ struct	ivect2 : public I2
 class vect2
 {
 public:
-	double x,y;
+//	double x,y;
+	union { double x;	int32_t ix[2];};
+	union { double y;	int32_t iy[2];};
 
 	vect2() :x(0),y(0){}
 	vect2( double f ) :x(f),y(f){}

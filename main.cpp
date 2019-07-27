@@ -841,6 +841,20 @@ struct Apr : public Sys
 		}
 		
 		//3字曲線
+		auto bezier_func = [] ( vect2 P0, vect2 P1, vect2 P2, vect2 P3, double t )
+		{
+			vect2 L0=(P1-P0)*t+P0;
+			vect2 L1=(P2-P1)*t+P1;
+			vect2 L2=(P3-P2)*t+P2;
+
+			vect2 M0=(L1-L0)*t+L0;
+			vect2 M1=(L2-L1)*t+L1;
+
+			vect2 Q=(M1-M0)*t+M0;
+
+			return Q;
+		};
+
 		vector<vect2> bezier_tbl =
 		{
 			#define X 400
@@ -1222,21 +1236,9 @@ struct Apr : public Sys
 
 			// ベジェ 酸字曲線
 			{
-				auto bezier_func = [] ( vect2 P0, vect2 P1, vect2 P2, vect2 P3, double t )
-				{
-					vect2 L0=(P1-P0)*t+P0;
-					vect2 L1=(P2-P1)*t+P1;
-					vect2 L2=(P3-P2)*t+P2;
-
-					vect2 M0=(L1-L0)*t+L0;
-					vect2 M1=(L2-L1)*t+L1;
-
-					vect2 Q=(M1-M0)*t+M0;
-		
-					return Q;
-				};
 			
-				{
+				
+				{//ベジェ計算＆描画
 					double lp = 20;
 					double st = 1/lp;
 					double t;
@@ -1259,7 +1261,7 @@ struct Apr : public Sys
 
 				}
 
-				{
+				{// 補助ライン描画
 					int cnt = 0;
 					vect2 v0 = bezier_tbl[0];
 					for ( unsigned int i = 1 ; i < bezier_tbl.size() ; i++ )
@@ -1267,7 +1269,7 @@ struct Apr : public Sys
 						vect2 v1 = bezier_tbl[i];
 						if ( cnt == 1 ) 
 						{
-							gra.Line( v0, v1, rgb(0.5,0.5,0.5));
+						//	gra.Line( v0, v1, rgb(0.5,0.5,0.5));
 						}
 						else
 						{
@@ -1285,7 +1287,13 @@ struct Apr : public Sys
 				static	double t = 0;
 				static	bool	dir = true;
 
+				int n = 0;
+				vect2 v = bezier_func( bezier_tbl[n+0], bezier_tbl[n+1], bezier_tbl[n+2], bezier_tbl[n+3], t );
+
+				gra.Circle( v, 6,rgb(1,0,0));
+
 				if ( dir ) t+=0.01; else t-=0.01;
+
 
 				if ( t >= 1.0 ) dir = !dir;
 				if ( t <= 0.0 ) dir = !dir;
