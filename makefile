@@ -15,13 +15,15 @@ LIBS = \
 	 -lgdi32
 
 FLGS = \
-	-c \
+	-c -g \
 	-std=c++14 \
 	-Wall -Werror\
-	-Wno-unused-variable \
-	-Wno-unused-function \
-	-Wno-unused-value \
-	-Wno-unused-but-set-variable \
+	-Wno-unused \
+
+#	-Wno-unused-variable \
+#	-Wno-unused-function \
+#	-Wno-unused-value \
+#	-Wno-unused-but-set-variable \
 
 #	-g \
 #	-m64 \

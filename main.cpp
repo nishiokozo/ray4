@@ -144,7 +144,7 @@ public:
 		sur.stat  = Surface::STAT_NONE;
 		
 		//	球
-		for ( unsigned int i = 0 ; i < m_tblSphere.size() ; i++ )
+		for ( int i = 0 ; i < (signed)m_tblSphere.size() ; i++ )
 		{
 			PrimSphere&	obj = *m_tblSphere[i];
 
@@ -206,7 +206,7 @@ public:
 		}
 
 		//	床
-		for ( unsigned int i = 0 ; i < m_tblPlate.size() ; i++ )
+		for ( int i = 0 ; i < (signed)m_tblPlate.size() ; i++ )
 		{
 			PrimPlate&	obj = *m_tblPlate[i];
 
@@ -757,6 +757,34 @@ struct Apr : public Sys
 		}
 
 	} mc;
+		vector<vect3> box_vert=
+		{
+			{	-1,	 1,	-1	},
+			{	 1,	 1,	-1	},
+			{	-1,	-1,	-1	},
+			{	 1,	-1,	-1	},
+			{	-1,	 1,	 1	},
+			{	 1,	 1,	 1	},
+			{	-1,	-1,	 1	},
+			{	 1,	-1,	 1	},
+		};
+		vector<vect3> box_disp;
+
+		vector<ivect2>	box_edge
+		{
+			{	0,	1	},
+			{	1,	3	},
+			{	3,	2	},
+			{	2,	0	},
+			{	4,	5	},
+			{	5,	7	},
+			{	7,	6	},
+			{	6,	4	},
+			{	0,	4	},
+			{	1,	5	},
+			{	2,	6	},
+			{	3,	7	},
+		};
 
 	//------------------------------------------------------------------------------
 	main()
@@ -799,24 +827,6 @@ struct Apr : public Sys
 			figCircle.edge.emplace_back( (ivect2){ s-1,0 } );
 		}
 
-/*
-		// ベジェ
-		vector<vect2> bezier_pos=
-		{
-			#define X 40
-			#define Y 120
-			vect2( 10+X, 10+50+Y),
-			vect2( 10+X,100+50+Y),
-			vect2(200+X, 10+Y),
-			vect2(200+X,100+Y),
-			#undef X
-			#undef Y
-		};
-		for ( vect2& v : bezier_pos )	// マーカー対象に位置を登録
-		{
-			mc.tblMarker.emplace_back( &gra, &figCircle, v, rad(-90) );
-		}
-*/
 
 		// カトマル曲線
 		auto catmull_func = []( double t, const vect2 P0, const vect2 P1, const vect2 P2, const vect2 P3 )
@@ -1003,34 +1013,6 @@ struct Apr : public Sys
 
 
 		// 箱
-		vector<vect3> box_vert=
-		{
-			{	-1,	 1,	-1	},
-			{	 1,	 1,	-1	},
-			{	-1,	-1,	-1	},
-			{	 1,	-1,	-1	},
-			{	-1,	 1,	 1	},
-			{	 1,	 1,	 1	},
-			{	-1,	-1,	 1	},
-			{	 1,	-1,	 1	},
-		};
-		vector<vect3> box_disp;
-
-		vector<ivect2>	box_edge
-		{
-			{	0,	1	},
-			{	1,	3	},
-			{	3,	2	},
-			{	2,	0	},
-			{	4,	5	},
-			{	5,	7	},
-			{	7,	6	},
-			{	6,	4	},
-			{	0,	4	},
-			{	1,	5	},
-			{	2,	6	},
-			{	3,	7	},
-		};
 
 
 
@@ -1202,16 +1184,14 @@ struct Apr : public Sys
 					double st = 1/div;
 
 //					for ( unsigned int n = -1 ; n < catmull_tbl.size()-3+1 ; n++ )
-					for ( unsigned int n = 0 ; n < catmull_tbl.size()-3 ; n++ )
+					for ( int n = -1 ; n < (signed)catmull_tbl.size()-3+1 ; n++ )
 					{
-						unsigned int n0 = n;
-						unsigned int n1 = n+1;
-						unsigned int n2 = n+2;
-						unsigned int n3 = n+3;
-					
-						if ( n0 < 0 ) n0 = n1;
-						if ( n3 >= catmull_tbl.size() ) n3 = n2;
-					
+						int n0 = n;
+						int n1 = n+1;
+						int n2 = n+2;
+						int n3 = n+3;
+						if ( n0 < 0 ) n0 = 0;
+						if ( n3 >= (signed)catmull_tbl.size() ) n3 = n2;
 					
 						double t = st;
 						vect2 v0 = catmull_func(0, catmull_tbl[n0], catmull_tbl[n1], catmull_tbl[n2], catmull_tbl[n3] );
@@ -1237,7 +1217,7 @@ struct Apr : public Sys
 					double div = 20;
 					double st = 1/div;
 
-					for ( unsigned int n = 0 ; n < bezier_tbl.size()-3 ; n+=3 )
+					for ( int n = 0 ; n < (signed)bezier_tbl.size()-3 ; n+=3 )
 					{
 						double t  = st;
 						vect2 v0 = bezier_tbl[n+0];
@@ -1256,7 +1236,7 @@ struct Apr : public Sys
 				{// 補助ライン描画
 					int cnt = 0;
 					vect2 v0 = bezier_tbl[0];
-					for ( unsigned int i = 1 ; i < bezier_tbl.size() ; i++ )
+					for ( int i = 1 ; i < (signed)bezier_tbl.size() ; i++ )
 					{ 
 						vect2 v1 = bezier_tbl[i];
 						if ( cnt != 1 ) 
