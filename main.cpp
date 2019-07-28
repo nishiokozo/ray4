@@ -819,29 +819,39 @@ struct Apr : public Sys
 */
 
 		// カトマル曲線
-		vector<vect2> catmul_tblVert =
+		auto catmull_func = []( double t, const vect2 P0, const vect2 P1, const vect2 P2, const vect2 P3 )
+		{
+			//Catmull-Rom 曲線
+			// P(t)=P1*(2t^3-3t^2+1)+m0*(t^3-2t^2+t)+P2*(-2t^3+3t^2)+m1*(t^3-t^2)
+			// m0=(P2-P0)/2
+			// m1=(P3-P1)/2
+
+			vect2 m0 = (P2-P0)/2.0;
+			vect2 m1 = (P3-P1)/2.0;
+			vect2 P = P1*(2*t*t*t - 3*t*t +1) + m0*( t*t*t -2*t*t +t ) + P2*( -2*t*t*t + 3*t*t ) + m1*( t*t*t - t*t );
+
+			return P;
+		};
+		vector<vect2> catmull_tbl =
 		{
 			#define X 600
 			#define Y 50
 			vect2(X+ 0,Y  +0),
-			vect2(X+ 0,Y+ 20),
+//			vect2(X+ 0,Y+ 20),
 			vect2(X+50,Y+100),
-			vect2(X+ 0,Y+180),
+			vect2(X-50,Y+140),
+//			vect2(X+ 0,Y+180),
 			vect2(X+ 0,Y+200),
 			#undef X
 			#undef Y
 		};
-		vector<int>	catmull_tblConnect
-		{
-			0, 1, 2, 3, 4
-		};
-		for ( vect2& v : catmul_tblVert )	// マーカー対象に位置を登録
+		for ( vect2& v : catmull_tbl )	// マーカー対象に位置を登録
 		{
 			mc.tblMarker.emplace_back( &gra, &figCircle, v, rad(-90) );
 		}
 		
 		//3字曲線
-		auto bezier_func = [] ( vect2 P0, vect2 P1, vect2 P2, vect2 P3, double t )
+		auto bezier_func = [] ( double t, vect2 P0, vect2 P1, vect2 P2, vect2 P3 )
 		{
 			vect2 L0=(P1-P0)*t+P0;
 			vect2 L1=(P2-P1)*t+P1;
@@ -907,7 +917,7 @@ struct Apr : public Sys
 		vector<Joint> tblJoint;
 		tblJoint.reserve(1000);
 		vector<Bone> tblBone;
-		if(0)
+		if(1)
 		{	//	対△
 			int ox=200,oy=300;
 
@@ -922,7 +932,7 @@ struct Apr : public Sys
 			tblBone.emplace_back( tblJoint[1], tblJoint[3] );
 			tblBone.emplace_back( tblJoint[2], tblJoint[3] );
 		}
-		if(1)
+		if(0)
 		{	//	四角格子メッシュ
 			int ox=200,oy=300;
 			const int  W=40;
@@ -1183,75 +1193,57 @@ struct Apr : public Sys
 			double a = 80;
 			gra.Tri( vect2(55+a,10), vect2(10+a,100), vect2(100+a,100),rgb(1,1,0));
 
-/*			//ベジェ
-			gra.Bezier(bezier_pos[0],bezier_pos[1],bezier_pos[2],bezier_pos[3],rgb(1,1,1));
-			vect2 v0 = bezier_pos[0];
-			for ( unsigned int i = 1 ; i < bezier_pos.size() ; i++ )
-			{
-				vect2 v1 = bezier_pos[i];
-				if ( i==1 || i==3 ) gra.Line(v1,v0,rgb(0,1,0));
-				v0=v1;
-			}
-*/
-	
 			
 			// カトマル
 			{
-				auto catmull = []( double t, const vect2 P0, const vect2 P1, const vect2 P2, const vect2 P3 )
-				{
-					//Catmull-Rom 曲線
-					// P(t)=P1*(2t^3-3t^2+1)+m0*(t^3-2t^2+t)+P2*(-2t^3+3t^2)+m1*(t^3-t^2)
-					// m0=(P2-P0)/2
-					// m1=(P3-P1)/2
-
-					vect2 m0 = (P2-P0)/2.0;
-					vect2 m1 = (P3-P1)/2.0;
-					vect2 P = P1*(2*t*t*t - 3*t*t +1) + m0*( t*t*t -2*t*t +t ) + P2*( -2*t*t*t + 3*t*t ) + m1*( t*t*t - t*t );
-
-					return P;
-				};
-
 				// マーカースプライン変換表示
-				if ( catmull_tblConnect.size() >=4 )
 				{
-					for ( unsigned int i = 0 ; i < catmull_tblConnect.size()-3 ; i++ )
+					double div = 10;
+					double st = 1/div;
+
+//					for ( unsigned int n = -1 ; n < catmull_tbl.size()-3+1 ; n++ )
+					for ( unsigned int n = 0 ; n < catmull_tbl.size()-3 ; n++ )
 					{
-						double st = 0.1;
-
-						int n = catmull_tblConnect[i];
-						vect2 Q = catmull(0, catmul_tblVert[n], catmul_tblVert[n+1], catmul_tblVert[n+2], catmul_tblVert[n+3] );
-
-						for ( double t = st ; t < 1.0 ; t+=st)
+						unsigned int n0 = n;
+						unsigned int n1 = n+1;
+						unsigned int n2 = n+2;
+						unsigned int n3 = n+3;
+					
+						if ( n0 < 0 ) n0 = n1;
+						if ( n3 >= catmull_tbl.size() ) n3 = n2;
+					
+					
+						double t = st;
+						vect2 v0 = catmull_func(0, catmull_tbl[n0], catmull_tbl[n1], catmull_tbl[n2], catmull_tbl[n3] );
+						for ( int i = 0 ; i <div ; i++ )
 						{
-							vect2 P = catmull(t, catmul_tblVert[n], catmul_tblVert[n+1], catmul_tblVert[n+2], catmul_tblVert[n+3] );
-							gra.Line( P, Q, rgb(1,1,1));
-							Q=P;
+							vect2 v1 = catmull_func(t, catmull_tbl[n0], catmull_tbl[n1], catmull_tbl[n2], catmull_tbl[n3] );
+							gra.Line( v1, v0, rgb(1,1,1));
+							gra.Fill( v1-1,v1+3, rgb(1,1,1));
+							v0=v1;
+							t+=st;
+
 						}	
-							vect2 P = catmull(1, catmul_tblVert[n], catmul_tblVert[n+1], catmul_tblVert[n+2], catmul_tblVert[n+3] );
-							gra.Line( P, Q, rgb(1,1,1));
 							
 					}
 				}
 			}
 
-			// ベジェ 酸字曲線
+			// ベジェ 三次曲線
 			{
 			
 				
 				{//ベジェ計算＆描画
-					double lp = 20;
-					double st = 1/lp;
-					double t;
-					int n;
-					vect2 v0;
+					double div = 20;
+					double st = 1/div;
 
 					for ( unsigned int n = 0 ; n < bezier_tbl.size()-3 ; n+=3 )
 					{
-						t  = st;
-						v0 = bezier_tbl[n+0];
-						for ( int i = 1 ; i <= lp ; i++ )
+						double t  = st;
+						vect2 v0 = bezier_tbl[n+0];
+						for ( int i = 0 ; i < div ; i++ )
 						{
-							vect2 v1 = bezier_func( bezier_tbl[n+0], bezier_tbl[n+1], bezier_tbl[n+2], bezier_tbl[n+3], t );
+							vect2 v1 = bezier_func( t, bezier_tbl[n+0], bezier_tbl[n+1], bezier_tbl[n+2], bezier_tbl[n+3] );
 							gra.Line( v0,v1, rgb(1,1,1));
 							gra.Fill( v1-1,v1+3, rgb(1,1,1));
 							v0=v1;
@@ -1267,11 +1259,7 @@ struct Apr : public Sys
 					for ( unsigned int i = 1 ; i < bezier_tbl.size() ; i++ )
 					{ 
 						vect2 v1 = bezier_tbl[i];
-						if ( cnt == 1 ) 
-						{
-						//	gra.Line( v0, v1, rgb(0.5,0.5,0.5));
-						}
-						else
+						if ( cnt != 1 ) 
 						{
 							gra.Line( v0, v1, rgb(0,1,0));
 						}
@@ -1281,24 +1269,6 @@ struct Apr : public Sys
 				}
 
 			}
-
-			{
-		
-				static	double t = 0;
-				static	bool	dir = true;
-
-				int n = 0;
-				vect2 v = bezier_func( bezier_tbl[n+0], bezier_tbl[n+1], bezier_tbl[n+2], bezier_tbl[n+3], t );
-
-				gra.Circle( v, 6,rgb(1,0,0));
-
-				if ( dir ) t+=0.01; else t-=0.01;
-
-
-				if ( t >= 1.0 ) dir = !dir;
-				if ( t <= 0.0 ) dir = !dir;
-			}
-
 
 			// キーフレーム
 			struct Keyframe
@@ -1310,6 +1280,26 @@ struct Apr : public Sys
 				}
 			};
 			static vector<Keyframe> tblKeyframe;
+
+			static vect2 gv;
+			{
+		
+				static	double t = 0;
+				static	bool	dir = true;
+
+				int n = 0;
+				gv = bezier_func( t, bezier_tbl[n+0], bezier_tbl[n+1], bezier_tbl[n+2], bezier_tbl[n+3] );
+
+				gra.Circle( gv, 6,rgb(1,0,0));
+
+				if ( dir ) t+=0.01; else t-=0.01;
+
+
+				if ( t >= 1.0 ) dir = !dir;
+				if ( t <= 0.0 ) dir = !dir;
+			}
+
+
 
 
 Joint& tar = tblJoint[0];
@@ -1324,8 +1314,9 @@ Joint& tar = tblJoint[0];
 			}
 			if (keys.SPACE.hi) 
 			{
-				tar.pos = tblKeyframe[0].pos;
+//				tar.pos = tblKeyframe[0].pos;
 			}
+				tar.pos = gv;
 
 			// 入力
 

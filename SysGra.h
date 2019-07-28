@@ -2,62 +2,6 @@
 #include "geom.h"
 struct SysGra
 {
-/*
-	struct	PrimBezier
-	{
-		vect2	v0;
-		vect2	v1;
-		vect2	v2;
-		vect2	v3;
-		int		col;
-	};
-*/
-
-/*
-	struct	PrimTri 
-	{
-		int	col;
-		vect2	v0;
-		vect2	v1;
-		vect2	v2;
-	};
-	struct	PrimBox
-	{
-		int	col;
-		vect2	v0;
-		vect2	v1;
-	};
-	struct	PrimFill
-	{
-		int	col;
-		vect2	v0;
-		vect2	v1;
-	};
-	struct	PrimLine
-	{
-		int	col;
-		vect2	v0;
-		vect2	v1;
-	};
-	struct	PrimPset
-	{
-		int	col;
-		vect2	v;
-	};
-	struct	PrimCircle
-	{
-		int	col;
-		vect2	v0;
-		vect2	v1;
-	};
-	struct	PrimClr
-	{
-		int	col;
-		bool	bActive;
-	};
-
-*/
-
 
 	enum EnumType
 	{
@@ -79,14 +23,7 @@ struct SysGra
 //		int			width;
 //		int			height;
 
-//		vector<PrimBezier>	tblBezier;
-//		vector<PrimTri>		tblTri;
-//		vector<PrimBox>		tblBox;
-	//	vector<PrimFill>	tblFill;
-	//	vector<PrimLine>	tblLine;
-//		vector<PrimPset>	tblPset;
-//		vector<PrimCircle>	tblCircle;
-//		PrimClr				clr;
+
 
 		vector<vect2>		tblVect2;
 
@@ -108,9 +45,7 @@ struct SysGra
 
 	void Update() ;
 
-//	void	Clr( int col );
 
-//	void	Bezier( vect2 v0, vect2 v1, vect2 v2, vect2 v3, int col);
 	void	Tri( vect2 v0, vect2 v1, vect2 v2, int col);
 	void	Box( vect2 v0, vect2 v1, int col);
 	void	Fill( vect2 v0, vect2 v1, int col);
