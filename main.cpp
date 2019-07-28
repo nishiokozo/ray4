@@ -863,14 +863,25 @@ struct Apr : public Sys
 		//3字曲線
 		auto bezier_func = [] ( double t, vect2 P0, vect2 P1, vect2 P2, vect2 P3 )
 		{
+		#if 0
 			vect2 L0=(P1-P0)*t+P0;
 			vect2 L1=(P2-P1)*t+P1;
 			vect2 L2=(P3-P2)*t+P2;
 
-			vect2 M0=(L1-L0)*t+L0;
-			vect2 M1=(L2-L1)*t+L1;
+			vect2 M0=(((P2-P1)*t+P1)-((P1-P0)*t+P0))*t+((P1-P0)*t+P0);
+			vect2 M1=(((P3-P2)*t+P2)-((P2-P1)*t+P1))*t+((P2-P1)*t+P1);
 
 			vect2 Q=(M1-M0)*t+M0;
+		#else
+			double tt = t*t;
+			double ttt = tt*t;
+			vect2 Q=
+				 P3*  ttt
+				+P2*(-ttt*3 +tt*3)
+				+P1*( ttt*3 -tt*6 +t*3)
+				+P0*(-ttt   +tt*3 -t*3 +1)
+				;
+		#endif
 
 			return Q;
 		};
@@ -1183,7 +1194,6 @@ struct Apr : public Sys
 					double div = 10;
 					double st = 1/div;
 
-//					for ( unsigned int n = -1 ; n < catmull_tbl.size()-3+1 ; n++ )
 					for ( int n = -1 ; n < (signed)catmull_tbl.size()-3+1 ; n++ )
 					{
 						int n0 = n;
@@ -1267,16 +1277,42 @@ struct Apr : public Sys
 				static	double t = 0;
 				static	bool	dir = true;
 
-				int n = 0;
+				static int n = 0;
 				gv = bezier_func( t, bezier_tbl[n+0], bezier_tbl[n+1], bezier_tbl[n+2], bezier_tbl[n+3] );
+//				gv = catmull_func( t, catmull_tbl[n+0], catmull_tbl[n+0], catmull_tbl[n+1], catmull_tbl[n+2] );
 
 				gra.Circle( gv, 6,rgb(1,0,0));
 
 				if ( dir ) t+=0.01; else t-=0.01;
 
 
-				if ( t >= 1.0 ) dir = !dir;
-				if ( t <= 0.0 ) dir = !dir;
+				if ( t >= 1.0 ) 
+				{
+					if ( n+3 < (signed)bezier_tbl.size()-3 )
+					{
+						t = 0;
+						n+=3;
+					}
+					else
+					{
+						t = 1.0;
+						dir = !dir;
+					}
+				}
+				else
+				if ( t <= 0.0 ) 
+				{
+					if ( n >= 3 )
+					{
+						t = 1.0;
+						n-=3;
+					}
+					else
+					{
+						t = 0.0;
+						dir = !dir;
+					}
+				}
 			}
 
 
