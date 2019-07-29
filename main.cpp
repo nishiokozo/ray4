@@ -838,7 +838,8 @@ struct Apr : public Sys
 
 			vect2 m0 = (P2-P0)/2.0;
 			vect2 m1 = (P3-P1)/2.0;
-			vect2 P = P1*(2*t*t*t - 3*t*t +1) + m0*( t*t*t -2*t*t +t ) + P2*( -2*t*t*t + 3*t*t ) + m1*( t*t*t - t*t );
+			vect2 P =  P1*(  2*t*t*t - 3*t*t +1) + m0*( t*t*t -2*t*t +t )
+					 + P2*( -2*t*t*t + 3*t*t   ) + m1*( t*t*t - t*t );
 
 			return P;
 		};
@@ -863,13 +864,13 @@ struct Apr : public Sys
 		//3字曲線
 		auto bezier_func = [] ( double t, vect2 P0, vect2 P1, vect2 P2, vect2 P3 )
 		{
-		#if 0
+		#if 1
 			vect2 L0=(P1-P0)*t+P0;
 			vect2 L1=(P2-P1)*t+P1;
 			vect2 L2=(P3-P2)*t+P2;
 
-			vect2 M0=(((P2-P1)*t+P1)-((P1-P0)*t+P0))*t+((P1-P0)*t+P0);
-			vect2 M1=(((P3-P2)*t+P2)-((P2-P1)*t+P1))*t+((P2-P1)*t+P1);
+			vect2 M0=(L1-L0)*t+L0;
+			vect2 M1=(L2-L1)*t+L1;
 
 			vect2 Q=(M1-M0)*t+M0;
 		#else
@@ -1221,8 +1222,6 @@ struct Apr : public Sys
 
 			// ベジェ 三次曲線
 			{
-			
-				
 				{//ベジェ計算＆描画
 					double div = 20;
 					double st = 1/div;
@@ -1272,14 +1271,14 @@ struct Apr : public Sys
 			static vector<Keyframe> tblKeyframe;
 
 			static vect2 gv;
-			{
+			if(0)
+			{//ベジェアニメーション
 		
 				static	double t = 0;
 				static	bool	dir = true;
 
 				static int n = 0;
 				gv = bezier_func( t, bezier_tbl[n+0], bezier_tbl[n+1], bezier_tbl[n+2], bezier_tbl[n+3] );
-//				gv = catmull_func( t, catmull_tbl[n+0], catmull_tbl[n+0], catmull_tbl[n+1], catmull_tbl[n+2] );
 
 				gra.Circle( gv, 6,rgb(1,0,0));
 
@@ -1315,6 +1314,55 @@ struct Apr : public Sys
 				}
 			}
 
+			if(1)
+			{//カトマルアニメーション
+		
+				static	double t = 0;
+				static	bool	dir = true;
+
+				static int n = 0;
+				int n0 = n-1;
+				int n1 = n;
+				int n2 = n+1;
+				int n3 = n+2;
+				if ( n0<0 ) n0 = 0;
+				if ( n3>=(signed)catmull_tbl.size() ) n3 =n2;
+
+				gv = catmull_func( t, catmull_tbl[n0], catmull_tbl[n1], catmull_tbl[n2], catmull_tbl[n3] );
+
+				gra.Circle( gv, 6,rgb(1,0,0));
+
+				if ( dir ) t+=0.01; else t-=0.01;
+
+
+				if ( t >= 1.0 ) 
+				{
+					if ( n+1 < (signed)catmull_tbl.size()-1 )
+					{
+						t = 0;
+						n+=1;
+					}
+					else
+					{
+						t = 1.0;
+						dir = !dir;
+					}
+				}
+				else
+				if ( t <= 0.0 ) 
+				{
+					if ( n >= 1 )
+					{
+						t = 1.0;
+						n-=1;
+					}
+					else
+					{
+						t = 0.0;
+						dir = !dir;
+					}
+				}
+			}
 
 
 
