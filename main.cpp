@@ -529,8 +529,8 @@ struct Apr : public Sys
 
 	struct Marker// : vect2
 	{
-		const SysGra*	pgra;
-		const Figure*	pfig;
+		const SysGra&	pgra;
+		const Figure&	pfig;
 		vect2&	pos;
 		bool 	bRectSelected;		//	矩形選択中、選択＆非選択
 		bool 	bRectIn;			//	矩形選択中、矩形選択対象
@@ -540,7 +540,7 @@ struct Apr : public Sys
 		int		colNormal = rgb(1,1,0);
 		int		colSelected = rgb(1,0,0);
 
-		Marker( SysGra* _gra, Figure* _fig, vect2& v, double _th ) : pgra(_gra), pfig(_fig), pos(v)
+		Marker( SysGra& _gra, Figure& _fig, vect2& v, double _th ) : pgra(_gra), pfig(_fig), pos(v)
 		{
 			bSelected		= false;
 			bRectIn			= false;
@@ -548,7 +548,7 @@ struct Apr : public Sys
 			bAffectable		= false;
 			th				= _th;
 		}
-		Marker(const Marker& a) :pgra(a.pgra), pfig(a.pfig), pos(a.pos)
+		Marker(const Marker& a) : pgra(a.pgra), pfig(a.pfig), pos(a.pos)
 		{
 			bSelected		= a.bSelected;
 			bRectIn			= a.bRectIn;
@@ -568,11 +568,11 @@ struct Apr : public Sys
 			
 			if ( flg )			
 			{
-				pfig->draw( pos,th, colSelected );
+				pfig.draw( pos,th, colSelected );
 			}
 			else
 			{
-				pfig->draw( pos,th, colNormal );
+				pfig.draw( pos,th, colNormal );
 			}
 		
 		}
@@ -599,7 +599,7 @@ struct Apr : public Sys
 			}
 		}
 		//------------------------------------------------------------------------------
-		void funcMarkerController( Figure* pFigAdder, SysMouse& mouse, SysKeys& keys, SysGra& gra )
+		void funcMarkerController( Figure& fig, SysMouse& mouse, SysKeys& keys, SysGra& gra )
 		//------------------------------------------------------------------------------
 		{
 			static vect2 drag_start(0,0);
@@ -609,7 +609,7 @@ struct Apr : public Sys
 			// マーカー追加
 			if ( mouse.M.hi )
 			{
-				tblMarker.emplace_back( &gra, pFigAdder, mouse.pos, rad(0) );
+				tblMarker.emplace_back( gra, fig, mouse.pos, rad(0) );
 			}
 
 
@@ -829,7 +829,7 @@ struct Apr : public Sys
 		};
 		for ( vect2& v : catmull_tbl )	// マーカー対象に位置を登録
 		{
-			mc.tblMarker.emplace_back( &gra, &figCircle, v, rad(-90) );
+			mc.tblMarker.emplace_back( gra, figCircle, v, rad(-90) );
 		}
 		
 		//3字曲線
@@ -877,7 +877,7 @@ struct Apr : public Sys
 		};
 		for ( vect2& v : bezier_tbl )	// マーカー対象に位置を登録
 		{
-			mc.tblMarker.emplace_back( &gra, &figCircle, v, rad(-90) );
+			mc.tblMarker.emplace_back( gra, figCircle, v, rad(-90) );
 		}
 
 		//骨---------------------------------------
@@ -989,7 +989,7 @@ struct Apr : public Sys
 		}
 		for ( Joint2& j : tblJoint )	//マーカー対象に位置を登録
 		{
-			mc.tblMarker.emplace_back( &gra, &figCircle, j.pos, rad(-90) );
+			mc.tblMarker.emplace_back( gra, figCircle, j.pos, rad(-90) );
 		}
 
 		//人
@@ -1075,7 +1075,7 @@ struct Apr : public Sys
 		}
 		for ( Joint3& j : human_tblJoint )	//マーカー対象に位置を登録
 		{
-//			mc.tblMarker.emplace_back( &gra, &figCircle, j.pos, rad(-90) );
+//			mc.tblMarker.emplace_back( gra, figCircle, j.pos, rad(-90) );
 		}
 
 		
@@ -1478,7 +1478,7 @@ Joint2& tar = tblJoint[0];
 			}
 
 			// マーカー操作	
-			mc.funcMarkerController( &figCircle, mouse, keys, gra );
+			mc.funcMarkerController( figCircle, mouse, keys, gra );
 
 			// 関節速度
 			for ( Joint2& j : tblJoint )
