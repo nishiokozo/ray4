@@ -147,7 +147,7 @@ public:
 //	vect3( double _x, double _y, double _z ) { x = _x; y = _y; z = _z; };
 
 	vect3() :x(0),y(0),z(0){};
-	vect3( double f ) :x(f), y(f), z(z){};
+	vect3( double f ) :x(f), y(f), z(f){};
 	vect3( double _x, double _y, double _z) :x(_x), y(_y), z(_z){};
 
 //	vect3 abs() { return vect3( std::abs(x) , std::abs(y) ); }
