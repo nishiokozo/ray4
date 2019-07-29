@@ -527,10 +527,10 @@ struct Apr : public Sys
 
 	};
 
-	struct Marker// : vect2
+	struct Marker2
 	{
-		const SysGra&	pgra;
-		const Figure&	pfig;
+		const SysGra&	gra;
+		const Figure&	fig;
 		vect2&	pos;
 		bool 	bRectSelected;		//	矩形選択中、選択＆非選択
 		bool 	bRectIn;			//	矩形選択中、矩形選択対象
@@ -540,7 +540,7 @@ struct Apr : public Sys
 		int		colNormal = rgb(1,1,0);
 		int		colSelected = rgb(1,0,0);
 
-		Marker( SysGra& _gra, Figure& _fig, vect2& v, double _th ) : pgra(_gra), pfig(_fig), pos(v)
+		Marker2( SysGra& _gra, Figure& _fig, vect2& v, double _th ) : gra(_gra), fig(_fig), pos(v)
 		{
 			bSelected		= false;
 			bRectIn			= false;
@@ -548,7 +548,7 @@ struct Apr : public Sys
 			bAffectable		= false;
 			th				= _th;
 		}
-		Marker(const Marker& a) : pgra(a.pgra), pfig(a.pfig), pos(a.pos)
+		Marker2(const Marker2& a) : gra(a.gra), fig(a.fig), pos(a.pos)
 		{
 			bSelected		= a.bSelected;
 			bRectIn			= a.bRectIn;
@@ -556,7 +556,7 @@ struct Apr : public Sys
 			bAffectable 	= a.bAffectable;
 			th 				= a.th;
 		}	
-		const Marker&	operator=(Marker&& a){return a;}	
+		const Marker2&	operator=(Marker2&& a){return a;}	
 		void draw()
 		{
 			bool flg =  bSelected;
@@ -568,35 +568,36 @@ struct Apr : public Sys
 			
 			if ( flg )			
 			{
-				pfig.draw( pos,th, colSelected );
+				fig.draw( pos,th, colSelected );
 			}
 			else
 			{
-				pfig.draw( pos,th, colNormal );
+				fig.draw( pos,th, colNormal );
 			}
 		
 		}
 	};
 
+
+	
 	~Apr()
 	{
 	}
 
 	struct MarkerController
 	{
-		vector<Marker>	tblMarker;
-
+		vector<Marker2>	tblMarker2;
 		//------------------------------------------------------------------------------
-		void funcMarkerDraw()
+		void funcMarkerDraw2()
 		//------------------------------------------------------------------------------
 		{
-			for ( Marker m : tblMarker )
+			for ( Marker2 m : tblMarker2 )
 			{
 				m.draw();
 			}
 		}
 		//------------------------------------------------------------------------------
-		void funcMarkerController( Figure& fig, SysMouse& mouse, SysKeys& keys, SysGra& gra )
+		void funcMarkerController2( Figure& fig, SysMouse& mouse, SysKeys& keys, SysGra& gra )
 		//------------------------------------------------------------------------------
 		{
 			static vect2 drag_start(0,0);
@@ -606,14 +607,14 @@ struct Apr : public Sys
 			// マーカー追加
 			if ( mouse.M.hi )
 			{
-				tblMarker.emplace_back( gra, fig, mouse.pos, rad(0) );
+				tblMarker2.emplace_back( gra, fig, mouse.pos, rad(0) );
 			}
 
 
 			// マーカー削除
 			if  ( keys.CTRL.on && keys.X.hi )
 			{
-				for ( Marker& m : tblMarker )
+				for ( Marker2& m : tblMarker2 )
 				{
 					if ( m.bSelected )
 					{
@@ -621,11 +622,11 @@ struct Apr : public Sys
 					}
 				}
 
-				for ( int i = tblMarker.size()-1 ; i >= 0 ; i-- )
+				for ( int i = tblMarker2.size()-1 ; i >= 0 ; i-- )
 				{
-					if ( tblMarker[i].bAffectable )
+					if ( tblMarker2[i].bAffectable )
 					{
-							   tblMarker.erase(tblMarker.begin() +i);	
+							   tblMarker2.erase(tblMarker2.begin() +i);	
 					}
 				}
 			}
@@ -636,12 +637,12 @@ struct Apr : public Sys
 				struct
 				{
 					double	len;
-					Marker*	pmark;
+					Marker2*	pmark;
 					int		cnt;
 				} a = {99999,0,0};
 
 				// 最近マーカーを検索
-				for ( Marker& m : tblMarker )
+				for ( Marker2& m : tblMarker2 )
 				{
 					double len = (m.pos-mouse.pos).length();
 					if ( len < 20.0 && a.len > len )
@@ -670,7 +671,7 @@ struct Apr : public Sys
 					if ( a.pmark && a.pmark->bSelected == true ){}
 					else
 					{
-						for ( Marker& m : tblMarker )
+						for ( Marker2& m : tblMarker2 )
 						{
 							m.bSelected = false;
 						}
@@ -698,13 +699,13 @@ struct Apr : public Sys
 						vect2 v1 = max( drag_start, mouse.pos );
 						gra.Box( v0,v1, rgb(0,0.5,1));
 
-						for ( Marker& m : tblMarker )
+						for ( Marker2& m : tblMarker2 )
 						{
 							m.bRectIn = false;
 						}
 
 						// 矩形内マーカーを検索
-						for ( Marker& m : tblMarker )
+						for ( Marker2& m : tblMarker2 )
 						{
 							double len = (m.pos-mouse.pos).length();
 							if ( m.pos.x > v0.x && m.pos.x < v1.x && m.pos.y > v0.y && m.pos.y < v1.y )
@@ -724,7 +725,7 @@ struct Apr : public Sys
 					}
 					else
 					// マーカー移動
-					for ( Marker& m : tblMarker )
+					for ( Marker2& m : tblMarker2 )
 					{
 						if ( m.bSelected )
 						{
@@ -738,7 +739,7 @@ struct Apr : public Sys
 				if ( bDrag )
 				{
 					bDrag = false;
-					for ( Marker& m : tblMarker )
+					for ( Marker2& m : tblMarker2 )
 					{
 						if ( m.bRectIn )
 						{
@@ -832,7 +833,7 @@ struct Apr : public Sys
 		};
 		for ( vect2& v : catmull_tbl )	// マーカー対象に位置を登録
 		{
-			mc.tblMarker.emplace_back( gra, figCircle, v, rad(-90) );
+			mc.tblMarker2.emplace_back( gra, figCircle, v, rad(-90) );
 		}
 		
 		//3字曲線
@@ -880,7 +881,7 @@ struct Apr : public Sys
 		};
 		for ( vect2& v : bezier_tbl )	// マーカー対象に位置を登録
 		{
-			mc.tblMarker.emplace_back( gra, figCircle, v, rad(-90) );
+			mc.tblMarker2.emplace_back( gra, figCircle, v, rad(-90) );
 		}
 
 		//骨---------------------------------------
@@ -992,7 +993,7 @@ struct Apr : public Sys
 		}
 		for ( Joint2& j : tblJoint )	//マーカー対象に位置を登録
 		{
-			mc.tblMarker.emplace_back( gra, figCircle, j.pos, rad(-90) );
+			mc.tblMarker2.emplace_back( gra, figCircle, j.pos, rad(-90) );
 		}
 
 		//人
@@ -1000,7 +1001,8 @@ struct Apr : public Sys
 		{
 			vect3 pos;
 			vect3 tension;
-			vect3 disp;
+			vect3 world;
+			vect2 disp;
 			double len;
 			Joint3( vect3 v )
 			{
@@ -1075,12 +1077,24 @@ struct Apr : public Sys
 		}
 		for ( Joint3& j : human_tblJoint )	//マーカー対象に位置を登録
 		{
-//			mc.tblMarker.emplace_back( gra, figCircle, j.pos, rad(-90) );
+			mc.tblMarker2.emplace_back( gra, figCircle, j.disp, rad(-90) );
 		}
 		vector<vect3> human_disp;
 
 		
+		struct Camera
+		{
+			vect3	pos;
+			vect3	at;
+			vect3	up;
+			mat44	mat;
+			Camera( vect3 _pos, vect3 _at, vect3 _up ) : pos(_pos), at(_at), up(_up)
+			{
+				mat.LookAt( _pos, _at, _up );
+			}  		
+		};
 		
+		Camera cam = Camera( vect3( 0,0,-10), vect3( 0, 0, 0 ), vect3( 0,-1, 0) ); 
 
 		// 箱
 		vector<vect3> box_vert=
@@ -1227,10 +1241,10 @@ struct Apr : public Sys
 			
 			
 			static	double	val=45;
-			if (keys.Q.rep) {val--;cout << val <<" "<<1/tan(rad(val)) << endl; }
-			if (keys.A.rep) {val++;cout << val <<" "<<1/tan(rad(val)) << endl; }
-			if (keys.W.rep) {val-=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
-			if (keys.S.rep) {val+=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
+//			if (keys.Q.rep) {val--;cout << val <<" "<<1/tan(rad(val)) << endl; }
+//			if (keys.A.rep) {val++;cout << val <<" "<<1/tan(rad(val)) << endl; }
+			if (keys.R.rep) {val-=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
+			if (keys.F.rep) {val+=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
 
 			val += -mouse.wheel/30;
 
@@ -1256,95 +1270,6 @@ struct Apr : public Sys
 				double y1 = n.y/(n.z+sz)	*sc	+128;
 				gra.Line( vect2(x0,y0), vect2(x1,y1),rgb(0,1,1));
 
-			}
-
-			// Human
-			for ( int i = 0 ; i < 1 ; i++ )
-			{
-				// 骨コリジョン 張力計算
-				for ( Bone3 b : human_tblBone )
-				{
-					vect3 v = b.j1.pos - b.j0.pos;
-					double l = v.length() - b.length;
-					double w = 0;
-					vect3 va  =	v.normalize()*l;
-					b.j0.tension += va/3;
-					b.j1.tension -= va/3;
-
-				}
-
-				// 張力解消
-				for ( Joint3& a : human_tblJoint )
-				{
-					a.pos += a.tension;
-					a.tension=0;
-				}
-			}
-			{
-				vect2 ofs(100,200);
-				double sc=50.0;
-				// Human 骨描画 2D
-				for ( Bone3 b : human_tblBone )
-				{
-					vect2 v0 = vect2( b.j0.pos.x, b.j0.pos.y )*sc+ofs;
-					vect2 v1 = vect2( b.j1.pos.x, b.j1.pos.y )*sc+ofs;
-					gra.Line( v0, v1, rgb( 1,1,1 ) );
-				}
-				// Human 関節描画 2D
-				for ( Joint3& a : human_tblJoint )
-				{
-					vect2 v0 = vect2( a.pos.x, a.pos.y )*sc+ofs;
-			//		gra.Circle( v0, 4, rgb( 0,1,0 ) );
-				}
-			}
-			
-			// Human pers
-			for ( Joint3& j : human_tblJoint )
-			{
-				double	x,y,z;
-				//	右手系座標系
-				//	右手ねじ周り
-				//	roll	:z	奥+
-				//	pitch	:x	右+
-				//	yaw		:y	下+
-
-				rx+=rad(0.01);
-				ry+=rad(0.02);
-				rz+=rad(0.03);
-				mat44	rotx;
-				mat44	roty;
-				mat44	rotz;
-				rotx.setRotateX(rx);
-				roty.setRotateY(ry);
-				rotz.setRotateZ(rz);
-				vect3 v= rotx * roty * rotz *j.pos ;
-				v.z+=pz;
-
-				j.disp = v;
-			}
-
-			// Human 描画
-			for ( Bone3 b : human_tblBone )
-			{
-				int ox=200, oy=300;
-			
-				const vect3& p = b.j0.disp;
-				const vect3& n = b.j1.disp;
-				double	x,y,z;
-				
-				double	fovy = rad(val);	//	画角
-				//画角から投影面パラメータを求める
-				double	sc = m.height/2;
-				double	sz = 1/tan(fovy/2);
-
-				//pers
-				double x0 = p.x/(p.z+sz)	*sc	+ox;
-				double y0 = p.y/(p.z+sz)	*sc	+oy;
-				double x1 = n.x/(n.z+sz)	*sc	+ox;
-				double y1 = n.y/(n.z+sz)	*sc	+oy;
-				gra.Line( vect2(x0,y0), vect2(x1,y1),rgb(1,1,1));
-
-//cout<< p.x << " " << p.y << endl;
 			}
 
 
@@ -1533,6 +1458,13 @@ struct Apr : public Sys
 			}
 
 
+			//=================================
+			// 入力
+			//=================================
+
+			// マーカー操作	
+			mc.funcMarkerController2( figCircle, mouse, keys, gra );
+
 Joint2& tar = tblJoint[0];
 
 			// キーフレーム追加
@@ -1551,8 +1483,10 @@ Joint2& tar = tblJoint[0];
 				tar.pos = gv;
 
 
-			// 入力
 
+			//=================================
+			// 2D骨力
+			//=================================
 			// 慣性移動
 			for ( Joint2& a : tblJoint )
 			{
@@ -1560,10 +1494,6 @@ Joint2& tar = tblJoint[0];
 //				a.accell*=0.90;
 			}
 
-			// マーカー操作	
-			mc.funcMarkerController( figCircle, mouse, keys, gra );
-
-			// 関節速度
 			for ( Joint2& j : tblJoint )
 			{
 //				j.mov = ( j.pos - j.prev );
@@ -1621,8 +1551,102 @@ else
 				gra.Line( v0, v1, rgb( 1,1,1 ) );
 			}
 
+
+			//=================================
+			// Human
+			//=================================
+			for ( int i = 0 ; i < 1 ; i++ )
+			{
+				// 骨コリジョン 張力計算
+				for ( Bone3 b : human_tblBone )
+				{
+					vect3 v = b.j1.pos - b.j0.pos;
+					double l = v.length() - b.length;
+					double w = 0;
+					vect3 va  =	v.normalize()*l;
+					b.j0.tension += va/3;
+					b.j1.tension -= va/3;
+
+				}
+
+				// 張力解消
+				for ( Joint3& a : human_tblJoint )
+				{
+					a.pos += a.tension;
+					a.tension=0;
+				}
+			}
+
+			if ( keys.ALT.on )
+			{
+				cam.mat.RotateY( rad( mouse.mov.x)  );
+			}
+			if ( keys.W.rep ) cam.mat.AddTranslate( vect3( 0,0,0.5) );
+			if ( keys.S.rep ) cam.mat.AddTranslate( vect3( 0,0,-0.5) );
+			if ( keys.A.rep ) cam.mat.AddTranslate( vect3(-0.5,0,0) );
+			if ( keys.D.rep ) cam.mat.AddTranslate( vect3( 0.5,0,0) );
+
+
+			// Human pers
+			static struct
+			{
+				vect3 rot = vect3(0,0,0);
+			} human;
+			for ( Joint3& j : human_tblJoint )
+			{
+				double	x,y,z;
+				//	右手系座標系
+				//	右手ねじ周り
+				//	roll	:z	奥+
+				//	pitch	:x	右+
+				//	yaw		:y	下+
+
+				human.rot.y=rad(45);
+				mat44	rotx;
+				mat44	roty;
+				mat44	rotz;
+				rotx.setRotateX(human.rot.x);
+				roty.setRotateY(human.rot.y);
+				rotz.setRotateZ(human.rot.z);
+				vect3 v= rotx * roty * rotz *j.pos *cam.mat;
+				v.z+=pz;
+
+				j.world = v;
+
+				{
+					double ox=200,oy=300;
+				
+					const vect3& v = j.world;
+					
+					double	fovy = rad(val);	//	画角
+					//画角から投影面パラメータを求める
+					double	sc = m.height/2*3;
+					double	sz = 1/tan(fovy/2);
+
+					j.disp.x = v.x/(v.z+sz)	*sc	+ox;
+					j.disp.y = v.y/(v.z+sz)	*sc	+oy;
+				}				
+
+			}
+
+			// Human 描画
+			for ( Bone3 b : human_tblBone )
+			{
+				int ox=200, oy=300;
+			
+				const vect2& p = b.j0.disp;
+				const vect2& n = b.j1.disp;
+				gra.Line( p,n,rgb(1,1,1));
+			}
+			for ( const Joint3& j : human_tblJoint )
+			{
+//				gra.Fill( j.disp-3, j.disp+3,rgb(1,1,1));
+			}
+
+
+
 			// マーカー表示
-			mc.funcMarkerDraw();
+			mc.funcMarkerDraw2();
 //			for ( Joint2 j : tblJoint ) gra.Circle( j.pos, 4, rgb(0,1,0));
 
 

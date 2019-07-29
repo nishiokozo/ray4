@@ -222,7 +222,7 @@ extern vect3	mix( double f, vect3 a, vect3 b );
 extern double	mod( double a, double b );
 extern double	length( vect3 a );
 extern double	length( vect3 a, vect3 b );
-extern vect3	normalizXe( vect3 a );
+//extern vect3	normalize( vect3 a );
 extern vect3	normalize( vect3 a );
 
 
@@ -379,6 +379,12 @@ public:
 		m[3][0] = 0.0f;	m[3][1] = 0.0f;	m[3][2] = 0.0f;	m[3][3] = 1.0f;
 	}
 	
+	void AddTranslate( vect3 pos )
+	{
+		m[3][0] += pos.x;
+		m[3][1] += pos.y;
+		m[3][2] += pos.z;
+	}
 	void SetTranslate( vect3 pos )
 	{
 		m[3][0] = pos.x;
@@ -435,7 +441,7 @@ public:
 
 	void LookAt( vect3 pos, vect3 at, vect3 up )
 	{
-		vect3	z = normalizXe(at-pos);
+		vect3	z = normalize(at-pos);
 		vect3	x = cross( up, z );
 		vect3	y = cross( z, x );
 	
