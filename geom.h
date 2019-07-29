@@ -94,7 +94,7 @@ public:
 	vect2( double f ) :x(f),y(f){}
 	vect2( double _x, double _y) :x(_x),y(_y){}
 
-	vect2 abs() { return vect2( std::abs(x) , std::abs(y) ); }
+//	vect2 abs() { return vect2( std::abs(x) , std::abs(y) ); }
 	vect2 normalize() { return (*this)/length(); }
 	double length() { return sqrt( x*x + y*y ); }
 
@@ -138,13 +138,21 @@ public:
 class vect3
 {
 public:
-	union { double	x;	double	r;	 };
-	union { double	y;	double	g;	 }; 
-	union {	double	z;	double  b;   };
+	union { double	x, r; };
+	union { double	y, g; }; 
+	union {	double	z, b; };
 
-	vect3(){};
-	vect3( double a ) { x = a; y = a; z = a; };
-	vect3( double _x, double _y, double _z ) { x = _x; y = _y; z = _z; };
+//	vect3(){};
+//	vect3( double a ) { x = a; y = a; z = a; };
+//	vect3( double _x, double _y, double _z ) { x = _x; y = _y; z = _z; };
+
+	vect3() :x(0),y(0),z(0){};
+	vect3( double f ) :x(f), y(f), z(z){};
+	vect3( double _x, double _y, double _z) :x(_x), y(_y), z(_z){};
+
+//	vect3 abs() { return vect3( std::abs(x) , std::abs(y) ); }
+	vect3 normalize() { return (*this)/length(); }
+	double length() { return sqrt( x*x + y*y + z*z ); }
 
 	vect3 operator*=( vect3 v ) { x *= v.x; y *= v.y; z *= v.z;  return *this; }
 	vect3 operator/=( vect3 v ) { x /= v.x; y /= v.y; z /= v.z;  return *this; }
@@ -166,12 +174,12 @@ public:
 	friend	vect3 operator+( double f, vect3 v )  { vect3	ret; ret.x = f + v.x; ret.y = f + v.y; ret.z = f + v.z;  return ret; }
 
 
-	void Print()
+	void dump()
 	{
 		printf("(vect3)%9.6f %9.6f %9.6f\n", x, y, z );
 	}
 
-	void Print( const char* str )
+	void dump( const char* str )
 	{
 		printf("%s<%9.6f %9.6f %9.6f>\n", str, x, y, z );
 	}
