@@ -128,7 +128,7 @@ public:
 	friend	vect2 operator+( double f, vect2 v )  { return vect2( f + v.x, f + v.y ); }
 	friend	vect2 operator-( double f, vect2 v )  { return vect2( f - v.x, f - v.y ); }
 
-	void dump()
+	void dump() const
 	{
 		printf("(vect2)%9.6f %9.6f\n", x, y );
 	}
@@ -170,16 +170,21 @@ public:
 	vect3 operator*( double f ) const { vect3	ret; ret.x = x * f; ret.y = y * f; ret.z = z * f; return ret; }
 	vect3 operator/( double f ) const { double a = 1.0f / f; vect3	ret; ret.x = x * a; ret.y = y * a; ret.z = z * a; return ret; }
 
-	friend	vect3 operator*( double f, vect3 v )  { vect3	ret; ret.x = f * v.x; ret.y = f * v.y; ret.z = f * v.z;  return ret; }
-	friend	vect3 operator+( double f, vect3 v )  { vect3	ret; ret.x = f + v.x; ret.y = f + v.y; ret.z = f + v.z;  return ret; }
+//	friend	vect3 operator*( double f, vect3 v )  { vect3	ret; ret.x = f * v.x; ret.y = f * v.y; ret.z = f * v.z;  return ret; }
+//	friend	vect3 operator+( double f, vect3 v )  { vect3	ret; ret.x = f + v.x; ret.y = f + v.y; ret.z = f + v.z;  return ret; }
+
+	friend	vect3 operator*( double f, vect3 v )  { return vect3( f * v.x, f * v.y, f * v.z ); }
+	friend	vect3 operator/( double f, vect3 v )  { return vect3( f / v.x, f / v.y, f / v.z ); }
+	friend	vect3 operator+( double f, vect3 v )  { return vect3( f + v.x, f + v.y, f + v.z ); }
+	friend	vect3 operator-( double f, vect3 v )  { return vect3( f - v.x, f - v.y, f - v.z ); }
 
 
-	void dump()
+	void dump() const
 	{
 		printf("(vect3)%9.6f %9.6f %9.6f\n", x, y, z );
 	}
 
-	void dump( const char* str )
+	void dump( const char* str ) const
 	{
 		printf("%s<%9.6f %9.6f %9.6f>\n", str, x, y, z );
 	}

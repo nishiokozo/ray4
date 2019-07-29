@@ -578,9 +578,6 @@ struct Apr : public Sys
 		}
 	};
 
-	Apr( const char* name, int pos_x, int pos_y, int width, int height ) : Sys( name, pos_x, pos_y, width, height )
-	{
-	}
 	~Apr()
 	{
 	}
@@ -757,11 +754,19 @@ struct Apr : public Sys
 		}
 
 	} mc;
+
+
+	//------------------------------------------------------------------------------
+	Apr( const char* name, int pos_x, int pos_y, int width, int height ) : Sys( name, pos_x, pos_y, width, height )
+	//------------------------------------------------------------------------------
+	{
+	}
+
 	//------------------------------------------------------------------------------
 	main()
 	//------------------------------------------------------------------------------
 	{
-		Figure figArrow(gra);
+		Figure figArrow=Figure(gra);
 		figArrow.vert.emplace_back( (vect2){   0,20*tan(rad(60))	-10*tan(rad(30)) } );
 		figArrow.vert.emplace_back( (vect2){-10,  0 	    	   	-10*tan(rad(30)) } );
 		figArrow.vert.emplace_back( (vect2){ 10,  0 				-10*tan(rad(30)) } );
@@ -770,8 +775,7 @@ struct Apr : public Sys
 		figArrow.edge.emplace_back( (ivect2){ 2,0 } );
 		figArrow.col = rgb(0,0.5,1);
 
-
-		Figure figTriangle(gra);
+		Figure figTriangle=Figure(gra);
 		figTriangle.vert.emplace_back( (vect2){   0,100*tan(rad(60))	-100*tan(rad(30)) } );
 		figTriangle.vert.emplace_back( (vect2){-100,  0 	    	   	-100*tan(rad(30)) } );
 		figTriangle.vert.emplace_back( (vect2){ 100,  0 				-100*tan(rad(30)) } );
@@ -780,7 +784,7 @@ struct Apr : public Sys
 		figTriangle.edge.emplace_back( (ivect2){ 2,0 } );
 		figTriangle.col = rgb(0,1,1);
 
-		Figure figCircle(gra);
+		Figure figCircle=Figure(gra);
 		{
 			int s=0;
 			for ( int i = 0 ; i < 360 ; i+=45 )
@@ -797,7 +801,6 @@ struct Apr : public Sys
 			}
 			figCircle.edge.emplace_back( (ivect2){ s-1,0 } );
 		}
-
 
 		// カトマル曲線
 		auto catmull_func = []( double t, const vect2 P0, const vect2 P1, const vect2 P2, const vect2 P3 )
@@ -997,6 +1000,7 @@ struct Apr : public Sys
 		{
 			vect3 pos;
 			vect3 tension;
+			vect3 disp;
 			double len;
 			Joint3( vect3 v )
 			{
@@ -1018,29 +1022,25 @@ struct Apr : public Sys
 		human_tblJoint.reserve(1000);
 		vector<Bone3> human_tblBone;
 		{	//	人
-			int ox=200,oy=200;
+			double ox=0,oy=-80,os=0.01;
 
-//			human_tblJoint.emplace_back( vect3( ox,oy, 0) );
-////			human_tblJoint.emplace_back( vect3( ox-30,oy+80, 0) );
-	//		human_tblJoint.emplace_back( vect3( ox+30,oy+80, 0) );
-	//		human_tblJoint.emplace_back( vect3( ox+0 ,oy+160, 0) );
+			human_tblJoint.emplace_back( os*vect3( ox-10,	oy- 20,	0 )	);//0
+			human_tblJoint.emplace_back( os*vect3( ox+10,	oy- 20,	0 )	);//1
+			human_tblJoint.emplace_back( os*vect3( ox+ 0,	oy+  0,	0 )	);//2
+			human_tblJoint.emplace_back( os*vect3( ox-30,	oy+  0,	0 )	);//3
+			human_tblJoint.emplace_back( os*vect3( ox+30,	oy+  0,	0 )	);//4
+			human_tblJoint.emplace_back( os*vect3( ox+ 0,	oy+ 60,	0 )	);//5
+			human_tblJoint.emplace_back( os*vect3( ox-20,	oy+ 90,	0 )	);//6
+			human_tblJoint.emplace_back( os*vect3( ox+20,	oy+ 90,	0 )	);//7
+			human_tblJoint.emplace_back( os*vect3( ox-20,	oy+150,	0 )	);//8
+			human_tblJoint.emplace_back( os*vect3( ox-20,	oy+210,	0 )	);//9
+			human_tblJoint.emplace_back( os*vect3( ox+20,	oy+150,	0 )	);//10
+			human_tblJoint.emplace_back( os*vect3( ox+20,	oy+210,	0 )	);//11
+			human_tblJoint.emplace_back( os*vect3( ox-30,	oy+ 50,	0 )	);//12
+			human_tblJoint.emplace_back( os*vect3( ox-30,	oy+100,	0 )	);//13
+			human_tblJoint.emplace_back( os*vect3( ox+30,	oy+ 50,	0 )	);//14
+			human_tblJoint.emplace_back( os*vect3( ox+30,	oy+100,	0 )	);//15
 
-			human_tblJoint.emplace_back( vect3( ox-10,	oy- 20,	0 )	);//0
-			human_tblJoint.emplace_back( vect3( ox+10,	oy- 20,	0 )	);//1
-			human_tblJoint.emplace_back( vect3( ox+ 0,	oy+  0,	0 )	);//2
-			human_tblJoint.emplace_back( vect3( ox-30,	oy+  0,	0 )	);//3
-			human_tblJoint.emplace_back( vect3( ox+30,	oy+  0,	0 )	);//4
-			human_tblJoint.emplace_back( vect3( ox+ 0,	oy+ 60,	0 )	);//5
-			human_tblJoint.emplace_back( vect3( ox-20,	oy+ 90,	0 )	);//6
-			human_tblJoint.emplace_back( vect3( ox+20,	oy+ 90,	0 )	);//7
-			human_tblJoint.emplace_back( vect3( ox-20,	oy+150,	0 )	);//8
-			human_tblJoint.emplace_back( vect3( ox-20,	oy+210,	0 )	);//9
-			human_tblJoint.emplace_back( vect3( ox+20,	oy+150,	0 )	);//10
-			human_tblJoint.emplace_back( vect3( ox+20,	oy+210,	0 )	);//11
-			human_tblJoint.emplace_back( vect3( ox-30,	oy+ 50,	0 )	);//12
-			human_tblJoint.emplace_back( vect3( ox-30,	oy+100,	0 )	);//13
-			human_tblJoint.emplace_back( vect3( ox+30,	oy+ 50,	0 )	);//14
-			human_tblJoint.emplace_back( vect3( ox+30,	oy+100,	0 )	);//15
 
 
 			human_tblBone.emplace_back( human_tblJoint[0], human_tblJoint[1] );
@@ -1077,6 +1077,7 @@ struct Apr : public Sys
 		{
 //			mc.tblMarker.emplace_back( gra, figCircle, j.pos, rad(-90) );
 		}
+		vector<vect3> human_disp;
 
 		
 		
@@ -1113,10 +1114,9 @@ struct Apr : public Sys
 
 
 
-		double	rx = rad(0);
-		double	ry = rad(0);
-		double	rz = rad(0);
 
+
+		//===========================================================================
 		while( Update() )
 		{
 	 		static int py=0;
@@ -1124,28 +1124,24 @@ struct Apr : public Sys
 
 			gra.Clr(rgb(0.3,0.3,0.3));
 //			gra.Fill(vect2(0,0),vect2(m.width,m.height),rgb(0.3,0.3,0.3));
-			
+
+
+			// レイトレ
 			//raytrace( gra, py++ );
 			if ( py >= m.height ) py=0;
 
-			//	move
-	//		rx += rad(0.2);	
-	//		rz += rad(1);	
-	//		ry += rad(0.5);	
+				
 
+			// 箱
+			static	double	rx = rad(0);
+			static	double	ry = rad(0);
+			static	double	rz = rad(0);
 			double pz =4;
-
-
 			//calc rotate
 			box_disp.clear();
 			for ( vect3 v : box_vert )
 			{
-	//			double x = v.x;
-	//			double y = v.y;
-	//			double z = v.z;
-
 				double	x,y,z;
-
 
 	#if 0
 				//rz
@@ -1240,14 +1236,11 @@ struct Apr : public Sys
 
 			//calc pers 
 
-			// 点
-			gra.Pset(vect2(10,10),rgb(1,1,1));
-
 			// 箱
 			for ( ivect2 e : box_edge )
 			{
-				vect3& p = box_disp[e.p];
-				vect3& n = box_disp[e.n];
+				const vect3& p = box_disp[e.p];
+				const vect3& n = box_disp[e.n];
 
 				double	x,y,z;
 				
@@ -1265,12 +1258,102 @@ struct Apr : public Sys
 
 			}
 
-			gra.Tri( vect2(55,10), vect2(10,100), vect2(100,100),rgb(1,1,0));
+			// Human
+			for ( int i = 0 ; i < 1 ; i++ )
+			{
+				// 骨コリジョン 張力計算
+				for ( Bone3 b : human_tblBone )
+				{
+					vect3 v = b.j1.pos - b.j0.pos;
+					double l = v.length() - b.length;
+					double w = 0;
+					vect3 va  =	v.normalize()*l;
+					b.j0.tension += va/3;
+					b.j1.tension -= va/3;
 
-			gra.Tri( vect2(55,10), vect2(10,100), vect2(100,100),rgb(1,1,0));
+				}
 
-			double a = 80;
-			gra.Tri( vect2(55+a,10), vect2(10+a,100), vect2(100+a,100),rgb(1,1,0));
+				// 張力解消
+				for ( Joint3& a : human_tblJoint )
+				{
+					a.pos += a.tension;
+					a.tension=0;
+				}
+			}
+			{
+				vect2 ofs(100,200);
+				double sc=50.0;
+				// Human 骨描画 2D
+				for ( Bone3 b : human_tblBone )
+				{
+					vect2 v0 = vect2( b.j0.pos.x, b.j0.pos.y )*sc+ofs;
+					vect2 v1 = vect2( b.j1.pos.x, b.j1.pos.y )*sc+ofs;
+					gra.Line( v0, v1, rgb( 1,1,1 ) );
+				}
+				// Human 関節描画 2D
+				for ( Joint3& a : human_tblJoint )
+				{
+					vect2 v0 = vect2( a.pos.x, a.pos.y )*sc+ofs;
+			//		gra.Circle( v0, 4, rgb( 0,1,0 ) );
+				}
+			}
+			
+			// Human pers
+			for ( Joint3& j : human_tblJoint )
+			{
+				double	x,y,z;
+				//	右手系座標系
+				//	右手ねじ周り
+				//	roll	:z	奥+
+				//	pitch	:x	右+
+				//	yaw		:y	下+
+
+				rx+=rad(0.01);
+				ry+=rad(0.02);
+				rz+=rad(0.03);
+				mat44	rotx;
+				mat44	roty;
+				mat44	rotz;
+				rotx.setRotateX(rx);
+				roty.setRotateY(ry);
+				rotz.setRotateZ(rz);
+				vect3 v= rotx * roty * rotz *j.pos ;
+				v.z+=pz;
+
+				j.disp = v;
+			}
+
+			// Human 描画
+			for ( Bone3 b : human_tblBone )
+			{
+				int ox=200, oy=300;
+			
+				const vect3& p = b.j0.disp;
+				const vect3& n = b.j1.disp;
+				double	x,y,z;
+				
+				double	fovy = rad(val);	//	画角
+				//画角から投影面パラメータを求める
+				double	sc = m.height/2;
+				double	sz = 1/tan(fovy/2);
+
+				//pers
+				double x0 = p.x/(p.z+sz)	*sc	+ox;
+				double y0 = p.y/(p.z+sz)	*sc	+oy;
+				double x1 = n.x/(n.z+sz)	*sc	+ox;
+				double y1 = n.y/(n.z+sz)	*sc	+oy;
+				gra.Line( vect2(x0,y0), vect2(x1,y1),rgb(1,1,1));
+
+//cout<< p.x << " " << p.y << endl;
+			}
+
+
+			// 点
+			gra.Pset(vect2(10,10),rgb(1,1,1));
+
+			// 塗りつぶし三角
+			gra.Tri( vect2(55,10), vect2(10,100), vect2(100,100),rgb(1,1,0));
+			gra.Tri( vect2(55+80,10), vect2(10+80,100), vect2(100+80,100),rgb(0.5,0.3,0.2));
 
 			
 			// カトマル
@@ -1544,41 +1627,7 @@ else
 
 
 
-			// human
-			// 入力
-			// マーカー操作	
 
-
-			for ( int i = 0 ; i < 1 ; i++ )
-			{
-				// 骨コリジョン 張力計算
-				for ( Bone3 b : human_tblBone )
-				{
-					vect3 v = b.j1.pos - b.j0.pos;
-					double l = v.length() - b.length;
-					double w = 0;
-					vect3 va  =	v.normalize()*l;
-					b.j0.tension += va/3;
-					b.j1.tension -= va/3;
-
-				}
-
-				// 張力解消
-				for ( Joint3& a : human_tblJoint )
-				{
-					a.pos += a.tension;
-					a.tension=0;
-				}
-			}
-
-			// 骨描画
-			for ( Bone3 b : human_tblBone )
-			{
-				vect2 v0 = vect2( b.j0.pos.x, b.j0.pos.y );
-				vect2 v1 = vect2( b.j1.pos.x, b.j1.pos.y );
-
-				gra.Line( v0, v1, rgb( 1,1,1 ) );
-			}
 
 
 
