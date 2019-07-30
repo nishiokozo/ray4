@@ -1089,7 +1089,7 @@ struct Apr : public Sys
 
 
 		// 箱
-		static struct
+		struct
 		{
 			double	rx = rad(0);
 			double	ry = rad(0);
@@ -1128,14 +1128,18 @@ struct Apr : public Sys
 
 		} box;
 
-
-
+		// 人
+		struct
+		{
+			vect3 rot = vect3(0,0,0);
+			vect3 pos = vect3(-2,-90.0/100.0,0);
+		} human;
 
 
 		// カメラ
-		struct Camera
+		struct
 		{
-			vect3	pos = vect3( 0,0, -1);
+			vect3	pos = vect3( 0,-1, -1);
 			vect3 	at = vect3( 0, 0, 0 );
 			vect3	up = vect3( 0, 1, 0);
 		  		
@@ -1144,8 +1148,8 @@ struct Apr : public Sys
 		struct Pers
 		{
 			double	val;
-			double	fovy;		// 画角
-			double	sz;			// 投影面までの距離
+//			double	fovy;		// 画角
+//			double	sz;			// 投影面までの距離
 			double	ox;			// 描画画面の中心W
 			double	oy;			// 描画画面の中心H
 			double	w;			// 描画画面の解像度W/2
@@ -1166,10 +1170,10 @@ struct Apr : public Sys
 				aspect	= screensize.y/screensize.x;	// 描画画面のアスペクト比
 			} 
 
-			vect3 calc( vect3 p )
+			vect3 calc( vect3 p ) const
 			{
-				fovy = rad(val);				// 画角
-				sz = 1/tan(fovy/2);				// 投影面までの距離
+				double fovy = rad(val);				// 画角
+				double sz = 1/tan(fovy/2);				// 投影面までの距離
 
 				vect3 ret;
 				ret.x = p.x/(p.z+sz)	*w*aspect	+ox;
@@ -1219,10 +1223,8 @@ struct Apr : public Sys
 
 
 			// グリッドgrid
-			
-			
 			if(0)
-			{
+			{	// ドットグリッド
 				const double NUM = 4;
 				{
 					for ( int i = -NUM ; i <= NUM ; i++ )
@@ -1230,45 +1232,100 @@ struct Apr : public Sys
 						for ( int j = -NUM ; j <= NUM ; j++ )
 						{
 							vect3 v0 = pers.calc( vect3(i,0,j) -cam.pos);
-							gra.Pset( vect2(v0.x-4,v0.y-4), rgb(1,1,0 ));
+							if ( v0.z > 0 ) 
+							{
+								double r = 5* v0.z;
+								if ( r < 1.0 )
+								{
+									gra.Pset( vect2(v0.x,v0.y), rgb(0,1,1 ));
+								}
+								else
+								{
+									gra.Circle( vect2(v0.x,v0.y), r,rgb(0,1,1 ));
+								}
+							}
 						}
 					}
-				}			
+				}
 			}
 
 			if(1)
-			{
-				const double NUM = 8+1;
+			{	// 格子グリッド
+				const double NUM = 4;
 				{
-					vect3 a(-4, 0,-4);
-					vect3 b( 4, 0,-4);
+					vect3 a(-NUM, 0,-NUM);
+					vect3 b( NUM, 0,-NUM);
 					a += -cam.pos;
 					b += -cam.pos;
-					for ( int i = 0 ; i < NUM ; i++ )
+					for ( int i = 0 ; i < NUM*2+1 ; i++ )
 					{
-						vect3 v0 = pers.calc(a);
-						vect3 v1 = pers.calc(b);
-						if ( v0.z > 0 && v1.z > 0 )
+						vect3 va = pers.calc(a);
+						vect3 vb = pers.calc(b);
+
+
+						if ( va.z > 0 && vb.z > 0 )
 						{
-							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1));
+							gra.Line( vect2(va.x,va.y), vect2(vb.x,vb.y), rgb(0,1,1));
 						}
+						
 
 						a.z+=1.0;
 						b.z+=1.0;
 					}
 				}			
 				{
-					vect3 a(-4, 0, 4);
-					vect3 b(-4, 0,-4);
+					vect3 a(-NUM, 0, NUM);
+					vect3 b(-NUM, 0,-NUM);
 					a += -cam.pos;
 					b += -cam.pos;
-					for ( int i = 0 ; i < NUM ; i++ )
+//					b += vect3(NUM,0,0);
+					for ( int i = 0 ; i < NUM*2+1 ; i++ )
+//					for ( int i = 0 ; i < 1 ; i++ )
 					{
-						vect3 v0 = pers.calc(a);
-						vect3 v1 = pers.calc(b);
-						if ( v0.z > 0 && v1.z > 0 )
+						vect3 va = pers.calc(a);
+						vect3 vb = pers.calc(b);
+#if 0
+ int cnt = 0;
+						function<void(vect3&,vect3&)>func = [pers ,&cnt, &func ]( vect3& a, vect3& b )
 						{
-							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1));
+cnt++;
+cout << cnt << ": " << a.z << "," << b.z << endl;
+if ( cnt > 10 ) return;
+							vect3 va = pers.calc(a);
+							vect3 vb = pers.calc(b);
+							if ( vb.z <= 0 )
+							{
+								b =  (a+b)/2;
+
+								vect3 v = pers.calc(b);
+
+								if ( v.z<=0 )
+
+								func( a, b );
+							}
+							if ( vb.z > 0.1 )
+							{
+								a =  (a+b)/2;
+								func( a, b );
+							}
+						};
+
+
+						if ( vb.z < 0 )
+						{
+						cout <<endl;
+							vect3 a2=a;
+							vect3 b2=b;
+							func(a2,b2);
+							
+							vb = pers.calc(b2);
+						}
+
+
+#endif
+						if ( va.z > 0 && vb.z > 0 )
+						{
+							gra.Line( vect2(va.x,va.y), vect2(vb.x,vb.y), rgb(0,0,1));
 						}
 						a.x+=1.0;
 						b.x+=1.0;
@@ -1697,11 +1754,6 @@ else
 
 
 			// Human pers
-			static struct
-			{
-				vect3 rot = vect3(0,0,0);
-				vect3 pos = vect3(-50,0,0);
-			} human;
 
 			for ( Joint3& j : human_tblJoint )
 			{
@@ -1719,7 +1771,7 @@ else
 				roty.setRotateY(human.rot.y);
 				rotz.setRotateZ(human.rot.z);
 				trans.SetTranslate(human.pos);
-				vect3 v= rotx * roty * rotz * trans *  j.pos;
+				vect3 v= rotx * roty * rotz *  j.pos + human.pos;
 
 				v += -cam.pos;
 
