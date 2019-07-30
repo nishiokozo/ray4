@@ -603,6 +603,7 @@ struct Apr : public Sys
 			static vect2 drag_start(0,0);
 			static bool bDrag = false;
 
+			if  ( keys.ALT.on ) return;
 
 			// マーカー追加
 			if ( mouse.M.hi )
@@ -777,13 +778,16 @@ struct Apr : public Sys
 		figArrow.col = rgb(0,0.5,1);
 
 		Figure figTriangle=Figure(gra);
-		figTriangle.vert.emplace_back( (vect2){   0,100*tan(rad(60))	-100*tan(rad(30)) } );
-		figTriangle.vert.emplace_back( (vect2){-100,  0 	    	   	-100*tan(rad(30)) } );
-		figTriangle.vert.emplace_back( (vect2){ 100,  0 				-100*tan(rad(30)) } );
-		figTriangle.edge.emplace_back( (ivect2){ 0,1 } );
-		figTriangle.edge.emplace_back( (ivect2){ 1,2 } );
-		figTriangle.edge.emplace_back( (ivect2){ 2,0 } );
-		figTriangle.col = rgb(0,1,1);
+		{
+			const double R=50;
+			figTriangle.vert.emplace_back( (vect2){   0,R*tan(rad(60))	-R*tan(rad(30)) } );
+			figTriangle.vert.emplace_back( (vect2){-R,  0 	    	   	-R*tan(rad(30)) } );
+			figTriangle.vert.emplace_back( (vect2){ R,  0 				-R*tan(rad(30)) } );
+			figTriangle.edge.emplace_back( (ivect2){ 0,1 } );
+			figTriangle.edge.emplace_back( (ivect2){ 1,2 } );
+			figTriangle.edge.emplace_back( (ivect2){ 2,0 } );
+			figTriangle.col = rgb(0,1,1);
+		}
 
 		Figure figCircle=Figure(gra);
 		{
@@ -1029,46 +1033,46 @@ struct Apr : public Sys
 			human_tblJoint.emplace_back( os*vect3( ox-10,	oy- 20,	0 )	);//0
 			human_tblJoint.emplace_back( os*vect3( ox+10,	oy- 20,	0 )	);//1
 			human_tblJoint.emplace_back( os*vect3( ox+ 0,	oy+  0,	0 )	);//2
-			human_tblJoint.emplace_back( os*vect3( ox-30,	oy+  0,	0 )	);//3
-			human_tblJoint.emplace_back( os*vect3( ox+30,	oy+  0,	0 )	);//4
-			human_tblJoint.emplace_back( os*vect3( ox+ 0,	oy+ 60,	0 )	);//5
-			human_tblJoint.emplace_back( os*vect3( ox-20,	oy+ 90,	0 )	);//6
-			human_tblJoint.emplace_back( os*vect3( ox+20,	oy+ 90,	0 )	);//7
-			human_tblJoint.emplace_back( os*vect3( ox-20,	oy+150,	0 )	);//8
-			human_tblJoint.emplace_back( os*vect3( ox-20,	oy+210,	0 )	);//9
-			human_tblJoint.emplace_back( os*vect3( ox+20,	oy+150,	0 )	);//10
-			human_tblJoint.emplace_back( os*vect3( ox+20,	oy+210,	0 )	);//11
-			human_tblJoint.emplace_back( os*vect3( ox-30,	oy+ 50,	0 )	);//12
-			human_tblJoint.emplace_back( os*vect3( ox-30,	oy+100,	0 )	);//13
-			human_tblJoint.emplace_back( os*vect3( ox+30,	oy+ 50,	0 )	);//14
-			human_tblJoint.emplace_back( os*vect3( ox+30,	oy+100,	0 )	);//15
+			human_tblJoint.emplace_back( os*vect3( ox-20,	oy+  0,	0 )	);//3
+			human_tblJoint.emplace_back( os*vect3( ox+20,	oy+  0,	0 )	);//4
+			human_tblJoint.emplace_back( os*vect3( ox+ 0,	oy+ 50,	0 )	);//5
+			human_tblJoint.emplace_back( os*vect3( ox-15,	oy+ 70,	0 )	);//6
+			human_tblJoint.emplace_back( os*vect3( ox+15,	oy+ 70,	0 )	);//7
+			human_tblJoint.emplace_back( os*vect3( ox-15,	oy+115,	0 )	);//8
+			human_tblJoint.emplace_back( os*vect3( ox-15,	oy+160,	0 )	);//9
+			human_tblJoint.emplace_back( os*vect3( ox+15,	oy+115,	0 )	);//10
+			human_tblJoint.emplace_back( os*vect3( ox+15,	oy+160,	0 )	);//11
+			human_tblJoint.emplace_back( os*vect3( ox-20,	oy+ 40,	0 )	);//12
+			human_tblJoint.emplace_back( os*vect3( ox-20,	oy+ 80,	0 )	);//13
+			human_tblJoint.emplace_back( os*vect3( ox+20,	oy+ 40,	0 )	);//14
+			human_tblJoint.emplace_back( os*vect3( ox+20,	oy+ 80,	0 )	);//15
 
 
 
-			human_tblBone.emplace_back( human_tblJoint[0], human_tblJoint[1] );
+			human_tblBone.emplace_back( human_tblJoint[0], human_tblJoint[1] );	//head
 			human_tblBone.emplace_back( human_tblJoint[1], human_tblJoint[2] );
 			human_tblBone.emplace_back( human_tblJoint[2], human_tblJoint[0] );
 
-			human_tblBone.emplace_back( human_tblJoint[2], human_tblJoint[5] );
+			human_tblBone.emplace_back( human_tblJoint[2], human_tblJoint[5] ); //chest
 			human_tblBone.emplace_back( human_tblJoint[5], human_tblJoint[3] );
 			human_tblBone.emplace_back( human_tblJoint[3], human_tblJoint[2] );
 			human_tblBone.emplace_back( human_tblJoint[2], human_tblJoint[4] );
 			human_tblBone.emplace_back( human_tblJoint[4], human_tblJoint[5] );
 
-			human_tblBone.emplace_back( human_tblJoint[5], human_tblJoint[7] );
+			human_tblBone.emplace_back( human_tblJoint[5], human_tblJoint[7] ); //hip
 			human_tblBone.emplace_back( human_tblJoint[7], human_tblJoint[6] );
 			human_tblBone.emplace_back( human_tblJoint[6], human_tblJoint[5] );
 
-			human_tblBone.emplace_back( human_tblJoint[6], human_tblJoint[8] );
+			human_tblBone.emplace_back( human_tblJoint[6], human_tblJoint[8] ); //leg
 			human_tblBone.emplace_back( human_tblJoint[8], human_tblJoint[9] );
 
-			human_tblBone.emplace_back( human_tblJoint[7], human_tblJoint[10] );
+			human_tblBone.emplace_back( human_tblJoint[7], human_tblJoint[10] ); //leg
 			human_tblBone.emplace_back( human_tblJoint[10], human_tblJoint[11] );
 
-			human_tblBone.emplace_back( human_tblJoint[3], human_tblJoint[12] );
+			human_tblBone.emplace_back( human_tblJoint[3], human_tblJoint[12] ); //arm
 			human_tblBone.emplace_back( human_tblJoint[12], human_tblJoint[13] );
 
-			human_tblBone.emplace_back( human_tblJoint[4], human_tblJoint[14] );
+			human_tblBone.emplace_back( human_tblJoint[4], human_tblJoint[14] ); //arm
 			human_tblBone.emplace_back( human_tblJoint[14], human_tblJoint[15] );
 		}
 		for ( Bone3& b : human_tblBone )
@@ -1091,10 +1095,11 @@ struct Apr : public Sys
 			Camera( vect3 _pos, vect3 _at, vect3 _up ) : pos(_pos), at(_at), up(_up)
 			{
 				mat.LookAt( _pos, _at, _up );
-			}  		
+			}
+		  		
 		};
 		
-		Camera cam = Camera( vect3( 0,0,-10), vect3( 0, 0, 0 ), vect3( 0,-1, 0) ); 
+		Camera cam = Camera( vect3( 0,0, -5), vect3( 0, 0, 0 ), vect3( 0, 1, 0) ); 
 
 		// 箱
 		vector<vect3> box_vert=
@@ -1144,7 +1149,12 @@ struct Apr : public Sys
 			//raytrace( gra, py++ );
 			if ( py >= m.height ) py=0;
 
-				
+
+			// カメラ
+			cam.pos = vect3( 0,0, -1);
+			cam.at = vect3( 0, 0, 0 );
+			cam.up = vect3( 0, 1, 0);
+	
 
 			// 箱
 			static	double	rx = rad(0);
@@ -1188,9 +1198,9 @@ struct Apr : public Sys
 				//	pitch	:x	右+
 				//	yaw		:y	下+
 
-				rx+=rad(0.03);
-				ry+=rad(0.05);
-				rz+=rad(0.1);
+//				rx+=rad(0.03);
+//				ry+=rad(0.05);
+//				rz+=rad(0.1);
 	/*
 				mat44 rotx(
 					1.0			,	0.0			,	0.0			,	0.0	,
@@ -1233,23 +1243,29 @@ struct Apr : public Sys
 				
 	#endif
 
-				v.z+=pz;
+				v += -cam.pos;
 
 				box_disp.emplace_back( v );
 
 			}
 			
 			
-			static	double	val=45;
+			static	double	pers_val=90/3;
 //			if (keys.Q.rep) {val--;cout << val <<" "<<1/tan(rad(val)) << endl; }
 //			if (keys.A.rep) {val++;cout << val <<" "<<1/tan(rad(val)) << endl; }
-			if (keys.R.rep) {val-=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
-			if (keys.F.rep) {val+=5;cout << val <<" "<<1/tan(rad(val)) << endl; }
+			if (keys.R.rep) {pers_val-=5;cout << pers_val <<" "<<1/tan(rad(pers_val)) << endl; }
+			if (keys.F.rep) {pers_val+=5;cout << pers_val <<" "<<1/tan(rad(pers_val)) << endl; }
 
-			val += -mouse.wheel/30;
-
+			pers_val += -mouse.wheel/30;
+			double	pers_fovy = rad(pers_val);		// 画角
+//			double	pers_sc = 1;					// 投影面の高さ
+			double	pers_sz = 1/tan(pers_fovy/2);	// 投影面までの距離
+			double	pers_ox	= m.width/2;			// 描画画面の中心W
+			double	pers_oy	= m.height/2;			// 描画画面の中心H
+			double	pers_w	= m.width/2;			// 描画画面の解像度W/2
+			double	pers_h	= m.height/2;			// 描画画面の解像度H/2
+			double	pers_aspect	= (double)m.height/(double)m.width;	// 描画画面のアスペクト比
 			//calc pers 
-
 			// 箱
 			for ( ivect2 e : box_edge )
 			{
@@ -1258,16 +1274,13 @@ struct Apr : public Sys
 
 				double	x,y,z;
 				
-				double	fovy = rad(val);	//	画角
-				//画角から投影面パラメータを求める
-				double	sc = m.height/2;
-				double	sz = 1/tan(fovy/2);
 
+///				double ox=m.width/2,oy=m.height/2;
 				//pers
-				double x0 = p.x/(p.z+sz)	*sc	+384;
-				double y0 = p.y/(p.z+sz)	*sc	+128;
-				double x1 = n.x/(n.z+sz)	*sc	+384;
-				double y1 = n.y/(n.z+sz)	*sc	+128;
+				double x0 = p.x/(p.z+pers_sz)	*pers_w*pers_aspect	+pers_ox;
+				double y0 = p.y/(p.z+pers_sz)	*pers_h				+pers_oy;
+				double x1 = n.x/(n.z+pers_sz)	*pers_w*pers_aspect	+pers_ox;
+				double y1 = n.y/(n.z+pers_sz)	*pers_h				+pers_oy;
 				gra.Line( vect2(x0,y0), vect2(x1,y1),rgb(0,1,1));
 
 			}
@@ -1577,54 +1590,61 @@ else
 				}
 			}
 
-			if ( keys.ALT.on )
-			{
-				cam.mat.RotateY( rad( mouse.mov.x)  );
-			}
-			if ( keys.W.rep ) cam.mat.AddTranslate( vect3( 0,0,0.5) );
-			if ( keys.S.rep ) cam.mat.AddTranslate( vect3( 0,0,-0.5) );
-			if ( keys.A.rep ) cam.mat.AddTranslate( vect3(-0.5,0,0) );
-			if ( keys.D.rep ) cam.mat.AddTranslate( vect3( 0.5,0,0) );
+//			if ( keys.W.rep ) cam.mat.AddTranslate( vect3( 0,0,0.5) );
+//			if ( keys.S.rep ) cam.mat.AddTranslate( vect3( 0,0,-0.5) );
+//			if ( keys.A.rep ) cam.mat.AddTranslate( vect3(-0.5,0,0) );
+//			if ( keys.D.rep ) cam.mat.AddTranslate( vect3( 0.5,0,0) );
+
+
+
+			
 
 
 			// Human pers
 			static struct
 			{
 				vect3 rot = vect3(0,0,0);
+				vect3 pos = vect3(-50,0,0);
 			} human;
+			if ( keys.ALT.on )
+			{
+//				human.rot.y += rad(mouse.mov.x) ;
+				cam.mat.RotateY( rad(mouse.mov.x)  );
+			}
+//cout << pers_sz << endl;
 			for ( Joint3& j : human_tblJoint )
 			{
-				double	x,y,z;
 				//	右手系座標系
 				//	右手ねじ周り
 				//	roll	:z	奥+
 				//	pitch	:x	右+
 				//	yaw		:y	下+
 
-				human.rot.y=rad(45);
+//				human.rot.y +=rad(1);
 				mat44	rotx;
 				mat44	roty;
 				mat44	rotz;
+				mat44	trans;
 				rotx.setRotateX(human.rot.x);
 				roty.setRotateY(human.rot.y);
 				rotz.setRotateZ(human.rot.z);
-				vect3 v= rotx * roty * rotz *j.pos *cam.mat;
-				v.z+=pz;
+				trans.SetTranslate(human.pos);
+				vect3 v= rotx * roty * rotz * trans *  j.pos;
+
+				v += -cam.pos;
+
+
+//				v.z+=1;
 
 				j.world = v;
 
 				{
-					double ox=200,oy=300;
+//					double ox=200,oy=300;
 				
 					const vect3& v = j.world;
 					
-					double	fovy = rad(val);	//	画角
-					//画角から投影面パラメータを求める
-					double	sc = m.height/2*3;
-					double	sz = 1/tan(fovy/2);
-
-					j.disp.x = v.x/(v.z+sz)	*sc	+ox;
-					j.disp.y = v.y/(v.z+sz)	*sc	+oy;
+					j.disp.x = v.x/(v.z+pers_sz)	*pers_w *pers_aspect	+pers_ox;
+					j.disp.y = v.y/(v.z+pers_sz)	*pers_h					+pers_oy;
 				}				
 
 			}
@@ -1632,15 +1652,11 @@ else
 			// Human 描画
 			for ( Bone3 b : human_tblBone )
 			{
-				int ox=200, oy=300;
-			
-				const vect2& p = b.j0.disp;
-				const vect2& n = b.j1.disp;
-				gra.Line( p,n,rgb(1,1,1));
+				gra.Line( b.j0.disp, b.j1.disp, rgb(1,1,1));
 			}
 			for ( const Joint3& j : human_tblJoint )
 			{
-//				gra.Fill( j.disp-3, j.disp+3,rgb(1,1,1));
+				gra.Fill( j.disp-3, j.disp+3,rgb(1,1,1));
 			}
 
 
@@ -1648,10 +1664,6 @@ else
 			// マーカー表示
 			mc.funcMarkerDraw2();
 //			for ( Joint2 j : tblJoint ) gra.Circle( j.pos, 4, rgb(0,1,0));
-
-
-
-
 
 
 

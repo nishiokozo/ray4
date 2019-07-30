@@ -164,8 +164,10 @@ public:
 	vect3 operator-( vect3 v ) const { vect3	ret; ret.x = x - v.x; ret.y = y - v.y; ret.z = z - v.z; return ret; }
 	vect3 operator+( vect3 v ) const { vect3	ret; ret.x = x + v.x; ret.y = y + v.y; ret.z = z + v.z; return ret; }
 
-	vect3 operator-() const { vect3	ret; ret.x = -x; ret.y = -y; ret.z = -z; return ret; }
-	vect3 operator+() const { vect3	ret; ret.x =  x; ret.y =  y; ret.z =  z; return ret; }
+//	vect3 operator-() const { vect3	ret; ret.x = -x; ret.y = -y; ret.z = -z; return ret; }
+//	vect3 operator+() const { vect3	ret; ret.x =  x; ret.y =  y; ret.z =  z; return ret; }
+	vect3 operator-() const { return vect3( -x, -y, -z ); } 
+	vect3 operator+() const { return vect3(  x,  y,  z ); } 
 
 	vect3 operator*( double f ) const { vect3	ret; ret.x = x * f; ret.y = y * f; ret.z = z * f; return ret; }
 	vect3 operator/( double f ) const { double a = 1.0f / f; vect3	ret; ret.x = x * a; ret.y = y * a; ret.z = z * a; return ret; }
@@ -441,7 +443,7 @@ public:
 
 	void LookAt( vect3 pos, vect3 at, vect3 up )
 	{
-		vect3	z = normalize(at-pos);
+		vect3	z = (at-pos).normalize();
 		vect3	x = cross( up, z );
 		vect3	y = cross( z, x );
 	
@@ -523,6 +525,85 @@ public:
 		m[0][0] *= scale.x;
 		m[1][1] *= scale.y;
 		m[2][2] *= scale.z;
+	}
+
+	//-----------------------------------------------------------------------------
+	mat44 invers()
+	//-----------------------------------------------------------------------------
+	{
+
+		double a[4][4];
+
+		a[0][0] = m[0][0];
+		a[0][1] = m[0][1]; 
+		a[0][2] = m[0][2]; 
+		a[0][3] = m[0][3]; 
+		a[1][0] = m[1][0]; 
+		a[1][1] = m[1][1]; 
+		a[1][2] = m[1][2]; 
+		a[1][3] = m[1][3]; 
+		a[2][0] = m[2][0]; 
+		a[2][1] = m[2][1]; 
+		a[2][2] = m[2][2]; 
+		a[2][3] = m[2][3]; 
+		a[3][0] = m[3][0]; 
+		a[3][1] = m[3][1]; 
+		a[3][2] = m[3][2]; 
+		a[3][3] = m[3][3]; 
+
+
+
+//		double inv_a[4][4]; //ここに逆行列が入る
+		mat44 inv_a;
+		
+		double buf; //一時的なデータを蓄える
+		int i,j,k; //カウンタ
+		int z1=4;  //配列の次数
+
+		//単位行列を作る
+		for(i=0;i<z1;i++)
+		{
+			for(j=0;j<z1;j++)
+			{
+				inv_a.m[i][j]=(i==j)?1.0:0.0;
+			}
+		}
+		//掃き出し法
+		for(i=0;i<z1;i++)
+		{
+			buf=1/a[i][i];
+			for(j=0;j<z1;j++)
+			{
+				a[i][j]*=buf;
+				inv_a.m[i][j]*=buf;
+			}
+			for(j=0;j<z1;j++)
+			{
+				if(i!=j)
+				{
+					buf=a[j][i];
+					for(k=0;k<z1;k++)
+					{
+						a[j][k]-=a[i][k]*buf;
+						inv_a.m[j][k]-=inv_a.m[i][k]*buf;
+					}
+				}
+			}
+		}
+/*
+		//逆行列を出力
+		for(i=0;i<z1;i++)
+		{
+			for(j=0;j<z1;j++)
+			{
+				//	    printf(" %z2",inv_a[i][j]);
+				m[i][j] = inv_a[i][j];
+			}
+			//	  printf("\n");
+		}
+*/
+		return inv_a;
+
 	}
 
 	void Print()
