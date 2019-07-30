@@ -606,7 +606,7 @@ struct Apr : public Sys
 			if  ( keys.ALT.on ) return;
 
 			// マーカー追加
-			if ( mouse.M.hi )
+			if ( keys.M.hi )
 			{
 				tblMarker2.emplace_back( gra, fig, mouse.pos, rad(0) );
 			}
@@ -1086,58 +1086,106 @@ struct Apr : public Sys
 		vector<vect3> human_disp;
 
 		
-		struct Camera
-		{
-			vect3	pos;
-			vect3	at;
-			vect3	up;
-			mat44	mat;
-			Camera( vect3 _pos, vect3 _at, vect3 _up ) : pos(_pos), at(_at), up(_up)
-			{
-				mat.LookAt( _pos, _at, _up );
-			}
-		  		
-		};
-		
-		Camera cam = Camera( vect3( 0,0, -5), vect3( 0, 0, 0 ), vect3( 0, 1, 0) ); 
+
 
 		// 箱
-		vector<vect3> box_vert=
+		static struct
 		{
-			{	-1,	 1,	-1	},
-			{	 1,	 1,	-1	},
-			{	-1,	-1,	-1	},
-			{	 1,	-1,	-1	},
-			{	-1,	 1,	 1	},
-			{	 1,	 1,	 1	},
-			{	-1,	-1,	 1	},
-			{	 1,	-1,	 1	},
-		};
-		vector<vect3> box_disp;
+			double	rx = rad(0);
+			double	ry = rad(0);
+			double	rz = rad(0);
 
-		vector<ivect2>	box_edge
+			vect3 pos = {1,-1,0};
+
+			vector<vect3> vert=
+			{
+				{	-1,	 1,	-1	},
+				{	 1,	 1,	-1	},
+				{	-1,	-1,	-1	},
+				{	 1,	-1,	-1	},
+				{	-1,	 1,	 1	},
+				{	 1,	 1,	 1	},
+				{	-1,	-1,	 1	},
+				{	 1,	-1,	 1	},
+			};
+			vector<vect3> disp;
+
+			vector<ivect2>	edge
+			{
+				{	0,	1	},
+				{	1,	3	},
+				{	3,	2	},
+				{	2,	0	},
+				{	4,	5	},
+				{	5,	7	},
+				{	7,	6	},
+				{	6,	4	},
+				{	0,	4	},
+				{	1,	5	},
+				{	2,	6	},
+				{	3,	7	},
+			};
+
+		} box;
+
+
+
+
+
+		// カメラ
+		struct Camera
 		{
-			{	0,	1	},
-			{	1,	3	},
-			{	3,	2	},
-			{	2,	0	},
-			{	4,	5	},
-			{	5,	7	},
-			{	7,	6	},
-			{	6,	4	},
-			{	0,	4	},
-			{	1,	5	},
-			{	2,	6	},
-			{	3,	7	},
+			vect3	pos = vect3( 0,0, -1);
+			vect3 	at = vect3( 0, 0, 0 );
+			vect3	up = vect3( 0, 1, 0);
+		  		
+		} cam ;
+		
+		struct Pers
+		{
+			double	val;
+			double	fovy;		// 画角
+			double	sz;			// 投影面までの距離
+			double	ox;			// 描画画面の中心W
+			double	oy;			// 描画画面の中心H
+			double	w;			// 描画画面の解像度W/2
+			double	h;			// 描画画面の解像度H/2
+			double	aspect;		// 描画画面のアスペクト比
+		
+			Pers()
+			{
+				val=90/3;
+			}
+		
+			void Update( vect2 screensize )
+			{
+				ox	= screensize.x/2;			// 描画画面の中心W
+				oy	= screensize.y/2;			// 描画画面の中心H
+				w	= screensize.x/2;			// 描画画面の解像度W/2
+				h	= screensize.y/2;			// 描画画面の解像度H/2
+				aspect	= screensize.y/screensize.x;	// 描画画面のアスペクト比
+			} 
+
+			vect3 calc( vect3 p )
+			{
+				fovy = rad(val);				// 画角
+				sz = 1/tan(fovy/2);				// 投影面までの距離
+
+				vect3 ret;
+				ret.x = p.x/(p.z+sz)	*w*aspect	+ox;
+				ret.y = p.y/(p.z+sz)	*h			+oy;
+				ret.z = 1/(p.z+sz);
+				return ret;
+			}
+	
 		};
-
-
-
-
+		Pers pers;
 
 		//===========================================================================
 		while( Update() )
 		{
+			pers.Update( vect2( m.width, m.height ) );
+
 	 		static int py=0;
 
 
@@ -1150,44 +1198,111 @@ struct Apr : public Sys
 			if ( py >= m.height ) py=0;
 
 
-			// カメラ
-			cam.pos = vect3( 0,0, -1);
-			cam.at = vect3( 0, 0, 0 );
-			cam.up = vect3( 0, 1, 0);
-	
-
-			// 箱
-			static	double	rx = rad(0);
-			static	double	ry = rad(0);
-			static	double	rz = rad(0);
-			double pz =4;
-			//calc rotate
-			box_disp.clear();
-			for ( vect3 v : box_vert )
+			// パースペクティブ
+			pers.val += -mouse.wheel/30;
+			if (keys.R.rep) {pers.val-=1;cout << pers.val <<" "<<1/tan(rad(pers.val)) << endl; }
+			if (keys.F.rep) {pers.val+=1;cout << pers.val <<" "<<1/tan(rad(pers.val)) << endl; }
+//cout << pers.val << endl;
+			// カメラ移動
+			if ( keys.ALT.on )
 			{
-				double	x,y,z;
+				if ( mouse.R.on )
+				{
+					cam.pos.z += mouse.mov.y/100.0;
+				}
+				if ( mouse.M.on )
+				{
+					cam.pos.x += mouse.mov.x/100.0;
+					cam.pos.y += mouse.mov.y/100.0;
+				}
+			}
+
+
+			// グリッドgrid
+			
+			
+			if(0)
+			{
+				const double NUM = 4;
+				{
+					for ( int i = -NUM ; i <= NUM ; i++ )
+					{
+						for ( int j = -NUM ; j <= NUM ; j++ )
+						{
+							vect3 v0 = pers.calc( vect3(i,0,j) -cam.pos);
+							gra.Pset( vect2(v0.x-4,v0.y-4), rgb(1,1,0 ));
+						}
+					}
+				}			
+			}
+
+			if(1)
+			{
+				const double NUM = 8+1;
+				{
+					vect3 a(-4, 0,-4);
+					vect3 b( 4, 0,-4);
+					a += -cam.pos;
+					b += -cam.pos;
+					for ( int i = 0 ; i < NUM ; i++ )
+					{
+						vect3 v0 = pers.calc(a);
+						vect3 v1 = pers.calc(b);
+						if ( v0.z > 0 && v1.z > 0 )
+						{
+							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1));
+						}
+
+						a.z+=1.0;
+						b.z+=1.0;
+					}
+				}			
+				{
+					vect3 a(-4, 0, 4);
+					vect3 b(-4, 0,-4);
+					a += -cam.pos;
+					b += -cam.pos;
+					for ( int i = 0 ; i < NUM ; i++ )
+					{
+						vect3 v0 = pers.calc(a);
+						vect3 v1 = pers.calc(b);
+						if ( v0.z > 0 && v1.z > 0 )
+						{
+							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1));
+						}
+						a.x+=1.0;
+						b.x+=1.0;
+					}
+				}			
+			}
+			// 箱
+			//calc rotate
+			box.disp.clear();
+			for ( vect3 v : box.vert )
+			{
 
 	#if 0
-				//rz
-				x=v.x*cos(rz) - v.y*sin(rz) + v.z *0;
-				y=v.x*sin(rz) + v.y*cos(rz) + v.z *0;
+				double	x,y,z;
+				//box.rz
+				x=v.x*cos(box.rz) - v.y*sin(box.rz) + v.z *0;
+				y=v.x*sin(box.rz) + v.y*cos(box.rz) + v.z *0;
 				z=v.x* 0      + v.y*0       + v.z *1;
 				v.x=x;
 				v.y=y;
 				v.z=z;
 
-				//rx
+				//box.rx
 				x=v.x;
-				y=v.y*cos(rx) - v.z*sin(rx);
-				z=v.y*sin(rx) + v.z*cos(rx);
+				y=v.y*cos(box.rx) - v.z*sin(box.rx);
+				z=v.y*sin(box.rx) + v.z*cos(box.rx);
 				v.x=x;
 				v.y=y;
 				v.z=z;
 
-				//ry
-				x=v.x*cos(ry) - v.z*sin(ry);
+				//box.ry
+				x=v.x*cos(box.ry) - v.z*sin(box.ry);
 				y=v.y;
-				z=v.x*sin(ry) + v.z*cos(ry);
+				z=v.x*sin(box.ry) + v.z*cos(box.ry);
 				v.x=x;
 				v.y=y;
 				v.z=z;
@@ -1198,27 +1313,27 @@ struct Apr : public Sys
 				//	pitch	:x	右+
 				//	yaw		:y	下+
 
-//				rx+=rad(0.03);
-//				ry+=rad(0.05);
-//				rz+=rad(0.1);
+//				box.rx+=rad(0.03);
+//				box.ry+=rad(0.05);
+//				box.rz+=rad(0.1);
 	/*
 				mat44 rotx(
 					1.0			,	0.0			,	0.0			,	0.0	,
-					0.0			,	 cos(rx)	,	-sin(rx)	,	0.0	,
-					0.0			,	 sin(rx)	,	 cos(rx)	,	0.0	,
+					0.0			,	 cos(box.rx)	,	-sin(box.rx)	,	0.0	,
+					0.0			,	 sin(box.rx)	,	 cos(box.rx)	,	0.0	,
 					0.0			,	0.0			,	0.0			,	0.0	
 				);
 
 				mat44 roty(
-					 cos(ry)	,	0.0			,	 sin(ry)	,	0.0	,
+					 cos(box.ry)	,	0.0			,	 sin(box.ry)	,	0.0	,
 					 0.0		,	1.0			,	0.0			,	0.0	,
-					-sin(ry)	,	0.0			,	 cos(ry)	,	0.0	,
+					-sin(box.ry)	,	0.0			,	 cos(box.ry)	,	0.0	,
 					 0.0		,	0.0			,	0.0			,	0.0	
 				);
 
 				mat44 rotz(
-					 cos(rz)	,	-sin(rz)	,	0.0			,	0.0	,
-					 sin(rz)	,	 cos(rz)	,	0.0			,	0.0	,
+					 cos(box.rz)	,	-sin(box.rz)	,	0.0			,	0.0	,
+					 sin(box.rz)	,	 cos(box.rz)	,	0.0			,	0.0	,
 					0.0			,	0.0			,	1.0			,	0.0	,
 					0.0			,	0.0			,	0.0			,	0.0	
 				);
@@ -1226,17 +1341,17 @@ struct Apr : public Sys
 				mat44	rotx;
 				mat44	roty;
 				mat44	rotz;
-				rotx.setRotateX(rx);
-				roty.setRotateY(ry);
-				rotz.setRotateZ(rz);
+				rotx.setRotateX(box.rx);
+				roty.setRotateY(box.ry);
+				rotz.setRotateZ(box.rz);
 		
 
-	#if 1
+	#if 0
 				v= rotx *v ;
 				v= roty *v ;
 				v= rotz *v ;
 	#else
-				v= rotx * roty * rotz *v ;
+				v= rotx * roty * rotz *v + box.pos ;
 	#endif
 
 
@@ -1245,43 +1360,24 @@ struct Apr : public Sys
 
 				v += -cam.pos;
 
-				box_disp.emplace_back( v );
+				box.disp.emplace_back( v );
 
 			}
 			
 			
-			static	double	pers_val=90/3;
-//			if (keys.Q.rep) {val--;cout << val <<" "<<1/tan(rad(val)) << endl; }
-//			if (keys.A.rep) {val++;cout << val <<" "<<1/tan(rad(val)) << endl; }
-			if (keys.R.rep) {pers_val-=5;cout << pers_val <<" "<<1/tan(rad(pers_val)) << endl; }
-			if (keys.F.rep) {pers_val+=5;cout << pers_val <<" "<<1/tan(rad(pers_val)) << endl; }
-
-			pers_val += -mouse.wheel/30;
-			double	pers_fovy = rad(pers_val);		// 画角
-//			double	pers_sc = 1;					// 投影面の高さ
-			double	pers_sz = 1/tan(pers_fovy/2);	// 投影面までの距離
-			double	pers_ox	= m.width/2;			// 描画画面の中心W
-			double	pers_oy	= m.height/2;			// 描画画面の中心H
-			double	pers_w	= m.width/2;			// 描画画面の解像度W/2
-			double	pers_h	= m.height/2;			// 描画画面の解像度H/2
-			double	pers_aspect	= (double)m.height/(double)m.width;	// 描画画面のアスペクト比
-			//calc pers 
 			// 箱
-			for ( ivect2 e : box_edge )
+			for ( ivect2 e : box.edge )
 			{
-				const vect3& p = box_disp[e.p];
-				const vect3& n = box_disp[e.n];
+				const vect3& a = box.disp[e.p];
+				const vect3& b = box.disp[e.n];
 
-				double	x,y,z;
-				
 
-///				double ox=m.width/2,oy=m.height/2;
-				//pers
-				double x0 = p.x/(p.z+pers_sz)	*pers_w*pers_aspect	+pers_ox;
-				double y0 = p.y/(p.z+pers_sz)	*pers_h				+pers_oy;
-				double x1 = n.x/(n.z+pers_sz)	*pers_w*pers_aspect	+pers_ox;
-				double y1 = n.y/(n.z+pers_sz)	*pers_h				+pers_oy;
-				gra.Line( vect2(x0,y0), vect2(x1,y1),rgb(0,1,1));
+				vect3 v0 = pers.calc(a);
+				vect3 v1 = pers.calc(b);
+				if ( v0.z > 0 && v1.z > 0 )
+				{
+					gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,1,1));
+				}
 
 			}
 
@@ -1606,12 +1702,7 @@ else
 				vect3 rot = vect3(0,0,0);
 				vect3 pos = vect3(-50,0,0);
 			} human;
-			if ( keys.ALT.on )
-			{
-//				human.rot.y += rad(mouse.mov.x) ;
-				cam.mat.RotateY( rad(mouse.mov.x)  );
-			}
-//cout << pers_sz << endl;
+
 			for ( Joint3& j : human_tblJoint )
 			{
 				//	右手系座標系
@@ -1620,7 +1711,6 @@ else
 				//	pitch	:x	右+
 				//	yaw		:y	下+
 
-//				human.rot.y +=rad(1);
 				mat44	rotx;
 				mat44	roty;
 				mat44	rotz;
@@ -1633,19 +1723,12 @@ else
 
 				v += -cam.pos;
 
-
-//				v.z+=1;
-
 				j.world = v;
 
-				{
-//					double ox=200,oy=300;
-				
-					const vect3& v = j.world;
-					
-					j.disp.x = v.x/(v.z+pers_sz)	*pers_w *pers_aspect	+pers_ox;
-					j.disp.y = v.y/(v.z+pers_sz)	*pers_h					+pers_oy;
-				}				
+//				j.disp = pers.calc(v);
+				vect3 v0 = pers.calc(v);
+				j.disp = vect2(v0.x,v0.y);
+
 
 			}
 
@@ -1669,7 +1752,7 @@ else
 
 			// figTriangle
 			{
-				int ox=384,oy=128;
+				int ox=256,oy=64;
 				int sx =ox-128;
 				int sy =oy-128;
 				int ex =ox+128;

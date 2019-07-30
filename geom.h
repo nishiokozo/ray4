@@ -87,8 +87,8 @@ class vect2
 {
 public:
 //	double x,y;
-	union { double x,h;};
-	union { double y,l;};
+	union { double x,w;};
+	union { double y,h;};
 
 	vect2() :x(0),y(0){}
 	vect2( double f ) :x(f),y(f){}
