@@ -1006,7 +1006,7 @@ struct Apr : public Sys
 			vect3 pos;
 			vect3 tension;
 			vect3 world;
-			vect2 disp;
+			vect3 disp;
 			double len;
 			Joint3( vect3 v )
 			{
@@ -1028,7 +1028,7 @@ struct Apr : public Sys
 		human_tblJoint.reserve(1000);
 		vector<Bone3> human_tblBone;
 		{	//	人
-			double ox=0,oy=-80,os=0.01;
+			double ox=0,oy=-160,os=0.01;
 
 			human_tblJoint.emplace_back( os*vect3( ox-10,	oy- 20,	0 )	);//0
 			human_tblJoint.emplace_back( os*vect3( ox+10,	oy- 20,	0 )	);//1
@@ -1046,8 +1046,6 @@ struct Apr : public Sys
 			human_tblJoint.emplace_back( os*vect3( ox-20,	oy+ 80,	0 )	);//13
 			human_tblJoint.emplace_back( os*vect3( ox+20,	oy+ 40,	0 )	);//14
 			human_tblJoint.emplace_back( os*vect3( ox+20,	oy+ 80,	0 )	);//15
-
-
 
 			human_tblBone.emplace_back( human_tblJoint[0], human_tblJoint[1] );	//head
 			human_tblBone.emplace_back( human_tblJoint[1], human_tblJoint[2] );
@@ -1081,10 +1079,17 @@ struct Apr : public Sys
 		}
 		for ( Joint3& j : human_tblJoint )	//マーカー対象に位置を登録
 		{
-			mc.tblMarker2.emplace_back( gra, figCircle, j.disp, rad(-90) );
+//			mc.tblMarker2.emplace_back( gra, figCircle, j.disp, rad(-90) );
 		}
 		vector<vect3> human_disp;
 
+
+		// 人
+		struct
+		{
+			vect3 rot = vect3(0,0,0);
+			vect3 pos = vect3(-2,0.0,0);
+		} human;
 		
 
 
@@ -1128,18 +1133,12 @@ struct Apr : public Sys
 
 		} box;
 
-		// 人
-		struct
-		{
-			vect3 rot = vect3(0,0,0);
-			vect3 pos = vect3(-2,-90.0/100.0,0);
-		} human;
 
 
 		// カメラ
 		struct
 		{
-			vect3	pos = vect3( 0,-1, -1);
+			vect3	pos = vect3( 0,-1, -5);
 			vect3 	at = vect3( 0, 0, 0 );
 			vect3	up = vect3( 0, 1, 0);
 		  		
@@ -1158,7 +1157,7 @@ struct Apr : public Sys
 		
 			Pers()
 			{
-				val=90/3;
+				val=90/2;
 				fovy = rad(val);				// 画角
 				sz = 1/tan(fovy/2);				// 投影面までの距離
 			}
@@ -1173,13 +1172,14 @@ struct Apr : public Sys
 				w	= screensize.x/2;			// 描画画面の解像度W/2
 				h	= screensize.y/2;			// 描画画面の解像度H/2
 				aspect	= screensize.y/screensize.x;	// 描画画面のアスペクト比
+
 			} 
 
 			vect3 calc( vect3 p ) const
 			{
 				vect3 ret;
-				ret.x = p.x/(p.z+sz)	*w*aspect	+ox;
-				ret.y = p.y/(p.z+sz)	*h			+oy;
+				ret.x = p.x/(p.z+sz)	*sz*w*aspect	+ox;
+				ret.y = p.y/(p.z+sz)	*sz*h			+oy;
 				ret.z = 1/(p.z+sz);
 				return ret;
 			}
@@ -1191,6 +1191,8 @@ struct Apr : public Sys
 		while( Update() )
 		{
 			pers.Update( vect2( m.width, m.height ) );
+
+if ( keys.H.hi ) cout << "fovy=" << pers.val << endl;
 
 	 		static int py=0;
 
@@ -1267,7 +1269,7 @@ struct Apr : public Sys
 
 						if ( va.z > 0 && vb.z > 0 )
 						{
-							gra.Line( vect2(va.x,va.y), vect2(vb.x,vb.y), rgb(0,1,1));
+							gra.Line( vect2(va.x,va.y), vect2(vb.x,vb.y), rgb(0,0,1));
 						}
 						
 
@@ -1280,52 +1282,43 @@ struct Apr : public Sys
 					vect3 b(-NUM, 0,-NUM);
 					a += -cam.pos;
 					b += -cam.pos;
-#if 0
-					a = vect3(-1, 0, NUM)-cam.pos;
-					b = vect3(-1, 0,-NUM)-cam.pos;
-					for ( int i = 0 ; i < 1 ; i++ )
-#else
 					for ( int i = 0 ; i < NUM*2+1 ; i++ )
-#endif
-
 
 					{
 						vect3 va = pers.calc(a);
 						vect3 vb = pers.calc(b);
-#if 1
-						function<vect3(vect3,vect3,int)>func_nearclip_b = [ pers , &func_nearclip_b ]( vect3 a, vect3 b, int n )
-						{
-							if (n <=0 ) return b;
 
-							vect3 c =  (a+b)/2;
-					
-							if ( c.z <= -pers.sz )
+						{//シザリング
+							function<vect3(vect3,vect3,int)>nearclip = [ pers , &nearclip ]( vect3 a, vect3 b, int n )
 							{
-								c = func_nearclip_b( a, c, n-1 );
-							}
-							if ( c.z > 1.0-pers.sz )
-							{
-								c = func_nearclip_b( c, b, n-1 );
-							}
-							return c;
-						};
+								if (n <=0 ) return b;
 
-						if ( va.z > 0|| vb.z > 0 )
-						{
-							if ( va.z < 0 )
+								vect3 c =  (a+b)/2;
+						
+								if ( c.z <= -pers.sz )
+								{
+									c = nearclip( a, c, n-1 );
+								}
+								if ( c.z > 1.0-pers.sz )
+								{
+									c = nearclip( c, b, n-1 );
+								}
+								return c;
+							};
+							if ( va.z > 0|| vb.z > 0 )
 							{
-								vect3 c = func_nearclip_b(b,a,4);
-								c  = (a-b)*c.z+b;
-
-							//	va = pers.calc(c);
-							}
-							if ( vb.z < 0 )
-							{
-								vect3 c = func_nearclip_b(a,b,4);
-								vb = pers.calc(c);
+								if ( va.z < 0 )
+								{
+									vect3 c = nearclip(b,a,4);
+									va = pers.calc(c);
+								}
+								if ( vb.z < 0 )
+								{
+									vect3 c = nearclip(a,b,4);
+									vb = pers.calc(c);
+								}
 							}
 						}
-#endif
 						if ( va.z > 0 && vb.z > 0 )
 						{
 							gra.Line( vect2(va.x,va.y), vect2(vb.x,vb.y), rgb(0,0,1));
@@ -1780,9 +1773,9 @@ else
 
 				j.world = v;
 
-//				j.disp = pers.calc(v);
-				vect3 v0 = pers.calc(v);
-				j.disp = vect2(v0.x,v0.y);
+				j.disp = pers.calc(v);
+//				vect3 v0 = pers.calc(v);
+//				j.disp = v0;//vect2(v0.x,v0.y);
 
 
 			}
@@ -1790,11 +1783,23 @@ else
 			// Human 描画
 			for ( Bone3 b : human_tblBone )
 			{
-				gra.Line( b.j0.disp, b.j1.disp, rgb(1,1,1));
+				if ( b.j0.disp.z > 0 && b.j0.disp.z > 0 )
+				{
+					vect2 v0(b.j0.disp.x,b.j0.disp.y);
+					vect2 v1(b.j1.disp.x,b.j1.disp.y);
+					gra.Line( v0,v1, rgb(1,1,1));
+				}
 			}
 			for ( const Joint3& j : human_tblJoint )
 			{
-				gra.Fill( j.disp-3, j.disp+3,rgb(1,1,1));
+//				gra.Fill( j.disp-3, j.disp+3,rgb(1,1,1));
+
+				if ( j.disp.z > 0 )
+				{
+					vect2 v(j.disp.x,j.disp.y);
+					gra.Fill( v-3,v+3, rgb(1,1,1));
+				}
+
 			}
 
 
