@@ -1585,7 +1585,7 @@ if ( cnt > 10 ) return;
 				int n2 = n+1;
 				int n3 = n+2;
 				if ( n0<0 ) n0 = 0;
-				if ( n3>=(signed)catmull_tbl.size() ) n3 =n0;
+				if ( n3>=(signed)catmull_tbl.size() ) n3 =n2;
 
 				gv = catmull_func( t, catmull_tbl[n0], catmull_tbl[n1], catmull_tbl[n2], catmull_tbl[n3] );
 
