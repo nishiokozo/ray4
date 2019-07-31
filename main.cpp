@@ -1175,12 +1175,51 @@ struct Apr : public Sys
 
 			} 
 
-			vect3 calc( vect3 p ) const
+			bool ScissorLine( vect3 v0, vect3 v1, vect3& va, vect3& vb ) const
+			{
+				va = calcPoint(v0);
+				vb = calcPoint(v1);
+
+				{//シザリング ニアクリップ
+					function<vect3(vect3,vect3,int)>nearclip = [ this,&nearclip ]( vect3 a, vect3 b, int n )
+					{
+						if (n <=0 ) return b;
+
+						vect3 c =  (a+b)/2;
+				
+						if ( c.z <= -sz )
+						{
+							c = nearclip( a, c, n-1 );
+						}
+						if ( c.z > 1.0-sz )
+						{
+							c = nearclip( c, b, n-1 );
+						}
+						return c;
+					};
+					if ( va.z > 0|| vb.z > 0 )
+					{
+						if ( va.z < 0 )
+						{
+							vect3 c = nearclip(v1,v0,4);
+							va = calcPoint(c);
+						}
+						if ( vb.z < 0 )
+						{
+							vect3 c = nearclip(v0,v1,4);
+							vb = calcPoint(c);
+						}
+					}
+				}
+				return ( va.z > 0 && vb.z > 0 );
+			}			
+
+			vect3 calcPoint( vect3 v ) const
 			{
 				vect3 ret;
-				ret.x = p.x/(p.z+sz)	*sz*w*aspect	+ox;
-				ret.y = p.y/(p.z+sz)	*sz*h			+oy;
-				ret.z = 1/(p.z+sz);
+				ret.x = v.x/(v.z+sz)	*sz*w*aspect	+ox;
+				ret.y = v.y/(v.z+sz)	*sz*h			+oy;
+				ret.z = 1/(v.z+sz);
 				return ret;
 			}
 	
@@ -1235,7 +1274,7 @@ if ( keys.H.hi ) cout << "fovy=" << pers.val << endl;
 					{
 						for ( int j = -NUM ; j <= NUM ; j++ )
 						{
-							vect3 v0 = pers.calc( vect3(i,0,j) -cam.pos);
+							vect3 v0 = pers.calcPoint( vect3(i,0,j) -cam.pos);
 							if ( v0.z > 0 ) 
 							{
 								double r = 5* v0.z;
@@ -1263,13 +1302,15 @@ if ( keys.H.hi ) cout << "fovy=" << pers.val << endl;
 					b += -cam.pos;
 					for ( int i = 0 ; i < NUM*2+1 ; i++ )
 					{
-						vect3 va = pers.calc(a);
-						vect3 vb = pers.calc(b);
-
-
-						if ( va.z > 0 && vb.z > 0 )
+						vect3 v0;
+						vect3 v1;
+						bool flg = pers.ScissorLine( a, b, v0, v1 );
+						if ( flg )
+//						vect3 va = pers.calcPoint(a);
+//						vect3 vb = pers.calcPoint(b);
+//						if ( va.z > 0 && vb.z > 0 )
 						{
-							gra.Line( vect2(va.x,va.y), vect2(vb.x,vb.y), rgb(0,0,1));
+							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1));
 						}
 						
 
@@ -1285,43 +1326,12 @@ if ( keys.H.hi ) cout << "fovy=" << pers.val << endl;
 					for ( int i = 0 ; i < NUM*2+1 ; i++ )
 
 					{
-						vect3 va = pers.calc(a);
-						vect3 vb = pers.calc(b);
-
-						{//シザリング
-							function<vect3(vect3,vect3,int)>nearclip = [ pers , &nearclip ]( vect3 a, vect3 b, int n )
-							{
-								if (n <=0 ) return b;
-
-								vect3 c =  (a+b)/2;
-						
-								if ( c.z <= -pers.sz )
-								{
-									c = nearclip( a, c, n-1 );
-								}
-								if ( c.z > 1.0-pers.sz )
-								{
-									c = nearclip( c, b, n-1 );
-								}
-								return c;
-							};
-							if ( va.z > 0|| vb.z > 0 )
-							{
-								if ( va.z < 0 )
-								{
-									vect3 c = nearclip(b,a,4);
-									va = pers.calc(c);
-								}
-								if ( vb.z < 0 )
-								{
-									vect3 c = nearclip(a,b,4);
-									vb = pers.calc(c);
-								}
-							}
-						}
-						if ( va.z > 0 && vb.z > 0 )
+						vect3 v0;
+						vect3 v1;
+						bool flg = pers.ScissorLine( a, b, v0, v1 );
+						if ( flg )
 						{
-							gra.Line( vect2(va.x,va.y), vect2(vb.x,vb.y), rgb(0,0,1));
+							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1));
 						}
 						a.x+=1.0;
 						b.x+=1.0;
@@ -1329,7 +1339,7 @@ if ( keys.H.hi ) cout << "fovy=" << pers.val << endl;
 				}			
 			}
 			// 箱
-			//calc rotate
+			//calcPoint rotate
 			box.disp.clear();
 			for ( vect3 v : box.vert )
 			{
@@ -1425,9 +1435,13 @@ if ( keys.H.hi ) cout << "fovy=" << pers.val << endl;
 				const vect3& b = box.disp[e.n];
 
 
-				vect3 v0 = pers.calc(a);
-				vect3 v1 = pers.calc(b);
-				if ( v0.z > 0 && v1.z > 0 )
+				vect3 v0;
+				vect3 v1;
+				bool flg = pers.ScissorLine( a, b, v0, v1 );
+				if ( flg )
+//				vect3 v0 = pers.calcPoint(a);
+//				vect3 v1 = pers.calcPoint(b);
+//				if ( v0.z > 0 && v1.z > 0 )
 				{
 					gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,1,1));
 				}
@@ -1773,11 +1787,7 @@ else
 
 				j.world = v;
 
-				j.disp = pers.calc(v);
-//				vect3 v0 = pers.calc(v);
-//				j.disp = v0;//vect2(v0.x,v0.y);
-
-
+				j.disp = pers.calcPoint(v);
 			}
 
 			// Human 描画
