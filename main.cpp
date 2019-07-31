@@ -1203,12 +1203,12 @@ struct Apr : public Sys
 					{
 						if ( va.z < 0 )
 						{
-							vect3 c = nearclip(v1,v0,4);
+							vect3 c = nearclip(v1,v0,8);
 							va = calcPoint(c);
 						}
 						if ( vb.z < 0 )
 						{
-							vect3 c = nearclip(v0,v1,4);
+							vect3 c = nearclip(v0,v1,8);
 							vb = calcPoint(c);
 						}
 					}
@@ -1313,77 +1313,86 @@ struct Apr : public Sys
 				vect3 v = pers.calcPoint( cam.at * cam.mat.invers() );
 				if ( v.z > 0 )
 				{
-					gra.Circle( vect2(v.x,v.y), 5, rgb(1,0.5,0));
+//					gra.Circle( vect2(v.x,v.y), 2, rgb(1,0.5,0));
 				}
 			}
 
 			// グリッドgrid
-			if(0)
-			{	// ドットグリッド
-				const double NUM = 4;
-				{
-					for ( int i = -NUM ; i <= NUM ; i++ )
+			{
+				int col = rgb(0.5,0.5,0.5);
+				if(0)
+				{	// ドットグリッド
+					const double NUM = 4;
 					{
-						for ( int j = -NUM ; j <= NUM ; j++ )
+						for ( int i = -NUM ; i <= NUM ; i++ )
 						{
-							vect3 v0 = pers.calcPoint( vect3(i,0,j)  * cam.mat.invers() );
-							if ( v0.z > 0 ) 
+							for ( int j = -NUM ; j <= NUM ; j++ )
 							{
-								double r = 5* v0.z;
-								if ( r < 1.0 )
+								vect3 v0 = pers.calcPoint( vect3(i,0,j)  * cam.mat.invers() );
+								if ( v0.z > 0 ) 
 								{
-									gra.Pset( vect2(v0.x,v0.y), rgb(0,1,1 ));
-								}
-								else
-								{
-									gra.Circle( vect2(v0.x,v0.y), r,rgb(0,1,1 ));
+									double r = 5* v0.z;
+									if ( r < 1.0 )
+									{
+										gra.Pset( vect2(v0.x,v0.y), col);
+									}
+									else
+									{
+										gra.Circle( vect2(v0.x,v0.y), r,col);
+									}
 								}
 							}
 						}
 					}
 				}
-			}
 
-			if(1)
-			{	// 格子グリッド
-				const double NUM = 4;
-				{
-					vect3 a(-NUM, 0,-NUM);
-					vect3 b( NUM, 0,-NUM);
-					for ( int i = 0 ; i < NUM*2+1 ; i++ )
+				if(1)
+				{	// 格子グリッド
+					const double NUM = 20;
 					{
-						vect3 v0;
-						vect3 v1;
-						bool flg = pers.ScissorLine( a* cam.mat.invers(), b* cam.mat.invers(), v0, v1 );
-
-						if ( flg )
+						vect3 a(-NUM, 0,-NUM);
+						vect3 b( NUM, 0,-NUM);
+						for ( int i = 0 ; i < NUM*2+1 ; i++ )
 						{
-							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1));
+							vect3 v0;
+							vect3 v1;
+							bool flg = pers.ScissorLine( a* cam.mat.invers(), b* cam.mat.invers(), v0, v1 );
+
+							if ( flg )
+							{
+								gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col );
+							}
+							
+
+							a.z+=1.0;
+							b.z+=1.0;
 						}
-						
-
-						a.z+=1.0;
-						b.z+=1.0;
-					}
-				}			
-				{
-					vect3 a(-NUM, 0, NUM);
-					vect3 b(-NUM, 0,-NUM);
-					for ( int i = 0 ; i < NUM*2+1 ; i++ )
-
+					}			
 					{
-						vect3 v0;
-						vect3 v1;
-						bool flg = pers.ScissorLine( a* cam.mat.invers(), b* cam.mat.invers(), v0, v1 );
-						if ( flg )
+#if 1
+						vect3 a(-NUM, 0, NUM);
+						vect3 b(-NUM, 0,-NUM);
+						for ( int i = 0 ; i < NUM*2+1 ; i++ )
+#else
+						vect3 a(0, 0, NUM);
+						vect3 b(0, 0,-NUM);
+						for ( int i = 0 ; i < 1 ; i++ )
+#endif
 						{
-							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1));
+							vect3 v0;
+							vect3 v1;
+							bool flg = pers.ScissorLine( a* cam.mat.invers(), b* cam.mat.invers(), v0, v1 );
+							if ( flg )
+							{
+								gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col);
+							}
+							a.x+=1.0;
+							b.x+=1.0;
 						}
-						a.x+=1.0;
-						b.x+=1.0;
-					}
-				}			
+					}			
+				}
 			}
+			
 			// 箱
 			//calcPoint rotate
 			box.disp.clear();
@@ -1879,24 +1888,32 @@ else
 				cnt++;
 			}
 			{
-				static chrono::system_clock::time_point time_a;
-				static chrono::system_clock::time_point time_b;
-				static chrono::system_clock::time_point time_sec;
-				static chrono::system_clock::time_point time_amt;
+				static chrono::system_clock::duration dime_a;
+				static chrono::system_clock::duration dime_b;
+				static chrono::system_clock::duration dime_sec;
+				static chrono::system_clock::duration dime_now;
+				static chrono::system_clock::duration dime_max;
 
-				time_b = chrono::system_clock::now(); 
-				time_amt += time_b-time_a;
-				while( chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now()-time_a).count() < 16.6667*1000 )	// 60fps同期処理
+				dime_b = chrono::system_clock::now().time_since_epoch(); 
+				if ( dime_max < dime_b-dime_a ) dime_max = dime_b-dime_a;
+
+				// ウェイト
+				while( chrono::system_clock::now().time_since_epoch()-dime_a < chrono::microseconds(16666) )	// 60fps同期処理
 				{
-	 				this_thread::sleep_for (chrono::microseconds(100));
+	 				this_thread::sleep_for(chrono::microseconds(100));
 				}
-				if (chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now()-time_sec).count() > 5*1000*1000 ) // n sec毎表示
+
+				// 表示
+			    dime_now = chrono::system_clock::now().time_since_epoch();
+				if ( dime_now-dime_sec > chrono::seconds(2) ) // n sec毎表示
 				{
-					time_sec = chrono::system_clock::now();
-					double f = chrono::duration_cast<chrono::microseconds>(time_b-time_a).count();
-					cout << "time " << f/1000 << " msec" << endl;
+					dime_sec = chrono::system_clock::now().time_since_epoch();
+
+					double f2 = chrono::duration_cast<chrono::microseconds>(dime_max).count();
+					cout << "time " << f2/1000 << " msec" << endl;
+					dime_max = chrono::seconds(0);
 				}
-				time_a = chrono::system_clock::now();  
+				dime_a = chrono::system_clock::now().time_since_epoch();  
 			}
 
 		}
