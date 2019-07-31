@@ -1255,7 +1255,7 @@ struct Apr : public Sys
 
 			// マウスホイールZOOM
 			{
-				vect3	v= vect3(0,0,mouse.wheel/500);
+				vect3	v= vect3(0,0,mouse.wheel/25);
 				mat44 mrot = cam.mat;
 				mrot.SetTranslate(vect3(0,0,0));
 				v = v* mrot;
@@ -1272,7 +1272,7 @@ struct Apr : public Sys
 				if ( mouse.L.on )
 				{
 					// 回転
-					vect3	v= vect3(mouse.mov.x/50,mouse.mov.y/50,0);
+					vect3	v= vect3(-mouse.mov.x/28,-mouse.mov.y/28,0);
 					mat44 mrot = cam.mat;
 					mrot.SetTranslate(vect3(0,0,0));
 					v = v* mrot;
@@ -1294,7 +1294,7 @@ struct Apr : public Sys
 				if ( mouse.M.on )
 				{
 					// 平行移動
-					vect3	v= vect3(mouse.mov.x/100,mouse.mov.y/100,0);
+					vect3	v= vect3(-mouse.mov.x/80,-mouse.mov.y/80,0);
 					mat44 mrot = cam.mat;
 					mrot.SetTranslate(vect3(0,0,0));
 					v = v* mrot;
