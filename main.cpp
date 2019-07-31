@@ -1095,7 +1095,7 @@ struct Apr : public Sys
 			double	ry = rad(0);
 			double	rz = rad(0);
 
-			vect3 pos = {1,-1,0};
+			vect3 pos = {2,-1,0};
 
 			vector<vect3> vert=
 			{
@@ -1276,53 +1276,47 @@ struct Apr : public Sys
 				{
 					vect3 a(-NUM, 0, NUM);
 					vect3 b(-NUM, 0,-NUM);
+
+					a = vect3(-1, 0, NUM);
+					b = vect3(-1, 0,-NUM);
+
 					a += -cam.pos;
 					b += -cam.pos;
-//					b += vect3(NUM,0,0);
-					for ( int i = 0 ; i < NUM*2+1 ; i++ )
-//					for ( int i = 0 ; i < 1 ; i++ )
+//					for ( int i = 0 ; i < NUM*2+1 ; i++ )
+					for ( int i = 0 ; i < 1 ; i++ )
 					{
 						vect3 va = pers.calc(a);
 						vect3 vb = pers.calc(b);
-#if 0
- int cnt = 0;
-						function<void(vect3&,vect3&)>func = [pers ,&cnt, &func ]( vect3& a, vect3& b )
+#if 1
+						function<vect3(vect3,vect3,int)>func = [pers , &func ]( vect3 a, vect3 b, int n )
 						{
-cnt++;
-cout << cnt << ": " << a.z << "," << b.z << endl;
-if ( cnt > 10 ) return;
-							vect3 va = pers.calc(a);
-							vect3 vb = pers.calc(b);
-							if ( vb.z <= 0 )
+							if (n <=0 ) return b;
+
+							vect3 c =  (a+b)/2;
+
+							vect3 vc = pers.calc(c);
+
+cout << n << ":" << " a " << a.z << " b " << b.z << " : " << (1/vc.z) << endl;
+
+							if ( 1/vc.z <= 0.0 )
 							{
-								b =  (a+b)/2;
-
-								vect3 v = pers.calc(b);
-
-								if ( v.z<=0 )
-
-								func( a, b );
+								c = func( a, c, n-1 );
 							}
-							if ( vb.z > 0.1 )
+							if ( 1/vc.z > 1.0 )
 							{
-								a =  (a+b)/2;
-								func( a, b );
+								c = func( c, b, n-1 );
 							}
+							return c;
 						};
-
 
 						if ( vb.z < 0 )
 						{
-						cout <<endl;
-							vect3 a2=a;
-							vect3 b2=b;
-							func(a2,b2);
-							
-							vb = pers.calc(b2);
+						cout << endl;
+							b = func(a,b,4);
+							vb = pers.calc(b);
 						}
-
-
 #endif
+
 						if ( va.z > 0 && vb.z > 0 )
 						{
 							gra.Line( vect2(va.x,va.y), vect2(vb.x,vb.y), rgb(0,0,1));
