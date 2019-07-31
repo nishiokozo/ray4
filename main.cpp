@@ -1235,7 +1235,6 @@ struct Apr : public Sys
 		{
 			pers.Update( vect2( m.width, m.height ) );
 
-if ( keys.H.hi ) cout << "fovy=" << pers.val << endl;
 
 	 		static int py=0;
 
@@ -1250,21 +1249,50 @@ if ( keys.H.hi ) cout << "fovy=" << pers.val << endl;
 
 
 			// パースペクティブ
-			pers.val += -mouse.wheel/30;
-			if (keys.R.rep) {pers.val-=1;cout << pers.val <<" "<<1/tan(rad(pers.val)) << endl; }
-			if (keys.F.rep) {pers.val+=1;cout << pers.val <<" "<<1/tan(rad(pers.val)) << endl; }
-//cout << pers.val << endl;
+			if (keys.R.rep) {pers.val-=2;cout << pers.val <<" "<<1/tan(rad(pers.val)) << endl; }
+			if (keys.F.rep) {pers.val+=2;cout << pers.val <<" "<<1/tan(rad(pers.val)) << endl; }
+
 			// カメラ移動
 			if ( keys.ALT.on )
 			{
+				{	// ZOOM
+					vect3	v= vect3(0,0,mouse.wheel/500);
+					mat44 mrot = cam.mat;
+					mrot.SetTranslate(vect3(0,0,0));
+					cam.pos.z += -mouse.wheel/500;
+				}
+
+				if ( mouse.L.on )
+				{
+					// 回転
+					vect3	v= vect3(mouse.mov.x/50,mouse.mov.y/50,0);
+					mat44 mrot = cam.mat;
+					mrot.SetTranslate(vect3(0,0,0));
+					v = v* mrot;
+
+					cam.at += v;
+				}
 				if ( mouse.R.on )
 				{
-					cam.pos.z += mouse.mov.y/100.0;
+					// ズーム
+					vect3	v= vect3(0,0,mouse.mov.y/100);
+					mat44 mrot = cam.mat;
+					mrot.SetTranslate(vect3(0,0,0));
+					v = v* mrot;
+
+					cam.at += v;
+					cam.pos += v;
 				}
 				if ( mouse.M.on )
 				{
-					cam.pos.x += mouse.mov.x/100.0;
-					cam.pos.y += mouse.mov.y/100.0;
+					// 平行移動
+					vect3	v= vect3(mouse.mov.x/100,mouse.mov.y/100,0);
+					mat44 mrot = cam.mat;
+					mrot.SetTranslate(vect3(0,0,0));
+					v = v* mrot;
+
+					cam.at += v;
+					cam.pos += v;
 				}
 			}
 			// カメラマトリクス計算
@@ -1763,18 +1791,7 @@ else
 				}
 			}
 
-//			if ( keys.W.rep ) cam.mat.AddTranslate( vect3( 0,0,0.5) );
-//			if ( keys.S.rep ) cam.mat.AddTranslate( vect3( 0,0,-0.5) );
-//			if ( keys.A.rep ) cam.mat.AddTranslate( vect3(-0.5,0,0) );
-//			if ( keys.D.rep ) cam.mat.AddTranslate( vect3( 0.5,0,0) );
-
-
-
-			
-
-
 			// Human pers
-
 			for ( Joint3& j : human_tblJoint )
 			{
 				//	右手系座標系
@@ -1865,7 +1882,7 @@ else
 				{
 	 				this_thread::sleep_for (chrono::microseconds(100));
 				}
-				if (chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now()-time_sec).count() > 1*1000*1000 ) // n sec毎表示
+				if (chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now()-time_sec).count() > 5*1000*1000 ) // n sec毎表示
 				{
 					time_sec = chrono::system_clock::now();
 					double f = chrono::duration_cast<chrono::microseconds>(time_b-time_a).count();
