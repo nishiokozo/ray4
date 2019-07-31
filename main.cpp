@@ -1148,8 +1148,8 @@ struct Apr : public Sys
 		struct Pers
 		{
 			double	val;
-//			double	fovy;		// 画角
-//			double	sz;			// 投影面までの距離
+			double	fovy;		// 画角
+			double	sz;			// 投影面までの距離
 			double	ox;			// 描画画面の中心W
 			double	oy;			// 描画画面の中心H
 			double	w;			// 描画画面の解像度W/2
@@ -1159,10 +1159,15 @@ struct Apr : public Sys
 			Pers()
 			{
 				val=90/3;
+				fovy = rad(val);				// 画角
+				sz = 1/tan(fovy/2);				// 投影面までの距離
 			}
 		
 			void Update( vect2 screensize )
 			{
+				fovy = rad(val);				// 画角
+				sz = 1/tan(fovy/2);				// 投影面までの距離
+
 				ox	= screensize.x/2;			// 描画画面の中心W
 				oy	= screensize.y/2;			// 描画画面の中心H
 				w	= screensize.x/2;			// 描画画面の解像度W/2
@@ -1172,9 +1177,6 @@ struct Apr : public Sys
 
 			vect3 calc( vect3 p ) const
 			{
-				double fovy = rad(val);				// 画角
-				double sz = 1/tan(fovy/2);				// 投影面までの距離
-
 				vect3 ret;
 				ret.x = p.x/(p.z+sz)	*w*aspect	+ox;
 				ret.y = p.y/(p.z+sz)	*h			+oy;
@@ -1276,47 +1278,54 @@ struct Apr : public Sys
 				{
 					vect3 a(-NUM, 0, NUM);
 					vect3 b(-NUM, 0,-NUM);
-
-					a = vect3(-1, 0, NUM);
-					b = vect3(-1, 0,-NUM);
-
 					a += -cam.pos;
 					b += -cam.pos;
-//					for ( int i = 0 ; i < NUM*2+1 ; i++ )
+#if 0
+					a = vect3(-1, 0, NUM)-cam.pos;
+					b = vect3(-1, 0,-NUM)-cam.pos;
 					for ( int i = 0 ; i < 1 ; i++ )
+#else
+					for ( int i = 0 ; i < NUM*2+1 ; i++ )
+#endif
+
+
 					{
 						vect3 va = pers.calc(a);
 						vect3 vb = pers.calc(b);
 #if 1
-						function<vect3(vect3,vect3,int)>func = [pers , &func ]( vect3 a, vect3 b, int n )
+						function<vect3(vect3,vect3,int)>func_nearclip_b = [ pers , &func_nearclip_b ]( vect3 a, vect3 b, int n )
 						{
 							if (n <=0 ) return b;
 
 							vect3 c =  (a+b)/2;
-
-							vect3 vc = pers.calc(c);
-
-cout << n << ":" << " a " << a.z << " b " << b.z << " : " << (1/vc.z) << endl;
-
-							if ( 1/vc.z <= 0.0 )
+					
+							if ( c.z <= -pers.sz )
 							{
-								c = func( a, c, n-1 );
+								c = func_nearclip_b( a, c, n-1 );
 							}
-							if ( 1/vc.z > 1.0 )
+							if ( c.z > 1.0-pers.sz )
 							{
-								c = func( c, b, n-1 );
+								c = func_nearclip_b( c, b, n-1 );
 							}
 							return c;
 						};
 
-						if ( vb.z < 0 )
+						if ( va.z > 0|| vb.z > 0 )
 						{
-						cout << endl;
-							b = func(a,b,4);
-							vb = pers.calc(b);
+							if ( va.z < 0 )
+							{
+								vect3 c = func_nearclip_b(b,a,4);
+								c  = (a-b)*c.z+b;
+
+							//	va = pers.calc(c);
+							}
+							if ( vb.z < 0 )
+							{
+								vect3 c = func_nearclip_b(a,b,4);
+								vb = pers.calc(c);
+							}
 						}
 #endif
-
 						if ( va.z > 0 && vb.z > 0 )
 						{
 							gra.Line( vect2(va.x,va.y), vect2(vb.x,vb.y), rgb(0,0,1));
