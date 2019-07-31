@@ -1,4 +1,5 @@
 main.o: main.cpp geom.h SysKeys.h SysMouse.h SysGra.h Sys.h
+raytrace.o: raytrace.cpp geom.h SysGra.h
 geom.o: geom.cpp geom.h
 Sys.o: Sys.cpp SysKeys.h SysMouse.h geom.h SysGra.h Sys.h SysWin.h
 Syswin.o: Syswin.cpp SysWin.h

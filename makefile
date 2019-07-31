@@ -4,6 +4,7 @@ TAR = main.exe
 
 SRCS = \
 	main.cpp \
+	raytrace.cpp \
 	geom.cpp \
 	Sys.cpp \
 	Syswin.cpp \

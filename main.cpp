@@ -17,487 +17,11 @@ using namespace std;
 #include "SysGra.h"
 #include "Sys.h"
 
+#include "raytrace.h"
 
 
 
-const	static	double INFINIT =  numeric_limits<double>::max();	//DBL_MAX
 
-struct  Material
-{
-	vect3	C;					//	ベースカラー
-	double	valReflectance;		//	反射率
-	double	valRefractive;		//	屈折率
-	double	valPower;			//	スペキュラ強度
-	double	valEmissive;		//	エミッシブ
-	double	valTransmittance;	//	透過率
-};
-
-
-struct	Surface : Material
-{
-	enum
-	{
-		STAT_NONE,
-		STAT_OUT,
-		STAT_FRONT,
-		STAT_BACK,
-	};
-
-	double	t;
-	bool	flg; 
-	int		stat; 
-		// 0:none
-		// 1:back
-		// 2:front
-		// 3:inside
-
-	vect3	Q;
-	vect3	N;
-	vect3	R;	//	Reflectionion
-	vect3	Rr;	//	Refractive	
-
-	Surface()
-	{
-		t		= INFINIT;
-		flg		= false;
-		stat	= 0;
-		Q = vect3(0,0,0);
-		N = vect3(0,0,0);
-		R = vect3(0,0,0);
-		Rr = vect3(0,0,0);
-	}
-};
-
-
-
-struct PrimSphere : public Material
-{
-	vect3	P;
-	double	r;
-
-	PrimSphere( const vect3& _p, double _r, vect3 _c, double _valReflection, double _valRefractive, double _valPower, double _valEmissive, double _valTransmittance )
-	{
-		P = _p;
-		r = _r;
-		C = max(0.0,min(1.0,_c));
-		valReflectance	= _valReflection;
-		valRefractive	= _valRefractive;
-		valPower= _valPower;
-		valEmissive	= _valEmissive;
-		valTransmittance	= _valTransmittance;
-	};
-};
-struct PrimPlate : public Material
-{
-	vect3	P;
-	vect3	N;
-
-	PrimPlate( const vect3& _p, const vect3& _n, vect3 _c, double _valReflection, double _valRefractive, double _valPower, double _valEmissive, double _valTransmittance )
-	{
-		P = _p;
-		N = _n;
-		C = _c;
-		valReflectance = _valReflection;
-		valRefractive	= _valRefractive;
-		valPower = _valPower;
-		valEmissive = _valEmissive;
-		valTransmittance = _valTransmittance;
-	};
-};
-
-struct	PrimLight
-{
-	vect3	P;
-	vect3	C;
-
-	PrimLight( const vect3& _p, const vect3& _c )
-	{
-		P = _p;
-		C = _c;
-	}
-};
-
-////////////////////////////////////////////////////////////////////////////////
-class	Renderer 
-////////////////////////////////////////////////////////////////////////////////
-{
-	vector<PrimSphere*>	m_tblSphere;
-	vector<PrimPlate*>	m_tblPlate;
-	vector<PrimLight*>	m_tblLight;
-	vect3	A;
-
-public:
-	int m_cntRay;
-
-
-	//------------------------------------------------------------------------------
-	Surface raycast( vect3& P, const vect3& I )
-	//------------------------------------------------------------------------------
-	{
-		Surface sur;
-
-		P += I*2e-10;
-
-		sur.flg = false;
-
-		sur.t  = INFINIT;
-		sur.stat  = Surface::STAT_NONE;
-		
-		//	球
-		for ( int i = 0 ; i < (signed)m_tblSphere.size() ; i++ )
-		{
-			PrimSphere&	obj = *m_tblSphere[i];
-
-			vect3	O = obj.P;
-			double	r = obj.r;
-
-			vect3	OP = P-O;
-			double	b = dot( I, OP );
-			double	aa = r*r - dot(OP,OP)+ b*b;
-
-			int	stat = 0;
-
-			if ( aa >= 0 )
-			{
-				double t = - sqrt( aa ) - b;
-
-				if ( t < 0 )
-				{
-					t = + sqrt( aa ) - b;
-					stat++;
-				}
-
-				if ( sur.t >= t && t >= 0 )
-				{
-					stat += 2;
-
-					sur.stat = stat;
-
-					sur.t = t; 
-
-					sur.Q = I * t + P;
-
-					if ( stat == Surface::STAT_BACK )
-					{
-						sur.N = -normalize(sur.Q - O);
-					}
-					else
-					{
-						sur.N = normalize(sur.Q - O);
-					}
-
-					sur.C = obj.C;
-
-					sur.R = reflect( I, sur.N );
-
-					sur.valReflectance = obj.valReflectance;
-
-					sur.valRefractive   = obj.valRefractive;
-
-					sur.valPower = obj.valPower;
-
-					sur.valEmissive = obj.valEmissive;
-
-					sur.valTransmittance = obj.valTransmittance;
-
-					sur.flg = true;
-				}
-			}
-		}
-
-		//	床
-		for ( int i = 0 ; i < (signed)m_tblPlate.size() ; i++ )
-		{
-			PrimPlate&	obj = *m_tblPlate[i];
-
-			double	f = dot(obj.N,P - obj.P);
-			if ( f > 0 )
-			{
-				double	t = -f/dot(obj.N,I);
-
-				if ( sur.t >= t && t >= 0 )
-				{
-					sur.stat = Surface::STAT_FRONT;
-
-					sur.t = t; 
-
-					sur.Q = I * t + P;
-
-					sur.N = obj.N;
-
-					if (   (fmod(sur.Q.x+10e3, 1.0) < 0.5 && fmod(sur.Q.z+10e3, 1.0) < 0.5 )
-						|| (fmod(sur.Q.x+10e3, 1.0) > 0.5 && fmod(sur.Q.z+10e3, 1.0) > 0.5 ) )
-					{
-						sur.C = obj.C;
-					}
-					else
-					{
-						sur.C = obj.C * 0.5;
-					}
-		
-					sur.R = reflect( I, obj.N );
-		
-					sur.valReflectance = obj.valReflectance;
-
-					sur.valRefractive   = obj.valRefractive;
-
-					sur.valPower = obj.valPower;
-
-					sur.valEmissive = obj.valEmissive;
-
-					sur.valTransmittance = obj.valTransmittance;
-
-
-					sur.flg = true;
-				}
-				
-			}
-
-		}
-
-		return sur;
-
-	}
-
-	//------------------------------------------------------------------------------
-	void	Entry( PrimSphere* a )
-	//------------------------------------------------------------------------------
-	{
-		m_tblSphere.emplace_back( a );
-
-	}
-
-	//------------------------------------------------------------------------------
-	void	Entry( PrimPlate* a )
-	//------------------------------------------------------------------------------
-	{
-		m_tblPlate.emplace_back( a );
-	}
-
-	//------------------------------------------------------------------------------
-	void	Entry( PrimLight* a )
-	//------------------------------------------------------------------------------
-	{
-		m_tblLight.emplace_back( a );
-	}
-
-	//------------------------------------------------------------------------------
-	~Renderer()
-	//------------------------------------------------------------------------------
-	{
-	}
-
-	//------------------------------------------------------------------------------
-	Renderer()
-	//------------------------------------------------------------------------------
-	{
-		m_cntRay = 0;
-		A = vect3(0,0,0);
-
-
-		float r,s,pw,e,tm,rl,rr;
-		vect3	P,C,N;
-
-	#define	SCENE 1
-	#if SCENE==1
-		Entry( new PrimPlate( P=vect3( 0  ,  0 ,0.0),N=vect3(0,1,0),C=vect3(0.8,0.8,0.8),rl=0.5,rr=1.0 ,pw=20,e= 0.0,tm=0.0 ) );
-		Entry( new PrimSphere(vect3( 0.0 , 1.25, -2       ),   0.5 , vect3(1  , 0.2, 0.2), 0.5, 1.0, 20, 0.0, 0.0 ) );
-		Entry( new PrimSphere(vect3( 0.0 , 0.5 , -2-0.433 ),   0.5 , vect3(0.0, 0.0, 0.0), 1.0, 1.0, 20, 0.0, 0.0 ) );
-		Entry( new PrimSphere(vect3( 0.5 , 0.5 , -2+0.433 ),   0.5 , vect3(0.2, 0.2, 1.0), 0.5, 1.0, 20, 0.0, 0.0 ) );
-		Entry( new PrimSphere(vect3(-0.5 , 0.5 , -2+0.433 ),   0.5 , vect3(0.0, 1.0, 0.0), 0.5, 1.0, 20, 0.0, 0.0 ) );
-		Entry( new PrimLight( vect3( 0   ,  30 ,  0 ), vect3(1,1,1)*1300 )  );
-		A = vect3( 0.2,0.4,0.6)*0.0;
-	#endif
-	#if SCENE==2 //5 balls
-		Entry( new PrimPlate( P=vect3( 0  ,  0 ,0.0),N=vect3(0,1,0),C=vect3(0.8,0.8,0.8),rl=0.5,rr=1.0 ,pw=20,e= 0.0,tm=0.0 ) );
-		Entry( new PrimSphere(vect3(-2.0 , 0.5 , -2 ),   0.5 , vect3(0.0, 0.0, 0.0), 1.0 , 1.0, 20, 0.0, 0.0 ) );
-		Entry( new PrimSphere(vect3(-1.0 , 0.5 , -2 ),   0.5 , vect3(0.0, 0.0, 0.0), 0.75, 1.0, 20, 0.0, 0.0 ) );
-		Entry( new PrimSphere(vect3( 0.0 , 0.5 , -2 ),   0.5 , vect3(0.0, 0.0, 0.0), 0.5 , 1.0, 20, 0.0, 0.0 ) );
-		Entry( new PrimSphere(vect3( 1.0 , 0.5 , -2 ),   0.5 , vect3(0.0, 0.0, 0.0), 0.25, 1.0, 20, 0.0, 0.0 ) );
-		Entry( new PrimSphere(vect3( 2.0 , 0.5 , -2 ),   0.5 , vect3(0.0, 0.0, 0.0), 0.0 , 1.0, 20, 0.0, 0.0 ) );
-		Entry( new PrimLight( vect3( 0   ,  20 ,  -2 ), vect3(1.0, 1.0, 1.0)*800 ) );
-		A = vect3( 0.2,0.4,0.6)*1.0;
-	#endif
-	#if SCENE==3 // ring
-		Entry( new PrimPlate( P=vect3( 0  ,  0 ,0.0),N=vect3(0,1,0),C=vect3(0.8,0.8,0.8),rl=0.5,rr=1.0 ,pw=20,e= 0.0,tm=0.0 ) );
-		Entry( new PrimSphere(  vect3( 0 , 1.0 , 0 ),   0.5 ,  vect3(0.0, 0.0, 0.0),   0.5,   1.0 ,  100,  0.0,  0.0 ) );
-		int	max = 16*3;
-		for ( int i = 0 ; i < max ; i++ )
-		{
-			double	th  = (double)i *(pi/360)*16 * 3;
-			double	th2 = (double)i *(pi/360)*16 * 0.5;
-			double	x = cos(th);
-			double	z = sin(th) ;
-			double	y = cos(th2) +1.2;
-			Entry( new PrimSphere(P=vect3( x , y , z ),r=0.2 ,C=vect3( x, y,  z) ,rl=0.2,rr=0.0 ,pw=100,e= 0.0,tm=0.0 ) );
-
-		}
-		Entry( new PrimLight( vect3( 0   ,  30 ,  0 ), vect3(1,1,1)*1800 )  );
-		Entry( new PrimLight( vect3(-30   ,  30 ,  0 ), vect3(0.5,1,1)*1800 )  );
-		Entry( new PrimLight( vect3(60   ,  80 ,  0 ), vect3(1,1,0.5)*4800 )  );
-		Entry( new PrimLight( vect3(-60   ,  80 , 0 ), vect3(1,0.5,1)*4800 )  );
-		A = vect3( 0.2,0.4,0.6)*0.0;
-	#endif
-	#if SCENE==4 //twin balls
-		Entry( new PrimPlate( vect3( 0   ,  0 ,  0    ), normalize(vect3(0, 1,0))  , vect3(0.8, 0.8, 0.8), 0.5, 1.0, 20, 0.0, 0.0 ) );
-		Entry( new PrimSphere(vect3(-1.0 , 1.0 , -2 ),   1.0 , vect3(1.0, 0.5, 0.5), 0.2, 1.0, 20, 0.0, 0.0 ) );
-		Entry( new PrimSphere(vect3( 1.0 , 1.0 , -2 ),   1.0 , vect3(0.0, 0.0, 0.0), 0.2, 1.0, 20, 0.0, 0.0 ) );
-		Entry( new PrimLight( vect3( 0   ,  20 ,  -2 ), vect3(1.0, 1.0, 1.0)*1800 ) );
-		A = vect3( 0.2,0.4,0.6)*1.0;
-	#endif
-	#if SCENE==5//2 balls
-		Entry( new PrimPlate( P=vect3(0  , 0 ,0.0),N=vect3(0,1,0),C=vect3(0.8,0.8,0.8),rl=0.5,rr=1.0 ,pw=20,e= 0.0,tm=0.0 ) );
-		Entry( new PrimSphere(P=vect3( 0.5,1.0,3.0),r=0.5       ,C=vect3(0.0,0.0,1.0),rl=0.5,rr=1.0 ,pw=20,e=10.0,tm=0.0 ) );
-		Entry( new PrimSphere(P=vect3(-0.5,1.0,3.0),r=0.5       ,C=vect3(0.0,1.0,0.0),rl=0.5,rr=1.0 ,pw=20,e=10.0,tm=0.0 ) );
-		Entry( new PrimSphere(P=vect3( 0.0,1.5,3.0),r=0.5       ,C=vect3(1.0,0.0,0.0),rl=0.5,rr=1.0 ,pw=20,e=10.0,tm=0.0 ) );
-		Entry( new PrimSphere(P=vect3( 0.0,0.5,3.0),r=0.5       ,C=vect3(1.0,1.0,0.0),rl=0.5,rr=1.0 ,pw=20,e=10.0,tm=0.0 ) );
-		Entry( new PrimSphere(P=vect3( 0.0,1.0,2.75),r=0.25      ,C=vect3(1.0,1.0,1.0),rl=0.5,rr=1.0 ,pw=20,e=10.0,tm=0.0 ) );
-		Entry( new PrimLight( P=vect3( 1.0 ,15, 0 )          ,C=vect3(1,1,1)*360 )  );
-		A = vect3( 0.2,0.4,0.6)*0.5;
-	#endif
-	}
-
-	//------------------------------------------------------------------------------
-	vect3 Raycast( vect3 P, vect3 I )
-	//------------------------------------------------------------------------------g
-	{
-		vect3 ret = vect3(0,0,0);
-
-		if ( m_cntRay > 5 ) return ret;
-		m_cntRay++;
-
-		Surface sur;
-		PrimLight&	lgt = *m_tblLight[0];
-		vect3	Lc;
-		vect3	L;
-		float	d;
-		float	s=0;
-		float	r=0;
-		float	t=0;
-		
-		if ( (sur = raycast( P, I )).flg )
-		{
-			L	= normalize(sur.Q - lgt.P);
-			Lc	= lgt.C / dot(sur.Q - lgt.P, sur.Q - lgt.P);
-			d	= max( 0.0, dot( sur.N, -L ) );
-			s	= (sur.valPower+2)/(8*pi)*pow( max( 0.0, dot( sur.R, -L ) ), sur.valPower );
-			r	= sur.valReflectance;
-			ret += r* (Raycast( sur.Q, sur.R )+s) * Lc;
-
-			if ( sur.valTransmittance == 0.0 )
-			{
-				ret += (1-r)*( d * sur.C ) * Lc;
-			}
-			else
-			{
-				I = refract( I, sur.N, sur.valRefractive/1.0 );
-				sur = raycast( sur.Q, I );
-
-
-
-				I = refract( I, sur.N, 1.0/sur.valRefractive );
-				ret += (1-r)*Raycast( sur.Q, I );
-			}
-
-		}
-		else
-		{
-			L = normalize(sur.Q - lgt.P);
-			Lc = lgt.C / dot(sur.Q - lgt.P, sur.Q - lgt.P);
-			int n = 20;
-			ret += s;
-		}
-
-		return ret;
-	}
-	//------------------------------------------------------------------------------
-	void	Paint( unsigned char* to, int height, int width, int psize )
-	//------------------------------------------------------------------------------
-	{
-
-		vect3	posScr = vect3(0,1.0,-12+8);
-		vect3	posEye = vect3(0,1.0,-17+8);
-
-		float r,s,p,e,t,rl,rr;
-		vect3	C;
-
-		int	cntMax = 0;
-		int	cntRay = 0;
-		for( int py = 0 ; py < height ; py++ )
-		{
-			for( int px = 0 ; px < width ; px++ )
-			{
-				double x = ((double)px / width) *2.0-1.0;
-				double y = ((double)py / height) *2.0-1.0;
-				vect3	P = vect3( x, y, 0 ) + posScr;
-				vect3	I = normalize(P - posEye);
-
-				double	valRefractive = 1.0;
-
-				m_cntRay = 0;
-				int	cntNext = 0;
-		 		C = Raycast( P, I );
-				if ( m_cntRay > cntMax ) cntMax = m_cntRay;
-				cntRay+= m_cntRay;
-
-				int r = min( 255, (int)(255*C.r) );
-				int g = min( 255, (int)(255*C.g) );
-				int b = min( 255, (int)(255*C.b) );
-
-				to[(py*width + px)*psize +0] = b;
-				to[(py*width + px)*psize +1] = r;
-				to[(py*width + px)*psize +2] = g;
-			}
-		}
-		
-	}
-
-};
-
-#if 1
-//------------------------------------------------------------------------------
-void	raytrace( SysGra& gra, int py )
-//------------------------------------------------------------------------------
-{
-	Renderer ren;
-
-	{
-		int width	= gra.GetWidth(); 
-		int height	= gra.GetHeight(); 
-	
-		vect3	posScr = vect3(0,1.0,-12+8);
-		vect3	posEye = vect3(0,1.0,-17+8);
-
-		float r,s,p,e,t,rl,rr;
-		vect3	C;
-
-		int	cntMax = 0;
-		int	cntRay = 0;
-//		for( int py = 0 ; py < height ; py++ )
-		{
-			for( int px = 0 ; px < width ; px++ )
-			{
-				double x = ((double)px / width) *2.0-1.0;
-				double y = ((double)py / height) *2.0-1.0;
-				vect3	P = vect3( x, y, 0 ) + posScr;
-				vect3	I = normalize(P - posEye);
-
-				double	valRefractive = 1.0;
-
-				ren.m_cntRay = 0;
-				int	cntNext = 0;
-		 		C = ren.Raycast( P, I );
-				if ( ren.m_cntRay > cntMax ) cntMax = ren.m_cntRay;
-				cntRay+= ren.m_cntRay;
-
-				gra.Pset( vect2(px,height-py) ,rgb(C.r,C.g,C.b));
-			}
-		}
-		
-	}
-
-}
-#endif
 
 struct Apr : public Sys
 {
@@ -1146,33 +670,28 @@ struct Apr : public Sys
 		
 		struct Pers
 		{
-			double	val;
 			double	fovy;		// 画角
 			double	sz;			// 投影面までの距離
 			double	ox;			// 描画画面の中心W
 			double	oy;			// 描画画面の中心H
-			double	w;			// 描画画面の解像度W/2
-			double	h;			// 描画画面の解像度H/2
+			double	width;		// 描画画面の解像度W/2
+			double	height;		// 描画画面の解像度H/2
 			double	aspect;		// 描画画面のアスペクト比
 		
 			Pers()
 			{
-				val=90/2;
-				fovy = rad(val);				// 画角
-				sz = 1/tan(fovy/2);				// 投影面までの距離
+				fovy=90/2;
+				sz = 1/tan(rad(fovy)/2);				// 投影面までの距離
 			}
 		
 			void Update( vect2 screensize )
 			{
-				fovy = rad(val);				// 画角
-				sz = 1/tan(fovy/2);				// 投影面までの距離
-
-				ox	= screensize.x/2;			// 描画画面の中心W
-				oy	= screensize.y/2;			// 描画画面の中心H
-				w	= screensize.x/2;			// 描画画面の解像度W/2
-				h	= screensize.y/2;			// 描画画面の解像度H/2
+				sz = 1/tan(rad(fovy)/2);				// 投影面までの距離
+				ox		= screensize.x/2;				// 描画画面の中心W
+				oy		= screensize.y/2;				// 描画画面の中心H
+				width	= screensize.x/2;				// 描画画面の解像度W/2
+				height	= screensize.y/2;				// 描画画面の解像度H/2
 				aspect	= screensize.y/screensize.x;	// 描画画面のアスペクト比
-
 			} 
 
 			//--------------------------------------------------------------------------
@@ -1221,9 +740,10 @@ struct Apr : public Sys
 			//--------------------------------------------------------------------------
 			{
 				vect3 ret;
-				ret.x = v.x/(v.z+sz)	*sz*w*aspect	+ox;
-				ret.y = v.y/(v.z+sz)	*sz*h			+oy;
-				ret.z = 1/(v.z+sz);
+				double w = 1/(v.z+sz);
+				ret.x = v.x*w	*sz* width  *aspect	+ox;
+				ret.y = v.y*w	*sz* height			+oy;
+				ret.z = w;
 				return ret;
 			}
 	
@@ -1233,25 +753,27 @@ struct Apr : public Sys
 		//===========================================================================
 		while( Update() )
 		{
+			// パースペクティブ
+			if (keys.R.rep) {pers.fovy-=2;cout << pers.fovy <<" "<<1/tan(rad(pers.fovy)) << endl; }
+			if (keys.F.rep) {pers.fovy+=2;cout << pers.fovy <<" "<<1/tan(rad(pers.fovy)) << endl; }
+
+			// パース更新
 			pers.Update( vect2( m.width, m.height ) );
 
 
-	 		static int py=0;
 
 
-			gra.Clr(rgb(0.3,0.3,0.3));
-//			gra.Fill(vect2(0,0),vect2(m.width,m.height),rgb(0.3,0.3,0.3));
-
-
+	 	#if 0
 			// レイトレ
-			//raytrace( gra, py++ );
+	 		static int py=0;
+			raytrace( gra, py++ );
 			if ( py >= m.height ) py=0;
+		#else
 
-
-			// パースペクティブ
-			if (keys.R.rep) {pers.val-=2;cout << pers.val <<" "<<1/tan(rad(pers.val)) << endl; }
-			if (keys.F.rep) {pers.val+=2;cout << pers.val <<" "<<1/tan(rad(pers.val)) << endl; }
-
+			// 画面クリア
+			gra.Clr(rgb(0.3,0.3,0.3));
+		#endif
+		
 
 			// マウスホイールZOOM
 			{
@@ -1306,15 +828,6 @@ struct Apr : public Sys
 			// カメラマトリクス計算
 			{
 				cam.mat.LookAt( cam.pos, cam.at, cam.up );
-			}
-
-			// カメラ注視点描画
-			{
-				vect3 v = pers.calcPoint( cam.at * cam.mat.invers() );
-				if ( v.z > 0 )
-				{
-//					gra.Circle( vect2(v.x,v.y), 2, rgb(1,0.5,0));
-				}
 			}
 
 			// グリッドgrid
@@ -1494,9 +1007,6 @@ struct Apr : public Sys
 				vect3 v1;
 				bool flg = pers.ScissorLine( a, b, v0, v1 );
 				if ( flg )
-//				vect3 v0 = pers.calcPoint(a);
-//				vect3 v1 = pers.calcPoint(b);
-//				if ( v0.z > 0 && v1.z > 0 )
 				{
 					gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,1,1));
 				}
@@ -1897,8 +1407,8 @@ else
 				dime_b = chrono::system_clock::now().time_since_epoch(); 
 				if ( dime_max < dime_b-dime_a ) dime_max = dime_b-dime_a;
 
-				// ウェイト
-				while( chrono::system_clock::now().time_since_epoch()-dime_a < chrono::microseconds(16666) )	// 60fps同期処理
+				// ウェイト(60fps)
+				while( chrono::system_clock::now().time_since_epoch()-dime_a < chrono::microseconds(16666) )
 				{
 	 				this_thread::sleep_for(chrono::microseconds(100));
 				}
@@ -1910,7 +1420,7 @@ else
 					dime_sec = chrono::system_clock::now().time_since_epoch();
 
 					double f2 = chrono::duration_cast<chrono::microseconds>(dime_max).count();
-					cout << "time " << f2/1000 << " msec" << endl;
+					cout << "time-max " << f2/1000 << " msec" << endl;
 					dime_max = chrono::seconds(0);
 				}
 				dime_a = chrono::system_clock::now().time_since_epoch();  
