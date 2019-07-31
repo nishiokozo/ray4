@@ -1252,15 +1252,22 @@ struct Apr : public Sys
 			if (keys.R.rep) {pers.val-=2;cout << pers.val <<" "<<1/tan(rad(pers.val)) << endl; }
 			if (keys.F.rep) {pers.val+=2;cout << pers.val <<" "<<1/tan(rad(pers.val)) << endl; }
 
+
+			// マウスホイールZOOM
+			{
+				vect3	v= vect3(0,0,mouse.wheel/500);
+				mat44 mrot = cam.mat;
+				mrot.SetTranslate(vect3(0,0,0));
+				v = v* mrot;
+
+				vect3 r = cam.pos;
+				cam.pos += v;
+				if( (cam.pos-cam.at).length() < v.length() ) cam.pos = r;
+			}
+
 			// カメラ移動
 			if ( keys.ALT.on )
 			{
-				{	// ZOOM
-					vect3	v= vect3(0,0,mouse.wheel/500);
-					mat44 mrot = cam.mat;
-					mrot.SetTranslate(vect3(0,0,0));
-					cam.pos.z += -mouse.wheel/500;
-				}
 
 				if ( mouse.L.on )
 				{
@@ -1270,7 +1277,7 @@ struct Apr : public Sys
 					mrot.SetTranslate(vect3(0,0,0));
 					v = v* mrot;
 
-					cam.at += v;
+					cam.pos += v;
 				}
 				if ( mouse.R.on )
 				{
@@ -1280,8 +1287,9 @@ struct Apr : public Sys
 					mrot.SetTranslate(vect3(0,0,0));
 					v = v* mrot;
 
-					cam.at += v;
+					vect3 r = cam.pos;
 					cam.pos += v;
+					if( (cam.pos-cam.at).length() < v.length() ) cam.pos = r;
 				}
 				if ( mouse.M.on )
 				{
