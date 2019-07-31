@@ -678,13 +678,17 @@ struct Apr : public Sys
 			double	height;		// 描画画面の解像度H/2
 			double	aspect;		// 描画画面のアスペクト比
 		
+			//--------------------------------------------------------------------------
 			Pers()
+			//--------------------------------------------------------------------------
 			{
 				fovy=90/2;
 				sz = 1/tan(rad(fovy)/2);				// 投影面までの距離
 			}
 		
+			//--------------------------------------------------------------------------
 			void Update( vect2 screensize )
+			//--------------------------------------------------------------------------
 			{
 				sz = 1/tan(rad(fovy)/2);				// 投影面までの距離
 				ox		= screensize.x/2;				// 描画画面の中心W
@@ -777,7 +781,13 @@ struct Apr : public Sys
 
 			// マウスホイールZOOM
 			{
-				vect3	v= vect3(0,0,mouse.wheel/25);
+				double l = (cam.pos-cam.at).length()/10;
+				if ( l < 0.01 ) l = 0.01;
+				if ( l > 1 ) l = 1.0;
+
+				double step = mouse.wheel/25;
+
+				vect3	v= vect3(0,0,step*l);
 				mat44 mrot = cam.mat;
 				mrot.SetTranslate(vect3(0,0,0));
 				v = v* mrot;
@@ -793,8 +803,12 @@ struct Apr : public Sys
 
 				if ( mouse.L.on )
 				{
+					double l = (cam.pos-cam.at).length()/10;
+					if ( l < 0.01 ) l = 0.01;
+					if ( l > 4 ) l = 4.0;
+
 					// 回転
-					vect3	v= vect3(-mouse.mov.x/28,-mouse.mov.y/28,0);
+					vect3	v= vect3(-mouse.mov.x/28,-mouse.mov.y/28,0) * l;
 					mat44 mrot = cam.mat;
 					mrot.SetTranslate(vect3(0,0,0));
 					v = v* mrot;
@@ -815,8 +829,12 @@ struct Apr : public Sys
 				}
 				if ( mouse.M.on )
 				{
+					double l = (cam.pos-cam.at).length()/10;
+					if ( l < 0.4 ) l = 0.4;
+					if ( l > 4 ) l = 4.0;
+
 					// 平行移動
-					vect3	v= vect3(-mouse.mov.x/80,-mouse.mov.y/80,0);
+					vect3	v= vect3(-mouse.mov.x/80,-mouse.mov.y/80,0)*l;
 					mat44 mrot = cam.mat;
 					mrot.SetTranslate(vect3(0,0,0));
 					v = v* mrot;
