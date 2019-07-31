@@ -1141,7 +1141,7 @@ struct Apr : public Sys
 			vect3	pos = vect3( 0,-1, -5);
 			vect3 	at = vect3( 0, 0, 0 );
 			vect3	up = vect3( 0, 1, 0);
-		  		
+		  	mat44	mat;		
 		} cam ;
 		
 		struct Pers
@@ -1175,7 +1175,9 @@ struct Apr : public Sys
 
 			} 
 
+			//--------------------------------------------------------------------------
 			bool ScissorLine( vect3 v0, vect3 v1, vect3& va, vect3& vb ) const
+			//--------------------------------------------------------------------------
 			{
 				va = calcPoint(v0);
 				vb = calcPoint(v1);
@@ -1214,7 +1216,9 @@ struct Apr : public Sys
 				return ( va.z > 0 && vb.z > 0 );
 			}			
 
+			//--------------------------------------------------------------------------
 			vect3 calcPoint( vect3 v ) const
+			//--------------------------------------------------------------------------
 			{
 				vect3 ret;
 				ret.x = v.x/(v.z+sz)	*sz*w*aspect	+ox;
@@ -1263,7 +1267,19 @@ if ( keys.H.hi ) cout << "fovy=" << pers.val << endl;
 					cam.pos.y += mouse.mov.y/100.0;
 				}
 			}
+			// カメラマトリクス計算
+			{
+				cam.mat.LookAt( cam.pos, cam.at, cam.up );
+			}
 
+			// カメラ注視点描画
+			{
+				vect3 v = pers.calcPoint( cam.at * cam.mat.invers() );
+				if ( v.z > 0 )
+				{
+					gra.Circle( vect2(v.x,v.y), 5, rgb(1,0.5,0));
+				}
+			}
 
 			// グリッドgrid
 			if(0)
@@ -1274,7 +1290,7 @@ if ( keys.H.hi ) cout << "fovy=" << pers.val << endl;
 					{
 						for ( int j = -NUM ; j <= NUM ; j++ )
 						{
-							vect3 v0 = pers.calcPoint( vect3(i,0,j) -cam.pos);
+							vect3 v0 = pers.calcPoint( vect3(i,0,j)  * cam.mat.invers() );
 							if ( v0.z > 0 ) 
 							{
 								double r = 5* v0.z;
@@ -1298,17 +1314,13 @@ if ( keys.H.hi ) cout << "fovy=" << pers.val << endl;
 				{
 					vect3 a(-NUM, 0,-NUM);
 					vect3 b( NUM, 0,-NUM);
-					a += -cam.pos;
-					b += -cam.pos;
 					for ( int i = 0 ; i < NUM*2+1 ; i++ )
 					{
 						vect3 v0;
 						vect3 v1;
-						bool flg = pers.ScissorLine( a, b, v0, v1 );
+						bool flg = pers.ScissorLine( a* cam.mat.invers(), b* cam.mat.invers(), v0, v1 );
+
 						if ( flg )
-//						vect3 va = pers.calcPoint(a);
-//						vect3 vb = pers.calcPoint(b);
-//						if ( va.z > 0 && vb.z > 0 )
 						{
 							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1));
 						}
@@ -1321,14 +1333,12 @@ if ( keys.H.hi ) cout << "fovy=" << pers.val << endl;
 				{
 					vect3 a(-NUM, 0, NUM);
 					vect3 b(-NUM, 0,-NUM);
-					a += -cam.pos;
-					b += -cam.pos;
 					for ( int i = 0 ; i < NUM*2+1 ; i++ )
 
 					{
 						vect3 v0;
 						vect3 v1;
-						bool flg = pers.ScissorLine( a, b, v0, v1 );
+						bool flg = pers.ScissorLine( a* cam.mat.invers(), b* cam.mat.invers(), v0, v1 );
 						if ( flg )
 						{
 							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1));
@@ -1421,7 +1431,7 @@ if ( keys.H.hi ) cout << "fovy=" << pers.val << endl;
 				
 	#endif
 
-				v += -cam.pos;
+				v = v * cam.mat.invers();
 
 				box.disp.emplace_back( v );
 
@@ -1783,7 +1793,9 @@ else
 				trans.SetTranslate(human.pos);
 				vect3 v= rotx * roty * rotz *  j.pos + human.pos;
 
-				v += -cam.pos;
+//				v += -cam.pos;
+
+				v = v * cam.mat.invers();
 
 				j.world = v;
 
