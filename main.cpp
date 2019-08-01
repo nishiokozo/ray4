@@ -532,7 +532,7 @@ struct Apr : public Sys
 
 		Figure figTriangle=Figure(gra);
 		{
-			const double R=50;
+			const double R=30;
 			figTriangle.vert.emplace_back( (vect2){   0,R*tan(rad(60))	-R*tan(rad(30)) } );
 			figTriangle.vert.emplace_back( (vect2){-R,  0 	    	   	-R*tan(rad(30)) } );
 			figTriangle.vert.emplace_back( (vect2){ R,  0 				-R*tan(rad(30)) } );
@@ -577,14 +577,12 @@ struct Apr : public Sys
 		};
 		vector<vect2> catmull_tbl =
 		{
-			#define X 600
+			#define X 700
 			#define Y 50
-			vect2(X+ 0,Y  +0),
-//			vect2(X+ 0,Y+ 20),
-			vect2(X+50,Y+100),
-			vect2(X-50,Y+140),
-//			vect2(X+ 0,Y+180),
-			vect2(X+ 0,Y+200),
+			vect2(X-+ 0,Y +0),
+			vect2(X+50,Y+ 60),
+			vect2(X+ 0,Y+120),
+			vect2(X+50,Y+180),
 			#undef X
 			#undef Y
 		};
@@ -621,18 +619,15 @@ struct Apr : public Sys
 
 		vector<vect2> bezier_tbl =
 		{
-			#define X 400
-			#define Y 350
+			#define X 550
+			#define Y 400
 				vect2(X+ 00,Y+90),
 				vect2(X+ 00,Y+20),
 				vect2(X+100,Y+90),
+				vect2(X+100,Y+60),
 				vect2(X+100,Y+20),
-				vect2(X+100,Y-20),
-				vect2(X+200,Y+20),
+				vect2(X+200,Y+60),
 				vect2(X+200,Y+90),
-				vect2(X+200,Y+120),
-				vect2(X+300,Y+20),
-				vect2(X+300,Y+90),
 			#undef X
 			#undef Y
 		};
@@ -674,9 +669,9 @@ struct Apr : public Sys
 			int ox=200,oy=300;
 
 			tblJoint.emplace_back( vect2( ox,oy) );
-			tblJoint.emplace_back( vect2( ox-30,oy+80) );
-			tblJoint.emplace_back( vect2( ox+30,oy+80) );
-			tblJoint.emplace_back( vect2( ox+0 ,oy+160) );
+			tblJoint.emplace_back( vect2( ox-20,oy+60) );
+			tblJoint.emplace_back( vect2( ox+20,oy+60) );
+			tblJoint.emplace_back( vect2( ox+0 ,oy+120) );
 
 			tblBone.emplace_back( tblJoint[0], tblJoint[1] );
 			tblBone.emplace_back( tblJoint[0], tblJoint[2] );
@@ -855,18 +850,18 @@ struct Apr : public Sys
 			double	ry = rad(0);
 			double	rz = rad(0);
 
-			vect3 pos = {2,-1,4};
+			vect3 pos = {4.5,-0.51,8.5};
 
 			vector<vect3> vert=
 			{
-				{	-1,	 1,	-1	},
-				{	 1,	 1,	-1	},
-				{	-1,	-1,	-1	},
-				{	 1,	-1,	-1	},
-				{	-1,	 1,	 1	},
-				{	 1,	 1,	 1	},
-				{	-1,	-1,	 1	},
-				{	 1,	-1,	 1	},
+				{	-0.5,	 0.5,	-0.5	},
+				{	 0.5,	 0.5,	-0.5	},
+				{	-0.5,	-0.5,	-0.5	},
+				{	 0.5,	-0.5,	-0.5	},
+				{	-0.5,	 0.5,	 0.5	},
+				{	 0.5,	 0.5,	 0.5	},
+				{	-0.5,	-0.5,	 0.5	},
+				{	 0.5,	-0.5,	 0.5	},
 			};
 			vector<vect3> disp;
 
@@ -1016,8 +1011,8 @@ struct Apr : public Sys
 			// マウスホイールZOOM
 			{
 				double l = (cam.pos-cam.at).length()/10;
-				if ( l < 0.01 ) l = 0.01;
-				if ( l > 1 ) l = 1.0;
+					l=max(l,0.00001);
+					l=min(l,8);
 
 				double step = mouse.wheel/25;
 
@@ -1043,8 +1038,10 @@ struct Apr : public Sys
 				if ( mouse.L.on )
 				{
 					double l = (cam.pos-cam.at).length()/10;
-					if ( l < 0.01 ) l = 0.01;
-					if ( l > 4 ) l = 4.0;
+					l=max(l,0.00001);
+					l=min(l,8);
+//					if ( l < 0.05 ) l = 0.05;
+//					if ( l > 4 ) l = 4.0;
 
 					// 回転
 					vect3	v= vect3(-mouse.mov.x/28,-mouse.mov.y/28,0) * l;
@@ -1092,7 +1089,7 @@ struct Apr : public Sys
 				vect3 v = pers.calcPoint(cam.at*cam.mat.invers());
 				if ( v.z > 0 ) 
 				{
-					gra.Circle( vect2(v.x,v.y), 14, rgb(0,1,0));
+					//gra.Circle( vect2(v.x,v.y), 8, rgb(0,1,0));
 				}
 			}
 
@@ -1285,9 +1282,8 @@ struct Apr : public Sys
 
 			// 塗りつぶし三角
 			{
-				int ox =100;
-				gra.Tri( vect2(ox+55   ,10), vect2(ox+10   ,100), vect2(ox+100   ,100),rgb(1,1,0));
-				gra.Tri( vect2(ox+55+80,10), vect2(ox+10+80,100), vect2(ox+100+80,100),rgb(0.5,0.3,0.2));
+				int ox =20,oy=402;
+				gra.Tri( vect2(ox+55+80,oy), vect2(ox+10+80,oy+90), vect2(ox+100+80,oy+90),rgb(0.5,0.3,0.2));
 			}
 			
 			// カトマル
@@ -1734,7 +1730,7 @@ else
 
 			// figTriangle
 			{
-				int ox=256,oy=64;
+				int ox=156,oy=464;
 				int sx =ox-128;
 				int sy =oy-128;
 				int ex =ox+128;

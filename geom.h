@@ -444,8 +444,8 @@ public:
 	void LookAt( vect3 pos, vect3 at, vect3 up )
 	{
 		vect3	z = (at-pos).normalize();
-		vect3	x = cross( up, z );
-		vect3	y = cross( z, x );
+		vect3	x = cross( up, z ).normalize();
+		vect3	y = cross( z, x ).normalize();
 	
 		m[0][0] =x.x;	m[0][1] =x.y;	m[0][2] =x.z;	m[0][3] = 0.0f;
 		m[1][0] =y.x;	m[1][1] =y.y;	m[1][2] =y.z;	m[1][3] = 0.0f;
