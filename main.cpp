@@ -22,9 +22,10 @@ using namespace std;
 
 
 
-
 struct Apr : public Sys
 {
+	double	time_peak = 0;;
+
 	struct Figure
 	{
 		SysGra&	gra;
@@ -784,7 +785,7 @@ struct Apr : public Sys
 			human_tblJoint.emplace_back( os*vect3( ox+ 0,	oy+  0,	0 )	);//2
 			human_tblJoint.emplace_back( os*vect3( ox-20,	oy+  0,	0 )	);//3
 			human_tblJoint.emplace_back( os*vect3( ox+20,	oy+  0,	0 )	);//4
-			human_tblJoint.emplace_back( os*vect3( ox+ 0,	oy+ 50,	0 )	);//5
+			human_tblJoint.emplace_back( os*vect3( ox+ 0,	oy+ 40,	0 )	);//5
 			human_tblJoint.emplace_back( os*vect3( ox-15,	oy+ 70,	0 )	);//6
 			human_tblJoint.emplace_back( os*vect3( ox+15,	oy+ 70,	0 )	);//7
 			human_tblJoint.emplace_back( os*vect3( ox-15,	oy+115,	0 )	);//8
@@ -1005,8 +1006,9 @@ struct Apr : public Sys
 			gra.Clr(rgb(0.3,0.3,0.3));
 		#endif
 
-			gra.Print(vect2(10,10),string("Y/H fovY:")+to_string(int(pers.fovy)));
-		
+			gra.Print(vect2(10,16*1),string("Y/H fovY:")+to_string(int(pers.fovy)));
+			gra.Print( vect2(10,16*31+10),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
+
 
 			// マウスホイールZOOM
 			{
@@ -1026,8 +1028,8 @@ struct Apr : public Sys
 //				if( (cam.pos-cam.at).length() < v.length() ) cam.pos = r;
 				if( (cam.pos-cam.at).length() <= v.length() ) cam.pos = (r-cam.at).normalize()*0.00001+cam.at;
 
-				gra.Print( vect2(10,20),string("far:")+to_string((cam.pos-cam.at).length())); 
-				gra.Print( vect2(10,30),string("at x=")+to_string(cam.at.x)+string("y=")+to_string(cam.at.y)+string(" z=")+to_string(cam.at.z) ); 
+				gra.Print( vect2(10,16*2),string("far:")+to_string((cam.pos-cam.at).length())); 
+				gra.Print( vect2(10,16*3),string("at x=")+to_string(cam.at.x)+string("y=")+to_string(cam.at.y)+string(" z=")+to_string(cam.at.z) ); 
 			}
 
 
@@ -1283,7 +1285,7 @@ struct Apr : public Sys
 			// 塗りつぶし三角
 			{
 				int ox =20,oy=402;
-				gra.Tri( vect2(ox+55+80,oy), vect2(ox+10+80,oy+90), vect2(ox+100+80,oy+90),rgb(0.5,0.3,0.2));
+				//gra.Tri( vect2(ox+55+80,oy), vect2(ox+10+80,oy+90), vect2(ox+100+80,oy+90),rgb(0.5,0.3,0.2));
 			}
 			
 			// カトマル
@@ -1682,7 +1684,7 @@ else
 						
 							if ( keys.Z.on ) m.pos.x += l;
 							if ( keys.X.on ) m.pos.y += l;
-							if ( keys.C.on ) m.pos.z += l;
+							if ( keys.C.on ) m.pos.z -= l;
 						}
 					}
 
@@ -1745,7 +1747,7 @@ else
 				};
 				figTriangle.draw( func, 256,256,rad(cnt), rgb(0,1,1) );
 	#else
-				figTriangle.draw( vect2(ox,oy),rad(cnt), rgb(0,1,1) );
+				//figTriangle.draw( vect2(ox,oy),rad(cnt), rgb(0,1,1) );
 	#endif
 				cnt++;
 			}
@@ -1772,7 +1774,8 @@ else
 					dime_sec = chrono::system_clock::now().time_since_epoch();
 
 					double f2 = chrono::duration_cast<chrono::microseconds>(dime_max).count();
-					cout << "time-max " << f2/1000 << " msec" << endl;
+//					cout << "time-max " << f2/1000 << " msec" << endl;
+					time_peak = f2;
 					dime_max = chrono::seconds(0);
 				}
 				dime_a = chrono::system_clock::now().time_since_epoch();  
