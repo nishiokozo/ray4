@@ -356,7 +356,7 @@ struct Apr : public Sys
 			// マーカー追加
 			if ( keys.M.hi )
 			{
-				tblMarker3.emplace_back( gra, fig, mouse.pos, rad(0) );
+			//	tblMarker3.emplace_back( gra, fig, mouse.pos, rad(0) );
 			}
 
 
@@ -478,7 +478,9 @@ struct Apr : public Sys
 					{
 						if ( m.bSelected )
 						{
-							m.disp += mouse.mov;
+//							m.disp += mouse.mov;
+							m.pos.x += mouse.mov.x/100;
+							m.pos.z += mouse.mov.y/100;
 						}
 					}
 				}
@@ -755,6 +757,7 @@ struct Apr : public Sys
 			vect3 tension;
 			vect3 world;
 			vect3 disp;
+			vect2 mark_disp;
 			double len;
 			Joint3( vect3 v )
 			{
@@ -827,7 +830,8 @@ struct Apr : public Sys
 		}
 		for ( Joint3& j : human_tblJoint )	//マーカー対象に位置を登録
 		{
-//			mc.tblMarker2.emplace_back( gra, figCircle, j.disp, rad(-90) );
+			mc3.tblMarker3.emplace_back( gra, figCircle, j.pos, j.mark_disp, rad(-90) );
+
 		}
 		vector<vect3> human_disp;
 
@@ -978,12 +982,13 @@ struct Apr : public Sys
 		};
 		Pers pers;
 
+
 		//===========================================================================
 		while( Update() )
 		{
 			// パースペクティブ
-			if (keys.R.rep) {pers.fovy-=2;cout << pers.fovy <<" "<<1/tan(rad(pers.fovy)) << endl; }
-			if (keys.F.rep) {pers.fovy+=2;cout << pers.fovy <<" "<<1/tan(rad(pers.fovy)) << endl; }
+			if (keys.T.rep) {pers.fovy-=2;cout << pers.fovy <<" "<<1/tan(rad(pers.fovy)) << endl; }
+			if (keys.G.rep) {pers.fovy+=2;cout << pers.fovy <<" "<<1/tan(rad(pers.fovy)) << endl; }
 
 			// パース更新
 			pers.Update( vect2( m.width, m.height ) );
@@ -1001,6 +1006,8 @@ struct Apr : public Sys
 			// 画面クリア
 			gra.Clr(rgb(0.3,0.3,0.3));
 		#endif
+
+			gra.Print(vect2(10,10),string("T/G fovy:")+to_string(int(pers.fovy)));
 		
 
 			// マウスホイールZOOM
@@ -1257,12 +1264,14 @@ struct Apr : public Sys
 
 
 			// 点
-			gra.Pset(vect2(10,10),rgb(1,1,1));
+			gra.Pset(vect2(1,1),rgb(1,1,1));
 
 			// 塗りつぶし三角
-			gra.Tri( vect2(55,10), vect2(10,100), vect2(100,100),rgb(1,1,0));
-			gra.Tri( vect2(55+80,10), vect2(10+80,100), vect2(100+80,100),rgb(0.5,0.3,0.2));
-
+			{
+				int ox =100;
+				gra.Tri( vect2(ox+55   ,10), vect2(ox+10   ,100), vect2(ox+100   ,100),rgb(1,1,0));
+				gra.Tri( vect2(ox+55+80,10), vect2(ox+10+80,100), vect2(ox+100+80,100),rgb(0.5,0.3,0.2));
+			}
 			
 			// カトマル
 			{
@@ -1534,6 +1543,12 @@ else
 				gra.Line( v0, v1, rgb( 1,1,1 ) );
 			}
 
+			// マーカー表示
+			mc.funcMarkerDraw2();
+
+
+			// 3Dマーカー入力
+			mc3.funcMarkerController3( figCircle, mouse, keys, gra );
 
 			//=================================
 			// Human
@@ -1568,7 +1583,7 @@ else
 				//	roll	:z	奥+
 				//	pitch	:x	右+
 				//	yaw		:y	下+
-
+#if 0
 				mat44	rotx;
 				mat44	roty;
 				mat44	rotz;
@@ -1578,6 +1593,9 @@ else
 				rotz.setRotateZ(human.rot.z);
 				trans.SetTranslate(human.pos);
 				vect3 v= rotx * roty * rotz *  j.pos + human.pos;
+#else
+				vect3 v= j.pos;
+#endif
 
 //				v += -cam.pos;
 
@@ -1586,6 +1604,7 @@ else
 				j.world = v;
 
 				j.disp = pers.calcPoint(v);
+				j.mark_disp = vect2(j.disp.x,j.disp.y);
 			}
 
 			// Human 描画
@@ -1613,8 +1632,7 @@ else
 
 
 			// マーカー表示
-			mc.funcMarkerDraw2();
-//			for ( Joint2 j : tblJoint ) gra.Circle( j.pos, 4, rgb(0,1,0));
+			mc3.funcMarkerDraw3();
 
 
 

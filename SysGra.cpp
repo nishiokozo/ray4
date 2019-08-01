@@ -17,15 +17,14 @@ using namespace std;
 static struct G
 {
 	bool flgActive;
-//	RECT rect;
 	HDC  hdcBackbuffer;
 	HBITMAP hBitmap;
-
+	HFONT hfon, hfonPrev;
+	vector<string>tblString;
 	int pos_x;
 	int pos_y;
 	int	width;
 	int height;
-
 	G()
 	{
 		flgActive = false;
@@ -102,11 +101,15 @@ void  SysGra::CreatePixelBits(int bpp, int width, int height )
 */
 }
 
+
 //------------------------------------------------------------------------------
 void  SysGra::OnCreate() 
 //------------------------------------------------------------------------------
 {
 	HWND hWnd = SysWin::GetInstance().win.hWnd;
+	//g.hfon = (HFONT) GetStockObject(OEM_FIXED_FONT); // 固定幅フォント標準
+	//g.hfon = (HFONT) GetStockObject(ANSI_FIXED_FONT); // 固定幅フォント中明朝
+	g.hfon = (HFONT) GetStockObject(DEFAULT_GUI_FONT); // 可変長小
 }	
 
 //------------------------------------------------------------------------------
@@ -115,8 +118,6 @@ void  SysGra::OnSize( int width, int height )
 {
 	g.width = width;
 	g.height = height;
-
-//cout << "onsize " << g.width << " " << g.height << endl;
 
 	HWND hWnd = SysWin::GetInstance().win.hWnd;
     HDC hDc = GetDC(hWnd);
@@ -149,13 +150,6 @@ void  SysGra::OnMove( int pos_x, int pos_y )
 		RECT rect;
 		SetRect(&rect, 0, 0, g.width, g.height );
 		AdjustWindowRectEx(&rect, WS_OVERLAPPEDWINDOW, FALSE, 0);
-//cout << "a" << endl;
-//cout << pos_x << " " << pos_y << endl;
-//cout << g.width << " " << g.height << endl;
-//
-//cout << "b" << endl;
-//cout << pos_x + rect.left << " " << pos_y + rect.top << endl;
-//cout << rect.right-rect.left << " " << rect.bottom-rect.top << endl;
 	}
 
 
@@ -170,22 +164,6 @@ void  SysGra::OnPaint()
 	{
 		HDC hDc = g.hdcBackbuffer;
 
-		// clear background
-/*
-if(0)
-		if ( m.clr.bActive )
-		{
-			HBRUSH hBrush  = CreateSolidBrush(m.clr.col);
-			SelectObject( hDc , hBrush);
-
-//			PatBlt( hDc , 0 , 0 ,g.rect.right, g.rect.bottom , PATCOPY);
-			PatBlt( hDc , 0 , 0 ,g.width, g.height , PATCOPY);
-
-			DeleteObject( hBrush );
-
-//			m.clr.bActive = false;
-		}
-*/
 
 		// bmp
 		{
@@ -205,6 +183,8 @@ if(0)
 			HBRUSH hBrush = CreateSolidBrush( col );
 			HBRUSH hOldBrush = SelectBrush(hDc, hBrush);
 
+
+		
 			switch ( type )
 			{
 				case TypeClr:
@@ -267,12 +247,30 @@ if(0)
 					break;
 
 			}
-
+        
 			SelectBrush(hDc, hOldBrush);
 			DeleteObject(hBrush);
 
 			SelectPen(hDc, hOldPen);
 			DeleteObject(hPen);
+		}
+		
+
+		{
+	        SetTextColor(hDc, RGB(0xff, 0xff, 0xff));  // 文字色を設定
+	        SetBkColor(hDc, RGB(0xf, 0xf, 0xf));    // 背景色を設定
+	        SetBkMode( hDc, TRANSPARENT ); // 背景を塗りつぶさない
+	        g.hfonPrev = (HFONT) SelectObject(hDc, g.hfon);  // フォントを選択
+//			int y = 0;
+			for ( Message& m : m.tblMessage )
+	        {
+	        	const char* str = m.str.c_str();
+	        	int x = m.pos.x;
+	        	int y = m.pos.y;
+		        TextOut(hDc, x, y, str, lstrlen(str));
+//				y+= 16;
+			}
+	        SelectObject(hDc, g.hfonPrev);      
 		}
 
 
@@ -283,7 +281,6 @@ if(0)
 	{
 	    PAINTSTRUCT ps;
 	    HDC hDc = BeginPaint(hWnd, &ps);
-//	    BitBlt(hDc, 0, 0, g.rect.right, g.rect.bottom, g.hdcBackbuffer, 0, 0, SRCCOPY);
 	    BitBlt(hDc, 0, 0, g.width, g.height, g.hdcBackbuffer, 0, 0, SRCCOPY);
 	    EndPaint(hWnd, &ps);
 	}
@@ -297,6 +294,8 @@ void  SysGra::OnDestroy()
 
 	DeleteDC(g.hdcBackbuffer);
 	DeleteObject(g.hBitmap);
+
+	DeleteObject(g.hfon);
 
 	PostQuitMessage( 0 );
 }
@@ -339,16 +338,9 @@ int	SysGra::Rgb( double r, double g , double b )
 void SysGra::Update()
 //------------------------------------------------------------------------------
 {
-//		m.tblBezier.clear();
-//		m.tblTri.clear();
-//		m.tblBox.clear();
-//		m.tblFill.clear();
-//		m.tblLine.clear();
-//		m.tblPset.clear();
-//		m.tblCircle.clear();
-//		m.clr.bActive = false;
 
-		m.tblVect2.clear();
+	m.tblVect2.clear();
+	m.tblMessage.clear();
 }
 //------------------------------------------------------------------------------
 void SysGra::Clr( int col)
@@ -425,14 +417,9 @@ void SysGra::Tri( vect2 v0, vect2 v1, vect2 v2, int col)
 	m.tblVect2.emplace_back( v2 );
 
 }
-/*
 //------------------------------------------------------------------------------
-void SysGra::Bezier( vect2 v0, vect2 v1, vect2 v2, vect2 v3, int col)
+void SysGra::Print( vect2 pos, string str )
 //------------------------------------------------------------------------------
 {
-	PrimBezier a = {col,v0,v1,v2,v3,col};
-	
-	(*this).m.tblBezier.push_back( a );
+	m.tblMessage.emplace_back( str, pos );
 }
-*/
-

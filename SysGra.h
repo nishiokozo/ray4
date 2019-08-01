@@ -1,4 +1,5 @@
 #include <vector>
+#include <string>
 #include "geom.h"
 struct SysGra
 {
@@ -14,8 +15,17 @@ struct SysGra
 		TypeTri,
 	};
 
-
-	struct
+	struct Message
+	{
+		string	str;
+		vect2	pos;
+		Message( string _str, vect2 _pos )
+		{
+			str = _str;
+			pos = _pos;
+		}
+	} ;
+	struct 
 	{
 //		BITMAPINFO	bmpInfo;
 //		int			bpp;
@@ -26,6 +36,7 @@ struct SysGra
 
 
 		vector<vect2>		tblVect2;
+		vector<Message>		tblMessage;
 
 
 
@@ -45,6 +56,9 @@ struct SysGra
 
 	void Update() ;
 
+
+	void	Print( vect2 v, string str );
+	void	Cls();
 
 	void	Tri( vect2 v0, vect2 v1, vect2 v2, int col);
 	void	Box( vect2 v0, vect2 v1, int col);
