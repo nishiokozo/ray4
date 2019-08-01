@@ -1028,8 +1028,13 @@ struct Apr : public Sys
 
 				vect3 r = cam.pos;
 				cam.pos += v;
-				if( (cam.pos-cam.at).length() < v.length() ) cam.pos = r;
+//				if( (cam.pos-cam.at).length() < v.length() ) cam.pos = r;
+				if( (cam.pos-cam.at).length() <= v.length() ) cam.pos = (r-cam.at).normalize()*0.00001+cam.at;
+
+				gra.Print( vect2(10,20),string("far:")+to_string((cam.pos-cam.at).length())); 
+				gra.Print( vect2(10,30),string("at x=")+to_string(cam.at.x)+string("y=")+to_string(cam.at.y)+string(" z=")+to_string(cam.at.z) ); 
 			}
+
 
 			// カメラ移動
 			if ( keys.ALT.on )
@@ -1059,7 +1064,7 @@ struct Apr : public Sys
 
 					vect3 r = cam.pos;
 					cam.pos += v;
-					if( (cam.pos-cam.at).length() < v.length() ) cam.pos = r;
+					if( (cam.pos-cam.at).length() <= v.length() ) cam.pos = (r-cam.at).normalize()*0.00001+cam.at;
 				}
 				if ( mouse.M.on )
 				{
@@ -1080,6 +1085,15 @@ struct Apr : public Sys
 			// カメラマトリクス計算
 			{
 				cam.mat.LookAt( cam.pos, cam.at, cam.up );
+			}
+
+			// カメラ注視点表示
+			{
+				vect3 v = pers.calcPoint(cam.at*cam.mat.invers());
+				if ( v.z > 0 ) 
+				{
+					gra.Circle( vect2(v.x,v.y), 14, rgb(0,1,0));
+				}
 			}
 
 			// グリッドgrid
