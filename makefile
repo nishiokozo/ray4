@@ -42,11 +42,10 @@ FILE=main.o
 CC	= g++
 
 $(TAR)	:	$(SRCS:.cpp=.o)
-	sleep 2
 	$(CC) -o $(TAR) $^ $(LIBS)
 
 %.o:%.cpp
-	$(CC) -o $@ $< $(FLGS) &
+	$(CC) -o $@ $< $(FLGS) 
 
 clean:
 	rm -f *.exe
