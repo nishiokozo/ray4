@@ -133,7 +133,10 @@ struct Apr : public Sys
 			th 				= a.th;
 		}	
 		const Marker3&	operator=(Marker3&& a){return a;}	
+
+		//------------------------------------------------------------------------------
 		void draw()
+		//------------------------------------------------------------------------------
 		{
 			bool flg =  bSelected;
 			
@@ -478,9 +481,9 @@ struct Apr : public Sys
 					{
 						if ( m.bSelected )
 						{
-//							m.disp += mouse.mov;
-							m.pos.x += mouse.mov.x/100;
-							m.pos.z += mouse.mov.y/100;
+//							if ( keys.Z.on ) m.pos.x += mouse.mov.x/100;
+///							if ( keys.X.on ) m.pos.x += mouse.mov.x/100;
+//							if ( keys.C.on ) m.pos.x += mouse.mov.y/100;
 						}
 					}
 				}
@@ -852,7 +855,7 @@ struct Apr : public Sys
 			double	ry = rad(0);
 			double	rz = rad(0);
 
-			vect3 pos = {2,-1,0};
+			vect3 pos = {2,-1,4};
 
 			vector<vect3> vert=
 			{
@@ -890,8 +893,8 @@ struct Apr : public Sys
 		// カメラ
 		struct
 		{
-			vect3	pos = vect3( 0,-1, -5);
-			vect3 	at = vect3( 0, 0, 0 );
+			vect3	pos = vect3( 0,-1, -2);
+			vect3 	at = vect3( 0, -1, 0 );
 			vect3	up = vect3( 0, 1, 0);
 		  	mat44	mat;		
 		} cam ;
@@ -987,8 +990,8 @@ struct Apr : public Sys
 		while( Update() )
 		{
 			// パースペクティブ
-			if (keys.T.rep) {pers.fovy-=2;cout << pers.fovy <<" "<<1/tan(rad(pers.fovy)) << endl; }
-			if (keys.G.rep) {pers.fovy+=2;cout << pers.fovy <<" "<<1/tan(rad(pers.fovy)) << endl; }
+			if (keys.Y.rep) {pers.fovy-=2;cout << pers.fovy <<" "<<1/tan(rad(pers.fovy)) << endl; }
+			if (keys.H.rep) {pers.fovy+=2;cout << pers.fovy <<" "<<1/tan(rad(pers.fovy)) << endl; }
 
 			// パース更新
 			pers.Update( vect2( m.width, m.height ) );
@@ -1007,7 +1010,7 @@ struct Apr : public Sys
 			gra.Clr(rgb(0.3,0.3,0.3));
 		#endif
 
-			gra.Print(vect2(10,10),string("T/G fovy:")+to_string(int(pers.fovy)));
+			gra.Print(vect2(10,10),string("Y/H fovY:")+to_string(int(pers.fovy)));
 		
 
 			// マウスホイールZOOM
@@ -1624,7 +1627,7 @@ else
 				if ( j.disp.z > 0 )
 				{
 					vect2 v(j.disp.x,j.disp.y);
-					gra.Fill( v-3,v+3, rgb(1,1,1));
+//					gra.Fill( v-3,v+3, rgb(1,1,1));
 				}
 
 			}
@@ -1632,7 +1635,86 @@ else
 
 
 			// マーカー表示
-			mc3.funcMarkerDraw3();
+//			mc3.funcMarkerDraw3();
+			{
+				int		cntAve=0;
+				vect3	posAve=0;
+				for ( Marker3 m : mc3.tblMarker3 )
+				{
+						//m.draw();
+					bool flg =  m.bSelected;
+					
+					if ( m.bRectIn )
+					{
+						flg = m.bRectSelected;
+					}
+					int col=m.colNormal;
+					if ( flg )			
+					{
+						col = m.colSelected;
+						cntAve++;
+						posAve += m.pos;
+					}
+					gra.Fill( m.disp-3,m.disp+3, col );
+				}
+
+						posAve /= cntAve;;
+
+				if ( cntAve )
+				{
+					// マーカー移動
+					for ( Marker3& m : mc3.tblMarker3 )
+					{
+						if ( m.bSelected )
+						{
+							// 平行移動
+							double	l= (mouse.mov.x + mouse.mov.y)/80;
+						
+							if ( keys.Z.on ) m.pos.x += l;
+							if ( keys.X.on ) m.pos.y += l;
+							if ( keys.C.on ) m.pos.z += l;
+						}
+					}
+
+
+
+
+					{//x
+						vect3 a = posAve - vect3(0,0, 0.0);
+						vect3 b = posAve - vect3(0.1,0, 0);
+						vect3 v0;
+						vect3 v1;
+						bool flg = pers.ScissorLine( a* cam.mat.invers(), b* cam.mat.invers(), v0, v1 );
+						if ( flg )
+						{
+							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(1,1,0) );
+						}
+					}
+					{//y
+						vect3 a = posAve - vect3(0,0, 0.0);
+						vect3 b = posAve - vect3(0,0.1,0);
+						vect3 v0;
+						vect3 v1;
+						bool flg = pers.ScissorLine( a* cam.mat.invers(), b* cam.mat.invers(), v0, v1 );
+						if ( flg )
+						{
+							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(1,1,0) );
+						}
+					}
+					{//z
+						vect3 a = posAve - vect3(0,0, 0.0);
+						vect3 b = posAve - vect3(0,0, 0.1);
+						vect3 v0;
+						vect3 v1;
+						bool flg = pers.ScissorLine( a* cam.mat.invers(), b* cam.mat.invers(), v0, v1 );
+						if ( flg )
+						{
+							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(1,1,0) );
+						}
+					}
+				}
+				
+			}
 
 
 
