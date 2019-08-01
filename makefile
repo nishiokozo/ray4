@@ -1,5 +1,8 @@
 # 2019/07/04   msys64 / GDI
-
+# $@ ルールのターゲットのファイル名。
+# $< 最初の依存関係 (ターゲットの右に書かれるファイル名)
+# $^ 全ての依存関係の名前のそれぞれの間にスペースを挟んで並べたもの。
+# 
 TAR = main.exe
 
 SRCS = \
@@ -21,6 +24,8 @@ FLGS = \
 	-Wall -Werror\
 	-Wno-unused \
 
+FILE=main.o
+
 #	-Wno-unused-variable \
 #	-Wno-unused-function \
 #	-Wno-unused-value \
@@ -37,13 +42,11 @@ FLGS = \
 CC	= g++
 
 $(TAR)	:	$(SRCS:.cpp=.o)
-	$(CC) -o $(TAR) $(SRCS:.cpp=.o) $(LIBS)
-
-geom.o:geom.cpp
-	$(CC) -o $@ $< $(FLGS) -O1
+	sleep 2
+	$(CC) -o $(TAR) $^ $(LIBS)
 
 %.o:%.cpp
-	$(CC) -o $@ $< $(FLGS) 
+	$(CC) -o $@ $< $(FLGS) &
 
 clean:
 	rm -f *.exe
@@ -54,7 +57,8 @@ clean:
 	make mm
 
 mm:	$(SRCS)
-	$(CC)   -MM $? >mm.mk
+	echo $^
+	$(CC)   -MM $^ >mm.mk
 
 include mm.mk
 
