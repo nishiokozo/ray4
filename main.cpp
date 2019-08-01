@@ -102,13 +102,65 @@ struct Apr : public Sys
 		}
 	};
 
+	struct Marker3
+	{
+		const SysGra&	gra;
+		const Figure&	fig;
+		vect3&	pos;
+		vect2&	disp;
+		bool 	bRectSelected;		//	矩形選択中、選択＆非選択
+		bool 	bRectIn;			//	矩形選択中、矩形選択対象
+		bool 	bSelected;			//	選択
+		bool 	bAffectable;		//	削除対象
+		double	th;
+		int		colNormal = rgb(1,1,0);
+		int		colSelected = rgb(1,0,0);
+
+		Marker3( SysGra& _gra, Figure& _fig, vect3& _pos, vect2& _disp, double _th ) : gra(_gra), fig(_fig), pos(_pos), disp(_disp)
+		{
+			bSelected		= false;
+			bRectIn			= false;
+			bRectSelected	= false;
+			bAffectable		= false;
+			th				= _th;
+		}
+		Marker3(const Marker3& a) : gra(a.gra), fig(a.fig), pos(a.pos), disp(a.disp)
+		{
+			bSelected		= a.bSelected;
+			bRectIn			= a.bRectIn;
+			bRectSelected	= a.bRectSelected;
+			bAffectable 	= a.bAffectable;
+			th 				= a.th;
+		}	
+		const Marker3&	operator=(Marker3&& a){return a;}	
+		void draw()
+		{
+			bool flg =  bSelected;
+			
+			if ( bRectIn )
+			{
+				flg = bRectSelected;
+			}
+			
+			if ( flg )			
+			{
+				fig.draw( disp,th, colSelected );
+			}
+			else
+			{
+				fig.draw( disp,th, colNormal );
+			}
+		
+		}
+	};
+
 
 	
 	~Apr()
 	{
 	}
 
-	struct MarkerController
+	struct
 	{
 		vector<Marker2>	tblMarker2;
 		//------------------------------------------------------------------------------
@@ -280,6 +332,178 @@ struct Apr : public Sys
 		}
 
 	} mc;
+	struct
+	{
+		vector<Marker3>	tblMarker3;
+		//------------------------------------------------------------------------------
+		void funcMarkerDraw3()
+		//------------------------------------------------------------------------------
+		{
+			for ( Marker3 m : tblMarker3 )
+			{
+				m.draw();
+			}
+		}
+		//------------------------------------------------------------------------------
+		void funcMarkerController3( Figure& fig, SysMouse& mouse, SysKeys& keys, SysGra& gra )
+		//------------------------------------------------------------------------------
+		{
+			static vect2 drag_start(0,0);
+			static bool bDrag = false;
+
+			if  ( keys.ALT.on ) return;
+
+			// マーカー追加
+			if ( keys.M.hi )
+			{
+				tblMarker3.emplace_back( gra, fig, mouse.pos, rad(0) );
+			}
+
+
+			// マーカー削除
+			if  ( keys.CTRL.on && keys.X.hi )
+			{
+				for ( Marker3& m : tblMarker3 )
+				{
+					if ( m.bSelected )
+					{
+						m.bAffectable = true;
+					}
+				}
+
+				for ( int i = tblMarker3.size()-1 ; i >= 0 ; i-- )
+				{
+					if ( tblMarker3[i].bAffectable )
+					{
+							   tblMarker3.erase(tblMarker3.begin() +i);	
+					}
+				}
+			}
+			
+			// マーカー選択
+			if ( mouse.L.on )
+			{
+				struct
+				{
+					double	len;
+					Marker3*	pmark;
+					int		cnt;
+				} a = {99999,0,0};
+
+				// 最近マーカーを検索
+				for ( Marker3& m : tblMarker3 )
+				{
+					double len = (m.disp-mouse.pos).length();
+					if ( len < 20.0 && a.len > len )
+					{
+						a.len = len;
+						a.pmark = &m;
+						a.cnt++;
+					}
+				}
+
+				// マーカー選択＆解除
+				if ( mouse.L.hi )
+				{
+					// 矩形選択
+					if ( a.pmark == 0 ) 
+					{
+						bDrag = true;
+						drag_start = mouse.pos;
+					}
+
+					// マーカー全解除
+					if ( keys.CTRL.on ){}
+					else
+					if ( keys.SHIFT.on ){}
+					else
+					if ( a.pmark && a.pmark->bSelected == true ){}
+					else
+					{
+						for ( Marker3& m : tblMarker3 )
+						{
+							m.bSelected = false;
+						}
+					}
+					
+					//	マーカー選択
+					if ( a.pmark )
+					{
+						if ( keys.CTRL.on )
+						{
+							a.pmark->bSelected = !a.pmark->bSelected;
+						}
+						else
+						{
+							a.pmark->bSelected = true;
+						}
+					}
+				}
+				else
+				{
+					if ( bDrag )
+					{
+						// 矩形カーソル表示
+						vect2 v0 = min( drag_start, mouse.pos );
+						vect2 v1 = max( drag_start, mouse.pos );
+						gra.Box( v0,v1, rgb(0,0.5,1));
+
+						for ( Marker3& m : tblMarker3 )
+						{
+							m.bRectIn = false;
+						}
+
+						// 矩形内マーカーを検索
+						for ( Marker3& m : tblMarker3 )
+						{
+							double len = (m.disp-mouse.pos).length();
+							if ( m.disp.x > v0.x && m.disp.x < v1.x && m.disp.y > v0.y && m.disp.y < v1.y )
+							{
+								m.bRectIn = true;
+								if ( keys.CTRL.on )
+								{
+									m.bRectSelected = !m.bSelected;
+								}
+								else
+								{
+									m.bRectSelected = true;
+								}
+							}
+						}
+
+					}
+					else
+					// マーカー移動
+					for ( Marker3& m : tblMarker3 )
+					{
+						if ( m.bSelected )
+						{
+							m.disp += mouse.mov;
+						}
+					}
+				}
+			}
+			else
+			{
+				if ( bDrag )
+				{
+					bDrag = false;
+					for ( Marker3& m : tblMarker3 )
+					{
+						if ( m.bRectIn )
+						{
+							m.bSelected = m.bRectSelected;
+						}
+						m.bRectIn = false;
+						m.bRectSelected = false;
+					}
+				}
+			}
+			
+
+		}
+
+	} mc3;
 
 
 	//------------------------------------------------------------------------------

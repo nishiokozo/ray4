@@ -47,13 +47,15 @@ $(TAR)	:	$(SRCS:.cpp=.o)
 %.o:%.cpp
 	$(CC) -o $@ $< $(FLGS) 
 
+cleanall:clean
+	rm mm.mk
+	touch mm.mk
+	make mm
+
 clean:
 	rm -f *.exe
 	rm -f *.o
 	rm -f *.*.stackdump
-	rm mm.mk
-	touch mm.mk
-	make mm
 
 mm:	$(SRCS)
 	echo $^
