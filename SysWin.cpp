@@ -309,7 +309,7 @@ void SysWin::OpenWindow( const char* windowname, int pos_x, int pos_y, int width
 	}
 
 	// 仮ウインドウを生成する
-		int valWin = 0;//WS_OVERLAPPEDWINDOW;
+	int valWin = WS_OVERLAPPEDWINDOW;
 	{
 		win.hWnd = CreateWindowEx(
 			 0
@@ -338,14 +338,14 @@ void SysWin::OpenWindow( const char* windowname, int pos_x, int pos_y, int width
 	{
 		RECT rect;
 		SetRect(&rect, 0, 0, width, height );
-		AdjustWindowRectEx(&rect, WS_OVERLAPPEDWINDOW, FALSE, 0);
+		AdjustWindowRectEx(&rect, valWin, FALSE, 0);
 
 		SetWindowPos(
 			  win.hWnd 
 //			, HWND_TOPMOST	// 常に最前面
 			, HWND_TOP	// 最前面に持ってくる
-			, pos_x + rect.left	
-			, pos_y + rect.top	
+			, pos_x //+ rect.left	
+			, pos_y //+ rect.top	
 			, rect.right-rect.left 	
 			, rect.bottom-rect.top	
 			,0

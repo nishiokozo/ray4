@@ -1007,7 +1007,7 @@ struct Apr : public Sys
 		#endif
 
 			gra.Print(vect2(10,16*1),string("Y/H fovY:")+to_string(int(pers.fovy)));
-			gra.Print( vect2(10,16*31+10),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
+			gra.Print( vect2(10,16*30+10),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 
 
 			// マウスホイールZOOM
@@ -1279,14 +1279,6 @@ struct Apr : public Sys
 			}
 
 
-			// 点
-			gra.Pset(vect2(1,1),rgb(1,1,1));
-
-			// 塗りつぶし三角
-			{
-				int ox =20,oy=402;
-				//gra.Tri( vect2(ox+55+80,oy), vect2(ox+10+80,oy+90), vect2(ox+100+80,oy+90),rgb(0.5,0.3,0.2));
-			}
 			
 			// カトマル
 			{
@@ -1729,15 +1721,30 @@ else
 			}
 
 
-
+			// 点 
+			{
+				gra.Pset(vect2(1,1),rgb(1,1,1));
+				gra.Pset(vect2(766,1),rgb(1,1,1));
+				gra.Pset(vect2(1,510),rgb(1,1,1));
+				gra.Pset(vect2(766,510),rgb(1,1,1));
+			}
+			
+			// 塗りつぶし三角
+			{
+				vect2	ofs = vect2(10,432);
+				double	scale=0.5;
+				vect2	v0 = scale * vect2( 55,0) + ofs;
+				vect2	v1 = scale * vect2( 10,90) + ofs;
+				vect2	v2 = scale * vect2(100,90) + ofs;
+				gra.Tri( v0,v1,v2,rgb(0.5,0.3,0.2));
+			}
 			// figTriangle
 			{
-				int ox=156,oy=464;
+				int ox=56,oy=464;
 				int sx =ox-128;
 				int sy =oy-128;
 				int ex =ox+128;
 				int ey =oy+128;
-//				gra.Fill(vect2(sx,sy),vect2(ex,ey),rgb(0.3,0.3,0.3));
 
 				static int cnt = 0;
 	#if 0
@@ -1747,7 +1754,7 @@ else
 				};
 				figTriangle.draw( func, 256,256,rad(cnt), rgb(0,1,1) );
 	#else
-				//figTriangle.draw( vect2(ox,oy),rad(cnt), rgb(0,1,1) );
+				figTriangle.draw( vect2(ox,oy),rad(cnt), rgb(0,1,1) );
 	#endif
 				cnt++;
 			}
