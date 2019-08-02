@@ -24,7 +24,9 @@ using namespace std;
 
 struct Apr : public Sys
 {
-	double	time_peak = 0;;
+	double	time_peak = 0;
+	vector<vector<vect3>> human_keyframe;
+	int human_numKeyframe = 0;
 
 	struct Figure
 	{
@@ -1007,9 +1009,6 @@ struct Apr : public Sys
 		#endif
 
 			gra.Print(vect2(10,16*1),string("Y/H fovY:")+to_string(int(pers.fovy)));
-			gra.Print( vect2(10,16*30+10),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
-
-
 			// マウスホイールZOOM
 			{
 				double l = (cam.pos-cam.at).length()/10;
@@ -1031,6 +1030,11 @@ struct Apr : public Sys
 				gra.Print( vect2(10,16*2),string("far:")+to_string((cam.pos-cam.at).length())); 
 				gra.Print( vect2(10,16*3),string("at x=")+to_string(cam.at.x)+string("y=")+to_string(cam.at.y)+string(" z=")+to_string(cam.at.z) ); 
 			}
+
+			gra.Print( vect2(10,16*4),string("key=")+to_string(human_numKeyframe) + string(" cnt=")+to_string(human_keyframe.size()) ); 
+			gra.Print( vect2(10,16*29),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
+
+
 
 
 			// カメラ移動
@@ -1351,28 +1355,17 @@ struct Apr : public Sys
 
 			}
 
-			// キーフレーム
-			struct Keyframe
-			{
-				vect2 pos;
-				Keyframe( vect2 _pos )
-				{
-					pos = _pos;
-				}
-			};
-			static vector<Keyframe> tblKeyframe;
-
-			static vect2 gv;
-			if(0)
+			static vect2 gv1;
+			if(1)
 			{//ベジェアニメーション
 		
 				static	double t = 0;
 				static	bool	dir = true;
 
 				static int n = 0;
-				gv = bezier_func( t, bezier_tbl[n+0], bezier_tbl[n+1], bezier_tbl[n+2], bezier_tbl[n+3] );
+				gv1 = bezier_func( t, bezier_tbl[n+0], bezier_tbl[n+1], bezier_tbl[n+2], bezier_tbl[n+3] );
 
-				gra.Circle( gv, 6,rgb(1,0,0));
+				gra.Circle( gv1, 6,rgb(1,0,0));
 
 				if ( dir ) t+=0.01; else t-=0.01;
 
@@ -1406,6 +1399,7 @@ struct Apr : public Sys
 				}
 			}
 
+			static vect2 gv2;
 			if(1)
 			{//カトマルアニメーション
 		
@@ -1420,9 +1414,9 @@ struct Apr : public Sys
 				if ( n0<0 ) n0 = 0;
 				if ( n3>=(signed)catmull_tbl.size() ) n3 =n2;
 
-				gv = catmull_func( t, catmull_tbl[n0], catmull_tbl[n1], catmull_tbl[n2], catmull_tbl[n3] );
+				gv2 = catmull_func( t, catmull_tbl[n0], catmull_tbl[n1], catmull_tbl[n2], catmull_tbl[n3] );
 
-				gra.Circle( gv, 6,rgb(1,0,0));
+				gra.Circle( gv2, 6,rgb(1,0,0));
 
 				if ( dir ) t+=0.01; else t-=0.01;
 
@@ -1456,6 +1450,7 @@ struct Apr : public Sys
 				}
 			}
 
+			
 
 			//=================================
 			// 入力
@@ -1465,23 +1460,7 @@ struct Apr : public Sys
 			mc.funcMarkerController2( figCircle, mouse, keys, gra );
 
 Joint2& tar = tblJoint[0];
-
-			// キーフレーム追加
-			if (keys.K.hi) 
-			{
-				tblKeyframe.emplace_back( mouse.pos );
-			}
-			for ( Keyframe k : tblKeyframe )
-			{
-				gra.Circle( k.pos, 5, rgb(0,1,1));
-			}
-			if (keys.SPACE.hi) 
-			{
-//				tar.pos = tblKeyframe[0].pos;
-			}
-				tar.pos = gv;
-
-
+tar.pos = gv1;
 
 			//=================================
 			// 2D骨力
@@ -1729,6 +1708,41 @@ else
 				}
 				
 			}
+
+
+#if 1
+			{
+				// キーフレーム記録
+				if ( keys.K.hi )
+				{
+					human_numKeyframe = human_keyframe.size();
+					human_keyframe.emplace_back();
+					for ( const Joint3& j : human_tblJoint )
+					{
+						human_keyframe[ human_numKeyframe ].emplace_back( j.pos );
+					}
+				}
+				// キーフレーム移動
+				bool bChanged = false;
+				if ( keys.UP.rep ) 		{ human_numKeyframe++; bChanged=true; }
+				if ( keys.DOWN.rep ) 	{ human_numKeyframe--; bChanged=true; }
+				human_numKeyframe = max( human_numKeyframe, 0 );
+//				human_numKeyframe = min( human_numKeyframe, ((signed)human_keyframe.size())-1 );
+				human_numKeyframe = min( human_numKeyframe, human_keyframe.size()-1 );
+
+
+				if ( bChanged )
+				{
+					// キーフレーム切り替え
+					int i = 0;
+					for ( Joint3& j : human_tblJoint )
+					{
+						j.pos = human_keyframe[ human_numKeyframe ][i];
+						i++;
+					}
+				}
+			}
+#endif
 
 
 			// 点 
