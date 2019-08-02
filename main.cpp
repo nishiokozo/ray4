@@ -1015,7 +1015,7 @@ struct Apr : public Sys
 					l=max(l,0.00001);
 					l=min(l,8);
 
-				double step = mouse.wheel/25;
+				double step = -mouse.wheel/25;
 
 				vect3	v= vect3(0,0,step*l);
 				mat44 mrot = cam.mat;
@@ -1035,9 +1035,30 @@ struct Apr : public Sys
 			gra.Print( vect2(10,16*29),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 
 
+			if ( !keys.ALT.on )
+			{
+
+				if ( mouse.R.on )
+				{
+					double l = (cam.pos-cam.at).length()/10;
+					l=max(l,0.00001);
+					l=min(l,8);
+//					if ( l < 0.05 ) l = 0.05;
+//					if ( l > 4 ) l = 4.0;
+
+					// 回転
+					vect3	v= vect3(-mouse.mov.x/28,-mouse.mov.y/28,0) * l;
+					mat44 mrot = cam.mat;
+					mrot.SetTranslate(vect3(0,0,0));
+					v = v* mrot;
+
+					cam.pos += v;
+				}
+			}
 
 
 			// カメラ移動
+
 			if ( keys.ALT.on )
 			{
 
