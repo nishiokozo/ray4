@@ -240,7 +240,7 @@ struct Apr : public Sys
 					// 矩形選択
 					if ( a.pmark == 0 ) 
 					{
-						bDrag = true;
+						//bDrag = true;
 						drag_start = mouse.pos;
 					}
 
@@ -335,9 +335,9 @@ struct Apr : public Sys
 
 		}
 
-	} mc;
-	struct
-	{
+//	} mc;
+//	struct
+//	{
 		vector<Marker3>	tblMarker3;
 		//------------------------------------------------------------------------------
 		void funcMarkerDraw3()
@@ -509,7 +509,7 @@ struct Apr : public Sys
 
 		}
 
-	} mc3;
+	} mc;
 
 
 	//------------------------------------------------------------------------------
@@ -829,7 +829,7 @@ struct Apr : public Sys
 		}
 		for ( Joint3& j : human_tblJoint )	//マーカー対象に位置を登録
 		{
-			mc3.tblMarker3.emplace_back( gra, figCircle, j.pos, j.mark_disp, rad(-90) );
+			mc.tblMarker3.emplace_back( gra, figCircle, j.pos, j.mark_disp, rad(-90) );
 
 		}
 		vector<vect3> human_disp;
@@ -1555,7 +1555,7 @@ else
 
 
 			// 3Dマーカー入力
-			mc3.funcMarkerController3( figCircle, mouse, keys, gra );
+			mc.funcMarkerController3( figCircle, mouse, keys, gra );
 
 			//=================================
 			// Human
@@ -1639,11 +1639,11 @@ else
 
 
 			// マーカー表示
-//			mc3.funcMarkerDraw3();
+//			mc.funcMarkerDraw3();
 			{
 				int		cntAve=0;
 				vect3	posAve=0;
-				for ( Marker3 m : mc3.tblMarker3 )
+				for ( Marker3 m : mc.tblMarker3 )
 				{
 						//m.draw();
 					bool flg =  m.bSelected;
@@ -1659,7 +1659,8 @@ else
 						cntAve++;
 						posAve += m.pos;
 					}
-					gra.Fill( m.disp-3,m.disp+3, col );
+//					gra.Fill( m.disp-3,m.disp+3, col );
+					gra.Circle( m.disp, 7, col );
 				}
 
 						posAve /= cntAve;;
@@ -1667,21 +1668,29 @@ else
 				if ( cntAve )
 				{
 					// マーカー移動
-					for ( Marker3& m : mc3.tblMarker3 )
+					if ( !keys.ALT.on && mouse.L.on )
 					{
-						if ( m.bSelected )
+						for ( Marker3& m : mc.tblMarker3 )
 						{
-							// 平行移動
-							double	l= (mouse.mov.x + mouse.mov.y)/80;
-						
-							if ( keys.Z.on ) m.pos.x += l;
-							if ( keys.X.on ) m.pos.y += l;
-							if ( keys.C.on ) m.pos.z -= l;
+							if ( m.bSelected )
+							{
+								// 平行移動
+								vect3 v = vect3(mouse.mov.x, mouse.mov.y, 0)/80;
+								mat44 mrot = cam.mat;
+								mrot.SetTranslate(vect3(0,0,0));
+								mrot.invers();
+								v = v* mrot;
+							//	double	l= (mouse.mov.x + mouse.mov.y)/80;
+							
+	//							if ( keys.Z.on ) m.pos.x += l;
+	//							if ( keys.X.on ) m.pos.y += l;
+	//							if ( keys.C.on ) m.pos.z -= l;
+								m.pos += v ;
+							}
 						}
 					}
 
-
-
+/*
 
 					{//x
 						vect3 a = posAve - vect3(0,0, 0.0);
@@ -1716,6 +1725,7 @@ else
 							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(1,1,0) );
 						}
 					}
+*/
 				}
 				
 			}

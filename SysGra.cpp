@@ -191,11 +191,32 @@ void  SysGra::OnPaint()
 					PatBlt( hDc , 0 , 0 ,g.width, g.height , PATCOPY);
 					break;
 
-				case TypeCircle:
+/*
+				case TypeCircleOld:
 					{
 						vect2 v0 = m.tblVect2[i++];
 						vect2 v1 = m.tblVect2[i++];
 						Ellipse(hDc , v0.x, v0.y, v1.x, v1.y);
+					}
+					break;
+*/
+				case TypeCircle:
+					{
+						vect2 v = m.tblVect2[i++];
+						vect2 param = m.tblVect2[i++];
+						double r = param.x;
+						
+						int s=0;
+						vect2 v0 = v + vect2(r,0);
+						MoveToEx(hDc, v0.x, v0.y, NULL); 
+						for ( int i = 0 ; i < 360 ; i+=45 )
+						{
+							double th = rad(i);
+							vect2 v1 = vect2( r*cos(th), r*sin(th) )+v;
+							LineTo(hDc, v1.x, v1.y); 
+							s++;
+						}
+						LineTo(hDc, v0.x, v0.y); 
 					}
 					break;
 
@@ -346,29 +367,32 @@ void SysGra::Update()
 void SysGra::Clr( int col)
 //------------------------------------------------------------------------------
 {
-//	(*this).m.clr.bActive = true;
-//	(*this).m.clr.col = col;
-
 	m.tblVect2.emplace_back( TypeClr, col );
 }
+/*
 //------------------------------------------------------------------------------
 void SysGra::Circle( vect2 v, double r, int col )
 //------------------------------------------------------------------------------
 {
-//	PrimCircle a = {col,vect2(v.x-r, v.y-r), vect2(v.x+r, v.y+r)};
-//	(*this).m.tblCircle.push_back( a );
-	m.tblVect2.emplace_back( TypeCircle, col );
+	m.tblVect2.emplace_back( TypeCircleOld, col );
 	m.tblVect2.emplace_back( v.x-r, v.y-r );
 	m.tblVect2.emplace_back( v.x+r, v.y+r );
+
+}
+*/
+//------------------------------------------------------------------------------
+void SysGra::Circle( vect2 v0, double r, int col )
+//------------------------------------------------------------------------------
+{
+	m.tblVect2.emplace_back( TypeCircle, col );
+	m.tblVect2.emplace_back( v0 );
+	m.tblVect2.emplace_back( r, 8.0  ); // 半径 , 分割数
 
 }
 //------------------------------------------------------------------------------
 void SysGra::Pset( vect2 v0, int col )
 //------------------------------------------------------------------------------
 {
-//	PrimPset a = {col,v};
-//	(*this).m.tblPset.push_back( a );
-
 	m.tblVect2.emplace_back( TypePset, col );
 	m.tblVect2.emplace_back( v0 );
 }
@@ -376,8 +400,6 @@ void SysGra::Pset( vect2 v0, int col )
 void SysGra::Box( vect2 v0, vect2 v1,int col)
 //------------------------------------------------------------------------------
 {
-//	PrimBox a = {col,v0,v1};
-//	(*this).m.tblBox.push_back( a );
 	m.tblVect2.emplace_back( TypeBox, col );
 	m.tblVect2.emplace_back( v0 );
 	m.tblVect2.emplace_back( v1 );
@@ -386,9 +408,6 @@ void SysGra::Box( vect2 v0, vect2 v1,int col)
 void SysGra::Fill( vect2 v0, vect2 v1,int col)
 //------------------------------------------------------------------------------
 {
-//	PrimFill a = {col,v0,v1};
-//	(*this).m.tblFill.push_back( a );
-
 	m.tblVect2.emplace_back( TypeFill, col );
 	m.tblVect2.emplace_back( v0 );
 	m.tblVect2.emplace_back( v1 );
@@ -397,20 +416,14 @@ void SysGra::Fill( vect2 v0, vect2 v1,int col)
 void SysGra::Line( vect2 v0, vect2 v1,int col)
 //------------------------------------------------------------------------------
 {
-//	PrimLine a = {col,v0,v1};
-//	(*this).m.tblLine.push_back( a );
-
 	m.tblVect2.emplace_back( TypeLine, col );
 	m.tblVect2.emplace_back( v0 );
 	m.tblVect2.emplace_back( v1 );
-
 }
 //------------------------------------------------------------------------------
 void SysGra::Tri( vect2 v0, vect2 v1, vect2 v2, int col)
 //------------------------------------------------------------------------------
 {
-//	PrimTri a = {col,v0,v1,v2};
-//		(*this).m.tblTri.push_back( a );
 	m.tblVect2.emplace_back( TypeTri, col );
 	m.tblVect2.emplace_back( v0 );
 	m.tblVect2.emplace_back( v1 );
