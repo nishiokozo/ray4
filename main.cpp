@@ -760,6 +760,8 @@ struct Apr : public Sys
 			vect3 disp;
 			vect2 mark_disp;
 			double len;
+			
+			vector<reference_wrapper<Joint3>>	relative;
 			Joint3( vect3 v )
 			{
 				pos = v;
@@ -825,16 +827,21 @@ struct Apr : public Sys
 			human_tblBone.emplace_back( human_tblJoint[4], human_tblJoint[14] ); //arm
 			human_tblBone.emplace_back( human_tblJoint[14], human_tblJoint[15] );
 		}
-		for ( Bone3& b : human_tblBone )
+		for ( Bone3& b : human_tblBone )	// 関節の距離を決定する。
 		{
 			b.length = (b.j1.pos - b.j0.pos).length();
 		}
-		for ( Joint3& j : human_tblJoint )	//マーカー対象に位置を登録
+		for ( Joint3& j : human_tblJoint )	//マーカー登録
 		{
 			mc.tblMarker3.emplace_back( gra, figCircle, j.pos, j.mark_disp, rad(-90) );
 
 		}
-		vector<vect3> human_disp;
+		for ( Bone3& b : human_tblBone )	// ジョイントに関節の距離を決定する。
+		{
+			b.j1.relative.emplace_back( b.j0 ); 
+			b.j0.relative.emplace_back( b.j1 ); 
+		}
+//		vector<vect3> human_disp;
 
 
 		// 人
@@ -1557,6 +1564,8 @@ else
 			// 3Dマーカー入力
 			mc.funcMarkerController3( figCircle, mouse, keys, gra );
 
+Joint3& tar3 = human_tblJoint[15];
+gra.Circle( vect2(tar3.disp.x,tar3.disp.y), 9, rgb(1,1,1 ));
 			//=================================
 			// Human
 			//=================================
@@ -1569,8 +1578,21 @@ else
 					double l = v.length() - b.length;
 					double w = 0;
 					vect3 va  =	v.normalize()*l;
+
+if ( &tar3 == &b.j0 )
+{
+					b.j1.tension -= va/3;
+}
+else
+if ( &tar3 == &b.j1 )
+{
+					b.j0.tension += va/3;
+}
+else
+{
 					b.j0.tension += va/3;
 					b.j1.tension -= va/3;
+}
 
 				}
 
@@ -1590,21 +1612,7 @@ else
 				//	roll	:z	奥+
 				//	pitch	:x	右+
 				//	yaw		:y	下+
-#if 0
-				mat44	rotx;
-				mat44	roty;
-				mat44	rotz;
-				mat44	trans;
-				rotx.setRotateX(human.rot.x);
-				roty.setRotateY(human.rot.y);
-				rotz.setRotateZ(human.rot.z);
-				trans.SetTranslate(human.pos);
-				vect3 v= rotx * roty * rotz *  j.pos + human.pos;
-#else
 				vect3 v= j.pos;
-#endif
-
-//				v += -cam.pos;
 
 				v = v * cam.mat.invers();
 
@@ -1624,22 +1632,11 @@ else
 					gra.Line( v0,v1, rgb(1,1,1));
 				}
 			}
-			for ( const Joint3& j : human_tblJoint )
-			{
-//				gra.Fill( j.disp-3, j.disp+3,rgb(1,1,1));
-
-				if ( j.disp.z > 0 )
-				{
-					vect2 v(j.disp.x,j.disp.y);
-//					gra.Fill( v-3,v+3, rgb(1,1,1));
-				}
-
-			}
 
 
 
-			// マーカー表示
-//			mc.funcMarkerDraw3();
+			// human sマーカー表示
+			//mc.funcMarkerDraw3();
 			{
 				int		cntAve=0;
 				vect3	posAve=0;
@@ -1659,7 +1656,6 @@ else
 						cntAve++;
 						posAve += m.pos;
 					}
-//					gra.Fill( m.disp-3,m.disp+3, col );
 					gra.Circle( m.disp, 7, col );
 				}
 
@@ -1667,7 +1663,7 @@ else
 
 				if ( cntAve )
 				{
-					// マーカー移動
+					// human マーカー移動
 					if ( !keys.ALT.on && mouse.L.on )
 					{
 						for ( Marker3& m : mc.tblMarker3 )
@@ -1675,57 +1671,18 @@ else
 							if ( m.bSelected )
 							{
 								// 平行移動
-								vect3 v = vect3(mouse.mov.x, mouse.mov.y, 0)/80;
+//								double sz = 1/tan(rad(pers.fovy)/2);				// 投影面までの距離
+
+								vect3 v = vect3(mouse.mov.x, mouse.mov.y, 0)/2.5/pers.height/tar3.disp.z;
 								mat44 mrot = cam.mat;
 								mrot.SetTranslate(vect3(0,0,0));
 								mrot.invers();
 								v = v* mrot;
-							//	double	l= (mouse.mov.x + mouse.mov.y)/80;
-							
-	//							if ( keys.Z.on ) m.pos.x += l;
-	//							if ( keys.X.on ) m.pos.y += l;
-	//							if ( keys.C.on ) m.pos.z -= l;
 								m.pos += v ;
 							}
 						}
 					}
 
-/*
-
-					{//x
-						vect3 a = posAve - vect3(0,0, 0.0);
-						vect3 b = posAve - vect3(0.1,0, 0);
-						vect3 v0;
-						vect3 v1;
-						bool flg = pers.ScissorLine( a* cam.mat.invers(), b* cam.mat.invers(), v0, v1 );
-						if ( flg )
-						{
-							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(1,1,0) );
-						}
-					}
-					{//y
-						vect3 a = posAve - vect3(0,0, 0.0);
-						vect3 b = posAve - vect3(0,0.1,0);
-						vect3 v0;
-						vect3 v1;
-						bool flg = pers.ScissorLine( a* cam.mat.invers(), b* cam.mat.invers(), v0, v1 );
-						if ( flg )
-						{
-							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(1,1,0) );
-						}
-					}
-					{//z
-						vect3 a = posAve - vect3(0,0, 0.0);
-						vect3 b = posAve - vect3(0,0, 0.1);
-						vect3 v0;
-						vect3 v1;
-						bool flg = pers.ScissorLine( a* cam.mat.invers(), b* cam.mat.invers(), v0, v1 );
-						if ( flg )
-						{
-							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(1,1,0) );
-						}
-					}
-*/
 				}
 				
 			}
