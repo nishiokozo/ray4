@@ -24,7 +24,7 @@ using namespace std;
 
 struct Apr : public Sys
 {
-	double	time_peak = 0;
+	long long	time_peak = 0;
 	vector<vector<vect3>> human_keyframe;
 	int human_numKeyframe = 0;
 
@@ -205,7 +205,7 @@ struct Apr : public Sys
 					}
 				}
 
-				for ( int i = tblMarker2.size()-1 ; i >= 0 ; i-- )
+				for ( int i = static_cast<signed>(tblMarker2.size())-1 ; i >= 0 ; i-- )
 				{
 					if ( tblMarker2[i].bAffectable )
 					{
@@ -377,7 +377,7 @@ struct Apr : public Sys
 					}
 				}
 
-				for ( int i = tblMarker3.size()-1 ; i >= 0 ; i-- )
+				for ( int i = static_cast<signed>(tblMarker3.size())-1 ; i >= 0 ; i-- )
 				{
 					if ( tblMarker3[i].bAffectable )
 					{
@@ -717,7 +717,7 @@ struct Apr : public Sys
 			{ 
 				if ( n > 0 )
 				{
-					int ix = tblJoint.size();
+					int ix = static_cast<signed>(tblJoint.size());
 					tblJoint.emplace_back( vect2( (tblJoint[v0].pos + tblJoint[v1].pos )/2 ) );
 					tblJoint.emplace_back( vect2( (tblJoint[v1].pos + tblJoint[v2].pos )/2 ) );
 					tblJoint.emplace_back( vect2( (tblJoint[v2].pos + tblJoint[v0].pos )/2 ) );
@@ -1312,14 +1312,14 @@ struct Apr : public Sys
 					double div = 10;
 					double st = 1/div;
 
-					for ( int n = -1 ; n < (signed)catmull_tbl.size()-3+1 ; n++ )
+					for ( int n = -1 ; n < static_cast<signed>(catmull_tbl.size())-3+1 ; n++ )
 					{
 						int n0 = n;
 						int n1 = n+1;
 						int n2 = n+2;
 						int n3 = n+3;
 						if ( n0 < 0 ) n0 = 0;
-						if ( n3 >= (signed)catmull_tbl.size() ) n3 = n2;
+						if ( n3 >= static_cast<signed>(catmull_tbl.size()) ) n3 = n2;
 					
 						double t = st;
 						vect2 v0 = catmull_func(0, catmull_tbl[n0], catmull_tbl[n1], catmull_tbl[n2], catmull_tbl[n3] );
@@ -1343,7 +1343,7 @@ struct Apr : public Sys
 					double div = 20;
 					double st = 1/div;
 
-					for ( int n = 0 ; n < (signed)bezier_tbl.size()-3 ; n+=3 )
+					for ( int n = 0 ; n < static_cast<signed>(bezier_tbl.size())-3 ; n+=3 )
 					{
 						double t  = st;
 						vect2 v0 = bezier_tbl[n+0];
@@ -1362,7 +1362,7 @@ struct Apr : public Sys
 				{// 補助ライン描画
 					int cnt = 0;
 					vect2 v0 = bezier_tbl[0];
-					for ( int i = 1 ; i < (signed)bezier_tbl.size() ; i++ )
+					for ( int i = 1 ; i < static_cast<signed>(bezier_tbl.size()) ; i++ )
 					{ 
 						vect2 v1 = bezier_tbl[i];
 						if ( cnt != 1 ) 
@@ -1393,7 +1393,7 @@ struct Apr : public Sys
 
 				if ( t >= 1.0 ) 
 				{
-					if ( n+3 < (signed)bezier_tbl.size()-3 )
+					if ( n+3 < static_cast<signed>(bezier_tbl.size())-3 )
 					{
 						t = 0;
 						n+=3;
@@ -1433,7 +1433,7 @@ struct Apr : public Sys
 				int n2 = n+1;
 				int n3 = n+2;
 				if ( n0<0 ) n0 = 0;
-				if ( n3>=(signed)catmull_tbl.size() ) n3 =n2;
+				if ( n3>=static_cast<signed>(catmull_tbl.size()) ) n3 =n2;
 
 				gv2 = catmull_func( t, catmull_tbl[n0], catmull_tbl[n1], catmull_tbl[n2], catmull_tbl[n3] );
 
@@ -1444,7 +1444,7 @@ struct Apr : public Sys
 
 				if ( t >= 1.0 ) 
 				{
-					if ( n+1 < (signed)catmull_tbl.size()-1 )
+					if ( n+1 < static_cast<signed>(catmull_tbl.size())-1 )
 					{
 						t = 0;
 						n+=1;
@@ -1736,7 +1736,7 @@ else
 				// キーフレーム記録
 				if ( keys.K.hi )
 				{
-					human_numKeyframe = human_keyframe.size();
+					human_numKeyframe = static_cast<signed>(human_keyframe.size());
 					human_keyframe.emplace_back();
 					for ( const Joint3& j : human_tblJoint )
 					{
@@ -1748,8 +1748,8 @@ else
 				if ( keys.UP.rep ) 		{ human_numKeyframe++; bChanged=true; }
 				if ( keys.DOWN.rep ) 	{ human_numKeyframe--; bChanged=true; }
 				human_numKeyframe = max( human_numKeyframe, 0 );
-//				human_numKeyframe = min( human_numKeyframe, ((signed)human_keyframe.size())-1 );
-				human_numKeyframe = min( human_numKeyframe, (signed)human_keyframe.size()-1 );
+//				human_numKeyframe = min( human_numKeyframe, (static_cast<signed>(human_keyframe.size())-1 );
+				human_numKeyframe = min( human_numKeyframe, static_cast<signed>(human_keyframe.size())-1 );
 
 
 				if ( bChanged )
@@ -1825,7 +1825,7 @@ else
 				{
 					dime_sec = chrono::system_clock::now().time_since_epoch();
 
-					double f2 = chrono::duration_cast<chrono::microseconds>(dime_max).count();
+					long long f2 = chrono::duration_cast<chrono::microseconds>(dime_max).count();
 //					cout << "time-max " << f2/1000 << " msec" << endl;
 					time_peak = f2;
 					dime_max = chrono::seconds(0);

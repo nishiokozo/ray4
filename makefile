@@ -21,9 +21,8 @@ LIBS = \
 FLGS = \
 	-c -g \
 	-std=c++14 \
-	-Wall -Werror\
-	-Wno-unused \
-	-Wconversion -Wno-sign-conversion -Wno-shorten-64-to-32\
+	-Werror \
+	-Wall -Wno-unused -Wconversion -Wno-sign-conversion -Wno-shorten-64-to-32\
 
 FILE=main.o
 
@@ -39,8 +38,8 @@ FILE=main.o
 #	-Wno-unknown-pragmas \
 #	-Werror \
 
-CC	= clang++
-#CC	= g++
+#CC	= clang++#
+CC	= g++
 
 $(TAR)	:	$(SRCS:.cpp=.o)
 	$(CC) -o $(TAR) $^ $(LIBS)
