@@ -176,7 +176,7 @@ void  SysGra::OnPaint()
 		{
 			vect2 attr = m.tblVect2[i++];
 			EnumType	type	= (EnumType)attr.x;
-			int			col		= attr.y;
+			int			col		= (int)attr.y;
 
 			HPEN hPen = CreatePen(PS_SOLID, 1, col);
 			HPEN hOldPen = SelectPen(hDc, hPen);
@@ -208,22 +208,22 @@ void  SysGra::OnPaint()
 						
 						int s=0;
 						vect2 v0 = v + vect2(r,0);
-						MoveToEx(hDc, v0.x, v0.y, NULL); 
+						MoveToEx(hDc, (int)v0.x, (int)v0.y, NULL); 
 						for ( int i = 0 ; i < 360 ; i+=45 )
 						{
 							double th = rad(i);
 							vect2 v1 = vect2( r*cos(th), r*sin(th) )+v;
-							LineTo(hDc, v1.x, v1.y); 
+							LineTo(hDc, (int)v1.x, (int)v1.y); 
 							s++;
 						}
-						LineTo(hDc, v0.x, v0.y); 
+						LineTo(hDc, (int)v0.x, (int)v0.y); 
 					}
 					break;
 
 				case TypePset:
 					{
 						vect2 v0 = m.tblVect2[i++];
-						SetPixel( hDc, v0.x, v0.y, col );
+						SetPixel( hDc, (int)v0.x, (int)v0.y, col );
 					}
 					break;
 
@@ -231,7 +231,7 @@ void  SysGra::OnPaint()
 					{
 						vect2 v0 = m.tblVect2[i++];
 						vect2 v1 = m.tblVect2[i++];
-						Rectangle(hDc , v0.x, v0.y, v1.x, v1.y); 
+						Rectangle(hDc , (int)v0.x, (int)v0.y, (int)v1.x, (int)v1.y); 
 					}
 					break;
 				
@@ -239,8 +239,8 @@ void  SysGra::OnPaint()
 					{
 						vect2 v0 = m.tblVect2[i++];
 						vect2 v1 = m.tblVect2[i++];
-						MoveToEx(hDc, v0.x, v0.y, NULL); 
-						LineTo(hDc, v1.x, v1.y); 
+						MoveToEx(hDc, (int)v0.x, (int)v0.y, NULL); 
+						LineTo(hDc, (int)v1.x, (int)v1.y); 
 					}
 					break;
 
@@ -248,11 +248,11 @@ void  SysGra::OnPaint()
 					{
 						vect2 v0 = m.tblVect2[i++];
 						vect2 v1 = m.tblVect2[i++];
-						MoveToEx(hDc, v0.x, v0.y, NULL);
-						LineTo(hDc, v1.x, v0.y);
-						LineTo(hDc, v1.x, v1.y);
-						LineTo(hDc, v0.x, v1.y);
-						LineTo(hDc, v0.x, v0.y);
+						MoveToEx(hDc, (int)v0.x, (int)v0.y, NULL);
+						LineTo(hDc, (int)v1.x, (int)v0.y);
+						LineTo(hDc, (int)v1.x, (int)v1.y);
+						LineTo(hDc, (int)v0.x, (int)v1.y);
+						LineTo(hDc, (int)v0.x, (int)v0.y);
 					}
 					break;
 
@@ -286,8 +286,8 @@ void  SysGra::OnPaint()
 			for ( Message& m : m.tblMessage )
 	        {
 	        	const char* str = m.str.c_str();
-	        	int x = m.pos.x;
-	        	int y = m.pos.y;
+	        	int x = (int)m.pos.x;
+	        	int y = (int)m.pos.y;
 		        TextOut(hDc, x, y, str, lstrlen(str));
 //				y+= 16;
 			}

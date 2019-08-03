@@ -287,7 +287,7 @@ public:
 		A = vect3(0,0,0);
 
 
-		float r,s,pw,e,tm,rl,rr;
+		double r,s,pw,e,tm,rl,rr;
 		vect3	P,C,N;
 
 	#define	SCENE 1
@@ -362,10 +362,10 @@ public:
 		PrimLight&	lgt = *m_tblLight[0];
 		vect3	Lc;
 		vect3	L;
-		float	d;
-		float	s=0;
-		float	r=0;
-		float	t=0;
+		double	d;
+		double	s=0;
+		double	r=0;
+		double	t=0;
 		
 		if ( (sur = raycast( P, I )).flg )
 		{
@@ -394,7 +394,8 @@ public:
 		}
 		else
 		{
-			L = normalize(sur.Q - lgt.P);
+//			L = normalize(sur.Q - lgt.P);
+			L = (sur.Q - lgt.P).normalize();
 			Lc = lgt.C / dot(sur.Q - lgt.P, sur.Q - lgt.P);
 			int n = 20;
 			ret += s;
@@ -410,7 +411,7 @@ public:
 		vect3	posScr = vect3(0,1.0,-12+8);
 		vect3	posEye = vect3(0,1.0,-17+8);
 
-		float r,s,p,e,t,rl,rr;
+		double r,s,p,e,t,rl,rr;
 		vect3	C;
 
 		int	cntMax = 0;
@@ -436,9 +437,9 @@ public:
 				int g = min( 255, (int)(255*C.g) );
 				int b = min( 255, (int)(255*C.b) );
 
-				to[(py*width + px)*psize +0] = b;
-				to[(py*width + px)*psize +1] = r;
-				to[(py*width + px)*psize +2] = g;
+				to[(py*width + px)*psize +0] = (unsigned char)b;
+				to[(py*width + px)*psize +1] = (unsigned char)r;
+				to[(py*width + px)*psize +2] = (unsigned char)g;
 			}
 		}
 		
@@ -459,7 +460,7 @@ void	raytrace( SysGra& gra, int py )
 		vect3	posScr = vect3(0,1.0,-12+8);
 		vect3	posEye = vect3(0,1.0,-17+8);
 
-		float r,s,p,e,t,rl,rr;
+		double r,s,p,e,t,rl,rr;
 		vect3	C;
 
 		int	cntMax = 0;

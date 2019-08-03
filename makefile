@@ -23,6 +23,7 @@ FLGS = \
 	-std=c++14 \
 	-Wall -Werror\
 	-Wno-unused \
+	-Wconversion -Wno-sign-conversion -Wno-shorten-64-to-32\
 
 FILE=main.o
 

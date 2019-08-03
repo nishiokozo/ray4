@@ -217,7 +217,7 @@ vect3	normalize( vect3 a )
 //-----------------------------------------------------------------------------
 {
 	vect3 v; 
-	double	l = 1.0f / sqrt( a.x*a.x + a.y*a.y + a.z*a.z );
+	double	l = 1.0 / sqrt( a.x*a.x + a.y*a.y + a.z*a.z );
 	
 	v.x = a.x * l;
 	v.y = a.y * l;
@@ -394,7 +394,7 @@ void mat4_perspective ( mat44& m, double fovy, double aspect, double zNear, doub
 void mat4_perspective (double* m, double fovy, double aspect, double zNear, double zFar)
 //-----------------------------------------------------------------------------
 {
-        double p = 1.0f / tanf(fovy * (pi/360.0));
+        double p = 1.0 / tan(fovy * (pi/360.0));
 
 /*
         m[0] = z2 / aspect;
@@ -457,7 +457,7 @@ double d = 2.0 * zFar * zNear / (zNear - zFar);
 void mat4_ray_perspective (double* m, double fovy, double aspect )
 //-----------------------------------------------------------------------------
 {
-        double	p = 1.0f / tanf(fovy * (pi/360.0));
+        double	p = 1.0f / tan(fovy * (pi/360.0));
 		double	ofs_x = 0.0;	//x	offset-x
 		double	ofs_y = 0.0;	//y	offset-y
 		double	ofs_z = -p;		//z	offset-z

@@ -1125,7 +1125,7 @@ struct Apr : public Sys
 				int col = rgb(0.5,0.5,0.5);
 				if(0)
 				{	// ドットグリッド
-					const double NUM = 4;
+					const int NUM = 4;
 					{
 						for ( int i = -NUM ; i <= NUM ; i++ )
 						{
@@ -1151,7 +1151,7 @@ struct Apr : public Sys
 
 				if(1)
 				{	// 格子グリッド
-					const double NUM = 20;
+					const int NUM = 20;
 					{
 						vect3 a(-NUM, 0,-NUM);
 						vect3 b( NUM, 0,-NUM);
@@ -1749,7 +1749,7 @@ else
 				if ( keys.DOWN.rep ) 	{ human_numKeyframe--; bChanged=true; }
 				human_numKeyframe = max( human_numKeyframe, 0 );
 //				human_numKeyframe = min( human_numKeyframe, ((signed)human_keyframe.size())-1 );
-				human_numKeyframe = min( human_numKeyframe, human_keyframe.size()-1 );
+				human_numKeyframe = min( human_numKeyframe, (signed)human_keyframe.size()-1 );
 
 
 				if ( bChanged )
