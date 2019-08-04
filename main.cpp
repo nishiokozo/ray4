@@ -108,16 +108,19 @@ struct Apr : public Sys
 
 		struct Joint3
 		{
+			int id;
 			vect3 pos;
 			vect3 tension;
 			vect3 world;
 			vect3 disp;
 			vect2 readonly_disp2;
 			double len;
+			int priority;
 			
 			vector<reference_wrapper<Joint3>>	relative;
 			Joint3( vect3 v )
 			{
+				id = 0;
 				pos = v;
 				tension = 0;
 				len = 0;
@@ -668,18 +671,33 @@ struct Apr : public Sys
 		{
 			b.length = (b.j1.pos - b.j0.pos).length();
 		}
+		{
+			int cnt = 0 ;
+			for ( Joint3& j : human_tblJoint )
+			{
+				j.id = cnt++;				//id登録
+			}
+		}
 		for ( Joint3& j : human_tblJoint )	//マーカー登録
 		{
-//			mc.tblMarker3.emplace_back( gra, figCircle, j, j.pos, j.readonly_disp2, rad(-90) );
 			mc.tblMarker3.emplace_back( gra, figCircle, j, rad(-90) );
-
 		}
 		for ( Bone3& b : human_tblBone )	// ジョイントに関節の距離を決定する。
 		{
 			b.j1.relative.emplace_back( b.j0 ); 
 			b.j0.relative.emplace_back( b.j1 ); 
 		}
-//		vector<vect3> human_disp;
+
+	{
+		for ( Joint3& j : human_tblJoint )
+		{
+			for ( Joint3& r : j.relative )
+			{
+				
+			}
+		}		
+	}
+
 
 
 		// 人
@@ -1404,7 +1422,7 @@ else
 			//-----------------------------------------------------------------
 			// 3Dマーカー入力
 			//-----------------------------------------------------------------
-static Joint3& tar3 = human_tblJoint[15];
+static Joint3* pTar3 = 0;
 
 //			mc.funcMarkerController3( figCircle, mouse, keys, gra );
 			if  ( !keys.ALT.on ) 
@@ -1494,6 +1512,23 @@ static Joint3& tar3 = human_tblJoint[15];
 							else
 							{
 								a.pmark->bSelected = true;
+pTar3 = &a.pmark->joint;
+								for ( Joint3& j : human_tblJoint )
+								{
+									j.priority = 999;
+								}
+								function<void( Joint3&,int)> funcSetPriority = [&funcSetPriority] ( Joint3& j, int prio )
+								{
+									j.priority = prio;
+									for ( Joint3& r : j.relative )
+									{
+										if ( r.priority > prio+1 ) funcSetPriority( r, prio+1 );
+									}
+								};
+								
+								funcSetPriority( a.pmark->joint, 1 );
+
+
 							}
 						}
 					}
@@ -1563,7 +1598,6 @@ static Joint3& tar3 = human_tblJoint[15];
 										mrot.invers();
 										v = v* mrot;
 										m.joint.pos += v ;
-	//tar3 = m.joint;
 									}
 								}
 							}
@@ -1590,7 +1624,7 @@ static Joint3& tar3 = human_tblJoint[15];
 
 			}
 
-gra.Circle( tar3.readonly_disp2, 10, rgb(1,1,1 ));
+if ( pTar3 ) gra.Circle( pTar3->readonly_disp2, 10, rgb(1,1,1 ));
 			//=================================
 			// Human
 			//=================================
@@ -1601,25 +1635,40 @@ gra.Circle( tar3.readonly_disp2, 10, rgb(1,1,1 ));
 				{
 					vect3 v = b.j1.pos - b.j0.pos;
 					double l = v.length() - b.length;
-					double w = 0;
 					vect3 va  =	v.normalize()*l;
 
-#if 0
-if ( &tar3 == &b.j0 )
-{
-					b.j1.tension -= va/3;
-}
-else
-if ( &tar3 == &b.j1 )
-{
-					b.j0.tension += va/3;
-}
-else
-#endif
-{
-					b.j0.tension += va/3;
-					b.j1.tension -= va/3;
-}
+					double w0 = 0;
+					double w1 = 0;
+					if ( b.j0.priority ==1 ) 
+					{
+						w0 = 0.0;
+						w1 = 1.0;
+					}
+					else
+					if ( b.j1.priority ==1 ) 
+					{
+						w0 = 1.0;
+						w1 = 0.0;
+					}
+					else
+					if ( b.j0.priority < b.j1.priority ) 
+					{
+						w0 = 0.20;
+						w1 = 0.50;
+					}
+					else
+					if ( b.j0.priority > b.j1.priority ) 
+					{
+						w0 = 0.50;
+						w1 = 0.20;
+					}
+					else
+					{
+						w0 = 0.33;
+						w1 = 0.33;
+					}
+					b.j0.tension += va*w0;
+					b.j1.tension -= va*w1;
 
 				}
 
@@ -1684,6 +1733,9 @@ else
 						posAve += m.joint.pos;
 					}
 					gra.Circle( m.joint.readonly_disp2, 7, col );
+//					gra.Print( m.joint.readonly_disp2+vect2(10,0), to_string(m.joint.priority) );
+					gra.Print( m.joint.readonly_disp2+vect2(10,0), to_string(m.joint.id) );
+		
 				}
 
 						posAve /= cntAve;;
