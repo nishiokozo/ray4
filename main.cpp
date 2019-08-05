@@ -8,6 +8,7 @@
 #include <cmath>
 #include <functional>
 #include <fstream>
+#include <sstream>
 using namespace std;
 
 #include "geom.h"
@@ -25,9 +26,43 @@ using namespace std;
 
 struct Apr : public Sys
 {
+	int numKeyframe = 0;
+
 	long long	time_peak = 0;
-	vector<vector<vect3>> human_keyframe;
-	int human_numKeyframe = 0;
+
+	struct Joint3
+	{
+		int id;
+		vect3 pos;
+		vect3 tension;
+		vect3 world;
+		vect3 disp;
+		vect2 readonly_disp2;
+		double len;
+		int priority;
+		
+		vector<reference_wrapper<Joint3>>	relative;
+		Joint3( vect3 v )
+		{
+			id = 0;
+			pos = v;
+			tension = 0;
+			len = 0;
+		}
+	};
+
+	struct Bone3
+	{
+		int n0;
+		int n1;
+		Joint3& j0;
+		Joint3& j1;
+		double length;
+		Bone3( vector<Joint3>& tbl, int _n0, int _n1 ) :n0(_n0), n1(_n1), j0(tbl[_n0]), j1(tbl[_n1]){}
+//			Bone3( vector<Joint3>& tbl, int _n0, int _n1 ) :n0(_n0), n1(_n1), j0(tbl[_n0]), j1(tbl[_n1]){}
+	};
+
+
 
 	struct Figure
 	{
@@ -106,38 +141,6 @@ struct Apr : public Sys
 		}
 	};
 
-
-		struct Joint3
-		{
-			int id;
-			vect3 pos;
-			vect3 tension;
-			vect3 world;
-			vect3 disp;
-			vect2 readonly_disp2;
-			double len;
-			int priority;
-			
-			vector<reference_wrapper<Joint3>>	relative;
-			Joint3( vect3 v )
-			{
-				id = 0;
-				pos = v;
-				tension = 0;
-				len = 0;
-			}
-		};
-
-		struct Bone3
-		{
-			int n0;
-			int n1;
-			Joint3& j0;
-			Joint3& j1;
-			double length;
-			Bone3( int _n0, int _n1, Joint3& _j0, Joint3& _j1 ) :n0(_n0), n1(_n1), j0(_j0), j1(_j1){}
-			Bone3( int _n0, int _n1, Joint3&& _j0, Joint3&& _j1 ) :n0(_n0), n1(_n1), j0(_j0), j1(_j1){}
-		};
 
 	struct Marker3
 	{
@@ -621,9 +624,10 @@ struct Apr : public Sys
 		}
 
 		//人
+
 		vector<Joint3> human_tblJoint;
-		human_tblJoint.reserve(1000);
 		vector<Bone3> human_tblBone;
+		vector<vector<vect3>> human_keyframe;
 		{	//	人
 			double ox=0,oy=-160,os=0.01;
 
@@ -644,31 +648,25 @@ struct Apr : public Sys
 			human_tblJoint.emplace_back( os*vect3( ox+20,	oy+ 40,	0 )	);//14
 			human_tblJoint.emplace_back( os*vect3( ox+20,	oy+ 80,	0 )	);//15
 
-			human_tblBone.emplace_back( 0,1,human_tblJoint[0], human_tblJoint[1] );	//head
-			human_tblBone.emplace_back( 1,2,human_tblJoint[1], human_tblJoint[2] );
-			human_tblBone.emplace_back( 2,0,human_tblJoint[2], human_tblJoint[0] );
-
-			human_tblBone.emplace_back( 2,5,human_tblJoint[2], human_tblJoint[5] ); //chest
-			human_tblBone.emplace_back( 5,3,human_tblJoint[5], human_tblJoint[3] );
-			human_tblBone.emplace_back( 3,2,human_tblJoint[3], human_tblJoint[2] );
-			human_tblBone.emplace_back( 2,4,human_tblJoint[2], human_tblJoint[4] );
-			human_tblBone.emplace_back( 4,5,human_tblJoint[4], human_tblJoint[5] );
-
-			human_tblBone.emplace_back( 5,7,human_tblJoint[5], human_tblJoint[7] ); //hip
-			human_tblBone.emplace_back( 7,6,human_tblJoint[7], human_tblJoint[6] );
-			human_tblBone.emplace_back( 6,5,human_tblJoint[6], human_tblJoint[5] );
-
-			human_tblBone.emplace_back( 6,8,human_tblJoint[6], human_tblJoint[8] ); //leg
-			human_tblBone.emplace_back( 8,9,human_tblJoint[8], human_tblJoint[9] );
-
-			human_tblBone.emplace_back( 7,10,human_tblJoint[7], human_tblJoint[10] ); //leg
-			human_tblBone.emplace_back( 10,11,human_tblJoint[10], human_tblJoint[11] );
-
-			human_tblBone.emplace_back( 3,12,human_tblJoint[3], human_tblJoint[12] ); //arm
-			human_tblBone.emplace_back( 12,13,human_tblJoint[12], human_tblJoint[13] );
-
-			human_tblBone.emplace_back( 4,14,human_tblJoint[4], human_tblJoint[14] ); //arm
-			human_tblBone.emplace_back( 14,15,human_tblJoint[14], human_tblJoint[15] );
+		 	human_tblBone.emplace_back( human_tblJoint, 0, 1 );	//head
+			human_tblBone.emplace_back( human_tblJoint, 1, 2 );
+			human_tblBone.emplace_back( human_tblJoint, 2, 0 );
+			human_tblBone.emplace_back( human_tblJoint, 2, 5 ); //chest
+			human_tblBone.emplace_back( human_tblJoint, 5, 3 );
+			human_tblBone.emplace_back( human_tblJoint, 3, 2 );
+			human_tblBone.emplace_back( human_tblJoint, 2, 4 );
+			human_tblBone.emplace_back( human_tblJoint, 4, 5 );
+			human_tblBone.emplace_back( human_tblJoint, 5, 7 ); //hip
+			human_tblBone.emplace_back( human_tblJoint, 7, 6 );
+			human_tblBone.emplace_back( human_tblJoint, 6, 5 );
+			human_tblBone.emplace_back( human_tblJoint, 6, 8 ); //leg
+			human_tblBone.emplace_back( human_tblJoint, 8, 9 );
+			human_tblBone.emplace_back( human_tblJoint, 7,10 ); //leg
+			human_tblBone.emplace_back( human_tblJoint,10,11 );
+			human_tblBone.emplace_back( human_tblJoint, 3,12 ); //arm
+			human_tblBone.emplace_back( human_tblJoint,12,13 );
+			human_tblBone.emplace_back( human_tblJoint, 4,14 ); //arm
+			human_tblBone.emplace_back( human_tblJoint,14,15 );
 		}
 		for ( Bone3& b : human_tblBone )	// 関節の距離を決定する。
 		{
@@ -681,25 +679,31 @@ struct Apr : public Sys
 				j.id = cnt++;				//id登録
 			}
 		}
-		for ( Joint3& j : human_tblJoint )	//マーカー登録
-		{
-			mc.tblMarker3.emplace_back( gra, figCircle, j, rad(-90) );
-		}
 		for ( Bone3& b : human_tblBone )	// ジョイントに関節の距離を決定する。
 		{
 			b.j1.relative.emplace_back( b.j0 ); 
 			b.j0.relative.emplace_back( b.j1 ); 
 		}
 
-	{
-		for ( Joint3& j : human_tblJoint )
+		for ( Joint3& j : human_tblJoint )	//マーカー登録
 		{
-			for ( Joint3& r : j.relative )
-			{
-				
-			}
-		}		
-	}
+			mc.tblMarker3.emplace_back( gra, figCircle, j, rad(-90) );
+		}
+
+
+
+		struct Data
+		{
+			vector<Joint3>*			pJoint;
+			vector<Bone3>*			pBone;
+			vector<vector<vect3>>*	pKeyframe;
+		};
+		
+		Data* pData = new Data;
+
+		pData->pJoint		= &human_tblJoint;
+		pData->pBone		= &human_tblBone;
+		pData->pKeyframe	= &human_keyframe;
 
 
 
@@ -874,12 +878,167 @@ struct Apr : public Sys
 			gra.Clr(rgb(0.3,0.3,0.3));
 		#endif
 
-			gra.Print(vect2(10,16*1),string("Y/H fovY:")+to_string(int(pers.fovy)));
+			{
+				gra.Print(vect2(100,16*1),string("[S]ave/[L]oad mot"));
+				// キーフレームロード
+				if ( keys.L.hi )
+				{
+					Data*	pNew = new Data;
+					pNew->pJoint = new vector<Joint3>;
+					pNew->pBone = new vector<Bone3>;
+					pNew->pKeyframe = new vector<vector<vect3>>;
+				
+					fstream fi( "human.mot", ios::in );
+					string buf;
+					enum
+					{
+						ModeNone,
+						ModeJoint,
+						ModeBone,
+						ModeMotion,
+					} mode = ModeNone;
+					
+					function<vector<string>(const string&, char)> split = [] (const string &s, char delim) 
+					{
+						vector<string> elems;
+						stringstream ss(s);
+						string item;
+						while (getline(ss, item, delim)) 
+						{
+							if (!item.empty()) 
+							{
+								elems.push_back(item);
+							}
+						}
+						return elems;
+					};
+
+					while ( getline( fi, buf ) )
+					{
+						cout << buf << endl;
+						if ( string(buf) == "joint" )	{mode = ModeJoint;	continue;}
+						if ( string(buf) == "bone" )	{mode = ModeBone;	continue;}
+						if ( string(buf) == "motion" )	
+						{
+							mode = ModeMotion;	
+							(*pNew->pKeyframe).emplace_back();
+							continue;
+						}
+						if ( string(buf) == "," ) 
+						{
+							(*pNew->pKeyframe).emplace_back();
+							continue;
+						}
+						if ( string(buf) == "end" )	
+						{	
+							for ( Bone3& b : (*pNew->pBone) )	// 関節の距離を決定する。
+							{
+								b.length = (b.j1.pos - b.j0.pos).length();
+							}
+							{
+								int cnt = 0 ;
+								for ( Joint3& j : (*pNew->pJoint) )
+								{
+									j.id = cnt++;				//id登録
+								}
+							}
+							for ( Bone3& b : (*pNew->pBone) )	// ジョイントに関節の距離を決定する。
+							{
+								b.j1.relative.emplace_back( b.j0 ); 
+								b.j0.relative.emplace_back( b.j1 ); 
+							}
+							//マーカー削除＆登録
+							mc.tblMarker3.clear();
+							for ( Joint3& j : (*pNew->pJoint) )	//マーカー登録
+							{
+								mc.tblMarker3.emplace_back( gra, figCircle, j, rad(-90) );
+							}
+							pData = pNew;
+							numKeyframe = 0;
+							break;
+						}
+						switch( mode )
+						{
+							case ModeJoint:
+								{
+									vector<string> v = split( buf, '\t');
+									double x = stod(v[0]);
+									double y = stod(v[1]);
+									double z = stod(v[2]);
+									(*pNew->pJoint).emplace_back( vect3(x,y,z) );
+									//	cout << x << "," << y << "," << z << endl; 
+								}
+								break;
+							case ModeBone:
+								{
+									vector<string> v = split( buf, '\t');
+									int n0 = stoi(v[0]);
+									int n1 = stoi(v[1]);
+									(*pNew->pBone).emplace_back( (*pNew->pJoint), n0, n1 );
+									//	cout << x << "," << y << "," << z << endl; 
+								}
+								break;
+							case ModeMotion:
+								{
+									vector<string> v = split( buf, '\t');
+									double x = stod(v[0]);
+									double y = stod(v[1]);
+									double z = stod(v[2]);
+									(*pNew->pKeyframe)[ (*pNew->pKeyframe).size()-1 ].emplace_back( x,y,z );
+									//	cout << x << "," << y << "," << z << endl; 
+								}
+								break;
+							default:
+								break;
+						}
+
+					}
+					cout << "LOADED" << endl;
+				}
+
+				// キーフレームセーブ
+				if ( keys.S.hi )
+				{
+					fstream fo( "human.mot", ios::out );
+
+					{
+						fo << "joint" << endl;
+						for ( Joint3& j : (*pData->pJoint) )	// 関節の位置
+						{
+							fo << "\t"<< j.pos.x << "\t" << j.pos.y << "\t" << j.pos.z << endl;
+						}
+
+						fo << "bone" << endl;
+						for ( Bone3& b : (*pData->pBone) )	// 骨
+						{
+							b.length = (b.j1.pos - b.j0.pos).length();
+							fo  << "\t"<< b.n0 << "\t" << b.n1 << endl;
+						}
+					}
+					{
+						fo << "motion" << endl;
+						int	cnt = static_cast<signed>((*pData->pKeyframe).size());
+						for ( int i = 0 ; i < cnt ; i++ )
+						{
+//							fo << to_string(i)  << endl;
+							for ( int j = 0 ; j < static_cast<signed>((*pData->pJoint).size()) ; j++ )
+							{
+								fo  << "\t"<< (*pData->pKeyframe)[ i ][ j ].x << "\t" << (*pData->pKeyframe)[ i ][ j ].y << "\t" << (*pData->pKeyframe)[ i ][ j ].z << endl;
+							}
+							if( i+1 < cnt ) fo << "," << endl;
+						}
+					}
+					fo << "end" << endl;
+
+					cout << "SAVED" << endl;
+				}
+			}
+
+			gra.Print(vect2(10,16*1),string("[Y]/[H] fovY:")+to_string(int(pers.fovy)));
 			gra.Print( vect2(10,16*2),string("far:")+to_string((cam.pos-cam.at).length())); 
 			gra.Print( vect2(10,16*3),string("at x=")+to_string(cam.at.x)+string("y=")+to_string(cam.at.y)+string(" z=")+to_string(cam.at.z) ); 
-			gra.Print( vect2(10,16*4),string("key=")+to_string(human_numKeyframe) + string(" cnt=")+to_string(human_keyframe.size()) ); 
+			gra.Print( vect2(10,16*4),string("key=")+to_string(numKeyframe) + string(" cnt=")+to_string((*pData->pKeyframe).size()) ); 
 			gra.Print( vect2(10,16*31),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
-
 
 			if ( !keys.ALT.on )
 			{
@@ -1527,7 +1686,7 @@ else
 							{
 								a.pmark->bSelected = true;
 //pTar3 = &a.pmark->joint;
-								for ( Joint3& j : human_tblJoint )
+								for ( Joint3& j : (*pData->pJoint) )
 								{
 									j.priority = 999;
 								}
@@ -1645,7 +1804,7 @@ else
 			for ( int i = 0 ; i < 5 ; i++ )
 			{
 				// 骨コリジョン 張力計算
-				for ( Bone3 b : human_tblBone )
+				for ( Bone3 b : (*pData->pBone) )
 				{
 					vect3 v = b.j1.pos - b.j0.pos;
 					double l = v.length() - b.length;
@@ -1677,7 +1836,7 @@ else
 				}
 
 				// 張力解消
-				for ( Joint3& a : human_tblJoint )
+				for ( Joint3& a : (*pData->pJoint) )
 				{
 					a.pos += a.tension;
 					a.tension=0;
@@ -1685,7 +1844,7 @@ else
 			}
 
 			// Human pers
-			for ( Joint3& j : human_tblJoint )
+			for ( Joint3& j : (*pData->pJoint) )
 			{
 				//	右手系座標系
 				//	右手ねじ周り
@@ -1703,7 +1862,7 @@ else
 			}
 
 			// Human 描画
-			for ( Bone3 b : human_tblBone )
+			for ( Bone3 b : (*pData->pBone) )
 			{
 				if ( b.j0.disp.z > 0 && b.j0.disp.z > 0 )
 				{
@@ -1754,83 +1913,31 @@ else
 
 #if 1
 			{
-				// キーフレームロード
-				if ( keys.CTRL.on && keys.L.hi )
-				{
-					fstream fi( "in.txt", ios::in );
-					string buf;
-					while ( getline( fi, buf ) )
-					{
-						cout << buf << endl;
-					}
-					cout << "LOADED" << endl;
-				}
-
-				// キーフレームセーブ
-				if ( keys.CTRL.on && keys.S.hi )
-				{
-					fstream fo( "out.mot", ios::out );
-
-					{
-						fo << "joint";
-						fo << "{" << endl;
-						for ( Joint3& j : human_tblJoint )	// 関節の位置
-						{
-							fo << "\t"<< j.pos.x << "\t" << j.pos.y << "\t" << j.pos.z << endl;
-						}
-						fo << "}" << endl;
-
-						fo << "bone";
-						fo << "{" << endl;
-						for ( Bone3& b : human_tblBone )	// 骨
-						{
-							b.length = (b.j1.pos - b.j0.pos).length();
-							fo  << "\t"<< b.n0 << "\t" << b.n1 << endl;
-						}
-						fo << "}" << endl;
-					}
-					{
-						int	cnt = static_cast<signed>(human_keyframe.size());
-						for ( int i = 0 ; i < cnt ; i++ )
-						{
-							fo << to_string(i);
-							fo << "{" << endl;
-							for ( int j = 0 ; j < static_cast<signed>(human_tblJoint.size()) ; j++ )
-							{
-								fo  << "\t"<< human_keyframe[ i ][ j ].x << "\t" << human_keyframe[ i ][ j ].y << "\t" << human_keyframe[ i ][ j ].z << endl;
-							}
-							fo << "}" << endl;
-						}
-					}
-					cout << "SAVED" << endl;
-				}
-
 				// キーフレーム記録
 				if ( keys.K.hi )
 				{
-					human_numKeyframe = static_cast<signed>(human_keyframe.size());
-					human_keyframe.emplace_back();
-					for ( const Joint3& j : human_tblJoint )
+					numKeyframe = static_cast<signed>((*pData->pKeyframe).size());
+					(*pData->pKeyframe).emplace_back();
+					for ( const Joint3& j : (*pData->pJoint) )
 					{
-						human_keyframe[ human_numKeyframe ].emplace_back( j.pos );
+						(*pData->pKeyframe)[ numKeyframe ].emplace_back( j.pos );
 					}
 				}
 				// キーフレーム移動
 				bool bChanged = false;
-				if ( keys.UP.rep ) 		{ human_numKeyframe++; bChanged=true; }
-				if ( keys.DOWN.rep ) 	{ human_numKeyframe--; bChanged=true; }
-				human_numKeyframe = max( human_numKeyframe, 0 );
-//				human_numKeyframe = min( human_numKeyframe, (static_cast<signed>(human_keyframe.size())-1 );
-				human_numKeyframe = min( human_numKeyframe, static_cast<signed>(human_keyframe.size())-1 );
+				if ( keys.UP.rep ) 		{ numKeyframe++; bChanged=true; }
+				if ( keys.DOWN.rep ) 	{ numKeyframe--; bChanged=true; }
+				numKeyframe = max( numKeyframe, 0 );
+//				numKeyframe = min( numKeyframe, (static_cast<signed>((*pData->pKeyframe).size())-1 );
+				numKeyframe = min( numKeyframe, static_cast<signed>((*pData->pKeyframe).size())-1 );
 
-
-				if ( bChanged )
+				if ( bChanged && numKeyframe >= 0 )
 				{
 					// キーフレーム切り替え
 					int i = 0;
-					for ( Joint3& j : human_tblJoint )
+					for ( Joint3& j : (*pData->pJoint) )
 					{
-						j.pos = human_keyframe[ human_numKeyframe ][i];
+						j.pos = (*pData->pKeyframe)[ numKeyframe ][i];
 						i++;
 					}
 				}
