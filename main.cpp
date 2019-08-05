@@ -7,6 +7,7 @@
 #include <chrono>
 #include <cmath>
 #include <functional>
+#include <fstream>
 using namespace std;
 
 #include "geom.h"
@@ -129,11 +130,13 @@ struct Apr : public Sys
 
 		struct Bone3
 		{
+			int n0;
+			int n1;
 			Joint3& j0;
 			Joint3& j1;
 			double length;
-			Bone3( Joint3& _j0, Joint3& _j1 ) :j0(_j0), j1(_j1){}
-			Bone3( Joint3&& _j0, Joint3&& _j1 ) :j0(_j0), j1(_j1){}
+			Bone3( int _n0, int _n1, Joint3& _j0, Joint3& _j1 ) :n0(_n0), n1(_n1), j0(_j0), j1(_j1){}
+			Bone3( int _n0, int _n1, Joint3&& _j0, Joint3&& _j1 ) :n0(_n0), n1(_n1), j0(_j0), j1(_j1){}
 		};
 
 	struct Marker3
@@ -641,31 +644,31 @@ struct Apr : public Sys
 			human_tblJoint.emplace_back( os*vect3( ox+20,	oy+ 40,	0 )	);//14
 			human_tblJoint.emplace_back( os*vect3( ox+20,	oy+ 80,	0 )	);//15
 
-			human_tblBone.emplace_back( human_tblJoint[0], human_tblJoint[1] );	//head
-			human_tblBone.emplace_back( human_tblJoint[1], human_tblJoint[2] );
-			human_tblBone.emplace_back( human_tblJoint[2], human_tblJoint[0] );
+			human_tblBone.emplace_back( 0,1,human_tblJoint[0], human_tblJoint[1] );	//head
+			human_tblBone.emplace_back( 1,2,human_tblJoint[1], human_tblJoint[2] );
+			human_tblBone.emplace_back( 2,0,human_tblJoint[2], human_tblJoint[0] );
 
-			human_tblBone.emplace_back( human_tblJoint[2], human_tblJoint[5] ); //chest
-			human_tblBone.emplace_back( human_tblJoint[5], human_tblJoint[3] );
-			human_tblBone.emplace_back( human_tblJoint[3], human_tblJoint[2] );
-			human_tblBone.emplace_back( human_tblJoint[2], human_tblJoint[4] );
-			human_tblBone.emplace_back( human_tblJoint[4], human_tblJoint[5] );
+			human_tblBone.emplace_back( 2,5,human_tblJoint[2], human_tblJoint[5] ); //chest
+			human_tblBone.emplace_back( 5,3,human_tblJoint[5], human_tblJoint[3] );
+			human_tblBone.emplace_back( 3,2,human_tblJoint[3], human_tblJoint[2] );
+			human_tblBone.emplace_back( 2,4,human_tblJoint[2], human_tblJoint[4] );
+			human_tblBone.emplace_back( 4,5,human_tblJoint[4], human_tblJoint[5] );
 
-			human_tblBone.emplace_back( human_tblJoint[5], human_tblJoint[7] ); //hip
-			human_tblBone.emplace_back( human_tblJoint[7], human_tblJoint[6] );
-			human_tblBone.emplace_back( human_tblJoint[6], human_tblJoint[5] );
+			human_tblBone.emplace_back( 5,7,human_tblJoint[5], human_tblJoint[7] ); //hip
+			human_tblBone.emplace_back( 7,6,human_tblJoint[7], human_tblJoint[6] );
+			human_tblBone.emplace_back( 6,5,human_tblJoint[6], human_tblJoint[5] );
 
-			human_tblBone.emplace_back( human_tblJoint[6], human_tblJoint[8] ); //leg
-			human_tblBone.emplace_back( human_tblJoint[8], human_tblJoint[9] );
+			human_tblBone.emplace_back( 6,8,human_tblJoint[6], human_tblJoint[8] ); //leg
+			human_tblBone.emplace_back( 8,9,human_tblJoint[8], human_tblJoint[9] );
 
-			human_tblBone.emplace_back( human_tblJoint[7], human_tblJoint[10] ); //leg
-			human_tblBone.emplace_back( human_tblJoint[10], human_tblJoint[11] );
+			human_tblBone.emplace_back( 7,10,human_tblJoint[7], human_tblJoint[10] ); //leg
+			human_tblBone.emplace_back( 10,11,human_tblJoint[10], human_tblJoint[11] );
 
-			human_tblBone.emplace_back( human_tblJoint[3], human_tblJoint[12] ); //arm
-			human_tblBone.emplace_back( human_tblJoint[12], human_tblJoint[13] );
+			human_tblBone.emplace_back( 3,12,human_tblJoint[3], human_tblJoint[12] ); //arm
+			human_tblBone.emplace_back( 12,13,human_tblJoint[12], human_tblJoint[13] );
 
-			human_tblBone.emplace_back( human_tblJoint[4], human_tblJoint[14] ); //arm
-			human_tblBone.emplace_back( human_tblJoint[14], human_tblJoint[15] );
+			human_tblBone.emplace_back( 4,14,human_tblJoint[4], human_tblJoint[14] ); //arm
+			human_tblBone.emplace_back( 14,15,human_tblJoint[14], human_tblJoint[15] );
 		}
 		for ( Bone3& b : human_tblBone )	// 関節の距離を決定する。
 		{
@@ -872,7 +875,8 @@ struct Apr : public Sys
 		#endif
 
 			gra.Print(vect2(10,16*1),string("Y/H fovY:")+to_string(int(pers.fovy)));
-
+			gra.Print( vect2(10,16*2),string("far:")+to_string((cam.pos-cam.at).length())); 
+			gra.Print( vect2(10,16*3),string("at x=")+to_string(cam.at.x)+string("y=")+to_string(cam.at.y)+string(" z=")+to_string(cam.at.z) ); 
 			gra.Print( vect2(10,16*4),string("key=")+to_string(human_numKeyframe) + string(" cnt=")+to_string(human_keyframe.size()) ); 
 			gra.Print( vect2(10,16*31),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 
@@ -898,8 +902,6 @@ struct Apr : public Sys
 	//				if( (cam.pos-cam.at).length() < v.length() ) cam.pos = r;
 					if( (cam.pos-cam.at).length() <= v.length() ) cam.pos = (r-cam.at).normalize()*0.00001+cam.at;
 
-					gra.Print( vect2(10,16*2),string("far:")+to_string((cam.pos-cam.at).length())); 
-					gra.Print( vect2(10,16*3),string("at x=")+to_string(cam.at.x)+string("y=")+to_string(cam.at.y)+string(" z=")+to_string(cam.at.z) ); 
 				}
 
 				// カメラ回転
@@ -1640,7 +1642,7 @@ else
 			//=================================
 			// Human
 			//=================================
-			for ( int i = 0 ; i < 50 ; i++ )
+			for ( int i = 0 ; i < 5 ; i++ )
 			{
 				// 骨コリジョン 張力計算
 				for ( Bone3 b : human_tblBone )
@@ -1651,7 +1653,7 @@ else
 
 					double w0 = 0;
 					double w1 = 0;
-/*
+#if 0
 					if ( b.j0.priority ==1 ) 
 					{
 						w0 = 0.0;
@@ -1664,19 +1666,7 @@ else
 						w1 = 0.0;
 					}
 					else
-					if ( b.j0.priority < b.j1.priority ) 
-					{
-						w0 = 0.20;
-						w1 = 0.50;
-					}
-					else
-					if ( b.j0.priority > b.j1.priority ) 
-					{
-						w0 = 0.50;
-						w1 = 0.20;
-					}
-					else
-*/
+#endif
 					{
 						w0 = 0.33;
 						w1 = 0.33;
@@ -1764,6 +1754,57 @@ else
 
 #if 1
 			{
+				// キーフレームロード
+				if ( keys.CTRL.on && keys.L.hi )
+				{
+					fstream fi( "in.txt", ios::in );
+					string buf;
+					while ( getline( fi, buf ) )
+					{
+						cout << buf << endl;
+					}
+					cout << "LOADED" << endl;
+				}
+
+				// キーフレームセーブ
+				if ( keys.CTRL.on && keys.S.hi )
+				{
+					fstream fo( "out.mot", ios::out );
+
+					{
+						fo << "joint";
+						fo << "{" << endl;
+						for ( Joint3& j : human_tblJoint )	// 関節の位置
+						{
+							fo << "\t"<< j.pos.x << "\t" << j.pos.y << "\t" << j.pos.z << endl;
+						}
+						fo << "}" << endl;
+
+						fo << "bone";
+						fo << "{" << endl;
+						for ( Bone3& b : human_tblBone )	// 骨
+						{
+							b.length = (b.j1.pos - b.j0.pos).length();
+							fo  << "\t"<< b.n0 << "\t" << b.n1 << endl;
+						}
+						fo << "}" << endl;
+					}
+					{
+						int	cnt = static_cast<signed>(human_keyframe.size());
+						for ( int i = 0 ; i < cnt ; i++ )
+						{
+							fo << to_string(i);
+							fo << "{" << endl;
+							for ( int j = 0 ; j < static_cast<signed>(human_tblJoint.size()) ; j++ )
+							{
+								fo  << "\t"<< human_keyframe[ i ][ j ].x << "\t" << human_keyframe[ i ][ j ].y << "\t" << human_keyframe[ i ][ j ].z << endl;
+							}
+							fo << "}" << endl;
+						}
+					}
+					cout << "SAVED" << endl;
+				}
+
 				// キーフレーム記録
 				if ( keys.K.hi )
 				{
