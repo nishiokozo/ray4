@@ -536,23 +536,23 @@ struct Apr : public Sys
 			Bone2( Joint2& _j0, Joint2& _j1 ) :j0(_j0), j1(_j1){}
 			Bone2( Joint2&& _j0, Joint2&& _j1 ) :j0(_j0), j1(_j1){}
 		};
-		vector<Joint2> tblJoint;
-		tblJoint.reserve(1000);
-		vector<Bone2> tblBone;
+		vector<Joint2> tblJoint_2d;
+		tblJoint_2d.reserve(1000);
+		vector<Bone2> tblBone_2d;
 		if(1)
 		{	//	対△
 			int ox=200,oy=300;
 
-			tblJoint.emplace_back( vect2( ox,oy) );
-			tblJoint.emplace_back( vect2( ox-20,oy+60) );
-			tblJoint.emplace_back( vect2( ox+20,oy+60) );
-			tblJoint.emplace_back( vect2( ox+0 ,oy+120) );
+			tblJoint_2d.emplace_back( vect2( ox,oy) );
+			tblJoint_2d.emplace_back( vect2( ox-20,oy+60) );
+			tblJoint_2d.emplace_back( vect2( ox+20,oy+60) );
+			tblJoint_2d.emplace_back( vect2( ox+0 ,oy+120) );
 
-			tblBone.emplace_back( tblJoint[0], tblJoint[1] );
-			tblBone.emplace_back( tblJoint[0], tblJoint[2] );
-			tblBone.emplace_back( tblJoint[1], tblJoint[2] );
-			tblBone.emplace_back( tblJoint[1], tblJoint[3] );
-			tblBone.emplace_back( tblJoint[2], tblJoint[3] );
+			tblBone_2d.emplace_back( tblJoint_2d[0], tblJoint_2d[1] );
+			tblBone_2d.emplace_back( tblJoint_2d[0], tblJoint_2d[2] );
+			tblBone_2d.emplace_back( tblJoint_2d[1], tblJoint_2d[2] );
+			tblBone_2d.emplace_back( tblJoint_2d[1], tblJoint_2d[3] );
+			tblBone_2d.emplace_back( tblJoint_2d[2], tblJoint_2d[3] );
 		}
 		if(0)
 		{	//	四角格子メッシュ
@@ -565,21 +565,21 @@ struct Apr : public Sys
 			{
 				for ( int y = 0 ; y < Y ; y++ )
 				{
-					tblJoint.emplace_back( vect2( x*W+ox,y*H+oy) );
+					tblJoint_2d.emplace_back( vect2( x*W+ox,y*H+oy) );
 				}
 			}
 			for ( int y=0 ; y < Y-1 ; y++ )
 			{
 				for ( int x=0 ; x < X ; x++ )
 				{
-					tblBone.emplace_back( tblJoint[x*Y+y], tblJoint[x*Y+y+1] );
+					tblBone_2d.emplace_back( tblJoint_2d[x*Y+y], tblJoint_2d[x*Y+y+1] );
 				}
 			}
 			for ( int y=0 ; y < Y ; y++ )
 			{
 				for ( int x=0 ; x < X-1 ; x++ )
 				{
-					tblBone.emplace_back( tblJoint[x*Y+y], tblJoint[(x+1)*Y+y] );
+					tblBone_2d.emplace_back( tblJoint_2d[x*Y+y], tblJoint_2d[(x+1)*Y+y] );
 				}
 			}
 		}
@@ -589,10 +589,10 @@ struct Apr : public Sys
 			{ 
 				if ( n > 0 )
 				{
-					int ix = static_cast<signed>(tblJoint.size());
-					tblJoint.emplace_back( vect2( (tblJoint[v0].pos + tblJoint[v1].pos )/2 ) );
-					tblJoint.emplace_back( vect2( (tblJoint[v1].pos + tblJoint[v2].pos )/2 ) );
-					tblJoint.emplace_back( vect2( (tblJoint[v2].pos + tblJoint[v0].pos )/2 ) );
+					int ix = static_cast<signed>(tblJoint_2d.size());
+					tblJoint_2d.emplace_back( vect2( (tblJoint_2d[v0].pos + tblJoint_2d[v1].pos )/2 ) );
+					tblJoint_2d.emplace_back( vect2( (tblJoint_2d[v1].pos + tblJoint_2d[v2].pos )/2 ) );
+					tblJoint_2d.emplace_back( vect2( (tblJoint_2d[v2].pos + tblJoint_2d[v0].pos )/2 ) );
 					
 					func( v0, ix+0, ix+2, n-1 );
 					func( v1, ix+1, ix+0, n-1 );
@@ -600,120 +600,106 @@ struct Apr : public Sys
 				}
 				else
 				{
-					tblBone.emplace_back( tblJoint[v0], tblJoint[v1] );
-					tblBone.emplace_back( tblJoint[v1], tblJoint[v2] );
-					tblBone.emplace_back( tblJoint[v2], tblJoint[v0] );
+					tblBone_2d.emplace_back( tblJoint_2d[v0], tblJoint_2d[v1] );
+					tblBone_2d.emplace_back( tblJoint_2d[v1], tblJoint_2d[v2] );
+					tblBone_2d.emplace_back( tblJoint_2d[v2], tblJoint_2d[v0] );
 				}
 			};
 
 			double R=80;
-			tblJoint.emplace_back( vect2(200+0, 500-R*tan(rad(60))	-R*tan(rad(30)) ));
-			tblJoint.emplace_back( vect2(200-R, 500+  	    	   	-R*tan(rad(30))) );
-			tblJoint.emplace_back( vect2(200+R, 500+  				-R*tan(rad(30))) );
+			tblJoint_2d.emplace_back( vect2(200+0, 500-R*tan(rad(60))	-R*tan(rad(30)) ));
+			tblJoint_2d.emplace_back( vect2(200-R, 500+  	    	   	-R*tan(rad(30))) );
+			tblJoint_2d.emplace_back( vect2(200+R, 500+  				-R*tan(rad(30))) );
 
 			func( 0, 1, 2, 3 );
-			cout << tblJoint.size() << endl;
+			cout << tblJoint_2d.size() << endl;
 		}
-		for ( Bone2& b : tblBone )
+		for ( Bone2& b : tblBone_2d )
 		{
 			b.length = (b.j1.pos - b.j0.pos).length();
 		}
-		for ( Joint2& j : tblJoint )	//マーカー対象に位置を登録
+		for ( Joint2& j : tblJoint_2d )	//マーカー対象に位置を登録
 		{
 			mc.tblMarker2.emplace_back( gra, figCircle, j.pos, rad(-90) );
 		}
 
 		//人
 
-		vector<Joint3> human_tblJoint;
-		vector<Bone3> human_tblBone;
-		vector<vector<vect3>> human_keyframe;
+		struct Data
+		{
+			vector<Joint3>			tblJoint;
+			vector<Bone3>			tblBone;
+			vector<vector<vect3>>	tblKeyframe;
+		};
+
+		Data* pHuman = new Data;
+
 		{	//	人
 			double ox=0,oy=-160,os=0.01;
 
-			human_tblJoint.emplace_back( os*vect3( ox-10,	oy- 20,	0 )	);//0
-			human_tblJoint.emplace_back( os*vect3( ox+10,	oy- 20,	0 )	);//1
-			human_tblJoint.emplace_back( os*vect3( ox+ 0,	oy+  0,	0 )	);//2
-			human_tblJoint.emplace_back( os*vect3( ox-20,	oy+  0,	0 )	);//3
-			human_tblJoint.emplace_back( os*vect3( ox+20,	oy+  0,	0 )	);//4
-			human_tblJoint.emplace_back( os*vect3( ox+ 0,	oy+ 40,	0 )	);//5
-			human_tblJoint.emplace_back( os*vect3( ox-15,	oy+ 70,	0 )	);//6
-			human_tblJoint.emplace_back( os*vect3( ox+15,	oy+ 70,	0 )	);//7
-			human_tblJoint.emplace_back( os*vect3( ox-15,	oy+115,	0 )	);//8
-			human_tblJoint.emplace_back( os*vect3( ox-15,	oy+160,	0 )	);//9
-			human_tblJoint.emplace_back( os*vect3( ox+15,	oy+115,	0 )	);//10
-			human_tblJoint.emplace_back( os*vect3( ox+15,	oy+160,	0 )	);//11
-			human_tblJoint.emplace_back( os*vect3( ox-20,	oy+ 40,	0 )	);//12
-			human_tblJoint.emplace_back( os*vect3( ox-20,	oy+ 80,	0 )	);//13
-			human_tblJoint.emplace_back( os*vect3( ox+20,	oy+ 40,	0 )	);//14
-			human_tblJoint.emplace_back( os*vect3( ox+20,	oy+ 80,	0 )	);//15
+			pHuman->tblJoint.emplace_back( os*vect3( ox-10,	oy- 20,	0 )	);//0
+			pHuman->tblJoint.emplace_back( os*vect3( ox+10,	oy- 20,	0 )	);//1
+			pHuman->tblJoint.emplace_back( os*vect3( ox+ 0,	oy+  0,	0 )	);//2
+			pHuman->tblJoint.emplace_back( os*vect3( ox-20,	oy+  0,	0 )	);//3
+			pHuman->tblJoint.emplace_back( os*vect3( ox+20,	oy+  0,	0 )	);//4
+			pHuman->tblJoint.emplace_back( os*vect3( ox+ 0,	oy+ 40,	0 )	);//5
+			pHuman->tblJoint.emplace_back( os*vect3( ox-15,	oy+ 70,	0 )	);//6
+			pHuman->tblJoint.emplace_back( os*vect3( ox+15,	oy+ 70,	0 )	);//7
+			pHuman->tblJoint.emplace_back( os*vect3( ox-15,	oy+115,	0 )	);//8
+			pHuman->tblJoint.emplace_back( os*vect3( ox-15,	oy+160,	0 )	);//9
+			pHuman->tblJoint.emplace_back( os*vect3( ox+15,	oy+115,	0 )	);//10
+			pHuman->tblJoint.emplace_back( os*vect3( ox+15,	oy+160,	0 )	);//11
+			pHuman->tblJoint.emplace_back( os*vect3( ox-20,	oy+ 40,	0 )	);//12
+			pHuman->tblJoint.emplace_back( os*vect3( ox-20,	oy+ 80,	0 )	);//13
+			pHuman->tblJoint.emplace_back( os*vect3( ox+20,	oy+ 40,	0 )	);//14
+			pHuman->tblJoint.emplace_back( os*vect3( ox+20,	oy+ 80,	0 )	);//15
 
-		 	human_tblBone.emplace_back( human_tblJoint, 0, 1 );	//head
-			human_tblBone.emplace_back( human_tblJoint, 1, 2 );
-			human_tblBone.emplace_back( human_tblJoint, 2, 0 );
-			human_tblBone.emplace_back( human_tblJoint, 2, 5 ); //chest
-			human_tblBone.emplace_back( human_tblJoint, 5, 3 );
-			human_tblBone.emplace_back( human_tblJoint, 3, 2 );
-			human_tblBone.emplace_back( human_tblJoint, 2, 4 );
-			human_tblBone.emplace_back( human_tblJoint, 4, 5 );
-			human_tblBone.emplace_back( human_tblJoint, 5, 7 ); //hip
-			human_tblBone.emplace_back( human_tblJoint, 7, 6 );
-			human_tblBone.emplace_back( human_tblJoint, 6, 5 );
-			human_tblBone.emplace_back( human_tblJoint, 6, 8 ); //leg
-			human_tblBone.emplace_back( human_tblJoint, 8, 9 );
-			human_tblBone.emplace_back( human_tblJoint, 7,10 ); //leg
-			human_tblBone.emplace_back( human_tblJoint,10,11 );
-			human_tblBone.emplace_back( human_tblJoint, 3,12 ); //arm
-			human_tblBone.emplace_back( human_tblJoint,12,13 );
-			human_tblBone.emplace_back( human_tblJoint, 4,14 ); //arm
-			human_tblBone.emplace_back( human_tblJoint,14,15 );
+		 	pHuman->tblBone.emplace_back( pHuman->tblJoint, 0, 1 );	//head
+			pHuman->tblBone.emplace_back( pHuman->tblJoint, 1, 2 );
+			pHuman->tblBone.emplace_back( pHuman->tblJoint, 2, 0 );
+			pHuman->tblBone.emplace_back( pHuman->tblJoint, 2, 5 ); //chest
+			pHuman->tblBone.emplace_back( pHuman->tblJoint, 5, 3 );
+			pHuman->tblBone.emplace_back( pHuman->tblJoint, 3, 2 );
+			pHuman->tblBone.emplace_back( pHuman->tblJoint, 2, 4 );
+			pHuman->tblBone.emplace_back( pHuman->tblJoint, 4, 5 );
+			pHuman->tblBone.emplace_back( pHuman->tblJoint, 5, 7 ); //hip
+			pHuman->tblBone.emplace_back( pHuman->tblJoint, 7, 6 );
+			pHuman->tblBone.emplace_back( pHuman->tblJoint, 6, 5 );
+			pHuman->tblBone.emplace_back( pHuman->tblJoint, 6, 8 ); //leg
+			pHuman->tblBone.emplace_back( pHuman->tblJoint, 8, 9 );
+			pHuman->tblBone.emplace_back( pHuman->tblJoint, 7,10 ); //leg
+			pHuman->tblBone.emplace_back( pHuman->tblJoint,10,11 );
+			pHuman->tblBone.emplace_back( pHuman->tblJoint, 3,12 ); //arm
+			pHuman->tblBone.emplace_back( pHuman->tblJoint,12,13 );
+			pHuman->tblBone.emplace_back( pHuman->tblJoint, 4,14 ); //arm
+			pHuman->tblBone.emplace_back( pHuman->tblJoint,14,15 );
 		}
-		for ( Bone3& b : human_tblBone )	// 関節の距離を決定する。
+		for ( Bone3& b : pHuman->tblBone )	// 関節の距離を決定する。
 		{
 			b.length = (b.j1.pos - b.j0.pos).length();
 		}
 		{
 			int cnt = 0 ;
-			for ( Joint3& j : human_tblJoint )
+			for ( Joint3& j : pHuman->tblJoint )
 			{
 				j.id = cnt++;				//id登録
 			}
 		}
-		for ( Bone3& b : human_tblBone )	// ジョイントに関節の距離を決定する。
+		for ( Bone3& b : pHuman->tblBone )	// ジョイントに関節の距離を決定する。
 		{
 			b.j1.relative.emplace_back( b.j0 ); 
 			b.j0.relative.emplace_back( b.j1 ); 
 		}
 
-		for ( Joint3& j : human_tblJoint )	//マーカー登録
+		for ( Joint3& j : pHuman->tblJoint )	//マーカー登録
 		{
 			mc.tblMarker3.emplace_back( gra, figCircle, j, rad(-90) );
 		}
 
 
-
-		struct Data
-		{
-			vector<Joint3>*			pJoint;
-			vector<Bone3>*			pBone;
-			vector<vector<vect3>>*	pKeyframe;
-		};
 		
-		Data* pData = new Data;
+		Data* pData = pHuman;
 
-		pData->pJoint		= &human_tblJoint;
-		pData->pBone		= &human_tblBone;
-		pData->pKeyframe	= &human_keyframe;
-
-
-
-		// 人
-		struct
-		{
-			vect3 rot = vect3(0,0,0);
-			vect3 pos = vect3(-2,0.0,0);
-		} human;
-		
 
 
 		// 箱
@@ -884,9 +870,9 @@ struct Apr : public Sys
 				if ( keys.L.hi )
 				{
 					Data*	pNew = new Data;
-					pNew->pJoint = new vector<Joint3>;
-					pNew->pBone = new vector<Bone3>;
-					pNew->pKeyframe = new vector<vector<vect3>>;
+//					pNew->tblJoint = new vector<Joint3>;
+//					pNew->tblBone = new vector<Bone3>;
+//					pNew->tblKeyframe = new vector<vector<vect3>>;
 				
 					fstream fi( "human.mot", ios::in );
 					string buf;
@@ -921,35 +907,35 @@ struct Apr : public Sys
 						if ( string(buf) == "motion" )	
 						{
 							mode = ModeMotion;	
-							(*pNew->pKeyframe).emplace_back();
+							pNew->tblKeyframe.emplace_back();
 							continue;
 						}
 						if ( string(buf) == "," ) 
 						{
-							(*pNew->pKeyframe).emplace_back();
+							pNew->tblKeyframe.emplace_back();
 							continue;
 						}
 						if ( string(buf) == "end" )	
 						{	
-							for ( Bone3& b : (*pNew->pBone) )	// 関節の距離を決定する。
+							for ( Bone3& b : pNew->tblBone )	// 関節の距離を決定する。
 							{
 								b.length = (b.j1.pos - b.j0.pos).length();
 							}
 							{
 								int cnt = 0 ;
-								for ( Joint3& j : (*pNew->pJoint) )
+								for ( Joint3& j : pNew->tblJoint )
 								{
 									j.id = cnt++;				//id登録
 								}
 							}
-							for ( Bone3& b : (*pNew->pBone) )	// ジョイントに関節の距離を決定する。
+							for ( Bone3& b : pNew->tblBone )	// ジョイントに関節の距離を決定する。
 							{
 								b.j1.relative.emplace_back( b.j0 ); 
 								b.j0.relative.emplace_back( b.j1 ); 
 							}
 							//マーカー削除＆登録
 							mc.tblMarker3.clear();
-							for ( Joint3& j : (*pNew->pJoint) )	//マーカー登録
+							for ( Joint3& j : pNew->tblJoint )	//マーカー登録
 							{
 								mc.tblMarker3.emplace_back( gra, figCircle, j, rad(-90) );
 							}
@@ -965,7 +951,7 @@ struct Apr : public Sys
 									double x = stod(v[0]);
 									double y = stod(v[1]);
 									double z = stod(v[2]);
-									(*pNew->pJoint).emplace_back( vect3(x,y,z) );
+									pNew->tblJoint.emplace_back( vect3(x,y,z) );
 									//	cout << x << "," << y << "," << z << endl; 
 								}
 								break;
@@ -974,7 +960,7 @@ struct Apr : public Sys
 									vector<string> v = split( buf, '\t');
 									int n0 = stoi(v[0]);
 									int n1 = stoi(v[1]);
-									(*pNew->pBone).emplace_back( (*pNew->pJoint), n0, n1 );
+									pNew->tblBone.emplace_back( pNew->tblJoint, n0, n1 );
 									//	cout << x << "," << y << "," << z << endl; 
 								}
 								break;
@@ -984,7 +970,7 @@ struct Apr : public Sys
 									double x = stod(v[0]);
 									double y = stod(v[1]);
 									double z = stod(v[2]);
-									(*pNew->pKeyframe)[ (*pNew->pKeyframe).size()-1 ].emplace_back( x,y,z );
+									pNew->tblKeyframe[ pNew->tblKeyframe.size()-1 ].emplace_back( x,y,z );
 									//	cout << x << "," << y << "," << z << endl; 
 								}
 								break;
@@ -1003,13 +989,13 @@ struct Apr : public Sys
 
 					{
 						fo << "joint" << endl;
-						for ( Joint3& j : (*pData->pJoint) )	// 関節の位置
+						for ( Joint3& j : pData->tblJoint )	// 関節の位置
 						{
 							fo << "\t"<< j.pos.x << "\t" << j.pos.y << "\t" << j.pos.z << endl;
 						}
 
 						fo << "bone" << endl;
-						for ( Bone3& b : (*pData->pBone) )	// 骨
+						for ( Bone3& b : pData->tblBone )	// 骨
 						{
 							b.length = (b.j1.pos - b.j0.pos).length();
 							fo  << "\t"<< b.n0 << "\t" << b.n1 << endl;
@@ -1017,13 +1003,13 @@ struct Apr : public Sys
 					}
 					{
 						fo << "motion" << endl;
-						int	cnt = static_cast<signed>((*pData->pKeyframe).size());
+						int	cnt = static_cast<signed>(pData->tblKeyframe.size());
 						for ( int i = 0 ; i < cnt ; i++ )
 						{
 //							fo << to_string(i)  << endl;
-							for ( int j = 0 ; j < static_cast<signed>((*pData->pJoint).size()) ; j++ )
+							for ( int j = 0 ; j < static_cast<signed>(pData->tblJoint.size()) ; j++ )
 							{
-								fo  << "\t"<< (*pData->pKeyframe)[ i ][ j ].x << "\t" << (*pData->pKeyframe)[ i ][ j ].y << "\t" << (*pData->pKeyframe)[ i ][ j ].z << endl;
+								fo  << "\t"<< pData->tblKeyframe[ i ][ j ].x << "\t" << pData->tblKeyframe[ i ][ j ].y << "\t" << pData->tblKeyframe[ i ][ j ].z << endl;
 							}
 							if( i+1 < cnt ) fo << "," << endl;
 						}
@@ -1037,7 +1023,7 @@ struct Apr : public Sys
 			gra.Print(vect2(10,16*1),string("[Y]/[H] fovY:")+to_string(int(pers.fovy)));
 			gra.Print( vect2(10,16*2),string("far:")+to_string((cam.pos-cam.at).length())); 
 			gra.Print( vect2(10,16*3),string("at x=")+to_string(cam.at.x)+string("y=")+to_string(cam.at.y)+string(" z=")+to_string(cam.at.z) ); 
-			gra.Print( vect2(10,16*4),string("key=")+to_string(numKeyframe) + string(" cnt=")+to_string((*pData->pKeyframe).size()) ); 
+			gra.Print( vect2(10,16*4),string("key=")+to_string(numKeyframe) + string(" cnt=")+to_string(pData->tblKeyframe.size()) ); 
 			gra.Print( vect2(10,16*31),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 
 			if ( !keys.ALT.on )
@@ -1518,20 +1504,20 @@ struct Apr : public Sys
 			// マーカー操作	
 			mc.funcMarkerController2( figCircle, mouse, keys, gra );
 
-Joint2& tar = tblJoint[0];
+Joint2& tar = tblJoint_2d[0];
 tar.pos = gv1;
 
 			//=================================
 			// 2D骨力
 			//=================================
 			// 慣性移動
-			for ( Joint2& a : tblJoint )
+			for ( Joint2& a : tblJoint_2d )
 			{
 //				a.pos += a.accell;
 //				a.accell*=0.90;
 			}
 
-			for ( Joint2& j : tblJoint )
+			for ( Joint2& j : tblJoint_2d )
 			{
 //				j.mov = ( j.pos - j.prev );
 			}
@@ -1539,7 +1525,7 @@ tar.pos = gv1;
 			for ( int i = 0 ; i < 1 ; i++ )
 			{
 				// 骨コリジョン 張力計算
-				for ( Bone2 b : tblBone )
+				for ( Bone2 b : tblBone_2d )
 				{
 					vect2 v = b.j1.pos - b.j0.pos;
 					double l = v.length() - b.length;
@@ -1565,7 +1551,7 @@ else
 				}
 
 				// 張力解消
-				for ( Joint2& a : tblJoint )
+				for ( Joint2& a : tblJoint_2d )
 				{
 					a.pos += a.tension;
 					//a.accell += a.tension;
@@ -1574,13 +1560,13 @@ else
 			}
 
 			// 保管	
-			for ( Joint2& a : tblJoint )
+			for ( Joint2& a : tblJoint_2d )
 			{
 //				a.prev = a.pos;
 			}
 
 			// 骨描画
-			for ( Bone2 b : tblBone )
+			for ( Bone2 b : tblBone_2d )
 			{
 				vect2 v0 = b.j0.pos;
 				vect2 v1 = b.j1.pos;
@@ -1686,7 +1672,7 @@ else
 							{
 								a.pmark->bSelected = true;
 //pTar3 = &a.pmark->joint;
-								for ( Joint3& j : (*pData->pJoint) )
+								for ( Joint3& j : pData->tblJoint )
 								{
 									j.priority = 999;
 								}
@@ -1804,7 +1790,7 @@ else
 			for ( int i = 0 ; i < 5 ; i++ )
 			{
 				// 骨コリジョン 張力計算
-				for ( Bone3 b : (*pData->pBone) )
+				for ( Bone3 b : pData->tblBone )
 				{
 					vect3 v = b.j1.pos - b.j0.pos;
 					double l = v.length() - b.length;
@@ -1836,7 +1822,7 @@ else
 				}
 
 				// 張力解消
-				for ( Joint3& a : (*pData->pJoint) )
+				for ( Joint3& a : pData->tblJoint )
 				{
 					a.pos += a.tension;
 					a.tension=0;
@@ -1844,7 +1830,7 @@ else
 			}
 
 			// Human pers
-			for ( Joint3& j : (*pData->pJoint) )
+			for ( Joint3& j : pData->tblJoint )
 			{
 				//	右手系座標系
 				//	右手ねじ周り
@@ -1862,7 +1848,7 @@ else
 			}
 
 			// Human 描画
-			for ( Bone3 b : (*pData->pBone) )
+			for ( Bone3 b : pData->tblBone )
 			{
 				if ( b.j0.disp.z > 0 && b.j0.disp.z > 0 )
 				{
@@ -1916,11 +1902,11 @@ else
 				// キーフレーム記録
 				if ( keys.K.hi )
 				{
-					numKeyframe = static_cast<signed>((*pData->pKeyframe).size());
-					(*pData->pKeyframe).emplace_back();
-					for ( const Joint3& j : (*pData->pJoint) )
+					numKeyframe = static_cast<signed>(pData->tblKeyframe.size());
+					pData->tblKeyframe.emplace_back();
+					for ( const Joint3& j : pData->tblJoint )
 					{
-						(*pData->pKeyframe)[ numKeyframe ].emplace_back( j.pos );
+						pData->tblKeyframe[ numKeyframe ].emplace_back( j.pos );
 					}
 				}
 				// キーフレーム移動
@@ -1928,16 +1914,16 @@ else
 				if ( keys.UP.rep ) 		{ numKeyframe++; bChanged=true; }
 				if ( keys.DOWN.rep ) 	{ numKeyframe--; bChanged=true; }
 				numKeyframe = max( numKeyframe, 0 );
-//				numKeyframe = min( numKeyframe, (static_cast<signed>((*pData->pKeyframe).size())-1 );
-				numKeyframe = min( numKeyframe, static_cast<signed>((*pData->pKeyframe).size())-1 );
+//				numKeyframe = min( numKeyframe, (static_cast<signed>(pData->tblKeyframe.size())-1 );
+				numKeyframe = min( numKeyframe, static_cast<signed>(pData->tblKeyframe.size())-1 );
 
 				if ( bChanged && numKeyframe >= 0 )
 				{
 					// キーフレーム切り替え
 					int i = 0;
-					for ( Joint3& j : (*pData->pJoint) )
+					for ( Joint3& j : pData->tblJoint )
 					{
-						j.pos = (*pData->pKeyframe)[ numKeyframe ][i];
+						j.pos = pData->tblKeyframe[ numKeyframe ][i];
 						i++;
 					}
 				}
