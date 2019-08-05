@@ -875,7 +875,7 @@ struct Apr : public Sys
 			// マウスホイールZOOM
 			{
 				double l = (cam.pos-cam.at).length()/10;
-					l=max(l,0.00001);
+					l=max(l,0.01);
 					l=min(l,8);
 
 				double step = -mouse.wheel/25;
@@ -895,7 +895,7 @@ struct Apr : public Sys
 			}
 
 			gra.Print( vect2(10,16*4),string("key=")+to_string(human_numKeyframe) + string(" cnt=")+to_string(human_keyframe.size()) ); 
-			gra.Print( vect2(10,16*29),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
+			gra.Print( vect2(10,16*31),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 
 
 			if ( !keys.ALT.on )
@@ -928,7 +928,7 @@ struct Apr : public Sys
 				if ( mouse.L.on )
 				{
 					double l = (cam.pos-cam.at).length()/10;
-					l=max(l,0.00001);
+					l=max(l,0.01);
 					l=min(l,8);
 //					if ( l < 0.05 ) l = 0.05;
 //					if ( l > 4 ) l = 4.0;
@@ -1651,7 +1651,7 @@ if ( pTar3 ) gra.Circle( pTar3->readonly_disp2, 10, rgb(1,1,1 ));
 						w1 = 0.0;
 					}
 					else
-					if ( b.j0.priority < b.j1.priority ) 
+/*					if ( b.j0.priority < b.j1.priority ) 
 					{
 						w0 = 0.20;
 						w1 = 0.50;
@@ -1663,6 +1663,7 @@ if ( pTar3 ) gra.Circle( pTar3->readonly_disp2, 10, rgb(1,1,1 ));
 						w1 = 0.20;
 					}
 					else
+*/
 					{
 						w0 = 0.33;
 						w1 = 0.33;
