@@ -872,27 +872,6 @@ struct Apr : public Sys
 		#endif
 
 			gra.Print(vect2(10,16*1),string("Y/H fovY:")+to_string(int(pers.fovy)));
-			// マウスホイールZOOM
-			{
-				double l = (cam.pos-cam.at).length()/10;
-					l=max(l,0.01);
-					l=min(l,8);
-
-				double step = -mouse.wheel/25;
-
-				vect3	v= vect3(0,0,step*l);
-				mat44 mrot = cam.mat;
-				mrot.SetTranslate(vect3(0,0,0));
-				v = v* mrot;
-
-				vect3 r = cam.pos;
-				cam.pos += v;
-//				if( (cam.pos-cam.at).length() < v.length() ) cam.pos = r;
-				if( (cam.pos-cam.at).length() <= v.length() ) cam.pos = (r-cam.at).normalize()*0.00001+cam.at;
-
-				gra.Print( vect2(10,16*2),string("far:")+to_string((cam.pos-cam.at).length())); 
-				gra.Print( vect2(10,16*3),string("at x=")+to_string(cam.at.x)+string("y=")+to_string(cam.at.y)+string(" z=")+to_string(cam.at.z) ); 
-			}
 
 			gra.Print( vect2(10,16*4),string("key=")+to_string(human_numKeyframe) + string(" cnt=")+to_string(human_keyframe.size()) ); 
 			gra.Print( vect2(10,16*31),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
@@ -901,13 +880,34 @@ struct Apr : public Sys
 			if ( !keys.ALT.on )
 			{
 
+				// マウスホイールZOOM
+				{
+					double l = (cam.pos-cam.at).length()/10;
+						l=max(l,0.01);
+						l=min(l,8);
+
+					double step = -mouse.wheel/25;
+
+					vect3	v= vect3(0,0,step*l);
+					mat44 mrot = cam.mat;
+					mrot.SetTranslate(vect3(0,0,0));
+					v = v* mrot;
+
+					vect3 r = cam.pos;
+					cam.pos += v;
+	//				if( (cam.pos-cam.at).length() < v.length() ) cam.pos = r;
+					if( (cam.pos-cam.at).length() <= v.length() ) cam.pos = (r-cam.at).normalize()*0.00001+cam.at;
+
+					gra.Print( vect2(10,16*2),string("far:")+to_string((cam.pos-cam.at).length())); 
+					gra.Print( vect2(10,16*3),string("at x=")+to_string(cam.at.x)+string("y=")+to_string(cam.at.y)+string(" z=")+to_string(cam.at.z) ); 
+				}
+
+				// カメラ回転
 				if ( mouse.R.on )
 				{
 					double l = (cam.pos-cam.at).length()/10;
 					l=max(l,0.00001);
 					l=min(l,8);
-//					if ( l < 0.05 ) l = 0.05;
-//					if ( l > 4 ) l = 4.0;
 
 					// 回転
 					vect3	v= vect3(-mouse.mov.x/28,-mouse.mov.y/28,0) * l;
@@ -917,11 +917,25 @@ struct Apr : public Sys
 
 					cam.pos += v;
 				}
+
+				// カメラ平行移動
+				if ( mouse.M.on )
+				{
+					double l = (cam.pos-cam.at).length()/10;
+					if ( l < 0.4 ) l = 0.4;
+					if ( l > 4 ) l = 4.0;
+
+					vect3	v= vect3(-mouse.mov.x/80,-mouse.mov.y/80,0)*l;
+					mat44 mrot = cam.mat;
+					mrot.SetTranslate(vect3(0,0,0));
+					v = v* mrot;
+
+					cam.at += v;
+					cam.pos += v;
+				}
+	
 			}
-
-
 			// カメラ移動
-
 			if ( keys.ALT.on )
 			{
 
@@ -930,8 +944,6 @@ struct Apr : public Sys
 					double l = (cam.pos-cam.at).length()/10;
 					l=max(l,0.01);
 					l=min(l,8);
-//					if ( l < 0.05 ) l = 0.05;
-//					if ( l > 4 ) l = 4.0;
 
 					// 回転
 					vect3	v= vect3(-mouse.mov.x/28,-mouse.mov.y/28,0) * l;
@@ -1422,7 +1434,7 @@ else
 			//-----------------------------------------------------------------
 			// 3Dマーカー入力
 			//-----------------------------------------------------------------
-static Joint3* pTar3 = 0;
+//static Joint3* pTar3 = 0;
 
 //			mc.funcMarkerController3( figCircle, mouse, keys, gra );
 			if  ( !keys.ALT.on ) 
@@ -1512,7 +1524,7 @@ static Joint3* pTar3 = 0;
 							else
 							{
 								a.pmark->bSelected = true;
-pTar3 = &a.pmark->joint;
+//pTar3 = &a.pmark->joint;
 								for ( Joint3& j : human_tblJoint )
 								{
 									j.priority = 999;
@@ -1624,11 +1636,11 @@ pTar3 = &a.pmark->joint;
 
 			}
 
-if ( pTar3 ) gra.Circle( pTar3->readonly_disp2, 10, rgb(1,1,1 ));
+//if ( pTar3 ) gra.Circle( pTar3->readonly_disp2, 10, rgb(1,1,1 ));
 			//=================================
 			// Human
 			//=================================
-			for ( int i = 0 ; i < 1 ; i++ )
+			for ( int i = 0 ; i < 50 ; i++ )
 			{
 				// 骨コリジョン 張力計算
 				for ( Bone3 b : human_tblBone )
@@ -1639,6 +1651,7 @@ if ( pTar3 ) gra.Circle( pTar3->readonly_disp2, 10, rgb(1,1,1 ));
 
 					double w0 = 0;
 					double w1 = 0;
+/*
 					if ( b.j0.priority ==1 ) 
 					{
 						w0 = 0.0;
@@ -1651,7 +1664,7 @@ if ( pTar3 ) gra.Circle( pTar3->readonly_disp2, 10, rgb(1,1,1 ));
 						w1 = 0.0;
 					}
 					else
-/*					if ( b.j0.priority < b.j1.priority ) 
+					if ( b.j0.priority < b.j1.priority ) 
 					{
 						w0 = 0.20;
 						w1 = 0.50;
@@ -1716,7 +1729,7 @@ if ( pTar3 ) gra.Circle( pTar3->readonly_disp2, 10, rgb(1,1,1 ));
 			//mc.funcMarkerDraw3();
 			{
 				int		cntAve=0;
-				vect3	posAve=0;
+				vect2	posAve=0;
 				for ( Marker3 m : mc.tblMarker3 )
 				{
 						//m.draw();
@@ -1731,7 +1744,7 @@ if ( pTar3 ) gra.Circle( pTar3->readonly_disp2, 10, rgb(1,1,1 ));
 					{
 						col = m.colSelected;
 						cntAve++;
-						posAve += m.joint.pos;
+						posAve +=  m.joint.readonly_disp2;
 					}
 					gra.Circle( m.joint.readonly_disp2, 7, col );
 //					gra.Print( m.joint.readonly_disp2+vect2(10,0), to_string(m.joint.priority) );
@@ -1739,10 +1752,10 @@ if ( pTar3 ) gra.Circle( pTar3->readonly_disp2, 10, rgb(1,1,1 ));
 		
 				}
 
-						posAve /= cntAve;;
-
-				if ( cntAve )
+				if ( cntAve >= 2 )
 				{
+					posAve /= cntAve;
+					//gra.Circle( posAve, 10, rgb(0,1,0));
 
 				}
 				
