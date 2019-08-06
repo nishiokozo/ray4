@@ -384,7 +384,6 @@ struct Apr : public Sys
 
 	} mc;
 
-	int numKeyframe = 0;
 	struct Data
 	{
 		vector<Joint3>			tblJoint;
@@ -392,11 +391,21 @@ struct Apr : public Sys
 
 		struct Frame
 		{
-			vector<vect3>	frame;
+			vector<vect3>	pos;
 		};
 		vector<Frame>	tblFrame;
 
-//		vector<vector<vect3>>	tblKeyFrame;
+		int	numKeyframe = 0;	//	キーフレームカーソル位置
+
+		struct
+		{
+			double	t = 0;
+			double	dt = 0;
+			int n = 0;
+			bool	bForward = true;
+			bool	bPlaying = false;
+		} anim;
+
 	};
 
 	Figure figCircle=Figure(gra);
@@ -496,29 +505,100 @@ struct Apr : public Sys
 	};
 	Pers pers;
 
+	// カトマル曲線3D
+	//------------------------------------------------------------------------------
+	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vect3 P2, const vect3 P3 )
+	//------------------------------------------------------------------------------
+	{
+		//catmull-Rom 曲線
+		// P(t)=P1*(2t^3-3t^2+1)+m0*(t^3-2t^2+t)+P2*(-2t^3+3t^2)+m1*(t^3-t^2)
+		// m0=(P2-P0)/2
+		// m1=(P3-P1)/2
+
+		vect3 m0 = (P2-P0)/2.0;
+		vect3 m1 = (P3-P1)/2.0;
+		vect3 P =  P1*(  2*t*t*t - 3*t*t +1) + m0*( t*t*t -2*t*t +t )
+				 + P2*( -2*t*t*t + 3*t*t   ) + m1*( t*t*t - t*t );
+
+		return P;
+	};
+
 	//------------------------------------------------------------------------------
 	void bone_Play( Data& data )
 	//------------------------------------------------------------------------------
 	{
-		
+		if(static_cast<signed>(data.tblFrame.size())<4) return;
+
+		int n0 = data.anim.n-1;
+		int n1 = data.anim.n;
+		int n2 = data.anim.n+1;
+		int n3 = data.anim.n+2;
+		if ( n0<0 ) n0 = 0;
+		if ( n3>=static_cast<signed>(data.tblFrame.size()) ) n3 =n2;
+
+		for ( int j = 0 ; j < static_cast<signed>(data.tblFrame[0].pos.size()) ; j++ )
+		{
+			vect3 P0 = data.tblFrame[ n0 ].pos[j];
+			vect3 P1 = data.tblFrame[ n1 ].pos[j];
+			vect3 P2 = data.tblFrame[ n2 ].pos[j];
+			vect3 P3 = data.tblFrame[ n3 ].pos[j];
+			vect3 b = catmull3d_func(data.anim.t, P0,P1,P2,P3 );
+
+			data.tblJoint[j].pos = b;
+
+//			vect3 v0 = pers.calcPoint( b * cam.mat.invers() );
+//			if ( v0.z > 0 )
+//			{ 
+//				gra.Circle( vect2(v0.x,v0.y), 5, rgb(1,0,0));
+//			}
+		}
+
+		if ( data.anim.bForward ) data.anim.t+=data.anim.dt; else data.anim.t-=data.anim.dt;
+
+
+		if ( data.anim.t >= 1.0 ) 
+		{
+			if ( data.anim.n+1 < static_cast<signed>(data.tblFrame.size())-1 )
+			{
+				data.anim.t = 0;
+				data.anim.n+=1;
+			}
+			else
+			{
+				data.anim.t = 1.0;
+				data.anim.bForward = !data.anim.bForward;
+			}
+		}
+		else
+		if ( data.anim.t <= 0.0 ) 
+		{
+			if ( data.anim.n >= 1 )
+			{
+				data.anim.t = 1.0;
+				data.anim.n-=1;
+			}
+			else
+			{
+				data.anim.t = 0.0;
+				data.anim.bForward = !data.anim.bForward;
+			}
+		}
 	}
 	
 	//------------------------------------------------------------------------------
 	void bone_ChangeKeyframeDown( Data& data )
 	//------------------------------------------------------------------------------
 	{
-		numKeyframe--;
-		if ( numKeyframe < 0 ) numKeyframe = static_cast<signed>(data.tblFrame.size())-1;
-//		numKeyframe = max( numKeyframe, 0 );
-//		numKeyframe = min( numKeyframe, static_cast<signed>(data.tblFrame.size())-1 );
+		data.numKeyframe--;
+		if ( data.numKeyframe < 0 ) data.numKeyframe = static_cast<signed>(data.tblFrame.size())-1;
 
-		if ( numKeyframe >= 0 )
+		if ( data.numKeyframe >= 0 )
 		{
 			// キーフレーム切り替え
 			int i = 0;
 			for ( Joint3& j : data.tblJoint )
 			{
-				j.pos = data.tblFrame[ numKeyframe ].frame[i];
+				j.pos = data.tblFrame[ data.numKeyframe ].pos[i];
 				i++;
 			}
 		}
@@ -528,18 +608,16 @@ struct Apr : public Sys
 	void bone_ChangeKeyframeUp( Data& data )
 	//------------------------------------------------------------------------------
 	{
-		numKeyframe++; 
-		if ( numKeyframe > static_cast<signed>(data.tblFrame.size())-1 ) numKeyframe = 0;
-//		numKeyframe = max( numKeyframe, 0 );
-//		numKeyframe = min( numKeyframe, static_cast<signed>(data.tblFrame.size())-1 );
+		data.numKeyframe++; 
+		if ( data.numKeyframe > static_cast<signed>(data.tblFrame.size())-1 ) data.numKeyframe = 0;
 
-		if ( numKeyframe >= 0 )
+		if ( data.numKeyframe >= 0 )
 		{
 			// キーフレーム切り替え
 			int i = 0;
 			for ( Joint3& j : data.tblJoint )
 			{
-				j.pos = data.tblFrame[ numKeyframe ].frame[i];
+				j.pos = data.tblFrame[ data.numKeyframe ].pos[i];
 				i++;
 			}
 		}
@@ -551,7 +629,7 @@ struct Apr : public Sys
 	{
 		for ( int i = 0 ; i < static_cast<signed>(data.tblJoint.size()) ; i++ )
 		{ 
-			data.tblFrame[ numKeyframe ].frame[i] = data.tblJoint[i].pos;
+			data.tblFrame[ data.numKeyframe ].pos[i] = data.tblJoint[i].pos;
 		}
 	}
 	
@@ -559,11 +637,11 @@ struct Apr : public Sys
 	void bone_AddKeyframe( Data& data )
 	//------------------------------------------------------------------------------
 	{
-		numKeyframe = static_cast<signed>(data.tblFrame.size());
+		data.numKeyframe = static_cast<signed>(data.tblFrame.size());
 		data.tblFrame.emplace_back();
 		for ( const Joint3& j : data.tblJoint )
 		{
-			data.tblFrame[ numKeyframe ].frame.emplace_back( j.pos );
+			data.tblFrame[ data.numKeyframe ].pos.emplace_back( j.pos );
 		}
 	}
 
@@ -670,7 +748,7 @@ struct Apr : public Sys
 //							fo << to_string(i)  << endl;
 				for ( int j = 0 ; j < static_cast<signed>(data.tblJoint.size()) ; j++ )
 				{
-					fo  << "\t"<< data.tblFrame[ i ].frame[ j ].x << "\t" << data.tblFrame[ i ].frame[ j ].y << "\t" << data.tblFrame[ i ].frame[ j ].z << endl;
+					fo  << "\t"<< data.tblFrame[ i ].pos[ j ].x << "\t" << data.tblFrame[ i ].pos[ j ].y << "\t" << data.tblFrame[ i ].pos[ j ].z << endl;
 				}
 				if( i+1 < cnt ) fo << "," << endl;
 			}
@@ -750,7 +828,7 @@ struct Apr : public Sys
 				{
 					mc.tblMarker3.emplace_back( gra, figCircle, j, rad(-90) );
 				}
-				numKeyframe = 0;
+				pNew->numKeyframe = 0;
 				break;
 			}
 			switch( mode )
@@ -780,7 +858,7 @@ struct Apr : public Sys
 						double x = stod(v[0]);
 						double y = stod(v[1]);
 						double z = stod(v[2]);
-						pNew->tblFrame[ pNew->tblFrame.size()-1 ].frame.emplace_back( x,y,z );
+						pNew->tblFrame[ pNew->tblFrame.size()-1 ].pos.emplace_back( x,y,z );
 						//	cout << x << "," << y << "," << z << endl; 
 					}
 					break;
@@ -842,10 +920,10 @@ struct Apr : public Sys
 			figCircle.edge.emplace_back( (ivect2){ s-1,0 } );
 		}
 
-		// カトマル曲線
+		// カトマル曲線2D
 		auto catmull_func = []( double t, const vect2 P0, const vect2 P1, const vect2 P2, const vect2 P3 )
 		{
-			//Catmull-Rom 曲線
+			//catmull-Rom 曲線
 			// P(t)=P1*(2t^3-3t^2+1)+m0*(t^3-2t^2+t)+P2*(-2t^3+3t^2)+m1*(t^3-t^2)
 			// m0=(P2-P0)/2
 			// m1=(P3-P1)/2
@@ -1211,17 +1289,28 @@ struct Apr : public Sys
 				}
 
 				// アニメーション再生
-				if ( keys.P.rep )
+				if ( keys.P.hi )
+				{
+					pData->anim.bForward = true;
+					pData->anim.bPlaying = true;
+					pData->anim.n = 0;
+					pData->anim.t = 0;
+					pData->anim.dt = 0.1;
+					
+				}
+				if ( pData->anim.bPlaying )
 				{
 					bone_Play( *pData );
+					if ( pData->anim.bForward == false ) pData->anim.bPlaying = false;
 				}
+				
 				
 			}
 
 			gra.Print(vect2(10,16*1),string("[Y]/[H] fovY:")+to_string(int(pers.fovy)));
 			gra.Print( vect2(10,16*2),string("far:")+to_string((cam.pos-cam.at).length())); 
 			gra.Print( vect2(10,16*3),string("at x=")+to_string(cam.at.x)+string("y=")+to_string(cam.at.y)+string(" z=")+to_string(cam.at.z) ); 
-			gra.Print( vect2(10,16*4),string("key=")+to_string(numKeyframe) + string(" cnt=")+to_string(pData->tblFrame.size()) ); 
+			gra.Print( vect2(10,16*4),string("key=")+to_string(pData->numKeyframe) + string(" cnt=")+to_string(pData->tblFrame.size()) ); 
 			gra.Print( vect2(10,16*31),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 
 			if ( !keys.ALT.on )
@@ -1524,7 +1613,6 @@ struct Apr : public Sys
 			}
 
 
-			
 			// カトマル
 			{
 				// マーカースプライン変換表示
@@ -1556,6 +1644,56 @@ struct Apr : public Sys
 					}
 				}
 			}
+
+			// カトマル3D
+			{
+				// マーカースプライン変換表示
+				{
+					Data& data = (*pData);
+					double div = 10;
+					double st = 1/div;
+
+					for ( int n = -1 ; n < static_cast<signed>(data.tblFrame.size())-3+1 ; n++ )
+					{
+						int n0 = n;
+						int n1 = n+1;
+						int n2 = n+2;
+						int n3 = n+3;
+						if ( n0 < 0 ) n0 = 0;
+						if ( n3 >= static_cast<signed>(data.tblFrame.size()) ) n3 = n2;
+					
+					
+						for ( int j = 0 ;  j < static_cast<signed>(data.tblFrame[ 0 ].pos.size()) ; j++ )
+						{
+							vect3 P0 = data.tblFrame[ n0 ].pos[j];
+							vect3 P1 = data.tblFrame[ n1 ].pos[j];
+							vect3 P2 = data.tblFrame[ n2 ].pos[j];
+							vect3 P3 = data.tblFrame[ n3 ].pos[j];
+
+							double t = st;
+							vect3 a = catmull3d_func(0, P0,P1,P2,P3 );
+							for ( int i = 0 ; i <div ; i++ )
+							{
+								vect3 b = catmull3d_func(t, P0,P1,P2,P3 );
+
+								vect3 v0;
+								vect3 v1;
+								bool flg = pers.ScissorLine( a* cam.mat.invers(), b* cam.mat.invers(), v0, v1 );
+
+								if ( flg )
+								{
+									gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1));
+								}
+								a=b;
+								t+=st;
+
+							}	
+						}
+					}
+				}
+			}
+
+			
 
 			// ベジェ 三次曲線
 			{
@@ -1601,7 +1739,7 @@ struct Apr : public Sys
 			{//ベジェアニメーション
 		
 				static	double t = 0;
-				static	bool	dir = true;
+				static	bool	bForward = true;
 
 				static int n = 0;
 				gv1 = bezier_func( t, bezier_tbl[n+0], bezier_tbl[n+1], bezier_tbl[n+2], bezier_tbl[n+3] );
@@ -1609,7 +1747,7 @@ struct Apr : public Sys
 //				gra.Circle( gv1, 5,rgb(0,0,1));
 				gra.Fill( gv1-4, gv1+4, rgb(1,1,1));
 
-				if ( dir ) t+=0.01; else t-=0.01;
+				if ( bForward ) t+=0.01; else t-=0.01;
 
 
 				if ( t >= 1.0 ) 
@@ -1622,7 +1760,7 @@ struct Apr : public Sys
 					else
 					{
 						t = 1.0;
-						dir = !dir;
+						bForward = !bForward;
 					}
 				}
 				else
@@ -1636,7 +1774,7 @@ struct Apr : public Sys
 					else
 					{
 						t = 0.0;
-						dir = !dir;
+						bForward = !bForward;
 					}
 				}
 			}
@@ -1646,7 +1784,7 @@ struct Apr : public Sys
 			{//カトマルアニメーション
 		
 				static	double t = 0;
-				static	bool	dir = true;
+				static	bool	bForward = true;
 
 				static int n = 0;
 				int n0 = n-1;
@@ -1661,7 +1799,7 @@ struct Apr : public Sys
 //				gra.Circle( gv2, 5,rgb(0,0,1));
 				gra.Fill( gv2-4, gv2+4, rgb(1,1,1));
 
-				if ( dir ) t+=0.01; else t-=0.01;
+				if ( bForward ) t+=0.01; else t-=0.01;
 
 
 				if ( t >= 1.0 ) 
@@ -1674,7 +1812,7 @@ struct Apr : public Sys
 					else
 					{
 						t = 1.0;
-						dir = !dir;
+						bForward = !bForward;
 					}
 				}
 				else
@@ -1688,7 +1826,71 @@ struct Apr : public Sys
 					else
 					{
 						t = 0.0;
-						dir = !dir;
+						bForward = !bForward;
+					}
+				}
+			}
+
+			if(0)
+			{//カトマルアニメーション3D
+				Data& data = (*pData);
+				if(static_cast<signed>(data.tblFrame.size())>=4)
+				{
+			
+					static	double t = 0;
+					static	bool	bForward = true;
+
+					static int n = 0;
+					int n0 = n-1;
+					int n1 = n;
+					int n2 = n+1;
+					int n3 = n+2;
+					if ( n0<0 ) n0 = 0;
+					if ( n3>=static_cast<signed>(data.tblFrame.size()) ) n3 =n2;
+
+					int j = 0;
+					vect3 P0 = data.tblFrame[ n0 ].pos[j];
+					vect3 P1 = data.tblFrame[ n1 ].pos[j];
+					vect3 P2 = data.tblFrame[ n2 ].pos[j];
+					vect3 P3 = data.tblFrame[ n3 ].pos[j];
+	//				gv2 = catmull3d_func( t, catmull_tbl[n0], catmull_tbl[n1], catmull_tbl[n2], catmull_tbl[n3] );
+					vect3 b = catmull3d_func(t, P0,P1,P2,P3 );
+
+					vect3 v0 = pers.calcPoint( b * cam.mat.invers() );
+					if ( v0.z > 0 )
+					{ 
+						gra.Circle( vect2(v0.x,v0.y), 5, rgb(1,0,0));
+					}
+
+					if ( bForward ) t+=0.01; else t-=0.01;
+
+
+					if ( t >= 1.0 ) 
+					{
+						if ( n+1 < static_cast<signed>(data.tblFrame.size())-1 )
+						{
+							t = 0;
+							n+=1;
+						}
+						else
+						{
+							t = 1.0;
+							bForward = !bForward;
+						}
+					}
+					else
+					if ( t <= 0.0 ) 
+					{
+						if ( n >= 1 )
+						{
+							t = 1.0;
+							n-=1;
+						}
+						else
+						{
+							t = 0.0;
+							bForward = !bForward;
+						}
 					}
 				}
 			}
@@ -1989,7 +2191,6 @@ else
 			// Human
 			//=================================
 			bone_update( *pData );
-
 
 			// human sマーカー表示
 			//mc.funcMarkerDraw3();
