@@ -1441,7 +1441,8 @@ struct Apr : public Sys
 				// カメラ回転
 				if ( mouse.R.on )
 				{
-					double l = (cam.pos-cam.at).length()/10;
+					double len = (cam.pos-cam.at).length();
+					double l = len/10;
 					l=max(l,0.00001);
 					l=min(l,8);
 
@@ -1452,6 +1453,14 @@ struct Apr : public Sys
 					v = v* mrot;
 
 					cam.pos += v;
+
+					{
+						vect3 v = (cam.pos-cam.at).normalize();
+						cam.pos = cam.at + v*len;
+//						double l = v.length();
+						
+					}
+
 				}
 
 				// カメラ平行移動
