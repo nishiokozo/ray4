@@ -385,6 +385,387 @@ struct Apr : public Sys
 
 	} mc;
 
+	struct Data
+	{
+		vector<Joint3>			tblJoint;
+		vector<Bone3>			tblBone;
+		vector<vector<vect3>>	tblKeyframe;
+	};
+
+	Figure figCircle=Figure(gra);
+
+	// カメラ
+	struct
+	{
+		vect3	pos = vect3( 0,-1, -2);
+		vect3 	at = vect3( 0, -1, 0 );
+		vect3	up = vect3( 0, 1, 0);
+	  	mat44	mat;		
+	} cam ;
+
+	struct Pers
+	{
+		double	fovy;		// 画角
+		double	sz;			// 投影面までの距離
+		double	ox;			// 描画画面の中心W
+		double	oy;			// 描画画面の中心H
+		double	width;		// 描画画面の解像度W/2
+		double	height;		// 描画画面の解像度H/2
+		double	aspect;		// 描画画面のアスペクト比
+	
+		//--------------------------------------------------------------------------
+		Pers()
+		//--------------------------------------------------------------------------
+		{
+			fovy=90/2;
+			sz = 1/tan(rad(fovy)/2);				// 投影面までの距離
+		}
+	
+		//--------------------------------------------------------------------------
+		void Update( vect2 screensize )
+		//--------------------------------------------------------------------------
+		{
+			sz = 1/tan(rad(fovy)/2);				// 投影面までの距離
+			ox		= screensize.x/2;				// 描画画面の中心W
+			oy		= screensize.y/2;				// 描画画面の中心H
+			width	= screensize.x/2;				// 描画画面の解像度W/2
+			height	= screensize.y/2;				// 描画画面の解像度H/2
+			aspect	= screensize.y/screensize.x;	// 描画画面のアスペクト比
+		} 
+
+		//--------------------------------------------------------------------------
+		bool ScissorLine( vect3 v0, vect3 v1, vect3& va, vect3& vb ) const
+		//--------------------------------------------------------------------------
+		{
+			va = calcPoint(v0);
+			vb = calcPoint(v1);
+
+			{//シザリング ニアクリップ
+				function<vect3(vect3,vect3,int)>nearclip = [ this,&nearclip ]( vect3 a, vect3 b, int n )
+				{
+					if (n <=0 ) return b;
+
+					vect3 c =  (a+b)/2;
+			
+					if ( c.z <= -sz )
+					{
+						c = nearclip( a, c, n-1 );
+					}
+					if ( c.z > 1.0-sz )
+					{
+						c = nearclip( c, b, n-1 );
+					}
+					return c;
+				};
+				if ( va.z > 0|| vb.z > 0 )
+				{
+					if ( va.z < 0 )
+					{
+						vect3 c = nearclip(v1,v0,8);
+						va = calcPoint(c);
+					}
+					if ( vb.z < 0 )
+					{
+						vect3 c = nearclip(v0,v1,8);
+						vb = calcPoint(c);
+					}
+				}
+			}
+			return ( va.z > 0 && vb.z > 0 );
+		}			
+
+		//--------------------------------------------------------------------------
+		vect3 calcPoint( vect3 v ) const
+		//--------------------------------------------------------------------------
+		{
+			vect3 ret;
+			double w = 1/(v.z+sz);
+			ret.x = v.x*w	*sz* width  *aspect	+ox;
+			ret.y = v.y*w	*sz* height			+oy;
+			ret.z = w;
+			return ret;
+		}
+
+	};
+	Pers pers;
+
+	//------------------------------------------------------------------------------
+	void bone_ChangeKeyframeDown( Data& data )
+	//------------------------------------------------------------------------------
+	{
+		numKeyframe--;
+		numKeyframe = max( numKeyframe, 0 );
+		numKeyframe = min( numKeyframe, static_cast<signed>(data.tblKeyframe.size())-1 );
+
+		if ( numKeyframe >= 0 )
+		{
+			// キーフレーム切り替え
+			int i = 0;
+			for ( Joint3& j : data.tblJoint )
+			{
+				j.pos = data.tblKeyframe[ numKeyframe ][i];
+				i++;
+			}
+		}
+	}
+
+	//------------------------------------------------------------------------------
+	void bone_ChangeKeyframeUp( Data& data )
+	//------------------------------------------------------------------------------
+	{
+		numKeyframe++; 
+		numKeyframe = max( numKeyframe, 0 );
+		numKeyframe = min( numKeyframe, static_cast<signed>(data.tblKeyframe.size())-1 );
+
+		if ( numKeyframe >= 0 )
+		{
+			// キーフレーム切り替え
+			int i = 0;
+			for ( Joint3& j : data.tblJoint )
+			{
+				j.pos = data.tblKeyframe[ numKeyframe ][i];
+				i++;
+			}
+		}
+	}
+
+	//------------------------------------------------------------------------------
+	void bone_AddKeyframe( Data& data )
+	//------------------------------------------------------------------------------
+	{
+		numKeyframe = static_cast<signed>(data.tblKeyframe.size());
+		data.tblKeyframe.emplace_back();
+		for ( const Joint3& j : data.tblJoint )
+		{
+			data.tblKeyframe[ numKeyframe ].emplace_back( j.pos );
+		}
+	}
+
+	//------------------------------------------------------------------------------
+	void bone_update( Data& data )
+	//------------------------------------------------------------------------------
+	{
+		for ( int i = 0 ; i < 5 ; i++ )
+		{
+			// 骨コリジョン 張力計算
+			for ( Bone3 b : data.tblBone )
+			{
+				vect3 v = b.j1.pos - b.j0.pos;
+				double l = v.length() - b.length;
+				vect3 va  =	v.normalize()*l;
+
+				double w0 = 0;
+				double w1 = 0;
+#if 0
+				if ( b.j0.priority ==1 ) 
+				{
+					w0 = 0.0;
+					w1 = 1.0;
+				}
+				else
+				if ( b.j1.priority ==1 ) 
+				{
+					w0 = 1.0;
+					w1 = 0.0;
+				}
+				else
+#endif
+				{
+					w0 = 0.33;
+					w1 = 0.33;
+				}
+				b.j0.tension += va*w0;
+				b.j1.tension -= va*w1;
+
+			}
+
+			// 張力解消
+			for ( Joint3& a : data.tblJoint )
+			{
+				a.pos += a.tension;
+				a.tension=0;
+			}
+		}
+
+		// Human pers
+		for ( Joint3& j : data.tblJoint )
+		{
+			//	右手系座標系
+			//	右手ねじ周り
+			//	roll	:z	奥+
+			//	pitch	:x	右+
+			//	yaw		:y	下+
+			vect3 v= j.pos;
+
+			v = v * cam.mat.invers();
+
+			j.world = v;
+
+			j.disp = pers.calcPoint(v);
+			j.readonly_disp2 = vect2(j.disp.x,j.disp.y);
+		}
+
+		// Human 描画
+		for ( Bone3 b : data.tblBone )
+		{
+			if ( b.j0.disp.z > 0 && b.j0.disp.z > 0 )
+			{
+				vect2 v0(b.j0.disp.x,b.j0.disp.y);
+				vect2 v1(b.j1.disp.x,b.j1.disp.y);
+				gra.Line( v0,v1, rgb(1,1,1));
+			}
+		}
+	}
+	//------------------------------------------------------------------------------
+	void bone_save( Data& data, const char* filename )
+	//------------------------------------------------------------------------------
+	{
+		fstream fo( filename, ios::out );
+
+		{
+			fo << "joint" << endl;
+			for ( Joint3& j : data.tblJoint )	// 関節の位置
+			{
+				fo << "\t"<< j.pos.x << "\t" << j.pos.y << "\t" << j.pos.z << endl;
+			}
+
+			fo << "bone" << endl;
+			for ( Bone3& b : data.tblBone )	// 骨
+			{
+				b.length = (b.j1.pos - b.j0.pos).length();
+				fo  << "\t"<< b.n0 << "\t" << b.n1 << endl;
+			}
+		}
+		{
+			fo << "motion" << endl;
+			int	cnt = static_cast<signed>(data.tblKeyframe.size());
+			for ( int i = 0 ; i < cnt ; i++ )
+			{
+//							fo << to_string(i)  << endl;
+				for ( int j = 0 ; j < static_cast<signed>(data.tblJoint.size()) ; j++ )
+				{
+					fo  << "\t"<< data.tblKeyframe[ i ][ j ].x << "\t" << data.tblKeyframe[ i ][ j ].y << "\t" << data.tblKeyframe[ i ][ j ].z << endl;
+				}
+				if( i+1 < cnt ) fo << "," << endl;
+			}
+		}
+		fo << "end" << endl;
+
+		cout << "SAVED" << endl;
+	}
+	//------------------------------------------------------------------------------
+	Data*	bone_load( const char* filename )
+	//------------------------------------------------------------------------------
+	{
+		Data*	pNew = new Data;
+
+		fstream fi( filename, ios::in );
+		string buf;
+		enum
+		{
+			ModeNone,
+			ModeJoint,
+			ModeBone,
+			ModeMotion,
+		} mode = ModeNone;
+		
+		function<vector<string>(const string&, char)> split = [] (const string &s, char delim) 
+		{
+			vector<string> elems;
+			stringstream ss(s);
+			string item;
+			while (getline(ss, item, delim)) 
+			{
+				if (!item.empty()) 
+				{
+					elems.push_back(item);
+				}
+			}
+			return elems;
+		};
+
+		while ( getline( fi, buf ) )
+		{
+			cout << buf << endl;
+			if ( string(buf) == "joint" )	{mode = ModeJoint;	continue;}
+			if ( string(buf) == "bone" )	{mode = ModeBone;	continue;}
+			if ( string(buf) == "motion" )	
+			{
+				mode = ModeMotion;	
+				pNew->tblKeyframe.emplace_back();
+				continue;
+			}
+			if ( string(buf) == "," ) 
+			{
+				pNew->tblKeyframe.emplace_back();
+				continue;
+			}
+			if ( string(buf) == "end" )	
+			{	
+				for ( Bone3& b : pNew->tblBone )	// 関節の距離を決定する。
+				{
+					b.length = (b.j1.pos - b.j0.pos).length();
+				}
+				{
+					int cnt = 0 ;
+					for ( Joint3& j : pNew->tblJoint )
+					{
+						j.id = cnt++;				//id登録
+					}
+				}
+				for ( Bone3& b : pNew->tblBone )	// ジョイントに関節の距離を決定する。
+				{
+					b.j1.relative.emplace_back( b.j0 ); 
+					b.j0.relative.emplace_back( b.j1 ); 
+				}
+				//マーカー削除＆登録
+				mc.tblMarker3.clear();
+				for ( Joint3& j : pNew->tblJoint )	//マーカー登録
+				{
+					mc.tblMarker3.emplace_back( gra, figCircle, j, rad(-90) );
+				}
+				numKeyframe = 0;
+				break;
+			}
+			switch( mode )
+			{
+				case ModeJoint:
+					{
+						vector<string> v = split( buf, '\t');
+						double x = stod(v[0]);
+						double y = stod(v[1]);
+						double z = stod(v[2]);
+						pNew->tblJoint.emplace_back( vect3(x,y,z) );
+						//	cout << x << "," << y << "," << z << endl; 
+					}
+					break;
+				case ModeBone:
+					{
+						vector<string> v = split( buf, '\t');
+						int n0 = stoi(v[0]);
+						int n1 = stoi(v[1]);
+						pNew->tblBone.emplace_back( pNew->tblJoint, n0, n1 );
+						//	cout << x << "," << y << "," << z << endl; 
+					}
+					break;
+				case ModeMotion:
+					{
+						vector<string> v = split( buf, '\t');
+						double x = stod(v[0]);
+						double y = stod(v[1]);
+						double z = stod(v[2]);
+						pNew->tblKeyframe[ pNew->tblKeyframe.size()-1 ].emplace_back( x,y,z );
+						//	cout << x << "," << y << "," << z << endl; 
+					}
+					break;
+				default:
+					break;
+			}
+
+		}
+		cout << "LOADED" << endl;
+		return pNew;
+	}
 
 	//------------------------------------------------------------------------------
 	Apr( const char* name, int pos_x, int pos_y, int width, int height ) : Sys( name, pos_x, pos_y, width, height )
@@ -417,7 +798,7 @@ struct Apr : public Sys
 			figTriangle.col = rgb(0,1,1);
 		}
 
-		Figure figCircle=Figure(gra);
+//		Figure figCircle=Figure(gra);
 		{
 			int s=0;
 			for ( int i = 0 ; i < 360 ; i+=45 )
@@ -625,12 +1006,6 @@ struct Apr : public Sys
 
 		//人
 
-		struct Data
-		{
-			vector<Joint3>			tblJoint;
-			vector<Bone3>			tblBone;
-			vector<vector<vect3>>	tblKeyframe;
-		};
 
 		Data* pHuman = new Data;
 
@@ -744,100 +1119,7 @@ struct Apr : public Sys
 
 
 
-		// カメラ
-		struct
-		{
-			vect3	pos = vect3( 0,-1, -2);
-			vect3 	at = vect3( 0, -1, 0 );
-			vect3	up = vect3( 0, 1, 0);
-		  	mat44	mat;		
-		} cam ;
 		
-		struct Pers
-		{
-			double	fovy;		// 画角
-			double	sz;			// 投影面までの距離
-			double	ox;			// 描画画面の中心W
-			double	oy;			// 描画画面の中心H
-			double	width;		// 描画画面の解像度W/2
-			double	height;		// 描画画面の解像度H/2
-			double	aspect;		// 描画画面のアスペクト比
-		
-			//--------------------------------------------------------------------------
-			Pers()
-			//--------------------------------------------------------------------------
-			{
-				fovy=90/2;
-				sz = 1/tan(rad(fovy)/2);				// 投影面までの距離
-			}
-		
-			//--------------------------------------------------------------------------
-			void Update( vect2 screensize )
-			//--------------------------------------------------------------------------
-			{
-				sz = 1/tan(rad(fovy)/2);				// 投影面までの距離
-				ox		= screensize.x/2;				// 描画画面の中心W
-				oy		= screensize.y/2;				// 描画画面の中心H
-				width	= screensize.x/2;				// 描画画面の解像度W/2
-				height	= screensize.y/2;				// 描画画面の解像度H/2
-				aspect	= screensize.y/screensize.x;	// 描画画面のアスペクト比
-			} 
-
-			//--------------------------------------------------------------------------
-			bool ScissorLine( vect3 v0, vect3 v1, vect3& va, vect3& vb ) const
-			//--------------------------------------------------------------------------
-			{
-				va = calcPoint(v0);
-				vb = calcPoint(v1);
-
-				{//シザリング ニアクリップ
-					function<vect3(vect3,vect3,int)>nearclip = [ this,&nearclip ]( vect3 a, vect3 b, int n )
-					{
-						if (n <=0 ) return b;
-
-						vect3 c =  (a+b)/2;
-				
-						if ( c.z <= -sz )
-						{
-							c = nearclip( a, c, n-1 );
-						}
-						if ( c.z > 1.0-sz )
-						{
-							c = nearclip( c, b, n-1 );
-						}
-						return c;
-					};
-					if ( va.z > 0|| vb.z > 0 )
-					{
-						if ( va.z < 0 )
-						{
-							vect3 c = nearclip(v1,v0,8);
-							va = calcPoint(c);
-						}
-						if ( vb.z < 0 )
-						{
-							vect3 c = nearclip(v0,v1,8);
-							vb = calcPoint(c);
-						}
-					}
-				}
-				return ( va.z > 0 && vb.z > 0 );
-			}			
-
-			//--------------------------------------------------------------------------
-			vect3 calcPoint( vect3 v ) const
-			//--------------------------------------------------------------------------
-			{
-				vect3 ret;
-				double w = 1/(v.z+sz);
-				ret.x = v.x*w	*sz* width  *aspect	+ox;
-				ret.y = v.y*w	*sz* height			+oy;
-				ret.z = w;
-				return ret;
-			}
-	
-		};
-		Pers pers;
 
 
 		//===========================================================================
@@ -869,154 +1151,30 @@ struct Apr : public Sys
 				// キーフレームロード
 				if ( keys.L.hi )
 				{
-					Data*	pNew = new Data;
-//					pNew->tblJoint = new vector<Joint3>;
-//					pNew->tblBone = new vector<Bone3>;
-//					pNew->tblKeyframe = new vector<vector<vect3>>;
-				
-					fstream fi( "human.mot", ios::in );
-					string buf;
-					enum
-					{
-						ModeNone,
-						ModeJoint,
-						ModeBone,
-						ModeMotion,
-					} mode = ModeNone;
-					
-					function<vector<string>(const string&, char)> split = [] (const string &s, char delim) 
-					{
-						vector<string> elems;
-						stringstream ss(s);
-						string item;
-						while (getline(ss, item, delim)) 
-						{
-							if (!item.empty()) 
-							{
-								elems.push_back(item);
-							}
-						}
-						return elems;
-					};
-
-					while ( getline( fi, buf ) )
-					{
-						cout << buf << endl;
-						if ( string(buf) == "joint" )	{mode = ModeJoint;	continue;}
-						if ( string(buf) == "bone" )	{mode = ModeBone;	continue;}
-						if ( string(buf) == "motion" )	
-						{
-							mode = ModeMotion;	
-							pNew->tblKeyframe.emplace_back();
-							continue;
-						}
-						if ( string(buf) == "," ) 
-						{
-							pNew->tblKeyframe.emplace_back();
-							continue;
-						}
-						if ( string(buf) == "end" )	
-						{	
-							for ( Bone3& b : pNew->tblBone )	// 関節の距離を決定する。
-							{
-								b.length = (b.j1.pos - b.j0.pos).length();
-							}
-							{
-								int cnt = 0 ;
-								for ( Joint3& j : pNew->tblJoint )
-								{
-									j.id = cnt++;				//id登録
-								}
-							}
-							for ( Bone3& b : pNew->tblBone )	// ジョイントに関節の距離を決定する。
-							{
-								b.j1.relative.emplace_back( b.j0 ); 
-								b.j0.relative.emplace_back( b.j1 ); 
-							}
-							//マーカー削除＆登録
-							mc.tblMarker3.clear();
-							for ( Joint3& j : pNew->tblJoint )	//マーカー登録
-							{
-								mc.tblMarker3.emplace_back( gra, figCircle, j, rad(-90) );
-							}
-							pData = pNew;
-							numKeyframe = 0;
-							break;
-						}
-						switch( mode )
-						{
-							case ModeJoint:
-								{
-									vector<string> v = split( buf, '\t');
-									double x = stod(v[0]);
-									double y = stod(v[1]);
-									double z = stod(v[2]);
-									pNew->tblJoint.emplace_back( vect3(x,y,z) );
-									//	cout << x << "," << y << "," << z << endl; 
-								}
-								break;
-							case ModeBone:
-								{
-									vector<string> v = split( buf, '\t');
-									int n0 = stoi(v[0]);
-									int n1 = stoi(v[1]);
-									pNew->tblBone.emplace_back( pNew->tblJoint, n0, n1 );
-									//	cout << x << "," << y << "," << z << endl; 
-								}
-								break;
-							case ModeMotion:
-								{
-									vector<string> v = split( buf, '\t');
-									double x = stod(v[0]);
-									double y = stod(v[1]);
-									double z = stod(v[2]);
-									pNew->tblKeyframe[ pNew->tblKeyframe.size()-1 ].emplace_back( x,y,z );
-									//	cout << x << "," << y << "," << z << endl; 
-								}
-								break;
-							default:
-								break;
-						}
-
-					}
-					cout << "LOADED" << endl;
+					pData = bone_load( "human.mot");
 				}
 
 				// キーフレームセーブ
 				if ( keys.S.hi )
 				{
-					fstream fo( "human.mot", ios::out );
+					bone_save( *pData, "human.mot" );
+				}
 
-					{
-						fo << "joint" << endl;
-						for ( Joint3& j : pData->tblJoint )	// 関節の位置
-						{
-							fo << "\t"<< j.pos.x << "\t" << j.pos.y << "\t" << j.pos.z << endl;
-						}
+				// キーフレーム記録
+				if ( keys.K.hi )
+				{
+					bone_AddKeyframe( *pData );
+				}
 
-						fo << "bone" << endl;
-						for ( Bone3& b : pData->tblBone )	// 骨
-						{
-							b.length = (b.j1.pos - b.j0.pos).length();
-							fo  << "\t"<< b.n0 << "\t" << b.n1 << endl;
-						}
-					}
-					{
-						fo << "motion" << endl;
-						int	cnt = static_cast<signed>(pData->tblKeyframe.size());
-						for ( int i = 0 ; i < cnt ; i++ )
-						{
-//							fo << to_string(i)  << endl;
-							for ( int j = 0 ; j < static_cast<signed>(pData->tblJoint.size()) ; j++ )
-							{
-								fo  << "\t"<< pData->tblKeyframe[ i ][ j ].x << "\t" << pData->tblKeyframe[ i ][ j ].y << "\t" << pData->tblKeyframe[ i ][ j ].z << endl;
-							}
-							if( i+1 < cnt ) fo << "," << endl;
-						}
-					}
-					fo << "end" << endl;
+				// キーフレーム移動
+				if ( keys.UP.rep )
+				{
+					bone_ChangeKeyframeUp( *pData );
+				}
 
-					cout << "SAVED" << endl;
+				if ( keys.DOWN.rep )
+				{
+					bone_ChangeKeyframeDown( *pData );
 				}
 			}
 
@@ -1672,7 +1830,9 @@ else
 							{
 								a.pmark->bSelected = true;
 //pTar3 = &a.pmark->joint;
-								for ( Joint3& j : pData->tblJoint )
+							#if 0
+								// 優先度つけ
+								for ( Joint3& j : data.tblJoint )
 								{
 									j.priority = 999;
 								}
@@ -1686,7 +1846,7 @@ else
 								};
 								
 								funcSetPriority( a.pmark->joint, 1 );
-
+							#endif
 
 							}
 						}
@@ -1783,81 +1943,12 @@ else
 
 			}
 
+			
 //if ( pTar3 ) gra.Circle( pTar3->readonly_disp2, 10, rgb(1,1,1 ));
 			//=================================
 			// Human
 			//=================================
-			for ( int i = 0 ; i < 5 ; i++ )
-			{
-				// 骨コリジョン 張力計算
-				for ( Bone3 b : pData->tblBone )
-				{
-					vect3 v = b.j1.pos - b.j0.pos;
-					double l = v.length() - b.length;
-					vect3 va  =	v.normalize()*l;
-
-					double w0 = 0;
-					double w1 = 0;
-#if 0
-					if ( b.j0.priority ==1 ) 
-					{
-						w0 = 0.0;
-						w1 = 1.0;
-					}
-					else
-					if ( b.j1.priority ==1 ) 
-					{
-						w0 = 1.0;
-						w1 = 0.0;
-					}
-					else
-#endif
-					{
-						w0 = 0.33;
-						w1 = 0.33;
-					}
-					b.j0.tension += va*w0;
-					b.j1.tension -= va*w1;
-
-				}
-
-				// 張力解消
-				for ( Joint3& a : pData->tblJoint )
-				{
-					a.pos += a.tension;
-					a.tension=0;
-				}
-			}
-
-			// Human pers
-			for ( Joint3& j : pData->tblJoint )
-			{
-				//	右手系座標系
-				//	右手ねじ周り
-				//	roll	:z	奥+
-				//	pitch	:x	右+
-				//	yaw		:y	下+
-				vect3 v= j.pos;
-
-				v = v * cam.mat.invers();
-
-				j.world = v;
-
-				j.disp = pers.calcPoint(v);
-				j.readonly_disp2 = vect2(j.disp.x,j.disp.y);
-			}
-
-			// Human 描画
-			for ( Bone3 b : pData->tblBone )
-			{
-				if ( b.j0.disp.z > 0 && b.j0.disp.z > 0 )
-				{
-					vect2 v0(b.j0.disp.x,b.j0.disp.y);
-					vect2 v1(b.j1.disp.x,b.j1.disp.y);
-					gra.Line( v0,v1, rgb(1,1,1));
-				}
-			}
-
+			bone_update( *pData );
 
 
 			// human sマーカー表示
@@ -1897,38 +1988,6 @@ else
 			}
 
 
-#if 1
-			{
-				// キーフレーム記録
-				if ( keys.K.hi )
-				{
-					numKeyframe = static_cast<signed>(pData->tblKeyframe.size());
-					pData->tblKeyframe.emplace_back();
-					for ( const Joint3& j : pData->tblJoint )
-					{
-						pData->tblKeyframe[ numKeyframe ].emplace_back( j.pos );
-					}
-				}
-				// キーフレーム移動
-				bool bChanged = false;
-				if ( keys.UP.rep ) 		{ numKeyframe++; bChanged=true; }
-				if ( keys.DOWN.rep ) 	{ numKeyframe--; bChanged=true; }
-				numKeyframe = max( numKeyframe, 0 );
-//				numKeyframe = min( numKeyframe, (static_cast<signed>(pData->tblKeyframe.size())-1 );
-				numKeyframe = min( numKeyframe, static_cast<signed>(pData->tblKeyframe.size())-1 );
-
-				if ( bChanged && numKeyframe >= 0 )
-				{
-					// キーフレーム切り替え
-					int i = 0;
-					for ( Joint3& j : pData->tblJoint )
-					{
-						j.pos = pData->tblKeyframe[ numKeyframe ][i];
-						i++;
-					}
-				}
-			}
-#endif
 
 
 			// 点 
