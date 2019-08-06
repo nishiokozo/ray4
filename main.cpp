@@ -400,8 +400,8 @@ struct Apr : public Sys
 
 	struct
 	{
+		int	numAnimation = 0;	//	アニメーションカーソル位置
 		int	numKeyframe = 0;	//	キーフレームカーソル位置
-		int	numAnimation = 0;	//	キーフレームカーソル位置
 		//
 		double	t = 0;
 		double	dt = 0;
@@ -594,7 +594,8 @@ struct Apr : public Sys
 	{
 		int num = anim.numAnimation;
 		anim.numKeyframe--;
-		if ( anim.numKeyframe < 0 ) anim.numKeyframe = static_cast<signed>(data.tblFrame[num].size())-1;
+//		if ( anim.numKeyframe < 0 ) anim.numKeyframe = static_cast<signed>(data.tblFrame[num].size())-1;
+		if ( anim.numKeyframe < 0 ) anim.numKeyframe = 0;
 
 		if ( anim.numKeyframe >= 0 )
 		{
@@ -614,7 +615,8 @@ struct Apr : public Sys
 	{
 		int num = anim.numAnimation;
 		anim.numKeyframe++; 
-		if ( anim.numKeyframe > static_cast<signed>(data.tblFrame[num].size())-1 ) anim.numKeyframe = 0;
+//		if ( anim.numKeyframe > static_cast<signed>(data.tblFrame[num].size())-1 ) anim.numKeyframe = 0;
+		if ( anim.numKeyframe > static_cast<signed>(data.tblFrame[num].size())-1 ) anim.numKeyframe = static_cast<signed>(data.tblFrame[num].size())-1;
 
 		if ( anim.numKeyframe >= 0 )
 		{
@@ -649,6 +651,67 @@ struct Apr : public Sys
 		for ( const Joint3& j : data.tblJoint )
 		{
 			data.tblFrame[num][ anim.numKeyframe ].pos.emplace_back( j.pos );
+		}
+	}
+
+	//------------------------------------------------------------------------------
+	void bone_ChangeAnimationDown( Data& data )
+	//------------------------------------------------------------------------------
+	{
+		anim.numAnimation--;
+		if ( anim.numAnimation < 0 ) anim.numAnimation = 0;
+
+		int num = anim.numAnimation;
+		anim.numKeyframe = 0;
+		{
+			// キーフレーム切り替え
+			int i = 0;
+			for ( Joint3& j : data.tblJoint )
+			{
+				j.pos = data.tblFrame[num][ anim.numKeyframe ].pos[i];
+				i++;
+			}
+		}
+	}
+
+	//------------------------------------------------------------------------------
+	void bone_ChangeAnimationUp( Data& data )
+	//------------------------------------------------------------------------------
+	{
+		anim.numAnimation++; 
+		if ( anim.numAnimation > static_cast<signed>(data.tblFrame.size())-1 ) anim.numAnimation = static_cast<signed>(data.tblFrame.size())-1;
+
+		int num = anim.numAnimation;
+		anim.numKeyframe = 0;
+		{
+			// キーフレーム切り替え
+			int i = 0;
+			for ( Joint3& j : data.tblJoint )
+			{
+				j.pos = data.tblFrame[num][ anim.numKeyframe ].pos[i];
+				i++;
+			}
+		}
+	}
+
+	//------------------------------------------------------------------------------
+	void bone_AddAnimation( Data& data )
+	//------------------------------------------------------------------------------
+	{
+
+
+		anim.numAnimation = static_cast<signed>(data.tblFrame.size());
+		anim.numKeyframe = 0;
+		data.tblFrame.emplace_back();
+
+		{
+			int num = anim.numAnimation;
+
+			data.tblFrame[num].emplace_back();
+			for ( const Joint3& j : data.tblJoint )
+			{
+				data.tblFrame[num][ anim.numKeyframe ].pos.emplace_back( j.pos );
+			}
 		}
 	}
 
@@ -748,10 +811,10 @@ struct Apr : public Sys
 			}
 		}
 		{
-			fo << "motion" << endl;
 			int	cntAction = static_cast<signed>(data.tblFrame.size());
 			for ( int num = 0 ; num < cntAction ; num++ )
 			{
+				fo << "motion" << endl;
 				int	cnt = static_cast<signed>(data.tblFrame[num].size());
 				for ( int i = 0 ; i < cnt ; i++ )
 				{
@@ -1303,6 +1366,26 @@ struct Apr : public Sys
 					bone_ChangeKeyframeDown( *pData );
 				}
 
+
+				// アニメーション記録
+				if ( keys.I.hi )
+				{
+					bone_AddAnimation( *pData );
+				}
+
+				// アニメーション次
+				if ( keys.UP.rep )
+				{
+					bone_ChangeAnimationDown( *pData );
+				}
+
+				// アニメーション前
+				if ( keys.DOWN.rep )
+				{
+					bone_ChangeAnimationUp( *pData );
+				}
+
+
 				// アニメーション再生
 				if ( keys.P.hi )
 				{
@@ -1327,7 +1410,8 @@ struct Apr : public Sys
 			gra.Print( vect2(10,16*3),string("at x=")+to_string(cam.at.x)+string("y=")+to_string(cam.at.y)+string(" z=")+to_string(cam.at.z) ); 
 			{
 				int num = anim.numAnimation;
-				gra.Print( vect2(10,16*4),string("anim=")+to_string(num) + string("key=")+to_string(anim.numKeyframe) + string(" cnt=")+to_string(pData->tblFrame[num].size()) ); 
+				gra.Print( vect2(10,16*4),string("anim=")+to_string(num) + string(" cnt=")+to_string(pData->tblFrame.size()) ); 
+				gra.Print( vect2(10,16*5),string("key=")+to_string(anim.numKeyframe) + string(" cnt=")+to_string(pData->tblFrame[num].size()) ); 
 			}
 			gra.Print( vect2(10,16*31),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 
