@@ -107,8 +107,8 @@ void  SysGra::OnCreate()
 //------------------------------------------------------------------------------
 {
 	HWND hWnd = SysWin::GetInstance().win.hWnd;
-	//g.hfon = (HFONT) GetStockObject(OEM_FIXED_FONT); // 固定幅フォント標準
-	//g.hfon = (HFONT) GetStockObject(ANSI_FIXED_FONT); // 固定幅フォント中明朝
+//	g.hfon = (HFONT) GetStockObject(OEM_FIXED_FONT); // 固定幅フォント標準
+//	g.hfon = (HFONT) GetStockObject(ANSI_FIXED_FONT); // 固定幅フォント中明朝
 	g.hfon = (HFONT) GetStockObject(DEFAULT_GUI_FONT); // 可変長小
 }	
 

@@ -1,1 +1,1 @@
-extern	void	raytrace( SysGra& gra, int py );
+extern	void	raytrace( SysGra& gra );
