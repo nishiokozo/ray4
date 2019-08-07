@@ -413,11 +413,11 @@ struct Apr : public Sys
 		void Update( vect2 screensize )
 		//--------------------------------------------------------------------------
 		{
-		#if 1
+		#if 0
 			sc = 1;									// 投影面の高さ/2
 			sz = sc/tan(rad(fovy)/2);				// 投影面までの距離
 		#else
-			sz = 1;									// 投影面までの距離
+			sz = 1.0;									// 投影面までの距離
 			sc = sz*tan(rad(fovy)/2);				// 投影面の高さ/2
 		#endif
 			cx		= screensize.x/2;				// 描画画面の中心W
@@ -433,8 +433,8 @@ struct Apr : public Sys
 		{
 			vect3 ret;
 			double w = 1/(v.z+sz);
-			ret.x = v.x/(v.z+sz)	*sz *sc *width  *aspect	+cx;
-			ret.y = v.y/(v.z+sz)	*sz *sc *height			+cy;
+			ret.x = v.x/(v.z+sz)	*sz /sc *width  *aspect	+cx;
+			ret.y = v.y/(v.z+sz)	*sz /sc *height			+cy;
 			ret.z = w;
 			return ret;
 		}
@@ -1362,7 +1362,6 @@ struct Apr : public Sys
 				{
 					bone_ChangeKeyframeDown( *pData );
 				}
-
 
 				// アニメーション記録
 				gra.Print(vect2(10,16*y++),string("[I] Add Animation"));
