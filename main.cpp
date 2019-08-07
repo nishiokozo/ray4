@@ -39,6 +39,7 @@ struct Apr : public Sys
 		vect2 readonly_disp2;
 		double len;
 		int priority;
+		bool bSelected = false;
 		
 		vector<reference_wrapper<Joint3>>	relative;
 		Joint3( vect3 v )
@@ -174,7 +175,14 @@ struct Apr : public Sys
 
 	};
 
+	//------------------------------------------------------------------------------
+//	void marker3_input()
+	//------------------------------------------------------------------------------
 
+
+	//------------------------------------------------------------------------------
+	//void marker3_draw()
+	//------------------------------------------------------------------------------
 	
 	~Apr()
 	{
@@ -373,11 +381,11 @@ struct Apr : public Sys
 
 	struct
 	{
-		int	numAnimation = 0;	//	アニメーションカーソル位置
-		int	numKeyframe = 0;	//	キーフレームカーソル位置
+		int	num = 0;	//	アニメーションカーソル位置
+		int	key = 0;	//	キーフレームカーソル位置
 		//
 		double	t = 0;
-		double	dt = 0;
+		double	dt = 0.1;
 		int n = 0;
 		bool	bForward = true;
 		bool	bPlaying = false;
@@ -522,7 +530,7 @@ struct Apr : public Sys
 	void bone_Play( Data& data )
 	//------------------------------------------------------------------------------
 	{
-		int num = anim.numAnimation;
+		int num = anim.num;
 		if(static_cast<signed>(data.animations[num].pose.size())<4) return;
 
 		int n0 = anim.n-1;
@@ -581,22 +589,22 @@ struct Apr : public Sys
 	void bone_ChangeKeyframeDown( Data& data )
 	//------------------------------------------------------------------------------
 	{
-		int num = anim.numAnimation;
+		int num = anim.num;
 		if ( data.animations.size() ==0 ) return;
 		if ( data.animations[num].pose.size()==0) return;
 		if ( data.animations[num].pose[ 0 ].pos.size()==0 ) return;
 
-		anim.numKeyframe--;
-//		if ( anim.numKeyframe < 0 ) anim.numKeyframe = static_cast<signed>(data.animations[num].pose.size())-1;
-		if ( anim.numKeyframe < 0 ) anim.numKeyframe = 0;
+		anim.key--;
+//		if ( anim.key < 0 ) anim.key = static_cast<signed>(data.animations[num].pose.size())-1;
+		if ( anim.key < 0 ) anim.key = 0;
 
-		if ( anim.numKeyframe >= 0 )
+		if ( anim.key >= 0 )
 		{
 			// キーフレーム切り替え
 			int i = 0;
 			for ( Joint3& j : data.tblJoint )
 			{
-				j.pos = data.animations[num].pose[ anim.numKeyframe ].pos[i];
+				j.pos = data.animations[num].pose[ anim.key ].pos[i];
 				i++;
 			}
 		}
@@ -606,22 +614,22 @@ struct Apr : public Sys
 	void bone_ChangeKeyframeUp( Data& data )
 	//------------------------------------------------------------------------------
 	{
-		int num = anim.numAnimation;
+		int num = anim.num;
 		if ( data.animations.size() ==0 ) return;
 		if ( data.animations[num].pose.size()==0) return;
 		if ( data.animations[num].pose[ 0 ].pos.size()==0 ) return;
 
-		anim.numKeyframe++; 
-//		if ( anim.numKeyframe > static_cast<signed>(data.animations[num].pose.size())-1 ) anim.numKeyframe = 0;
-		if ( anim.numKeyframe > static_cast<signed>(data.animations[num].pose.size())-1 ) anim.numKeyframe = static_cast<signed>(data.animations[num].pose.size())-1;
+		anim.key++; 
+//		if ( anim.key > static_cast<signed>(data.animations[num].pose.size())-1 ) anim.key = 0;
+		if ( anim.key > static_cast<signed>(data.animations[num].pose.size())-1 ) anim.key = static_cast<signed>(data.animations[num].pose.size())-1;
 
-		if ( anim.numKeyframe >= 0 )
+		if ( anim.key >= 0 )
 		{
 			// キーフレーム切り替え
 			int i = 0;
 			for ( Joint3& j : data.tblJoint )
 			{
-				j.pos = data.animations[num].pose[ anim.numKeyframe ].pos[i];
+				j.pos = data.animations[num].pose[ anim.key ].pos[i];
 				i++;
 			}
 		}
@@ -631,14 +639,14 @@ struct Apr : public Sys
 	void bone_RefrectKeyframe( Data& data )
 	//------------------------------------------------------------------------------
 	{
-		int num = anim.numAnimation;
+		int num = anim.num;
 		if ( data.animations.size() ==0 ) return;
 		if ( data.animations[num].pose.size()==0) return;
 		if ( data.animations[num].pose[ 0 ].pos.size()==0 ) return;
 
 		for ( int i = 0 ; i < static_cast<signed>(data.tblJoint.size()) ; i++ )
 		{ 
-			data.animations[num].pose[ anim.numKeyframe ].pos[i] = data.tblJoint[i].pos;
+			data.animations[num].pose[ anim.key ].pos[i] = data.tblJoint[i].pos;
 		}
 	}
 	
@@ -646,12 +654,14 @@ struct Apr : public Sys
 	void bone_AddKeyframe( Data& data )
 	//------------------------------------------------------------------------------
 	{
-		int num = anim.numAnimation;
-		anim.numKeyframe = static_cast<signed>(data.animations[num].pose.size());
-		data.animations[num].pose.emplace_back();
+		int num = anim.num;
+//		anim.key = static_cast<signed>(data.animations[num].pose.size());
+//		data.animations[num].pose.emplace_back();
+
+		data.animations[num].pose.emplace( data.animations[num].pose.begin() + anim.key );
 		for ( const Joint3& j : data.tblJoint )
 		{
-			data.animations[num].pose[ anim.numKeyframe ].pos.emplace_back( j.pos );
+			data.animations[num].pose[ anim.key ].pos.emplace_back( j.pos );
 		}
 	}
 
@@ -659,14 +669,14 @@ struct Apr : public Sys
 	void bone_DeleteKeyframe( Data& data )
 	//------------------------------------------------------------------------------
 	{
-		int num = anim.numAnimation;
+		int num = anim.num;
 		if ( data.animations.size() ==0 ) return;
 		if ( data.animations[num].pose.size()==0) return;
 		if ( data.animations[num].pose[ 0 ].pos.size()==0 ) return;
 
-		data.animations[num].pose.erase(data.animations[num].pose.begin() +anim.numKeyframe );	
+		data.animations[num].pose.erase(data.animations[num].pose.begin() +anim.key );	
 
-		if ( anim.numKeyframe >= (signed)data.animations[num].pose.size() ) anim.numKeyframe = (signed)data.animations[num].pose.size()-1;
+		if ( anim.key >= (signed)data.animations[num].pose.size() ) anim.key = (signed)data.animations[num].pose.size()-1;
 
 	}
 
@@ -674,23 +684,23 @@ struct Apr : public Sys
 	void bone_PrevAnimation( Data& data )
 	//------------------------------------------------------------------------------
 	{
-		anim.numAnimation--;
-		if ( anim.numAnimation < 0 ) anim.numAnimation = 0;
+		anim.num--;
+		if ( anim.num < 0 ) anim.num = 0;
 
-		int num = anim.numAnimation;
+		int num = anim.num;
 		if ( data.animations.size() ==0 ) return;
 		if ( data.animations[num].pose.size()==0) return;
 		if ( data.animations[num].pose[ 0 ].pos.size()==0 ) return;
 
 		{
-			int num = anim.numAnimation;
-			anim.numKeyframe = 0;
+			int num = anim.num;
+			anim.key = 0;
 			{
 				// キーフレーム切り替え
 				int i = 0;
 				for ( Joint3& j : data.tblJoint )
 				{
-					j.pos = data.animations[num].pose[ anim.numKeyframe ].pos[i];
+					j.pos = data.animations[num].pose[ anim.key ].pos[i];
 					i++;
 				}
 			}
@@ -702,17 +712,17 @@ struct Apr : public Sys
 	//------------------------------------------------------------------------------
 	{
 
-		anim.numAnimation++; 
-		if ( anim.numAnimation > static_cast<signed>(data.animations.size())-1 ) anim.numAnimation = static_cast<signed>(data.animations.size())-1;
+		anim.num++; 
+		if ( anim.num > static_cast<signed>(data.animations.size())-1 ) anim.num = static_cast<signed>(data.animations.size())-1;
 
-		int num = anim.numAnimation;
+		int num = anim.num;
 		if ( data.animations.size() ==0 ) return;
 		if ( data.animations[num].pose.size()==0) return;
 		if ( data.animations[num].pose[ 0 ].pos.size()==0 ) return;
 
 		{
-			int num = anim.numAnimation;
-			anim.numKeyframe = 0;
+			int num = anim.num;
+			anim.key = 0;
 
 			{
 				// キーフレーム切り替え
@@ -720,7 +730,7 @@ struct Apr : public Sys
 				for ( Joint3& j : data.tblJoint )
 				{
 				
-					j.pos = data.animations[num].pose[ anim.numKeyframe ].pos[i];
+					j.pos = data.animations[num].pose[ anim.key ].pos[i];
 					i++;
 				}
 			}
@@ -731,17 +741,17 @@ struct Apr : public Sys
 	void bone_AddAnimation( Data& data )
 	//------------------------------------------------------------------------------
 	{
-		anim.numAnimation = static_cast<signed>(data.animations.size());
-		anim.numKeyframe = 0;
+		anim.num = static_cast<signed>(data.animations.size());
+		anim.key = 0;
 		data.animations.emplace_back();
 
 		{
-			int num = anim.numAnimation;
+			int num = anim.num;
 
 			data.animations[num].pose.emplace_back();
 			for ( const Joint3& j : data.tblJoint )
 			{
-				data.animations[num].pose[ anim.numKeyframe ].pos.emplace_back( j.pos );
+				data.animations[num].pose[ anim.key ].pos.emplace_back( j.pos );
 			}
 		}
 	}
@@ -937,7 +947,7 @@ struct Apr : public Sys
 				{
 					mc.tblMarker3.emplace_back( gra, figCircle, j, rad(-90) );
 				}
-				anim.numKeyframe = 0;
+				anim.key = 0;
 				break;
 			}
 			switch( mode )
@@ -1373,7 +1383,7 @@ struct Apr : public Sys
 					gra.Print(vect2(10,16*y++),string("[I] Add Animation"));
 					gra.Print(vect2(10,16*y++),string("[UP]   Animation -"));
 					gra.Print(vect2(10,16*y++),string("[DOWN] Animation +"));
-					gra.Print(vect2(10,16*y++),string("[P]lay Animation"));
+					gra.Print(vect2(10,16*y++),string("[ENTER]lay Animation"));
 				}
 				else
 				{
@@ -1427,9 +1437,9 @@ struct Apr : public Sys
 				gra.Print( vect2(10,16*y++),string("at  x=")+to_string(cam.at.x)+string(" y=")+to_string(cam.at.y)+string(" z=")+to_string(cam.at.z) ); 
 				gra.Print( vect2(10,16*y++),string("pos x=")+to_string(cam.pos.x)+string(" y=")+to_string(cam.pos.y)+string(" z=")+to_string(cam.pos.z) ); 
 				{
-					int num = anim.numAnimation;
+					int num = anim.num;
 					gra.Print( vect2(10,16*y++),string("anim=")+to_string(num) + string(" cnt=")+to_string(pData->animations.size()) ); 
-					gra.Print( vect2(10,16*y++),string("key=")+to_string(anim.numKeyframe) + string(" cnt=")+to_string(pData->animations[num].pose.size()) ); 
+					gra.Print( vect2(10,16*y++),string("key=")+to_string(anim.key) + string(" cnt=")+to_string(pData->animations[num].pose.size()) ); 
 				}
 				gra.Print( vect2(10,16*31),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 			}
@@ -1709,7 +1719,7 @@ struct Apr : public Sys
 				// マーカースプライン変換表示
 				{
 					double div = 10;
-					double st = 1/div;
+					double dt = 1/div;
 
 					for ( int n = -1 ; n < static_cast<signed>(catmull_tbl.size())-3+1 ; n++ )
 					{
@@ -1720,7 +1730,7 @@ struct Apr : public Sys
 						if ( n0 < 0 ) n0 = 0;
 						if ( n3 >= static_cast<signed>(catmull_tbl.size()) ) n3 = n2;
 					
-						double t = st;
+						double t = dt;
 						vect2 v0 = catmull_func(0, catmull_tbl[n0], catmull_tbl[n1], catmull_tbl[n2], catmull_tbl[n3] );
 						for ( int i = 0 ; i <div ; i++ )
 						{
@@ -1728,7 +1738,7 @@ struct Apr : public Sys
 							gra.Line( v1, v0, rgb(1,1,1));
 							gra.Fill( v1-1,v1+2, rgb(1,1,1));
 							v0=v1;
-							t+=st;
+							t+=dt;
 
 						}	
 							
@@ -1736,54 +1746,6 @@ struct Apr : public Sys
 				}
 			}
 
-			// カトマル3D
-			{
-				int num = anim.numAnimation;
-				// マーカースプライン変換表示
-				{
-					Data& data = (*pData);
-					double div = 10;
-					double st = 1/div;
-
-					for ( int n = -1 ; n < static_cast<signed>(data.animations[num].pose.size())-3+1 ; n++ )
-					{
-						int n0 = n;
-						int n1 = n+1;
-						int n2 = n+2;
-						int n3 = n+3;
-						if ( n0 < 0 ) n0 = 0;
-						if ( n3 >= static_cast<signed>(data.animations[num].pose.size()) ) n3 = n2;
-					
-					
-						for ( int j = 0 ;  j < static_cast<signed>(data.animations[num].pose[ 0 ].pos.size()) ; j++ )
-						{
-							vect3 P0 = data.animations[num].pose[ n0 ].pos[j];
-							vect3 P1 = data.animations[num].pose[ n1 ].pos[j];
-							vect3 P2 = data.animations[num].pose[ n2 ].pos[j];
-							vect3 P3 = data.animations[num].pose[ n3 ].pos[j];
-
-							double t = st;
-							vect3 a = catmull3d_func(0, P0,P1,P2,P3 );
-							for ( int i = 0 ; i <div ; i++ )
-							{
-								vect3 b = catmull3d_func(t, P0,P1,P2,P3 );
-
-								vect3 v0;
-								vect3 v1;
-								bool flg = pers.ScissorLine( a* cam.mat.invers(), b* cam.mat.invers(), v0, v1 );
-
-								if ( flg )
-								{
-									gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1));
-								}
-								a=b;
-								t+=st;
-
-							}	
-						}
-					}
-				}
-			}
 
 			
 
@@ -1791,11 +1753,11 @@ struct Apr : public Sys
 			{
 				{//ベジェ計算＆描画
 					double div = 20;
-					double st = 1/div;
+					double dt = 1/div;
 
 					for ( int n = 0 ; n < static_cast<signed>(bezier_tbl.size())-3 ; n+=3 )
 					{
-						double t  = st;
+						double t  = dt;
 						vect2 v0 = bezier_tbl[n+0];
 						for ( int i = 0 ; i < div ; i++ )
 						{
@@ -1803,7 +1765,7 @@ struct Apr : public Sys
 							gra.Line( v0,v1, rgb(1,1,1));
 							gra.Fill( v1-1,v1+2, rgb(1,1,1));
 							v0=v1;
-							t+=st;
+							t+=dt;
 						}
 					}
 
@@ -2007,13 +1969,8 @@ else
 			mc.funcMarkerDraw2();
 
 
-			//-----------------------------------------------------------------
 			// 3Dマーカー入力
-			//-----------------------------------------------------------------
-//static Joint3* pTar3 = 0;
-
-//			mc.funcMarkerController3( figCircle, mouse, keys, gra );
-			if  ( !keys.ALT.on ) 
+			if  ( !keys.ALT.on ) //marker3_input();
 			{
 				static vect2 drag_start(0,0);
 				static bool bDrag = false;
@@ -2100,7 +2057,7 @@ else
 							else
 							{
 								a.pmark->bSelected = true;
-//pTar3 = &a.pmark->joint;
+		//pTar3 = &a.pmark->joint;
 							#if 0
 								// 優先度つけ
 								for ( Joint3& j : data.tblJoint )
@@ -2211,18 +2168,12 @@ else
 					}
 				}
 				
-
 			}
-
-			
-//if ( pTar3 ) gra.Circle( pTar3->readonly_disp2, 10, rgb(1,1,1 ));
-			//=================================
-			// Human
-			//=================================
+			// human 更新
 			bone_update( *pData );
 
-			// human sマーカー表示
-			//mc.funcMarkerDraw3();
+			// 3Dマーカー表示
+//			marker3_draw();
 			{
 				int		cntAve=0;
 				vect2	posAve=0;
@@ -2243,19 +2194,86 @@ else
 						posAve +=  m.joint.readonly_disp2;
 					}
 					gra.Circle( m.joint.readonly_disp2, 7, col );
-//					gra.Print( m.joint.readonly_disp2+vect2(10,0), to_string(m.joint.priority) );
 					gra.Print( m.joint.readonly_disp2+vect2(10,0), to_string(m.joint.id) );
-		
+
 				}
 
 				if ( cntAve >= 2 )
 				{
 					posAve /= cntAve;
-					//gra.Circle( posAve, 10, rgb(0,1,0));
-
 				}
-				
 			}
+
+			// カトマル3D モーション軌跡表示
+			if(1)
+			{
+
+							// とり会えずコピー
+							for ( Marker3& m : mc.tblMarker3 )
+							{
+								m.joint.bSelected = m.bSelected;
+							}
+
+			
+				int num = anim.num;
+				// マーカースプライン変換表示
+				{
+					Data& data = (*pData);
+//					double div = 8;
+//					double dt = 1/div;
+					double dt = anim.dt;
+					double div = 1/dt;
+//Joint3
+					for ( int n = -1 ; n < static_cast<signed>(data.animations[num].pose.size())-3+1 ; n++ )
+					{
+						int n0 = n;
+						int n1 = n+1;
+						int n2 = n+2;
+						int n3 = n+3;
+						if ( n0 < 0 ) n0 = 0;
+						if ( n3 >= static_cast<signed>(data.animations[num].pose.size()) ) n3 = n2;
+					
+//						for ( int j = 0 ;  j < static_cast<signed>(data.animations[num].pose[ 0 ].pos.size()) ; j++ )
+						for ( int j = 0 ;  j < static_cast<signed>(data.tblJoint.size()) ; j++ )
+						{
+						if ( data.tblJoint[j].bSelected == false ) continue;
+//							for ( Marker& m : mc.tblMarker3 )
+							{
+//								if( m.joint.bSelected && &m.joint == .bSelected )
+							}
+						
+							vect3 P0 = data.animations[num].pose[ n0 ].pos[j];
+							vect3 P1 = data.animations[num].pose[ n1 ].pos[j];
+							vect3 P2 = data.animations[num].pose[ n2 ].pos[j];
+							vect3 P3 = data.animations[num].pose[ n3 ].pos[j];
+
+							double t = dt;
+							vect3 a = catmull3d_func(0, P0,P1,P2,P3 );
+							for ( int i = 0 ; i <div ; i++ )
+							{
+								vect3 b = catmull3d_func(t, P0,P1,P2,P3 );
+
+								vect3 v0;
+								vect3 v1;
+								bool flg = pers.ScissorLine( a* cam.mat.invers(), b* cam.mat.invers(), v0, v1 );
+
+								if ( flg )
+								{
+									gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1));
+								}
+								
+								if ( v1.z > 0 ) gra.Fill(vect2(v1.x,v1.y)-2, vect2(v1.x,v1.y)+3,rgb(0,0,1));
+
+								a=b;
+								t+=dt;
+
+							}	
+						}
+					}
+				}
+			}
+
+
 
 
 
