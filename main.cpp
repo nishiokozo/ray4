@@ -1429,108 +1429,78 @@ struct Apr : public Sys
 				gra.Print( vect2(10,16*31),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 			}
 
-			if ( !keys.ALT.on )
+			// カメラ回転
+			if ( (!keys.ALT.on && mouse.R.on) || (keys.ALT.on && mouse.L.on) )
 			{
+				double len = (cam.pos-cam.at).length();
+				double l = (cam.pos-cam.at).length()/10;
+				l=max(l,0.00001);
+				l=min(l,8);
 
-				// マウスホイールZOOM
+				// 回転
+				vect3	v= vect3(-mouse.mov.x/28,-mouse.mov.y/28,0) * l;
+				mat44 mrot = cam.mat;
+				mrot.SetTranslate(vect3(0,0,0));
+				v = v* mrot;
+				cam.pos += v;
+				
 				{
-					double l = (cam.pos-cam.at).length()/10;
-						l=max(l,0.01);
-						l=min(l,8);
-
-					double step = -mouse.wheel/25;
-
-					vect3	v= vect3(0,0,step*l);
-					mat44 mrot = cam.mat;
-					mrot.SetTranslate(vect3(0,0,0));
-					v = v* mrot;
-
-					vect3 r = cam.pos;
-					cam.pos += v;
-	//				if( (cam.pos-cam.at).length() < v.length() ) cam.pos = r;
-					if( (cam.pos-cam.at).length() <= v.length() ) cam.pos = (r-cam.at).normalize()*0.00001+cam.at;
-
+					vect3 dir = (cam.pos-cam.at).normalize();
+					cam.pos = cam.at+dir*len;
 				}
 
-				// カメラ回転
-				if ( mouse.R.on )
-				{
-					double l = (cam.pos-cam.at).length()/10;
-					l=max(l,0.00001);
-					l=min(l,8);
-
-					// 回転
-					vect3	v= vect3(-mouse.mov.x/28,-mouse.mov.y/28,0) * l;
-					mat44 mrot = cam.mat;
-					mrot.SetTranslate(vect3(0,0,0));
-					v = v* mrot;
-
-					cam.pos += v;
-				}
-
-				// カメラ平行移動
-				if ( mouse.M.on )
-				{
-					double l = (cam.pos-cam.at).length()/10;
-					if ( l < 0.4 ) l = 0.4;
-					if ( l > 4 ) l = 4.0;
-
-					vect3	v= vect3(-mouse.mov.x/80,-mouse.mov.y/80,0)*l;
-					mat44 mrot = cam.mat;
-					mrot.SetTranslate(vect3(0,0,0));
-					v = v* mrot;
-
-					cam.at += v;
-					cam.pos += v;
-				}
-	
 			}
-			// カメラ移動
-			if ( keys.ALT.on )
-			{
 
-				if ( mouse.L.on )
-				{
-					double l = (cam.pos-cam.at).length()/10;
+			// カメラ平行移動
+			if ( !keys.ALT.on  &&  mouse.M.on )
+			{
+				double l = (cam.pos-cam.at).length()/10;
+				if ( l < 0.4 ) l = 0.4;
+				if ( l > 4 ) l = 4.0;
+
+				vect3	v= vect3(-mouse.mov.x/80,-mouse.mov.y/80,0)*l;
+				mat44 mrot = cam.mat;
+				mrot.SetTranslate(vect3(0,0,0));
+				v = v* mrot;
+
+				cam.at += v;
+				cam.pos += v;
+			}
+
+			// マウスホイールZOOM
+			if ( !keys.ALT.on  )
+			{
+				double l = (cam.pos-cam.at).length()/10;
 					l=max(l,0.01);
 					l=min(l,8);
 
-					// 回転
-					vect3	v= vect3(-mouse.mov.x/28,-mouse.mov.y/28,0) * l;
-					mat44 mrot = cam.mat;
-					mrot.SetTranslate(vect3(0,0,0));
-					v = v* mrot;
+				double step = -mouse.wheel/25;
 
-					cam.pos += v;
-				}
-				if ( mouse.R.on )
-				{
-					// ズーム
-					vect3	v= vect3(0,0,mouse.mov.y/100);
-					mat44 mrot = cam.mat;
-					mrot.SetTranslate(vect3(0,0,0));
-					v = v* mrot;
+				vect3	v= vect3(0,0,step*l);
+				mat44 mrot = cam.mat;
+				mrot.SetTranslate(vect3(0,0,0));
+				v = v* mrot;
 
-					vect3 r = cam.pos;
-					cam.pos += v;
-					if( (cam.pos-cam.at).length() <= v.length() ) cam.pos = (r-cam.at).normalize()*0.00001+cam.at;
-				}
-				if ( mouse.M.on )
-				{
-					double l = (cam.pos-cam.at).length()/10;
-					if ( l < 0.4 ) l = 0.4;
-					if ( l > 4 ) l = 4.0;
-
-					// 平行移動
-					vect3	v= vect3(-mouse.mov.x/80,-mouse.mov.y/80,0)*l;
-					mat44 mrot = cam.mat;
-					mrot.SetTranslate(vect3(0,0,0));
-					v = v* mrot;
-
-					cam.at += v;
-					cam.pos += v;
-				}
+				vect3 r = cam.pos;
+				cam.pos += v;
+//				if( (cam.pos-cam.at).length() < v.length() ) cam.pos = r;
+				if( (cam.pos-cam.at).length() <= v.length() ) cam.pos = (r-cam.at).normalize()*0.00001+cam.at;
 			}
+
+			// カメラ移動
+			if ( keys.ALT.on && mouse.R.on ) )
+			{
+				// ズーム
+				vect3	v= vect3(0,0,mouse.mov.y/100);
+				mat44 mrot = cam.mat;
+				mrot.SetTranslate(vect3(0,0,0));
+				v = v* mrot;
+
+				vect3 r = cam.pos;
+				cam.pos += v;
+				if( (cam.pos-cam.at).length() <= v.length() ) cam.pos = (r-cam.at).normalize()*0.00001+cam.at;
+			}
+
 			// カメラマトリクス計算
 			{
 				cam.mat.LookAt( cam.pos, cam.at, cam.up );
