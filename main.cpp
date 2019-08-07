@@ -384,7 +384,7 @@ struct Apr : public Sys
 	// カメラ
 	struct
 	{
-		vect3	pos = vect3( -2,-2, -2 );
+		vect3	pos = vect3( -2,-2, -2+0.1 );
 		vect3 	at = vect3( 0, -1, 0 );
 		vect3	up = vect3( 0, 1, 0);
 	  	mat44	mat;		
@@ -417,7 +417,7 @@ struct Apr : public Sys
 			sc = 1;									// 投影面の高さ/2
 			sz = sc/tan(rad(fovy)/2);				// 投影面までの距離
 		#else
-			sz = 1.0;									// 投影面までの距離
+			sz = 1.0;								// 投影面までの距離
 			sc = sz*tan(rad(fovy)/2);				// 投影面の高さ/2
 		#endif
 			cx		= screensize.x/2;				// 描画画面の中心W
@@ -1321,71 +1321,81 @@ struct Apr : public Sys
 			{
 				int y = 16;
 
+				if ( keys.F1.on )
+				{
+					gra.Print(vect2(10,16*y++),string("[Y] fovY -"));
+					gra.Print(vect2(10,16*y++),string("[H] fovY +"));
+					gra.Print(vect2(10,16*y++),string("[L] Load"));
+					gra.Print(vect2(10,16*y++),string("[S] Save"));
+					gra.Print(vect2(10,16*y++),string("[J] Refrect Keyframe"));
+					gra.Print(vect2(10,16*y++),string("[K] Add Keyframe"));
+					gra.Print(vect2(10,16*y++),string("[LEFT]  keyframe -"));
+					gra.Print(vect2(10,16*y++),string("[RIGHT] keyframe +"));
+					gra.Print(vect2(10,16*y++),string("[I] Add Animation"));
+					gra.Print(vect2(10,16*y++),string("[UP]   Animation -"));
+					gra.Print(vect2(10,16*y++),string("[DOWN] Animation +"));
+					gra.Print(vect2(10,16*y++),string("[P]lay Animation"));
+				}
+				else
+				{
+					gra.Print(vect2(10,16*y++),string("[F1] Help"));
+				}
+				
 				// キーフレームロード
-				gra.Print(vect2(10,16*y++),string("[L]oad"));
 				if ( keys.L.hi )
 				{
 					pData = bone_load( "human.mot");
 				}
 
 				// キーフレームセーブ
-				gra.Print(vect2(10,16*y++),string("[S]ave"));
 				if ( keys.S.hi )
 				{
 					bone_save( *pData, "human.mot" );
 				}
 
 				// キーフレームへ反映
-				gra.Print(vect2(10,16*y++),string("[J] Refrect"));
 				if ( keys.J.hi )
 				{
 					bone_RefrectKeyframe( *pData );
 				}
 
 				// キーフレーム記録
-				gra.Print(vect2(10,16*y++),string("[K] Add Keyframe"));
 				if ( keys.K.hi )
 				{
 					bone_AddKeyframe( *pData );
 				}
 
 				// キーフレーム次
-				gra.Print(vect2(10,16*y++),string("[RIGHT] keyframe next"));
 				if ( keys.RIGHT.rep )
 				{
 					bone_ChangeKeyframeUp( *pData );
 				}
 
 				// キーフレーム前
-				gra.Print(vect2(10,16*y++),string("[LEFT] keyframe prev"));
 				if ( keys.LEFT.rep )
 				{
 					bone_ChangeKeyframeDown( *pData );
 				}
 
 				// アニメーション記録
-				gra.Print(vect2(10,16*y++),string("[I] Add Animation"));
 				if ( keys.I.hi )
 				{
 					bone_AddAnimation( *pData );
 				}
 
 				// アニメーション次
-				gra.Print(vect2(10,16*y++),string("[UP] Animation next"));
 				if ( keys.UP.rep )
 				{
 					bone_ChangeAnimationDown( *pData );
 				}
 
 				// アニメーション前
-				gra.Print(vect2(10,16*y++),string("[DOWN] Animation prev"));
 				if ( keys.DOWN.rep )
 				{
 					bone_ChangeAnimationUp( *pData );
 				}
 
 				// アニメーション再生
-				gra.Print(vect2(10,16*y++),string("[P]lay Animation"));
 				if ( keys.P.hi )
 				{
 					anim.bForward = true;
@@ -1406,7 +1416,7 @@ struct Apr : public Sys
 
 			{
 				int y = 1;
-				gra.Print(vect2(10,16*y++),string("[Y]/[H] fovY:")+to_string(int(pers.fovy)));
+				gra.Print(vect2(10,16*y++),string("fovY:")+to_string(int(pers.fovy)));
 				gra.Print(vect2(10,16*y++),string("sz:")+to_string(pers.sz) +string(" sc:")+to_string(pers.sc));
 				gra.Print( vect2(10,16*y++),string("far:")+to_string((cam.pos-cam.at).length())); 
 				gra.Print( vect2(10,16*y++),string("at  x=")+to_string(cam.at.x)+string(" y=")+to_string(cam.at.y)+string(" z=")+to_string(cam.at.z) ); 
@@ -1537,10 +1547,10 @@ struct Apr : public Sys
 
 			// グリッドgrid
 			{
-				int col = rgb(0.5,0.5,0.5);
+				const int NUM = 10;
 				if(0)
 				{	// ドットグリッド
-					const int NUM = 4;
+					int col = rgb(1,1,1);
 					{
 						for ( int i = -NUM ; i <= NUM ; i++ )
 						{
@@ -1566,7 +1576,7 @@ struct Apr : public Sys
 
 				if(1)
 				{	// 格子グリッド
-					const int NUM = 20;
+					int col = rgb(0.5,0.5,0.5);
 					{
 						vect3 a(-NUM, 0,-NUM);
 						vect3 b( NUM, 0,-NUM);
