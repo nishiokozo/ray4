@@ -386,16 +386,14 @@ struct Apr : public Sys
 
 	struct Data
 	{
-		vector<Joint3>			tblJoint;
-		vector<Bone3>			tblBone;
+		vector<Joint3>				tblJoint;
+		vector<Bone3>				tblBone;
 
-		struct Frame
+		struct Keyframe
 		{
-			vector<vect3>	pos;
+			vector<vect3>			pos;
 		};
-		vector<vector<Frame>>	tblFrame;
-
-
+		vector<vector<Keyframe>>	tblKeyframe;
 	};
 
 	struct
@@ -530,21 +528,21 @@ struct Apr : public Sys
 	//------------------------------------------------------------------------------
 	{
 		int num = anim.numAnimation;
-		if(static_cast<signed>(data.tblFrame[num].size())<4) return;
+		if(static_cast<signed>(data.tblKeyframe[num].size())<4) return;
 
 		int n0 = anim.n-1;
 		int n1 = anim.n;
 		int n2 = anim.n+1;
 		int n3 = anim.n+2;
 		if ( n0<0 ) n0 = 0;
-		if ( n3>=static_cast<signed>(data.tblFrame[num].size()) ) n3 =n2;
+		if ( n3>=static_cast<signed>(data.tblKeyframe[num].size()) ) n3 =n2;
 
-		for ( int j = 0 ; j < static_cast<signed>(data.tblFrame[num][0].pos.size()) ; j++ )
+		for ( int j = 0 ; j < static_cast<signed>(data.tblKeyframe[num][0].pos.size()) ; j++ )
 		{
-			vect3 P0 = data.tblFrame[num][ n0 ].pos[j];
-			vect3 P1 = data.tblFrame[num][ n1 ].pos[j];
-			vect3 P2 = data.tblFrame[num][ n2 ].pos[j];
-			vect3 P3 = data.tblFrame[num][ n3 ].pos[j];
+			vect3 P0 = data.tblKeyframe[num][ n0 ].pos[j];
+			vect3 P1 = data.tblKeyframe[num][ n1 ].pos[j];
+			vect3 P2 = data.tblKeyframe[num][ n2 ].pos[j];
+			vect3 P3 = data.tblKeyframe[num][ n3 ].pos[j];
 			vect3 b = catmull3d_func(anim.t, P0,P1,P2,P3 );
 
 			data.tblJoint[j].pos = b;
@@ -561,7 +559,7 @@ struct Apr : public Sys
 
 		if ( anim.t >= 1.0 ) 
 		{
-			if ( anim.n+1 < static_cast<signed>(data.tblFrame[num].size())-1 )
+			if ( anim.n+1 < static_cast<signed>(data.tblKeyframe[num].size())-1 )
 			{
 				anim.t = 0;
 				anim.n+=1;
@@ -592,9 +590,13 @@ struct Apr : public Sys
 	void bone_ChangeKeyframeDown( Data& data )
 	//------------------------------------------------------------------------------
 	{
+		if ( data.tblKeyframe.size() ==0 ) return;
+		if ( data.tblKeyframe[0].size()==0) return;
+		if ( data.tblKeyframe[0][ 0 ].pos.size()==0 ) return;
+
 		int num = anim.numAnimation;
 		anim.numKeyframe--;
-//		if ( anim.numKeyframe < 0 ) anim.numKeyframe = static_cast<signed>(data.tblFrame[num].size())-1;
+//		if ( anim.numKeyframe < 0 ) anim.numKeyframe = static_cast<signed>(data.tblKeyframe[num].size())-1;
 		if ( anim.numKeyframe < 0 ) anim.numKeyframe = 0;
 
 		if ( anim.numKeyframe >= 0 )
@@ -603,7 +605,7 @@ struct Apr : public Sys
 			int i = 0;
 			for ( Joint3& j : data.tblJoint )
 			{
-				j.pos = data.tblFrame[num][ anim.numKeyframe ].pos[i];
+				j.pos = data.tblKeyframe[num][ anim.numKeyframe ].pos[i];
 				i++;
 			}
 		}
@@ -613,10 +615,14 @@ struct Apr : public Sys
 	void bone_ChangeKeyframeUp( Data& data )
 	//------------------------------------------------------------------------------
 	{
+		if ( data.tblKeyframe.size() ==0 ) return;
+		if ( data.tblKeyframe[0].size()==0) return;
+		if ( data.tblKeyframe[0][ 0 ].pos.size()==0 ) return;
+
 		int num = anim.numAnimation;
 		anim.numKeyframe++; 
-//		if ( anim.numKeyframe > static_cast<signed>(data.tblFrame[num].size())-1 ) anim.numKeyframe = 0;
-		if ( anim.numKeyframe > static_cast<signed>(data.tblFrame[num].size())-1 ) anim.numKeyframe = static_cast<signed>(data.tblFrame[num].size())-1;
+//		if ( anim.numKeyframe > static_cast<signed>(data.tblKeyframe[num].size())-1 ) anim.numKeyframe = 0;
+		if ( anim.numKeyframe > static_cast<signed>(data.tblKeyframe[num].size())-1 ) anim.numKeyframe = static_cast<signed>(data.tblKeyframe[num].size())-1;
 
 		if ( anim.numKeyframe >= 0 )
 		{
@@ -624,7 +630,7 @@ struct Apr : public Sys
 			int i = 0;
 			for ( Joint3& j : data.tblJoint )
 			{
-				j.pos = data.tblFrame[num][ anim.numKeyframe ].pos[i];
+				j.pos = data.tblKeyframe[num][ anim.numKeyframe ].pos[i];
 				i++;
 			}
 		}
@@ -634,10 +640,14 @@ struct Apr : public Sys
 	void bone_RefrectKeyframe( Data& data )
 	//------------------------------------------------------------------------------
 	{
+		if ( data.tblKeyframe.size() ==0 ) return;
+		if ( data.tblKeyframe[0].size()==0) return;
+		if ( data.tblKeyframe[0][ 0 ].pos.size()==0 ) return;
+
 		int num = anim.numAnimation;
 		for ( int i = 0 ; i < static_cast<signed>(data.tblJoint.size()) ; i++ )
 		{ 
-			data.tblFrame[num][ anim.numKeyframe ].pos[i] = data.tblJoint[i].pos;
+			data.tblKeyframe[num][ anim.numKeyframe ].pos[i] = data.tblJoint[i].pos;
 		}
 	}
 	
@@ -646,11 +656,11 @@ struct Apr : public Sys
 	//------------------------------------------------------------------------------
 	{
 		int num = anim.numAnimation;
-		anim.numKeyframe = static_cast<signed>(data.tblFrame[num].size());
-		data.tblFrame[num].emplace_back();
+		anim.numKeyframe = static_cast<signed>(data.tblKeyframe[num].size());
+		data.tblKeyframe[num].emplace_back();
 		for ( const Joint3& j : data.tblJoint )
 		{
-			data.tblFrame[num][ anim.numKeyframe ].pos.emplace_back( j.pos );
+			data.tblKeyframe[num][ anim.numKeyframe ].pos.emplace_back( j.pos );
 		}
 	}
 
@@ -658,6 +668,10 @@ struct Apr : public Sys
 	void bone_ChangeAnimationDown( Data& data )
 	//------------------------------------------------------------------------------
 	{
+		if ( data.tblKeyframe.size() ==0 ) return;
+		if ( data.tblKeyframe[0].size()==0) return;
+		if ( data.tblKeyframe[0][ 0 ].pos.size()==0 ) return;
+
 		anim.numAnimation--;
 		if ( anim.numAnimation < 0 ) anim.numAnimation = 0;
 
@@ -668,7 +682,7 @@ struct Apr : public Sys
 			int i = 0;
 			for ( Joint3& j : data.tblJoint )
 			{
-				j.pos = data.tblFrame[num][ anim.numKeyframe ].pos[i];
+				j.pos = data.tblKeyframe[num][ anim.numKeyframe ].pos[i];
 				i++;
 			}
 		}
@@ -678,17 +692,23 @@ struct Apr : public Sys
 	void bone_ChangeAnimationUp( Data& data )
 	//------------------------------------------------------------------------------
 	{
+		if ( data.tblKeyframe.size() ==0 ) return;
+		if ( data.tblKeyframe[0].size()==0) return;
+		if ( data.tblKeyframe[0][ 0 ].pos.size()==0 ) return;
+
 		anim.numAnimation++; 
-		if ( anim.numAnimation > static_cast<signed>(data.tblFrame.size())-1 ) anim.numAnimation = static_cast<signed>(data.tblFrame.size())-1;
+		if ( anim.numAnimation > static_cast<signed>(data.tblKeyframe.size())-1 ) anim.numAnimation = static_cast<signed>(data.tblKeyframe.size())-1;
 
 		int num = anim.numAnimation;
 		anim.numKeyframe = 0;
+
 		{
 			// キーフレーム切り替え
 			int i = 0;
 			for ( Joint3& j : data.tblJoint )
 			{
-				j.pos = data.tblFrame[num][ anim.numKeyframe ].pos[i];
+			
+				j.pos = data.tblKeyframe[num][ anim.numKeyframe ].pos[i];
 				i++;
 			}
 		}
@@ -700,17 +720,17 @@ struct Apr : public Sys
 	{
 
 
-		anim.numAnimation = static_cast<signed>(data.tblFrame.size());
+		anim.numAnimation = static_cast<signed>(data.tblKeyframe.size());
 		anim.numKeyframe = 0;
-		data.tblFrame.emplace_back();
+		data.tblKeyframe.emplace_back();
 
 		{
 			int num = anim.numAnimation;
 
-			data.tblFrame[num].emplace_back();
+			data.tblKeyframe[num].emplace_back();
 			for ( const Joint3& j : data.tblJoint )
 			{
-				data.tblFrame[num][ anim.numKeyframe ].pos.emplace_back( j.pos );
+				data.tblKeyframe[num][ anim.numKeyframe ].pos.emplace_back( j.pos );
 			}
 		}
 	}
@@ -811,17 +831,17 @@ struct Apr : public Sys
 			}
 		}
 		{
-			int	cntAction = static_cast<signed>(data.tblFrame.size());
+			int	cntAction = static_cast<signed>(data.tblKeyframe.size());
 			for ( int num = 0 ; num < cntAction ; num++ )
 			{
 				fo << "motion" << endl;
-				int	cnt = static_cast<signed>(data.tblFrame[num].size());
+				int	cnt = static_cast<signed>(data.tblKeyframe[num].size());
 				for ( int i = 0 ; i < cnt ; i++ )
 				{
 	//							fo << to_string(i)  << endl;
 					for ( int j = 0 ; j < static_cast<signed>(data.tblJoint.size()) ; j++ )
 					{
-						fo  << "\t"<< data.tblFrame[num][ i ].pos[ j ].x << "\t" << data.tblFrame[num][ i ].pos[ j ].y << "\t" << data.tblFrame[num][ i ].pos[ j ].z << endl;
+						fo  << "\t"<< data.tblKeyframe[num][ i ].pos[ j ].x << "\t" << data.tblKeyframe[num][ i ].pos[ j ].y << "\t" << data.tblKeyframe[num][ i ].pos[ j ].z << endl;
 					}
 					if( i+1 < cnt ) fo << "," << endl;
 				}
@@ -872,14 +892,14 @@ struct Apr : public Sys
 			if ( string(buf) == "motion" )	
 			{
 				mode = ModeMotion;
-				num = static_cast<signed>(pNew->tblFrame.size());
-				pNew->tblFrame.emplace_back();
-				pNew->tblFrame[num].emplace_back();
+				num = static_cast<signed>(pNew->tblKeyframe.size());
+				pNew->tblKeyframe.emplace_back();
+				pNew->tblKeyframe[num].emplace_back();
 				continue;
 			}
 			if ( string(buf) == "," ) 
 			{
-				pNew->tblFrame[num].emplace_back();
+				pNew->tblKeyframe[num].emplace_back();
 				continue;
 			}
 			if ( string(buf) == "end" )	
@@ -936,7 +956,7 @@ struct Apr : public Sys
 						double x = stod(v[0]);
 						double y = stod(v[1]);
 						double z = stod(v[2]);
-						pNew->tblFrame[num][ pNew->tblFrame[num].size()-1 ].pos.emplace_back( x,y,z );
+						pNew->tblKeyframe[num][ pNew->tblKeyframe[num].size()-1 ].pos.emplace_back( x,y,z );
 						//	cout << x << "," << y << "," << z << endl; 
 					}
 					break;
@@ -1253,7 +1273,7 @@ struct Apr : public Sys
 			mc.tblMarker3.emplace_back( gra, figCircle, j, rad(-90) );
 		}
 
-		pPreset->tblFrame.emplace_back();
+		pPreset->tblKeyframe.emplace_back();
 
 		Data* pData = pPreset;
 
@@ -1410,8 +1430,8 @@ struct Apr : public Sys
 			gra.Print( vect2(10,16*3),string("at x=")+to_string(cam.at.x)+string("y=")+to_string(cam.at.y)+string(" z=")+to_string(cam.at.z) ); 
 			{
 				int num = anim.numAnimation;
-				gra.Print( vect2(10,16*4),string("anim=")+to_string(num) + string(" cnt=")+to_string(pData->tblFrame.size()) ); 
-				gra.Print( vect2(10,16*5),string("key=")+to_string(anim.numKeyframe) + string(" cnt=")+to_string(pData->tblFrame[num].size()) ); 
+				gra.Print( vect2(10,16*4),string("anim=")+to_string(num) + string(" cnt=")+to_string(pData->tblKeyframe.size()) ); 
+				gra.Print( vect2(10,16*5),string("key=")+to_string(anim.numKeyframe) + string(" cnt=")+to_string(pData->tblKeyframe[num].size()) ); 
 			}
 			gra.Print( vect2(10,16*31),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 
@@ -1756,22 +1776,22 @@ struct Apr : public Sys
 					double div = 10;
 					double st = 1/div;
 
-					for ( int n = -1 ; n < static_cast<signed>(data.tblFrame[num].size())-3+1 ; n++ )
+					for ( int n = -1 ; n < static_cast<signed>(data.tblKeyframe[num].size())-3+1 ; n++ )
 					{
 						int n0 = n;
 						int n1 = n+1;
 						int n2 = n+2;
 						int n3 = n+3;
 						if ( n0 < 0 ) n0 = 0;
-						if ( n3 >= static_cast<signed>(data.tblFrame[num].size()) ) n3 = n2;
+						if ( n3 >= static_cast<signed>(data.tblKeyframe[num].size()) ) n3 = n2;
 					
 					
-						for ( int j = 0 ;  j < static_cast<signed>(data.tblFrame[num][ 0 ].pos.size()) ; j++ )
+						for ( int j = 0 ;  j < static_cast<signed>(data.tblKeyframe[num][ 0 ].pos.size()) ; j++ )
 						{
-							vect3 P0 = data.tblFrame[num][ n0 ].pos[j];
-							vect3 P1 = data.tblFrame[num][ n1 ].pos[j];
-							vect3 P2 = data.tblFrame[num][ n2 ].pos[j];
-							vect3 P3 = data.tblFrame[num][ n3 ].pos[j];
+							vect3 P0 = data.tblKeyframe[num][ n0 ].pos[j];
+							vect3 P1 = data.tblKeyframe[num][ n1 ].pos[j];
+							vect3 P2 = data.tblKeyframe[num][ n2 ].pos[j];
+							vect3 P3 = data.tblKeyframe[num][ n3 ].pos[j];
 
 							double t = st;
 							vect3 a = catmull3d_func(0, P0,P1,P2,P3 );
