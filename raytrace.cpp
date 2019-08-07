@@ -113,9 +113,9 @@ struct	PrimLight
 class	Renderer 
 ////////////////////////////////////////////////////////////////////////////////
 {
-	vector<PrimSphere*>	m_tblSphere;
-	vector<PrimPlate*>	m_tblPlate;
-	vector<PrimLight*>	m_tblLight;
+	vector<PrimSphere>	m_tblSphere;
+	vector<PrimPlate>	m_tblPlate;
+	vector<PrimLight>	m_tblLight;
 	vect3	A;
 
 public:
@@ -138,7 +138,7 @@ public:
 		//	球
 		for ( int i = 0 ; i < (signed)m_tblSphere.size() ; i++ )
 		{
-			PrimSphere&	obj = *m_tblSphere[i];
+			PrimSphere&	obj = m_tblSphere[i];
 
 			vect3	O = obj.P;
 			double	r = obj.r;
@@ -200,7 +200,7 @@ public:
 		//	床
 		for ( int i = 0 ; i < (signed)m_tblPlate.size() ; i++ )
 		{
-			PrimPlate&	obj = *m_tblPlate[i];
+			PrimPlate&	obj = m_tblPlate[i];
 
 			double	f = dot(obj.N,P - obj.P);
 			if ( f > 0 )
@@ -252,28 +252,6 @@ public:
 	}
 
 	//------------------------------------------------------------------------------
-	void	Entry( PrimSphere* a )
-	//------------------------------------------------------------------------------
-	{
-		m_tblSphere.emplace_back( a );
-
-	}
-
-	//------------------------------------------------------------------------------
-	void	Entry( PrimPlate* a )
-	//------------------------------------------------------------------------------
-	{
-		m_tblPlate.emplace_back( a );
-	}
-
-	//------------------------------------------------------------------------------
-	void	Entry( PrimLight* a )
-	//------------------------------------------------------------------------------
-	{
-		m_tblLight.emplace_back( a );
-	}
-
-	//------------------------------------------------------------------------------
 	~Renderer()
 	//------------------------------------------------------------------------------
 	{
@@ -290,29 +268,29 @@ public:
 		double r,s,pw,e,tm,rl,rr;
 		vect3	P,C,N;
 
-	#define	SCENE 1
+	#define	SCENE 3
 	#if SCENE==1
-		Entry( new PrimPlate( P=vect3( 0  ,  0 ,0.0),N=vect3(0,1,0),C=vect3(0.8,0.8,0.8),rl=0.5,rr=1.0 ,pw=20,e= 0.0,tm=0.0 ) );
-		Entry( new PrimSphere(vect3( 0.0 , 1.25, -2       ),   0.5 , vect3(1  , 0.2, 0.2), 0.5, 1.0, 20, 0.0, 0.0 ) );
-		Entry( new PrimSphere(vect3( 0.0 , 0.5 , -2-0.433 ),   0.5 , vect3(0.0, 0.0, 0.0), 1.0, 1.0, 20, 0.0, 0.0 ) );
-		Entry( new PrimSphere(vect3( 0.5 , 0.5 , -2+0.433 ),   0.5 , vect3(0.2, 0.2, 1.0), 0.5, 1.0, 20, 0.0, 0.0 ) );
-		Entry( new PrimSphere(vect3(-0.5 , 0.5 , -2+0.433 ),   0.5 , vect3(0.0, 1.0, 0.0), 0.5, 1.0, 20, 0.0, 0.0 ) );
-		Entry( new PrimLight( vect3( 0   ,  30 ,  0 ), vect3(1,1,1)*1300 )  );
+		m_tblPlate.push_back( PrimPlate( P=vect3( 0  ,  0 ,0.0),N=vect3(0,1,0),C=vect3(0.8,0.8,0.8),rl=0.5,rr=1.0 ,pw=20,e= 0.0,tm=0.0 ) );
+		m_tblSphere.push_back( PrimSphere(vect3( 0.0 , 1.25, -2       ),   0.5 , vect3(1  , 0.2, 0.2), 0.5, 1.0, 20, 0.0, 0.0 ) );
+		m_tblSphere.push_back( PrimSphere(vect3( 0.0 , 0.5 , -2-0.433 ),   0.5 , vect3(0.0, 0.0, 0.0), 1.0, 1.0, 20, 0.0, 0.0 ) );
+		m_tblSphere.push_back( PrimSphere(vect3( 0.5 , 0.5 , -2+0.433 ),   0.5 , vect3(0.2, 0.2, 1.0), 0.5, 1.0, 20, 0.0, 0.0 ) );
+		m_tblSphere.push_back( PrimSphere(vect3(-0.5 , 0.5 , -2+0.433 ),   0.5 , vect3(0.0, 1.0, 0.0), 0.5, 1.0, 20, 0.0, 0.0 ) );
+		m_tblLight.push_back( PrimLight( vect3( 0   ,  30 ,  0 ), vect3(1,1,1)*1300 )  );
 		A = vect3( 0.2,0.4,0.6)*0.0;
 	#endif
 	#if SCENE==2 //5 balls
-		Entry( new PrimPlate( P=vect3( 0  ,  0 ,0.0),N=vect3(0,1,0),C=vect3(0.8,0.8,0.8),rl=0.5,rr=1.0 ,pw=20,e= 0.0,tm=0.0 ) );
-		Entry( new PrimSphere(vect3(-2.0 , 0.5 , -2 ),   0.5 , vect3(0.0, 0.0, 0.0), 1.0 , 1.0, 20, 0.0, 0.0 ) );
-		Entry( new PrimSphere(vect3(-1.0 , 0.5 , -2 ),   0.5 , vect3(0.0, 0.0, 0.0), 0.75, 1.0, 20, 0.0, 0.0 ) );
-		Entry( new PrimSphere(vect3( 0.0 , 0.5 , -2 ),   0.5 , vect3(0.0, 0.0, 0.0), 0.5 , 1.0, 20, 0.0, 0.0 ) );
-		Entry( new PrimSphere(vect3( 1.0 , 0.5 , -2 ),   0.5 , vect3(0.0, 0.0, 0.0), 0.25, 1.0, 20, 0.0, 0.0 ) );
-		Entry( new PrimSphere(vect3( 2.0 , 0.5 , -2 ),   0.5 , vect3(0.0, 0.0, 0.0), 0.0 , 1.0, 20, 0.0, 0.0 ) );
-		Entry( new PrimLight( vect3( 0   ,  20 ,  -2 ), vect3(1.0, 1.0, 1.0)*800 ) );
+		m_tblPlate.push_back( PrimPlate( P=vect3( 0  ,  0 ,0.0),N=vect3(0,1,0),C=vect3(0.8,0.8,0.8),rl=0.5,rr=1.0 ,pw=20,e= 0.0,tm=0.0 ) );
+		m_tblSphere.push_back( PrimSphere(vect3(-2.0 , 0.5 , -2 ),   0.5 , vect3(0.0, 0.0, 0.0), 1.0 , 1.0, 20, 0.0, 0.0 ) );
+		m_tblSphere.push_back( PrimSphere(vect3(-1.0 , 0.5 , -2 ),   0.5 , vect3(0.0, 0.0, 0.0), 0.75, 1.0, 20, 0.0, 0.0 ) );
+		m_tblSphere.push_back( PrimSphere(vect3( 0.0 , 0.5 , -2 ),   0.5 , vect3(0.0, 0.0, 0.0), 0.5 , 1.0, 20, 0.0, 0.0 ) );
+		m_tblSphere.push_back( PrimSphere(vect3( 1.0 , 0.5 , -2 ),   0.5 , vect3(0.0, 0.0, 0.0), 0.25, 1.0, 20, 0.0, 0.0 ) );
+		m_tblSphere.push_back( PrimSphere(vect3( 2.0 , 0.5 , -2 ),   0.5 , vect3(0.0, 0.0, 0.0), 0.0 , 1.0, 20, 0.0, 0.0 ) );
+		m_tblLight.push_back( PrimLight( vect3( 0   ,  20 ,  -2 ), vect3(1.0, 1.0, 1.0)*800 ) );
 		A = vect3( 0.2,0.4,0.6)*1.0;
 	#endif
 	#if SCENE==3 // ring
-		Entry( new PrimPlate( P=vect3( 0  ,  0 ,0.0),N=vect3(0,1,0),C=vect3(0.8,0.8,0.8),rl=0.5,rr=1.0 ,pw=20,e= 0.0,tm=0.0 ) );
-		Entry( new PrimSphere(  vect3( 0 , 1.0 , 0 ),   0.5 ,  vect3(0.0, 0.0, 0.0),   0.5,   1.0 ,  100,  0.0,  0.0 ) );
+		m_tblPlate.push_back( PrimPlate( P=vect3( 0  ,  0 ,0.0),N=vect3(0,1,0),C=vect3(0.8,0.8,0.8),rl=0.5,rr=1.0 ,pw=20,e= 0.0,tm=0.0 ) );
+		m_tblSphere.push_back( PrimSphere(  vect3( 0 , 1.0 , 0 ),   0.5 ,  vect3(0.0, 0.0, 0.0),   0.5,   1.0 ,  100,  0.0,  0.0 ) );
 		int	max = 16*3;
 		for ( int i = 0 ; i < max ; i++ )
 		{
@@ -321,30 +299,30 @@ public:
 			double	x = cos(th);
 			double	z = sin(th) ;
 			double	y = cos(th2) +1.2;
-			Entry( new PrimSphere(P=vect3( x , y , z ),r=0.2 ,C=vect3( x, y,  z) ,rl=0.2,rr=0.0 ,pw=100,e= 0.0,tm=0.0 ) );
+			m_tblSphere.push_back( PrimSphere(P=vect3( x , y , z ),r=0.2 ,C=vect3( x, y,  z) ,rl=0.2,rr=0.0 ,pw=100,e= 0.0,tm=0.0 ) );
 
 		}
-		Entry( new PrimLight( vect3( 0   ,  30 ,  0 ), vect3(1,1,1)*1800 )  );
-		Entry( new PrimLight( vect3(-30   ,  30 ,  0 ), vect3(0.5,1,1)*1800 )  );
-		Entry( new PrimLight( vect3(60   ,  80 ,  0 ), vect3(1,1,0.5)*4800 )  );
-		Entry( new PrimLight( vect3(-60   ,  80 , 0 ), vect3(1,0.5,1)*4800 )  );
+		m_tblLight.push_back( PrimLight( vect3( 0   ,  30 ,  0 ), vect3(1,1,1)*1800 )  );
+		m_tblLight.push_back( PrimLight( vect3(-30   ,  30 ,  0 ), vect3(0.5,1,1)*1800 )  );
+		m_tblLight.push_back( PrimLight( vect3(60   ,  80 ,  0 ), vect3(1,1,0.5)*4800 )  );
+		m_tblLight.push_back( PrimLight( vect3(-60   ,  80 , 0 ), vect3(1,0.5,1)*4800 )  );
 		A = vect3( 0.2,0.4,0.6)*0.0;
 	#endif
 	#if SCENE==4 //twin balls
-		Entry( new PrimPlate( vect3( 0   ,  0 ,  0    ), normalize(vect3(0, 1,0))  , vect3(0.8, 0.8, 0.8), 0.5, 1.0, 20, 0.0, 0.0 ) );
-		Entry( new PrimSphere(vect3(-1.0 , 1.0 , -2 ),   1.0 , vect3(1.0, 0.5, 0.5), 0.2, 1.0, 20, 0.0, 0.0 ) );
-		Entry( new PrimSphere(vect3( 1.0 , 1.0 , -2 ),   1.0 , vect3(0.0, 0.0, 0.0), 0.2, 1.0, 20, 0.0, 0.0 ) );
-		Entry( new PrimLight( vect3( 0   ,  20 ,  -2 ), vect3(1.0, 1.0, 1.0)*1800 ) );
+		m_tblPlate.push_back( PrimPlate( vect3( 0   ,  0 ,  0    ), normalize(vect3(0, 1,0))  , vect3(0.8, 0.8, 0.8), 0.5, 1.0, 20, 0.0, 0.0 ) );
+		m_tblSphere.push_back( PrimSphere(vect3(-1.0 , 1.0 , -2 ),   1.0 , vect3(1.0, 0.5, 0.5), 0.2, 1.0, 20, 0.0, 0.0 ) );
+		m_tblSphere.push_back( PrimSphere(vect3( 1.0 , 1.0 , -2 ),   1.0 , vect3(0.0, 0.0, 0.0), 0.2, 1.0, 20, 0.0, 0.0 ) );
+		m_tblLight.push_back( PrimLight( vect3( 0   ,  20 ,  -2 ), vect3(1.0, 1.0, 1.0)*1800 ) );
 		A = vect3( 0.2,0.4,0.6)*1.0;
 	#endif
 	#if SCENE==5//2 balls
-		Entry( new PrimPlate( P=vect3(0  , 0 ,0.0),N=vect3(0,1,0),C=vect3(0.8,0.8,0.8),rl=0.5,rr=1.0 ,pw=20,e= 0.0,tm=0.0 ) );
-		Entry( new PrimSphere(P=vect3( 0.5,1.0,3.0),r=0.5       ,C=vect3(0.0,0.0,1.0),rl=0.5,rr=1.0 ,pw=20,e=10.0,tm=0.0 ) );
-		Entry( new PrimSphere(P=vect3(-0.5,1.0,3.0),r=0.5       ,C=vect3(0.0,1.0,0.0),rl=0.5,rr=1.0 ,pw=20,e=10.0,tm=0.0 ) );
-		Entry( new PrimSphere(P=vect3( 0.0,1.5,3.0),r=0.5       ,C=vect3(1.0,0.0,0.0),rl=0.5,rr=1.0 ,pw=20,e=10.0,tm=0.0 ) );
-		Entry( new PrimSphere(P=vect3( 0.0,0.5,3.0),r=0.5       ,C=vect3(1.0,1.0,0.0),rl=0.5,rr=1.0 ,pw=20,e=10.0,tm=0.0 ) );
-		Entry( new PrimSphere(P=vect3( 0.0,1.0,2.75),r=0.25      ,C=vect3(1.0,1.0,1.0),rl=0.5,rr=1.0 ,pw=20,e=10.0,tm=0.0 ) );
-		Entry( new PrimLight( P=vect3( 1.0 ,15, 0 )          ,C=vect3(1,1,1)*360 )  );
+		m_tblPlate.push_back( PrimPlate( P=vect3(0  , 0 ,0.0),N=vect3(0,1,0),C=vect3(0.8,0.8,0.8),rl=0.5,rr=1.0 ,pw=20,e= 0.0,tm=0.0 ) );
+		m_tblSphere.push_back( PrimSphere(P=vect3( 0.5,1.0,3.0),r=0.5       ,C=vect3(0.0,0.0,1.0),rl=0.5,rr=1.0 ,pw=20,e=10.0,tm=0.0 ) );
+		m_tblSphere.push_back( PrimSphere(P=vect3(-0.5,1.0,3.0),r=0.5       ,C=vect3(0.0,1.0,0.0),rl=0.5,rr=1.0 ,pw=20,e=10.0,tm=0.0 ) );
+		m_tblSphere.push_back( PrimSphere(P=vect3( 0.0,1.5,3.0),r=0.5       ,C=vect3(1.0,0.0,0.0),rl=0.5,rr=1.0 ,pw=20,e=10.0,tm=0.0 ) );
+		m_tblSphere.push_back( PrimSphere(P=vect3( 0.0,0.5,3.0),r=0.5       ,C=vect3(1.0,1.0,0.0),rl=0.5,rr=1.0 ,pw=20,e=10.0,tm=0.0 ) );
+		m_tblSphere.push_back( PrimSphere(P=vect3( 0.0,1.0,2.75),r=0.25      ,C=vect3(1.0,1.0,1.0),rl=0.5,rr=1.0 ,pw=20,e=10.0,tm=0.0 ) );
+		m_tblLight.push_back( PrimLight( P=vect3( 1.0 ,15, 0 )          ,C=vect3(1,1,1)*360 )  );
 		A = vect3( 0.2,0.4,0.6)*0.5;
 	#endif
 	}
@@ -359,7 +337,7 @@ public:
 		m_cntRay++;
 
 		Surface sur;
-		PrimLight&	lgt = *m_tblLight[0];
+		PrimLight&	lgt = m_tblLight[0];
 		vect3	Lc;
 		vect3	L;
 		double	d;
@@ -394,7 +372,6 @@ public:
 		}
 		else
 		{
-//			L = normalize(sur.Q - lgt.P);
 			L = (sur.Q - lgt.P).normalize();
 			Lc = lgt.C / dot(sur.Q - lgt.P, sur.Q - lgt.P);
 			int n = 20;
@@ -448,17 +425,23 @@ public:
 };
 
 //------------------------------------------------------------------------------
-void	raytrace( SysGra& gra, int py )
+void	raytrace( SysGra& gra )
 //------------------------------------------------------------------------------
 {
 	Renderer ren;
 
+	static int px = 0;
+	static int py = 0;
+
 	{
 		int width	= gra.GetWidth(); 
 		int height	= gra.GetHeight(); 
+
+		double	aspect = (double)width / (double)height;
+		double	center_x = -((double)width / (double)height)/2;
 	
-		vect3	posScr = vect3(0,1.0,-12+8);
-		vect3	posEye = vect3(0,1.0,-17+8);
+		vect3	posScr = vect3(center_x,1.0,-12+8);
+		vect3	posEye = vect3(center_x,1.0,-17+8);
 
 		double r,s,p,e,t,rl,rr;
 		vect3	C;
@@ -467,9 +450,9 @@ void	raytrace( SysGra& gra, int py )
 		int	cntRay = 0;
 //		for( int py = 0 ; py < height ; py++ )
 		{
-			for( int px = 0 ; px < width ; px++ )
+//			for( int px = 0 ; px < width ; px++ )
 			{
-				double x = ((double)px / width) *2.0-1.0;
+				double x = ((double)px / width) *2.0*aspect-1.0;
 				double y = ((double)py / height) *2.0-1.0;
 				vect3	P = vect3( x, y, 0 ) + posScr;
 				vect3	I = normalize(P - posEye);
@@ -486,6 +469,9 @@ void	raytrace( SysGra& gra, int py )
 			}
 		}
 		
+		px++;
+		if ( px >= width ) {px = 0;py++;}
+		if ( py >= height ) py = 0;
 	}
 
 }

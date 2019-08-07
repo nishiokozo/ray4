@@ -146,8 +146,6 @@ struct Apr : public Sys
 		const SysGra&	gra;
 		const Figure&	fig;
 		Joint3&	joint;
-//		vect3&	posx;
-//		vect2&	dispx;
 		bool 	bRectSelected;		//	矩形選択中、選択＆非選択
 		bool 	bRectIn;			//	矩形選択中、矩形選択対象
 		bool 	bSelected;			//	選択
@@ -156,8 +154,7 @@ struct Apr : public Sys
 		int		colNormal = rgb(1,1,0);
 		int		colSelected = rgb(1,0,0);
 
-//		Marker3( SysGra& _gra, Figure& _fig, Joint3& _joint, vect3& _pos, vect2& _disp, double _th ) : gra(_gra), fig(_fig), joint(_joint), posx(_pos), dispx(_disp)
-		Marker3( SysGra& _gra, Figure& _fig, Joint3& _joint, double _th ) : gra(_gra), fig(_fig), joint(_joint)//, posx(_pos), dispx(_disp)
+		Marker3( SysGra& _gra, Figure& _fig, Joint3& _joint, double _th ) : gra(_gra), fig(_fig), joint(_joint)
 		{
 			bSelected		= false;
 			bRectIn			= false;
@@ -165,7 +162,7 @@ struct Apr : public Sys
 			bAffectable		= false;
 			th				= _th;
 		}
-		Marker3(const Marker3& a) : gra(a.gra), fig(a.fig), joint(a.joint)//, posx(a.posx), dispx(a.dispx)
+		Marker3(const Marker3& a) : gra(a.gra), fig(a.fig), joint(a.joint)
 		{
 			bSelected		= a.bSelected;
 			bRectIn			= a.bRectIn;
@@ -175,29 +172,6 @@ struct Apr : public Sys
 		}	
 		const Marker3&	operator=(Marker3&& a){return a;}	
 
-/*
-		//------------------------------------------------------------------------------
-		void draw()
-		//------------------------------------------------------------------------------
-		{
-			bool flg =  bSelected;
-			
-			if ( bRectIn )
-			{
-				flg = bRectSelected;
-			}
-			
-			if ( flg )			
-			{
-				fig.draw( disp,th, colSelected );
-			}
-			else
-			{
-				fig.draw( disp,th, colNormal );
-			}
-		
-		}
-*/
 	};
 
 
@@ -377,9 +351,6 @@ struct Apr : public Sys
 
 		}
 
-//	} mc;
-//	struct
-//	{
 		vector<Marker3>	tblMarker3;
 
 	} mc;
@@ -413,7 +384,7 @@ struct Apr : public Sys
 	// カメラ
 	struct
 	{
-		vect3	pos = vect3( -2,-2, -2);
+		vect3	pos = vect3( -2,-2, -2 );
 		vect3 	at = vect3( 0, -1, 0 );
 		vect3	up = vect3( 0, 1, 0);
 	  	mat44	mat;		
@@ -423,8 +394,9 @@ struct Apr : public Sys
 	{
 		double	fovy;		// 画角
 		double	sz;			// 投影面までの距離
-		double	ox;			// 描画画面の中心W
-		double	oy;			// 描画画面の中心H
+		double	sc;			// 投影面の高さ/2（描画スケール）
+		double	cx;			// 描画画面の中心W
+		double	cy;			// 描画画面の中心H
 		double	width;		// 描画画面の解像度W/2
 		double	height;		// 描画画面の解像度H/2
 		double	aspect;		// 描画画面のアスペクト比
@@ -441,14 +413,32 @@ struct Apr : public Sys
 		void Update( vect2 screensize )
 		//--------------------------------------------------------------------------
 		{
-			sz = 1/tan(rad(fovy)/2);				// 投影面までの距離
-			ox		= screensize.x/2;				// 描画画面の中心W
-			oy		= screensize.y/2;				// 描画画面の中心H
+		#if 1
+			sc = 1;									// 投影面の高さ/2
+			sz = sc/tan(rad(fovy)/2);				// 投影面までの距離
+		#else
+			sz = 1;									// 投影面までの距離
+			sc = sz*tan(rad(fovy)/2);				// 投影面の高さ/2
+		#endif
+			cx		= screensize.x/2;				// 描画画面の中心W
+			cy		= screensize.y/2;				// 描画画面の中心H
 			width	= screensize.x/2;				// 描画画面の解像度W/2
 			height	= screensize.y/2;				// 描画画面の解像度H/2
 			aspect	= screensize.y/screensize.x;	// 描画画面のアスペクト比
 		} 
 
+		//--------------------------------------------------------------------------
+		vect3 calcPoint( vect3 v ) const
+		//--------------------------------------------------------------------------
+		{
+			vect3 ret;
+			double w = 1/(v.z+sz);
+			ret.x = v.x/(v.z+sz)	*sz *sc *width  *aspect	+cx;
+			ret.y = v.y/(v.z+sz)	*sz *sc *height			+cy;
+			ret.z = w;
+			return ret;
+		}
+		
 		//--------------------------------------------------------------------------
 		bool ScissorLine( vect3 v0, vect3 v1, vect3& va, vect3& vb ) const
 		//--------------------------------------------------------------------------
@@ -490,17 +480,7 @@ struct Apr : public Sys
 			return ( va.z > 0 && vb.z > 0 );
 		}			
 
-		//--------------------------------------------------------------------------
-		vect3 calcPoint( vect3 v ) const
-		//--------------------------------------------------------------------------
-		{
-			vect3 ret;
-			double w = 1/(v.z+sz);
-			ret.x = v.x*w	*sz* width  *aspect	+ox;
-			ret.y = v.y*w	*sz* height			+oy;
-			ret.z = w;
-			return ret;
-		}
+
 
 	};
 	Pers pers;
@@ -547,11 +527,6 @@ struct Apr : public Sys
 
 			data.tblJoint[j].pos = b;
 
-//			vect3 v0 = pers.calcPoint( b * cam.mat.invers() );
-//			if ( v0.z > 0 )
-//			{ 
-//				gra.Circle( vect2(v0.x,v0.y), 5, rgb(1,0,0));
-//			}
 		}
 
 		if ( anim.bForward ) anim.t+=anim.dt; else anim.t-=anim.dt;
@@ -1000,7 +975,6 @@ struct Apr : public Sys
 			figTriangle.col = rgb(0,1,1);
 		}
 
-//		Figure figCircle=Figure(gra);
 		{
 			int s=0;
 			for ( int i = 0 ; i < 360 ; i+=45 )
@@ -1124,12 +1098,12 @@ struct Apr : public Sys
 		vector<Bone2> tblBone_2d;
 		if(1)
 		{	//	対△
-			int ox=200,oy=300;
+			int cx=200,cy=300;
 
-			tblJoint_2d.emplace_back( vect2( ox,oy) );
-			tblJoint_2d.emplace_back( vect2( ox-20,oy+60) );
-			tblJoint_2d.emplace_back( vect2( ox+20,oy+60) );
-			tblJoint_2d.emplace_back( vect2( ox+0 ,oy+120) );
+			tblJoint_2d.emplace_back( vect2( cx,cy) );
+			tblJoint_2d.emplace_back( vect2( cx-20,cy+60) );
+			tblJoint_2d.emplace_back( vect2( cx+20,cy+60) );
+			tblJoint_2d.emplace_back( vect2( cx+0 ,cy+120) );
 
 			tblBone_2d.emplace_back( tblJoint_2d[0], tblJoint_2d[1] );
 			tblBone_2d.emplace_back( tblJoint_2d[0], tblJoint_2d[2] );
@@ -1139,7 +1113,7 @@ struct Apr : public Sys
 		}
 		if(0)
 		{	//	四角格子メッシュ
-			int ox=200,oy=300;
+			int cx=200,cy=300;
 			const int  W=40;
 			const int  H=80;
 			const int  X=2;
@@ -1148,7 +1122,7 @@ struct Apr : public Sys
 			{
 				for ( int y = 0 ; y < Y ; y++ )
 				{
-					tblJoint_2d.emplace_back( vect2( x*W+ox,y*H+oy) );
+					tblJoint_2d.emplace_back( vect2( x*W+cx,y*H+cy) );
 				}
 			}
 			for ( int y=0 ; y < Y-1 ; y++ )
@@ -1212,24 +1186,24 @@ struct Apr : public Sys
 		Data* pPreset = new Data;
 
 		{	//	人
-			double ox=0,oy=-160,os=0.01;
+			double cx=0,cy=-160,os=0.01;
 
-			pPreset->tblJoint.emplace_back( os*vect3( ox-10,	oy- 20,	0 )	);//0
-			pPreset->tblJoint.emplace_back( os*vect3( ox+10,	oy- 20,	0 )	);//1
-			pPreset->tblJoint.emplace_back( os*vect3( ox+ 0,	oy+  0,	0 )	);//2
-			pPreset->tblJoint.emplace_back( os*vect3( ox-20,	oy+  0,	0 )	);//3
-			pPreset->tblJoint.emplace_back( os*vect3( ox+20,	oy+  0,	0 )	);//4
-			pPreset->tblJoint.emplace_back( os*vect3( ox+ 0,	oy+ 40,	0 )	);//5
-			pPreset->tblJoint.emplace_back( os*vect3( ox-15,	oy+ 70,	0 )	);//6
-			pPreset->tblJoint.emplace_back( os*vect3( ox+15,	oy+ 70,	0 )	);//7
-			pPreset->tblJoint.emplace_back( os*vect3( ox-15,	oy+115,	0 )	);//8
-			pPreset->tblJoint.emplace_back( os*vect3( ox-15,	oy+160,	0 )	);//9
-			pPreset->tblJoint.emplace_back( os*vect3( ox+15,	oy+115,	0 )	);//10
-			pPreset->tblJoint.emplace_back( os*vect3( ox+15,	oy+160,	0 )	);//11
-			pPreset->tblJoint.emplace_back( os*vect3( ox-20,	oy+ 40,	0 )	);//12
-			pPreset->tblJoint.emplace_back( os*vect3( ox-20,	oy+ 80,	0 )	);//13
-			pPreset->tblJoint.emplace_back( os*vect3( ox+20,	oy+ 40,	0 )	);//14
-			pPreset->tblJoint.emplace_back( os*vect3( ox+20,	oy+ 80,	0 )	);//15
+			pPreset->tblJoint.emplace_back( os*vect3( cx-10,	cy- 20,	0 )	);//0
+			pPreset->tblJoint.emplace_back( os*vect3( cx+10,	cy- 20,	0 )	);//1
+			pPreset->tblJoint.emplace_back( os*vect3( cx+ 0,	cy+  0,	0 )	);//2
+			pPreset->tblJoint.emplace_back( os*vect3( cx-20,	cy+  0,	0 )	);//3
+			pPreset->tblJoint.emplace_back( os*vect3( cx+20,	cy+  0,	0 )	);//4
+			pPreset->tblJoint.emplace_back( os*vect3( cx+ 0,	cy+ 40,	0 )	);//5
+			pPreset->tblJoint.emplace_back( os*vect3( cx-15,	cy+ 70,	0 )	);//6
+			pPreset->tblJoint.emplace_back( os*vect3( cx+15,	cy+ 70,	0 )	);//7
+			pPreset->tblJoint.emplace_back( os*vect3( cx-15,	cy+115,	0 )	);//8
+			pPreset->tblJoint.emplace_back( os*vect3( cx-15,	cy+160,	0 )	);//9
+			pPreset->tblJoint.emplace_back( os*vect3( cx+15,	cy+115,	0 )	);//10
+			pPreset->tblJoint.emplace_back( os*vect3( cx+15,	cy+160,	0 )	);//11
+			pPreset->tblJoint.emplace_back( os*vect3( cx-20,	cy+ 40,	0 )	);//12
+			pPreset->tblJoint.emplace_back( os*vect3( cx-20,	cy+ 80,	0 )	);//13
+			pPreset->tblJoint.emplace_back( os*vect3( cx+20,	cy+ 40,	0 )	);//14
+			pPreset->tblJoint.emplace_back( os*vect3( cx+20,	cy+ 80,	0 )	);//15
 
 		 	pPreset->tblBone.emplace_back( pPreset->tblJoint, 0, 1 );	//head
 			pPreset->tblBone.emplace_back( pPreset->tblJoint, 1, 2 );
@@ -1321,7 +1295,14 @@ struct Apr : public Sys
 
 
 
-		
+	#if 0
+			// レイトレ
+		while( Update() )
+	 	{
+			raytrace( gra );
+		}
+		return 0;
+	#endif	
 
 
 		//===========================================================================
@@ -1334,53 +1315,49 @@ struct Apr : public Sys
 			// パース更新
 			pers.Update( vect2( m.width, m.height ) );
 
-
-
-
-	 	#if 0
-			// レイトレ
-	 		static int py=0;
-			raytrace( gra, py++ );
-			if ( py >= m.height ) py=0;
-		#else
-
 			// 画面クリア
 			gra.Clr(rgb(0.3,0.3,0.3));
-		#endif
 
 			{
-				gra.Print(vect2(100,16*1),string("[S]ave/[L]oad mot"));
+				int y = 16;
+
 				// キーフレームロード
+				gra.Print(vect2(10,16*y++),string("[L]oad"));
 				if ( keys.L.hi )
 				{
 					pData = bone_load( "human.mot");
 				}
 
 				// キーフレームセーブ
+				gra.Print(vect2(10,16*y++),string("[S]ave"));
 				if ( keys.S.hi )
 				{
 					bone_save( *pData, "human.mot" );
 				}
 
 				// キーフレームへ反映
+				gra.Print(vect2(10,16*y++),string("[J] Refrect"));
 				if ( keys.J.hi )
 				{
 					bone_RefrectKeyframe( *pData );
 				}
 
 				// キーフレーム記録
+				gra.Print(vect2(10,16*y++),string("[K] Add Keyframe"));
 				if ( keys.K.hi )
 				{
 					bone_AddKeyframe( *pData );
 				}
 
 				// キーフレーム次
+				gra.Print(vect2(10,16*y++),string("[RIGHT] keyframe next"));
 				if ( keys.RIGHT.rep )
 				{
 					bone_ChangeKeyframeUp( *pData );
 				}
 
 				// キーフレーム前
+				gra.Print(vect2(10,16*y++),string("[LEFT] keyframe prev"));
 				if ( keys.LEFT.rep )
 				{
 					bone_ChangeKeyframeDown( *pData );
@@ -1388,25 +1365,28 @@ struct Apr : public Sys
 
 
 				// アニメーション記録
+				gra.Print(vect2(10,16*y++),string("[I] Add Animation"));
 				if ( keys.I.hi )
 				{
 					bone_AddAnimation( *pData );
 				}
 
 				// アニメーション次
+				gra.Print(vect2(10,16*y++),string("[UP] Animation next"));
 				if ( keys.UP.rep )
 				{
 					bone_ChangeAnimationDown( *pData );
 				}
 
 				// アニメーション前
+				gra.Print(vect2(10,16*y++),string("[DOWN] Animation prev"));
 				if ( keys.DOWN.rep )
 				{
 					bone_ChangeAnimationUp( *pData );
 				}
 
-
 				// アニメーション再生
+				gra.Print(vect2(10,16*y++),string("[P]lay Animation"));
 				if ( keys.P.hi )
 				{
 					anim.bForward = true;
@@ -1425,15 +1405,20 @@ struct Apr : public Sys
 				
 			}
 
-			gra.Print(vect2(10,16*1),string("[Y]/[H] fovY:")+to_string(int(pers.fovy)));
-			gra.Print( vect2(10,16*2),string("far:")+to_string((cam.pos-cam.at).length())); 
-			gra.Print( vect2(10,16*3),string("at x=")+to_string(cam.at.x)+string("y=")+to_string(cam.at.y)+string(" z=")+to_string(cam.at.z) ); 
 			{
-				int num = anim.numAnimation;
-				gra.Print( vect2(10,16*4),string("anim=")+to_string(num) + string(" cnt=")+to_string(pData->tblKeyframe.size()) ); 
-				gra.Print( vect2(10,16*5),string("key=")+to_string(anim.numKeyframe) + string(" cnt=")+to_string(pData->tblKeyframe[num].size()) ); 
+				int y = 1;
+				gra.Print(vect2(10,16*y++),string("[Y]/[H] fovY:")+to_string(int(pers.fovy)));
+				gra.Print(vect2(10,16*y++),string("sz:")+to_string(pers.sz) +string(" sc:")+to_string(pers.sc));
+				gra.Print( vect2(10,16*y++),string("far:")+to_string((cam.pos-cam.at).length())); 
+				gra.Print( vect2(10,16*y++),string("at  x=")+to_string(cam.at.x)+string(" y=")+to_string(cam.at.y)+string(" z=")+to_string(cam.at.z) ); 
+				gra.Print( vect2(10,16*y++),string("pos x=")+to_string(cam.pos.x)+string(" y=")+to_string(cam.pos.y)+string(" z=")+to_string(cam.pos.z) ); 
+				{
+					int num = anim.numAnimation;
+					gra.Print( vect2(10,16*y++),string("anim=")+to_string(num) + string(" cnt=")+to_string(pData->tblKeyframe.size()) ); 
+					gra.Print( vect2(10,16*y++),string("key=")+to_string(anim.numKeyframe) + string(" cnt=")+to_string(pData->tblKeyframe[num].size()) ); 
+				}
+				gra.Print( vect2(10,16*31),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 			}
-			gra.Print( vect2(10,16*31),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 
 			if ( !keys.ALT.on )
 			{
@@ -2310,11 +2295,11 @@ else
 			}
 			// figTriangle
 			{
-				int ox=56,oy=464;
-				int sx =ox-128;
-				int sy =oy-128;
-				int ex =ox+128;
-				int ey =oy+128;
+				int cx=56,cy=464;
+				int sx =cx-128;
+				int sy =cy-128;
+				int ex =cx+128;
+				int ey =cy+128;
 
 				static int cnt = 0;
 	#if 0
@@ -2324,7 +2309,7 @@ else
 				};
 				figTriangle.draw( func, 256,256,rad(cnt), rgb(0,1,1) );
 	#else
-				figTriangle.draw( vect2(ox,oy),rad(cnt), rgb(0,1,1) );
+				figTriangle.draw( vect2(cx,cy),rad(cnt), rgb(0,1,1) );
 	#endif
 				cnt++;
 			}
