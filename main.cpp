@@ -589,6 +589,8 @@ struct Apr : public Sys
 	void bone_ChangeKeyframeDown( Data& data )
 	//------------------------------------------------------------------------------
 	{
+		anim.bPlaying = false;
+
 		int num = anim.num;
 		if ( data.animations.size() ==0 ) return;
 		if ( data.animations[num].pose.size()==0) return;
@@ -614,6 +616,8 @@ struct Apr : public Sys
 	void bone_ChangeKeyframeUp( Data& data )
 	//------------------------------------------------------------------------------
 	{
+		anim.bPlaying = false;
+
 		int num = anim.num;
 		if ( data.animations.size() ==0 ) return;
 		if ( data.animations[num].pose.size()==0) return;
@@ -639,6 +643,8 @@ struct Apr : public Sys
 	void bone_RefrectKeyframe( Data& data )
 	//------------------------------------------------------------------------------
 	{
+		anim.bPlaying = false;
+
 		int num = anim.num;
 		if ( data.animations.size() ==0 ) return;
 		if ( data.animations[num].pose.size()==0) return;
@@ -654,9 +660,9 @@ struct Apr : public Sys
 	void bone_AddKeyframe( Data& data )
 	//------------------------------------------------------------------------------
 	{
+		anim.bPlaying = false;
+
 		int num = anim.num;
-//		anim.key = static_cast<signed>(data.animations[num].pose.size());
-//		data.animations[num].pose.emplace_back();
 
 		data.animations[num].pose.emplace( data.animations[num].pose.begin() + anim.key );
 		for ( const Joint3& j : data.tblJoint )
@@ -669,6 +675,8 @@ struct Apr : public Sys
 	void bone_DeleteKeyframe( Data& data )
 	//------------------------------------------------------------------------------
 	{
+		anim.bPlaying = false;
+
 		int num = anim.num;
 		if ( data.animations.size() ==0 ) return;
 		if ( data.animations[num].pose.size()==0) return;
@@ -684,6 +692,8 @@ struct Apr : public Sys
 	void bone_PrevAnimation( Data& data )
 	//------------------------------------------------------------------------------
 	{
+		anim.bPlaying = false;
+
 		anim.num--;
 		if ( anim.num < 0 ) anim.num = 0;
 
@@ -711,6 +721,7 @@ struct Apr : public Sys
 	void bone_NextAnimation( Data& data )
 	//------------------------------------------------------------------------------
 	{
+		anim.bPlaying = false;
 
 		anim.num++; 
 		if ( anim.num > static_cast<signed>(data.animations.size())-1 ) anim.num = static_cast<signed>(data.animations.size())-1;
@@ -721,7 +732,6 @@ struct Apr : public Sys
 		if ( data.animations[num].pose[ 0 ].pos.size()==0 ) return;
 
 		{
-			int num = anim.num;
 			anim.key = 0;
 
 			{
@@ -741,6 +751,8 @@ struct Apr : public Sys
 	void bone_AddAnimation( Data& data )
 	//------------------------------------------------------------------------------
 	{
+		anim.bPlaying = false;
+
 		anim.num = static_cast<signed>(data.animations.size());
 		anim.key = 0;
 		data.animations.emplace_back();
@@ -835,6 +847,8 @@ struct Apr : public Sys
 	void bone_save( Data& data, const char* filename )
 	//------------------------------------------------------------------------------
 	{
+		anim.bPlaying = false;
+
 		fstream fo( filename, ios::out );
 
 		{
@@ -876,6 +890,8 @@ struct Apr : public Sys
 	Data*	bone_load( const char* filename )
 	//------------------------------------------------------------------------------
 	{
+		anim.bPlaying = false;
+
 		Data*	pNew = new Data;
 
 		fstream fi( filename, ios::in );
@@ -1228,7 +1244,7 @@ struct Apr : public Sys
 
 		//人
 
-
+/*
 		Data* pPreset = new Data;
 
 		{	//	人
@@ -1296,7 +1312,9 @@ struct Apr : public Sys
 		pPreset->animations.emplace_back();
 
 		Data* pData = pPreset;
+*/
 
+		Data* pData = bone_load( "primary.mot");
 
 
 		// 箱
@@ -1389,6 +1407,7 @@ struct Apr : public Sys
 				{
 					gra.Print(vect2(10,16*y++),string("[F1] Help"));
 				}
+
 				
 				// キーフレームロード
 				if ( keys.L.hi ) pData = bone_load( "human.mot");
