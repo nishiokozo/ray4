@@ -625,7 +625,7 @@ struct Apr : public Sys
 	}
 	
 	//------------------------------------------------------------------------------
-	void bone_ChangeKeyframeDown( Data& data )
+	void bone_PrevKeyframe( Data& data )
 	//------------------------------------------------------------------------------
 	{
 		anim.bPlaying = false;
@@ -652,7 +652,32 @@ struct Apr : public Sys
 	}
 
 	//------------------------------------------------------------------------------
-	void bone_ChangeKeyframeUp( Data& data )
+	void bone_TopKeyframe( Data& data )
+	//------------------------------------------------------------------------------
+	{
+		anim.bPlaying = false;
+
+		int num = anim.num;
+		if ( data.animations.size() ==0 ) return;
+		if ( data.animations[num].pose.size()==0) return;
+		if ( data.animations[num].pose[ 0 ].pos.size()==0 ) return;
+
+		anim.key = 0;
+
+		if ( anim.key >= 0 )
+		{
+			// キーフレーム切り替え
+			int i = 0;
+			for ( Joint3& j : data.tblJoint )
+			{
+				j.pos = data.animations[num].pose[ anim.key ].pos[i];
+				i++;
+			}
+		}
+	}
+
+	//------------------------------------------------------------------------------
+	void bone_NextKeyframe( Data& data )
 	//------------------------------------------------------------------------------
 	{
 		anim.bPlaying = false;
@@ -665,6 +690,31 @@ struct Apr : public Sys
 		anim.key++; 
 //		if ( anim.key > static_cast<signed>(data.animations[num].pose.size())-1 ) anim.key = 0;
 		if ( anim.key > static_cast<signed>(data.animations[num].pose.size())-1 ) anim.key = static_cast<signed>(data.animations[num].pose.size())-1;
+
+		if ( anim.key >= 0 )
+		{
+			// キーフレーム切り替え
+			int i = 0;
+			for ( Joint3& j : data.tblJoint )
+			{
+				j.pos = data.animations[num].pose[ anim.key ].pos[i];
+				i++;
+			}
+		}
+	}
+
+	//------------------------------------------------------------------------------
+	void bone_LastKeyframe( Data& data )
+	//------------------------------------------------------------------------------
+	{
+		anim.bPlaying = false;
+
+		int num = anim.num;
+		if ( data.animations.size() ==0 ) return;
+		if ( data.animations[num].pose.size()==0) return;
+		if ( data.animations[num].pose[ 0 ].pos.size()==0 ) return;
+
+		anim.key = static_cast<signed>(data.animations[num].pose.size())-1;
 
 		if ( anim.key >= 0 )
 		{
@@ -949,12 +999,13 @@ struct Apr : public Sys
 		cout << "SAVED" << endl;
 	}
 	//------------------------------------------------------------------------------
-	Data*	bone_load( const char* filename )
+	void bone_loadX( Data& data, const char* filename )
 	//------------------------------------------------------------------------------
 	{
 		anim.bPlaying = false;
 
-		Data*	pNew = new Data;
+
+	//	Data*	pNew = new Data;
 
 		fstream fi( filename, ios::in );
 		string buf;
@@ -993,37 +1044,37 @@ struct Apr : public Sys
 			if ( string(buf) == "motion" )	
 			{
 				mode = ModeMotion;
-				num = static_cast<signed>(pNew->animations.size());
-				pNew->animations.emplace_back();
-				pNew->animations[num].pose.emplace_back();
+				num = static_cast<signed>(data.animations.size());
+				data.animations.emplace_back();
+				data.animations[num].pose.emplace_back();
 				continue;
 			}
 			if ( string(buf) == "," ) 
 			{
-				pNew->animations[num].pose.emplace_back();
+				data.animations[num].pose.emplace_back();
 				continue;
 			}
 			if ( string(buf) == "end" )	
 			{	
-				for ( Bone3& b : pNew->tblBone )	// 関節の距離を決定する。
+				for ( Bone3& b : data.tblBone )	// 関節の距離を決定する。
 				{
 					b.length = (b.j1.pos - b.j0.pos).length();
 				}
 				{
 					int cnt = 0 ;
-					for ( Joint3& j : pNew->tblJoint )
+					for ( Joint3& j : data.tblJoint )
 					{
 						j.id = cnt++;				//id登録
 					}
 				}
-				for ( Bone3& b : pNew->tblBone )	// ジョイントに関節の距離を決定する。
+				for ( Bone3& b : data.tblBone )	// ジョイントに関節の距離を決定する。
 				{
 					b.j1.relative.emplace_back( b.j0 ); 
 					b.j0.relative.emplace_back( b.j1 ); 
 				}
 				//マーカー削除＆登録
 				mc.tblMarker3.clear();
-				for ( Joint3& j : pNew->tblJoint )	//マーカー登録
+				for ( Joint3& j : data.tblJoint )	//マーカー登録
 				{
 					mc.tblMarker3.emplace_back( gra, figCircle, j );
 				}
@@ -1038,7 +1089,7 @@ struct Apr : public Sys
 						double x = stod(v[0]);
 						double y = stod(v[1]);
 						double z = stod(v[2]);
-						pNew->tblJoint.emplace_back( vect3(x,y,z) );
+						data.tblJoint.emplace_back( vect3(x,y,z) );
 						//	cout << x << "," << y << "," << z << endl; 
 					}
 					break;
@@ -1047,7 +1098,7 @@ struct Apr : public Sys
 						vector<string> v = split( buf, '\t');
 						int n0 = stoi(v[0]);
 						int n1 = stoi(v[1]);
-						pNew->tblBone.emplace_back( pNew->tblJoint, n0, n1 );
+						data.tblBone.emplace_back( data.tblJoint, n0, n1 );
 						//	cout << x << "," << y << "," << z << endl; 
 					}
 					break;
@@ -1057,7 +1108,7 @@ struct Apr : public Sys
 						double x = stod(v[0]);
 						double y = stod(v[1]);
 						double z = stod(v[2]);
-						pNew->animations[num].pose[ pNew->animations[num].pose.size()-1 ].pos.emplace_back( x,y,z );
+						data.animations[num].pose[ data.animations[num].pose.size()-1 ].pos.emplace_back( x,y,z );
 						//	cout << x << "," << y << "," << z << endl; 
 					}
 					break;
@@ -1067,7 +1118,7 @@ struct Apr : public Sys
 
 		}
 		cout << "LOADED" << endl;
-		return pNew;
+	//	return pNew;
 	}
 
 	//------------------------------------------------------------------------------
@@ -1355,9 +1406,9 @@ struct Apr : public Sys
 		Data* pData = pPreset;
 
 #else
-		Data* pData = bone_load( "primary.mot");
-//		Data* pData = bone_load( "human.mot");
 
+		unique_ptr<Data> pData(new Data);
+		bone_loadX( *pData, "primary.mot");
 #endif
 
 		// 箱
@@ -1426,25 +1477,27 @@ struct Apr : public Sys
 			gra.Clr(rgb(0.3,0.3,0.3));
 
 			{
-				int y = 16;
+				int y = 10;
 
 				if ( keys.F1.on )
 				{
-					gra.Print(vect2(10,16*y++),string("[Y] fovY -"));
-					gra.Print(vect2(10,16*y++),string("[H] fovY +"));
+					gra.Print(vect2(10,16*y++),string("[Y] pers -"));
+					gra.Print(vect2(10,16*y++),string("[H] pers +"));
 					gra.Print(vect2(10,16*y++),string("[L] Load"));
 					gra.Print(vect2(10,16*y++),string("[S] Save"));
 					gra.Print(vect2(10,16*y++),string("--Keyframe--"));
-					gra.Print(vect2(10,16*y++),string("[J] Refrect Keyframe"));
-					gra.Print(vect2(10,16*y++),string("[K] Add Keyframe"));
-					gra.Print(vect2(10,16*y++),string("[D] Delete Keyframe"));
-					gra.Print(vect2(10,16*y++),string("[LEFT]  pose -"));
-					gra.Print(vect2(10,16*y++),string("[RIGHT] pose +"));
+					gra.Print(vect2(10,16*y++),string("[J] Refrect"));
+					gra.Print(vect2(10,16*y++),string("[K] Insert"));
+					gra.Print(vect2(10,16*y++),string("[D] Delete"));
+					gra.Print(vect2(10,16*y++),string("[C] Copy"));
+					gra.Print(vect2(10,16*y++),string("[V] Past"));
+					gra.Print(vect2(10,16*y++),string("[LEFT]  -"));
+					gra.Print(vect2(10,16*y++),string("[RIGHT] +"));
 					gra.Print(vect2(10,16*y++),string("--Animation--"));
-					gra.Print(vect2(10,16*y++),string("[I] Add Animation"));
-					gra.Print(vect2(10,16*y++),string("[UP]   Animation -"));
-					gra.Print(vect2(10,16*y++),string("[DOWN] Animation +"));
-					gra.Print(vect2(10,16*y++),string("[ENTER]lay Animation"));
+					gra.Print(vect2(10,16*y++),string("[I] Add"));
+					gra.Print(vect2(10,16*y++),string("[UP] -"));
+					gra.Print(vect2(10,16*y++),string("[DOWN] +"));
+					gra.Print(vect2(10,16*y++),string("[P] Play"));
 				}
 				else
 				{
@@ -1453,7 +1506,14 @@ struct Apr : public Sys
 
 				
 				// キーフレームロード
-				if ( keys.L.hi ) pData = bone_load( "human.mot");
+//				if ( keys.L.hi ) pData = bone_load( "human.mot");
+				if ( keys.L.hi ) 
+				{
+					unique_ptr<Data> pNew(new Data);
+					bone_loadX( *pNew, "human.mot");
+					pData = move(pNew);
+				}
+
 
 				// キーフレームセーブ
 				if ( keys.S.hi ) bone_save( *pData, "human.mot" );
@@ -1474,10 +1534,16 @@ struct Apr : public Sys
 				if ( keys.D.hi ) bone_DeleteKeyframe( *pData );
 
 				// キーフレーム次
-				if ( keys.RIGHT.rep ) bone_ChangeKeyframeUp( *pData );
+				if ( keys.RIGHT.rep ) bone_NextKeyframe( *pData );
+
+				// キーフレーム最後
+				if ( keys.CTRL.on && keys.RIGHT.rep ) bone_LastKeyframe( *pData );
 
 				// キーフレーム前
-				if ( keys.LEFT.rep ) bone_ChangeKeyframeDown( *pData );
+				if ( keys.LEFT.rep ) bone_PrevKeyframe( *pData );
+
+				// キーフレーム先頭
+				if ( keys.CTRL.on && keys.LEFT.rep ) bone_TopKeyframe( *pData );
 
 				// アニメーション記録
 				if ( keys.I.hi ) bone_AddAnimation( *pData );
@@ -1518,7 +1584,7 @@ struct Apr : public Sys
 				gra.Print( vect2(10,16*31),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 			}
 
-			// animカーソルビュー
+			// animカーソルビュー cursor
 			{
 				for ( int y = 0 ; y < (signed)pData->animations.size() ; y++ )
 				{
@@ -1526,13 +1592,13 @@ struct Apr : public Sys
 					{
 						vect2 v = vect2( x, y )*vect2( 4, 8 ) + vect2(400,16);
 
-						if ( y == anim.num && x == anim.key )
-						{
-							gra.Fill( v, v+vect2(3,7), rgb(1,0,0) );
-						}
-						else
 						{
 							gra.Fill( v, v+vect2(3,7), rgb(1,1,1) );
+						}
+
+						if ( y == anim.num && x == anim.key )
+						{
+							gra.Fill( v+vect2(0,4), v+vect2(3,7), rgb(1,0,0) );
 						}
 					}
 				}
