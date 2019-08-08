@@ -66,7 +66,6 @@ struct Apr : public Sys
 		Joint3& j1;
 		double length;
 		Bone3( vector<Joint3>& tbl, int _n0, int _n1 ) :n0(_n0), n1(_n1), j0(tbl[_n0]), j1(tbl[_n1]){}
-//			Bone3( vector<Joint3>& tbl, int _n0, int _n1 ) :n0(_n0), n1(_n1), j0(tbl[_n0]), j1(tbl[_n1]){}
 	};
 
 
@@ -161,9 +160,9 @@ struct Apr : public Sys
 		Marker3( SysGra& _gra, Figure& _fig, Joint3& _joint, double _th ) : gra(_gra), fig(_fig), joint(_joint)
 		{
 			joint.bSelected		= false;
-			joint.bRectIn			= false;
+			joint.bRectIn		= false;
 			joint.bRectSelected	= false;
-			joint.bAffectable		= false;
+			joint.bAffectable	= false;
 			th				= _th;
 		}
 		Marker3(const Marker3& a) : gra(a.gra), fig(a.fig), joint(a.joint)
@@ -1464,7 +1463,10 @@ struct Apr : public Sys
 				{
 					int num = anim.num;
 					gra.Print( vect2(10,16*y++),string("anim=")+to_string(num) + string(" cnt=")+to_string(pData->animations.size()) ); 
-//					gra.Print( vect2(10,16*y++),string("key=")+to_string(anim.key) + string(" cnt=")+to_string(pData->animations[num].pose.size()) ); 
+					if ( pData->animations.size() > 0 ) 
+					{
+						gra.Print( vect2(10,16*y++),string("key=")+to_string(anim.key) + string(" cnt=")+to_string(pData->animations[num].pose.size()) ); 
+					}
 				}
 				gra.Print( vect2(10,16*31),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 			}
