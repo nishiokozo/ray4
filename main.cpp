@@ -923,6 +923,8 @@ struct Apr : public Sys
 
 		while ( getline( fi, buf ) )
 		{
+	 		if( *(buf.end()-1) == 0x0d ) buf.pop_back();//CRLF対応
+
 			cout << buf << endl;
 			if ( string(buf) == "joint" )	{mode = ModeJoint;	continue;}
 			if ( string(buf) == "bone" )	{mode = ModeBone;	continue;}
@@ -1244,9 +1246,8 @@ struct Apr : public Sys
 
 		//人
 
-/*
+#if 0 
 		Data* pPreset = new Data;
-
 		{	//	人
 			double cx=0,cy=-160,os=0.01;
 
@@ -1312,10 +1313,12 @@ struct Apr : public Sys
 		pPreset->animations.emplace_back();
 
 		Data* pData = pPreset;
-*/
 
+#else
 		Data* pData = bone_load( "primary.mot");
+//		Data* pData = bone_load( "human.mot");
 
+#endif
 
 		// 箱
 		struct
@@ -1458,7 +1461,7 @@ struct Apr : public Sys
 				{
 					int num = anim.num;
 					gra.Print( vect2(10,16*y++),string("anim=")+to_string(num) + string(" cnt=")+to_string(pData->animations.size()) ); 
-					gra.Print( vect2(10,16*y++),string("key=")+to_string(anim.key) + string(" cnt=")+to_string(pData->animations[num].pose.size()) ); 
+//					gra.Print( vect2(10,16*y++),string("key=")+to_string(anim.key) + string(" cnt=")+to_string(pData->animations[num].pose.size()) ); 
 				}
 				gra.Print( vect2(10,16*31),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 			}
@@ -2235,9 +2238,10 @@ else
 
 			
 				int num = anim.num;
+				Data& data = (*pData);
 				// マーカースプライン変換表示
+				if ( static_cast<signed>(data.animations.size()) > 0 )
 				{
-					Data& data = (*pData);
 //					double div = 8;
 //					double dt = 1/div;
 					double dt = anim.dt;
