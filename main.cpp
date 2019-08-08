@@ -23,7 +23,7 @@ using namespace std;
 
 
 
-static bool g_flg = false;
+//static bool g_flg = false;
 
 struct Apr : public Sys
 {
@@ -36,6 +36,9 @@ struct Apr : public Sys
 		bool 	bRectIn			= false;		//	矩形選択中、矩形選択対象
 		bool 	bSelected		= false;		//	選択
 		bool 	bAffectable		= false;		//	削除対象
+		vect2	node = vect2(0,0);
+	
+		virtual void Move( vect2 v ) {};
 	};
 
 	struct Joint3 : Markstat
@@ -45,7 +48,6 @@ struct Apr : public Sys
 		vect3 tension;
 		vect3 world;
 		vect3 disp;
-		vect2 readonly_disp2;
 		double len;
 		int priority;
 		
@@ -101,16 +103,13 @@ struct Apr : public Sys
 	{
 		const SysGra&	gra;
 		const Figure&	fig;
-		vect2&	pos;
-//		bool 	bRectSelected;		//	矩形選択中、選択＆非選択
-//		bool 	bRectIn;			//	矩形選択中、矩形選択対象
-//		bool 	bSelected;			//	選択
-//		bool 	bAffectable;		//	削除対象
+		Markstat*	mark;
+		vect2&	pos2;
 		double	th;
 		int		colNormal = rgb(1,1,0);
 		int		colSelected = rgb(1,0,0);
 
-		Marker2( SysGra& _gra, Figure& _fig, vect2& v, double _th ) : gra(_gra), fig(_fig), pos(v)
+		Marker2( SysGra& _gra, Figure& _fig, Markstat* _mark, vect2& v, double _th ) : gra(_gra), fig(_fig), mark(_mark), pos2(v)
 		{
 			bSelected		= false;
 			bRectIn			= false;
@@ -118,13 +117,14 @@ struct Apr : public Sys
 			bAffectable		= false;
 			th				= _th;
 		}
-		Marker2(const Marker2& a) : gra(a.gra), fig(a.fig), pos(a.pos)
+		Marker2(const Marker2& a) : gra(a.gra), fig(a.fig), mark(a.mark), pos2(a.pos2)
 		{
 			bSelected		= a.bSelected;
 			bRectIn			= a.bRectIn;
 			bRectSelected	= a.bRectSelected;
 			bAffectable 	= a.bAffectable;
 			th 				= a.th;
+			node 			= a.node;
 		}	
 		const Marker2&	operator=(Marker2&& a){return a;}	
 		void draw()
@@ -138,11 +138,11 @@ struct Apr : public Sys
 			
 			if ( flg )			
 			{
-				fig.draw( pos,th, colSelected );
+				fig.draw( node,th, colSelected );
 			}
 			else
 			{
-				fig.draw( pos,th, colNormal );
+				fig.draw( node,th, colNormal );
 			}
 		
 		}
@@ -191,8 +191,54 @@ struct Apr : public Sys
 	{
 	}
 
+	struct Joint2 : Markstat
+	{
+		vect2 pos;
+		vect2 tension;
+		double len;
+		Joint2( vect2 v )
+		{
+			pos = v;
+			tension = 0;
+			len = 0;
+		}
+		void Move( vect2 v )
+		{
+			pos += v;
+		}
+	};
+	struct Bone2
+	{
+		Joint2& j0;
+		Joint2& j1;
+		double length;
+		Bone2( Joint2& _j0, Joint2& _j1 ) :j0(_j0), j1(_j1){}
+		Bone2( Joint2&& _j0, Joint2&& _j1 ) :j0(_j0), j1(_j1){}
+	};
+	struct Catmull : Markstat
+	{
+		vect2	pos;
+		Catmull( const vect2& _pos ) : pos(_pos){}
+
+		void Move( vect2 v )
+		{
+			pos += v;
+		}
+
+	};
+	struct Bezier : Markstat
+	{
+		vect2	pos;
+		Bezier( const vect2& _pos ) : pos(_pos){}
+		void Move( vect2 v )
+		{
+			pos += v;
+		}
+	};
+
 	struct
 	{
+
 		vector<Marker2>	tblMarker2;
 		//------------------------------------------------------------------------------
 		void funcMarkerDraw2()
@@ -215,7 +261,7 @@ struct Apr : public Sys
 			// マーカー追加
 			if ( keys.M.hi )
 			{
-				tblMarker2.emplace_back( gra, fig, mouse.pos, rad(0) );
+//				tblMarker2.emplace_back( gra, fig, mouse.pos, rad(0) );
 			}
 
 
@@ -252,7 +298,7 @@ struct Apr : public Sys
 				// 最近マーカーを検索
 				for ( Marker2& m : tblMarker2 )
 				{
-					double len = (m.pos-mouse.pos).length();
+					double len = (m.node-mouse.pos).length();
 					if ( len < 20.0 && a.len > len )
 					{
 						a.len = len;
@@ -315,8 +361,8 @@ struct Apr : public Sys
 						// 矩形内マーカーを検索
 						for ( Marker2& m : tblMarker2 )
 						{
-							double len = (m.pos-mouse.pos).length();
-							if ( m.pos.x > v0.x && m.pos.x < v1.x && m.pos.y > v0.y && m.pos.y < v1.y )
+							double len = (m.node-mouse.pos).length();
+							if ( m.node.x > v0.x && m.node.x < v1.x && m.node.y > v0.y && m.node.y < v1.y )
 							{
 								m.bRectIn = true;
 								if ( keys.CTRL.on )
@@ -337,7 +383,7 @@ struct Apr : public Sys
 					{
 						if ( m.bSelected )
 						{
-							m.pos += mouse.mov;
+							m.mark->Move( mouse.mov );
 						}
 					}
 				}
@@ -358,7 +404,6 @@ struct Apr : public Sys
 					}
 				}
 			}
-			
 
 		}
 
@@ -547,6 +592,7 @@ struct Apr : public Sys
 
 		for ( int j = 0 ; j < static_cast<signed>(data.animations[num].pose[0].pos.size()) ; j++ )
 		{
+/*
 			if ( g_flg ) 
 			{
 				if ( j == 3 || j == 4 ) continue;	//肩
@@ -556,6 +602,7 @@ struct Apr : public Sys
 	//			if ( j == 8 || j == 10 ) continue;	//足
 	//			if ( j == 9 || j == 11 ) continue;	//膝
 			}
+*/
 			vect3 P0 = data.animations[num].pose[ n0 ].pos[j];
 			vect3 P1 = data.animations[num].pose[ n1 ].pos[j];
 			vect3 P2 = data.animations[num].pose[ n2 ].pos[j];
@@ -867,7 +914,7 @@ struct Apr : public Sys
 			j.world = v;
 
 			j.disp = pers.calcPoint(v);
-			j.readonly_disp2 = vect2(j.disp.x,j.disp.y);
+			j.node = vect2(j.disp.x,j.disp.y);
 		}
 
 		// Human 描画
@@ -1109,20 +1156,22 @@ struct Apr : public Sys
 
 			return P;
 		};
-		vector<vect2> catmull_tbl =
+
+		vector<Catmull> catmull_tbl =
 		{
 			#define X 700
 			#define Y 50
-			vect2(X-+ 0,Y +0),
-			vect2(X+50,Y+ 60),
-			vect2(X+ 0,Y+120),
-			vect2(X+50,Y+180),
+			Catmull( vect2(X-+ 0,Y +0) ),
+			Catmull( vect2(X+50,Y+ 60) ),
+			Catmull( vect2(X+ 0,Y+120) ),
+			Catmull( vect2(X+50,Y+180) ),
 			#undef X
 			#undef Y
 		};
-		for ( vect2& v : catmull_tbl )	// マーカー対象に位置を登録
+
+		for ( Catmull& c : catmull_tbl )	// マーカー対象に位置を登録
 		{
-			mc.tblMarker2.emplace_back( gra, figCircle, v, rad(-90) );
+			mc.tblMarker2.emplace_back( gra, figCircle, &c, c.pos, rad(-90) );
 		}
 		
 		//3字曲線
@@ -1151,50 +1200,26 @@ struct Apr : public Sys
 			return Q;
 		};
 
-		vector<vect2> bezier_tbl =
+		vector<Bezier> bezier_tbl =
 		{
 			#define X 550
 			#define Y 400
-				vect2(X+ 00,Y+90),
-				vect2(X+ 00,Y+20),
-				vect2(X+100,Y+90),
-				vect2(X+100,Y+60),
-				vect2(X+100,Y+20),
-				vect2(X+200,Y+60),
-				vect2(X+200,Y+90),
+				Bezier( vect2(X+ 00,Y+90) ),
+				Bezier( vect2(X+ 00,Y+20) ),
+				Bezier( vect2(X+100,Y+90) ),
+				Bezier( vect2(X+100,Y+60) ),
+				Bezier( vect2(X+100,Y+20) ),
+				Bezier( vect2(X+200,Y+60) ),
+				Bezier( vect2(X+200,Y+90) ),
 			#undef X
 			#undef Y
 		};
-		for ( vect2& v : bezier_tbl )	// マーカー対象に位置を登録
+		for ( Bezier& b : bezier_tbl )	// マーカー対象に位置を登録
 		{
-			mc.tblMarker2.emplace_back( gra, figCircle, v, rad(-90) );
+			mc.tblMarker2.emplace_back( gra, figCircle, &b, b.pos, rad(-90) );
 		}
 
 		//骨---------------------------------------
-		struct Joint2
-		{
-			vect2 pos;
-			vect2 tension;
-//			vect2 accell;
-//			vect2 mov;
-//			vect2 prev;
-			double len;
-			Joint2( vect2 v )
-			{
-				pos = v;
-				tension = 0;
-	//			prev = v;
-				len = 0;
-			}
-		};
-		struct Bone2
-		{
-			Joint2& j0;
-			Joint2& j1;
-			double length;
-			Bone2( Joint2& _j0, Joint2& _j1 ) :j0(_j0), j1(_j1){}
-			Bone2( Joint2&& _j0, Joint2&& _j1 ) :j0(_j0), j1(_j1){}
-		};
 		vector<Joint2> tblJoint_2d;
 		tblJoint_2d.reserve(1000);
 		vector<Bone2> tblBone_2d;
@@ -1279,7 +1304,7 @@ struct Apr : public Sys
 		}
 		for ( Joint2& j : tblJoint_2d )	//マーカー対象に位置を登録
 		{
-			mc.tblMarker2.emplace_back( gra, figCircle, j.pos, rad(-90) );
+			mc.tblMarker2.emplace_back( gra, figCircle, &j, j.pos, rad(-90) );
 		}
 
 		//人
@@ -1489,8 +1514,8 @@ struct Apr : public Sys
 				// アニメーションリクエスト
 				if ( keys.P.hi ) bone_ReqAnimation();
 
-if ( keys.Q.hi ) g_flg =!g_flg;
-gra.Print(vect2(16*20,16*1),string("flg ")+ to_string(g_flg) );
+//if ( keys.Q.hi ) g_flg =!g_flg;
+//gra.Print(vect2(16*20,16*1),string("flg ")+ to_string(g_flg) );
 
 				// アニメーション再生
 				if ( anim.bPlaying )	bone_Play( *pData );
@@ -1823,10 +1848,10 @@ gra.Print(vect2(16*20,16*1),string("flg ")+ to_string(g_flg) );
 						if ( n3 >= static_cast<signed>(catmull_tbl.size()) ) n3 = n2;
 					
 						double t = dt;
-						vect2 v0 = catmull_func(0, catmull_tbl[n0], catmull_tbl[n1], catmull_tbl[n2], catmull_tbl[n3] );
+						vect2 v0 = catmull_func(0, catmull_tbl[n0].pos, catmull_tbl[n1].pos, catmull_tbl[n2].pos, catmull_tbl[n3].pos );
 						for ( int i = 0 ; i <div ; i++ )
 						{
-							vect2 v1 = catmull_func(t, catmull_tbl[n0], catmull_tbl[n1], catmull_tbl[n2], catmull_tbl[n3] );
+							vect2 v1 = catmull_func(t, catmull_tbl[n0].pos, catmull_tbl[n1].pos, catmull_tbl[n2].pos, catmull_tbl[n3].pos );
 							gra.Line( v1, v0, rgb(1,1,1));
 							gra.Fill( v1-1,v1+2, rgb(1,1,1));
 							v0=v1;
@@ -1850,10 +1875,10 @@ gra.Print(vect2(16*20,16*1),string("flg ")+ to_string(g_flg) );
 					for ( int n = 0 ; n < static_cast<signed>(bezier_tbl.size())-3 ; n+=3 )
 					{
 						double t  = dt;
-						vect2 v0 = bezier_tbl[n+0];
+						vect2 v0 = bezier_tbl[n+0].pos;
 						for ( int i = 0 ; i < div ; i++ )
 						{
-							vect2 v1 = bezier_func( t, bezier_tbl[n+0], bezier_tbl[n+1], bezier_tbl[n+2], bezier_tbl[n+3] );
+							vect2 v1 = bezier_func( t, bezier_tbl[n+0].pos, bezier_tbl[n+1].pos, bezier_tbl[n+2].pos, bezier_tbl[n+3].pos );
 							gra.Line( v0,v1, rgb(1,1,1));
 							gra.Fill( v1-1,v1+2, rgb(1,1,1));
 							v0=v1;
@@ -1865,10 +1890,10 @@ gra.Print(vect2(16*20,16*1),string("flg ")+ to_string(g_flg) );
 
 				{// 補助ライン描画
 					int cnt = 0;
-					vect2 v0 = bezier_tbl[0];
+					vect2 v0 = bezier_tbl[0].pos;
 					for ( int i = 1 ; i < static_cast<signed>(bezier_tbl.size()) ; i++ )
 					{ 
-						vect2 v1 = bezier_tbl[i];
+						vect2 v1 = bezier_tbl[i].pos;
 						if ( cnt != 1 ) 
 						{
 							gra.Line( v0, v1, rgb(0,1,0));
@@ -1888,7 +1913,7 @@ gra.Print(vect2(16*20,16*1),string("flg ")+ to_string(g_flg) );
 				static	bool	bForward = true;
 
 				static int n = 0;
-				gv1 = bezier_func( t, bezier_tbl[n+0], bezier_tbl[n+1], bezier_tbl[n+2], bezier_tbl[n+3] );
+				gv1 = bezier_func( t, bezier_tbl[n+0].pos, bezier_tbl[n+1].pos, bezier_tbl[n+2].pos, bezier_tbl[n+3].pos );
 
 //				gra.Circle( gv1, 5,rgb(0,0,1));
 				gra.Fill( gv1-4, gv1+4, rgb(1,1,1));
@@ -1940,7 +1965,7 @@ gra.Print(vect2(16*20,16*1),string("flg ")+ to_string(g_flg) );
 				if ( n0<0 ) n0 = 0;
 				if ( n3>=static_cast<signed>(catmull_tbl.size()) ) n3 =n2;
 
-				gv2 = catmull_func( t, catmull_tbl[n0], catmull_tbl[n1], catmull_tbl[n2], catmull_tbl[n3] );
+				gv2 = catmull_func( t, catmull_tbl[n0].pos, catmull_tbl[n1].pos, catmull_tbl[n2].pos, catmull_tbl[n3].pos );
 
 //				gra.Circle( gv2, 5,rgb(0,0,1));
 				gra.Fill( gv2-4, gv2+4, rgb(1,1,1));
@@ -1986,6 +2011,12 @@ gra.Print(vect2(16*20,16*1),string("flg ")+ to_string(g_flg) );
 
 			// マーカー操作	
 			mc.funcMarkerController2( figCircle, mouse, keys, gra );
+			
+			for ( Marker2& m : mc.tblMarker2 )
+			{
+				m.node = m.pos2;
+			}
+
 
 Joint2& tar = tblJoint_2d[0];
 tar.pos = gv1;
@@ -2106,7 +2137,7 @@ else
 					// 最近マーカーを検索
 					for ( Marker3& m : mc.tblMarker3 )
 					{
-						double len = (m.joint.readonly_disp2-mouse.pos).length();
+						double len = (m.joint.node-mouse.pos).length();
 						if ( len < 20.0 && a.len > len )
 						{
 							a.len = len;
@@ -2188,8 +2219,8 @@ else
 							// 矩形内マーカーを検索
 							for ( Marker3& m : mc.tblMarker3 )
 							{
-								double len = (m.joint.readonly_disp2-mouse.pos).length();
-								if ( m.joint.readonly_disp2.x > v0.x && m.joint.readonly_disp2.x < v1.x && m.joint.readonly_disp2.y > v0.y && m.joint.readonly_disp2.y < v1.y )
+								double len = (m.joint.node-mouse.pos).length();
+								if ( m.joint.node.x > v0.x && m.joint.node.x < v1.x && m.joint.node.y > v0.y && m.joint.node.y < v1.y )
 								{
 									m.joint.bRectIn = true;
 									if ( keys.CTRL.on )
@@ -2283,10 +2314,10 @@ else
 					{
 						col = m.colSelected;
 						cntAve++;
-						posAve +=  m.joint.readonly_disp2;
+						posAve +=  m.joint.node;
 					}
-					gra.Circle( m.joint.readonly_disp2, 7, col );
-					gra.Print( m.joint.readonly_disp2+vect2(10,0), to_string(m.joint.id) );
+					gra.Circle( m.joint.node, 7, col );
+					gra.Print( m.joint.node+vect2(10,0), to_string(m.joint.id) );
 
 				}
 
