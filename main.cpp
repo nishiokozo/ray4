@@ -408,9 +408,12 @@ struct Apr : public Sys
 	struct
 	{
 		int	num = 0;	//	アニメーションカーソル位置
-		int	key = 0;	//	キーフレームカーソル位置
+		int	pose = 0;	//	キーフレームカーソル位置
 		int copied_num = 0;
 		int copied_key = 0;
+//		unique_ptr<Data> pCopybuf(new Data);
+		unique_ptr<Data> pCopybuf;
+
 		//
 		double	t = 0;
 		double	dt = 0.1;
@@ -635,17 +638,17 @@ struct Apr : public Sys
 		if ( data.animations[num].pose.size()==0) return;
 		if ( data.animations[num].pose[ 0 ].pos.size()==0 ) return;
 
-		anim.key--;
-//		if ( anim.key < 0 ) anim.key = static_cast<signed>(data.animations[num].pose.size())-1;
-		if ( anim.key < 0 ) anim.key = 0;
+		anim.pose--;
+//		if ( anim.pose < 0 ) anim.pose = static_cast<signed>(data.animations[num].pose.size())-1;
+		if ( anim.pose < 0 ) anim.pose = 0;
 
-		if ( anim.key >= 0 )
+		if ( anim.pose >= 0 )
 		{
 			// キーフレーム切り替え
 			int i = 0;
 			for ( Joint3& j : data.tblJoint )
 			{
-				j.pos = data.animations[num].pose[ anim.key ].pos[i];
+				j.pos = data.animations[num].pose[ anim.pose ].pos[i];
 				i++;
 			}
 		}
@@ -662,15 +665,15 @@ struct Apr : public Sys
 		if ( data.animations[num].pose.size()==0) return;
 		if ( data.animations[num].pose[ 0 ].pos.size()==0 ) return;
 
-		anim.key = 0;
+		anim.pose = 0;
 
-		if ( anim.key >= 0 )
+		if ( anim.pose >= 0 )
 		{
 			// キーフレーム切り替え
 			int i = 0;
 			for ( Joint3& j : data.tblJoint )
 			{
-				j.pos = data.animations[num].pose[ anim.key ].pos[i];
+				j.pos = data.animations[num].pose[ anim.pose ].pos[i];
 				i++;
 			}
 		}
@@ -687,17 +690,17 @@ struct Apr : public Sys
 		if ( data.animations[num].pose.size()==0) return;
 		if ( data.animations[num].pose[ 0 ].pos.size()==0 ) return;
 
-		anim.key++; 
-//		if ( anim.key > static_cast<signed>(data.animations[num].pose.size())-1 ) anim.key = 0;
-		if ( anim.key > static_cast<signed>(data.animations[num].pose.size())-1 ) anim.key = static_cast<signed>(data.animations[num].pose.size())-1;
+		anim.pose++; 
+//		if ( anim.pose > static_cast<signed>(data.animations[num].pose.size())-1 ) anim.pose = 0;
+		if ( anim.pose > static_cast<signed>(data.animations[num].pose.size())-1 ) anim.pose = static_cast<signed>(data.animations[num].pose.size())-1;
 
-		if ( anim.key >= 0 )
+		if ( anim.pose >= 0 )
 		{
 			// キーフレーム切り替え
 			int i = 0;
 			for ( Joint3& j : data.tblJoint )
 			{
-				j.pos = data.animations[num].pose[ anim.key ].pos[i];
+				j.pos = data.animations[num].pose[ anim.pose ].pos[i];
 				i++;
 			}
 		}
@@ -714,15 +717,15 @@ struct Apr : public Sys
 		if ( data.animations[num].pose.size()==0) return;
 		if ( data.animations[num].pose[ 0 ].pos.size()==0 ) return;
 
-		anim.key = static_cast<signed>(data.animations[num].pose.size())-1;
+		anim.pose = static_cast<signed>(data.animations[num].pose.size())-1;
 
-		if ( anim.key >= 0 )
+		if ( anim.pose >= 0 )
 		{
 			// キーフレーム切り替え
 			int i = 0;
 			for ( Joint3& j : data.tblJoint )
 			{
-				j.pos = data.animations[num].pose[ anim.key ].pos[i];
+				j.pos = data.animations[num].pose[ anim.pose ].pos[i];
 				i++;
 			}
 		}
@@ -741,7 +744,7 @@ struct Apr : public Sys
 
 		for ( int i = 0 ; i < static_cast<signed>(data.tblJoint.size()) ; i++ )
 		{ 
-			data.animations[num].pose[ anim.key ].pos[i] = data.tblJoint[i].pos;
+			data.animations[num].pose[ anim.pose ].pos[i] = data.tblJoint[i].pos;
 		}
 	}
 	
@@ -753,10 +756,10 @@ struct Apr : public Sys
 
 		int num = anim.num;
 
-		data.animations[num].pose.emplace( data.animations[num].pose.begin() + anim.key );
+		data.animations[num].pose.emplace( data.animations[num].pose.begin() + anim.pose );
 		for ( const Joint3& j : data.tblJoint )
 		{
-			data.animations[num].pose[ anim.key ].pos.emplace_back( j.pos );
+			data.animations[num].pose[ anim.pose ].pos.emplace_back( j.pos );
 		}
 	}
 
@@ -764,8 +767,58 @@ struct Apr : public Sys
 	void bone_CopyKeyframe( Data& data )
 	//------------------------------------------------------------------------------
 	{
+
+/*
+	struct Data
+	{
+		vector<Joint3>				tblJoint;
+		vector<Bone3>				tblBone;
+
+		struct Pos
+		{
+			vector<vect3>		pos;
+		};
+		struct Keyframe
+		{
+			vector<Pos>			pose;
+		};
+		vector<Keyframe>		animations;
+	};
+*/
+		unique_ptr<Data> pNew(new Data);
+		{
+			for ( Joint3& j : data.tblJoint )
+			{
+				pNew->tblJoint.emplace_back( j.pos );
+			}
+
+			for ( Bone3& b : data.tblBone )
+			{
+				pNew->tblBone.emplace_back( pNew->tblJoint, b.n0, b.n1 );
+			}
+		}
+		{
+			int	cntAction = static_cast<signed>(data.animations.size());
+			for ( int num = 0 ; num < cntAction ; num++ )
+			{
+				pNew->animations.emplace_back();
+
+				int	cntPose = static_cast<signed>(data.animations[num].pose.size());
+				for ( int pose = 0 ; pose < cntPose ; pose++ )
+				{
+					pNew->animations[num].pose.emplace_back();
+
+					for ( int j = 0 ; j < static_cast<signed>(data.tblJoint.size()) ; j++ )
+					{
+						vect3 pos = data.animations[num].pose[pose].pos[j];
+						pNew->animations[num].pose[pose].pos.emplace_back( pos );
+					}
+				}
+			}
+		}
+		anim.pCopybuf = move(pNew);
 		anim.copied_num = anim.num;
-		anim.copied_key = anim.key;
+		anim.copied_key = anim.pose;
 	}
 
 	//------------------------------------------------------------------------------
@@ -775,9 +828,10 @@ struct Apr : public Sys
 		bone_InsertKeyframe( data );
 		for ( int i = 0 ; i < static_cast<signed>(data.tblJoint.size()) ; i++ )
 		{ 
-			vect3 v = data.animations[anim.copied_num].pose[ anim.copied_key ].pos[i];
+//			vect3 v = data.animations[anim.copied_num].pose[ anim.copied_key ].pos[i];
+			vect3 v = anim.pCopybuf->animations[anim.copied_num].pose[ anim.copied_key ].pos[i];
 		
-			data.animations[anim.num].pose[ anim.key ].pos[i] = v;
+			data.animations[anim.num].pose[ anim.pose ].pos[i] = v;
 			data.tblJoint[i].pos = v;
 		}
 
@@ -795,9 +849,9 @@ struct Apr : public Sys
 		if ( data.animations[num].pose.size()==0) return;
 		if ( data.animations[num].pose[ 0 ].pos.size()==0 ) return;
 
-		data.animations[num].pose.erase(data.animations[num].pose.begin() +anim.key );	
+		data.animations[num].pose.erase(data.animations[num].pose.begin() +anim.pose );	
 
-		if ( anim.key >= (signed)data.animations[num].pose.size() ) anim.key = (signed)data.animations[num].pose.size()-1;
+		if ( anim.pose >= (signed)data.animations[num].pose.size() ) anim.pose = (signed)data.animations[num].pose.size()-1;
 
 	}
 
@@ -817,13 +871,13 @@ struct Apr : public Sys
 
 		{
 			int num = anim.num;
-			anim.key = 0;
+			anim.pose = 0;
 			{
 				// キーフレーム切り替え
 				int i = 0;
 				for ( Joint3& j : data.tblJoint )
 				{
-					j.pos = data.animations[num].pose[ anim.key ].pos[i];
+					j.pos = data.animations[num].pose[ anim.pose ].pos[i];
 					i++;
 				}
 			}
@@ -845,7 +899,7 @@ struct Apr : public Sys
 		if ( data.animations[num].pose[ 0 ].pos.size()==0 ) return;
 
 		{
-			anim.key = 0;
+			anim.pose = 0;
 
 			{
 				// キーフレーム切り替え
@@ -853,7 +907,7 @@ struct Apr : public Sys
 				for ( Joint3& j : data.tblJoint )
 				{
 				
-					j.pos = data.animations[num].pose[ anim.key ].pos[i];
+					j.pos = data.animations[num].pose[ anim.pose ].pos[i];
 					i++;
 				}
 			}
@@ -867,7 +921,7 @@ struct Apr : public Sys
 		anim.bPlaying = false;
 
 		anim.num = static_cast<signed>(data.animations.size());
-		anim.key = 0;
+		anim.pose = 0;
 		data.animations.emplace_back();
 
 		{
@@ -876,7 +930,7 @@ struct Apr : public Sys
 			data.animations[num].pose.emplace_back();
 			for ( const Joint3& j : data.tblJoint )
 			{
-				data.animations[num].pose[ anim.key ].pos.emplace_back( j.pos );
+				data.animations[num].pose[ anim.pose ].pos.emplace_back( j.pos );
 			}
 		}
 	}
@@ -982,15 +1036,14 @@ struct Apr : public Sys
 			for ( int num = 0 ; num < cntAction ; num++ )
 			{
 				fo << "motion" << endl;
-				int	cnt = static_cast<signed>(data.animations[num].pose.size());
-				for ( int i = 0 ; i < cnt ; i++ )
+				int	cntPose = static_cast<signed>(data.animations[num].pose.size());
+				for ( int pose = 0 ; pose < cntPose ; pose++ )
 				{
-	//							fo << to_string(i)  << endl;
 					for ( int j = 0 ; j < static_cast<signed>(data.tblJoint.size()) ; j++ )
 					{
-						fo  << "\t"<< data.animations[num].pose[ i ].pos[ j ].x << "\t" << data.animations[num].pose[ i ].pos[ j ].y << "\t" << data.animations[num].pose[ i ].pos[ j ].z << endl;
+						fo  << "\t"<< data.animations[num].pose[ pose ].pos[ j ].x << "\t" << data.animations[num].pose[ pose ].pos[ j ].y << "\t" << data.animations[num].pose[ pose ].pos[ j ].z << endl;
 					}
-					if( i+1 < cnt ) fo << "," << endl;
+					if( pose+1 < cntPose ) fo << "," << endl;
 				}
 			}
 		}
@@ -1078,7 +1131,7 @@ struct Apr : public Sys
 				{
 					mc.tblMarker3.emplace_back( gra, figCircle, j );
 				}
-				anim.key = 0;
+				anim.pose = 0;
 				break;
 			}
 			switch( mode )
@@ -1406,10 +1459,14 @@ struct Apr : public Sys
 		Data* pData = pPreset;
 
 #else
-
 		unique_ptr<Data> pData(new Data);
 		bone_loadX( *pData, "primary.mot");
 #endif
+
+		{
+			unique_ptr<Data> p(new Data);
+			anim.pCopybuf = move(p);
+		}
 
 		// 箱
 		struct
@@ -1578,7 +1635,7 @@ struct Apr : public Sys
 					gra.Print( vect2(10,16*y++),string("anim=")+to_string(num) + string(" cnt=")+to_string(pData->animations.size()) ); 
 					if ( pData->animations.size() > 0 ) 
 					{
-						gra.Print( vect2(10,16*y++),string("key=")+to_string(anim.key) + string(" cnt=")+to_string(pData->animations[num].pose.size()) ); 
+						gra.Print( vect2(10,16*y++),string("pose=")+to_string(anim.pose) + string(" cnt=")+to_string(pData->animations[num].pose.size()) ); 
 					}
 				}
 				gra.Print( vect2(10,16*31),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
@@ -1596,7 +1653,7 @@ struct Apr : public Sys
 							gra.Fill( v, v+vect2(3,7), rgb(1,1,1) );
 						}
 
-						if ( y == anim.num && x == anim.key )
+						if ( y == anim.num && x == anim.pose )
 						{
 							gra.Fill( v+vect2(0,4), v+vect2(3,7), rgb(1,0,0) );
 						}
