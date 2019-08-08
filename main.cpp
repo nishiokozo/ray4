@@ -23,25 +23,25 @@ using namespace std;
 
 
 
-//static bool g_flg = false;
-
 struct Apr : public Sys
 {
 
 	long long	time_peak = 0;
 
-	struct	Markstat
+	struct	Obj
 	{
 		bool 	bRectSelected	= false;		//	矩形選択中、選択＆非選択
 		bool 	bRectIn			= false;		//	矩形選択中、矩形選択対象
 		bool 	bSelected		= false;		//	選択
 		bool 	bAffectable		= false;		//	削除対象
-		vect2	node = vect2(0,0);
+
+		vect2	tag;
 	
-		virtual void Move( vect2 v ) =0;// {};
+		virtual void Move2( vect2 v ) =0;// {};
+		virtual vect2 Pos2() =0;// {};
 	};
 
-	struct Joint3 : Markstat
+	struct Joint3 : Obj
 	{
 		int id;
 		vect3 pos;
@@ -59,9 +59,13 @@ struct Apr : public Sys
 			tension = 0;
 			len = 0;
 		}
-		void Move( vect2 v )
+		void Move2( vect2 v )
 		{
 			//none
+		}
+		vect2 Pos2()
+		{
+			return vect2( disp.x, disp.y );
 		}
 	};
 
@@ -103,56 +107,51 @@ struct Apr : public Sys
 
 	};
 
-	struct Marker2// : Markstat
+	struct Marker2
 	{
 		const SysGra&	gra;
 		const Figure&	fig;
-		Markstat&	mark;
+		Obj&	obj;
 		vect2&	pos2;
 		double	th;
 		int		colNormal = rgb(1,1,0);
 		int		colSelected = rgb(1,0,0);
 
-		Marker2( SysGra& _gra, Figure& _fig, Markstat& _mark, vect2& v, double _th ) : gra(_gra), fig(_fig), mark(_mark), pos2(v)
+		Marker2( SysGra& _gra, Figure& _fig, Obj& _mark, vect2& v, double _th ) : gra(_gra), fig(_fig), obj(_mark), pos2(v)
 		{
-			mark.bSelected		= false;
-			mark.bRectIn		= false;
-			mark.bRectSelected	= false;
-			mark.bAffectable	= false;
+			obj.bSelected		= false;
+			obj.bRectIn		= false;
+			obj.bRectSelected	= false;
+			obj.bAffectable	= false;
 			th					= _th;
 		}
-		Marker2(const Marker2& a) : gra(a.gra), fig(a.fig), mark(a.mark), pos2(a.pos2)
+		Marker2(const Marker2& a) : gra(a.gra), fig(a.fig), obj(a.obj), pos2(a.pos2)
 		{
-			mark.bSelected		= a.mark.bSelected;
-			mark.bRectIn		= a.mark.bRectIn;
-			mark.bRectSelected	= a.mark.bRectSelected;
-			mark.bAffectable 	= a.mark.bAffectable;
+			obj.bSelected		= a.obj.bSelected;
+			obj.bRectIn			= a.obj.bRectIn;
+			obj.bRectSelected	= a.obj.bRectSelected;
+			obj.bAffectable 	= a.obj.bAffectable;
 			th 					= th;
-			mark.node 			= a.mark.node;
 		}	
 		const Marker2&	operator=(Marker2&& a){return a;}	
 		void draw()
 		{
-			bool flg =  mark.bSelected;
+			bool flg =  obj.bSelected;
 			
-			if ( mark.bRectIn )
+			if ( obj.bRectIn )
 			{
-				flg = mark.bRectSelected;
+				flg = obj.bRectSelected;
 			}
 			
 			if ( flg )			
 			{
-				fig.draw( mark.node,th, colSelected );
+				fig.draw( obj.Pos2(),th, colSelected );
 			}
 			else
 			{
-				fig.draw( mark.node,th, colNormal );
+				fig.draw( obj.Pos2(),th, colNormal );
 			}
 		
-		}
-		void Move( vect2 v )
-		{
-			//none
 		}
 
 	};
@@ -187,20 +186,12 @@ struct Apr : public Sys
 
 	};
 
-	//------------------------------------------------------------------------------
-//	void marker3_input()
-	//------------------------------------------------------------------------------
 
-
-	//------------------------------------------------------------------------------
-	//void marker3_draw()
-	//------------------------------------------------------------------------------
-	
 	~Apr()
 	{
 	}
 
-	struct Joint2 : Markstat
+	struct Joint2 : Obj
 	{
 		vect2 pos;
 		vect2 tension;
@@ -211,9 +202,13 @@ struct Apr : public Sys
 			tension = 0;
 			len = 0;
 		}
-		void Move( vect2 v )
+		void Move2( vect2 v )
 		{
 			pos += v;
+		}
+		vect2 Pos2()
+		{
+			return pos;
 		}
 	};
 	struct Bone2
@@ -224,24 +219,32 @@ struct Apr : public Sys
 		Bone2( Joint2& _j0, Joint2& _j1 ) :j0(_j0), j1(_j1){}
 		Bone2( Joint2&& _j0, Joint2&& _j1 ) :j0(_j0), j1(_j1){}
 	};
-	struct Catmull : Markstat
+	struct Catmull : Obj
 	{
 		vect2	pos;
 		Catmull( const vect2& _pos ) : pos(_pos){}
 
-		void Move( vect2 v )
+		void Move2( vect2 v )
 		{
 			pos += v;
 		}
+		vect2 Pos2()
+		{
+			return pos;
+		}
 
 	};
-	struct Bezier : Markstat
+	struct Bezier : Obj
 	{
 		vect2	pos;
 		Bezier( const vect2& _pos ) : pos(_pos){}
-		void Move( vect2 v )
+		void Move2( vect2 v )
 		{
 			pos += v;
+		}
+		vect2 Pos2()
+		{
+			return pos;
 		}
 	};
 
@@ -279,15 +282,15 @@ struct Apr : public Sys
 			{
 				for ( Marker2& m : tblMarker2 )
 				{
-					if ( m.mark.bSelected )
+					if ( m.obj.bSelected )
 					{
-						m.mark.bAffectable = true;
+						m.obj.bAffectable = true;
 					}
 				}
 
 				for ( int i = static_cast<signed>(tblMarker2.size())-1 ; i >= 0 ; i-- )
 				{
-					if ( tblMarker2[i].mark.bAffectable )
+					if ( tblMarker2[i].obj.bAffectable )
 					{
 							   tblMarker2.erase(tblMarker2.begin() +i);	
 					}
@@ -307,7 +310,7 @@ struct Apr : public Sys
 				// 最近マーカーを検索
 				for ( Marker2& m : tblMarker2 )
 				{
-					double len = (m.mark.node-mouse.pos).length();
+					double len = (m.obj.Pos2()-mouse.pos).length();
 					if ( len < 20.0 && a.len > len )
 					{
 						a.len = len;
@@ -331,12 +334,12 @@ struct Apr : public Sys
 					else
 					if ( keys.SHIFT.on ){}
 					else
-					if ( a.pm && a.pm->mark.bSelected == true ){}
+					if ( a.pm && a.pm->obj.bSelected == true ){}
 					else
 					{
 						for ( Marker2& m : tblMarker2 )
 						{
-							m.mark.bSelected = false;
+							m.obj.bSelected = false;
 						}
 					}
 					
@@ -345,11 +348,11 @@ struct Apr : public Sys
 					{
 						if ( keys.CTRL.on )
 						{
-							a.pm->mark.bSelected = !a.pm->mark.bSelected;
+							a.pm->obj.bSelected = !a.pm->obj.bSelected;
 						}
 						else
 						{
-							a.pm->mark.bSelected = true;
+							a.pm->obj.bSelected = true;
 						}
 					}
 				}
@@ -364,23 +367,23 @@ struct Apr : public Sys
 
 						for ( Marker2& m : tblMarker2 )
 						{
-							m.mark.bRectIn = false;
+							m.obj.bRectIn = false;
 						}
 
 						// 矩形内マーカーを検索
 						for ( Marker2& m : tblMarker2 )
 						{
-							double len = (m.mark.node-mouse.pos).length();
-							if ( m.mark.node.x > v0.x && m.mark.node.x < v1.x && m.mark.node.y > v0.y && m.mark.node.y < v1.y )
+							double len = (m.obj.Pos2()-mouse.pos).length();
+							if ( m.obj.Pos2().x > v0.x && m.obj.Pos2().x < v1.x && m.obj.Pos2().y > v0.y && m.obj.Pos2().y < v1.y )
 							{
-								m.mark.bRectIn = true;
+								m.obj.bRectIn = true;
 								if ( keys.CTRL.on )
 								{
-									m.mark.bRectSelected = !m.mark.bSelected;
+									m.obj.bRectSelected = !m.obj.bSelected;
 								}
 								else
 								{
-									m.mark.bRectSelected = true;
+									m.obj.bRectSelected = true;
 								}
 							}
 						}
@@ -390,9 +393,9 @@ struct Apr : public Sys
 					// マーカー移動
 					for ( Marker2& m : tblMarker2 )
 					{
-						if ( m.mark.bSelected )
+						if ( m.obj.bSelected )
 						{
-							m.mark.Move( mouse.mov );
+							m.obj.Move2( mouse.mov );
 						}
 					}
 				}
@@ -404,12 +407,12 @@ struct Apr : public Sys
 					bDrag = false;
 					for ( Marker2& m : tblMarker2 )
 					{
-						if ( m.mark.bRectIn )
+						if ( m.obj.bRectIn )
 						{
-							m.mark.bSelected = m.mark.bRectSelected;
+							m.obj.bSelected = m.obj.bRectSelected;
 						}
-						m.mark.bRectIn = false;
-						m.mark.bRectSelected = false;
+						m.obj.bRectIn = false;
+						m.obj.bRectSelected = false;
 					}
 				}
 			}
@@ -923,7 +926,6 @@ struct Apr : public Sys
 			j.world = v;
 
 			j.disp = pers.calcPoint(v);
-			j.node = vect2(j.disp.x,j.disp.y);
 		}
 
 		// Human 描画
@@ -2021,11 +2023,6 @@ struct Apr : public Sys
 			// マーカー操作	
 			mc.funcMarkerController2( figCircle, mouse, keys, gra );
 			
-			for ( Marker2& m : mc.tblMarker2 )
-			{
-				m.mark.node = m.pos2;
-			}
-
 
 Joint2& tar = tblJoint_2d[0];
 tar.pos = gv1;
@@ -2146,7 +2143,7 @@ else
 					// 最近マーカーを検索
 					for ( Marker3& m : mc.tblMarker3 )
 					{
-						double len = (m.joint.node-mouse.pos).length();
+						double len = (m.joint.Pos2()-mouse.pos).length();
 						if ( len < 20.0 && a.len > len )
 						{
 							a.len = len;
@@ -2228,8 +2225,8 @@ else
 							// 矩形内マーカーを検索
 							for ( Marker3& m : mc.tblMarker3 )
 							{
-								double len = (m.joint.node-mouse.pos).length();
-								if ( m.joint.node.x > v0.x && m.joint.node.x < v1.x && m.joint.node.y > v0.y && m.joint.node.y < v1.y )
+								double len = (m.joint.Pos2()-mouse.pos).length();
+								if ( m.joint.Pos2().x > v0.x && m.joint.Pos2().x < v1.x && m.joint.Pos2().y > v0.y && m.joint.Pos2().y < v1.y )
 								{
 									m.joint.bRectIn = true;
 									if ( keys.CTRL.on )
@@ -2319,14 +2316,16 @@ else
 						flg = m.joint.bRectSelected;
 					}
 					int col=m.colNormal;
+
+					vect2 disp2 = m.joint.Pos2();//vect2(m.joint.disp.x, m.joint.disp.y);
 					if ( flg )			
 					{
 						col = m.colSelected;
 						cntAve++;
-						posAve +=  m.joint.node;
+						posAve +=  disp2;
 					}
-					gra.Circle( m.joint.node, 7, col );
-					gra.Print( m.joint.node+vect2(10,0), to_string(m.joint.id) );
+					gra.Circle( disp2, 7, col );
+					gra.Print( disp2+vect2(10,0), to_string(m.joint.id) );
 
 				}
 
