@@ -38,7 +38,7 @@ struct Apr : public Sys
 		bool 	bAffectable		= false;		//	削除対象
 		vect2	node = vect2(0,0);
 	
-		virtual void Move( vect2 v ) {};
+		virtual void Move( vect2 v ) =0;// {};
 	};
 
 	struct Joint3 : Markstat
@@ -58,6 +58,10 @@ struct Apr : public Sys
 			pos = v;
 			tension = 0;
 			len = 0;
+		}
+		void Move( vect2 v )
+		{
+			//none
 		}
 	};
 
@@ -99,7 +103,7 @@ struct Apr : public Sys
 
 	};
 
-	struct Marker2 : Markstat
+	struct Marker2// : Markstat
 	{
 		const SysGra&	gra;
 		const Figure&	fig;
@@ -111,41 +115,46 @@ struct Apr : public Sys
 
 		Marker2( SysGra& _gra, Figure& _fig, Markstat& _mark, vect2& v, double _th ) : gra(_gra), fig(_fig), mark(_mark), pos2(v)
 		{
-			bSelected		= false;
-			bRectIn			= false;
-			bRectSelected	= false;
-			bAffectable		= false;
-			th				= _th;
+			mark.bSelected		= false;
+			mark.bRectIn		= false;
+			mark.bRectSelected	= false;
+			mark.bAffectable	= false;
+			th					= _th;
 		}
 		Marker2(const Marker2& a) : gra(a.gra), fig(a.fig), mark(a.mark), pos2(a.pos2)
 		{
-			bSelected		= a.bSelected;
-			bRectIn			= a.bRectIn;
-			bRectSelected	= a.bRectSelected;
-			bAffectable 	= a.bAffectable;
-			th 				= a.th;
-			node 			= a.node;
+			mark.bSelected		= a.mark.bSelected;
+			mark.bRectIn		= a.mark.bRectIn;
+			mark.bRectSelected	= a.mark.bRectSelected;
+			mark.bAffectable 	= a.mark.bAffectable;
+			th 					= th;
+			mark.node 			= a.mark.node;
 		}	
 		const Marker2&	operator=(Marker2&& a){return a;}	
 		void draw()
 		{
-			bool flg =  bSelected;
+			bool flg =  mark.bSelected;
 			
-			if ( bRectIn )
+			if ( mark.bRectIn )
 			{
-				flg = bRectSelected;
+				flg = mark.bRectSelected;
 			}
 			
 			if ( flg )			
 			{
-				fig.draw( node,th, colSelected );
+				fig.draw( mark.node,th, colSelected );
 			}
 			else
 			{
-				fig.draw( node,th, colNormal );
+				fig.draw( mark.node,th, colNormal );
 			}
 		
 		}
+		void Move( vect2 v )
+		{
+			//none
+		}
+
 	};
 
 
@@ -244,7 +253,7 @@ struct Apr : public Sys
 		void funcMarkerDraw2()
 		//------------------------------------------------------------------------------
 		{
-			for ( Marker2 m : tblMarker2 )
+			for ( Marker2& m : tblMarker2 )
 			{
 				m.draw();
 			}
@@ -270,15 +279,15 @@ struct Apr : public Sys
 			{
 				for ( Marker2& m : tblMarker2 )
 				{
-					if ( m.bSelected )
+					if ( m.mark.bSelected )
 					{
-						m.bAffectable = true;
+						m.mark.bAffectable = true;
 					}
 				}
 
 				for ( int i = static_cast<signed>(tblMarker2.size())-1 ; i >= 0 ; i-- )
 				{
-					if ( tblMarker2[i].bAffectable )
+					if ( tblMarker2[i].mark.bAffectable )
 					{
 							   tblMarker2.erase(tblMarker2.begin() +i);	
 					}
@@ -291,18 +300,18 @@ struct Apr : public Sys
 				struct
 				{
 					double	len;
-					Marker2*	pmark;
+					Marker2*	pm;
 					int		cnt;
 				} a = {99999,0,0};
 
 				// 最近マーカーを検索
 				for ( Marker2& m : tblMarker2 )
 				{
-					double len = (m.node-mouse.pos).length();
+					double len = (m.mark.node-mouse.pos).length();
 					if ( len < 20.0 && a.len > len )
 					{
 						a.len = len;
-						a.pmark = &m;
+						a.pm = &m;
 						a.cnt++;
 					}
 				}
@@ -311,7 +320,7 @@ struct Apr : public Sys
 				if ( mouse.L.hi )
 				{
 					// 矩形選択
-					if ( a.pmark == 0 ) 
+					if ( a.pm == 0 ) 
 					{
 						//bDrag = true;
 						drag_start = mouse.pos;
@@ -322,25 +331,25 @@ struct Apr : public Sys
 					else
 					if ( keys.SHIFT.on ){}
 					else
-					if ( a.pmark && a.pmark->bSelected == true ){}
+					if ( a.pm && a.pm->mark.bSelected == true ){}
 					else
 					{
 						for ( Marker2& m : tblMarker2 )
 						{
-							m.bSelected = false;
+							m.mark.bSelected = false;
 						}
 					}
 					
 					//	マーカー選択
-					if ( a.pmark )
+					if ( a.pm )
 					{
 						if ( keys.CTRL.on )
 						{
-							a.pmark->bSelected = !a.pmark->bSelected;
+							a.pm->mark.bSelected = !a.pm->mark.bSelected;
 						}
 						else
 						{
-							a.pmark->bSelected = true;
+							a.pm->mark.bSelected = true;
 						}
 					}
 				}
@@ -355,23 +364,23 @@ struct Apr : public Sys
 
 						for ( Marker2& m : tblMarker2 )
 						{
-							m.bRectIn = false;
+							m.mark.bRectIn = false;
 						}
 
 						// 矩形内マーカーを検索
 						for ( Marker2& m : tblMarker2 )
 						{
-							double len = (m.node-mouse.pos).length();
-							if ( m.node.x > v0.x && m.node.x < v1.x && m.node.y > v0.y && m.node.y < v1.y )
+							double len = (m.mark.node-mouse.pos).length();
+							if ( m.mark.node.x > v0.x && m.mark.node.x < v1.x && m.mark.node.y > v0.y && m.mark.node.y < v1.y )
 							{
-								m.bRectIn = true;
+								m.mark.bRectIn = true;
 								if ( keys.CTRL.on )
 								{
-									m.bRectSelected = !m.bSelected;
+									m.mark.bRectSelected = !m.mark.bSelected;
 								}
 								else
 								{
-									m.bRectSelected = true;
+									m.mark.bRectSelected = true;
 								}
 							}
 						}
@@ -381,7 +390,7 @@ struct Apr : public Sys
 					// マーカー移動
 					for ( Marker2& m : tblMarker2 )
 					{
-						if ( m.bSelected )
+						if ( m.mark.bSelected )
 						{
 							m.mark.Move( mouse.mov );
 						}
@@ -395,12 +404,12 @@ struct Apr : public Sys
 					bDrag = false;
 					for ( Marker2& m : tblMarker2 )
 					{
-						if ( m.bRectIn )
+						if ( m.mark.bRectIn )
 						{
-							m.bSelected = m.bRectSelected;
+							m.mark.bSelected = m.mark.bRectSelected;
 						}
-						m.bRectIn = false;
-						m.bRectSelected = false;
+						m.mark.bRectIn = false;
+						m.mark.bRectSelected = false;
 					}
 				}
 			}
@@ -2014,7 +2023,7 @@ struct Apr : public Sys
 			
 			for ( Marker2& m : mc.tblMarker2 )
 			{
-				m.node = m.pos2;
+				m.mark.node = m.pos2;
 			}
 
 
@@ -2130,7 +2139,7 @@ else
 					struct
 					{
 						double	len;
-						Marker3*	pmark;
+						Marker3*	pm;
 						int		cnt;
 					} a = {99999,0,0};
 
@@ -2141,7 +2150,7 @@ else
 						if ( len < 20.0 && a.len > len )
 						{
 							a.len = len;
-							a.pmark = &m;
+							a.pm = &m;
 							a.cnt++;
 						}
 					}
@@ -2150,7 +2159,7 @@ else
 					if ( mouse.L.hi )
 					{
 						// 矩形選択
-						if ( a.pmark == 0 ) 
+						if ( a.pm == 0 ) 
 						{
 							bDrag = true;
 							drag_start = mouse.pos;
@@ -2161,7 +2170,7 @@ else
 						else
 						if ( keys.SHIFT.on ){}
 						else
-						if ( a.pmark && a.pmark->joint.bSelected == true ){}
+						if ( a.pm && a.pm->joint.bSelected == true ){}
 						else
 						{
 							for ( Marker3& m : mc.tblMarker3 )
@@ -2171,16 +2180,16 @@ else
 						}
 						
 						//	マーカー選択
-						if ( a.pmark )
+						if ( a.pm )
 						{
 							if ( keys.CTRL.on )
 							{
-								a.pmark->joint.bSelected = !a.pmark->joint.bSelected;
+								a.pm->joint.bSelected = !a.pm->joint.bSelected;
 							}
 							else
 							{
-								a.pmark->joint.bSelected = true;
-		//pTar3 = &a.pmark->joint;
+								a.pm->joint.bSelected = true;
+		//pTar3 = &a.pm->joint;
 							#if 0
 								// 優先度つけ
 								for ( Joint3& j : data.tblJoint )
@@ -2196,7 +2205,7 @@ else
 									}
 								};
 								
-								funcSetPriority( a.pmark->joint, 1 );
+								funcSetPriority( a.pm->joint, 1 );
 							#endif
 
 							}
