@@ -29,7 +29,15 @@ struct Apr : public Sys
 
 	long long	time_peak = 0;
 
-	struct Joint3
+	struct	Markstat
+	{
+		bool 	bRectSelected	= false;		//	矩形選択中、選択＆非選択
+		bool 	bRectIn			= false;		//	矩形選択中、矩形選択対象
+		bool 	bSelected		= false;		//	選択
+		bool 	bAffectable		= false;		//	削除対象
+	};
+
+	struct Joint3 : Markstat
 	{
 		int id;
 		vect3 pos;
@@ -39,7 +47,6 @@ struct Apr : public Sys
 		vect2 readonly_disp2;
 		double len;
 		int priority;
-		bool bSelected = false;
 		
 		vector<reference_wrapper<Joint3>>	relative;
 		Joint3( vect3 v )
@@ -90,15 +97,15 @@ struct Apr : public Sys
 
 	};
 
-	struct Marker2
+	struct Marker2 : Markstat
 	{
 		const SysGra&	gra;
 		const Figure&	fig;
 		vect2&	pos;
-		bool 	bRectSelected;		//	矩形選択中、選択＆非選択
-		bool 	bRectIn;			//	矩形選択中、矩形選択対象
-		bool 	bSelected;			//	選択
-		bool 	bAffectable;		//	削除対象
+//		bool 	bRectSelected;		//	矩形選択中、選択＆非選択
+//		bool 	bRectIn;			//	矩形選択中、矩形選択対象
+//		bool 	bSelected;			//	選択
+//		bool 	bAffectable;		//	削除対象
 		double	th;
 		int		colNormal = rgb(1,1,0);
 		int		colSelected = rgb(1,0,0);
@@ -147,29 +154,25 @@ struct Apr : public Sys
 		const SysGra&	gra;
 		const Figure&	fig;
 		Joint3&	joint;
-		bool 	bRectSelected;		//	矩形選択中、選択＆非選択
-		bool 	bRectIn;			//	矩形選択中、矩形選択対象
-		bool 	bSelected;			//	選択
-		bool 	bAffectable;		//	削除対象
 		double	th;
 		int		colNormal = rgb(1,1,0);
 		int		colSelected = rgb(1,0,0);
 
 		Marker3( SysGra& _gra, Figure& _fig, Joint3& _joint, double _th ) : gra(_gra), fig(_fig), joint(_joint)
 		{
-			bSelected		= false;
-			bRectIn			= false;
-			bRectSelected	= false;
-			bAffectable		= false;
+			joint.bSelected		= false;
+			joint.bRectIn			= false;
+			joint.bRectSelected	= false;
+			joint.bAffectable		= false;
 			th				= _th;
 		}
 		Marker3(const Marker3& a) : gra(a.gra), fig(a.fig), joint(a.joint)
 		{
-			bSelected		= a.bSelected;
-			bRectIn			= a.bRectIn;
-			bRectSelected	= a.bRectSelected;
-			bAffectable 	= a.bAffectable;
-			th 				= a.th;
+			joint.bSelected		= a.joint.bSelected;
+			joint.bRectIn		= a.joint.bRectIn;
+			joint.bRectSelected	= a.joint.bRectSelected;
+			joint.bAffectable 	= a.joint.bAffectable;
+			th 					= a.th;
 		}	
 		const Marker3&	operator=(Marker3&& a){return a;}	
 
@@ -2008,15 +2011,15 @@ else
 				{
 					for ( Marker3& m : mc.tblMarker3 )
 					{
-						if ( m.bSelected )
+						if ( m.joint.bSelected )
 						{
-							m.bAffectable = true;
+							m.joint.bAffectable = true;
 						}
 					}
 
 					for ( int i = static_cast<signed>(mc.tblMarker3.size())-1 ; i >= 0 ; i-- )
 					{
-						if ( mc.tblMarker3[i].bAffectable )
+						if ( mc.tblMarker3[i].joint.bAffectable )
 						{
 								   mc.tblMarker3.erase(mc.tblMarker3.begin() +i);	
 						}
@@ -2060,12 +2063,12 @@ else
 						else
 						if ( keys.SHIFT.on ){}
 						else
-						if ( a.pmark && a.pmark->bSelected == true ){}
+						if ( a.pmark && a.pmark->joint.bSelected == true ){}
 						else
 						{
 							for ( Marker3& m : mc.tblMarker3 )
 							{
-								m.bSelected = false;
+								m.joint.bSelected = false;
 							}
 						}
 						
@@ -2074,11 +2077,11 @@ else
 						{
 							if ( keys.CTRL.on )
 							{
-								a.pmark->bSelected = !a.pmark->bSelected;
+								a.pmark->joint.bSelected = !a.pmark->joint.bSelected;
 							}
 							else
 							{
-								a.pmark->bSelected = true;
+								a.pmark->joint.bSelected = true;
 		//pTar3 = &a.pmark->joint;
 							#if 0
 								// 優先度つけ
@@ -2112,23 +2115,23 @@ else
 
 							for ( Marker3& m : mc.tblMarker3 )
 							{
-								m.bRectIn = false;
+								m.joint.bRectIn = false;
 							}
 
 							// 矩形内マーカーを検索
 							for ( Marker3& m : mc.tblMarker3 )
 							{
 								double len = (m.joint.readonly_disp2-mouse.pos).length();
-								if ( m.joint.disp.x > v0.x && m.joint.disp.x < v1.x && m.joint.disp.y > v0.y && m.joint.disp.y < v1.y )
+								if ( m.joint.readonly_disp2.x > v0.x && m.joint.readonly_disp2.x < v1.x && m.joint.readonly_disp2.y > v0.y && m.joint.readonly_disp2.y < v1.y )
 								{
-									m.bRectIn = true;
+									m.joint.bRectIn = true;
 									if ( keys.CTRL.on )
 									{
-										m.bRectSelected = !m.bSelected;
+										m.joint.bRectSelected = !m.joint.bSelected;
 									}
 									else
 									{
-										m.bRectSelected = true;
+										m.joint.bRectSelected = true;
 									}
 								}
 							}
@@ -2143,7 +2146,7 @@ else
 							int cnt = 0;
 							for ( Marker3& m : mc.tblMarker3 )
 							{
-								if ( m.bSelected )
+								if ( m.joint.bSelected )
 								{
 									aveZ += 1/m.joint.disp.z;
 									cnt++;
@@ -2157,7 +2160,7 @@ else
 							{
 								for ( Marker3& m : mc.tblMarker3 )
 								{
-									if ( m.bSelected )
+									if ( m.joint.bSelected )
 									{
 										// 平行移動
 		//								double sz = 1/tan(rad(pers.fovy)/2);				// 投影面までの距離
@@ -2180,12 +2183,12 @@ else
 						bDrag = false;
 						for ( Marker3& m : mc.tblMarker3 )
 						{
-							if ( m.bRectIn )
+							if ( m.joint.bRectIn )
 							{
-								m.bSelected = m.bRectSelected;
+								m.joint.bSelected = m.joint.bRectSelected;
 							}
-							m.bRectIn = false;
-							m.bRectSelected = false;
+							m.joint.bRectIn = false;
+							m.joint.bRectSelected = false;
 						}
 					}
 				}
@@ -2202,11 +2205,11 @@ else
 				for ( Marker3 m : mc.tblMarker3 )
 				{
 						//m.draw();
-					bool flg =  m.bSelected;
+					bool flg =  m.joint.bSelected;
 					
-					if ( m.bRectIn )
+					if ( m.joint.bRectIn )
 					{
-						flg = m.bRectSelected;
+						flg = m.joint.bRectSelected;
 					}
 					int col=m.colNormal;
 					if ( flg )			
@@ -2230,23 +2233,14 @@ else
 			if(1)
 			{
 
-							// とり会えずコピー
-							for ( Marker3& m : mc.tblMarker3 )
-							{
-								m.joint.bSelected = m.bSelected;
-							}
-
-			
 				int num = anim.num;
 				Data& data = (*pData);
 				// マーカースプライン変換表示
 				if ( static_cast<signed>(data.animations.size()) > 0 )
 				{
-//					double div = 8;
-//					double dt = 1/div;
 					double dt = anim.dt;
 					double div = 1/dt;
-//Joint3
+
 					for ( int n = -1 ; n < static_cast<signed>(data.animations[num].pose.size())-3+1 ; n++ )
 					{
 						int n0 = n;
@@ -2256,14 +2250,9 @@ else
 						if ( n0 < 0 ) n0 = 0;
 						if ( n3 >= static_cast<signed>(data.animations[num].pose.size()) ) n3 = n2;
 					
-//						for ( int j = 0 ;  j < static_cast<signed>(data.animations[num].pose[ 0 ].pos.size()) ; j++ )
 						for ( int j = 0 ;  j < static_cast<signed>(data.tblJoint.size()) ; j++ )
 						{
-						if ( data.tblJoint[j].bSelected == false ) continue;
-//							for ( Marker& m : mc.tblMarker3 )
-							{
-//								if( m.joint.bSelected && &m.joint == .bSelected )
-							}
+							if ( data.tblJoint[j].bSelected == false ) continue;
 						
 							vect3 P0 = data.animations[num].pose[ n0 ].pos[j];
 							vect3 P1 = data.animations[num].pose[ n1 ].pos[j];
