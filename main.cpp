@@ -23,6 +23,7 @@ using namespace std;
 
 
 
+static bool g_flg = false;
 
 struct Apr : public Sys
 {
@@ -385,6 +386,8 @@ struct Apr : public Sys
 	{
 		int	num = 0;	//	アニメーションカーソル位置
 		int	key = 0;	//	キーフレームカーソル位置
+		int copied_num = 0;
+		int copied_key = 0;
 		//
 		double	t = 0;
 		double	dt = 0.1;
@@ -544,6 +547,15 @@ struct Apr : public Sys
 
 		for ( int j = 0 ; j < static_cast<signed>(data.animations[num].pose[0].pos.size()) ; j++ )
 		{
+			if ( g_flg ) 
+			{
+				if ( j == 3 || j == 4 ) continue;	//肩
+				if ( j == 5 || j == 2 ) continue;	//腹首
+				if ( j == 6 || j == 7) continue;	//腰
+	//			if ( j == 12 || j == 14 ) continue;	//肘
+	//			if ( j == 8 || j == 10 ) continue;	//足
+	//			if ( j == 9 || j == 11 ) continue;	//膝
+			}
 			vect3 P0 = data.animations[num].pose[ n0 ].pos[j];
 			vect3 P1 = data.animations[num].pose[ n1 ].pos[j];
 			vect3 P2 = data.animations[num].pose[ n2 ].pos[j];
@@ -659,7 +671,7 @@ struct Apr : public Sys
 	}
 	
 	//------------------------------------------------------------------------------
-	void bone_AddKeyframe( Data& data )
+	void bone_InsertKeyframe( Data& data )
 	//------------------------------------------------------------------------------
 	{
 		anim.bPlaying = false;
@@ -671,6 +683,30 @@ struct Apr : public Sys
 		{
 			data.animations[num].pose[ anim.key ].pos.emplace_back( j.pos );
 		}
+	}
+
+	//------------------------------------------------------------------------------
+	void bone_CopyKeyframe( Data& data )
+	//------------------------------------------------------------------------------
+	{
+		anim.copied_num = anim.num;
+		anim.copied_key = anim.key;
+	}
+
+	//------------------------------------------------------------------------------
+	void bone_PastKeyframe( Data& data )
+	//------------------------------------------------------------------------------
+	{
+		bone_InsertKeyframe( data );
+		for ( int i = 0 ; i < static_cast<signed>(data.tblJoint.size()) ; i++ )
+		{ 
+			vect3 v = data.animations[anim.copied_num].pose[ anim.copied_key ].pos[i];
+		
+			data.animations[anim.num].pose[ anim.key ].pos[i] = v;
+			data.tblJoint[i].pos = v;
+		}
+
+		
 	}
 
 	//------------------------------------------------------------------------------
@@ -1423,8 +1459,14 @@ struct Apr : public Sys
 				// キーフレームへ反映
 				if ( keys.J.hi ) bone_RefrectKeyframe( *pData );
 
+				// キーフレームペースト
+				if ( keys.V.hi ) bone_PastKeyframe( *pData );
+
+				// キーフレームコピー
+				if ( keys.C.hi ) bone_CopyKeyframe( *pData );
+
 				// キーフレーム追加
-				if ( keys.K.hi ) bone_AddKeyframe( *pData );
+				if ( keys.K.hi ) bone_InsertKeyframe( *pData );
 
 				// キーフレーム削除
 				if ( keys.D.hi ) bone_DeleteKeyframe( *pData );
@@ -1446,6 +1488,9 @@ struct Apr : public Sys
 
 				// アニメーションリクエスト
 				if ( keys.P.hi ) bone_ReqAnimation();
+
+if ( keys.Q.hi ) g_flg =!g_flg;
+gra.Print(vect2(16*20,16*1),string("flg ")+ to_string(g_flg) );
 
 				// アニメーション再生
 				if ( anim.bPlaying )	bone_Play( *pData );
@@ -1469,6 +1514,26 @@ struct Apr : public Sys
 					}
 				}
 				gra.Print( vect2(10,16*31),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
+			}
+
+			// animカーソルビュー
+			{
+				for ( int y = 0 ; y < (signed)pData->animations.size() ; y++ )
+				{
+					for ( int x = 0 ; x < (signed)pData->animations[y].pose.size() ; x++ )
+					{
+						vect2 v = vect2( x, y )*vect2( 4, 8 ) + vect2(400,16);
+
+						if ( y == anim.num && x == anim.key )
+						{
+							gra.Fill( v, v+vect2(3,7), rgb(1,0,0) );
+						}
+						else
+						{
+							gra.Fill( v, v+vect2(3,7), rgb(1,1,1) );
+						}
+					}
+				}
 			}
 
 			// カメラ回転
