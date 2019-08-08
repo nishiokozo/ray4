@@ -107,80 +107,29 @@ struct Apr : public Sys
 
 	};
 
-	struct Marker2
+	struct Marker
 	{
 		const SysGra&	gra;
 		const Figure&	fig;
 		Obj&	obj;
-//		vect2&	pos2;
-//		double	th;
 		int		colNormal = rgb(1,1,0);
 		int		colSelected = rgb(1,0,0);
 
-		Marker2( SysGra& _gra, Figure& _fig, Obj& _obj ) : gra(_gra), fig(_fig), obj(_obj)//, pos2(v)
+		Marker( SysGra& _gra, Figure& _fig, Obj& _obj ) : gra(_gra), fig(_fig), obj(_obj)//, pos2(v)
 		{
 			obj.bSelected		= false;
 			obj.bRectIn			= false;
 			obj.bRectSelected	= false;
 			obj.bAffectable		= false;
-//			th					= _th;
 		}
-		Marker2(const Marker2& a) : gra(a.gra), fig(a.fig), obj(a.obj)//, pos2(a.pos2)
-		{
-			obj.bSelected		= a.obj.bSelected;
-			obj.bRectIn			= a.obj.bRectIn;
-			obj.bRectSelected	= a.obj.bRectSelected;
-			obj.bAffectable 	= a.obj.bAffectable;
-//			th 					= th;
-		}	
-		const Marker2&	operator=(Marker2&& a){return a;}	
-		void draw()
-		{
-			bool flg =  obj.bSelected;
-			
-			if ( obj.bRectIn )
-			{
-				flg = obj.bRectSelected;
-			}
-			
-			if ( flg )			
-			{
-				fig.draw( obj.Pos2(),rad(0), colSelected );
-			}
-			else
-			{
-				fig.draw( obj.Pos2(),rad(0), colNormal );
-			}
-		
-		}
-
-	};
-
-
-	struct Marker3
-	{
-		const SysGra&	gra;
-		const Figure&	fig;
-		Obj&	obj;
-		
-		int		colNormal = rgb(1,1,0);
-		int		colSelected = rgb(1,0,0);
-
-		Marker3( SysGra& _gra, Figure& _fig, Obj& _obj ) : gra(_gra), fig(_fig), obj(_obj)//, joint(_joint)
-		{
-			obj.bSelected		= false;
-			obj.bRectIn		= false;
-			obj.bRectSelected	= false;
-			obj.bAffectable	= false;
-		}
-		Marker3(const Marker3& a) : gra(a.gra), fig(a.fig), obj(a.obj)//, joint(a.joint)
+		Marker(const Marker& a) : gra(a.gra), fig(a.fig), obj(a.obj)//, pos2(a.pos2)
 		{
 			obj.bSelected		= a.obj.bSelected;
 			obj.bRectIn			= a.obj.bRectIn;
 			obj.bRectSelected	= a.obj.bRectSelected;
 			obj.bAffectable 	= a.obj.bAffectable;
 		}	
-		const Marker3&	operator=(Marker3&& a){return a;}	
+		const Marker&	operator=(Marker&& a){return a;}	
 		void draw()
 		{
 			bool flg =  obj.bSelected;
@@ -268,12 +217,12 @@ struct Apr : public Sys
 	struct
 	{
 
-		vector<Marker2>	tblMarker2;
+		vector<Marker>	tblMarker2;
 		//------------------------------------------------------------------------------
 		void funcMarkerDraw2()
 		//------------------------------------------------------------------------------
 		{
-			for ( Marker2& m : tblMarker2 )
+			for ( Marker& m : tblMarker2 )
 			{
 				m.draw();
 			}
@@ -297,7 +246,7 @@ struct Apr : public Sys
 			// マーカー削除
 			if  ( keys.CTRL.on && keys.X.hi )
 			{
-				for ( Marker2& m : tblMarker2 )
+				for ( Marker& m : tblMarker2 )
 				{
 					if ( m.obj.bSelected )
 					{
@@ -320,12 +269,12 @@ struct Apr : public Sys
 				struct
 				{
 					double	len;
-					Marker2*	pm;
+					Marker*	pm;
 					int		cnt;
 				} a = {99999,0,0};
 
 				// 最近マーカーを検索
-				for ( Marker2& m : tblMarker2 )
+				for ( Marker& m : tblMarker2 )
 				{
 					double len = (m.obj.Pos2()-mouse.pos).length();
 					if ( len < 20.0 && a.len > len )
@@ -354,7 +303,7 @@ struct Apr : public Sys
 					if ( a.pm && a.pm->obj.bSelected == true ){}
 					else
 					{
-						for ( Marker2& m : tblMarker2 )
+						for ( Marker& m : tblMarker2 )
 						{
 							m.obj.bSelected = false;
 						}
@@ -382,13 +331,13 @@ struct Apr : public Sys
 						vect2 v1 = max( drag_start, mouse.pos );
 						gra.Box( v0,v1, rgb(0,0.5,1));
 
-						for ( Marker2& m : tblMarker2 )
+						for ( Marker& m : tblMarker2 )
 						{
 							m.obj.bRectIn = false;
 						}
 
 						// 矩形内マーカーを検索
-						for ( Marker2& m : tblMarker2 )
+						for ( Marker& m : tblMarker2 )
 						{
 							double len = (m.obj.Pos2()-mouse.pos).length();
 							if ( m.obj.Pos2().x > v0.x && m.obj.Pos2().x < v1.x && m.obj.Pos2().y > v0.y && m.obj.Pos2().y < v1.y )
@@ -408,7 +357,7 @@ struct Apr : public Sys
 					}
 					else
 					// マーカー移動
-					for ( Marker2& m : tblMarker2 )
+					for ( Marker& m : tblMarker2 )
 					{
 						if ( m.obj.bSelected )
 						{
@@ -422,7 +371,7 @@ struct Apr : public Sys
 				if ( bDrag )
 				{
 					bDrag = false;
-					for ( Marker2& m : tblMarker2 )
+					for ( Marker& m : tblMarker2 )
 					{
 						if ( m.obj.bRectIn )
 						{
@@ -436,7 +385,7 @@ struct Apr : public Sys
 
 		}
 
-		vector<Marker3>	tblMarker3;
+		vector<Marker>	tblMarker3;
 
 	} mc;
 
@@ -2130,7 +2079,7 @@ else
 				// マーカー削除
 				if  ( keys.CTRL.on && keys.X.hi )
 				{
-					for ( Marker3& m : mc.tblMarker3 )
+					for ( Marker& m : mc.tblMarker3 )
 					{
 						if ( m.obj.bSelected )
 						{
@@ -2153,12 +2102,12 @@ else
 					struct
 					{
 						double	len;
-						Marker3*	pm;
+						Marker*	pm;
 						int		cnt;
 					} a = {99999,0,0};
 
 					// 最近マーカーを検索
-					for ( Marker3& m : mc.tblMarker3 )
+					for ( Marker& m : mc.tblMarker3 )
 					{
 						double len = (m.obj.Pos2()-mouse.pos).length();
 						if ( len < 20.0 && a.len > len )
@@ -2187,7 +2136,7 @@ else
 						if ( a.pm && a.pm->obj.bSelected == true ){}
 						else
 						{
-							for ( Marker3& m : mc.tblMarker3 )
+							for ( Marker& m : mc.tblMarker3 )
 							{
 								m.obj.bSelected = false;
 							}
@@ -2234,13 +2183,13 @@ else
 							vect2 v1 = max( drag_start, mouse.pos );
 							gra.Box( v0,v1, rgb(0,0.5,1));
 
-							for ( Marker3& m : mc.tblMarker3 )
+							for ( Marker& m : mc.tblMarker3 )
 							{
 								m.obj.bRectIn = false;
 							}
 
 							// 矩形内マーカーを検索
-							for ( Marker3& m : mc.tblMarker3 )
+							for ( Marker& m : mc.tblMarker3 )
 							{
 								double len = (m.obj.Pos2()-mouse.pos).length();
 								if ( m.obj.Pos2().x > v0.x && m.obj.Pos2().x < v1.x && m.obj.Pos2().y > v0.y && m.obj.Pos2().y < v1.y )
@@ -2267,7 +2216,7 @@ else
 								// マウスの先のＺ位置を仮り決めする
 								double aveZ = 0;
 								int cnt = 0;
-								for ( Marker3& m : mc.tblMarker3 )
+								for ( Marker& m : mc.tblMarker3 )
 								{
 									Joint3* pj = dynamic_cast<Joint3*>(&m.obj);
 									if ( pj->bSelected )
@@ -2282,7 +2231,7 @@ else
 
 								// 移動
 								{
-									for ( Marker3& m : mc.tblMarker3 )
+									for ( Marker& m : mc.tblMarker3 )
 									{
 										Joint3* pj = dynamic_cast<Joint3*>(&m.obj);
 										if ( pj->bSelected )
@@ -2307,7 +2256,7 @@ else
 					if ( bDrag )
 					{
 						bDrag = false;
-						for ( Marker3& m : mc.tblMarker3 )
+						for ( Marker& m : mc.tblMarker3 )
 						{
 							if ( m.obj.bRectIn )
 							{
@@ -2324,7 +2273,7 @@ else
 			bone_update( *pData );
 
 			// 3Dマーカー表示
-			for ( Marker3 m : mc.tblMarker3 )
+			for ( Marker m : mc.tblMarker3 )
 			{
 				m.draw();
 			}
@@ -2333,7 +2282,7 @@ if(0)
 			{
 				int		cntAve=0;
 				vect2	posAve=0;
-				for ( Marker3 m : mc.tblMarker3 )
+				for ( Marker m : mc.tblMarker3 )
 				{
 						//m.draw();
 					bool flg =  m.obj.bSelected;
