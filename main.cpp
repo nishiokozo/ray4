@@ -103,13 +103,13 @@ struct Apr : public Sys
 	{
 		const SysGra&	gra;
 		const Figure&	fig;
-		Markstat*	mark;
+		Markstat&	mark;
 		vect2&	pos2;
 		double	th;
 		int		colNormal = rgb(1,1,0);
 		int		colSelected = rgb(1,0,0);
 
-		Marker2( SysGra& _gra, Figure& _fig, Markstat* _mark, vect2& v, double _th ) : gra(_gra), fig(_fig), mark(_mark), pos2(v)
+		Marker2( SysGra& _gra, Figure& _fig, Markstat& _mark, vect2& v, double _th ) : gra(_gra), fig(_fig), mark(_mark), pos2(v)
 		{
 			bSelected		= false;
 			bRectIn			= false;
@@ -383,7 +383,7 @@ struct Apr : public Sys
 					{
 						if ( m.bSelected )
 						{
-							m.mark->Move( mouse.mov );
+							m.mark.Move( mouse.mov );
 						}
 					}
 				}
@@ -1171,7 +1171,7 @@ struct Apr : public Sys
 
 		for ( Catmull& c : catmull_tbl )	// マーカー対象に位置を登録
 		{
-			mc.tblMarker2.emplace_back( gra, figCircle, &c, c.pos, rad(-90) );
+			mc.tblMarker2.emplace_back( gra, figCircle, c, c.pos, rad(-90) );
 		}
 		
 		//3字曲線
@@ -1216,7 +1216,7 @@ struct Apr : public Sys
 		};
 		for ( Bezier& b : bezier_tbl )	// マーカー対象に位置を登録
 		{
-			mc.tblMarker2.emplace_back( gra, figCircle, &b, b.pos, rad(-90) );
+			mc.tblMarker2.emplace_back( gra, figCircle, b, b.pos, rad(-90) );
 		}
 
 		//骨---------------------------------------
@@ -1304,7 +1304,7 @@ struct Apr : public Sys
 		}
 		for ( Joint2& j : tblJoint_2d )	//マーカー対象に位置を登録
 		{
-			mc.tblMarker2.emplace_back( gra, figCircle, &j, j.pos, rad(-90) );
+			mc.tblMarker2.emplace_back( gra, figCircle, j, j.pos, rad(-90) );
 		}
 
 		//人
