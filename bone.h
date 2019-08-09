@@ -72,24 +72,24 @@
 			bool	bPlaying = false;
 		} anim;
 
-		void bone_load( const char* filename );
-		void bone_save( const char* filename );
-		void bone_AddAnimation();
-		void bone_NextAnimation();
-		void bone_PrevAnimation();
-		void bone_CutKeyframe();
-		void bone_PastKeyframe();
-		void bone_CopyKeyframe();
-		void bone_InsertKeyframe();
-		void bone_RefrectKeyframe();
-		void bone_LastKeyframe();
-		void bone_NextKeyframe();
-		void bone_TopKeyframe();
-		void bone_PrevKeyframe();
-		void bone_Play();
-		void bone_ReqAnimation();
-		void bone_update( Pers& pers, mat44& cam_mat, SysGra& gra );
-		void bone_drawMotion( Pers& pers, mat44& cam_mat, SysGra& gra );
+		void loadMotion( const char* filename );
+		void saveMotion( const char* filename );
+		void AddAnimation();
+		void NextAnimation();
+		void PrevAnimation();
+		void CutKeyframe();
+		void PastKeyframe();
+		void CopyKeyframe();
+		void InsertKeyframe();
+		void RefrectKeyframe();
+		void LastKeyframe();
+		void NextKeyframe();
+		void TopKeyframe();
+		void PrevKeyframe();
+		void PlayAnimation();
+		void ReqAnimation();
+		void update( Pers& pers, mat44& cam_mat, SysGra& gra );
+		void drawMotion( Pers& pers, mat44& cam_mat, SysGra& gra );
 
 	};
 

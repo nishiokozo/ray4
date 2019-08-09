@@ -640,17 +640,12 @@ struct Apr : public Sys
 
 		pPreset->animations.emplace_back();
 
-		Bone* pData = pPreset;
+		Bone* pBone = pPreset;
 
 #else
-		unique_ptr<Bone> pData(new Bone);
-//		pData->bone_load( "primary.mot");
+		unique_ptr<Bone> pBone(new Bone);
+//		pBone->load( "primary.mot");
 #endif
-
-//		{
-//			unique_ptr<Bone> p(new Bone);
-//			pData->anim.pCopybuf = move(p);
-//		}
 
 		// 箱
 		struct
@@ -746,77 +741,77 @@ struct Apr : public Sys
 				}
 
 
-				if ( pData->anim.bSelecting ==false && keys.SHIFT.on && (keys.UP.hi || keys.DOWN.hi || keys.LEFT.hi ||keys.RIGHT.hi) )
+				if ( pBone->anim.bSelecting ==false && keys.SHIFT.on && (keys.UP.hi || keys.DOWN.hi || keys.LEFT.hi ||keys.RIGHT.hi) )
 				{
-					pData->anim.bSelecting = true;
-					pData->anim.selecting_num = pData->anim.num;
-					pData->anim.selecting_pose = pData->anim.pose;
+					pBone->anim.bSelecting = true;
+					pBone->anim.selecting_num = pBone->anim.num;
+					pBone->anim.selecting_pose = pBone->anim.pose;
 				}
 				if ( !keys.SHIFT.on && (keys.UP.hi || keys.DOWN.hi || keys.LEFT.hi ||keys.RIGHT.hi) )
 				{
-					pData->anim.bSelecting = false;
+					pBone->anim.bSelecting = false;
 				}
 				
 				// キーフレームロード
-//				if ( keys.L.hi ) pData = pData->bone_load( "human.mot");
 				if ( keys.L.hi ) 
 				{
 					unique_ptr<Bone> pNew(new Bone);
-					pNew->bone_load( "human.mot");
+					pNew->loadMotion( "human.mot");
 					//マーカー削除＆登録
 					mc.tblMarker3.clear();
 					for ( Joint3& j : pNew->tblJoint )	//マーカー登録
 					{
 						mc.tblMarker3.emplace_back( gra, figCircle, j );
 					}
-					pData = move(pNew);
+					pBone = move(pNew);
+
 				}
 
 
 				// キーフレームセーブ
-				if ( keys.S.hi ) pData->bone_save( "human.mot" );
+				if ( keys.S.hi ) pBone->saveMotion( "human.mot" );
 
 				// キーフレームへ反映
-				if ( keys.J.hi ) pData->bone_RefrectKeyframe();
+				if ( keys.J.hi ) pBone->RefrectKeyframe();
 
 				// キーフレームペースト
-				if ( keys.V.hi ) pData->bone_PastKeyframe();
+				if ( keys.V.hi ) pBone->PastKeyframe();
 
 				// キーフレームコピー
-				if ( keys.C.hi ) pData->bone_CopyKeyframe();
+				if ( keys.C.hi ) pBone->CopyKeyframe();
 
 				// キーフレーム追加
-				if ( keys.K.hi ) pData->bone_InsertKeyframe();
+				if ( keys.K.hi ) pBone->InsertKeyframe();
 
 				// キーフレームカット
-				if ( keys.X.hi ) pData->bone_CutKeyframe();
+				if ( keys.X.hi ) pBone->CutKeyframe();
 
 				// キーフレーム次
-				if ( keys.RIGHT.rep ) pData->bone_NextKeyframe();
+				if ( keys.RIGHT.rep ) pBone->NextKeyframe();
 
 				// キーフレーム最後
-				if ( keys.CTRL.on && keys.RIGHT.rep ) pData->bone_LastKeyframe();
+				if ( keys.CTRL.on && keys.RIGHT.rep ) pBone->LastKeyframe();
 
 				// キーフレーム前
-				if ( keys.LEFT.rep ) pData->bone_PrevKeyframe();
+				if ( keys.LEFT.rep ) pBone->PrevKeyframe();
 
 				// キーフレーム先頭
-				if ( keys.CTRL.on && keys.LEFT.rep ) pData->bone_TopKeyframe();
+				if ( keys.CTRL.on && keys.LEFT.rep ) pBone->TopKeyframe();
 
 				// アニメーション記録
-				if ( keys.I.hi ) pData->bone_AddAnimation();
+				if ( keys.I.hi ) pBone->AddAnimation();
 
 				// アニメーション前
-				if ( keys.UP.rep ) pData->bone_PrevAnimation();
+				if ( keys.UP.rep ) pBone->PrevAnimation();
 
 				// アニメーション次
-				if ( keys.DOWN.rep ) pData->bone_NextAnimation();
+				if ( keys.DOWN.rep ) pBone->NextAnimation();
 
 				// アニメーションリクエスト
-				if ( keys.P.hi ) pData->bone_ReqAnimation();
+				if ( keys.P.hi ) pBone->ReqAnimation();
 
 				// アニメーション再生
-				if ( pData->anim.bPlaying )	pData->bone_Play();
+				if ( pBone->anim.bPlaying )	pBone->PlayAnimation();
 				
 				
 			}
@@ -829,10 +824,10 @@ struct Apr : public Sys
 				gra.Print( vect2(10,16*y++),string("at  x=")+to_string(cam.at.x)+string(" y=")+to_string(cam.at.y)+string(" z=")+to_string(cam.at.z) ); 
 				gra.Print( vect2(10,16*y++),string("pos x=")+to_string(cam.pos.x)+string(" y=")+to_string(cam.pos.y)+string(" z=")+to_string(cam.pos.z) ); 
 				{
-					gra.Print( vect2(10,16*y++),string("anim=")+to_string(pData->anim.num) + string(" cnt=")+to_string(pData->animations.size()) ); 
-					if ( pData->animations.size() > 0 ) 
+					gra.Print( vect2(10,16*y++),string("anim=")+to_string(pBone->anim.num) + string(" cnt=")+to_string(pBone->animations.size()) ); 
+					if ( pBone->animations.size() > 0 ) 
 					{
-						gra.Print( vect2(10,16*y++),string("pose=")+to_string(pData->anim.pose) + string(" cnt=")+to_string(pData->animations[pData->anim.num].pose.size()) ); 
+						gra.Print( vect2(10,16*y++),string("pose=")+to_string(pBone->anim.pose) + string(" cnt=")+to_string(pBone->animations[pBone->anim.num].pose.size()) ); 
 					}
 				}
 				gra.Print( vect2(10,16*31),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
@@ -841,19 +836,19 @@ struct Apr : public Sys
 			// animカーソルビュー cursor
 			{
 				bool flg = false;
-				for ( int y = 0 ; y < (signed)pData->animations.size() ; y++ )
+				for ( int y = 0 ; y < (signed)pBone->animations.size() ; y++ )
 				{
-					for ( int x = 0 ; x < (signed)pData->animations[y].pose.size() ; x++ )
+					for ( int x = 0 ; x < (signed)pBone->animations[y].pose.size() ; x++ )
 					{
-						if ( pData->anim.bSelecting && ( y == pData->anim.selecting_num && x == pData->anim.selecting_pose ) ) flg=!flg;
-						if ( pData->anim.bSelecting && ( y == pData->anim.num && x == pData->anim.pose ) ) flg=!flg;
+						if ( pBone->anim.bSelecting && ( y == pBone->anim.selecting_num && x == pBone->anim.selecting_pose ) ) flg=!flg;
+						if ( pBone->anim.bSelecting && ( y == pBone->anim.num && x == pBone->anim.pose ) ) flg=!flg;
 
 						vect2 v = vect2( x, y )*vect2( 4, 8 ) + vect2(400,16);
 						{
 							gra.Fill( v, v+vect2(3,7), rgb(1,1,1) );
 						}
 
-						if ( y == pData->anim.num && x == pData->anim.pose )
+						if ( y == pBone->anim.num && x == pBone->anim.pose )
 						{
 							gra.Fill( v+vect2(0,4), v+vect2(3,7), rgb(1,0,0) );
 						}
@@ -1598,7 +1593,7 @@ else
 				
 			}
 			// human 更新
-			pData->bone_update( pers, cam.mat, gra );
+			pBone->update( pers, cam.mat, gra );
 
 			// 3Dマーカー表示
 			for ( Marker m : mc.tblMarker3 )
@@ -1607,7 +1602,7 @@ else
 			}
 
 			// カトマル3D モーション軌跡表示
-			pData->bone_drawMotion( pers, cam.mat, gra );
+			pBone->drawMotion( pers, cam.mat, gra );
 
 
 
@@ -1694,9 +1689,3 @@ int main()
 	Apr	apr("Ray4 " __DATE__, 300,300,768, 512 );
 	return apr.main();
 }
-
-
-
-
-	
-

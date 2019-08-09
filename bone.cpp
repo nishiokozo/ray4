@@ -37,7 +37,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 
 
 	//------------------------------------------------------------------------------
-	void Bone::bone_ReqAnimation()
+	void Bone::ReqAnimation()
 	//------------------------------------------------------------------------------
 	{
 		anim.bSelecting = false;
@@ -49,11 +49,14 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	}	
 
 	//------------------------------------------------------------------------------
-	void Bone::bone_Play()
+	void Bone::PlayAnimation()
 	//------------------------------------------------------------------------------
 	{
-//		int num = anim.num;
-		if(static_cast<signed>(animations[anim.num].pose.size())<4) return;
+		if ( animations.size() ==0 ) return;
+		if ( animations[anim.num].pose.size()==0) return;
+		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
+
+		if(static_cast<signed>(animations[anim.num].pose.size())<2) return;
 
 		int n0 = anim.n-1;
 		int n1 = anim.n;
@@ -119,12 +122,11 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	}
 	
 	//------------------------------------------------------------------------------
-	void Bone::bone_PrevKeyframe()
+	void Bone::PrevKeyframe()
 	//------------------------------------------------------------------------------
 	{
 		anim.bPlaying = false;
 
-//		int num = anim.num;
 		if ( animations.size() ==0 ) return;
 		if ( animations[anim.num].pose.size()==0) return;
 		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
@@ -146,12 +148,11 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	}
 
 	//------------------------------------------------------------------------------
-	void Bone::bone_TopKeyframe()
+	void Bone::TopKeyframe()
 	//------------------------------------------------------------------------------
 	{
 		anim.bPlaying = false;
 
-//		int num = anim.num;
 		if ( animations.size() ==0 ) return;
 		if ( animations[anim.num].pose.size()==0) return;
 		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
@@ -171,12 +172,11 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	}
 
 	//------------------------------------------------------------------------------
-	void Bone::bone_NextKeyframe()
+	void Bone::NextKeyframe()
 	//------------------------------------------------------------------------------
 	{
 		anim.bPlaying = false;
 
-//		int num = anim.num;
 		if ( animations.size() ==0 ) return;
 		if ( animations[anim.num].pose.size()==0) return;
 		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
@@ -198,12 +198,11 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	}
 
 	//------------------------------------------------------------------------------
-	void Bone::bone_LastKeyframe()
+	void Bone::LastKeyframe()
 	//------------------------------------------------------------------------------
 	{
 		anim.bPlaying = false;
 
-//		int num = anim.num;
 		if ( animations.size() ==0 ) return;
 		if ( animations[anim.num].pose.size()==0) return;
 		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
@@ -223,12 +222,11 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	}
 
 	//------------------------------------------------------------------------------
-	void Bone::bone_RefrectKeyframe()
+	void Bone::RefrectKeyframe()
 	//------------------------------------------------------------------------------
 	{
 		anim.bPlaying = false;
 
-//		int num = anim.num;
 		if ( animations.size() ==0 ) return;
 		if ( animations[anim.num].pose.size()==0) return;
 		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
@@ -240,12 +238,11 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	}
 	
 	//------------------------------------------------------------------------------
-	void Bone::bone_InsertKeyframe()
+	void Bone::InsertKeyframe()
 	//------------------------------------------------------------------------------
 	{
 		anim.bPlaying = false;
 
-//		int num = anim.num;
 
 		animations[anim.num].pose.emplace( animations[anim.num].pose.begin() + anim.pose );
 		for ( const Joint3& j : tblJoint )
@@ -255,7 +252,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	}
 
 	//------------------------------------------------------------------------------
-	void Bone::bone_CopyKeyframe()
+	void Bone::CopyKeyframe()
 	//------------------------------------------------------------------------------
 	{
 
@@ -313,12 +310,12 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	}
 
 	//------------------------------------------------------------------------------
-	void Bone::bone_PastKeyframe()
+	void Bone::PastKeyframe()
 	//------------------------------------------------------------------------------
 	{
 		anim.bPlaying = false;
 
-		bone_InsertKeyframe();
+		InsertKeyframe();
 		for ( int i = 0 ; i < static_cast<signed>(tblJoint.size()) ; i++ )
 		{ 
 //			vect3 v = animations[anim.copied_num].pose[ anim.copied_pose ].pos[i];
@@ -331,7 +328,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	}
 
 	//------------------------------------------------------------------------------
-	void Bone::bone_CutKeyframe()
+	void Bone::CutKeyframe()
 	//------------------------------------------------------------------------------
 	{
 		anim.bPlaying = false;
@@ -340,7 +337,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 		if ( animations[anim.num].pose.size()==0 ) return;
 		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
 
-		bone_CopyKeyframe();
+		CopyKeyframe();
 	
 		animations[anim.num].pose.erase(animations[anim.num].pose.begin() +anim.pose );	
 
@@ -350,7 +347,6 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 		if ( animations[anim.num].pose.size() ==0 ) return;
 
 		{
-//			int num = anim.num;
 //			anim.pose = 0;
 			{
 				// キーフレーム切り替え
@@ -366,7 +362,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	}
 
 	//------------------------------------------------------------------------------
-	void Bone::bone_PrevAnimation()
+	void Bone::PrevAnimation()
 	//------------------------------------------------------------------------------
 	{
 		anim.bPlaying = false;
@@ -374,13 +370,11 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 		anim.num--;
 		if ( anim.num < 0 ) anim.num = 0;
 
-//		int num = anim.num;
 		if ( animations.size() ==0 ) return;
 		if ( animations[anim.num].pose.size()==0) return;
 		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
 
 		{
-//			int num = anim.num;
 			anim.pose = 0;
 			{
 				// キーフレーム切り替え
@@ -395,7 +389,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	}
 
 	//------------------------------------------------------------------------------
-	void Bone::bone_NextAnimation()
+	void Bone::NextAnimation()
 	//------------------------------------------------------------------------------
 	{
 		anim.bPlaying = false;
@@ -403,7 +397,6 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 		anim.num++; 
 		if ( anim.num > static_cast<signed>(animations.size())-1 ) anim.num = static_cast<signed>(animations.size())-1;
 
-//		int num = anim.num;
 		if ( animations.size() ==0 ) return;
 		if ( animations[anim.num].pose.size()==0) return;
 		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
@@ -425,7 +418,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	}
 
 	//------------------------------------------------------------------------------
-	void Bone::bone_AddAnimation()
+	void Bone::AddAnimation()
 	//------------------------------------------------------------------------------
 	{
 		anim.bPlaying = false;
@@ -435,7 +428,6 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 		animations.emplace_back();
 
 		{
-//			int num = anim.num;
 
 			animations[anim.num].pose.emplace_back();
 			for ( const Joint3& j : tblJoint )
@@ -446,7 +438,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	}
 
 	//------------------------------------------------------------------------------
-	void Bone::bone_update( Pers& pers, mat44& cam_mat, SysGra& gra )
+	void Bone::update( Pers& pers, mat44& cam_mat, SysGra& gra )
 	//------------------------------------------------------------------------------
 	{
 		for ( int i = 0 ; i < 5 ; i++ )
@@ -521,11 +513,9 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	}
 
 	//------------------------------------------------------------------------------
-	void Bone::bone_drawMotion( Pers& pers, mat44& cam_mat, SysGra& gra )
+	void Bone::drawMotion( Pers& pers, mat44& cam_mat, SysGra& gra )
 	//------------------------------------------------------------------------------
 	{
-//				int num = anim.num;
-//		Bone& data = (*pBone);
 		// マーカースプライン変換表示
 		if ( static_cast<signed>(animations.size()) > 0 )
 		{
@@ -577,7 +567,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	}
 
 	//------------------------------------------------------------------------------
-	void Bone::bone_save( const char* filename )
+	void Bone::saveMotion( const char* filename )
 	//------------------------------------------------------------------------------
 	{
 		anim.bPlaying = false;
@@ -619,7 +609,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 		cout << "SAVED" << endl;
 	}
 	//------------------------------------------------------------------------------
-	void Bone::bone_load( const char* filename )
+	void Bone::loadMotion( const char* filename )
 	//------------------------------------------------------------------------------
 	{
 		anim.bPlaying = false;
