@@ -20,6 +20,8 @@ using namespace std;
 #include "Sys.h"
 
 #include "raytrace.h"
+#include "obj.h"
+#include "bone.h"
 
 
 
@@ -28,56 +30,6 @@ struct Apr : public Sys
 
 	long long	time_peak = 0;
 
-	struct	Obj
-	{
-		bool 	bRectSelected	= false;		//	矩形選択中、選択＆非選択
-		bool 	bRectIn			= false;		//	矩形選択中、矩形選択対象
-		bool 	bSelected		= false;		//	選択
-		bool 	bAffectable		= false;		//	削除対象
-
-		vect2	tag;
-	
-		virtual void Move2( vect2 v ) =0;// {};
-		virtual vect2 Pos2() =0;// {};
-	};
-
-	struct Joint3 : Obj
-	{
-		int id;
-		vect3 pos;
-		vect3 tension;
-		vect3 world;
-		vect3 disp;
-		double len;
-		int priority;
-		
-		vector<reference_wrapper<Joint3>>	relative;
-		Joint3( vect3 v )
-		{
-			id = 0;
-			pos = v;
-			tension = 0;
-			len = 0;
-		}
-		void Move2( vect2 v )
-		{
-			//none
-		}
-		vect2 Pos2()
-		{
-			return vect2( disp.x, disp.y );
-		}
-	};
-
-	struct Bone3
-	{
-		int n0;
-		int n1;
-		Joint3& j0;
-		Joint3& j1;
-		double length;
-		Bone3( vector<Joint3>& tbl, int _n0, int _n1 ) :n0(_n0), n1(_n1), j0(tbl[_n0]), j1(tbl[_n1]){}
-	};
 
 
 
@@ -389,41 +341,6 @@ struct Apr : public Sys
 
 	} mc;
 
-	struct Data
-	{
-		vector<Joint3>				tblJoint;
-		vector<Bone3>				tblBone;
-
-		struct Pos
-		{
-			vector<vect3>		pos;
-		};
-		struct Keyframe
-		{
-			vector<Pos>			pose;
-		};
-		vector<Keyframe>		animations;
-	};
-
-	struct
-	{
-		int	num = 0;	//	アニメーションカーソル位置
-		int	pose = 0;	//	キーフレームカーソル位置
-		int copied_num = 0;
-		int copied_pose = 0;
-		unique_ptr<Data> pCopybuf;
-
-		bool	bSelecting = false;
-		int 	selecting_num = 0;
-		int 	selecting_pose = 0;
-
-		//
-		double	t = 0;
-		double	dt = 0.1;
-		int n = 0;
-		bool	bForward = true;
-		bool	bPlaying = false;
-	} anim;
 
 	Figure figCircle=Figure(gra);
 
@@ -436,766 +353,10 @@ struct Apr : public Sys
 	  	mat44	mat;		
 	} cam ;
 
-	struct Pers
-	{
-		double	fovy;		// 画角
-		double	sz;			// 投影面までの距離
-		double	sc;			// 投影面の高さ/2（描画スケール）
-		double	cx;			// 描画画面の中心W
-		double	cy;			// 描画画面の中心H
-		double	width;		// 描画画面の解像度W/2
-		double	height;		// 描画画面の解像度H/2
-		double	aspect;		// 描画画面のアスペクト比
-	
-		//--------------------------------------------------------------------------
-		Pers()
-		//--------------------------------------------------------------------------
-		{
-			fovy=90/2;
-			sz = 1/tan(rad(fovy)/2);				// 投影面までの距離
-		}
-	
-		//--------------------------------------------------------------------------
-		void Update( vect2 screensize )
-		//--------------------------------------------------------------------------
-		{
-		#if 0
-			sc = 1;									// 投影面の高さ/2
-			sz = sc/tan(rad(fovy)/2);				// 投影面までの距離
-		#else
-			sz = 1.0;								// 投影面までの距離
-			sc = sz*tan(rad(fovy)/2);				// 投影面の高さ/2
-		#endif
-			cx		= screensize.x/2;				// 描画画面の中心W
-			cy		= screensize.y/2;				// 描画画面の中心H
-			width	= screensize.x/2;				// 描画画面の解像度W/2
-			height	= screensize.y/2;				// 描画画面の解像度H/2
-			aspect	= screensize.y/screensize.x;	// 描画画面のアスペクト比
-		} 
 
-		//--------------------------------------------------------------------------
-		vect3 calcPoint( vect3 v ) const
-		//--------------------------------------------------------------------------
-		{
-			vect3 ret;
-			double w = 1/(v.z+sz);
-			ret.x = v.x/(v.z+sz)	*sz /sc *width  *aspect	+cx;
-			ret.y = v.y/(v.z+sz)	*sz /sc *height			+cy;
-			ret.z = w;
-			return ret;
-		}
-		
-		//--------------------------------------------------------------------------
-		bool ScissorLine( vect3 v0, vect3 v1, vect3& va, vect3& vb ) const
-		//--------------------------------------------------------------------------
-		{
-			va = calcPoint(v0);
-			vb = calcPoint(v1);
-
-			{//シザリング ニアクリップ
-				function<vect3(vect3,vect3,int)>nearclip = [ this,&nearclip ]( vect3 a, vect3 b, int n )
-				{
-					if (n <=0 ) return b;
-
-					vect3 c =  (a+b)/2;
-			
-					if ( c.z <= -sz )
-					{
-						c = nearclip( a, c, n-1 );
-					}
-					if ( c.z > 1.0-sz )
-					{
-						c = nearclip( c, b, n-1 );
-					}
-					return c;
-				};
-				if ( va.z > 0|| vb.z > 0 )
-				{
-					if ( va.z < 0 )
-					{
-						vect3 c = nearclip(v1,v0,8);
-						va = calcPoint(c);
-					}
-					if ( vb.z < 0 )
-					{
-						vect3 c = nearclip(v0,v1,8);
-						vb = calcPoint(c);
-					}
-				}
-			}
-			return ( va.z > 0 && vb.z > 0 );
-		}			
-
-
-
-	};
 	Pers pers;
 
-	// カトマル曲線3D
-	//------------------------------------------------------------------------------
-	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vect3 P2, const vect3 P3 )
-	//------------------------------------------------------------------------------
-	{
-		//catmull-Rom 曲線
-		// P(t)=P1*(2t^3-3t^2+1)+m0*(t^3-2t^2+t)+P2*(-2t^3+3t^2)+m1*(t^3-t^2)
-		// m0=(P2-P0)/2
-		// m1=(P3-P1)/2
 
-		vect3 m0 = (P2-P0)/2.0;
-		vect3 m1 = (P3-P1)/2.0;
-		vect3 P =  P1*(  2*t*t*t - 3*t*t +1) + m0*( t*t*t -2*t*t +t )
-				 + P2*( -2*t*t*t + 3*t*t   ) + m1*( t*t*t - t*t );
-
-		return P;
-	};
-
-	//------------------------------------------------------------------------------
-	void bone_ReqAnimation()
-	//------------------------------------------------------------------------------
-	{
-		anim.bSelecting = false;
-		anim.bForward = true;
-		anim.bPlaying = true;
-		anim.n = 0;
-		anim.t = 0;
-		anim.dt = 0.1;
-	}	
-
-	//------------------------------------------------------------------------------
-	void bone_Play( Data& data )
-	//------------------------------------------------------------------------------
-	{
-//		int num = anim.num;
-		if(static_cast<signed>(data.animations[anim.num].pose.size())<4) return;
-
-		int n0 = anim.n-1;
-		int n1 = anim.n;
-		int n2 = anim.n+1;
-		int n3 = anim.n+2;
-		if ( n0<0 ) n0 = 0;
-		if ( n3>=static_cast<signed>(data.animations[anim.num].pose.size()) ) n3 =n2;
-
-		for ( int j = 0 ; j < static_cast<signed>(data.animations[anim.num].pose[0].pos.size()) ; j++ )
-		{
-/*
-			if ( g_flg ) 
-			{
-				if ( j == 3 || j == 4 ) continue;	//肩
-				if ( j == 5 || j == 2 ) continue;	//腹首
-				if ( j == 6 || j == 7) continue;	//腰
-	//			if ( j == 12 || j == 14 ) continue;	//肘
-	//			if ( j == 8 || j == 10 ) continue;	//足
-	//			if ( j == 9 || j == 11 ) continue;	//膝
-			}
-*/
-			vect3 P0 = data.animations[anim.num].pose[ n0 ].pos[j];
-			vect3 P1 = data.animations[anim.num].pose[ n1 ].pos[j];
-			vect3 P2 = data.animations[anim.num].pose[ n2 ].pos[j];
-			vect3 P3 = data.animations[anim.num].pose[ n3 ].pos[j];
-			vect3 b = catmull3d_func(anim.t, P0,P1,P2,P3 );
-
-			data.tblJoint[j].pos = b;
-
-		}
-
-		if ( anim.bForward ) anim.t+=anim.dt; else anim.t-=anim.dt;
-
-
-		if ( anim.t >= 1.0 ) 
-		{
-			if ( anim.n+1 < static_cast<signed>(data.animations[anim.num].pose.size())-1 )
-			{
-				anim.t = 0;
-				anim.n+=1;
-			}
-			else
-			{
-				anim.t = 1.0;
-				anim.bForward = !anim.bForward;
-			}
-		}
-		else
-		if ( anim.t <= 0.0 ) 
-		{
-			if ( anim.n >= 1 )
-			{
-				anim.t = 1.0;
-				anim.n-=1;
-			}
-			else
-			{
-				anim.t = 0.0;
-				anim.bForward = !anim.bForward;
-			}
-		}
-		if ( anim.bForward == false ) anim.bPlaying = false;
-	}
-	
-	//------------------------------------------------------------------------------
-	void bone_PrevKeyframe( Data& data )
-	//------------------------------------------------------------------------------
-	{
-		anim.bPlaying = false;
-
-//		int num = anim.num;
-		if ( data.animations.size() ==0 ) return;
-		if ( data.animations[anim.num].pose.size()==0) return;
-		if ( data.animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
-
-		anim.pose--;
-//		if ( anim.pose < 0 ) anim.pose = static_cast<signed>(data.animations[anim.num].pose.size())-1;
-		if ( anim.pose < 0 ) anim.pose = 0;
-
-		if ( anim.pose >= 0 )
-		{
-			// キーフレーム切り替え
-			int i = 0;
-			for ( Joint3& j : data.tblJoint )
-			{
-				j.pos = data.animations[anim.num].pose[ anim.pose ].pos[i];
-				i++;
-			}
-		}
-	}
-
-	//------------------------------------------------------------------------------
-	void bone_TopKeyframe( Data& data )
-	//------------------------------------------------------------------------------
-	{
-		anim.bPlaying = false;
-
-//		int num = anim.num;
-		if ( data.animations.size() ==0 ) return;
-		if ( data.animations[anim.num].pose.size()==0) return;
-		if ( data.animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
-
-		anim.pose = 0;
-
-		if ( anim.pose >= 0 )
-		{
-			// キーフレーム切り替え
-			int i = 0;
-			for ( Joint3& j : data.tblJoint )
-			{
-				j.pos = data.animations[anim.num].pose[ anim.pose ].pos[i];
-				i++;
-			}
-		}
-	}
-
-	//------------------------------------------------------------------------------
-	void bone_NextKeyframe( Data& data )
-	//------------------------------------------------------------------------------
-	{
-		anim.bPlaying = false;
-
-//		int num = anim.num;
-		if ( data.animations.size() ==0 ) return;
-		if ( data.animations[anim.num].pose.size()==0) return;
-		if ( data.animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
-
-		anim.pose++; 
-//		if ( anim.pose > static_cast<signed>(data.animations[num].pose.size())-1 ) anim.pose = 0;
-		if ( anim.pose > static_cast<signed>(data.animations[anim.num].pose.size())-1 ) anim.pose = static_cast<signed>(data.animations[anim.num].pose.size())-1;
-
-		if ( anim.pose >= 0 )
-		{
-			// キーフレーム切り替え
-			int i = 0;
-			for ( Joint3& j : data.tblJoint )
-			{
-				j.pos = data.animations[anim.num].pose[ anim.pose ].pos[i];
-				i++;
-			}
-		}
-	}
-
-	//------------------------------------------------------------------------------
-	void bone_LastKeyframe( Data& data )
-	//------------------------------------------------------------------------------
-	{
-		anim.bPlaying = false;
-
-//		int num = anim.num;
-		if ( data.animations.size() ==0 ) return;
-		if ( data.animations[anim.num].pose.size()==0) return;
-		if ( data.animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
-
-		anim.pose = static_cast<signed>(data.animations[anim.num].pose.size())-1;
-
-		if ( anim.pose >= 0 )
-		{
-			// キーフレーム切り替え
-			int i = 0;
-			for ( Joint3& j : data.tblJoint )
-			{
-				j.pos = data.animations[anim.num].pose[ anim.pose ].pos[i];
-				i++;
-			}
-		}
-	}
-
-	//------------------------------------------------------------------------------
-	void bone_RefrectKeyframe( Data& data )
-	//------------------------------------------------------------------------------
-	{
-		anim.bPlaying = false;
-
-//		int num = anim.num;
-		if ( data.animations.size() ==0 ) return;
-		if ( data.animations[anim.num].pose.size()==0) return;
-		if ( data.animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
-
-		for ( int i = 0 ; i < static_cast<signed>(data.tblJoint.size()) ; i++ )
-		{ 
-			data.animations[anim.num].pose[ anim.pose ].pos[i] = data.tblJoint[i].pos;
-		}
-	}
-	
-	//------------------------------------------------------------------------------
-	void bone_InsertKeyframe( Data& data )
-	//------------------------------------------------------------------------------
-	{
-		anim.bPlaying = false;
-
-//		int num = anim.num;
-
-		data.animations[anim.num].pose.emplace( data.animations[anim.num].pose.begin() + anim.pose );
-		for ( const Joint3& j : data.tblJoint )
-		{
-			data.animations[anim.num].pose[ anim.pose ].pos.emplace_back( j.pos );
-		}
-	}
-
-	//------------------------------------------------------------------------------
-	void bone_CopyKeyframe( Data& data )
-	//------------------------------------------------------------------------------
-	{
-
-/*
-	struct Data
-	{
-		vector<Joint3>				tblJoint;
-		vector<Bone3>				tblBone;
-
-		struct Pos
-		{
-			vector<vect3>		pos;
-		};
-		struct Keyframe
-		{
-			vector<Pos>			pose;
-		};
-		vector<Keyframe>		animations;
-	};
-*/
-		unique_ptr<Data> pNew(new Data);
-		{
-			for ( Joint3& j : data.tblJoint )
-			{
-				pNew->tblJoint.emplace_back( j.pos );
-			}
-
-			for ( Bone3& b : data.tblBone )
-			{
-				pNew->tblBone.emplace_back( pNew->tblJoint, b.n0, b.n1 );
-			}
-		}
-		{
-			int	cntAction = static_cast<signed>(data.animations.size());
-			for ( int num = 0 ; num < cntAction ; num++ )
-			{
-				pNew->animations.emplace_back();
-
-				int	cntPose = static_cast<signed>(data.animations[num].pose.size());
-				for ( int pose = 0 ; pose < cntPose ; pose++ )
-				{
-					pNew->animations[num].pose.emplace_back();
-
-					for ( int j = 0 ; j < static_cast<signed>(data.tblJoint.size()) ; j++ )
-					{
-						vect3 pos = data.animations[num].pose[pose].pos[j];
-						pNew->animations[num].pose[pose].pos.emplace_back( pos );
-					}
-				}
-			}
-		}
-		anim.pCopybuf = move(pNew);
-		anim.copied_num = anim.num;
-		anim.copied_pose = anim.pose;
-	}
-
-	//------------------------------------------------------------------------------
-	void bone_PastKeyframe( Data& data )
-	//------------------------------------------------------------------------------
-	{
-		anim.bPlaying = false;
-
-		bone_InsertKeyframe( data );
-		for ( int i = 0 ; i < static_cast<signed>(data.tblJoint.size()) ; i++ )
-		{ 
-//			vect3 v = data.animations[anim.copied_num].pose[ anim.copied_pose ].pos[i];
-			vect3 v = anim.pCopybuf->animations[anim.copied_num].pose[ anim.copied_pose ].pos[i];
-		
-			data.animations[anim.num].pose[ anim.pose ].pos[i] = v;
-			data.tblJoint[i].pos = v;
-		}
-
-	}
-
-	//------------------------------------------------------------------------------
-	void bone_CutKeyframe( Data& data )
-	//------------------------------------------------------------------------------
-	{
-		anim.bPlaying = false;
-
-		if ( data.animations.size() ==0 ) return;
-		if ( data.animations[anim.num].pose.size()==0 ) return;
-		if ( data.animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
-
-		bone_CopyKeyframe( data );
-	
-		data.animations[anim.num].pose.erase(data.animations[anim.num].pose.begin() +anim.pose );	
-
-		if ( anim.pose > (signed)data.animations[anim.num].pose.size()-1 ) anim.pose = (signed)data.animations[anim.num].pose.size()-1;
-
-		if ( data.animations.size() ==0 ) return;
-		if ( data.animations[anim.num].pose.size() ==0 ) return;
-
-		{
-//			int num = anim.num;
-//			anim.pose = 0;
-			{
-				// キーフレーム切り替え
-				int i = 0;
-				for ( Joint3& j : data.tblJoint )
-				{
-					j.pos = data.animations[anim.num].pose[ anim.pose ].pos[i];
-					i++;
-				}
-			}
-		}
-
-	}
-
-	//------------------------------------------------------------------------------
-	void bone_PrevAnimation( Data& data )
-	//------------------------------------------------------------------------------
-	{
-		anim.bPlaying = false;
-
-		anim.num--;
-		if ( anim.num < 0 ) anim.num = 0;
-
-//		int num = anim.num;
-		if ( data.animations.size() ==0 ) return;
-		if ( data.animations[anim.num].pose.size()==0) return;
-		if ( data.animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
-
-		{
-//			int num = anim.num;
-			anim.pose = 0;
-			{
-				// キーフレーム切り替え
-				int i = 0;
-				for ( Joint3& j : data.tblJoint )
-				{
-					j.pos = data.animations[anim.num].pose[ anim.pose ].pos[i];
-					i++;
-				}
-			}
-		}
-	}
-
-	//------------------------------------------------------------------------------
-	void bone_NextAnimation( Data& data )
-	//------------------------------------------------------------------------------
-	{
-		anim.bPlaying = false;
-
-		anim.num++; 
-		if ( anim.num > static_cast<signed>(data.animations.size())-1 ) anim.num = static_cast<signed>(data.animations.size())-1;
-
-//		int num = anim.num;
-		if ( data.animations.size() ==0 ) return;
-		if ( data.animations[anim.num].pose.size()==0) return;
-		if ( data.animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
-
-		{
-			anim.pose = 0;
-
-			{
-				// キーフレーム切り替え
-				int i = 0;
-				for ( Joint3& j : data.tblJoint )
-				{
-				
-					j.pos = data.animations[anim.num].pose[ anim.pose ].pos[i];
-					i++;
-				}
-			}
-		}
-	}
-
-	//------------------------------------------------------------------------------
-	void bone_AddAnimation( Data& data )
-	//------------------------------------------------------------------------------
-	{
-		anim.bPlaying = false;
-
-		anim.num = static_cast<signed>(data.animations.size());
-		anim.pose = 0;
-		data.animations.emplace_back();
-
-		{
-//			int num = anim.num;
-
-			data.animations[anim.num].pose.emplace_back();
-			for ( const Joint3& j : data.tblJoint )
-			{
-				data.animations[anim.num].pose[ anim.pose ].pos.emplace_back( j.pos );
-			}
-		}
-	}
-
-	//------------------------------------------------------------------------------
-	void bone_update( Data& data )
-	//------------------------------------------------------------------------------
-	{
-		for ( int i = 0 ; i < 5 ; i++ )
-		{
-			// 骨コリジョン 張力計算
-			for ( Bone3 b : data.tblBone )
-			{
-				vect3 v = b.j1.pos - b.j0.pos;
-				double l = v.length() - b.length;
-				vect3 va  =	v.normalize()*l;
-
-				double w0 = 0;
-				double w1 = 0;
-#if 0
-				if ( b.j0.priority ==1 ) 
-				{
-					w0 = 0.0;
-					w1 = 1.0;
-				}
-				else
-				if ( b.j1.priority ==1 ) 
-				{
-					w0 = 1.0;
-					w1 = 0.0;
-				}
-				else
-#endif
-				{
-					w0 = 0.33;
-					w1 = 0.33;
-				}
-				b.j0.tension += va*w0;
-				b.j1.tension -= va*w1;
-
-			}
-
-			// 張力解消
-			for ( Joint3& a : data.tblJoint )
-			{
-				a.pos += a.tension;
-				a.tension=0;
-			}
-		}
-
-		// Human pers
-		for ( Joint3& j : data.tblJoint )
-		{
-			//	右手系座標系
-			//	右手ねじ周り
-			//	roll	:z	奥+
-			//	pitch	:x	右+
-			//	yaw		:y	下+
-			vect3 v= j.pos;
-
-			v = v * cam.mat.invers();
-
-			j.world = v;
-
-			j.disp = pers.calcPoint(v);
-		}
-
-		// Human 描画
-		for ( Bone3 b : data.tblBone )
-		{
-			if ( b.j0.disp.z > 0 && b.j0.disp.z > 0 )
-			{
-				vect2 v0(b.j0.disp.x,b.j0.disp.y);
-				vect2 v1(b.j1.disp.x,b.j1.disp.y);
-				gra.Line( v0,v1, rgb(1,1,1));
-			}
-		}
-	}
-	//------------------------------------------------------------------------------
-	void bone_save( Data& data, const char* filename )
-	//------------------------------------------------------------------------------
-	{
-		anim.bPlaying = false;
-
-		fstream fo( filename, ios::out );
-
-		{
-			fo << "joint" << endl;
-			for ( Joint3& j : data.tblJoint )	// 関節の位置
-			{
-				fo << "\t"<< j.pos.x << "\t" << j.pos.y << "\t" << j.pos.z << endl;
-			}
-
-			fo << "bone" << endl;
-			for ( Bone3& b : data.tblBone )	// 骨
-			{
-				b.length = (b.j1.pos - b.j0.pos).length();
-				fo  << "\t"<< b.n0 << "\t" << b.n1 << endl;
-			}
-		}
-		{
-			int	cntAction = static_cast<signed>(data.animations.size());
-			for ( int num = 0 ; num < cntAction ; num++ )
-			{
-				fo << "motion" << endl;
-				int	cntPose = static_cast<signed>(data.animations[num].pose.size());
-				for ( int pose = 0 ; pose < cntPose ; pose++ )
-				{
-					for ( int j = 0 ; j < static_cast<signed>(data.tblJoint.size()) ; j++ )
-					{
-						fo  << "\t"<< data.animations[num].pose[ pose ].pos[ j ].x << "\t" << data.animations[num].pose[ pose ].pos[ j ].y << "\t" << data.animations[num].pose[ pose ].pos[ j ].z << endl;
-					}
-					if( pose+1 < cntPose ) fo << "," << endl;
-				}
-			}
-		}
-		fo << "end" << endl;
-
-		cout << "SAVED" << endl;
-	}
-	//------------------------------------------------------------------------------
-	void bone_load( Data& data, const char* filename )
-	//------------------------------------------------------------------------------
-	{
-		anim.bPlaying = false;
-
-
-	//	Data*	pNew = new Data;
-
-		fstream fi( filename, ios::in );
-		string buf;
-		enum
-		{
-			ModeNone,
-			ModeJoint,
-			ModeBone,
-			ModeMotion,
-		} mode = ModeNone;
-		
-		function<vector<string>(const string&, char)> split = [] (const string &s, char delim) 
-		{
-			vector<string> elems;
-			stringstream ss(s);
-			string item;
-			while (getline(ss, item, delim)) 
-			{
-				if (!item.empty()) 
-				{
-					elems.push_back(item);
-				}
-			}
-			return elems;
-		};
-
-		int num = 0;
-
-		while ( getline( fi, buf ) )
-		{
-	 		if( *(buf.end()-1) == 0x0d ) buf.pop_back();//CRLF対応
-
-			cout << buf << endl;
-			if ( string(buf) == "joint" )	{mode = ModeJoint;	continue;}
-			if ( string(buf) == "bone" )	{mode = ModeBone;	continue;}
-			if ( string(buf) == "motion" )	
-			{
-				mode = ModeMotion;
-				num = static_cast<signed>(data.animations.size());
-				data.animations.emplace_back();
-				data.animations[num].pose.emplace_back();
-				continue;
-			}
-			if ( string(buf) == "," ) 
-			{
-				data.animations[num].pose.emplace_back();
-				continue;
-			}
-			if ( string(buf) == "end" )	
-			{	
-				for ( Bone3& b : data.tblBone )	// 関節の距離を決定する。
-				{
-					b.length = (b.j1.pos - b.j0.pos).length();
-				}
-				{
-					int cnt = 0 ;
-					for ( Joint3& j : data.tblJoint )
-					{
-						j.id = cnt++;				//id登録
-					}
-				}
-				for ( Bone3& b : data.tblBone )	// ジョイントに関節の距離を決定する。
-				{
-					b.j1.relative.emplace_back( b.j0 ); 
-					b.j0.relative.emplace_back( b.j1 ); 
-				}
-				//マーカー削除＆登録
-				mc.tblMarker3.clear();
-				for ( Joint3& j : data.tblJoint )	//マーカー登録
-				{
-					mc.tblMarker3.emplace_back( gra, figCircle, j );
-				}
-				anim.pose = 0;
-				break;
-			}
-			switch( mode )
-			{
-				case ModeJoint:
-					{
-						vector<string> v = split( buf, '\t');
-						double x = stod(v[0]);
-						double y = stod(v[1]);
-						double z = stod(v[2]);
-						data.tblJoint.emplace_back( vect3(x,y,z) );
-						//	cout << x << "," << y << "," << z << endl; 
-					}
-					break;
-				case ModeBone:
-					{
-						vector<string> v = split( buf, '\t');
-						int n0 = stoi(v[0]);
-						int n1 = stoi(v[1]);
-						data.tblBone.emplace_back( data.tblJoint, n0, n1 );
-						//	cout << x << "," << y << "," << z << endl; 
-					}
-					break;
-				case ModeMotion:
-					{
-						vector<string> v = split( buf, '\t');
-						double x = stod(v[0]);
-						double y = stod(v[1]);
-						double z = stod(v[2]);
-						data.animations[num].pose[ data.animations[num].pose.size()-1 ].pos.emplace_back( x,y,z );
-						//	cout << x << "," << y << "," << z << endl; 
-					}
-					break;
-				default:
-					break;
-			}
-
-		}
-		cout << "LOADED" << endl;
-	//	return pNew;
-	}
 
 	//------------------------------------------------------------------------------
 	Apr( const char* name, int pos_x, int pos_y, int width, int height ) : Sys( name, pos_x, pos_y, width, height )
@@ -1483,12 +644,12 @@ struct Apr : public Sys
 
 #else
 		unique_ptr<Data> pData(new Data);
-		bone_load( *pData, "primary.mot");
+//		bone_load( *pData, "primary.mot");
 #endif
 
 		{
 			unique_ptr<Data> p(new Data);
-			anim.pCopybuf = move(p);
+			pData->anim.pCopybuf = move(p);
 		}
 
 		// 箱
@@ -1585,15 +746,15 @@ struct Apr : public Sys
 				}
 
 
-				if ( anim.bSelecting ==false && keys.SHIFT.on && (keys.UP.hi || keys.DOWN.hi || keys.LEFT.hi ||keys.RIGHT.hi) )
+				if ( pData->anim.bSelecting ==false && keys.SHIFT.on && (keys.UP.hi || keys.DOWN.hi || keys.LEFT.hi ||keys.RIGHT.hi) )
 				{
-					anim.bSelecting = true;
-					anim.selecting_num = anim.num;
-					anim.selecting_pose = anim.pose;
+					pData->anim.bSelecting = true;
+					pData->anim.selecting_num = pData->anim.num;
+					pData->anim.selecting_pose = pData->anim.pose;
 				}
 				if ( !keys.SHIFT.on && (keys.UP.hi || keys.DOWN.hi || keys.LEFT.hi ||keys.RIGHT.hi) )
 				{
-					anim.bSelecting = false;
+					pData->anim.bSelecting = false;
 				}
 				
 				// キーフレームロード
@@ -1602,6 +763,12 @@ struct Apr : public Sys
 				{
 					unique_ptr<Data> pNew(new Data);
 					bone_load( *pNew, "human.mot");
+					//マーカー削除＆登録
+					mc.tblMarker3.clear();
+					for ( Joint3& j : pNew->tblJoint )	//マーカー登録
+					{
+						mc.tblMarker3.emplace_back( gra, figCircle, j );
+					}
 					pData = move(pNew);
 				}
 
@@ -1646,13 +813,13 @@ struct Apr : public Sys
 				if ( keys.DOWN.rep ) bone_NextAnimation( *pData );
 
 				// アニメーションリクエスト
-				if ( keys.P.hi ) bone_ReqAnimation();
+				if ( keys.P.hi ) bone_ReqAnimation( *pData );
 
 //if ( keys.Q.hi ) g_flg =!g_flg;
 //gra.Print(vect2(16*20,16*1),string("flg ")+ to_string(g_flg) );
 
 				// アニメーション再生
-				if ( anim.bPlaying )	bone_Play( *pData );
+				if ( pData->anim.bPlaying )	bone_Play( *pData );
 				
 				
 			}
@@ -1666,10 +833,10 @@ struct Apr : public Sys
 				gra.Print( vect2(10,16*y++),string("pos x=")+to_string(cam.pos.x)+string(" y=")+to_string(cam.pos.y)+string(" z=")+to_string(cam.pos.z) ); 
 				{
 //					int num = anim.num;
-					gra.Print( vect2(10,16*y++),string("anim=")+to_string(anim.num) + string(" cnt=")+to_string(pData->animations.size()) ); 
+					gra.Print( vect2(10,16*y++),string("anim=")+to_string(pData->anim.num) + string(" cnt=")+to_string(pData->animations.size()) ); 
 					if ( pData->animations.size() > 0 ) 
 					{
-						gra.Print( vect2(10,16*y++),string("pose=")+to_string(anim.pose) + string(" cnt=")+to_string(pData->animations[anim.num].pose.size()) ); 
+						gra.Print( vect2(10,16*y++),string("pose=")+to_string(pData->anim.pose) + string(" cnt=")+to_string(pData->animations[pData->anim.num].pose.size()) ); 
 					}
 				}
 				gra.Print( vect2(10,16*31),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
@@ -1682,15 +849,15 @@ struct Apr : public Sys
 				{
 					for ( int x = 0 ; x < (signed)pData->animations[y].pose.size() ; x++ )
 					{
-						if ( anim.bSelecting && ( y == anim.selecting_num && x == anim.selecting_pose ) ) flg=!flg;
-						if ( anim.bSelecting && ( y == anim.num && x == anim.pose ) ) flg=!flg;
+						if ( pData->anim.bSelecting && ( y == pData->anim.selecting_num && x == pData->anim.selecting_pose ) ) flg=!flg;
+						if ( pData->anim.bSelecting && ( y == pData->anim.num && x == pData->anim.pose ) ) flg=!flg;
 
 						vect2 v = vect2( x, y )*vect2( 4, 8 ) + vect2(400,16);
 						{
 							gra.Fill( v, v+vect2(3,7), rgb(1,1,1) );
 						}
 
-						if ( y == anim.num && x == anim.pose )
+						if ( y == pData->anim.num && x == pData->anim.pose )
 						{
 							gra.Fill( v+vect2(0,4), v+vect2(3,7), rgb(1,0,0) );
 						}
@@ -2435,105 +1602,16 @@ else
 				
 			}
 			// human 更新
-			bone_update( *pData );
+			bone_update( *pData, pers, cam.mat, gra );
 
 			// 3Dマーカー表示
 			for ( Marker m : mc.tblMarker3 )
 			{
 				m.draw();
 			}
-/*
-if(0)
-			{
-				int		cntAve=0;
-				vect2	posAve=0;
-				for ( Marker m : mc.tblMarker3 )
-				{
-						//m.draw();
-					bool flg =  m.obj.bSelected;
-					
-					if ( m.obj.bRectIn )
-					{
-						flg = m.obj.bRectSelected;
-					}
-					int col=m.colNormal;
-
-					vect2 disp2 = m.obj.Pos2();//vect2(m.obj.disp.x, m.obj.disp.y);
-					if ( flg )			
-					{
-						col = m.colSelected;
-						cntAve++;
-						posAve +=  disp2;
-					}
-					gra.Circle( disp2, 7, col );
-					gra.Print( disp2+vect2(10,0), "id" );//to_string(m.obj.id) );
-
-				}
-
-				if ( cntAve >= 2 )
-				{
-					posAve /= cntAve;
-				}
-			}
-*/
 
 			// カトマル3D モーション軌跡表示
-			if(1)
-			{
-
-//				int num = anim.num;
-				Data& data = (*pData);
-				// マーカースプライン変換表示
-				if ( static_cast<signed>(data.animations.size()) > 0 )
-				{
-					double dt = anim.dt;
-					double div = 1/dt;
-
-					for ( int n = -1 ; n < static_cast<signed>(data.animations[anim.num].pose.size())-3+1 ; n++ )
-					{
-						int n0 = n;
-						int n1 = n+1;
-						int n2 = n+2;
-						int n3 = n+3;
-						if ( n0 < 0 ) n0 = 0;
-						if ( n3 >= static_cast<signed>(data.animations[anim.num].pose.size()) ) n3 = n2;
-					
-						for ( int j = 0 ;  j < static_cast<signed>(data.tblJoint.size()) ; j++ )
-						{
-							if ( data.tblJoint[j].bSelected == false ) continue;
-						
-							vect3 P0 = data.animations[anim.num].pose[ n0 ].pos[j];
-							vect3 P1 = data.animations[anim.num].pose[ n1 ].pos[j];
-							vect3 P2 = data.animations[anim.num].pose[ n2 ].pos[j];
-							vect3 P3 = data.animations[anim.num].pose[ n3 ].pos[j];
-
-							double t = dt;
-							vect3 a = catmull3d_func(0, P0,P1,P2,P3 );
-							for ( int i = 0 ; i <div ; i++ )
-							{
-								vect3 b = catmull3d_func(t, P0,P1,P2,P3 );
-
-								vect3 v0;
-								vect3 v1;
-								bool flg = pers.ScissorLine( a* cam.mat.invers(), b* cam.mat.invers(), v0, v1 );
-
-								if ( flg )
-								{
-									gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1));
-								}
-								
-								if ( v1.z > 0 ) gra.Fill(vect2(v1.x,v1.y)-2, vect2(v1.x,v1.y)+3,rgb(0,0,1));
-
-								a=b;
-								t+=dt;
-
-							}	
-						}
-					}
-				}
-			}
-
-
+			bone_drawMotion( *pData, pers, cam.mat, gra );
 
 
 
