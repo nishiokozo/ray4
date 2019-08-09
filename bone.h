@@ -88,7 +88,8 @@
 		void PrevKeyframe();
 		void PlayAnimation();
 		void ReqAnimation();
-		void update( Pers& pers, mat44& cam_mat, SysGra& gra );
+		void update();
+		void draw( Pers& pers, mat44& cam_mat, SysGra& gra );
 		void drawMotion( Pers& pers, mat44& cam_mat, SysGra& gra );
 
 	};

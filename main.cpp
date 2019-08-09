@@ -1593,7 +1593,13 @@ else
 				
 			}
 			// human 更新
-			pBone->update( pers, cam.mat, gra );
+			pBone->update();
+
+			// human 描画
+			pBone->draw( pers, cam.mat, gra );
+
+			// カトマル3D モーション軌跡表示
+			pBone->drawMotion( pers, cam.mat, gra );
 
 			// 3Dマーカー表示
 			for ( Marker m : mc.tblMarker3 )
@@ -1601,8 +1607,6 @@ else
 				m.draw();
 			}
 
-			// カトマル3D モーション軌跡表示
-			pBone->drawMotion( pers, cam.mat, gra );
 
 
 

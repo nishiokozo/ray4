@@ -438,7 +438,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	}
 
 	//------------------------------------------------------------------------------
-	void Bone::update( Pers& pers, mat44& cam_mat, SysGra& gra )
+	void Bone::update()
 	//------------------------------------------------------------------------------
 	{
 		for ( int i = 0 ; i < 5 ; i++ )
@@ -482,7 +482,12 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 				a.tension=0;
 			}
 		}
+	}
 
+	//------------------------------------------------------------------------------
+	void Bone::draw( Pers& pers, mat44& cam_mat, SysGra& gra )
+	//------------------------------------------------------------------------------
+	{
 		// Human pers
 		for ( Joint3& j : tblJoint )
 		{
