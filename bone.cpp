@@ -19,7 +19,7 @@ using namespace std;
 
 	// カトマル曲線3D
 	//------------------------------------------------------------------------------
-	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vect3 P2, const vect3 P3 )
+static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vect3 P2, const vect3 P3 )
 	//------------------------------------------------------------------------------
 	{
 		//catmull-Rom 曲線
@@ -37,32 +37,32 @@ using namespace std;
 
 
 	//------------------------------------------------------------------------------
-	void bone_ReqAnimation( Data& data )
+	void Bone::bone_ReqAnimation()
 	//------------------------------------------------------------------------------
 	{
-		data.anim.bSelecting = false;
-		data.anim.bForward = true;
-		data.anim.bPlaying = true;
-		data.anim.n = 0;
-		data.anim.t = 0;
-		data.anim.dt = 0.1;
+		anim.bSelecting = false;
+		anim.bForward = true;
+		anim.bPlaying = true;
+		anim.n = 0;
+		anim.t = 0;
+		anim.dt = 0.1;
 	}	
 
 	//------------------------------------------------------------------------------
-	void bone_Play( Data& data )
+	void Bone::bone_Play()
 	//------------------------------------------------------------------------------
 	{
-//		int num = data.anim.num;
-		if(static_cast<signed>(data.animations[data.anim.num].pose.size())<4) return;
+//		int num = anim.num;
+		if(static_cast<signed>(animations[anim.num].pose.size())<4) return;
 
-		int n0 = data.anim.n-1;
-		int n1 = data.anim.n;
-		int n2 = data.anim.n+1;
-		int n3 = data.anim.n+2;
+		int n0 = anim.n-1;
+		int n1 = anim.n;
+		int n2 = anim.n+1;
+		int n3 = anim.n+2;
 		if ( n0<0 ) n0 = 0;
-		if ( n3>=static_cast<signed>(data.animations[data.anim.num].pose.size()) ) n3 =n2;
+		if ( n3>=static_cast<signed>(animations[anim.num].pose.size()) ) n3 =n2;
 
-		for ( int j = 0 ; j < static_cast<signed>(data.animations[data.anim.num].pose[0].pos.size()) ; j++ )
+		for ( int j = 0 ; j < static_cast<signed>(animations[anim.num].pose[0].pos.size()) ; j++ )
 		{
 /*
 			if ( g_flg ) 
@@ -75,192 +75,192 @@ using namespace std;
 	//			if ( j == 9 || j == 11 ) continue;	//膝
 			}
 */
-			vect3 P0 = data.animations[data.anim.num].pose[ n0 ].pos[j];
-			vect3 P1 = data.animations[data.anim.num].pose[ n1 ].pos[j];
-			vect3 P2 = data.animations[data.anim.num].pose[ n2 ].pos[j];
-			vect3 P3 = data.animations[data.anim.num].pose[ n3 ].pos[j];
-			vect3 b = catmull3d_func(data.anim.t, P0,P1,P2,P3 );
+			vect3 P0 = animations[anim.num].pose[ n0 ].pos[j];
+			vect3 P1 = animations[anim.num].pose[ n1 ].pos[j];
+			vect3 P2 = animations[anim.num].pose[ n2 ].pos[j];
+			vect3 P3 = animations[anim.num].pose[ n3 ].pos[j];
+			vect3 b = catmull3d_func(anim.t, P0,P1,P2,P3 );
 
-			data.tblJoint[j].pos = b;
+			tblJoint[j].pos = b;
 
 		}
 
-		if ( data.anim.bForward ) data.anim.t+=data.anim.dt; else data.anim.t-=data.anim.dt;
+		if ( anim.bForward ) anim.t+=anim.dt; else anim.t-=anim.dt;
 
 
-		if ( data.anim.t >= 1.0 ) 
+		if ( anim.t >= 1.0 ) 
 		{
-			if ( data.anim.n+1 < static_cast<signed>(data.animations[data.anim.num].pose.size())-1 )
+			if ( anim.n+1 < static_cast<signed>(animations[anim.num].pose.size())-1 )
 			{
-				data.anim.t = 0;
-				data.anim.n+=1;
+				anim.t = 0;
+				anim.n+=1;
 			}
 			else
 			{
-				data.anim.t = 1.0;
-				data.anim.bForward = !data.anim.bForward;
+				anim.t = 1.0;
+				anim.bForward = !anim.bForward;
 			}
 		}
 		else
-		if ( data.anim.t <= 0.0 ) 
+		if ( anim.t <= 0.0 ) 
 		{
-			if ( data.anim.n >= 1 )
+			if ( anim.n >= 1 )
 			{
-				data.anim.t = 1.0;
-				data.anim.n-=1;
+				anim.t = 1.0;
+				anim.n-=1;
 			}
 			else
 			{
-				data.anim.t = 0.0;
-				data.anim.bForward = !data.anim.bForward;
+				anim.t = 0.0;
+				anim.bForward = !anim.bForward;
 			}
 		}
-		if ( data.anim.bForward == false ) data.anim.bPlaying = false;
+		if ( anim.bForward == false ) anim.bPlaying = false;
 	}
 	
 	//------------------------------------------------------------------------------
-	void bone_PrevKeyframe( Data& data )
+	void Bone::bone_PrevKeyframe()
 	//------------------------------------------------------------------------------
 	{
-		data.anim.bPlaying = false;
+		anim.bPlaying = false;
 
-//		int num = data.anim.num;
-		if ( data.animations.size() ==0 ) return;
-		if ( data.animations[data.anim.num].pose.size()==0) return;
-		if ( data.animations[data.anim.num].pose[ 0 ].pos.size()==0 ) return;
+//		int num = anim.num;
+		if ( animations.size() ==0 ) return;
+		if ( animations[anim.num].pose.size()==0) return;
+		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
 
-		data.anim.pose--;
-//		if ( data.anim.pose < 0 ) data.anim.pose = static_cast<signed>(data.animations[data.anim.num].pose.size())-1;
-		if ( data.anim.pose < 0 ) data.anim.pose = 0;
+		anim.pose--;
+//		if ( anim.pose < 0 ) anim.pose = static_cast<signed>(animations[anim.num].pose.size())-1;
+		if ( anim.pose < 0 ) anim.pose = 0;
 
-		if ( data.anim.pose >= 0 )
+		if ( anim.pose >= 0 )
 		{
 			// キーフレーム切り替え
 			int i = 0;
-			for ( Joint3& j : data.tblJoint )
+			for ( Joint3& j : tblJoint )
 			{
-				j.pos = data.animations[data.anim.num].pose[ data.anim.pose ].pos[i];
+				j.pos = animations[anim.num].pose[ anim.pose ].pos[i];
 				i++;
 			}
 		}
 	}
 
 	//------------------------------------------------------------------------------
-	void bone_TopKeyframe( Data& data )
+	void Bone::bone_TopKeyframe()
 	//------------------------------------------------------------------------------
 	{
-		data.anim.bPlaying = false;
+		anim.bPlaying = false;
 
-//		int num = data.anim.num;
-		if ( data.animations.size() ==0 ) return;
-		if ( data.animations[data.anim.num].pose.size()==0) return;
-		if ( data.animations[data.anim.num].pose[ 0 ].pos.size()==0 ) return;
+//		int num = anim.num;
+		if ( animations.size() ==0 ) return;
+		if ( animations[anim.num].pose.size()==0) return;
+		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
 
-		data.anim.pose = 0;
+		anim.pose = 0;
 
-		if ( data.anim.pose >= 0 )
+		if ( anim.pose >= 0 )
 		{
 			// キーフレーム切り替え
 			int i = 0;
-			for ( Joint3& j : data.tblJoint )
+			for ( Joint3& j : tblJoint )
 			{
-				j.pos = data.animations[data.anim.num].pose[ data.anim.pose ].pos[i];
+				j.pos = animations[anim.num].pose[ anim.pose ].pos[i];
 				i++;
 			}
 		}
 	}
 
 	//------------------------------------------------------------------------------
-	void bone_NextKeyframe( Data& data )
+	void Bone::bone_NextKeyframe()
 	//------------------------------------------------------------------------------
 	{
-		data.anim.bPlaying = false;
+		anim.bPlaying = false;
 
-//		int num = data.anim.num;
-		if ( data.animations.size() ==0 ) return;
-		if ( data.animations[data.anim.num].pose.size()==0) return;
-		if ( data.animations[data.anim.num].pose[ 0 ].pos.size()==0 ) return;
+//		int num = anim.num;
+		if ( animations.size() ==0 ) return;
+		if ( animations[anim.num].pose.size()==0) return;
+		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
 
-		data.anim.pose++; 
-//		if ( data.anim.pose > static_cast<signed>(data.animations[num].pose.size())-1 ) data.anim.pose = 0;
-		if ( data.anim.pose > static_cast<signed>(data.animations[data.anim.num].pose.size())-1 ) data.anim.pose = static_cast<signed>(data.animations[data.anim.num].pose.size())-1;
+		anim.pose++; 
+//		if ( anim.pose > static_cast<signed>(animations[num].pose.size())-1 ) anim.pose = 0;
+		if ( anim.pose > static_cast<signed>(animations[anim.num].pose.size())-1 ) anim.pose = static_cast<signed>(animations[anim.num].pose.size())-1;
 
-		if ( data.anim.pose >= 0 )
+		if ( anim.pose >= 0 )
 		{
 			// キーフレーム切り替え
 			int i = 0;
-			for ( Joint3& j : data.tblJoint )
+			for ( Joint3& j : tblJoint )
 			{
-				j.pos = data.animations[data.anim.num].pose[ data.anim.pose ].pos[i];
+				j.pos = animations[anim.num].pose[ anim.pose ].pos[i];
 				i++;
 			}
 		}
 	}
 
 	//------------------------------------------------------------------------------
-	void bone_LastKeyframe( Data& data )
+	void Bone::bone_LastKeyframe()
 	//------------------------------------------------------------------------------
 	{
-		data.anim.bPlaying = false;
+		anim.bPlaying = false;
 
-//		int num = data.anim.num;
-		if ( data.animations.size() ==0 ) return;
-		if ( data.animations[data.anim.num].pose.size()==0) return;
-		if ( data.animations[data.anim.num].pose[ 0 ].pos.size()==0 ) return;
+//		int num = anim.num;
+		if ( animations.size() ==0 ) return;
+		if ( animations[anim.num].pose.size()==0) return;
+		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
 
-		data.anim.pose = static_cast<signed>(data.animations[data.anim.num].pose.size())-1;
+		anim.pose = static_cast<signed>(animations[anim.num].pose.size())-1;
 
-		if ( data.anim.pose >= 0 )
+		if ( anim.pose >= 0 )
 		{
 			// キーフレーム切り替え
 			int i = 0;
-			for ( Joint3& j : data.tblJoint )
+			for ( Joint3& j : tblJoint )
 			{
-				j.pos = data.animations[data.anim.num].pose[ data.anim.pose ].pos[i];
+				j.pos = animations[anim.num].pose[ anim.pose ].pos[i];
 				i++;
 			}
 		}
 	}
 
 	//------------------------------------------------------------------------------
-	void bone_RefrectKeyframe( Data& data )
+	void Bone::bone_RefrectKeyframe()
 	//------------------------------------------------------------------------------
 	{
-		data.anim.bPlaying = false;
+		anim.bPlaying = false;
 
-//		int num = data.anim.num;
-		if ( data.animations.size() ==0 ) return;
-		if ( data.animations[data.anim.num].pose.size()==0) return;
-		if ( data.animations[data.anim.num].pose[ 0 ].pos.size()==0 ) return;
+//		int num = anim.num;
+		if ( animations.size() ==0 ) return;
+		if ( animations[anim.num].pose.size()==0) return;
+		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
 
-		for ( int i = 0 ; i < static_cast<signed>(data.tblJoint.size()) ; i++ )
+		for ( int i = 0 ; i < static_cast<signed>(tblJoint.size()) ; i++ )
 		{ 
-			data.animations[data.anim.num].pose[ data.anim.pose ].pos[i] = data.tblJoint[i].pos;
+			animations[anim.num].pose[ anim.pose ].pos[i] = tblJoint[i].pos;
 		}
 	}
 	
 	//------------------------------------------------------------------------------
-	void bone_InsertKeyframe( Data& data )
+	void Bone::bone_InsertKeyframe()
 	//------------------------------------------------------------------------------
 	{
-		data.anim.bPlaying = false;
+		anim.bPlaying = false;
 
-//		int num = data.anim.num;
+//		int num = anim.num;
 
-		data.animations[data.anim.num].pose.emplace( data.animations[data.anim.num].pose.begin() + data.anim.pose );
-		for ( const Joint3& j : data.tblJoint )
+		animations[anim.num].pose.emplace( animations[anim.num].pose.begin() + anim.pose );
+		for ( const Joint3& j : tblJoint )
 		{
-			data.animations[data.anim.num].pose[ data.anim.pose ].pos.emplace_back( j.pos );
+			animations[anim.num].pose[ anim.pose ].pos.emplace_back( j.pos );
 		}
 	}
 
 	//------------------------------------------------------------------------------
-	void bone_CopyKeyframe( Data& data )
+	void Bone::bone_CopyKeyframe()
 	//------------------------------------------------------------------------------
 	{
 
 /*
-	struct Data
+	struct Bone
 	{
 		vector<Joint3>				tblJoint;
 		vector<Bone3>				tblBone;
@@ -276,88 +276,88 @@ using namespace std;
 		vector<Keyframe>		animations;
 	};
 */
-		unique_ptr<Data> pNew(new Data);
+		unique_ptr<Bone> pNew(new Bone);
 		{
-			for ( Joint3& j : data.tblJoint )
+			for ( Joint3& j : tblJoint )
 			{
 				pNew->tblJoint.emplace_back( j.pos );
 			}
 
-			for ( Bone3& b : data.tblBone )
+			for ( Bone3& b : tblBone )
 			{
 				pNew->tblBone.emplace_back( pNew->tblJoint, b.n0, b.n1 );
 			}
 		}
 		{
-			int	cntAction = static_cast<signed>(data.animations.size());
+			int	cntAction = static_cast<signed>(animations.size());
 			for ( int num = 0 ; num < cntAction ; num++ )
 			{
 				pNew->animations.emplace_back();
 
-				int	cntPose = static_cast<signed>(data.animations[num].pose.size());
+				int	cntPose = static_cast<signed>(animations[num].pose.size());
 				for ( int pose = 0 ; pose < cntPose ; pose++ )
 				{
 					pNew->animations[num].pose.emplace_back();
 
-					for ( int j = 0 ; j < static_cast<signed>(data.tblJoint.size()) ; j++ )
+					for ( int j = 0 ; j < static_cast<signed>(tblJoint.size()) ; j++ )
 					{
-						vect3 pos = data.animations[num].pose[pose].pos[j];
+						vect3 pos = animations[num].pose[pose].pos[j];
 						pNew->animations[num].pose[pose].pos.emplace_back( pos );
 					}
 				}
 			}
 		}
-		data.anim.pCopybuf = move(pNew);
-		data.anim.copied_num = data.anim.num;
-		data.anim.copied_pose = data.anim.pose;
+		anim.pCopybuf = move(pNew);
+		anim.copied_num = anim.num;
+		anim.copied_pose = anim.pose;
 	}
 
 	//------------------------------------------------------------------------------
-	void bone_PastKeyframe( Data& data )
+	void Bone::bone_PastKeyframe()
 	//------------------------------------------------------------------------------
 	{
-		data.anim.bPlaying = false;
+		anim.bPlaying = false;
 
-		bone_InsertKeyframe( data );
-		for ( int i = 0 ; i < static_cast<signed>(data.tblJoint.size()) ; i++ )
+		bone_InsertKeyframe();
+		for ( int i = 0 ; i < static_cast<signed>(tblJoint.size()) ; i++ )
 		{ 
-//			vect3 v = data.animations[data.anim.copied_num].pose[ data.anim.copied_pose ].pos[i];
-			vect3 v = data.anim.pCopybuf->animations[data.anim.copied_num].pose[ data.anim.copied_pose ].pos[i];
+//			vect3 v = animations[anim.copied_num].pose[ anim.copied_pose ].pos[i];
+			vect3 v = anim.pCopybuf->animations[anim.copied_num].pose[ anim.copied_pose ].pos[i];
 		
-			data.animations[data.anim.num].pose[ data.anim.pose ].pos[i] = v;
-			data.tblJoint[i].pos = v;
+			animations[anim.num].pose[ anim.pose ].pos[i] = v;
+			tblJoint[i].pos = v;
 		}
 
 	}
 
 	//------------------------------------------------------------------------------
-	void bone_CutKeyframe( Data& data )
+	void Bone::bone_CutKeyframe()
 	//------------------------------------------------------------------------------
 	{
-		data.anim.bPlaying = false;
+		anim.bPlaying = false;
 
-		if ( data.animations.size() ==0 ) return;
-		if ( data.animations[data.anim.num].pose.size()==0 ) return;
-		if ( data.animations[data.anim.num].pose[ 0 ].pos.size()==0 ) return;
+		if ( animations.size() ==0 ) return;
+		if ( animations[anim.num].pose.size()==0 ) return;
+		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
 
-		bone_CopyKeyframe( data );
+		bone_CopyKeyframe();
 	
-		data.animations[data.anim.num].pose.erase(data.animations[data.anim.num].pose.begin() +data.anim.pose );	
+		animations[anim.num].pose.erase(animations[anim.num].pose.begin() +anim.pose );	
 
-		if ( data.anim.pose > (signed)data.animations[data.anim.num].pose.size()-1 ) data.anim.pose = (signed)data.animations[data.anim.num].pose.size()-1;
+		if ( anim.pose > (signed)animations[anim.num].pose.size()-1 ) anim.pose = (signed)animations[anim.num].pose.size()-1;
 
-		if ( data.animations.size() ==0 ) return;
-		if ( data.animations[data.anim.num].pose.size() ==0 ) return;
+		if ( animations.size() ==0 ) return;
+		if ( animations[anim.num].pose.size() ==0 ) return;
 
 		{
-//			int num = data.anim.num;
-//			data.anim.pose = 0;
+//			int num = anim.num;
+//			anim.pose = 0;
 			{
 				// キーフレーム切り替え
 				int i = 0;
-				for ( Joint3& j : data.tblJoint )
+				for ( Joint3& j : tblJoint )
 				{
-					j.pos = data.animations[data.anim.num].pose[ data.anim.pose ].pos[i];
+					j.pos = animations[anim.num].pose[ anim.pose ].pos[i];
 					i++;
 				}
 			}
@@ -366,28 +366,28 @@ using namespace std;
 	}
 
 	//------------------------------------------------------------------------------
-	void bone_PrevAnimation( Data& data )
+	void Bone::bone_PrevAnimation()
 	//------------------------------------------------------------------------------
 	{
-		data.anim.bPlaying = false;
+		anim.bPlaying = false;
 
-		data.anim.num--;
-		if ( data.anim.num < 0 ) data.anim.num = 0;
+		anim.num--;
+		if ( anim.num < 0 ) anim.num = 0;
 
-//		int num = data.anim.num;
-		if ( data.animations.size() ==0 ) return;
-		if ( data.animations[data.anim.num].pose.size()==0) return;
-		if ( data.animations[data.anim.num].pose[ 0 ].pos.size()==0 ) return;
+//		int num = anim.num;
+		if ( animations.size() ==0 ) return;
+		if ( animations[anim.num].pose.size()==0) return;
+		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
 
 		{
-//			int num = data.anim.num;
-			data.anim.pose = 0;
+//			int num = anim.num;
+			anim.pose = 0;
 			{
 				// キーフレーム切り替え
 				int i = 0;
-				for ( Joint3& j : data.tblJoint )
+				for ( Joint3& j : tblJoint )
 				{
-					j.pos = data.animations[data.anim.num].pose[ data.anim.pose ].pos[i];
+					j.pos = animations[anim.num].pose[ anim.pose ].pos[i];
 					i++;
 				}
 			}
@@ -395,29 +395,29 @@ using namespace std;
 	}
 
 	//------------------------------------------------------------------------------
-	void bone_NextAnimation( Data& data )
+	void Bone::bone_NextAnimation()
 	//------------------------------------------------------------------------------
 	{
-		data.anim.bPlaying = false;
+		anim.bPlaying = false;
 
-		data.anim.num++; 
-		if ( data.anim.num > static_cast<signed>(data.animations.size())-1 ) data.anim.num = static_cast<signed>(data.animations.size())-1;
+		anim.num++; 
+		if ( anim.num > static_cast<signed>(animations.size())-1 ) anim.num = static_cast<signed>(animations.size())-1;
 
-//		int num = data.anim.num;
-		if ( data.animations.size() ==0 ) return;
-		if ( data.animations[data.anim.num].pose.size()==0) return;
-		if ( data.animations[data.anim.num].pose[ 0 ].pos.size()==0 ) return;
+//		int num = anim.num;
+		if ( animations.size() ==0 ) return;
+		if ( animations[anim.num].pose.size()==0) return;
+		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
 
 		{
-			data.anim.pose = 0;
+			anim.pose = 0;
 
 			{
 				// キーフレーム切り替え
 				int i = 0;
-				for ( Joint3& j : data.tblJoint )
+				for ( Joint3& j : tblJoint )
 				{
 				
-					j.pos = data.animations[data.anim.num].pose[ data.anim.pose ].pos[i];
+					j.pos = animations[anim.num].pose[ anim.pose ].pos[i];
 					i++;
 				}
 			}
@@ -425,34 +425,34 @@ using namespace std;
 	}
 
 	//------------------------------------------------------------------------------
-	void bone_AddAnimation( Data& data )
+	void Bone::bone_AddAnimation()
 	//------------------------------------------------------------------------------
 	{
-		data.anim.bPlaying = false;
+		anim.bPlaying = false;
 
-		data.anim.num = static_cast<signed>(data.animations.size());
-		data.anim.pose = 0;
-		data.animations.emplace_back();
+		anim.num = static_cast<signed>(animations.size());
+		anim.pose = 0;
+		animations.emplace_back();
 
 		{
-//			int num = data.anim.num;
+//			int num = anim.num;
 
-			data.animations[data.anim.num].pose.emplace_back();
-			for ( const Joint3& j : data.tblJoint )
+			animations[anim.num].pose.emplace_back();
+			for ( const Joint3& j : tblJoint )
 			{
-				data.animations[data.anim.num].pose[ data.anim.pose ].pos.emplace_back( j.pos );
+				animations[anim.num].pose[ anim.pose ].pos.emplace_back( j.pos );
 			}
 		}
 	}
 
 	//------------------------------------------------------------------------------
-	void bone_update( Data& data, Pers& pers, mat44& cam_mat, SysGra& gra )
+	void Bone::bone_update( Pers& pers, mat44& cam_mat, SysGra& gra )
 	//------------------------------------------------------------------------------
 	{
 		for ( int i = 0 ; i < 5 ; i++ )
 		{
 			// 骨コリジョン 張力計算
-			for ( Bone3 b : data.tblBone )
+			for ( Bone3 b : tblBone )
 			{
 				vect3 v = b.j1.pos - b.j0.pos;
 				double l = v.length() - b.length;
@@ -484,7 +484,7 @@ using namespace std;
 			}
 
 			// 張力解消
-			for ( Joint3& a : data.tblJoint )
+			for ( Joint3& a : tblJoint )
 			{
 				a.pos += a.tension;
 				a.tension=0;
@@ -492,7 +492,7 @@ using namespace std;
 		}
 
 		// Human pers
-		for ( Joint3& j : data.tblJoint )
+		for ( Joint3& j : tblJoint )
 		{
 			//	右手系座標系
 			//	右手ねじ周り
@@ -509,7 +509,7 @@ using namespace std;
 		}
 
 		// Human 描画
-		for ( Bone3 b : data.tblBone )
+		for ( Bone3 b : tblBone )
 		{
 			if ( b.j0.disp.z > 0 && b.j0.disp.z > 0 )
 			{
@@ -521,34 +521,34 @@ using namespace std;
 	}
 
 	//------------------------------------------------------------------------------
-	void bone_drawMotion(  Data& data, Pers& pers, mat44& cam_mat, SysGra& gra )
+	void Bone::bone_drawMotion( Pers& pers, mat44& cam_mat, SysGra& gra )
 	//------------------------------------------------------------------------------
 	{
 //				int num = anim.num;
-//		Data& data = (*pData);
+//		Bone& data = (*pBone);
 		// マーカースプライン変換表示
-		if ( static_cast<signed>(data.animations.size()) > 0 )
+		if ( static_cast<signed>(animations.size()) > 0 )
 		{
-			double dt = data.anim.dt;
+			double dt = anim.dt;
 			double div = 1/dt;
 
-			for ( int n = -1 ; n < static_cast<signed>(data.animations[data.anim.num].pose.size())-3+1 ; n++ )
+			for ( int n = -1 ; n < static_cast<signed>(animations[anim.num].pose.size())-3+1 ; n++ )
 			{
 				int n0 = n;
 				int n1 = n+1;
 				int n2 = n+2;
 				int n3 = n+3;
 				if ( n0 < 0 ) n0 = 0;
-				if ( n3 >= static_cast<signed>(data.animations[data.anim.num].pose.size()) ) n3 = n2;
+				if ( n3 >= static_cast<signed>(animations[anim.num].pose.size()) ) n3 = n2;
 			
-				for ( int j = 0 ;  j < static_cast<signed>(data.tblJoint.size()) ; j++ )
+				for ( int j = 0 ;  j < static_cast<signed>(tblJoint.size()) ; j++ )
 				{
-					if ( data.tblJoint[j].bSelected == false ) continue;
+					if ( tblJoint[j].bSelected == false ) continue;
 				
-					vect3 P0 = data.animations[data.anim.num].pose[ n0 ].pos[j];
-					vect3 P1 = data.animations[data.anim.num].pose[ n1 ].pos[j];
-					vect3 P2 = data.animations[data.anim.num].pose[ n2 ].pos[j];
-					vect3 P3 = data.animations[data.anim.num].pose[ n3 ].pos[j];
+					vect3 P0 = animations[anim.num].pose[ n0 ].pos[j];
+					vect3 P1 = animations[anim.num].pose[ n1 ].pos[j];
+					vect3 P2 = animations[anim.num].pose[ n2 ].pos[j];
+					vect3 P3 = animations[anim.num].pose[ n3 ].pos[j];
 
 					double t = dt;
 					vect3 a = catmull3d_func(0, P0,P1,P2,P3 );
@@ -577,38 +577,38 @@ using namespace std;
 	}
 
 	//------------------------------------------------------------------------------
-	void bone_save( Data& data, const char* filename )
+	void Bone::bone_save( const char* filename )
 	//------------------------------------------------------------------------------
 	{
-		data.anim.bPlaying = false;
+		anim.bPlaying = false;
 
 		fstream fo( filename, ios::out );
 
 		{
 			fo << "joint" << endl;
-			for ( Joint3& j : data.tblJoint )	// 関節の位置
+			for ( Joint3& j : tblJoint )	// 関節の位置
 			{
 				fo << "\t"<< j.pos.x << "\t" << j.pos.y << "\t" << j.pos.z << endl;
 			}
 
 			fo << "bone" << endl;
-			for ( Bone3& b : data.tblBone )	// 骨
+			for ( Bone3& b : tblBone )	// 骨
 			{
 				b.length = (b.j1.pos - b.j0.pos).length();
 				fo  << "\t"<< b.n0 << "\t" << b.n1 << endl;
 			}
 		}
 		{
-			int	cntAction = static_cast<signed>(data.animations.size());
+			int	cntAction = static_cast<signed>(animations.size());
 			for ( int num = 0 ; num < cntAction ; num++ )
 			{
 				fo << "motion" << endl;
-				int	cntPose = static_cast<signed>(data.animations[num].pose.size());
+				int	cntPose = static_cast<signed>(animations[num].pose.size());
 				for ( int pose = 0 ; pose < cntPose ; pose++ )
 				{
-					for ( int j = 0 ; j < static_cast<signed>(data.tblJoint.size()) ; j++ )
+					for ( int j = 0 ; j < static_cast<signed>(tblJoint.size()) ; j++ )
 					{
-						fo  << "\t"<< data.animations[num].pose[ pose ].pos[ j ].x << "\t" << data.animations[num].pose[ pose ].pos[ j ].y << "\t" << data.animations[num].pose[ pose ].pos[ j ].z << endl;
+						fo  << "\t"<< animations[num].pose[ pose ].pos[ j ].x << "\t" << animations[num].pose[ pose ].pos[ j ].y << "\t" << animations[num].pose[ pose ].pos[ j ].z << endl;
 					}
 					if( pose+1 < cntPose ) fo << "," << endl;
 				}
@@ -619,13 +619,13 @@ using namespace std;
 		cout << "SAVED" << endl;
 	}
 	//------------------------------------------------------------------------------
-	void bone_load( Data& data, const char* filename )
+	void Bone::bone_load( const char* filename )
 	//------------------------------------------------------------------------------
 	{
-		data.anim.bPlaying = false;
+		anim.bPlaying = false;
 
 
-	//	Data*	pNew = new Data;
+	//	Bone*	pNew = new Bone;
 
 		fstream fi( filename, ios::in );
 		string buf;
@@ -664,35 +664,35 @@ using namespace std;
 			if ( string(buf) == "motion" )	
 			{
 				mode = ModeMotion;
-				num = static_cast<signed>(data.animations.size());
-				data.animations.emplace_back();
-				data.animations[num].pose.emplace_back();
+				num = static_cast<signed>(animations.size());
+				animations.emplace_back();
+				animations[num].pose.emplace_back();
 				continue;
 			}
 			if ( string(buf) == "," ) 
 			{
-				data.animations[num].pose.emplace_back();
+				animations[num].pose.emplace_back();
 				continue;
 			}
 			if ( string(buf) == "end" )	
 			{	
-				for ( Bone3& b : data.tblBone )	// 関節の距離を決定する。
+				for ( Bone3& b : tblBone )	// 関節の距離を決定する。
 				{
 					b.length = (b.j1.pos - b.j0.pos).length();
 				}
 				{
 					int cnt = 0 ;
-					for ( Joint3& j : data.tblJoint )
+					for ( Joint3& j : tblJoint )
 					{
 						j.id = cnt++;				//id登録
 					}
 				}
-				for ( Bone3& b : data.tblBone )	// ジョイントに関節の距離を決定する。
+				for ( Bone3& b : tblBone )	// ジョイントに関節の距離を決定する。
 				{
 					b.j1.relative.emplace_back( b.j0 ); 
 					b.j0.relative.emplace_back( b.j1 ); 
 				}
-				data.anim.pose = 0;
+				anim.pose = 0;
 				break;
 			}
 			switch( mode )
@@ -703,7 +703,7 @@ using namespace std;
 						double x = stod(v[0]);
 						double y = stod(v[1]);
 						double z = stod(v[2]);
-						data.tblJoint.emplace_back( vect3(x,y,z) );
+						tblJoint.emplace_back( vect3(x,y,z) );
 						//	cout << x << "," << y << "," << z << endl; 
 					}
 					break;
@@ -712,7 +712,7 @@ using namespace std;
 						vector<string> v = split( buf, '\t');
 						int n0 = stoi(v[0]);
 						int n1 = stoi(v[1]);
-						data.tblBone.emplace_back( data.tblJoint, n0, n1 );
+						tblBone.emplace_back( tblJoint, n0, n1 );
 						//	cout << x << "," << y << "," << z << endl; 
 					}
 					break;
@@ -722,7 +722,7 @@ using namespace std;
 						double x = stod(v[0]);
 						double y = stod(v[1]);
 						double z = stod(v[2]);
-						data.animations[num].pose[ data.animations[num].pose.size()-1 ].pos.emplace_back( x,y,z );
+						animations[num].pose[ animations[num].pose.size()-1 ].pos.emplace_back( x,y,z );
 						//	cout << x << "," << y << "," << z << endl; 
 					}
 					break;

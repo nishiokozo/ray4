@@ -37,7 +37,7 @@
 	};
 
 
-	struct Data
+	struct Bone
 	{
 		vector<Joint3>				tblJoint;
 		vector<Bone3>				tblBone;
@@ -58,7 +58,7 @@
 			int	pose = 0;	//	キーフレームカーソル位置
 			int copied_num = 0;
 			int copied_pose = 0;
-			unique_ptr<Data> pCopybuf;
+			unique_ptr<Bone> pCopybuf;
 
 			bool	bSelecting = false;
 			int 	selecting_num = 0;
@@ -72,24 +72,24 @@
 			bool	bPlaying = false;
 		} anim;
 
+		void bone_load( const char* filename );
+		void bone_save( const char* filename );
+		void bone_AddAnimation();
+		void bone_NextAnimation();
+		void bone_PrevAnimation();
+		void bone_CutKeyframe();
+		void bone_PastKeyframe();
+		void bone_CopyKeyframe();
+		void bone_InsertKeyframe();
+		void bone_RefrectKeyframe();
+		void bone_LastKeyframe();
+		void bone_NextKeyframe();
+		void bone_TopKeyframe();
+		void bone_PrevKeyframe();
+		void bone_Play();
+		void bone_ReqAnimation();
+		void bone_update( Pers& pers, mat44& cam_mat, SysGra& gra );
+		void bone_drawMotion( Pers& pers, mat44& cam_mat, SysGra& gra );
+
 	};
 
-	void bone_load( Data& data, const char* filename );
-	void bone_save( Data& data, const char* filename );
-	void bone_AddAnimation( Data& data );
-	void bone_NextAnimation( Data& data );
-	void bone_PrevAnimation( Data& data );
-	void bone_CutKeyframe( Data& data );
-	void bone_PastKeyframe( Data& data );
-	void bone_CopyKeyframe( Data& data );
-	void bone_InsertKeyframe( Data& data );
-	void bone_RefrectKeyframe( Data& data );
-	void bone_LastKeyframe( Data& data );
-	void bone_NextKeyframe( Data& data );
-	void bone_TopKeyframe( Data& data );
-	void bone_PrevKeyframe( Data& data );
-	void bone_Play( Data& data );
-	void bone_ReqAnimation( Data& data );
-	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vect3 P2, const vect3 P3 );
-	void bone_update( Data& data, Pers& pers, mat44& cam_mat, SysGra& gra );
-	void bone_drawMotion(  Data& data, Pers& pers, mat44& cam_mat, SysGra& gra );

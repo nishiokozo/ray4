@@ -575,7 +575,7 @@ struct Apr : public Sys
 		//人
 
 #if 0 
-		Data* pPreset = new Data;
+		Bone* pPreset = new Bone;
 		{	//	人
 			double cx=0,cy=-160,os=0.01;
 
@@ -640,17 +640,17 @@ struct Apr : public Sys
 
 		pPreset->animations.emplace_back();
 
-		Data* pData = pPreset;
+		Bone* pData = pPreset;
 
 #else
-		unique_ptr<Data> pData(new Data);
-//		bone_load( *pData, "primary.mot");
+		unique_ptr<Bone> pData(new Bone);
+//		pData->bone_load( "primary.mot");
 #endif
 
-		{
-			unique_ptr<Data> p(new Data);
-			pData->anim.pCopybuf = move(p);
-		}
+//		{
+//			unique_ptr<Bone> p(new Bone);
+//			pData->anim.pCopybuf = move(p);
+//		}
 
 		// 箱
 		struct
@@ -758,11 +758,11 @@ struct Apr : public Sys
 				}
 				
 				// キーフレームロード
-//				if ( keys.L.hi ) pData = bone_load( "human.mot");
+//				if ( keys.L.hi ) pData = pData->bone_load( "human.mot");
 				if ( keys.L.hi ) 
 				{
-					unique_ptr<Data> pNew(new Data);
-					bone_load( *pNew, "human.mot");
+					unique_ptr<Bone> pNew(new Bone);
+					pNew->bone_load( "human.mot");
 					//マーカー削除＆登録
 					mc.tblMarker3.clear();
 					for ( Joint3& j : pNew->tblJoint )	//マーカー登録
@@ -774,52 +774,49 @@ struct Apr : public Sys
 
 
 				// キーフレームセーブ
-				if ( keys.S.hi ) bone_save( *pData, "human.mot" );
+				if ( keys.S.hi ) pData->bone_save( "human.mot" );
 
 				// キーフレームへ反映
-				if ( keys.J.hi ) bone_RefrectKeyframe( *pData );
+				if ( keys.J.hi ) pData->bone_RefrectKeyframe();
 
 				// キーフレームペースト
-				if ( keys.V.hi ) bone_PastKeyframe( *pData );
+				if ( keys.V.hi ) pData->bone_PastKeyframe();
 
 				// キーフレームコピー
-				if ( keys.C.hi ) bone_CopyKeyframe( *pData );
+				if ( keys.C.hi ) pData->bone_CopyKeyframe();
 
 				// キーフレーム追加
-				if ( keys.K.hi ) bone_InsertKeyframe( *pData );
+				if ( keys.K.hi ) pData->bone_InsertKeyframe();
 
 				// キーフレームカット
-				if ( keys.X.hi ) bone_CutKeyframe( *pData );
+				if ( keys.X.hi ) pData->bone_CutKeyframe();
 
 				// キーフレーム次
-				if ( keys.RIGHT.rep ) bone_NextKeyframe( *pData );
+				if ( keys.RIGHT.rep ) pData->bone_NextKeyframe();
 
 				// キーフレーム最後
-				if ( keys.CTRL.on && keys.RIGHT.rep ) bone_LastKeyframe( *pData );
+				if ( keys.CTRL.on && keys.RIGHT.rep ) pData->bone_LastKeyframe();
 
 				// キーフレーム前
-				if ( keys.LEFT.rep ) bone_PrevKeyframe( *pData );
+				if ( keys.LEFT.rep ) pData->bone_PrevKeyframe();
 
 				// キーフレーム先頭
-				if ( keys.CTRL.on && keys.LEFT.rep ) bone_TopKeyframe( *pData );
+				if ( keys.CTRL.on && keys.LEFT.rep ) pData->bone_TopKeyframe();
 
 				// アニメーション記録
-				if ( keys.I.hi ) bone_AddAnimation( *pData );
+				if ( keys.I.hi ) pData->bone_AddAnimation();
 
 				// アニメーション前
-				if ( keys.UP.rep ) bone_PrevAnimation( *pData );
+				if ( keys.UP.rep ) pData->bone_PrevAnimation();
 
 				// アニメーション次
-				if ( keys.DOWN.rep ) bone_NextAnimation( *pData );
+				if ( keys.DOWN.rep ) pData->bone_NextAnimation();
 
 				// アニメーションリクエスト
-				if ( keys.P.hi ) bone_ReqAnimation( *pData );
-
-//if ( keys.Q.hi ) g_flg =!g_flg;
-//gra.Print(vect2(16*20,16*1),string("flg ")+ to_string(g_flg) );
+				if ( keys.P.hi ) pData->bone_ReqAnimation();
 
 				// アニメーション再生
-				if ( pData->anim.bPlaying )	bone_Play( *pData );
+				if ( pData->anim.bPlaying )	pData->bone_Play();
 				
 				
 			}
@@ -832,7 +829,6 @@ struct Apr : public Sys
 				gra.Print( vect2(10,16*y++),string("at  x=")+to_string(cam.at.x)+string(" y=")+to_string(cam.at.y)+string(" z=")+to_string(cam.at.z) ); 
 				gra.Print( vect2(10,16*y++),string("pos x=")+to_string(cam.pos.x)+string(" y=")+to_string(cam.pos.y)+string(" z=")+to_string(cam.pos.z) ); 
 				{
-//					int num = anim.num;
 					gra.Print( vect2(10,16*y++),string("anim=")+to_string(pData->anim.num) + string(" cnt=")+to_string(pData->animations.size()) ); 
 					if ( pData->animations.size() > 0 ) 
 					{
@@ -1602,7 +1598,7 @@ else
 				
 			}
 			// human 更新
-			bone_update( *pData, pers, cam.mat, gra );
+			pData->bone_update( pers, cam.mat, gra );
 
 			// 3Dマーカー表示
 			for ( Marker m : mc.tblMarker3 )
@@ -1611,7 +1607,7 @@ else
 			}
 
 			// カトマル3D モーション軌跡表示
-			bone_drawMotion( *pData, pers, cam.mat, gra );
+			pData->bone_drawMotion( pers, cam.mat, gra );
 
 
 
