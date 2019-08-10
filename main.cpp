@@ -345,9 +345,129 @@ struct Apr : public Sys
 			double	len;
 			Marker*	pm;
 			int		cnt;
-		} a = {99999,0,0};
-		vector<Marker>	tblMarker3;
+		} marker_a = {99999,0,0};
+		vector<Marker>	marker_tblMarker3;
 
+		void marker_init( vect2 mouse_pos )
+		{
+			marker_a.len = 9999;
+			marker_a.pm = 0;
+			marker_a.cnt = 0;
+
+			// 最近マーカーを検索
+			for ( Marker& m : marker_tblMarker3 )
+			{
+				double len = (m.obj.Pos2()-mouse_pos).length();
+				if ( len < 20.0 && marker_a.len > len )
+				{
+					marker_a.len = len;
+					marker_a.pm = &m;
+					marker_a.cnt++;
+				}
+			}
+
+		}
+
+		void marker_beginRectcursor( vect2 mouse_pos )
+		{
+			marker_rect_bSelect = true;
+			marker_rect_pos = mouse_pos;
+		}
+		void marker_allclear()
+		{
+			for ( Marker& m : marker_tblMarker3 )
+			{
+				m.obj.bSelected = false;
+			}
+		}
+		void marker_reverseSelect()
+		{
+			marker_a.pm->obj.bSelected = !marker_a.pm->obj.bSelected;
+		}
+		void marker_select()
+		{
+			marker_a.pm->obj.bSelected = true;
+		}
+		void marker_rectSelectReverse( vect2 mouse_pos, SysGra& gra )
+		{
+			// 矩形カーソル表示
+			vect2 v0 = min( marker_rect_pos, mouse_pos );
+			vect2 v1 = max( marker_rect_pos, mouse_pos );
+			gra.Box( v0,v1, rgb(0,0.5,1));
+
+			// 矩形カーソル選択解除
+			for ( Marker& m : marker_tblMarker3 )
+			{
+				m.obj.bRectIn = false;
+			}
+
+			// 矩形カーソル内マーカーを検索
+			for ( Marker& m : marker_tblMarker3 )
+			{
+				double len = (m.obj.Pos2()-mouse_pos).length();
+				if ( m.obj.Pos2().x > v0.x && m.obj.Pos2().x < v1.x && m.obj.Pos2().y > v0.y && m.obj.Pos2().y < v1.y )
+				{
+					m.obj.bRectIn = true;
+					m.obj.bRectSelected = !m.obj.bSelected;
+				}
+			}
+		}
+		void marker_rectSelect( vect2 mouse_pos, SysGra& gra  )
+		{
+			// 矩形カーソル表示
+			vect2 v0 = min( marker_rect_pos, mouse_pos );
+			vect2 v1 = max( marker_rect_pos, mouse_pos );
+			gra.Box( v0,v1, rgb(0,0.5,1));
+
+			// 矩形カーソル選択解除
+			for ( Marker& m : marker_tblMarker3 )
+			{
+				m.obj.bRectIn = false;
+			}
+
+			// 矩形カーソル内マーカーを検索
+			for ( Marker& m : marker_tblMarker3 )
+			{
+				double len = (m.obj.Pos2()-mouse_pos).length();
+				if ( m.obj.Pos2().x > v0.x && m.obj.Pos2().x < v1.x && m.obj.Pos2().y > v0.y && m.obj.Pos2().y < v1.y )
+				{
+					m.obj.bRectIn = true;
+					m.obj.bRectSelected = true;
+				}
+			}
+
+		}
+		void marker_move( vect2 mouse_mov, Pers& pers, mat44& cam_mat, Bone& bone )
+		{
+			for ( Marker& m : marker_tblMarker3 )
+			{
+				Joint3* pj = dynamic_cast<Joint3*>(&m.obj);
+				if ( pj->bSelected )
+				{
+					// 平行移動
+					vect3 v = vect3(mouse_mov.x, mouse_mov.y, 0)/2.45/pers.height/(pj->disp.z);
+					mat44 mrot = cam_mat;
+					mrot.SetTranslate(vect3(0,0,0));
+					mrot.invers();
+					v = v* mrot;
+					pj->pos += v ;
+				}
+			}
+			bone.RefrectKeyframe();
+		}
+		void marker_endRect()
+		{
+			marker_rect_bSelect = false;
+			for ( Marker& m : marker_tblMarker3 )
+			{
+				if ( m.obj.bRectIn )
+				{
+					m.obj.bSelected = m.obj.bRectSelected;
+				}
+				m.obj.bRectIn = false;
+				m.obj.bRectSelected = false;
+			}
+		}
 	} mc;
 
 
@@ -644,7 +764,7 @@ struct Apr : public Sys
 
 		for ( Joint3& j : pPreset->tblJoint )	//マーカー登録
 		{
-			mc.tblMarker3.emplace_back( gra, figCircle, j );
+			mc.marker_tblMarker3.emplace_back( gra, figCircle, j );
 		}
 
 		pPreset->animations.emplace_back();
@@ -767,10 +887,10 @@ struct Apr : public Sys
 					unique_ptr<Bone> pNew(new Bone);
 					pNew->loadMotion( "human.mot");
 					//マーカー削除＆登録
-					mc.tblMarker3.clear();
+					mc.marker_tblMarker3.clear();
 					for ( Joint3& j : pNew->tblJoint )	//マーカー登録
 					{
-						mc.tblMarker3.emplace_back( gra, figCircle, j );
+						mc.marker_tblMarker3.emplace_back( gra, figCircle, j );
 					}
 					pBone = move(pNew);
 
@@ -1400,142 +1520,34 @@ else
 			// 3Dマーカー入力
 			{
 				// 最近マーカー初期化
-				if ( !keys.ALT.on && mouse.L.hi )
-				{
-					mc.a.len = 9999;
-					mc.a.pm = 0;
-					mc.a.cnt = 0;
-				}
+				if ( !keys.ALT.on && mouse.L.hi ) mc.marker_init( mouse.pos );
 
-				// 最近マーカーを検索
-				for ( Marker& m : mc.tblMarker3 )
-				{
-					double len = (m.obj.Pos2()-mouse.pos).length();
-					if ( len < 20.0 && mc.a.len > len )
-					{
-						mc.a.len = len;
-						mc.a.pm = &m;
-						mc.a.cnt++;
-					}
-				}
 				//----
 
 				// 矩形カーソル開始
-				if ( !keys.ALT.on && mouse.L.hi && mc.a.pm == 0 )
-				{
-					mc.marker_rect_bSelect = true;
-					mc.marker_rect_pos = mouse.pos;
-				}
+				if ( !keys.ALT.on && mouse.L.hi && mc.marker_a.pm == 0 ) mc.marker_beginRectcursor( mouse.pos );
 
 				// マーカー全解除
-				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && !(mc.a.pm && mc.a.pm->obj.bSelected == true) )
-				{
-					for ( Marker& m : mc.tblMarker3 )
-					{
-						m.obj.bSelected = false;
-					}
-				}
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && !(mc.marker_a.pm && mc.marker_a.pm->obj.bSelected == true) ) mc.marker_allclear();
 				//----
 
 				//	マーカー 反転選択
-				if ( !keys.ALT.on &&  keys.CTRL.on && mouse.L.hi && mc.a.pm )
-				{
-					mc.a.pm->obj.bSelected = !mc.a.pm->obj.bSelected;
-				}
+				if ( !keys.ALT.on &&  keys.CTRL.on && mouse.L.hi && mc.marker_a.pm ) mc.marker_reverseSelect();
 
-				//	マーカー選択 
-				if ( !keys.ALT.on && ! keys.CTRL.on &&mouse.L.hi && mc.a.pm )
-				{
-					mc.a.pm->obj.bSelected = true;
-				}
+				//	マーカー 選択 
+				if ( !keys.ALT.on && ! keys.CTRL.on &&mouse.L.hi && mc.marker_a.pm ) mc.marker_select();
 
 				// 矩形カーソル 反転 選択	
-				if ( !keys.ALT.on && mouse.L.on && mc.marker_rect_bSelect && keys.CTRL.on )
-				{
-					// 矩形カーソル表示
-					vect2 v0 = min( mc.marker_rect_pos, mouse.pos );
-					vect2 v1 = max( mc.marker_rect_pos, mouse.pos );
-					gra.Box( v0,v1, rgb(0,0.5,1));
-
-					// 矩形カーソル選択解除
-					for ( Marker& m : mc.tblMarker3 )
-					{
-						m.obj.bRectIn = false;
-					}
-
-					// 矩形カーソル内マーカーを検索
-					for ( Marker& m : mc.tblMarker3 )
-					{
-						double len = (m.obj.Pos2()-mouse.pos).length();
-						if ( m.obj.Pos2().x > v0.x && m.obj.Pos2().x < v1.x && m.obj.Pos2().y > v0.y && m.obj.Pos2().y < v1.y )
-						{
-							m.obj.bRectIn = true;
-							m.obj.bRectSelected = !m.obj.bSelected;
-						}
-					}
-				}
+				if ( !keys.ALT.on && mouse.L.on && mc.marker_rect_bSelect && keys.CTRL.on ) mc.marker_rectSelectReverse( mouse.pos, gra );
 
 				// 矩形カーソル選択	
-				if ( !keys.ALT.on && mouse.L.on && mc.marker_rect_bSelect && !keys.CTRL.on )
-				{
-					// 矩形カーソル表示
-					vect2 v0 = min( mc.marker_rect_pos, mouse.pos );
-					vect2 v1 = max( mc.marker_rect_pos, mouse.pos );
-					gra.Box( v0,v1, rgb(0,0.5,1));
-
-					// 矩形カーソル選択解除
-					for ( Marker& m : mc.tblMarker3 )
-					{
-						m.obj.bRectIn = false;
-					}
-
-					// 矩形カーソル内マーカーを検索
-					for ( Marker& m : mc.tblMarker3 )
-					{
-						double len = (m.obj.Pos2()-mouse.pos).length();
-						if ( m.obj.Pos2().x > v0.x && m.obj.Pos2().x < v1.x && m.obj.Pos2().y > v0.y && m.obj.Pos2().y < v1.y )
-						{
-							m.obj.bRectIn = true;
-							m.obj.bRectSelected = true;
-						}
-					}
-
-				}
+				if ( !keys.ALT.on && mouse.L.on && mc.marker_rect_bSelect && !keys.CTRL.on ) mc.marker_rectSelect( mouse.pos, gra );
 
 				// マーカー移動
-				if ( !keys.ALT.on && mouse.L.on && !mc.marker_rect_bSelect )
-				{
-					for ( Marker& m : mc.tblMarker3 )
-					{
-						Joint3* pj = dynamic_cast<Joint3*>(&m.obj);
-						if ( pj->bSelected )
-						{
-							// 平行移動
-							vect3 v = vect3(mouse.mov.x, mouse.mov.y, 0)/2.45/pers.height/(pj->disp.z);
-							mat44 mrot = cam.mat;
-							mrot.SetTranslate(vect3(0,0,0));
-							mrot.invers();
-							v = v* mrot;
-							pj->pos += v ;
-						}
-					}
-					pBone->RefrectKeyframe();
-				}
+				if ( !keys.ALT.on && mouse.L.on && !mc.marker_rect_bSelect ) mc.marker_move( mouse.mov, pers, cam.mat, (*pBone) );
 
 				// 矩形カーソル解除	
-				if ( !keys.ALT.on && !mouse.L.on && mc.marker_rect_bSelect )
-				{
-					mc.marker_rect_bSelect = false;
-					for ( Marker& m : mc.tblMarker3 )
-					{
-						if ( m.obj.bRectIn )
-						{
-							m.obj.bSelected = m.obj.bRectSelected;
-						}
-						m.obj.bRectIn = false;
-						m.obj.bRectSelected = false;
-					}
-				}
+				if ( !keys.ALT.on && !mouse.L.on && mc.marker_rect_bSelect ) mc.marker_endRect();
 				
 			}
 
@@ -1549,7 +1561,7 @@ else
 			pBone->drawMotion( pers, cam.mat, gra );
 
 			// 3Dマーカー表示
-			for ( Marker m : mc.tblMarker3 )
+			for ( Marker m : mc.marker_tblMarker3 )
 			{
 				m.draw();
 			}
