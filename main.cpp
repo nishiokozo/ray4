@@ -380,12 +380,20 @@ struct Apr : public Sys
 				m.obj.bSelected = false;
 			}
 		}
-		void marker_reverseSelect()
+		void marker_selectReverse()
 		{
 			marker_a.pm->obj.bSelected = !marker_a.pm->obj.bSelected;
 		}
-		void marker_select()
+		void marker_selectAdd()
 		{
+			marker_a.pm->obj.bSelected = true;
+		}
+		void marker_selectOne()
+		{
+			for ( Marker& m : marker_tblMarker3 )
+			{
+				m.obj.bSelected = false;
+			}
 			marker_a.pm->obj.bSelected = true;
 		}
 		void marker_rectSelectReverse( vect2 mouse_pos, SysGra& gra )
@@ -1528,14 +1536,16 @@ else
 				if ( !keys.ALT.on && mouse.L.hi && mc.marker_a.pm == 0 ) mc.marker_beginRectcursor( mouse.pos );
 
 				// マーカー全解除
-				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && !(mc.marker_a.pm && mc.marker_a.pm->obj.bSelected == true) ) mc.marker_allclear();
-				//----
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && !mc.marker_a.pm ) mc.marker_allclear();
 
 				//	マーカー 反転選択
-				if ( !keys.ALT.on &&  keys.CTRL.on && mouse.L.hi && mc.marker_a.pm ) mc.marker_reverseSelect();
+				if ( !keys.ALT.on && mouse.L.hi &&  keys.CTRL.on && !keys.SHIFT.on &&  mc.marker_a.pm ) mc.marker_selectReverse();
 
-				//	マーカー 選択 
-				if ( !keys.ALT.on && ! keys.CTRL.on &&mouse.L.hi && mc.marker_a.pm ) mc.marker_select();
+				//	マーカー 追加選択 
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on &&  keys.SHIFT.on &&  mc.marker_a.pm ) mc.marker_selectAdd();
+
+				//	マーカー 単独選択 
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on &&  mc.marker_a.pm && mc.marker_a.pm->obj.bSelected == false ) mc.marker_selectOne();
 
 				// 矩形カーソル 反転 選択	
 				if ( !keys.ALT.on && mouse.L.on && mc.marker_rect_bSelect && keys.CTRL.on ) mc.marker_rectSelectReverse( mouse.pos, gra );
