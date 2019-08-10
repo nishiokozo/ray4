@@ -741,15 +741,15 @@ struct Apr : public Sys
 				}
 
 
-				if ( pBone->anim.bSelecting ==false && keys.SHIFT.on && (keys.UP.hi || keys.DOWN.hi || keys.LEFT.hi ||keys.RIGHT.hi) )
+				if ( pBone->cur.bSelecting ==false && keys.SHIFT.on && (keys.UP.hi || keys.DOWN.hi || keys.LEFT.hi ||keys.RIGHT.hi) )
 				{
-					pBone->anim.bSelecting = true;
-					pBone->anim.selecting_num = pBone->anim.num;
-					pBone->anim.selecting_pose = pBone->anim.pose;
+					pBone->cur.bSelecting = true;
+					pBone->cur.selecting_act = pBone->cur.act;
+					pBone->cur.selecting_pose = pBone->cur.pose;
 				}
 				if ( !keys.SHIFT.on && (keys.UP.hi || keys.DOWN.hi || keys.LEFT.hi ||keys.RIGHT.hi) )
 				{
-					pBone->anim.bSelecting = false;
+					pBone->cur.bSelecting = false;
 				}
 				
 				// キーフレームロード
@@ -824,10 +824,10 @@ struct Apr : public Sys
 				gra.Print( vect2(10,16*y++),string("at  x=")+to_string(cam.at.x)+string(" y=")+to_string(cam.at.y)+string(" z=")+to_string(cam.at.z) ); 
 				gra.Print( vect2(10,16*y++),string("pos x=")+to_string(cam.pos.x)+string(" y=")+to_string(cam.pos.y)+string(" z=")+to_string(cam.pos.z) ); 
 				{
-					gra.Print( vect2(10,16*y++),string("anim=")+to_string(pBone->anim.num) + string(" cnt=")+to_string(pBone->animations.size()) ); 
+					gra.Print( vect2(10,16*y++),string("anim=")+to_string(pBone->cur.act) + string(" cnt=")+to_string(pBone->animations.size()) ); 
 					if ( pBone->animations.size() > 0 ) 
 					{
-						gra.Print( vect2(10,16*y++),string("pose=")+to_string(pBone->anim.pose) + string(" cnt=")+to_string(pBone->animations[pBone->anim.num].pose.size()) ); 
+						gra.Print( vect2(10,16*y++),string("pose=")+to_string(pBone->cur.pose) + string(" cnt=")+to_string(pBone->animations[pBone->cur.act].pose.size()) ); 
 					}
 				}
 				gra.Print( vect2(10,16*31),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
@@ -840,15 +840,15 @@ struct Apr : public Sys
 				{
 					for ( int x = 0 ; x < (signed)pBone->animations[y].pose.size() ; x++ )
 					{
-						if ( pBone->anim.bSelecting && ( y == pBone->anim.selecting_num && x == pBone->anim.selecting_pose ) ) flg=!flg;
-						if ( pBone->anim.bSelecting && ( y == pBone->anim.num && x == pBone->anim.pose ) ) flg=!flg;
+						if ( pBone->cur.bSelecting && ( y == pBone->cur.selecting_act && x == pBone->cur.selecting_pose ) ) flg=!flg;
+						if ( pBone->cur.bSelecting && ( y == pBone->cur.act && x == pBone->cur.pose ) ) flg=!flg;
 
 						vect2 v = vect2( x, y )*vect2( 4, 8 ) + vect2(400,16);
 						{
 							gra.Fill( v, v+vect2(3,7), rgb(1,1,1) );
 						}
 
-						if ( y == pBone->anim.num && x == pBone->anim.pose )
+						if ( y == pBone->cur.act && x == pBone->cur.pose )
 						{
 							gra.Fill( v+vect2(0,4), v+vect2(3,7), rgb(1,0,0) );
 						}

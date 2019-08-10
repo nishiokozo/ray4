@@ -39,32 +39,38 @@
 
 	struct Bone
 	{
-		vector<Joint3>				tblJoint;
-		vector<Bone3>				tblBone;
+		vector<Joint3>			tblJoint;
+		vector<Bone3>			tblBone;
 
-		struct Pos
-		{
-			vector<vect3>		pos;
-		};
 		struct Keyframe
 		{
-			vector<Pos>			pose;
+			struct Joint
+			{
+				struct Pos
+				{
+					vect3		pos;
+					Pos( const vect3& _pos ) : pos(_pos) {};
+				};
+				vector<Pos>		joint;
+			};
+			vector<Joint>		pose;
 		};
 		vector<Keyframe>		animations;
 
 		struct
 		{
-			int	num = 0;	//	アニメーションカーソル位置
+			int	act = 0;	//	アニメーションカーソル位置
 			int	pose = 0;	//	キーフレームカーソル位置
-			int copied_num = 0;
+			int copied_act = 0;
 			int copied_pose = 0;
 			unique_ptr<Bone> pCopybuf;
 
 			bool	bSelecting = false;
-			int 	selecting_num = 0;
+			int 	selecting_act = 0;
 			int 	selecting_pose = 0;
-
-			//
+		} cur;
+		struct
+		{
 			double	t = 0;
 			double	dt = 0.1;
 			int n = 0;

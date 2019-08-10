@@ -40,7 +40,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	void Bone::ReqAnimation()
 	//------------------------------------------------------------------------------
 	{
-		anim.bSelecting = false;
+		cur.bSelecting = false;
 		anim.bForward = true;
 		anim.bPlaying = true;
 		anim.n = 0;
@@ -53,19 +53,19 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	//------------------------------------------------------------------------------
 	{
 		if ( animations.size() ==0 ) return;
-		if ( animations[anim.num].pose.size()==0) return;
-		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
+		if ( animations[cur.act].pose.size()==0) return;
+		if ( animations[cur.act].pose[ 0 ].joint.size()==0 ) return;
 
-		if(static_cast<signed>(animations[anim.num].pose.size())<2) return;
+		if(static_cast<signed>(animations[cur.act].pose.size())<2) return;
 
 		int n0 = anim.n-1;
 		int n1 = anim.n;
 		int n2 = anim.n+1;
 		int n3 = anim.n+2;
 		if ( n0<0 ) n0 = 0;
-		if ( n3>=static_cast<signed>(animations[anim.num].pose.size()) ) n3 =n2;
+		if ( n3>=static_cast<signed>(animations[cur.act].pose.size()) ) n3 =n2;
 
-		for ( int j = 0 ; j < static_cast<signed>(animations[anim.num].pose[0].pos.size()) ; j++ )
+		for ( int j = 0 ; j < static_cast<signed>(animations[cur.act].pose[0].joint.size()) ; j++ )
 		{
 /*
 			if ( g_flg ) 
@@ -78,13 +78,13 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	//			if ( j == 9 || j == 11 ) continue;	//膝
 			}
 */
-			vect3 P0 = animations[anim.num].pose[ n0 ].pos[j];
-			vect3 P1 = animations[anim.num].pose[ n1 ].pos[j];
-			vect3 P2 = animations[anim.num].pose[ n2 ].pos[j];
-			vect3 P3 = animations[anim.num].pose[ n3 ].pos[j];
+			vect3 P0 = animations[cur.act].pose[ n0 ].joint[ j ].pos;
+			vect3 P1 = animations[cur.act].pose[ n1 ].joint[ j ].pos;
+			vect3 P2 = animations[cur.act].pose[ n2 ].joint[ j ].pos;
+			vect3 P3 = animations[cur.act].pose[ n3 ].joint[ j ].pos;
 			vect3 b = catmull3d_func(anim.t, P0,P1,P2,P3 );
 
-			tblJoint[j].pos = b;
+			tblJoint[ j ].pos = b;
 
 		}
 
@@ -93,7 +93,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 
 		if ( anim.t >= 1.0 ) 
 		{
-			if ( anim.n+1 < static_cast<signed>(animations[anim.num].pose.size())-1 )
+			if ( anim.n+1 < static_cast<signed>(animations[cur.act].pose.size())-1 )
 			{
 				anim.t = 0;
 				anim.n+=1;
@@ -120,7 +120,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 		}
 		if ( anim.bForward == false ) anim.bPlaying = false;
 	}
-	
+
 	//------------------------------------------------------------------------------
 	void Bone::PrevKeyframe()
 	//------------------------------------------------------------------------------
@@ -128,20 +128,20 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 		anim.bPlaying = false;
 
 		if ( animations.size() ==0 ) return;
-		if ( animations[anim.num].pose.size()==0) return;
-		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
+		if ( animations[cur.act].pose.size()==0) return;
+		if ( animations[cur.act].pose[ 0 ].joint.size()==0 ) return;
 
-		anim.pose--;
-//		if ( anim.pose < 0 ) anim.pose = static_cast<signed>(animations[anim.num].pose.size())-1;
-		if ( anim.pose < 0 ) anim.pose = 0;
+		cur.pose--;
+//		if ( cur.pose < 0 ) cur.pose = static_cast<signed>(animations[cur.act].pose.size())-1;
+		if ( cur.pose < 0 ) cur.pose = 0;
 
-		if ( anim.pose >= 0 )
+		if ( cur.pose >= 0 )
 		{
 			// キーフレーム切り替え
 			int i = 0;
 			for ( Joint3& j : tblJoint )
 			{
-				j.pos = animations[anim.num].pose[ anim.pose ].pos[i];
+				j.pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 				i++;
 			}
 		}
@@ -154,18 +154,18 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 		anim.bPlaying = false;
 
 		if ( animations.size() ==0 ) return;
-		if ( animations[anim.num].pose.size()==0) return;
-		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
+		if ( animations[cur.act].pose.size()==0) return;
+		if ( animations[cur.act].pose[ 0 ].joint.size()==0 ) return;
 
-		anim.pose = 0;
+		cur.pose = 0;
 
-		if ( anim.pose >= 0 )
+		if ( cur.pose >= 0 )
 		{
 			// キーフレーム切り替え
 			int i = 0;
 			for ( Joint3& j : tblJoint )
 			{
-				j.pos = animations[anim.num].pose[ anim.pose ].pos[i];
+				j.pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 				i++;
 			}
 		}
@@ -178,20 +178,20 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 		anim.bPlaying = false;
 
 		if ( animations.size() ==0 ) return;
-		if ( animations[anim.num].pose.size()==0) return;
-		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
+		if ( animations[cur.act].pose.size()==0) return;
+		if ( animations[cur.act].pose[ 0 ].joint.size()==0 ) return;
 
-		anim.pose++; 
-//		if ( anim.pose > static_cast<signed>(animations[num].pose.size())-1 ) anim.pose = 0;
-		if ( anim.pose > static_cast<signed>(animations[anim.num].pose.size())-1 ) anim.pose = static_cast<signed>(animations[anim.num].pose.size())-1;
+		cur.pose++; 
+//		if ( cur.pose > static_cast<signed>(animations[act].pose.size())-1 ) cur.pose = 0;
+		if ( cur.pose > static_cast<signed>(animations[cur.act].pose.size())-1 ) cur.pose = static_cast<signed>(animations[cur.act].pose.size())-1;
 
-		if ( anim.pose >= 0 )
+		if ( cur.pose >= 0 )
 		{
 			// キーフレーム切り替え
 			int i = 0;
 			for ( Joint3& j : tblJoint )
 			{
-				j.pos = animations[anim.num].pose[ anim.pose ].pos[i];
+				j.pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 				i++;
 			}
 		}
@@ -204,18 +204,18 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 		anim.bPlaying = false;
 
 		if ( animations.size() ==0 ) return;
-		if ( animations[anim.num].pose.size()==0) return;
-		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
+		if ( animations[cur.act].pose.size()==0) return;
+		if ( animations[cur.act].pose[ 0 ].joint.size()==0 ) return;
 
-		anim.pose = static_cast<signed>(animations[anim.num].pose.size())-1;
+		cur.pose = static_cast<signed>(animations[cur.act].pose.size())-1;
 
-		if ( anim.pose >= 0 )
+		if ( cur.pose >= 0 )
 		{
 			// キーフレーム切り替え
 			int i = 0;
 			for ( Joint3& j : tblJoint )
 			{
-				j.pos = animations[anim.num].pose[ anim.pose ].pos[i];
+				j.pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 				i++;
 			}
 		}
@@ -228,12 +228,12 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 		anim.bPlaying = false;
 
 		if ( animations.size() ==0 ) return;
-		if ( animations[anim.num].pose.size()==0) return;
-		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
+		if ( animations[cur.act].pose.size()==0) return;
+		if ( animations[cur.act].pose[ 0 ].joint.size()==0 ) return;
 
 		for ( int i = 0 ; i < static_cast<signed>(tblJoint.size()) ; i++ )
 		{ 
-			animations[anim.num].pose[ anim.pose ].pos[i] = tblJoint[i].pos;
+			animations[cur.act].pose[ cur.pose ].joint[ i ].pos = tblJoint[ i ].pos;
 		}
 	}
 	
@@ -244,10 +244,10 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 		anim.bPlaying = false;
 
 
-		animations[anim.num].pose.emplace( animations[anim.num].pose.begin() + anim.pose );
+		animations[cur.act].pose.emplace( animations[cur.act].pose.begin() + cur.pose );
 		for ( const Joint3& j : tblJoint )
 		{
-			animations[anim.num].pose[ anim.pose ].pos.emplace_back( j.pos );
+			animations[cur.act].pose[ cur.pose ].joint.emplace_back( j.pos );
 		}
 	}
 
@@ -287,26 +287,26 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 		}
 		{
 			int	cntAction = static_cast<signed>(animations.size());
-			for ( int num = 0 ; num < cntAction ; num++ )
+			for ( int act = 0 ; act < cntAction ; act++ )
 			{
 				pNew->animations.emplace_back();
 
-				int	cntPose = static_cast<signed>(animations[num].pose.size());
+				int	cntPose = static_cast<signed>(animations[act].pose.size());
 				for ( int pose = 0 ; pose < cntPose ; pose++ )
 				{
-					pNew->animations[num].pose.emplace_back();
+					pNew->animations[act].pose.emplace_back();
 
 					for ( int j = 0 ; j < static_cast<signed>(tblJoint.size()) ; j++ )
 					{
-						vect3 pos = animations[num].pose[pose].pos[j];
-						pNew->animations[num].pose[pose].pos.emplace_back( pos );
+						vect3 pos = animations[act].pose[pose].joint[ j ].pos;
+						pNew->animations[act].pose[pose].joint.emplace_back( pos );
 					}
 				}
 			}
 		}
-		anim.pCopybuf = move(pNew);
-		anim.copied_num = anim.num;
-		anim.copied_pose = anim.pose;
+		cur.pCopybuf = move(pNew);
+		cur.copied_act = cur.act;
+		cur.copied_pose = cur.pose;
 	}
 
 	//------------------------------------------------------------------------------
@@ -318,11 +318,11 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 		InsertKeyframe();
 		for ( int i = 0 ; i < static_cast<signed>(tblJoint.size()) ; i++ )
 		{ 
-//			vect3 v = animations[anim.copied_num].pose[ anim.copied_pose ].pos[i];
-			vect3 v = anim.pCopybuf->animations[anim.copied_num].pose[ anim.copied_pose ].pos[i];
+//			vect3 v = animations[cur.copied_act].pose[ cur.copied_pose ].joint[ i ].pos;
+			vect3 v = cur.pCopybuf->animations[cur.copied_act].pose[ cur.copied_pose ].joint[ i ].pos;
 		
-			animations[anim.num].pose[ anim.pose ].pos[i] = v;
-			tblJoint[i].pos = v;
+			animations[cur.act].pose[ cur.pose ].joint[ i ].pos = v;
+			tblJoint[ i ].pos = v;
 		}
 
 	}
@@ -334,26 +334,26 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 		anim.bPlaying = false;
 
 		if ( animations.size() ==0 ) return;
-		if ( animations[anim.num].pose.size()==0 ) return;
-		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
+		if ( animations[cur.act].pose.size()==0 ) return;
+		if ( animations[cur.act].pose[ 0 ].joint.size()==0 ) return;
 
 		CopyKeyframe();
 	
-		animations[anim.num].pose.erase(animations[anim.num].pose.begin() +anim.pose );	
+		animations[cur.act].pose.erase(animations[cur.act].pose.begin() +cur.pose );	
 
-		if ( anim.pose > (signed)animations[anim.num].pose.size()-1 ) anim.pose = (signed)animations[anim.num].pose.size()-1;
+		if ( cur.pose > (signed)animations[cur.act].pose.size()-1 ) cur.pose = (signed)animations[cur.act].pose.size()-1;
 
 		if ( animations.size() ==0 ) return;
-		if ( animations[anim.num].pose.size() ==0 ) return;
+		if ( animations[cur.act].pose.size() ==0 ) return;
 
 		{
-//			anim.pose = 0;
+//			cur.pose = 0;
 			{
 				// キーフレーム切り替え
 				int i = 0;
 				for ( Joint3& j : tblJoint )
 				{
-					j.pos = animations[anim.num].pose[ anim.pose ].pos[i];
+					j.pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 					i++;
 				}
 			}
@@ -367,21 +367,21 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	{
 		anim.bPlaying = false;
 
-		anim.num--;
-		if ( anim.num < 0 ) anim.num = 0;
+		cur.act--;
+		if ( cur.act < 0 ) cur.act = 0;
 
 		if ( animations.size() ==0 ) return;
-		if ( animations[anim.num].pose.size()==0) return;
-		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
+		if ( animations[cur.act].pose.size()==0) return;
+		if ( animations[cur.act].pose[ 0 ].joint.size()==0 ) return;
 
 		{
-			anim.pose = 0;
+			cur.pose = 0;
 			{
 				// キーフレーム切り替え
 				int i = 0;
 				for ( Joint3& j : tblJoint )
 				{
-					j.pos = animations[anim.num].pose[ anim.pose ].pos[i];
+					j.pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 					i++;
 				}
 			}
@@ -394,15 +394,15 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	{
 		anim.bPlaying = false;
 
-		anim.num++; 
-		if ( anim.num > static_cast<signed>(animations.size())-1 ) anim.num = static_cast<signed>(animations.size())-1;
+		cur.act++; 
+		if ( cur.act > static_cast<signed>(animations.size())-1 ) cur.act = static_cast<signed>(animations.size())-1;
 
 		if ( animations.size() ==0 ) return;
-		if ( animations[anim.num].pose.size()==0) return;
-		if ( animations[anim.num].pose[ 0 ].pos.size()==0 ) return;
+		if ( animations[cur.act].pose.size()==0) return;
+		if ( animations[cur.act].pose[ 0 ].joint.size()==0 ) return;
 
 		{
-			anim.pose = 0;
+			cur.pose = 0;
 
 			{
 				// キーフレーム切り替え
@@ -410,7 +410,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 				for ( Joint3& j : tblJoint )
 				{
 				
-					j.pos = animations[anim.num].pose[ anim.pose ].pos[i];
+					j.pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 					i++;
 				}
 			}
@@ -423,16 +423,16 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	{
 		anim.bPlaying = false;
 
-		anim.num = static_cast<signed>(animations.size());
-		anim.pose = 0;
+		cur.act = static_cast<signed>(animations.size());
+		cur.pose = 0;
 		animations.emplace_back();
 
 		{
 
-			animations[anim.num].pose.emplace_back();
+			animations[cur.act].pose.emplace_back();
 			for ( const Joint3& j : tblJoint )
 			{
-				animations[anim.num].pose[ anim.pose ].pos.emplace_back( j.pos );
+				animations[cur.act].pose[ cur.pose ].joint.emplace_back( j.pos );
 			}
 		}
 	}
@@ -527,23 +527,23 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 			double dt = anim.dt;
 			double div = 1/dt;
 
-			for ( int n = -1 ; n < static_cast<signed>(animations[anim.num].pose.size())-3+1 ; n++ )
+			for ( int n = -1 ; n < static_cast<signed>(animations[cur.act].pose.size())-3+1 ; n++ )
 			{
 				int n0 = n;
 				int n1 = n+1;
 				int n2 = n+2;
 				int n3 = n+3;
 				if ( n0 < 0 ) n0 = 0;
-				if ( n3 >= static_cast<signed>(animations[anim.num].pose.size()) ) n3 = n2;
+				if ( n3 >= static_cast<signed>(animations[cur.act].pose.size()) ) n3 = n2;
 			
 				for ( int j = 0 ;  j < static_cast<signed>(tblJoint.size()) ; j++ )
 				{
-					if ( tblJoint[j].bSelected == false ) continue;
+					if ( tblJoint[ j ].bSelected == false ) continue;
 				
-					vect3 P0 = animations[anim.num].pose[ n0 ].pos[j];
-					vect3 P1 = animations[anim.num].pose[ n1 ].pos[j];
-					vect3 P2 = animations[anim.num].pose[ n2 ].pos[j];
-					vect3 P3 = animations[anim.num].pose[ n3 ].pos[j];
+					vect3 P0 = animations[cur.act].pose[ n0 ].joint[ j ].pos;
+					vect3 P1 = animations[cur.act].pose[ n1 ].joint[ j ].pos;
+					vect3 P2 = animations[cur.act].pose[ n2 ].joint[ j ].pos;
+					vect3 P3 = animations[cur.act].pose[ n3 ].joint[ j ].pos;
 
 					double t = dt;
 					vect3 a = catmull3d_func(0, P0,P1,P2,P3 );
@@ -595,15 +595,15 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 		}
 		{
 			int	cntAction = static_cast<signed>(animations.size());
-			for ( int num = 0 ; num < cntAction ; num++ )
+			for ( int act = 0 ; act < cntAction ; act++ )
 			{
 				fo << "motion" << endl;
-				int	cntPose = static_cast<signed>(animations[num].pose.size());
+				int	cntPose = static_cast<signed>(animations[act].pose.size());
 				for ( int pose = 0 ; pose < cntPose ; pose++ )
 				{
 					for ( int j = 0 ; j < static_cast<signed>(tblJoint.size()) ; j++ )
 					{
-						fo  << "\t"<< animations[num].pose[ pose ].pos[ j ].x << "\t" << animations[num].pose[ pose ].pos[ j ].y << "\t" << animations[num].pose[ pose ].pos[ j ].z << endl;
+						fo  << "\t"<< animations[act].pose[ pose ].joint[ j ].pos.x << "\t" << animations[act].pose[ pose ].joint[ j ].pos.y << "\t" << animations[act].pose[ pose ].joint[ j ].pos.z << endl;
 					}
 					if( pose+1 < cntPose ) fo << "," << endl;
 				}
@@ -647,7 +647,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 			return elems;
 		};
 
-		int num = 0;
+		int act = 0;
 
 		while ( getline( fi, buf ) )
 		{
@@ -659,14 +659,14 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 			if ( string(buf) == "motion" )	
 			{
 				mode = ModeMotion;
-				num = static_cast<signed>(animations.size());
+				act = static_cast<signed>(animations.size());
 				animations.emplace_back();
-				animations[num].pose.emplace_back();
+				animations[act].pose.emplace_back();
 				continue;
 			}
 			if ( string(buf) == "," ) 
 			{
-				animations[num].pose.emplace_back();
+				animations[act].pose.emplace_back();
 				continue;
 			}
 			if ( string(buf) == "end" )	
@@ -687,7 +687,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 					b.j1.relative.emplace_back( b.j0 ); 
 					b.j0.relative.emplace_back( b.j1 ); 
 				}
-				anim.pose = 0;
+				cur.pose = 0;
 				break;
 			}
 			switch( mode )
@@ -717,7 +717,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 						double x = stod(v[0]);
 						double y = stod(v[1]);
 						double z = stod(v[2]);
-						animations[num].pose[ animations[num].pose.size()-1 ].pos.emplace_back( x,y,z );
+						animations[act].pose[ animations[act].pose.size()-1 ].joint.emplace_back( vect3(x,y,z) );
 						//	cout << x << "," << y << "," << z << endl; 
 					}
 					break;
