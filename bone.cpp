@@ -441,7 +441,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	void Bone::update()
 	//------------------------------------------------------------------------------
 	{
-		for ( int i = 0 ; i < 5 ; i++ )
+		for ( int i = 0 ; i < 1 ; i++ )
 		{
 			// 骨コリジョン 張力計算
 			for ( Bone3 b : tblBone )

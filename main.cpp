@@ -772,7 +772,7 @@ struct Apr : public Sys
 				if ( keys.S.hi ) pBone->saveMotion( "human.mot" );
 
 				// キーフレームへ反映
-				if ( keys.J.hi ) pBone->RefrectKeyframe();
+//				if ( keys.J.hi ) pBone->RefrectKeyframe();
 
 				// キーフレームペースト
 				if ( keys.V.hi ) pBone->PastKeyframe();
@@ -1569,6 +1569,8 @@ else
 											pj->pos += v ;
 										}
 									}
+									pBone->RefrectKeyframe();
+
 								}
 							}
 						}
@@ -1592,6 +1594,7 @@ else
 				}
 				
 			}
+
 			// human 更新
 			pBone->update();
 
