@@ -21,6 +21,7 @@
 		double	width;		// 描画画面の解像度W/2
 		double	height;		// 描画画面の解像度H/2
 		double	aspect;		// 描画画面のアスペクト比
+		mat44	m;
 	
 		//--------------------------------------------------------------------------
 		Pers()
@@ -46,18 +47,33 @@
 			width	= screensize.x/2;				// 描画画面の解像度W/2
 			height	= screensize.y/2;				// 描画画面の解像度H/2
 			aspect	= screensize.y/screensize.x;	// 描画画面のアスペクト比
+
+
 		} 
 
 		//--------------------------------------------------------------------------
 		vect3 calcPoint( vect3 v ) const
 		//--------------------------------------------------------------------------
 		{
+		#if 1
 			vect3 ret;
-			double w = 1/(v.z+sz);
-			ret.x = v.x/(v.z+sz)	*sz /sc *width  *aspect	+cx;
-			ret.y = v.y/(v.z+sz)	*sz /sc *height			+cy;
-			ret.z = w;
+		//	double w = 1/(v.z+sz);
+		//	ret.x = v.x*w	*sz /sc *width  *aspect	+cx;
+		//	ret.y = v.y*w	*sz /sc *height			+cy;
+		//	ret.z = w;
+			ret.x = v.x/(v.z+sz)	*sz /sc *width  *aspect								+cx;
+			ret.y = 								v.y/(v.z+sz)	*sz /sc *height		+cy;
+			ret.z = 															1/(v.z+sz);
 			return ret;
+		#else
+			double w = 1/(v.z+sz);
+			return v * mat44( 
+				w *sz /sc *width  *aspect	,	0					,	0	,	0,
+				0							,	w *sz /sc *height	,	0	,	0,
+				0							,	0					,	0	,	0,
+				cx							,	cy					,	w	,	0
+			);
+		#endif
 		}
 		
 		//--------------------------------------------------------------------------
@@ -100,7 +116,4 @@
 			}
 			return ( va.z > 0 && vb.z > 0 );
 		}			
-
-
-
 	};

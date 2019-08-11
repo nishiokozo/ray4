@@ -60,19 +60,9 @@ struct Apr : public Sys
 	{
 		Obj&	obj;
 
-		enum MODE
+		Marker( Obj& _obj, int id ) : obj(_obj)
 		{
-			MODE_NONE,
-			MODE_2D,
-			MODE_3D,
-		};
-
-		int mode = MODE_NONE;
-
-
-		Marker( Obj& _obj, MODE m, int id ) : obj(_obj)
-		{
-			mode				= m;
+//			mode				= m;
 			obj.id				= id;
 			obj.bSelected		= false;
 			obj.bRectIn			= false;
@@ -81,7 +71,7 @@ struct Apr : public Sys
 		}
 		Marker(const Marker& a) : obj(a.obj)
 		{
-			mode				= a.mode;
+//			mode				= a.mode;
 			obj.id				= a.obj.id;
 //			obj.mode			= a.obj.mode;
 			obj.bSelected		= a.obj.bSelected;
@@ -157,7 +147,14 @@ struct Apr : public Sys
 
 	struct Selector
 	{
-		int mode = 0;
+		enum MODE
+		{
+			MODE_NONE,
+			MODE_2D,
+			MODE_3D,
+		};
+
+		int mode = MODE_NONE;
 
 		vector<Marker>	tblMarker;
 		vect2 rect_pos = vect2(0,0);			//	矩形選択開始位置
@@ -304,7 +301,7 @@ struct Apr : public Sys
 		}
 		
 		//---------------------------------------------------------------------
-		void draw( vect2 mouse_pos, SysGra& gra )
+		void drawController( vect2 mouse_pos, SysGra& gra )
 		//---------------------------------------------------------------------
 		{
 
@@ -336,6 +333,11 @@ struct Apr : public Sys
 				}
 			}
 		}
+	
+		bool bAxisX = true;;
+		bool bAxisY = true;;
+		bool bAxisZ = true;;
+
 	};
 	Selector selector;
 
@@ -354,6 +356,49 @@ struct Apr : public Sys
 
 	Pers pers;
 
+
+	//------------------------------------------------------------------------------
+	void line3d( vect3 p0, vect3 p1, int col )
+	//------------------------------------------------------------------------------
+	{
+		double l = 0.2;
+		vect3 a = p0* cam.mat.invers();
+		vect3 b = p1* cam.mat.invers();
+		vect3 v0;
+		vect3 v1;
+		bool flg = pers.ScissorLine( a, b, v0, v1 );
+		if ( flg ) gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col );
+	}
+	//------------------------------------------------------------------------------
+	void circle3d_y( vect3 pos,  double r, int col )
+	//------------------------------------------------------------------------------
+	{
+		vect2 v0;
+		for ( int i = 0 ; i <= 360 ; i+=10 )
+		{
+			vect3 p = vect3( r*cos(rad(i)), 0, r*sin(rad(i)) ) + pos;
+			vect3 q = pers.calcPoint( p * cam.mat.invers() );
+			vect2 v1 = vect2( q.x, q.y );
+			if ( i > 0 ) gra.Line( v0,v1, col );
+			v0 = v1;
+		}
+	}
+
+	//------------------------------------------------------------------------------
+	void circle3d_z( vect3 pos,  double r, int col )
+	//------------------------------------------------------------------------------
+	{
+		vect2 v0;
+		for ( int i = 0 ; i <= 360 ; i+=10 )
+		{
+			vect3 p = vect3( r*cos(rad(i)), r*sin(rad(i)), 0 ) + pos;
+			vect3 q = pers.calcPoint( p * cam.mat.invers() );
+			vect2 v1 = vect2( q.x, q.y );
+			if ( i > 0 ) gra.Line( v0,v1, col );
+			v0 = v1;
+		}
+
+	}
 
 
 	//------------------------------------------------------------------------------
@@ -697,27 +742,30 @@ struct Apr : public Sys
 
 				if ( keys.F1.on )
 				{
+					gra.Print(vect2(10,16*y++),string("[F1] help"));
 					gra.Print(vect2(10,16*y++),string("[Y] pers -"));
 					gra.Print(vect2(10,16*y++),string("[H] pers +"));
 					gra.Print(vect2(10,16*y++),string("[L] Load"));
 					gra.Print(vect2(10,16*y++),string("[S] Save"));
 					gra.Print(vect2(10,16*y++),string("--Keyframe--"));
-					gra.Print(vect2(10,16*y++),string("[J] Refrect"));
 					gra.Print(vect2(10,16*y++),string("[K] Insert"));
-					gra.Print(vect2(10,16*y++),string("[D] Delete"));
+					gra.Print(vect2(10,16*y++),string("[X] Cut"));
 					gra.Print(vect2(10,16*y++),string("[C] Copy"));
 					gra.Print(vect2(10,16*y++),string("[V] Past"));
 					gra.Print(vect2(10,16*y++),string("[LEFT]  -"));
 					gra.Print(vect2(10,16*y++),string("[RIGHT] +"));
 					gra.Print(vect2(10,16*y++),string("--Animation--"));
 					gra.Print(vect2(10,16*y++),string("[I] Add"));
+					gra.Print(vect2(10,16*y++),string("[P] Play"));
 					gra.Print(vect2(10,16*y++),string("[UP] -"));
 					gra.Print(vect2(10,16*y++),string("[DOWN] +"));
-					gra.Print(vect2(10,16*y++),string("[P] Play"));
+					gra.Print(vect2(10,16*y++),string("--Other--"));
+					gra.Print(vect2(10,16*y++),string("[1] select 3d"));
+					gra.Print(vect2(10,16*y++),string("[2] select 2main"));
 				}
 				else
 				{
-					gra.Print(vect2(10,16*y++),string("[F1] Help"));
+					//gra.Print(vect2(10,16*y++),string("[F1] Help"));
 				}
 
 
@@ -745,9 +793,9 @@ struct Apr : public Sys
 						selector.tblMarker.clear();
 						for ( Joint3& j : pBone->tblJoint )	//マーカー登録
 						{
-							selector.tblMarker.emplace_back( j, Marker::MODE_3D, id++ );
+							selector.tblMarker.emplace_back( j, id++ );
 						}
-						selector.mode = 1;
+						selector.mode = Selector::MODE_3D;
 					}
 
 				}
@@ -794,25 +842,34 @@ struct Apr : public Sys
 
 				// アニメーション再生
 				if ( pBone->anim.bPlaying )	pBone->PlayAnimation();
+
+				// X/Y/Z軸選択モード切替
+				if ( keys.Q.hi ) selector.bAxisX = !selector.bAxisX;
+				if ( keys.W.hi ) selector.bAxisY = !selector.bAxisY;
+				if ( keys.E.hi ) selector.bAxisZ = !selector.bAxisZ;
 			}
 
 
 			{
 				int y = 1;
 				gra.Print(vect2(10,16*y++),string("fovY:")+to_string(int(pers.fovy)));
-				gra.Print(vect2(10,16*y++),string("sz:")+to_string(pers.sz) +string(" sc:")+to_string(pers.sc));
-				gra.Print( vect2(10,16*y++),string("far:")+to_string((cam.pos-cam.at).length())); 
-				gra.Print( vect2(10,16*y++),string("at  x=")+to_string(cam.at.x)+string(" y=")+to_string(cam.at.y)+string(" z=")+to_string(cam.at.z) ); 
-				gra.Print( vect2(10,16*y++),string("pos x=")+to_string(cam.pos.x)+string(" y=")+to_string(cam.pos.y)+string(" z=")+to_string(cam.pos.z) ); 
+				if( keys.F2.on )
 				{
+					gra.Print(vect2(10,16*y++),string("sz:")+to_string(pers.sz) +string(" sc:")+to_string(pers.sc));
+					gra.Print( vect2(10,16*y++),string("far:")+to_string((cam.pos-cam.at).length())); 
+					gra.Print( vect2(10,16*y++),string("at  x=")+to_string(cam.at.x)+string(" y=")+to_string(cam.at.y)+string(" z=")+to_string(cam.at.z) ); 
+					gra.Print( vect2(10,16*y++),string("pos x=")+to_string(cam.pos.x)+string(" y=")+to_string(cam.pos.y)+string(" z=")+to_string(cam.pos.z) ); 
 					gra.Print( vect2(10,16*y++),string("anim=")+to_string(pBone->cur.act) + string(" cnt=")+to_string(pBone->animations.size()) ); 
 					if ( pBone->animations.size() > 0 ) 
 					{
 						gra.Print( vect2(10,16*y++),string("pose=")+to_string(pBone->cur.pose) + string(" cnt=")+to_string(pBone->animations[pBone->cur.act].pose.size()) ); 
 					}
+					gra.Print( vect2(10,16*y++),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 				}
-				gra.Print( vect2(10,16*31),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
-			}
+
+//					gra.Print( vect2(10,16*y++),string("axis ")+to_string(selector.bAxisX)+to_string(selector.bAxisY)+to_string(selector.bAxisZ) ); 
+					gra.Print( vect2(10,16*y++),string("axis ")+(selector.bAxisX?"X":"-")+(selector.bAxisY?"Y":"-")+(selector.bAxisZ?"Z":"-") ); 
+				}
 
 			// animカーソルビュー cursor
 			{
@@ -958,7 +1015,8 @@ struct Apr : public Sys
 
 				if(1)
 				{	// 格子グリッド
-					int col = rgb(0.5,0.5,0.5);
+//					int col = rgb(0.5,0.5,0.5);
+					int col = rgb(0.2,0.2,0.2);
 					{
 						vect3 a(-NUM, 0,-NUM);
 						vect3 b( NUM, 0,-NUM);
@@ -1285,17 +1343,17 @@ struct Apr : public Sys
 					selector.tblMarker.clear();
 					for ( Catmull& c : catmull_tbl )	// マーカー対象に位置を登録
 					{
-						selector.tblMarker.emplace_back( c, Marker::MODE_2D, id++ );
+						selector.tblMarker.emplace_back( c, id++ );
 					}
 					for ( Bezier& b : bezier_tbl )	// マーカー対象に位置を登録
 					{
-						selector.tblMarker.emplace_back( b, Marker::MODE_2D, id++ );
+						selector.tblMarker.emplace_back( b, id++ );
 					}
 					for ( Joint2& j : tblJoint_2d )	//マーカー対象に位置を登録
 					{
-						selector.tblMarker.emplace_back( j, Marker::MODE_2D, id++ );
+						selector.tblMarker.emplace_back( j, id++ );
 					}
-					selector.mode = 2;
+					selector.mode = Selector::MODE_2D;
 				}
 				if ( keys._1.hi )
 				{
@@ -1303,9 +1361,9 @@ struct Apr : public Sys
 					selector.tblMarker.clear();
 					for ( Joint3& j : pBone->tblJoint )	//マーカー登録
 					{
-						selector.tblMarker.emplace_back( j, Marker::MODE_3D, id++ );
+						selector.tblMarker.emplace_back( j, id++ );
 					}
-					selector.mode = 1;
+					selector.mode = Selector::MODE_3D;
 				}
 
 			}
@@ -1333,8 +1391,32 @@ struct Apr : public Sys
 				// マーカー移動
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && !selector.rect_bSelect ) 
 				{
-					if ( selector.mode == 1 )
+					if ( selector.mode == Selector::MODE_3D )
 					{
+
+						#if 1
+						if ( selector.a.pm )
+						{
+							// 優先度つけ
+							for ( Joint3& j : pBone->tblJoint )
+							{
+								j.priority = 999;
+							}
+							function<void( Joint3&,int)> funcSetPriority = [&funcSetPriority] ( Joint3& j, int prio )
+							{
+								j.priority = prio;
+								for ( Joint3& r : j.relative )
+								{
+									if ( r.priority > prio+1 ) funcSetPriority( r, prio+1 );
+								}
+							};
+							
+							Joint3* pj = dynamic_cast<Joint3*>(&selector.a.pm->obj);
+							if ( pj ) funcSetPriority( *pj, 1 );
+						}
+						#endif
+
+
 						// 3Dマーカー移動
 						for ( Marker& m : selector.tblMarker )
 						{
@@ -1352,7 +1434,7 @@ struct Apr : public Sys
 						}
 						pBone->RefrectKeyframe();
 					}
-					if ( selector.mode == 2 )
+					if ( selector.mode == Selector::MODE_2D )
 					{
 						// 2Dマーカー移動
 						for ( Marker& m : selector.tblMarker )
@@ -1441,13 +1523,50 @@ struct Apr : public Sys
 			pBone->draw( pers, cam.mat, gra );
 
 
-			if ( !(pBone->anim.bPlaying && selector.mode == 1) )
+			if ( !(pBone->anim.bPlaying && selector.mode == Selector::MODE_3D) )
 			{
 				// カトマル3D モーション軌跡表示
 				pBone->drawMotion( pers, cam.mat, gra );
 
 				// マーカー表示
-				selector.draw( mouse.pos, gra );
+				selector.drawController( mouse.pos, gra );
+
+				// 3Dマーカー表示
+				if ( selector.mode == Selector::MODE_3D )
+				{
+
+					// 3Dマーカー表示
+					int col = rgb(0,1,0);
+					double l =0.2;
+					for ( Marker& m : selector.tblMarker )
+					{
+						Joint3* pj = dynamic_cast<Joint3*>(&m.obj);
+						if ( pj && pj->bSelected )
+						{
+							vect3 pos = pj->pos;
+							line3d( (pos + vect3(-l,0,0)), (pos + vect3(l,0,0)), col );
+							line3d( (pos + vect3(0,-l,0)), (pos + vect3(0,l,0)), col );
+							line3d( (pos + vect3(0,0,-l)), (pos + vect3(0,0,l)), col );
+
+							circle3d_y( pos, 0.1, col );
+
+						}
+					}
+				}
+			}
+			
+//				line3d( cam.pos, v , rgb (1,0,0));
+			circle3d_z( cam.pos, 0.1, rgb(1,0,0) );
+			
+			
+			// 原点
+			circle3d_y( vect3(0,0,0), 0.1, rgb(0.2,0.2,0.2) );
+
+			// マウスレイ
+			{
+				vect3 p = cam.pos;
+				vect3 q = vect3( mouse.pos.x, mouse.pos.y, pers.sz );
+				
 			}
 
 			// 点 
