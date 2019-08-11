@@ -1,6 +1,6 @@
 main.o: main.cpp geom.h SysKeys.h SysMouse.h SysGra.h Sys.h raytrace.h \
- bone.h
-bone.o: bone.cpp geom.h SysKeys.h SysMouse.h SysGra.h bone.h
+ obj.h bone.h
+bone.o: bone.cpp geom.h SysKeys.h SysMouse.h SysGra.h obj.h bone.h
 raytrace.o: raytrace.cpp geom.h SysGra.h raytrace.h
 geom.o: geom.cpp geom.h
 Sys.o: Sys.cpp SysKeys.h SysMouse.h geom.h SysGra.h Sys.h SysWin.h
