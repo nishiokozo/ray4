@@ -1,14 +1,6 @@
 	struct	Obj
 	{
-		enum MODE
-		{
-			MODE_NONE,
-			MODE_2D,
-			MODE_3D,
-		};
-
 		int id = 0;
-		int mode = MODE_NONE;
 
 		bool 	bRectSelected	= false;		//	矩形選択中、選択＆非選択
 		bool 	bRectIn			= false;		//	矩形選択中、矩形選択対象

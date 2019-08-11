@@ -60,21 +60,34 @@ struct Apr : public Sys
 	{
 		Obj&	obj;
 
-		Marker( Obj& _obj, Obj::MODE m ) : obj(_obj)
+		enum MODE
 		{
-//			obj.mode			= Obj::MODE_NONE;
-//			obj.bSelected		= false;
-//			obj.bRectIn			= false;
-//			obj.bRectSelected	= false;
-//			obj.bAffectable		= false;
+			MODE_NONE,
+			MODE_2D,
+			MODE_3D,
+		};
+
+		int mode = MODE_NONE;
+
+
+		Marker( Obj& _obj, MODE m, int id ) : obj(_obj)
+		{
+			mode				= m;
+			obj.id				= id;
+			obj.bSelected		= false;
+			obj.bRectIn			= false;
+			obj.bRectSelected	= false;
+			obj.bAffectable		= false;
 		}
 		Marker(const Marker& a) : obj(a.obj)
 		{
-//			obj.mode			= a,obj.mode
-//			obj.bSelected		= a.obj.bSelected;
-//			obj.bRectIn			= a.obj.bRectIn;
-//			obj.bRectSelected	= a.obj.bRectSelected;
-//			obj.bAffectable 	= a.obj.bAffectable;
+			mode				= a.mode;
+			obj.id				= a.obj.id;
+//			obj.mode			= a.obj.mode;
+			obj.bSelected		= a.obj.bSelected;
+			obj.bRectIn			= a.obj.bRectIn;
+			obj.bRectSelected	= a.obj.bRectSelected;
+			obj.bAffectable 	= a.obj.bAffectable;
 		}	
 		const Marker&	operator=(Marker&& a){return a;}	
 
@@ -295,6 +308,7 @@ struct Apr : public Sys
 		//---------------------------------------------------------------------
 		{
 
+			// 矩形エリア表示
 			if ( rect_bSelect )
 			{
 				vect2 v0 = min( rect_pos, mouse_pos );
@@ -302,6 +316,7 @@ struct Apr : public Sys
 				gra.Box( v0,v1, rgb(0,0.5,1));
 			}
 
+			// コントローラー表示
 			for ( Marker m : tblMarker )
 			{
 				bool flg =  m.obj.bSelected;
@@ -726,10 +741,11 @@ struct Apr : public Sys
 					pBone = move(pNew);
 
 					{
+						int id = 0;
 						selector.tblMarker.clear();
 						for ( Joint3& j : pBone->tblJoint )	//マーカー登録
 						{
-							selector.tblMarker.emplace_back( j, Obj::MODE_3D );
+							selector.tblMarker.emplace_back( j, Marker::MODE_3D, id++ );
 						}
 						selector.mode = 1;
 					}
@@ -1265,28 +1281,29 @@ struct Apr : public Sys
 			{
 				if ( keys._2.hi )
 				{
+					int id = 0;
 					selector.tblMarker.clear();
 					for ( Catmull& c : catmull_tbl )	// マーカー対象に位置を登録
 					{
-						Obj::MODE a = Obj::MODE_2D;
-						selector.tblMarker.emplace_back( c, Obj::MODE_2D );
+						selector.tblMarker.emplace_back( c, Marker::MODE_2D, id++ );
 					}
 					for ( Bezier& b : bezier_tbl )	// マーカー対象に位置を登録
 					{
-						selector.tblMarker.emplace_back( b, Obj::MODE_2D );
+						selector.tblMarker.emplace_back( b, Marker::MODE_2D, id++ );
 					}
 					for ( Joint2& j : tblJoint_2d )	//マーカー対象に位置を登録
 					{
-						selector.tblMarker.emplace_back( j, Obj::MODE_2D );
+						selector.tblMarker.emplace_back( j, Marker::MODE_2D, id++ );
 					}
 					selector.mode = 2;
 				}
 				if ( keys._1.hi )
 				{
+					int id = 0;
 					selector.tblMarker.clear();
 					for ( Joint3& j : pBone->tblJoint )	//マーカー登録
 					{
-						selector.tblMarker.emplace_back( j, Obj::MODE_3D );
+						selector.tblMarker.emplace_back( j, Marker::MODE_3D, id++ );
 					}
 					selector.mode = 1;
 				}
