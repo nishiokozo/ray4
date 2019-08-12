@@ -1424,7 +1424,7 @@ struct Apr : public Sys
 							if ( pj->bSelected )
 							{
 								// 平行移動
-								vect3 v = vect3(mouse.mov.x, mouse.mov.y, 0)/2.45/pers.height/(pj->disp.z);
+								vect3 v = vect3(mouse.mov.x, mouse.mov.y, 0)/pers.height/(pj->disp.z);
 								mat44 mrot = cam.mat;
 								mrot.SetTranslate(vect3(0,0,0));
 								mrot.invers();
@@ -1555,18 +1555,29 @@ struct Apr : public Sys
 				}
 			}
 			
-//				line3d( cam.pos, v , rgb (1,0,0));
-			circle3d_z( cam.pos, 0.1, rgb(1,0,0) );
 			
 			
 			// 原点
 			circle3d_y( vect3(0,0,0), 0.1, rgb(0.2,0.2,0.2) );
 
-			// マウスレイ
+//			circle3d_z( cam.pos, 0.01, rgb(1,0,0) );
+
+			// マウス座標（投影面座標）を３Ｄ空間座標に逆変換
 			{
-				vect3 p = cam.pos;
-				vect3 q = vect3( mouse.pos.x, mouse.pos.y, pers.sz );
-				
+				vect3 q = vect3( mouse.pos.x, mouse.pos.y, 0 );
+				vect3 v = pers.calcInvers( q )* cam.mat;
+
+				vect3 q2 = vect3( mouse.pos.x, mouse.pos.y, 10 );
+				vect3 p = pers.calcInvers( q2 )* cam.mat;
+
+
+				line3d( v, vect3(0,0,0), rgb(1,0,0));
+
+
+
+				gra.Print( vect2(10,16*20),string("v x=")+to_string(v.x) + string(" y=")+to_string(v.y) +string(" z=")+to_string(v.z) );
+				gra.Print( vect2(10,16*21),string("p x=")+to_string(p.x) + string(" y=")+to_string(p.y) +string(" z=")+to_string(p.z) );
+//				gra.Print( vect2(10,16*21),string(" x=")+to_string(cam.pos.x) + string(" y=")+to_string(cam.pos.y) +string(" z=")+to_string(cam.pos.z) );
 			}
 
 			// 点 
