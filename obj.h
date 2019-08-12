@@ -15,7 +15,7 @@
 	{
 		double	fovy;		// 画角
 		double	sz;			// 投影面までの距離
-		double	sc;			// 投影面の高さ/2（描画スケール）
+		double	fy;			// 投影面の高さ/2（描画スケール）
 		double	cx;			// 描画画面の中心W
 		double	cy;			// 描画画面の中心H
 		double	width;		// 描画画面の解像度W/2
@@ -36,11 +36,11 @@
 		//--------------------------------------------------------------------------
 		{
 		#if 0
-			sc = 1;									// 投影面の高さ/2
-			sz = sc/tan(rad(fovy)/2);				// 投影面までの距離
+			fy = 1;									// 投影面の高さ/2
+			sz = fy/tan(rad(fovy)/2);				// 投影面までの距離
 		#else
 			sz = 1.0;								// 投影面までの距離
-			sc = sz*tan(rad(fovy)/2);				// 投影面の高さ/2
+			fy = sz*tan(rad(fovy)/2);				// 投影面の高さ/2
 		#endif
 			cx		= screensize.x/2;				// 描画画面の中心W
 			cy		= screensize.y/2;				// 描画画面の中心H
@@ -58,21 +58,58 @@
 		#if 1
 			vect3 ret;
 		//	double w = 1/(v.z+sz);
-		//	ret.x = v.x*w	*sz /sc *width  *aspect	+cx;
-		//	ret.y = v.y*w	*sz /sc *height			+cy;
+		//	ret.x = v.x*w	*sz /fy *width  *aspect	+cx;
+		//	ret.y = v.y*w	*sz /fy *height			+cy;
 		//	ret.z = w;
-			ret.x = v.x/(v.z+sz)	*sz /sc *width  *aspect								+cx;
-			ret.y = 								v.y/(v.z+sz)	*sz /sc *height		+cy;
-			ret.z = 															1/(v.z+sz);
+/*
+			ret.x = (v.x	*sz  *width  *aspect 							+cx*(v.z*fy+sz*fy))/(v.z*fy+sz*fy);
+			ret.x = (v.x	*sz  *width  *aspect/(v.z*fy+sz*fy) 			+cx*(v.z*fy+sz*fy)/(v.z*fy+sz*fy));
+			ret.x = (v.x	*sz  *width  *aspect/(v.z*fy+sz*fy) )			+ cx*sz*fy/(v.z*fy+sz*fy) + cx*v.z*fy/(v.z*fy+sz*fy);
+			double x = v.x;
+			double z = v.z;
+			double s = 1;
+			double w = width*aspect;
+			double c = tan(rad(fovy)/2);
+			double b = cx;
+			ret.x = (x*s*w /(z*c+s*c) ) + b*s*c/(z*c+s*c) + b*z*c/(z*c+s*c);
+			ret.x = (x*s*w + b*s*c + b*z*c)/(z*c+s*c);
+			ret.x = x*s*w/c/(z + s) + b;
+
+			ret.x = x*s*w/(c*z + c*s) + b;
+
+			ret.x = b + x*w/(c*(z/s + 1));
+
+			ret.x = b + x*w/(c*z/s + c);
+
+			ret.x = (b*c*z/s + b*c + x*w)/(c*z/s + c);
+
+			ret.x = b + x*w/c/(z/s + 1);
+
+			ret.x = x*w/c/(z + 1) + b;
+*/
+
+
+
+			double w = 1/(v.z+sz);
+			ret.x = v.x*w	*sz /fy *width  *aspect	+cx;
+			ret.y = v.y*w	*sz /fy *height			+cy;
+			ret.z = w;
 			return ret;
 		#else
-			double w = 1/(v.z+sz);
 			return v * mat44( 
-				w *sz /sc *width  *aspect	,	0					,	0	,	0,
-				0							,	w *sz /sc *height	,	0	,	0,
+				w *sz /fy *width  *aspect	,	0					,	0	,	0,
+				0							,	w *sz /fy *height	,	0	,	0,
 				0							,	0					,	0	,	0,
 				cx							,	cy					,	w	,	0
 			);
+/*			double w = 1/(v.z+sz);
+			return v * mat44( 
+				w *sz /fy *width  *aspect	,	0					,	0	,	0,
+				0							,	w *sz /fy *height	,	0	,	0,
+				0							,	0					,	0	,	0,
+				cx							,	cy					,	w	,	0
+			);
+*/
 		#endif
 		}
 		

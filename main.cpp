@@ -27,6 +27,14 @@ using namespace std;
 
 struct Apr : public Sys
 {
+	//------------------------------------------------------------------------------
+	Apr( const char* name, int pos_x, int pos_y, int width, int height ) : Sys( name, pos_x, pos_y, width, height )
+	//------------------------------------------------------------------------------
+	{}
+	//------------------------------------------------------------------------------
+	~Apr()
+	//------------------------------------------------------------------------------
+	{}
 
 	long long	time_peak = 0;
 
@@ -62,7 +70,6 @@ struct Apr : public Sys
 
 		Marker( Obj& _obj, int id ) : obj(_obj)
 		{
-//			mode				= m;
 			obj.id				= id;
 			obj.bSelected		= false;
 			obj.bRectIn			= false;
@@ -71,9 +78,7 @@ struct Apr : public Sys
 		}
 		Marker(const Marker& a) : obj(a.obj)
 		{
-//			mode				= a.mode;
 			obj.id				= a.obj.id;
-//			obj.mode			= a.obj.mode;
 			obj.bSelected		= a.obj.bSelected;
 			obj.bRectIn			= a.obj.bRectIn;
 			obj.bRectSelected	= a.obj.bRectSelected;
@@ -84,9 +89,6 @@ struct Apr : public Sys
 	};
 
 
-	~Apr()
-	{
-	}
 
 	struct Joint2 : Obj
 	{
@@ -351,7 +353,70 @@ struct Apr : public Sys
 		vect3 	at = vect3( 0, -1, 0 );
 		vect3	up = vect3( 0, 1, 0);
 	  	mat44	mat;		
+
+		//------------------------------------------------------------------------------
+		void camera_rotation( vect3 mov )
+		//------------------------------------------------------------------------------
+		{
+			double len = (pos-at).length();
+			double l = (pos-at).length()/10;
+			l=max(l,0.00001);
+			l=min(l,8);
+
+			// 回転
+			vect3	v = mov * l;
+			mat44 mrot = mat;
+			mrot.SetTranslate(vect3(0,0,0));
+			v = v* mrot;
+			pos += v;
+			
+			{
+				vect3 dir = (pos-at).normalize();
+				pos = at+dir*len;
+			}
+
+		}
+
+		//------------------------------------------------------------------------------
+		void camera_move( vect3 mov )
+		//------------------------------------------------------------------------------
+		{
+			double l = (pos-at).length()/10;
+			if ( l < 0.4 ) l = 0.4;
+			if ( l > 4 ) l = 4.0;
+
+			vect3	v= mov*l;
+			mat44 mrot = mat;
+			mrot.SetTranslate(vect3(0,0,0));
+			v = v* mrot;
+
+			at += v;
+			pos += v;
+		}
+
+		//------------------------------------------------------------------------------
+		void camera_zoom( double zm )
+		//------------------------------------------------------------------------------
+		{
+			double l = (pos-at).length()/10;
+				l=max(l,0.01);
+				l=min(l,8);
+
+			double step = -zm;
+
+			vect3	v= vect3(0,0,step*l);
+			mat44 mrot = mat;
+			mrot.SetTranslate(vect3(0,0,0));
+			v = v* mrot;
+
+			vect3 r = pos;
+			pos += v;
+			if( (pos-at).length() <= v.length() ) pos = (r-at).normalize()*0.00001+at;
+		}
+
 	} cam ;
+
+
 
 
 	Pers pers;
@@ -398,13 +463,6 @@ struct Apr : public Sys
 			v0 = v1;
 		}
 
-	}
-
-
-	//------------------------------------------------------------------------------
-	Apr( const char* name, int pos_x, int pos_y, int width, int height ) : Sys( name, pos_x, pos_y, width, height )
-	//------------------------------------------------------------------------------
-	{
 	}
 
 	//------------------------------------------------------------------------------
@@ -855,7 +913,7 @@ struct Apr : public Sys
 				gra.Print(vect2(10,16*y++),string("fovY:")+to_string(int(pers.fovy)));
 				if( keys.F2.on )
 				{
-					gra.Print(vect2(10,16*y++),string("sz:")+to_string(pers.sz) +string(" sc:")+to_string(pers.sc));
+					gra.Print(vect2(10,16*y++),string("sz:")+to_string(pers.sz) +string(" fy:")+to_string(pers.fy));
 					gra.Print( vect2(10,16*y++),string("far:")+to_string((cam.pos-cam.at).length())); 
 					gra.Print( vect2(10,16*y++),string("at  x=")+to_string(cam.at.x)+string(" y=")+to_string(cam.at.y)+string(" z=")+to_string(cam.at.z) ); 
 					gra.Print( vect2(10,16*y++),string("pos x=")+to_string(cam.pos.x)+string(" y=")+to_string(cam.pos.y)+string(" z=")+to_string(cam.pos.z) ); 
@@ -900,76 +958,17 @@ struct Apr : public Sys
 			}
 
 			// カメラ回転
-			if ( (!keys.ALT.on && mouse.R.on) || (keys.ALT.on && mouse.L.on) )
-			{
-				double len = (cam.pos-cam.at).length();
-				double l = (cam.pos-cam.at).length()/10;
-				l=max(l,0.00001);
-				l=min(l,8);
-
-				// 回転
-				vect3	v= vect3(-mouse.mov.x/28,-mouse.mov.y/28,0) * l;
-				mat44 mrot = cam.mat;
-				mrot.SetTranslate(vect3(0,0,0));
-				v = v* mrot;
-				cam.pos += v;
-				
-				{
-					vect3 dir = (cam.pos-cam.at).normalize();
-					cam.pos = cam.at+dir*len;
-				}
-
-			}
+			if ( (!keys.ALT.on && mouse.R.on) || (keys.ALT.on && mouse.L.on) ) cam.camera_rotation( vect3(-mouse.mov.x/28,-mouse.mov.y/28,0) );
 
 			// カメラ平行移動
-			if ( !keys.ALT.on  &&  mouse.M.on )
-			{
-				double l = (cam.pos-cam.at).length()/10;
-				if ( l < 0.4 ) l = 0.4;
-				if ( l > 4 ) l = 4.0;
-
-				vect3	v= vect3(-mouse.mov.x/80,-mouse.mov.y/80,0)*l;
-				mat44 mrot = cam.mat;
-				mrot.SetTranslate(vect3(0,0,0));
-				v = v* mrot;
-
-				cam.at += v;
-				cam.pos += v;
-			}
+			if ( mouse.M.on ) cam.camera_move( vect3(-mouse.mov.x/80,-mouse.mov.y/80,0) );
 
 			// マウスホイールZOOM
-			if ( !keys.ALT.on  )
-			{
-				double l = (cam.pos-cam.at).length()/10;
-					l=max(l,0.01);
-					l=min(l,8);
-
-				double step = -mouse.wheel/25;
-
-				vect3	v= vect3(0,0,step*l);
-				mat44 mrot = cam.mat;
-				mrot.SetTranslate(vect3(0,0,0));
-				v = v* mrot;
-
-				vect3 r = cam.pos;
-				cam.pos += v;
-				if( (cam.pos-cam.at).length() <= v.length() ) cam.pos = (r-cam.at).normalize()*0.00001+cam.at;
-			}
-
+			if ( !keys.ALT.on  ) cam.camera_zoom( mouse.wheel /25 );
+			
 			// カメラ移動
-			if ( keys.ALT.on && mouse.R.on )
-			{
-				// ズーム
-				vect3	v= vect3(0,0,mouse.mov.y/100);
-				mat44 mrot = cam.mat;
-				mrot.SetTranslate(vect3(0,0,0));
-				v = v* mrot;
-
-				vect3 r = cam.pos;
-				cam.pos += v;
-				if( (cam.pos-cam.at).length() <= v.length() ) cam.pos = (r-cam.at).normalize()*0.00001+cam.at;
-			}
-
+			if ( keys.ALT.on && mouse.R.on ) cam.camera_zoom( -mouse.mov.y/20 );
+			
 			// カメラマトリクス計算
 			{
 				cam.mat.LookAt( cam.pos, cam.at, cam.up );
@@ -987,31 +986,6 @@ struct Apr : public Sys
 			// グリッドgrid
 			{
 				const int NUM = 10;
-				if(0)
-				{	// ドットグリッド
-					int col = rgb(1,1,1);
-					{
-						for ( int i = -NUM ; i <= NUM ; i++ )
-						{
-							for ( int j = -NUM ; j <= NUM ; j++ )
-							{
-								vect3 v0 = pers.calcPoint( vect3(i,0,j)  * cam.mat.invers() );
-								if ( v0.z > 0 ) 
-								{
-									double r = 5* v0.z;
-									if ( r < 1.0 )
-									{
-										gra.Pset( vect2(v0.x,v0.y), col);
-									}
-									else
-									{
-										gra.Circle( vect2(v0.x,v0.y), r,col);
-									}
-								}
-							}
-						}
-					}
-				}
 
 				if(1)
 				{	// 格子グリッド
@@ -1052,6 +1026,32 @@ struct Apr : public Sys
 							b.x+=1.0;
 						}
 					}			
+				}
+
+				if(0)
+				{	// ドットグリッド
+					int col = rgb(1,1,1);
+					{
+						for ( int i = -NUM ; i <= NUM ; i++ )
+						{
+							for ( int j = -NUM ; j <= NUM ; j++ )
+							{
+								vect3 v0 = pers.calcPoint( vect3(i,0,j)  * cam.mat.invers() );
+								if ( v0.z > 0 ) 
+								{
+									double r = 5* v0.z;
+									if ( r < 1.0 )
+									{
+										gra.Pset( vect2(v0.x,v0.y), col);
+									}
+									else
+									{
+										gra.Circle( vect2(v0.x,v0.y), r,col);
+									}
+								}
+							}
+						}
+					}
 				}
 			}
 			
