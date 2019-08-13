@@ -108,10 +108,24 @@ struct Pers
 	//	return 1/(fy*(z+1));	// 投影面のz位置を0とした場合のzに対するw値を求める。
 	}
 	//--------------------------------------------------------------------------
-	vect3 calcPoint( vect3 v ) const	// 透視投影変換
+	vect3 calcPoint2( vect3 v )	// 透視投影変換
 	//--------------------------------------------------------------------------
 	{
-//		v= v * cam.mat.invers();
+		v= v * cam.mat.invers();
+		vect3 ret;
+		{
+			double w = getW(v.z);
+			ret.x = v.x* w *width  *aspect	+cx;
+			ret.y = v.y* w *height			+cy;
+			ret.z = w;	// 三次元ベクトルで返す都合上、ZにW値を入れている。
+		}
+
+		return ret;
+	}
+	//--------------------------------------------------------------------------
+	vect3 calcPoint( vect3 v )	// 透視変換
+	//--------------------------------------------------------------------------
+	{
 		vect3 ret;
 		{
 			double w = getW(v.z);
@@ -147,7 +161,7 @@ struct Pers
 	}
 	
 	//--------------------------------------------------------------------------
-	bool calcScissorLine3d( vect3 v0, vect3 v1, vect3& va, vect3& vb ) const
+	bool calcScissorLine3d( vect3 v0, vect3 v1, vect3& va, vect3& vb )
 	//--------------------------------------------------------------------------
 	{
 		va = calcPoint(v0);
