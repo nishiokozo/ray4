@@ -346,75 +346,7 @@ struct Apr : public Sys
 
 	Figure figCircle=Figure(gra);
 
-	// カメラ
-	struct
-	{
-		vect3	pos = vect3( -2,-2, -2+0.1 );
-		vect3 	at = vect3( 0, -1, 0 );
-		vect3	up = vect3( 0, 1, 0);
-	  	mat44	mat;		
 
-		//------------------------------------------------------------------------------
-		void camera_rotation( vect3 mov )
-		//------------------------------------------------------------------------------
-		{
-			double len = (pos-at).length();
-			double l = (pos-at).length()/10;
-			l=max(l,0.00001);
-			l=min(l,8);
-
-			// 回転
-			vect3	v = mov * l;
-			mat44 mrot = mat;
-			mrot.SetTranslate(vect3(0,0,0));
-			v = v* mrot;
-			pos += v;
-			
-			{
-				vect3 dir = (pos-at).normalize();
-				pos = at+dir*len;
-			}
-
-		}
-
-		//------------------------------------------------------------------------------
-		void camera_move( vect3 mov )
-		//------------------------------------------------------------------------------
-		{
-			double l = (pos-at).length()/10;
-			if ( l < 0.4 ) l = 0.4;
-			if ( l > 4 ) l = 4.0;
-
-			vect3	v= mov*l;
-			mat44 mrot = mat;
-			mrot.SetTranslate(vect3(0,0,0));
-			v = v* mrot;
-
-			at += v;
-			pos += v;
-		}
-
-		//------------------------------------------------------------------------------
-		void camera_zoom( double zm )
-		//------------------------------------------------------------------------------
-		{
-			double l = (pos-at).length()/10;
-				l=max(l,0.01);
-				l=min(l,8);
-
-			double step = -zm;
-
-			vect3	v= vect3(0,0,step*l);
-			mat44 mrot = mat;
-			mrot.SetTranslate(vect3(0,0,0));
-			v = v* mrot;
-
-			vect3 r = pos;
-			pos += v;
-			if( (pos-at).length() <= v.length() ) pos = (r-at).normalize()*0.00001+at;
-		}
-
-	} cam ;
 
 
 
@@ -427,8 +359,8 @@ struct Apr : public Sys
 	//------------------------------------------------------------------------------
 	{
 		double l = 0.2;
-		vect3 a = p0* cam.mat.invers();
-		vect3 b = p1* cam.mat.invers();
+		vect3 a = p0* pers.cam.mat.invers();
+		vect3 b = p1* pers.cam.mat.invers();
 		vect3 v0;
 		vect3 v1;
 		bool flg = pers.ScissorLine( a, b, v0, v1 );
@@ -442,7 +374,7 @@ struct Apr : public Sys
 		for ( int i = 0 ; i <= 360 ; i+=10 )
 		{
 			vect3 p = vect3( r*cos(rad(i)), 0, r*sin(rad(i)) ) + pos;
-			vect3 q = pers.calcPoint( p * cam.mat.invers() );
+			vect3 q = pers.calcPoint( p * pers.cam.mat.invers() );
 			vect2 v1 = vect2( q.x, q.y );
 			if ( i > 0 ) gra.Line( v0,v1, col );
 			v0 = v1;
@@ -457,7 +389,7 @@ struct Apr : public Sys
 		for ( int i = 0 ; i <= 360 ; i+=10 )
 		{
 			vect3 p = vect3( r*cos(rad(i)), r*sin(rad(i)), 0 ) + pos;
-			vect3 q = pers.calcPoint( p * cam.mat.invers() );
+			vect3 q = pers.calcPoint( p * pers.cam.mat.invers() );
 			vect2 v1 = vect2( q.x, q.y );
 			if ( i > 0 ) gra.Line( v0,v1, col );
 			v0 = v1;
@@ -914,9 +846,9 @@ struct Apr : public Sys
 				if( keys.F2.on )
 				{
 					gra.Print(vect2(10,16*y++),string("sz:")+to_string(pers.sz) +string(" fy:")+to_string(pers.fy));
-					gra.Print( vect2(10,16*y++),string("far:")+to_string((cam.pos-cam.at).length())); 
-					gra.Print( vect2(10,16*y++),string("at  x=")+to_string(cam.at.x)+string(" y=")+to_string(cam.at.y)+string(" z=")+to_string(cam.at.z) ); 
-					gra.Print( vect2(10,16*y++),string("pos x=")+to_string(cam.pos.x)+string(" y=")+to_string(cam.pos.y)+string(" z=")+to_string(cam.pos.z) ); 
+					gra.Print( vect2(10,16*y++),string("far:")+to_string((pers.cam.pos-pers.cam.at).length())); 
+					gra.Print( vect2(10,16*y++),string("at  x=")+to_string(pers.cam.at.x)+string(" y=")+to_string(pers.cam.at.y)+string(" z=")+to_string(pers.cam.at.z) ); 
+					gra.Print( vect2(10,16*y++),string("pos x=")+to_string(pers.cam.pos.x)+string(" y=")+to_string(pers.cam.pos.y)+string(" z=")+to_string(pers.cam.pos.z) ); 
 					gra.Print( vect2(10,16*y++),string("anim=")+to_string(pBone->cur.act) + string(" cnt=")+to_string(pBone->animations.size()) ); 
 					if ( pBone->animations.size() > 0 ) 
 					{
@@ -958,25 +890,25 @@ struct Apr : public Sys
 			}
 
 			// カメラ回転
-			if ( (!keys.ALT.on && mouse.R.on) || (keys.ALT.on && mouse.L.on) ) cam.camera_rotation( vect3(-mouse.mov.x/28,-mouse.mov.y/28,0) );
+			if ( (!keys.ALT.on && mouse.R.on) || (keys.ALT.on && mouse.L.on) ) pers.cam.Rotation( vect3(-mouse.mov.x/28,-mouse.mov.y/28,0) );
 
 			// カメラ平行移動
-			if ( mouse.M.on ) cam.camera_move( vect3(-mouse.mov.x/80,-mouse.mov.y/80,0) );
+			if ( mouse.M.on ) pers.cam.Move( vect3(-mouse.mov.x,-mouse.mov.y,0)/pers.height/pers.getW((pers.cam.pos-pers.cam.at).length()));
 
 			// マウスホイールZOOM
-			if ( !keys.ALT.on  ) cam.camera_zoom( mouse.wheel /25 );
+			if ( !keys.ALT.on  ) pers.cam.Zoom( -mouse.wheel*1.5 /pers.height/pers.getW((pers.cam.pos-pers.cam.at).length()) );
 			
 			// カメラ移動
-			if ( keys.ALT.on && mouse.R.on ) cam.camera_zoom( -mouse.mov.y/20 );
+			if ( keys.ALT.on && mouse.R.on ) pers.cam.Zoom( mouse.mov.y*3/pers.height/pers.getW((pers.cam.pos-pers.cam.at).length()) );
 			
 			// カメラマトリクス計算
 			{
-				cam.mat.LookAt( cam.pos, cam.at, cam.up );
+				pers.cam.mat.LookAt( pers.cam.pos, pers.cam.at, pers.cam.up );
 			}
 
 			// カメラ注視点表示
 			{
-				vect3 v = pers.calcPoint(cam.at*cam.mat.invers());
+				vect3 v = pers.calcPoint(pers.cam.at*pers.cam.mat.invers());
 				if ( v.z > 0 ) 
 				{
 					//gra.Circle( vect2(v.x,v.y), 8, rgb(0,1,0));
@@ -998,7 +930,7 @@ struct Apr : public Sys
 						{
 							vect3 v0;
 							vect3 v1;
-							bool flg = pers.ScissorLine( a* cam.mat.invers(), b* cam.mat.invers(), v0, v1 );
+							bool flg = pers.ScissorLine( a* pers.cam.mat.invers(), b* pers.cam.mat.invers(), v0, v1 );
 
 							if ( flg )
 							{
@@ -1017,7 +949,7 @@ struct Apr : public Sys
 						{
 							vect3 v0;
 							vect3 v1;
-							bool flg = pers.ScissorLine( a* cam.mat.invers(), b* cam.mat.invers(), v0, v1 );
+							bool flg = pers.ScissorLine( a* pers.cam.mat.invers(), b* pers.cam.mat.invers(), v0, v1 );
 							if ( flg )
 							{
 								gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col);
@@ -1036,7 +968,7 @@ struct Apr : public Sys
 						{
 							for ( int j = -NUM ; j <= NUM ; j++ )
 							{
-								vect3 v0 = pers.calcPoint( vect3(i,0,j)  * cam.mat.invers() );
+								vect3 v0 = pers.calcPoint( vect3(i,0,j)  * pers.cam.mat.invers() );
 								if ( v0.z > 0 ) 
 								{
 									double r = 5* v0.z;
@@ -1138,7 +1070,7 @@ struct Apr : public Sys
 				
 	#endif
 
-				v = v * cam.mat.invers();
+				v = v * pers.cam.mat.invers();
 
 				box.disp.emplace_back( v );
 
@@ -1425,7 +1357,7 @@ struct Apr : public Sys
 							{
 								// 平行移動
 								vect3 v = vect3(mouse.mov.x, mouse.mov.y, 0)/pers.height/(pj->disp.z);
-								mat44 mrot = cam.mat;
+								mat44 mrot = pers.cam.mat;
 								mrot.SetTranslate(vect3(0,0,0));
 								mrot.invers();
 								v = v* mrot;
@@ -1520,13 +1452,13 @@ struct Apr : public Sys
 			pBone->update();
 
 			// human 描画
-			pBone->draw( pers, cam.mat, gra );
+			pBone->draw( pers, gra );
 
 
 			if ( !(pBone->anim.bPlaying && selector.mode == Selector::MODE_3D) )
 			{
 				// カトマル3D モーション軌跡表示
-				pBone->drawMotion( pers, cam.mat, gra );
+				pBone->drawMotion( pers, gra );
 
 				// マーカー表示
 				selector.drawController( mouse.pos, gra );
@@ -1560,15 +1492,13 @@ struct Apr : public Sys
 			// 原点
 			circle3d_y( vect3(0,0,0), 0.1, rgb(0.2,0.2,0.2) );
 
-//			circle3d_z( cam.pos, 0.01, rgb(1,0,0) );
-
 			// マウス座標（投影面座標）を３Ｄ空間座標に逆変換
 			{
 				vect3 q = vect3( mouse.pos.x, mouse.pos.y, 0 );
-				vect3 v = pers.calcInvers( q )* cam.mat;
+				vect3 v = pers.calcInvers( q );
 
 				vect3 q2 = vect3( mouse.pos.x, mouse.pos.y, 10 );
-				vect3 p = pers.calcInvers( q2 )* cam.mat;
+				vect3 p = pers.calcInvers( q2 );
 
 
 				line3d( v, vect3(0,0,0), rgb(1,0,0));
@@ -1577,7 +1507,7 @@ struct Apr : public Sys
 
 				gra.Print( vect2(10,16*20),string("v x=")+to_string(v.x) + string(" y=")+to_string(v.y) +string(" z=")+to_string(v.z) );
 				gra.Print( vect2(10,16*21),string("p x=")+to_string(p.x) + string(" y=")+to_string(p.y) +string(" z=")+to_string(p.z) );
-//				gra.Print( vect2(10,16*21),string(" x=")+to_string(cam.pos.x) + string(" y=")+to_string(cam.pos.y) +string(" z=")+to_string(cam.pos.z) );
+//				gra.Print( vect2(10,16*21),string(" x=")+to_string(pers.cam.pos.x) + string(" y=")+to_string(pers.cam.pos.y) +string(" z=")+to_string(pers.cam.pos.z) );
 			}
 
 			// 点 

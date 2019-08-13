@@ -485,7 +485,8 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	}
 
 	//------------------------------------------------------------------------------
-	void Bone::draw( Pers& pers, mat44& cam_mat, SysGra& gra )
+//	void Bone::draw( Pers& pers, mat44& cam_mat, SysGra& gra )
+	void Bone::draw( Pers& pers, SysGra& gra )
 	//------------------------------------------------------------------------------
 	{
 		// Human pers
@@ -498,7 +499,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 			//	yaw		:y	下+
 			vect3 v= j.pos;
 
-			v = v * cam_mat.invers();
+			v = v * pers.cam.mat.invers();
 
 			j.world = v;
 
@@ -518,7 +519,8 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	}
 
 	//------------------------------------------------------------------------------
-	void Bone::drawMotion( Pers& pers, mat44& cam_mat, SysGra& gra )
+//	void Bone::drawMotion( Pers& pers, mat44& cam_mat, SysGra& gra )
+	void Bone::drawMotion( Pers& pers, SysGra& gra )
 	//------------------------------------------------------------------------------
 	{
 		// マーカースプライン変換表示
@@ -553,7 +555,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 
 						vect3 v0;
 						vect3 v1;
-						bool flg = pers.ScissorLine( a* cam_mat.invers(), b* cam_mat.invers(), v0, v1 );
+						bool flg = pers.ScissorLine( a* pers.cam.mat.invers(), b* pers.cam.mat.invers(), v0, v1 );
 
 						if ( flg )
 						{

@@ -95,8 +95,10 @@
 		void PlayAnimation();
 		void ReqAnimation();
 		void update();
-		void draw( Pers& pers, mat44& cam_mat, SysGra& gra );
-		void drawMotion( Pers& pers, mat44& cam_mat, SysGra& gra );
+//		void draw( Pers& pers, mat44& cam_mat, SysGra& gra );
+//		void drawMotion( Pers& pers, mat44& cam_mat, SysGra& gra );
+		void draw( Pers& pers, SysGra& gra );
+		void drawMotion( Pers& pers, SysGra& gra );
 
 	};
 
