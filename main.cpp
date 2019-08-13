@@ -21,6 +21,7 @@ using namespace std;
 
 #include "raytrace.h"
 #include "obj.h"
+#include "pers.h"
 #include "bone.h"
 
 
@@ -1494,14 +1495,13 @@ struct Apr : public Sys
 
 			// マウス座標（投影面座標）を３Ｄ空間座標に逆変換
 			{
-				vect3 q = vect3( mouse.pos.x, mouse.pos.y, 0 );
-				vect3 v = pers.calcInvers( q );
-
-				vect3 q2 = vect3( mouse.pos.x, mouse.pos.y, 10 );
-				vect3 p = pers.calcInvers( q2 );
+				vect3 v = pers.calcInvers( vect2( mouse.pos.x, mouse.pos.y ) );
+				vect3 p = pers.calcRay( v, 10 );
 
 
-				line3d( v, vect3(0,0,0), rgb(1,0,0));
+				line3d( v, p, rgb(1,0,0));
+				line3d( vect3(0,0,0), v, rgb(1,1,0));
+				line3d( vect3(0,-1,0), p, rgb(1,0,1));
 
 
 

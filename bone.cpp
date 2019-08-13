@@ -9,12 +9,13 @@
 using namespace std;
 
 #include "geom.h"
-#include "SysKeys.h"
-#include "SysMouse.h"
+//#include "SysKeys.h"
+//#include "SysMouse.h"
 #include "SysGra.h"
 //#include "Sys.h"
 
 #include "obj.h"
+#include "pers.h"
 #include "bone.h"
 
 	// カトマル曲線3D
