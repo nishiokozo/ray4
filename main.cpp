@@ -339,6 +339,97 @@ struct Apr : public Sys
 	
 
 
+		struct 
+		{
+			bool bAxisX = true;;
+			bool bAxisY = true;;
+			bool bAxisZ = true;;
+				vect3	pos;
+			bool bActive = false;
+			//------------------------------------------------------------------------------
+			void manupirator_set( vect3 _pos )
+			//------------------------------------------------------------------------------
+			{
+				pos = _pos;
+				bActive = true;
+			}
+			//------------------------------------------------------------------------------
+			void manupirator_draw( Apr& apr )
+			//------------------------------------------------------------------------------
+			{
+				{
+					double l = 30;
+					{
+						vect3 v0 = apr.pers.calcPoint2( pos );
+						vect3 v1 = v0 + vect3( l,0,0) * apr.pers.cam.mat.invers();
+						apr.gra.Circle( vect2(v1.x,v1.y), 7, rgb(1,1,0) );
+						apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(1,0,0) );
+		
+					}
+					{
+						vect3 v0 = apr.pers.calcPoint2( pos );
+						vect3 v1 = v0 + vect3( 0,l,0) * apr.pers.cam.mat.invers();
+						apr.gra.Circle( vect2(v1.x,v1.y), 7, rgb(1,1,0) );
+						apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,1,0) );
+		
+					}
+					{
+						vect3 v0 = apr.pers.calcPoint2( pos );
+						vect3 v1 = v0 + vect3( 0,0,l) * apr.pers.cam.mat.invers();
+						apr.gra.Circle( vect2(v1.x,v1.y), 7, rgb(1,1,0) );
+						apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1) );
+		
+					}
+				}
+
+			
+				if(0)
+				{
+					double l = 0.1;
+
+					if ( bAxisX ) apr.line3d( (pos + vect3(-l,0,0)), (pos + vect3(l,0,0)), rgb(1,0,0) );
+					if ( bAxisY ) apr.line3d( (pos + vect3(0,-l,0)), (pos + vect3(0,l,0)), rgb(0,1,0) );
+					if ( bAxisZ ) apr.line3d( (pos + vect3(0,0,-l)), (pos + vect3(0,0,l)), rgb(0,0,1) );
+				}
+
+				if(0)
+				{
+					double l = 0.1;
+					if ( bAxisX && bAxisY )
+					{
+						apr.line3d( (pos + vect3(-l,-l,0)), (pos + vect3( l,-l,0)), rgb(0,0,1) );
+						apr.line3d( (pos + vect3(-l, l,0)), (pos + vect3( l, l,0)), rgb(0,0,1) );
+						apr.line3d( (pos + vect3(-l,-l,0)), (pos + vect3(-l, l,0)), rgb(0,0,1) );
+						apr.line3d( (pos + vect3( l,-l,0)), (pos + vect3( l, l,0)), rgb(0,0,1) );
+					}
+
+					if ( bAxisZ && bAxisY )
+					{
+						apr.line3d( (pos + vect3(0,-l,-l)), (pos + vect3(0, l,-l)), rgb(1,0,0) );
+						apr.line3d( (pos + vect3(0,-l, l)), (pos + vect3(0, l, l)), rgb(1,0,0) );
+						apr.line3d( (pos + vect3(0,-l,-l)), (pos + vect3(0,-l, l)), rgb(1,0,0) );
+						apr.line3d( (pos + vect3(0, l,-l)), (pos + vect3(0, l, l)), rgb(1,0,0) );
+					}
+
+					if ( bAxisZ && bAxisX )
+					{
+						apr.line3d( (pos + vect3(-l,0,-l)), (pos + vect3( l,0,-l)), rgb(0,1,0) );
+						apr.line3d( (pos + vect3(-l,0, l)), (pos + vect3( l,0, l)), rgb(0,1,0) );
+						apr.line3d( (pos + vect3(-l,0,-l)), (pos + vect3(-l,0, l)), rgb(0,1,0) );
+						apr.line3d( (pos + vect3( l,0,-l)), (pos + vect3( l,0, l)), rgb(0,1,0) );
+					}
+				}	
+
+				if(0)
+				{
+					double l = 0.15;
+					if ( bAxisZ && bAxisY ) apr.circle3d_x( pos, l, rgb(1,0,0) );
+					if ( bAxisX && bAxisZ ) apr.circle3d_y( pos, l, rgb(0,1,0) );
+					if ( bAxisX && bAxisY ) apr.circle3d_z( pos, l, rgb(0,0,1) );
+				}
+			}
+		} manupirator;
+		
 	};
 	Selector selector;
 
@@ -425,97 +516,7 @@ struct Apr : public Sys
 
 	}
 
-	struct 
-	{
-		bool bAxisX = true;;
-		bool bAxisY = true;;
-		bool bAxisZ = true;;
-			vect3	pos;
-		bool bActive = false;
-		//------------------------------------------------------------------------------
-		void manupirator_set( vect3 _pos )
-		//------------------------------------------------------------------------------
-		{
-			pos = _pos;
-			bActive = true;
-		}
-		//------------------------------------------------------------------------------
-		void manupirator_draw( Apr& apr )
-		//------------------------------------------------------------------------------
-		{
-			{
-				double l = 30;
-				{
-					vect3 v0 = apr.pers.calcPoint2( pos );
-					vect3 v1 = v0 + vect3( l,0,0) * apr.pers.cam.mat.invers();
-					apr.gra.Circle( vect2(v1.x,v1.y), 7, rgb(1,1,0) );
-					apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(1,0,0) );
-	
-				}
-				{
-					vect3 v0 = apr.pers.calcPoint2( pos );
-					vect3 v1 = v0 + vect3( 0,l,0) * apr.pers.cam.mat.invers();
-					apr.gra.Circle( vect2(v1.x,v1.y), 7, rgb(1,1,0) );
-					apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,1,0) );
-	
-				}
-				{
-					vect3 v0 = apr.pers.calcPoint2( pos );
-					vect3 v1 = v0 + vect3( 0,0,l) * apr.pers.cam.mat.invers();
-					apr.gra.Circle( vect2(v1.x,v1.y), 7, rgb(1,1,0) );
-					apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1) );
-	
-				}
-			}
 
-		
-			if(0)
-			{
-				double l = 0.1;
-
-				if ( bAxisX ) apr.line3d( (pos + vect3(-l,0,0)), (pos + vect3(l,0,0)), rgb(1,0,0) );
-				if ( bAxisY ) apr.line3d( (pos + vect3(0,-l,0)), (pos + vect3(0,l,0)), rgb(0,1,0) );
-				if ( bAxisZ ) apr.line3d( (pos + vect3(0,0,-l)), (pos + vect3(0,0,l)), rgb(0,0,1) );
-			}
-
-			if(0)
-			{
-				double l = 0.1;
-				if ( bAxisX && bAxisY )
-				{
-					apr.line3d( (pos + vect3(-l,-l,0)), (pos + vect3( l,-l,0)), rgb(0,0,1) );
-					apr.line3d( (pos + vect3(-l, l,0)), (pos + vect3( l, l,0)), rgb(0,0,1) );
-					apr.line3d( (pos + vect3(-l,-l,0)), (pos + vect3(-l, l,0)), rgb(0,0,1) );
-					apr.line3d( (pos + vect3( l,-l,0)), (pos + vect3( l, l,0)), rgb(0,0,1) );
-				}
-
-				if ( bAxisZ && bAxisY )
-				{
-					apr.line3d( (pos + vect3(0,-l,-l)), (pos + vect3(0, l,-l)), rgb(1,0,0) );
-					apr.line3d( (pos + vect3(0,-l, l)), (pos + vect3(0, l, l)), rgb(1,0,0) );
-					apr.line3d( (pos + vect3(0,-l,-l)), (pos + vect3(0,-l, l)), rgb(1,0,0) );
-					apr.line3d( (pos + vect3(0, l,-l)), (pos + vect3(0, l, l)), rgb(1,0,0) );
-				}
-
-				if ( bAxisZ && bAxisX )
-				{
-					apr.line3d( (pos + vect3(-l,0,-l)), (pos + vect3( l,0,-l)), rgb(0,1,0) );
-					apr.line3d( (pos + vect3(-l,0, l)), (pos + vect3( l,0, l)), rgb(0,1,0) );
-					apr.line3d( (pos + vect3(-l,0,-l)), (pos + vect3(-l,0, l)), rgb(0,1,0) );
-					apr.line3d( (pos + vect3( l,0,-l)), (pos + vect3( l,0, l)), rgb(0,1,0) );
-				}
-			}	
-
-			if(0)
-			{
-				double l = 0.15;
-				if ( bAxisZ && bAxisY ) apr.circle3d_x( pos, l, rgb(1,0,0) );
-				if ( bAxisX && bAxisZ ) apr.circle3d_y( pos, l, rgb(0,1,0) );
-				if ( bAxisX && bAxisY ) apr.circle3d_z( pos, l, rgb(0,0,1) );
-			}
-		}
-	} manupirator;
-	
 	//------------------------------------------------------------------------------
 	int main()
 	//------------------------------------------------------------------------------
@@ -953,9 +954,9 @@ struct Apr : public Sys
 				if ( pBone->anim.bPlaying )	pBone->PlayAnimation();
 
 				// X/Y/Z軸選択モード切替
-				if ( keys.Q.hi ) manupirator.bAxisX = !manupirator.bAxisX;
-				if ( keys.W.hi ) manupirator.bAxisY = !manupirator.bAxisY;
-				if ( keys.E.hi ) manupirator.bAxisZ = !manupirator.bAxisZ;
+				if ( keys.Q.hi ) selector.manupirator.bAxisX = !selector.manupirator.bAxisX;
+				if ( keys.W.hi ) selector.manupirator.bAxisY = !selector.manupirator.bAxisY;
+				if ( keys.E.hi ) selector.manupirator.bAxisZ = !selector.manupirator.bAxisZ;
 			}
 
 
@@ -976,7 +977,7 @@ struct Apr : public Sys
 					gra.Print( vect2(10,16*y++),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 				}
 
-					gra.Print( vect2(10,16*y++),string("axis ")+(manupirator.bAxisX?"X":"-")+(manupirator.bAxisY?"Y":"-")+(manupirator.bAxisZ?"Z":"-") ); 
+					gra.Print( vect2(10,16*y++),string("axis ")+(selector.manupirator.bAxisX?"X":"-")+(selector.manupirator.bAxisY?"Y":"-")+(selector.manupirator.bAxisZ?"Z":"-") ); 
 				}
 
 			// animカーソルビュー cursor
@@ -1418,6 +1419,26 @@ struct Apr : public Sys
 
 			}
 
+
+			// マニュピレーターとの衝突判定
+			if ( selector.manupirator.bActive )
+			{
+//				selector.manupirator.manupirator_set( pj->pos );
+					vect3 p = pers.calcInvers( vect2( mouse.pos.x, mouse.pos.y ) );
+					vect3 q = pers.calcRay( p, 10 );
+					
+					// 点と直線の距離公式
+					// 点A(x0,y0)と直線L:ax+by+c=0の距離dは
+					// d=(|ax0+by0+c|)/sqet(a^2+b^2)
+					// a,b,cはlの法線ベクトル
+					function<double(vect3,vect3)> func=[](vect3 a, vect3 l )
+					{
+						return 0;
+					//	d = a.x + b.x abs(
+					};
+
+			}
+
 			// マーカー操作	
 			{
 				// 最近マーカー初期化
@@ -1466,7 +1487,6 @@ struct Apr : public Sys
 						}
 						#endif
 
-//						manupirator.bActive = false; 
 
 						// 3Dマーカー移動
 						for ( Marker& m : selector.tblMarker )
@@ -1482,7 +1502,7 @@ struct Apr : public Sys
 								v = v* mrot;
 								pj->pos += v ;
 
-								manupirator.manupirator_set( pj->pos );
+								selector.manupirator.manupirator_set( pj->pos );
 							}
 						}
 						pBone->RefrectKeyframe();
@@ -1590,7 +1610,8 @@ struct Apr : public Sys
 					vect3 p = pers.calcInvers( vect2( mouse.pos.x, mouse.pos.y ) );
 					vect3 q = pers.calcRay( p, 10 );
 
-//					manupirator.bActive = false; 
+/*
+//					selector.manupirator.bActive = false; 
 
 					// 3Dマーカー表示
 					int col = rgb(0,1,0);
@@ -1599,12 +1620,12 @@ struct Apr : public Sys
 						Joint3* pj = dynamic_cast<Joint3*>(&m.obj);
 						if ( pj && pj->bSelected )
 						{
-//							manupirator.manupirator_set( pj->pos );
+//							selector.manupirator.manupirator_set( pj->pos );
 
 						}
 					}
-
-					if ( manupirator.bActive ) manupirator.manupirator_draw( *this );
+*/
+					if ( selector.manupirator.bActive ) selector.manupirator.manupirator_draw( *this );
 				}
 			}
 			
