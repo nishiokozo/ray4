@@ -1,14 +1,5 @@
 struct Pers
 {
-	double	fovy;		// 画角
-	double	sz;			// 投影面までの距離
-	double	fy;			// 投影面の高さ/2（描画スケール）
-	double	cx;			// 描画画面の中心W
-	double	cy;			// 描画画面の中心H
-	double	width;		// 描画画面の解像度W/2
-	double	height;		// 描画画面の解像度H/2
-	double	aspect;		// 描画画面のアスペクト比
-	mat44	m;
 
 	// カメラ
 	struct
@@ -69,6 +60,16 @@ struct Pers
 
 	} cam ;
 
+
+	double	fovy;		// 画角
+	double	sz;			// 投影面までの距離
+	double	fy;			// 投影面の高さ/2（描画スケール）
+	double	cx;			// 描画画面の中心W
+	double	cy;			// 描画画面の中心H
+	double	width;		// 描画画面の解像度W/2
+	double	height;		// 描画画面の解像度H/2
+	double	aspect;		// 描画画面のアスペクト比
+
 	//--------------------------------------------------------------------------
 	Pers()
 	//--------------------------------------------------------------------------
@@ -107,9 +108,10 @@ struct Pers
 	//	return 1/(fy*(z+1));	// 投影面のz位置を0とした場合のzに対するw値を求める。
 	}
 	//--------------------------------------------------------------------------
-	vect3 calcPoint( vect3 v ) const
+	vect3 calcPoint( vect3 v ) const	// 透視投影変換
 	//--------------------------------------------------------------------------
 	{
+//		v= v * cam.mat.invers();
 		vect3 ret;
 		{
 			double w = getW(v.z);
@@ -145,7 +147,7 @@ struct Pers
 	}
 	
 	//--------------------------------------------------------------------------
-	bool ScissorLine( vect3 v0, vect3 v1, vect3& va, vect3& vb ) const
+	bool calcScissorLine3d( vect3 v0, vect3 v1, vect3& va, vect3& vb ) const
 	//--------------------------------------------------------------------------
 	{
 		va = calcPoint(v0);
@@ -162,7 +164,7 @@ struct Pers
 				{
 					c = nearclip( a, c, n-1 );
 				}
-				if ( c.z > 1.0-sz )
+				if ( c.z > 0.0 )
 				{
 					c = nearclip( c, b, n-1 );
 				}

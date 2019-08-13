@@ -556,7 +556,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 
 						vect3 v0;
 						vect3 v1;
-						bool flg = pers.ScissorLine( a* pers.cam.mat.invers(), b* pers.cam.mat.invers(), v0, v1 );
+						bool flg = pers.calcScissorLine3d( a* pers.cam.mat.invers(), b* pers.cam.mat.invers(), v0, v1 );
 
 						if ( flg )
 						{

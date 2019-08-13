@@ -337,9 +337,7 @@ struct Apr : public Sys
 			}
 		}
 	
-		bool bAxisX = true;;
-		bool bAxisY = true;;
-		bool bAxisZ = true;;
+
 
 	};
 	Selector selector;
@@ -364,9 +362,38 @@ struct Apr : public Sys
 		vect3 b = p1* pers.cam.mat.invers();
 		vect3 v0;
 		vect3 v1;
-		bool flg = pers.ScissorLine( a, b, v0, v1 );
+		bool flg = pers.calcScissorLine3d( a, b, v0, v1 );
 		if ( flg ) gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col );
 	}
+
+	//------------------------------------------------------------------------------
+	void othro_line3d( vect3 p0, vect3 p1, int col )
+	//------------------------------------------------------------------------------
+	{
+		double l = 0.2;
+		vect3 a = p0* pers.cam.mat.invers();
+		vect3 b = p1* pers.cam.mat.invers();
+		vect3 v0;
+		vect3 v1;
+		bool flg = pers.calcScissorLine3d( a, b, v0, v1 );
+		if ( flg ) gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col );
+	}
+
+	//------------------------------------------------------------------------------
+	void circle3d_x( vect3 pos,  double r, int col )
+	//------------------------------------------------------------------------------
+	{
+		vect2 v0;
+		for ( int i = 0 ; i <= 360 ; i+=10 )
+		{
+			vect3 p = vect3( 0, r*cos(rad(i)), r*sin(rad(i)) ) + pos;
+			vect3 q = pers.calcPoint( p * pers.cam.mat.invers() );
+			vect2 v1 = vect2( q.x, q.y );
+			if ( i > 0 ) gra.Line( v0,v1, col );
+			v0 = v1;
+		}
+	}
+
 	//------------------------------------------------------------------------------
 	void circle3d_y( vect3 pos,  double r, int col )
 	//------------------------------------------------------------------------------
@@ -398,6 +425,79 @@ struct Apr : public Sys
 
 	}
 
+	struct 
+	{
+		bool bAxisX = true;;
+		bool bAxisY = true;;
+		bool bAxisZ = true;;
+
+		//------------------------------------------------------------------------------
+		void manupirator_draw( Apr& apr, vect3 pos )
+		//------------------------------------------------------------------------------
+		{
+			{
+				double l = 0.1;
+				{
+					vect3 v = apr.pers.calcPoint( (pos + vect3( l,0,0))* apr.pers.cam.mat.invers() );
+					apr.gra.Circle( vect2(v.x,v.y), 7, rgb(1,1,0) );
+				}
+				{
+					vect3 v = apr.pers.calcPoint( (pos + vect3( 0,l,0))* apr.pers.cam.mat.invers() );
+					apr.gra.Circle( vect2(v.x,v.y), 7, rgb(1,1,0) );
+				}
+				{
+					vect3 v = apr.pers.calcPoint( (pos + vect3( 0,0,l))* apr.pers.cam.mat.invers() );
+					apr.gra.Circle( vect2(v.x,v.y), 7, rgb(1,1,0) );
+				}
+			}
+
+		
+			{
+				double l = 0.1;
+
+				if ( bAxisX ) apr.line3d( (pos + vect3(-l,0,0)), (pos + vect3(l,0,0)), rgb(1,0,0) );
+				if ( bAxisY ) apr.line3d( (pos + vect3(0,-l,0)), (pos + vect3(0,l,0)), rgb(0,1,0) );
+				if ( bAxisZ ) apr.line3d( (pos + vect3(0,0,-l)), (pos + vect3(0,0,l)), rgb(0,0,1) );
+			}
+
+			if(0)
+			{
+				double l = 0.1;
+				if ( bAxisX && bAxisY )
+				{
+					apr.line3d( (pos + vect3(-l,-l,0)), (pos + vect3( l,-l,0)), rgb(0,0,1) );
+					apr.line3d( (pos + vect3(-l, l,0)), (pos + vect3( l, l,0)), rgb(0,0,1) );
+					apr.line3d( (pos + vect3(-l,-l,0)), (pos + vect3(-l, l,0)), rgb(0,0,1) );
+					apr.line3d( (pos + vect3( l,-l,0)), (pos + vect3( l, l,0)), rgb(0,0,1) );
+				}
+
+				if ( bAxisZ && bAxisY )
+				{
+					apr.line3d( (pos + vect3(0,-l,-l)), (pos + vect3(0, l,-l)), rgb(1,0,0) );
+					apr.line3d( (pos + vect3(0,-l, l)), (pos + vect3(0, l, l)), rgb(1,0,0) );
+					apr.line3d( (pos + vect3(0,-l,-l)), (pos + vect3(0,-l, l)), rgb(1,0,0) );
+					apr.line3d( (pos + vect3(0, l,-l)), (pos + vect3(0, l, l)), rgb(1,0,0) );
+				}
+
+				if ( bAxisZ && bAxisX )
+				{
+					apr.line3d( (pos + vect3(-l,0,-l)), (pos + vect3( l,0,-l)), rgb(0,1,0) );
+					apr.line3d( (pos + vect3(-l,0, l)), (pos + vect3( l,0, l)), rgb(0,1,0) );
+					apr.line3d( (pos + vect3(-l,0,-l)), (pos + vect3(-l,0, l)), rgb(0,1,0) );
+					apr.line3d( (pos + vect3( l,0,-l)), (pos + vect3( l,0, l)), rgb(0,1,0) );
+				}
+			}	
+
+			if(0)
+			{
+				double l = 0.15;
+				if ( bAxisZ && bAxisY ) apr.circle3d_x( pos, l, rgb(1,0,0) );
+				if ( bAxisX && bAxisZ ) apr.circle3d_y( pos, l, rgb(0,1,0) );
+				if ( bAxisX && bAxisY ) apr.circle3d_z( pos, l, rgb(0,0,1) );
+			}
+		}
+	} manupirator;
+	
 	//------------------------------------------------------------------------------
 	int main()
 	//------------------------------------------------------------------------------
@@ -835,9 +935,9 @@ struct Apr : public Sys
 				if ( pBone->anim.bPlaying )	pBone->PlayAnimation();
 
 				// X/Y/Z軸選択モード切替
-				if ( keys.Q.hi ) selector.bAxisX = !selector.bAxisX;
-				if ( keys.W.hi ) selector.bAxisY = !selector.bAxisY;
-				if ( keys.E.hi ) selector.bAxisZ = !selector.bAxisZ;
+				if ( keys.Q.hi ) manupirator.bAxisX = !manupirator.bAxisX;
+				if ( keys.W.hi ) manupirator.bAxisY = !manupirator.bAxisY;
+				if ( keys.E.hi ) manupirator.bAxisZ = !manupirator.bAxisZ;
 			}
 
 
@@ -858,8 +958,7 @@ struct Apr : public Sys
 					gra.Print( vect2(10,16*y++),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 				}
 
-//					gra.Print( vect2(10,16*y++),string("axis ")+to_string(selector.bAxisX)+to_string(selector.bAxisY)+to_string(selector.bAxisZ) ); 
-					gra.Print( vect2(10,16*y++),string("axis ")+(selector.bAxisX?"X":"-")+(selector.bAxisY?"Y":"-")+(selector.bAxisZ?"Z":"-") ); 
+					gra.Print( vect2(10,16*y++),string("axis ")+(manupirator.bAxisX?"X":"-")+(manupirator.bAxisY?"Y":"-")+(manupirator.bAxisZ?"Z":"-") ); 
 				}
 
 			// animカーソルビュー cursor
@@ -931,7 +1030,7 @@ struct Apr : public Sys
 						{
 							vect3 v0;
 							vect3 v1;
-							bool flg = pers.ScissorLine( a* pers.cam.mat.invers(), b* pers.cam.mat.invers(), v0, v1 );
+							bool flg = pers.calcScissorLine3d( a* pers.cam.mat.invers(), b* pers.cam.mat.invers(), v0, v1 );
 
 							if ( flg )
 							{
@@ -950,7 +1049,7 @@ struct Apr : public Sys
 						{
 							vect3 v0;
 							vect3 v1;
-							bool flg = pers.ScissorLine( a* pers.cam.mat.invers(), b* pers.cam.mat.invers(), v0, v1 );
+							bool flg = pers.calcScissorLine3d( a* pers.cam.mat.invers(), b* pers.cam.mat.invers(), v0, v1 );
 							if ( flg )
 							{
 								gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col);
@@ -1087,7 +1186,7 @@ struct Apr : public Sys
 
 				vect3 v0;
 				vect3 v1;
-				bool flg = pers.ScissorLine( a, b, v0, v1 );
+				bool flg = pers.calcScissorLine3d( a, b, v0, v1 );
 				if ( flg )
 				{
 					gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,1,1));
@@ -1465,23 +1564,20 @@ struct Apr : public Sys
 				selector.drawController( mouse.pos, gra );
 
 				// 3Dマーカー表示
-				if ( selector.mode == Selector::MODE_3D )
+//				if ( selector.mode == Selector::MODE_3D )
 				{
+
+					vect3 p = pers.calcInvers( vect2( mouse.pos.x, mouse.pos.y ) );
+					vect3 q = pers.calcRay( p, 10 );
 
 					// 3Dマーカー表示
 					int col = rgb(0,1,0);
-					double l =0.2;
 					for ( Marker& m : selector.tblMarker )
 					{
 						Joint3* pj = dynamic_cast<Joint3*>(&m.obj);
 						if ( pj && pj->bSelected )
 						{
-							vect3 pos = pj->pos;
-							line3d( (pos + vect3(-l,0,0)), (pos + vect3(l,0,0)), col );
-							line3d( (pos + vect3(0,-l,0)), (pos + vect3(0,l,0)), col );
-							line3d( (pos + vect3(0,0,-l)), (pos + vect3(0,0,l)), col );
-
-							circle3d_y( pos, 0.1, col );
+							manupirator.manupirator_draw( *this, pj->pos );
 
 						}
 					}
@@ -1494,6 +1590,7 @@ struct Apr : public Sys
 			circle3d_y( vect3(0,0,0), 0.1, rgb(0.2,0.2,0.2) );
 
 			// マウス座標（投影面座標）を３Ｄ空間座標に逆変換
+if(0)
 			{
 				vect3 v = pers.calcInvers( vect2( mouse.pos.x, mouse.pos.y ) );
 				vect3 p = pers.calcRay( v, 10 );
