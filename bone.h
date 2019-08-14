@@ -3,12 +3,19 @@
 		int id;
 		vect3 pos;
 		vect3 tension;
-		vect3 world;
+//		vect3 world;
 		vect3 disp;
 		double len;
 		int priority;
 		
 		vector<reference_wrapper<Joint3>>	relative;
+		Joint3()
+		{
+			id = 0;
+			pos = vect3(0,0,0);
+			tension = 0;
+			len = 0;
+		}
 		Joint3( vect3 v )
 		{
 			id = 0;

@@ -24,6 +24,7 @@ using namespace std;
 #include "pers.h"
 #include "bone.h"
 
+		static vect3	g_dummy = vect3(0,0,0);
 
 
 struct Apr : public Sys
@@ -147,6 +148,21 @@ struct Apr : public Sys
 			return pos;
 		}
 	};
+
+	struct PinAxis : Obj
+	{
+		
+		vect3 disp;
+		void Move2( vect2 v )
+		{
+		}
+		vect2 Pos2()
+		{
+			return vect2( disp.x, disp.y );
+		}
+	};
+	
+
 
 	struct Selector
 	{
@@ -338,101 +354,120 @@ struct Apr : public Sys
 		}
 	
 
-
-		struct 
-		{
-			bool bAxisX = true;;
-			bool bAxisY = true;;
-			bool bAxisZ = true;;
-				vect3	pos;
-			bool bActive = false;
-			//------------------------------------------------------------------------------
-			void manupirator_set( vect3 _pos )
-			//------------------------------------------------------------------------------
-			{
-				pos = _pos;
-				bActive = true;
-			}
-			//------------------------------------------------------------------------------
-			void manupirator_draw( Apr& apr )
-			//------------------------------------------------------------------------------
-			{
-				{
-					double l = 30;
-					{
-						vect3 v0 = apr.pers.calcDisp( pos * apr.pers.cam.mat.invers() );
-						vect3 v1 = v0 + vect3( l,0,0) * apr.pers.cam.mat.invers();
-						apr.gra.Circle( vect2(v1.x,v1.y), 7, rgb(1,1,0) );
-						apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(1,0,0) );
-		
-					}
-					{
-						vect3 v0 = apr.pers.calcDisp( pos * apr.pers.cam.mat.invers() );
-						vect3 v1 = v0 + vect3( 0,l,0) * apr.pers.cam.mat.invers();
-						apr.gra.Circle( vect2(v1.x,v1.y), 7, rgb(1,1,0) );
-						apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,1,0) );
-		
-					}
-					{
-						vect3 v0 = apr.pers.calcDisp( pos * apr.pers.cam.mat.invers() );
-						vect3 v1 = v0 + vect3( 0,0,l) * apr.pers.cam.mat.invers();
-						apr.gra.Circle( vect2(v1.x,v1.y), 7, rgb(1,1,0) );
-						apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1) );
-		
-					}
-				}
-
-			
-				if(0)
-				{
-					double l = 0.1;
-
-					if ( bAxisX ) apr.line3d( (pos + vect3(-l,0,0)), (pos + vect3(l,0,0)), rgb(1,0,0) );
-					if ( bAxisY ) apr.line3d( (pos + vect3(0,-l,0)), (pos + vect3(0,l,0)), rgb(0,1,0) );
-					if ( bAxisZ ) apr.line3d( (pos + vect3(0,0,-l)), (pos + vect3(0,0,l)), rgb(0,0,1) );
-				}
-
-				if(0)
-				{
-					double l = 0.1;
-					if ( bAxisX && bAxisY )
-					{
-						apr.line3d( (pos + vect3(-l,-l,0)), (pos + vect3( l,-l,0)), rgb(0,0,1) );
-						apr.line3d( (pos + vect3(-l, l,0)), (pos + vect3( l, l,0)), rgb(0,0,1) );
-						apr.line3d( (pos + vect3(-l,-l,0)), (pos + vect3(-l, l,0)), rgb(0,0,1) );
-						apr.line3d( (pos + vect3( l,-l,0)), (pos + vect3( l, l,0)), rgb(0,0,1) );
-					}
-
-					if ( bAxisZ && bAxisY )
-					{
-						apr.line3d( (pos + vect3(0,-l,-l)), (pos + vect3(0, l,-l)), rgb(1,0,0) );
-						apr.line3d( (pos + vect3(0,-l, l)), (pos + vect3(0, l, l)), rgb(1,0,0) );
-						apr.line3d( (pos + vect3(0,-l,-l)), (pos + vect3(0,-l, l)), rgb(1,0,0) );
-						apr.line3d( (pos + vect3(0, l,-l)), (pos + vect3(0, l, l)), rgb(1,0,0) );
-					}
-
-					if ( bAxisZ && bAxisX )
-					{
-						apr.line3d( (pos + vect3(-l,0,-l)), (pos + vect3( l,0,-l)), rgb(0,1,0) );
-						apr.line3d( (pos + vect3(-l,0, l)), (pos + vect3( l,0, l)), rgb(0,1,0) );
-						apr.line3d( (pos + vect3(-l,0,-l)), (pos + vect3(-l,0, l)), rgb(0,1,0) );
-						apr.line3d( (pos + vect3( l,0,-l)), (pos + vect3( l,0, l)), rgb(0,1,0) );
-					}
-				}	
-
-				if(0)
-				{
-					double l = 0.15;
-					if ( bAxisZ && bAxisY ) apr.circle3d_x( pos, l, rgb(1,0,0) );
-					if ( bAxisX && bAxisZ ) apr.circle3d_y( pos, l, rgb(0,1,0) );
-					if ( bAxisX && bAxisY ) apr.circle3d_z( pos, l, rgb(0,0,1) );
-				}
-			}
-		} manupirator;
 		
 	};
 	Selector selector;
 
+	struct Manupirator : Obj
+	{
+		vect3 disp;
+		void Move2( vect2 v )
+		{
+		}
+		vect2 Pos2()
+		{
+			return vect2( disp.x, disp.y );
+		}
+
+		bool bAxisX = true;;
+		bool bAxisY = true;;
+		bool bAxisZ = true;;
+
+		vect3	pos = g_dummy;
+		bool bActive = false;
+		
+		PinAxis	pinAxisX;
+		PinAxis	pinAxisY;
+		PinAxis	pinAxisZ;
+
+		//------------------------------------------------------------------------------
+		void manupirator_set( vect3 _pos )
+		//------------------------------------------------------------------------------
+		{
+			pos = _pos;
+			bActive = true;
+		}
+		//------------------------------------------------------------------------------
+		void manupirator_calc( Apr& apr )
+		//------------------------------------------------------------------------------
+		{
+			{
+					vect3 v0 = apr.pers.calcDisp( pos * apr.pers.cam.mat.invers() );
+					disp = v0;
+				double l = 30;
+				{
+					vect3 v1 = v0 + vect3( l,0,0) * apr.pers.cam.mat.invers();
+		//			apr.gra.Circle( vect2(v1.x,v1.y), 7, rgb(1,1,0) );
+					apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(1,0,0) );
+	
+					pinAxisX.disp = v1;
+	
+				}
+				{
+//					vect3 v0 = apr.pers.calcDisp( pos * apr.pers.cam.mat.invers() );
+					vect3 v1 = v0 + vect3( 0,l,0) * apr.pers.cam.mat.invers();
+					//apr.gra.Circle( vect2(v1.x,v1.y), 7, rgb(1,1,0) );
+					apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,1,0) );
+	
+					pinAxisY.disp = v1;
+				}
+				{
+//					vect3 v0 = apr.pers.calcDisp( pos * apr.pers.cam.mat.invers() );
+					vect3 v1 = v0 + vect3( 0,0,l) * apr.pers.cam.mat.invers();
+				//	apr.gra.Circle( vect2(v1.x,v1.y), 7, rgb(1,1,0) );
+					apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1) );
+	
+					pinAxisZ.disp = v1;
+				}
+			}
+
+		
+			if(0)
+			{
+				double l = 0.1;
+
+				if ( bAxisX ) apr.line3d( (pos + vect3(-l,0,0)), (pos + vect3(l,0,0)), rgb(1,0,0) );
+				if ( bAxisY ) apr.line3d( (pos + vect3(0,-l,0)), (pos + vect3(0,l,0)), rgb(0,1,0) );
+				if ( bAxisZ ) apr.line3d( (pos + vect3(0,0,-l)), (pos + vect3(0,0,l)), rgb(0,0,1) );
+			}
+
+			if(0)
+			{
+				double l = 0.1;
+				if ( bAxisX && bAxisY )
+				{
+					apr.line3d( (pos + vect3(-l,-l,0)), (pos + vect3( l,-l,0)), rgb(0,0,1) );
+					apr.line3d( (pos + vect3(-l, l,0)), (pos + vect3( l, l,0)), rgb(0,0,1) );
+					apr.line3d( (pos + vect3(-l,-l,0)), (pos + vect3(-l, l,0)), rgb(0,0,1) );
+					apr.line3d( (pos + vect3( l,-l,0)), (pos + vect3( l, l,0)), rgb(0,0,1) );
+				}
+
+				if ( bAxisZ && bAxisY )
+				{
+					apr.line3d( (pos + vect3(0,-l,-l)), (pos + vect3(0, l,-l)), rgb(1,0,0) );
+					apr.line3d( (pos + vect3(0,-l, l)), (pos + vect3(0, l, l)), rgb(1,0,0) );
+					apr.line3d( (pos + vect3(0,-l,-l)), (pos + vect3(0,-l, l)), rgb(1,0,0) );
+					apr.line3d( (pos + vect3(0, l,-l)), (pos + vect3(0, l, l)), rgb(1,0,0) );
+				}
+
+				if ( bAxisZ && bAxisX )
+				{
+					apr.line3d( (pos + vect3(-l,0,-l)), (pos + vect3( l,0,-l)), rgb(0,1,0) );
+					apr.line3d( (pos + vect3(-l,0, l)), (pos + vect3( l,0, l)), rgb(0,1,0) );
+					apr.line3d( (pos + vect3(-l,0,-l)), (pos + vect3(-l,0, l)), rgb(0,1,0) );
+					apr.line3d( (pos + vect3( l,0,-l)), (pos + vect3( l,0, l)), rgb(0,1,0) );
+				}
+			}	
+
+			if(0)
+			{
+				double l = 0.15;
+				if ( bAxisZ && bAxisY ) apr.circle3d_x( pos, l, rgb(1,0,0) );
+				if ( bAxisX && bAxisZ ) apr.circle3d_y( pos, l, rgb(0,1,0) );
+				if ( bAxisX && bAxisY ) apr.circle3d_z( pos, l, rgb(0,0,1) );
+			}
+		}
+	} manupirator;
 
 	Figure figCircle=Figure(gra);
 
@@ -906,6 +941,8 @@ struct Apr : public Sys
 							selector.tblMarker.emplace_back( j, id++ );
 						}
 						selector.mode = Selector::MODE_3D;
+
+
 					}
 
 				}
@@ -954,9 +991,9 @@ struct Apr : public Sys
 				if ( pBone->anim.bPlaying )	pBone->PlayAnimation();
 
 				// X/Y/Z軸選択モード切替
-				if ( keys.Q.hi ) selector.manupirator.bAxisX = !selector.manupirator.bAxisX;
-				if ( keys.W.hi ) selector.manupirator.bAxisY = !selector.manupirator.bAxisY;
-				if ( keys.E.hi ) selector.manupirator.bAxisZ = !selector.manupirator.bAxisZ;
+//				if ( keys.Q.hi ) manupirator.bAxisX = !manupirator.bAxisX;
+//				if ( keys.W.hi ) manupirator.bAxisY = !manupirator.bAxisY;
+//				if ( keys.E.hi ) manupirator.bAxisZ = !manupirator.bAxisZ;
 			}
 
 
@@ -977,7 +1014,7 @@ struct Apr : public Sys
 					gra.Print( vect2(10,16*y++),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 				}
 
-					gra.Print( vect2(10,16*y++),string("axis ")+(selector.manupirator.bAxisX?"X":"-")+(selector.manupirator.bAxisY?"Y":"-")+(selector.manupirator.bAxisZ?"Z":"-") ); 
+//					gra.Print( vect2(10,16*y++),string("axis ")+(manupirator.bAxisX?"X":"-")+(manupirator.bAxisY?"Y":"-")+(manupirator.bAxisZ?"Z":"-") ); 
 				}
 
 			// animカーソルビュー cursor
@@ -1388,7 +1425,22 @@ struct Apr : public Sys
 
 			// マーカー登録
 			{
-				if ( keys._2.hi )
+				if ( keys._3.hi )	//マニュピレーター
+				{
+					selector.mode = Selector::MODE_3D;
+					int id = 0;
+					selector.tblMarker.clear();
+											// マニュピレーターのマーカー登録
+							selector.tblMarker.emplace_back( manupirator, id++ );
+							selector.tblMarker.emplace_back( manupirator.pinAxisX, id++ );
+							selector.tblMarker.emplace_back( manupirator.pinAxisY, id++ );
+							selector.tblMarker.emplace_back( manupirator.pinAxisZ, id++ );
+
+								// マニュピレーターをアクティブ
+								manupirator.manupirator_set( vect3(0,-1,0 ) );
+
+				}
+				if ( keys._2.hi )	//2D
 				{
 					int id = 0;
 					selector.tblMarker.clear();
@@ -1406,7 +1458,7 @@ struct Apr : public Sys
 					}
 					selector.mode = Selector::MODE_2D;
 				}
-				if ( keys._1.hi )
+				if ( keys._1.hi )	//3D human
 				{
 					int id = 0;
 					selector.tblMarker.clear();
@@ -1414,16 +1466,15 @@ struct Apr : public Sys
 					{
 						selector.tblMarker.emplace_back( j, id++ );
 					}
-					selector.mode = Selector::MODE_3D;
 				}
 
 			}
 
 
 			// マニュピレーターとの衝突判定
-			if ( selector.manupirator.bActive )
+			if ( manupirator.bActive )
 			{
-//				selector.manupirator.manupirator_set( pj->pos );
+//				manupirator.manupirator_set( pj->pos );
 					vect3 p = pers.calcInvers( vect2( mouse.pos.x, mouse.pos.y ) );
 					vect3 q = pers.calcRay( p, 10 );
 					
@@ -1459,6 +1510,15 @@ struct Apr : public Sys
 				//	マーカー 単独選択 
 				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on &&  selector.a.pm && selector.a.pm->obj.bSelected == false ) selector.selectOne();
 
+				// 矩形カーソル 反転 選択	
+				if ( !keys.ALT.on && mouse.L.on &&  keys.CTRL.on && !keys.SHIFT.on &&  selector.rect_bSelect ) selector.rect_selectReverse( mouse.pos );
+
+				// 矩形カーソル 追加選択	
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on &&  selector.rect_bSelect ) selector.rect_selectAdd( mouse.pos );
+
+				// 矩形カーソル解除	
+				if ( !keys.ALT.on && !mouse.L.on &&  selector.rect_bSelect ) selector.endRect();
+
 				// マーカー移動
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && !selector.rect_bSelect ) 
 				{
@@ -1492,7 +1552,7 @@ struct Apr : public Sys
 						for ( Marker& m : selector.tblMarker )
 						{
 							Joint3* pj = dynamic_cast<Joint3*>(&m.obj);
-							if ( pj->bSelected )
+							if ( pj && pj->bSelected )
 							{
 								// 平行移動
 								vect3 v = vect3(mouse.mov.x, mouse.mov.y, 0)/pers.height/(pj->disp.z);
@@ -1502,7 +1562,6 @@ struct Apr : public Sys
 								v = v* mrot;
 								pj->pos += v ;
 
-								selector.manupirator.manupirator_set( pj->pos );
 							}
 						}
 						pBone->RefrectKeyframe();
@@ -1518,18 +1577,38 @@ struct Apr : public Sys
 							}
 						}
 					}
-				}
-
-				// 矩形カーソル 反転 選択	
-				if ( !keys.ALT.on && mouse.L.on &&  keys.CTRL.on && !keys.SHIFT.on &&  selector.rect_bSelect ) selector.rect_selectReverse( mouse.pos );
-
-				// 矩形カーソル 追加選択	
-				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on &&  selector.rect_bSelect ) selector.rect_selectAdd( mouse.pos );
-
-				// 矩形カーソル解除	
-				if ( !keys.ALT.on && !mouse.L.on &&  selector.rect_bSelect ) selector.endRect();
-				
+				}				
 			}			
+
+				// マニュピレーター操作
+				if ( manupirator.bActive  ) 
+				{
+					manupirator.manupirator_calc( *this );
+
+					// 3Dマーカー移動
+					if ( mouse.L.on  )
+					{
+						for ( Marker& m : selector.tblMarker )
+						{
+						
+							Manupirator* pj0 = dynamic_cast<Manupirator*>(&m.obj);
+							PinAxis* pj = dynamic_cast<PinAxis*>(&m.obj);
+							if ( (pj0 && pj0->bSelected) || (pj && pj->bSelected))
+							{
+
+									// 平行移動
+									vect3 v = vect3(mouse.mov.x, mouse.mov.y, 0)/pers.height/(manupirator.disp.z);
+									mat44 mrot = pers.cam.mat;
+									mrot.SetTranslate(vect3(0,0,0));
+									mrot.invers();
+									v = v* mrot;
+									
+									
+									manupirator.pos += v ;
+							}
+						}
+					}
+				}
 
 			//=================================
 			// 2D joint
@@ -1585,6 +1664,8 @@ struct Apr : public Sys
 				}
 			}
 
+
+
 			//=================================
 			// 3D joint
 			//=================================
@@ -1604,29 +1685,6 @@ struct Apr : public Sys
 				// マーカー表示
 				selector.drawController( mouse.pos, gra );
 
-				// 3Dマーカー表示
-				{
-
-					vect3 p = pers.calcInvers( vect2( mouse.pos.x, mouse.pos.y ) );
-					vect3 q = pers.calcRay( p, 10 );
-
-/*
-//					selector.manupirator.bActive = false; 
-
-					// 3Dマーカー表示
-					int col = rgb(0,1,0);
-					for ( Marker& m : selector.tblMarker )
-					{
-						Joint3* pj = dynamic_cast<Joint3*>(&m.obj);
-						if ( pj && pj->bSelected )
-						{
-//							selector.manupirator.manupirator_set( pj->pos );
-
-						}
-					}
-*/
-					if ( selector.manupirator.bActive ) selector.manupirator.manupirator_draw( *this );
-				}
 			}
 			
 			
@@ -1635,7 +1693,7 @@ struct Apr : public Sys
 			circle3d_y( vect3(0,0,0), 0.1, rgb(0.2,0.2,0.2) );
 
 			// マウス座標（投影面座標）を３Ｄ空間座標に逆変換
-if(0)
+			if(0)
 			{
 				vect3 v = pers.calcInvers( vect2( mouse.pos.x, mouse.pos.y ) );
 				vect3 p = pers.calcRay( v, 10 );
