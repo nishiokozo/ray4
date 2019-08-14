@@ -360,21 +360,21 @@ struct Apr : public Sys
 				{
 					double l = 30;
 					{
-						vect3 v0 = apr.pers.calcPoint2( pos );
+						vect3 v0 = apr.pers.calcDisp( pos * apr.pers.cam.mat.invers() );
 						vect3 v1 = v0 + vect3( l,0,0) * apr.pers.cam.mat.invers();
 						apr.gra.Circle( vect2(v1.x,v1.y), 7, rgb(1,1,0) );
 						apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(1,0,0) );
 		
 					}
 					{
-						vect3 v0 = apr.pers.calcPoint2( pos );
+						vect3 v0 = apr.pers.calcDisp( pos * apr.pers.cam.mat.invers() );
 						vect3 v1 = v0 + vect3( 0,l,0) * apr.pers.cam.mat.invers();
 						apr.gra.Circle( vect2(v1.x,v1.y), 7, rgb(1,1,0) );
 						apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,1,0) );
 		
 					}
 					{
-						vect3 v0 = apr.pers.calcPoint2( pos );
+						vect3 v0 = apr.pers.calcDisp( pos * apr.pers.cam.mat.invers() );
 						vect3 v1 = v0 + vect3( 0,0,l) * apr.pers.cam.mat.invers();
 						apr.gra.Circle( vect2(v1.x,v1.y), 7, rgb(1,1,0) );
 						apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1) );
@@ -478,7 +478,7 @@ struct Apr : public Sys
 		for ( int i = 0 ; i <= 360 ; i+=10 )
 		{
 			vect3 p = vect3( 0, r*cos(rad(i)), r*sin(rad(i)) ) + pos;
-			vect3 q = pers.calcPoint( p * pers.cam.mat.invers() );
+			vect3 q = pers.calcDisp( p * pers.cam.mat.invers() );
 			vect2 v1 = vect2( q.x, q.y );
 			if ( i > 0 ) gra.Line( v0,v1, col );
 			v0 = v1;
@@ -493,7 +493,7 @@ struct Apr : public Sys
 		for ( int i = 0 ; i <= 360 ; i+=10 )
 		{
 			vect3 p = vect3( r*cos(rad(i)), 0, r*sin(rad(i)) ) + pos;
-			vect3 q = pers.calcPoint( p * pers.cam.mat.invers() );
+			vect3 q = pers.calcDisp( p * pers.cam.mat.invers() );
 			vect2 v1 = vect2( q.x, q.y );
 			if ( i > 0 ) gra.Line( v0,v1, col );
 			v0 = v1;
@@ -508,7 +508,7 @@ struct Apr : public Sys
 		for ( int i = 0 ; i <= 360 ; i+=10 )
 		{
 			vect3 p = vect3( r*cos(rad(i)), r*sin(rad(i)), 0 ) + pos;
-			vect3 q = pers.calcPoint( p * pers.cam.mat.invers() );
+			vect3 q = pers.calcDisp( p * pers.cam.mat.invers() );
 			vect2 v1 = vect2( q.x, q.y );
 			if ( i > 0 ) gra.Line( v0,v1, col );
 			v0 = v1;
@@ -1027,7 +1027,7 @@ struct Apr : public Sys
 
 			// カメラ注視点表示
 			{
-				vect3 v = pers.calcPoint(pers.cam.at*pers.cam.mat.invers());
+				vect3 v = pers.calcDisp(pers.cam.at*pers.cam.mat.invers());
 				if ( v.z > 0 ) 
 				{
 					//gra.Circle( vect2(v.x,v.y), 8, rgb(0,1,0));
@@ -1087,7 +1087,7 @@ struct Apr : public Sys
 						{
 							for ( int j = -NUM ; j <= NUM ; j++ )
 							{
-								vect3 v0 = pers.calcPoint( vect3(i,0,j)  * pers.cam.mat.invers() );
+								vect3 v0 = pers.calcDisp( vect3(i,0,j)  * pers.cam.mat.invers() );
 								if ( v0.z > 0 ) 
 								{
 									double r = 5* v0.z;
@@ -1107,7 +1107,7 @@ struct Apr : public Sys
 			}
 			
 			// 箱
-			//calcPoint rotate
+			//calcDisp rotate
 			box.disp.clear();
 			for ( vect3 v : box.vert )
 			{

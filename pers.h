@@ -107,23 +107,9 @@ struct Pers
 		return 1/((fy/sz)*(z+sz));	// 投影面のz位置を0とした場合のzに対するw値を求める。
 	//	return 1/(fy*(z+1));	// 投影面のz位置を0とした場合のzに対するw値を求める。
 	}
-	//--------------------------------------------------------------------------
-	vect3 calcPoint2( vect3 v )	// 透視投影変換
-	//--------------------------------------------------------------------------
-	{
-		v= v * cam.mat.invers();
-		vect3 ret;
-		{
-			double w = getW(v.z);
-			ret.x = v.x* w *width  *aspect	+cx;
-			ret.y = v.y* w *height			+cy;
-			ret.z = w;	// 三次元ベクトルで返す都合上、ZにW値を入れている。
-		}
 
-		return ret;
-	}
 	//--------------------------------------------------------------------------
-	vect3 calcPoint( vect3 v )	// 透視変換
+	vect3 calcDisp( vect3 v )	// 透視変換
 	//--------------------------------------------------------------------------
 	{
 		vect3 ret;
@@ -164,8 +150,8 @@ struct Pers
 	bool calcScissorLine3d( vect3 v0, vect3 v1, vect3& va, vect3& vb )
 	//--------------------------------------------------------------------------
 	{
-		va = calcPoint(v0);
-		vb = calcPoint(v1);
+		va = calcDisp(v0);
+		vb = calcDisp(v1);
 
 		{//シザリング ニアクリップ
 			function<vect3(vect3,vect3,int)>nearclip = [ this,&nearclip ]( vect3 a, vect3 b, int n )
@@ -189,12 +175,12 @@ struct Pers
 				if ( va.z < 0 )
 				{
 					vect3 c = nearclip(v1,v0,8);
-					va = calcPoint(c);
+					va = calcDisp(c);
 				}
 				if ( vb.z < 0 )
 				{
 					vect3 c = nearclip(v0,v1,8);
-					vb = calcPoint(c);
+					vb = calcDisp(c);
 				}
 			}
 		}

@@ -504,7 +504,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 
 			j.world = v;
 
-			j.disp = pers.calcPoint(v);
+			j.disp = pers.calcDisp(v);
 		}
 
 		// Human 描画
