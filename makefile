@@ -39,8 +39,8 @@ FILE=main.o
 #	-Wno-unknown-pragmas \
 #	-Werror \
 
-#CC	= clang++#
-CC	= g++
+CC	= clang++#
+#CC	= g++
 
 $(TAR)	:	$(SRCS:.cpp=.o)
 	$(CC) -o $(TAR) $^ $(LIBS)

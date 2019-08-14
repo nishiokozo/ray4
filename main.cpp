@@ -111,6 +111,7 @@ struct Apr : public Sys
 		{
 			return pos;
 		}
+		virtual ~Joint2(){}
 	};
 	struct Bone2
 	{

@@ -9,6 +9,7 @@
 		int priority;
 		
 		vector<reference_wrapper<Joint3>>	relative;
+		virtual ~Joint3(){}
 		Joint3()
 		{
 			id = 0;
