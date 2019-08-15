@@ -1566,8 +1566,6 @@ struct Apr : public Sys
 							#else
 								{// 3D平面上を触る
 								
-									vect3 P = pers.calcInvers( vect2( mouse.pos.x, mouse.pos.y ) );
-									vect3 I = pers.calcRayvect( P );
 
 									struct Plate
 									{
@@ -1593,13 +1591,24 @@ struct Apr : public Sys
 										return false;
 									};
 
+									vect3 P = pers.calcInvers( vect2( mouse.pos.x, mouse.pos.y ) );
+									vect3 I = pers.calcRayvect( P );
 									vect3 Q;
 									bool b = func( P, I, Q );
-
 									if ( b )
 									{
-										circle3d_y( Q, 0.1, rgb(0.8,0.2,0.2) );
-										pj->pos = Q;
+										vect3 P = pers.calcInvers( vect2( mouse.prev.x, mouse.prev.y ) );
+										vect3 I = pers.calcRayvect( P );
+										vect3 Q0;
+										bool b = func( P, I, Q0 );
+										if ( b )
+										{
+										
+											circle3d_y( Q, 0.1, rgb(0.8,0.2,0.2) );
+
+											double z  = dot( (Q-Q0), vect3(0,0,1) );
+											pj->pos.z += z;
+										}
 									}
 								}
 							#endif

@@ -28,6 +28,7 @@ public:
 	Keyobj	F;	//フォワードボタン
 	Keyobj	B;	//バックボタン
 
+	vect2	prev;	//	マウスカーソル位置旧
 	vect2	pos;	//	マウスカーソル位置
 	vect2	mov;	//	マウスカーソル移動量
 

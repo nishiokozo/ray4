@@ -25,21 +25,23 @@ SysMouse::SysMouse()
 //-----------------------------------------------------------------------------
 {
 
-	POINT pos;
+	POINT point;
 
-	GetCursorPos( &pos );
+	GetCursorPos( &point );
 
 	SysWin& win = SysWin::GetInstance();
 
-//	this->sx = pos.x - win.GetPosX();
-//	this->sy = pos.y - win.GetPosY();
-	this->pos.x = pos.x - win.GetPosX();
-	this->pos.y = pos.y - win.GetPosY();
+//	this->sx = point.x - win.GetPosX();
+//	this->sy = point.y - win.GetPosY();
+	this->pos.x = point.x - win.GetPosX();
+	this->pos.y = point.y - win.GetPosY();
 
 //	this->mx = 0;
 //	this->my = 0;
 	this->mov.x = 0;
 	this->mov.y = 0;
+
+	this->prev = this->pos;
 
 	this->wheel = 0;
 
@@ -67,13 +69,13 @@ void SysMouse::OnMove( int pos_x, int pos_y )
 void SysMouse::Update()
 //-----------------------------------------------------------------------------
 {
-	POINT pos;
+	POINT point;
 
 	SysWin& win = SysWin::GetInstance();
-	GetCursorPos( &pos );
+	GetCursorPos( &point );
 	{
-		pos.x -= win.GetPosX();
-		pos.y -= win.GetPosY();
+		point.x -= win.GetPosX();
+		point.y -= win.GetPosY();
 	}
 
 	int	l = GetAsyncKeyState(VK_LBUTTON);
@@ -108,16 +110,17 @@ void SysMouse::Update()
 	this->B.lo =  this->B.on && !on_b;
 	this->B.on = on_b;
 
-//	this->mx = pos.x - this->sx;
-//	this->my = pos.y - this->sy;
+//	this->mx = point.x - this->sx;
+//	this->my = point.y - this->sy;
 //
-//	this->sx = pos.x;
-//	this->sy = pos.y;
+//	this->sx = point.x;
+//	this->sy = point.y;
 
-	this->mov.x = pos.x - this->pos.x;
-	this->mov.y = pos.y - this->pos.y;
-	this->pos.x = pos.x;
-	this->pos.y = pos.y;
+	this->prev = this->pos;
+	this->mov.x = point.x - this->pos.x;
+	this->mov.y = point.y - this->pos.y;
+	this->pos.x = point.x;
+	this->pos.y = point.y;
 
 	this->wheel = win.GetWheel();
 
