@@ -374,8 +374,8 @@ struct Apr : public Sys
 		bool bAxisY = true;;
 		bool bAxisZ = true;;
 
-		vect3	pos = g_dummy;
-		bool bActive = false;
+		vect3	pos = vect3(0,-1,0);
+		bool bActive = true;
 		
 		PinAxis	pinAxisX;
 		PinAxis	pinAxisY;
@@ -1438,7 +1438,7 @@ struct Apr : public Sys
 							selector.tblMarker.emplace_back( manupirator.pinAxisZ, id++ );
 
 								// マニュピレーターをアクティブ
-								manupirator.manupirator_set( vect3(0,-1,0 ) );
+						//		manupirator.manupirator_set( vect3(0,-1,0 ) );
 
 				}
 				if ( keys._2.hi )	//2D
@@ -1556,13 +1556,53 @@ struct Apr : public Sys
 							if ( pj && pj->bSelected )
 							{
 								// 平行移動
+							#if 0 
 								vect3 v = vect3(mouse.mov.x, mouse.mov.y, 0)/pers.height/(pj->disp.z);
 								mat44 mrot = pers.cam.mat;
 								mrot.SetTranslate(vect3(0,0,0));
 								mrot.invers();
 								v = v* mrot;
 								pj->pos += v ;
+							#else
+								{// 3D平面上を触る
+								
+									vect3 P = pers.calcInvers( vect2( mouse.pos.x, mouse.pos.y ) );
+									vect3 I = pers.calcRayvect( P );
 
+									struct Plate
+									{
+										vect3	P;
+										vect3	N;
+									}plate = {vect3(0,pj->pos.y,0),vect3(0,-1,0)};
+
+
+									auto func = [ plate ] (vect3 P , vect3 I, vect3& Q)
+									{
+										double	f = dot(plate.N, P - plate.P);
+
+//										if ( f > 0 )
+										{
+											double	t = -f/dot( plate.N, I );
+
+											if ( t >= 0 )
+											{
+												Q = I * t + P;
+												return true;
+											}
+										}
+										return false;
+									};
+
+									vect3 Q;
+									bool b = func( P, I, Q );
+
+									if ( b )
+									{
+										circle3d_y( Q, 0.1, rgb(0.8,0.2,0.2) );
+										pj->pos = Q;
+									}
+								}
+							#endif
 							}
 						}
 						pBone->RefrectKeyframe();
@@ -1581,35 +1621,38 @@ struct Apr : public Sys
 				}				
 			}			
 
-				// マニュピレーター操作
-				if ( manupirator.bActive  ) 
+			// マニュピレーター操作
+			if ( manupirator.bActive  ) 
+			{
+				manupirator.manupirator_calc( *this );
+
+				// 3Dマーカー移動
+				if ( mouse.L.on  )
 				{
-					manupirator.manupirator_calc( *this );
-
-					// 3Dマーカー移動
-					if ( mouse.L.on  )
+					for ( Marker& m : selector.tblMarker )
 					{
-						for ( Marker& m : selector.tblMarker )
+					
+						Manupirator* pj0 = dynamic_cast<Manupirator*>(&m.obj);
+						PinAxis* pj = dynamic_cast<PinAxis*>(&m.obj);
+						if ( (pj0 && pj0->bSelected) || (pj && pj->bSelected))
 						{
-						
-							Manupirator* pj0 = dynamic_cast<Manupirator*>(&m.obj);
-							PinAxis* pj = dynamic_cast<PinAxis*>(&m.obj);
-							if ( (pj0 && pj0->bSelected) || (pj && pj->bSelected))
-							{
 
-									// 平行移動
-									vect3 v = vect3(mouse.mov.x, mouse.mov.y, 0)/pers.height/(manupirator.disp.z);
-									mat44 mrot = pers.cam.mat;
-									mrot.SetTranslate(vect3(0,0,0));
-									mrot.invers();
-									v = v* mrot;
-									
-									
-									manupirator.pos += v ;
-							}
+								// 平行移動
+//									vect3 v = vect3(mouse.mov.x, mouse.mov.y, 0)/pers.height/(manupirator.disp.z);
+//									mat44 mrot = pers.cam.mat;
+//									mrot.SetTranslate(vect3(0,0,0));
+//									mrot.invers();
+//									v = v* mrot;
+							
+//									manupirator.pos.z += v.length() ;
 						}
 					}
 				}
+			}
+
+
+			
+
 
 			//=================================
 			// 2D joint
