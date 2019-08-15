@@ -357,6 +357,7 @@ struct Apr : public Sys
 
 		
 	};
+
 	Selector selector;
 
 	struct Manupirator : Obj
@@ -553,23 +554,115 @@ struct Apr : public Sys
 
 	}
 
-									bool funcIntersectPlate( vect3 plate_P, vect3 plate_N, vect3 P , vect3 I, vect3& Q)
-									{
-										double	f = dot(plate_N, P - plate_P);
-									//	if ( f > 0 )
-										{
-											double	t = -f/dot( plate_N, I );
+	//------------------------------------------------------------------------------
+	bool funcIntersectPlate( vect3 plate_P, vect3 plate_N, vect3 P , vect3 I, vect3& Q)
+	//------------------------------------------------------------------------------
+	{
+		double	f = dot(plate_N, P - plate_P);
+	//	if ( f > 0 )
+		{
+			double	t = -f/dot( plate_N, I );
 
-											if ( t >= 0 )
-											{
-												Q = I * t + P;
-												return true;
-											}
-										}
-										return false;
-									};
+			if ( t >= 0 )
+			{
+				Q = I * t + P;
+				return true;
+			}
+		}
+		return false;
+	};
 
+	struct Grid
+	{
+		vect3	pos;
+		int		mode;
+		int		NUM_U;
+		int		NUM_V;
+		double	dt;
+		int		col;
+	
+		//------------------------------------------------------------------------------
+		void SetMesh( vect3 _pos, int _mode, int _NUM_U, int _NUM_V, double _dt, int _col )
+		//------------------------------------------------------------------------------
+		{	// ミニグリッド
+			pos 	= _pos;
+			mode	= _mode;
+			NUM_U	= _NUM_U;
+			NUM_V	= _NUM_V;
+			dt		= _dt;
+			col	 = _col;
+		}
+		//------------------------------------------------------------------------------
+		void DrawMesh( Apr& apr )
+		//------------------------------------------------------------------------------
+		{	// ミニグリッド
+	//			const int NUM_U = 5;
+	//		double dt = 0.05;
+			vect3 vt = vect3(0,0,0);
+			double du = NUM_U*dt;
+			double dv = NUM_V*dt;
+			vect3 a;
+			vect3 b;
+//			int col = rgb(0.2,0.2,0.2)*2;
+			{
+				if ( mode == 0 )
+				{
+					a = pos+vect3(-du, 0,-du);
+					b = pos+vect3( du, 0,-du);
+					vt = vect3(0,0,dt);
+				}
+				if ( mode == 1 )
+				{
+					a = pos+vect3(-du,-du,0);
+					b = pos+vect3( du,-du,0);
+					vt = vect3(0,dt,0);
+				}
+				if ( mode == 2 )
+				{
+					a = pos+vect3( 0,-du,-du);
+					b = pos+vect3( 0, du,-du);
+					vt = vect3(0,0,dt);
+				}
+				for ( int i = 0 ; i < NUM_V*2+1 ; i++ )
+				{
+					apr.line3d( a, b, col*2 );
+					a+=vt;
+					b+=vt;
+				}
+			}			
+			{
 
+				if ( mode == 0 )
+				{
+					a = pos+vect3(-dv, 0, dv);
+					b = pos+vect3(-dv, 0,-dv);
+					vt = vect3(dt,0,0);
+				}
+				if ( mode == 1 )
+				{
+					a = pos+vect3(-dv, dv, 0);
+					b = pos+vect3(-dv,-dv, 0);
+					vt = vect3(dt,0,0);
+				}
+				if ( mode == 2 )
+				{
+					a = pos+vect3( 0,-dv, dv);
+					b = pos+vect3( 0,-dv,-dv);
+					vt = vect3(0,dt,0);
+				}
+				for ( int i = 0 ; i < NUM_U*2+1 ; i++ )
+				{
+					apr.line3d( a, b, col );
+					a+=vt;
+					b+=vt;
+				}
+			}			
+		}
+	};
+	Grid gridGround;
+	Grid gridMini;
+	
+	
 	//------------------------------------------------------------------------------
 	int main()
 	//------------------------------------------------------------------------------
@@ -1102,11 +1195,14 @@ struct Apr : public Sys
 				}
 			}
 
-			// グリッドgrid
+			// グリッドgridMini
 			{
 				const int NUM = 20;
 
-				if(1)
+				gridGround.SetMesh( vect3(0,0,0), 0, NUM, NUM, 1, rgb(0.2,0.2,0.2) );
+				gridGround.DrawMesh( *this );
+
+				if(0)
 				{	// 格子グリッド
 //					int col = rgb(0.5,0.5,0.5);
 					int col = rgb(0.2,0.2,0.2);
@@ -1552,8 +1648,8 @@ struct Apr : public Sys
 				// 矩形カーソル解除	
 				if ( !keys.ALT.on && !mouse.L.on &&  selector.rect_bSelect ) selector.endRect();
 
-				// マーカー移動
-				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && !selector.rect_bSelect ) 
+				// マーカー移動準備
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && !selector.rect_bSelect ) 
 				{
 					if ( selector.mode == Selector::MODE_3D )
 					{
@@ -1581,10 +1677,64 @@ struct Apr : public Sys
 						#endif
 
 
-//						gra.Print( vect2(mouse.pos.x+10,mouse.pos.y-10),string("")+(manupirator.bAxisX?"X":"-")+(manupirator.bAxisY?"Y":"-")+(manupirator.bAxisZ?"Z":"-") ); 
+						// 3Dマーカー移動
+						for ( Marker& m : selector.tblMarker )
+						{
+							Joint3* pj = dynamic_cast<Joint3*>(&m.obj);
+							if ( pj && pj->bSelected )
+							{
+								// 平行移動 カメラ面
+								if ( manupirator.bAxisX && manupirator.bAxisY && manupirator.bAxisZ )
+								{
+								}
+								else
+								{// 3D 平面上を触る
+									
+									if ( manupirator.bAxisX && manupirator.bAxisZ )
+									{
+										gridMini.SetMesh( pj->pos, 0, 5, 5, 0.05, rgb(0.2,0.2,0.2) );
+									}
+									else
+									if ( manupirator.bAxisX && manupirator.bAxisY )
+									{
+										gridMini.SetMesh( pj->pos, 1, 5, 5, 0.05, rgb(0.2,0.2,0.2) );
+									}
+									else
+									if ( manupirator.bAxisZ && manupirator.bAxisY )
+									{
+										gridMini.SetMesh( pj->pos, 2, 5, 5, 0.05, rgb(0.2,0.2,0.2) );
+									}
+									else
+									if ( manupirator.bAxisX )
+									{
+										gridMini.SetMesh( pj->pos, 0, 1, 5, 0.05, rgb(0.2,0.2,0.2) );
+									}
+									else
+									if ( manupirator.bAxisY )
+									{
+										gridMini.SetMesh( pj->pos, 1, 1, 5, 0.05, rgb(0.2,0.2,0.2) );
+									}
+									else
+									if ( manupirator.bAxisZ )
+									{
+										gridMini.SetMesh( pj->pos, 0, 1, 5, 0.05, rgb(0.2,0.2,0.2) );
+									}
+									
+									
+								}
+
+
+							}
+						}
+					}
+				
+				}
+				// マーカー移動
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && !selector.rect_bSelect ) 
+				{
+					if ( selector.mode == Selector::MODE_3D )
+					{
 						gra.Print( vect2(mouse.pos.x+10,mouse.pos.y-10),string("")+(manupirator.bAxisX?"X":"")+(manupirator.bAxisY?"Y":"")+(manupirator.bAxisZ?"Z":"") ); 
-
-
 
 						// 3Dマーカー移動
 						for ( Marker& m : selector.tblMarker )
@@ -1606,19 +1756,36 @@ struct Apr : public Sys
 								{// 3D 平面上を触る
 									vect3	plate_P = pj->pos;
 									vect3	plate_N;
-									if ( manupirator.bAxisX || manupirator.bAxisZ )
+									if ( manupirator.bAxisX && manupirator.bAxisZ )
 									{
 										// X-Z 平面 を仮定する。
 										 plate_N = vect3(0,-1,0);
 									}
-									if ( manupirator.bAxisX || manupirator.bAxisY )
+									else
+									if ( manupirator.bAxisX && manupirator.bAxisY )
 									{
 										// X-Y 平面 を仮定する。
 										 plate_N = vect3(0,0,-1);
 									}
-									if ( manupirator.bAxisZ || manupirator.bAxisY )
+									else
+									if ( manupirator.bAxisZ && manupirator.bAxisY )
 									{
 										// Z-Y 平面 を仮定する。
+										 plate_N = vect3(-1,0,0);
+									}
+									else
+									if ( manupirator.bAxisX )
+									{
+										 plate_N = vect3(0,-1,0);
+									}
+									else
+									if ( manupirator.bAxisY )
+									{
+										 plate_N = vect3(0,0,-1);
+									}
+									else
+									if ( manupirator.bAxisZ )
+									{
 										 plate_N = vect3(-1,0,0);
 									}
 
@@ -1653,61 +1820,8 @@ struct Apr : public Sys
 										}
 									}
 
-									{	// ミニグリッド
-											const int NUM = 5;
-											double dt = 0.05;
-											double dl = NUM*dt;
-					//					int col = rgb(0.5,0.5,0.5);
-											vect3 a;
-											vect3 b;
-										int col = rgb(0.2,0.2,0.2);
-										{
-											if ( manupirator.bAxisX && manupirator.bAxisZ )
-											{
-												a=pj->pos+vect3(-dl, 0,-dl);
-												b=pj->pos+vect3( dl, 0,-dl);
-											}
-											if ( manupirator.bAxisX && manupirator.bAxisY )
-											{
-												a=pj->pos+vect3(-dl,-dl,0);
-												b=pj->pos+vect3( dl,-dl,0);
-											}
-											if ( manupirator.bAxisZ && manupirator.bAxisY )
-											{
-												a=pj->pos+vect3( 0,-dl,-dl);
-												b=pj->pos+vect3( 0, dl,-dl);
-											}
-											for ( int i = 0 ; i < NUM*2+1 ; i++ )
-											{
-												line3d( a, b, col*2 );
-												a.z+=dt;
-												b.z+=dt;
-											}
-										}			
-										{
-											if ( manupirator.bAxisX && manupirator.bAxisZ )
-											{
-												a=pj->pos+vect3(-dl, 0, dl);
-												b=pj->pos+vect3(-dl, 0,-dl);
-											}
-											if ( manupirator.bAxisX && manupirator.bAxisY )
-											{
-												a=pj->pos+vect3(-dl, dl, 0);
-												b=pj->pos+vect3(-dl,-dl, 0);
-											}
-											if ( manupirator.bAxisZ && manupirator.bAxisY )
-											{
-												a=pj->pos+vect3( 0,-dl, dl);
-												b=pj->pos+vect3( 0,-dl,-dl);
-											}
-											for ( int i = 0 ; i < NUM*2+1 ; i++ )
-											{
-												line3d( a, b, col );
-												a.x+=dt;
-												b.x+=dt;
-											}
-										}			
-									}
+										gridMini.DrawMesh( *this );
+									
 									
 								}
 
