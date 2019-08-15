@@ -460,7 +460,7 @@ struct Apr : public Sys
 				}
 			}	
 
-			if(0)
+			if(1)
 			{
 				double l = 0.15;
 				if ( bAxisZ && bAxisY ) apr.circle3d_x( pos, l, rgb(1,0,0) );
@@ -470,6 +470,7 @@ struct Apr : public Sys
 		}
 	} manupirator;
 
+	
 	Figure figCircle=Figure(gra);
 
 
@@ -551,6 +552,22 @@ struct Apr : public Sys
 		}
 
 	}
+
+									bool funcIntersectPlate( vect3 plate_P, vect3 plate_N, vect3 P , vect3 I, vect3& Q)
+									{
+										double	f = dot(plate_N, P - plate_P);
+									//	if ( f > 0 )
+										{
+											double	t = -f/dot( plate_N, I );
+
+											if ( t >= 0 )
+											{
+												Q = I * t + P;
+												return true;
+											}
+										}
+										return false;
+									};
 
 
 	//------------------------------------------------------------------------------
@@ -817,6 +834,23 @@ struct Apr : public Sys
 #else
 		unique_ptr<Bone> pBone(new Bone);
 #endif
+				{
+					//読み込み
+					unique_ptr<Bone> pNew(new Bone);
+					pNew->loadMotion( "human.mot" );
+
+					{
+						int id = 0;
+						selector.tblMarker.clear();
+						for ( Joint3& j : pNew->tblJoint )	//マーカー登録
+						{
+							selector.tblMarker.emplace_back( j, id++ );
+						}
+						selector.mode = Selector::MODE_3D;
+					}
+					pBone = move(pNew);
+				}
+
 
 		// 箱
 		struct
@@ -927,42 +961,38 @@ struct Apr : public Sys
 				}
 				
 				// キーフレームロード
-				if ( keys.L.hi ) 
+				if ( keys.CTRL.on && keys.L.hi ) 
 				{
 					//読み込み
 					unique_ptr<Bone> pNew(new Bone);
-					pNew->loadMotion( "human.mot");
-					pBone = move(pNew);
+					pNew->loadMotion( "human.mot" );
 
 					{
 						int id = 0;
 						selector.tblMarker.clear();
-						for ( Joint3& j : pBone->tblJoint )	//マーカー登録
+						for ( Joint3& j : pNew->tblJoint )	//マーカー登録
 						{
 							selector.tblMarker.emplace_back( j, id++ );
 						}
 						selector.mode = Selector::MODE_3D;
-
-
 					}
-
+					pBone = move(pNew);
 				}
 
-
 				// キーフレームセーブ
-				if ( keys.S.hi ) pBone->saveMotion( "human.mot" );
+				if ( keys.CTRL.on && keys.S.hi ) pBone->saveMotion( "human.mot" );
 
 				// キーフレームペースト
-				if ( keys.V.hi ) pBone->PastKeyframe();
+				if ( keys.CTRL.on && keys.V.hi ) pBone->PastKeyframe();
 
 				// キーフレームコピー
-				if ( keys.C.hi ) pBone->CopyKeyframe();
+				if ( keys.CTRL.on && keys.C.hi ) pBone->CopyKeyframe();
+
+				// キーフレームカット
+				if ( keys.CTRL.on && keys.X.hi ) pBone->CutKeyframe();
 
 				// キーフレーム追加
 				if ( keys.K.hi ) pBone->InsertKeyframe();
-
-				// キーフレームカット
-				if ( keys.X.hi ) pBone->CutKeyframe();
 
 				// キーフレーム次
 				if ( keys.RIGHT.rep ) pBone->NextKeyframe();
@@ -992,9 +1022,9 @@ struct Apr : public Sys
 				if ( pBone->anim.bPlaying )	pBone->PlayAnimation();
 
 				// X/Y/Z軸選択モード切替
-//				if ( keys.Q.hi ) manupirator.bAxisX = !manupirator.bAxisX;
-//				if ( keys.W.hi ) manupirator.bAxisY = !manupirator.bAxisY;
-//				if ( keys.E.hi ) manupirator.bAxisZ = !manupirator.bAxisZ;
+				if ( keys.Q.hi ) manupirator.bAxisX = !manupirator.bAxisX;
+				if ( keys.W.hi ) manupirator.bAxisY = !manupirator.bAxisY;
+				if ( keys.E.hi ) manupirator.bAxisZ = !manupirator.bAxisZ;
 			}
 
 
@@ -1013,10 +1043,10 @@ struct Apr : public Sys
 						gra.Print( vect2(10,16*y++),string("pose=")+to_string(pBone->cur.pose) + string(" cnt=")+to_string(pBone->animations[pBone->cur.act].pose.size()) ); 
 					}
 					gra.Print( vect2(10,16*y++),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
+					gra.Print( vect2(10,16*y++),string("axis ")+(manupirator.bAxisX?"X":"-")+(manupirator.bAxisY?"Y":"-")+(manupirator.bAxisZ?"Z":"-") ); 
 				}
 
-//					gra.Print( vect2(10,16*y++),string("axis ")+(manupirator.bAxisX?"X":"-")+(manupirator.bAxisY?"Y":"-")+(manupirator.bAxisZ?"Z":"-") ); 
-				}
+			}
 
 			// animカーソルビュー cursor
 			{
@@ -1074,7 +1104,7 @@ struct Apr : public Sys
 
 			// グリッドgrid
 			{
-				const int NUM = 10;
+				const int NUM = 20;
 
 				if(1)
 				{	// 格子グリッド
@@ -1085,7 +1115,8 @@ struct Apr : public Sys
 						vect3 b( NUM, 0,-NUM);
 						for ( int i = 0 ; i < NUM*2+1 ; i++ )
 						{
-							vect3 v0;
+							line3d( a, b, col );
+/*							vect3 v0;
 							vect3 v1;
 							bool flg = pers.calcScissorLine3d( a* pers.cam.mat.invers(), b* pers.cam.mat.invers(), v0, v1 );
 
@@ -1094,7 +1125,7 @@ struct Apr : public Sys
 								gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col );
 							}
 							
-
+*/
 							a.z+=1.0;
 							b.z+=1.0;
 						}
@@ -1104,6 +1135,8 @@ struct Apr : public Sys
 						vect3 b(-NUM, 0,-NUM);
 						for ( int i = 0 ; i < NUM*2+1 ; i++ )
 						{
+							line3d( a, b, col );
+/*
 							vect3 v0;
 							vect3 v1;
 							bool flg = pers.calcScissorLine3d( a* pers.cam.mat.invers(), b* pers.cam.mat.invers(), v0, v1 );
@@ -1111,6 +1144,7 @@ struct Apr : public Sys
 							{
 								gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col);
 							}
+*/
 							a.x+=1.0;
 							b.x+=1.0;
 						}
@@ -1437,8 +1471,6 @@ struct Apr : public Sys
 							selector.tblMarker.emplace_back( manupirator.pinAxisY, id++ );
 							selector.tblMarker.emplace_back( manupirator.pinAxisZ, id++ );
 
-								// マニュピレーターをアクティブ
-						//		manupirator.manupirator_set( vect3(0,-1,0 ) );
 
 				}
 				if ( keys._2.hi )	//2D
@@ -1549,69 +1581,137 @@ struct Apr : public Sys
 						#endif
 
 
+//						gra.Print( vect2(mouse.pos.x+10,mouse.pos.y-10),string("")+(manupirator.bAxisX?"X":"-")+(manupirator.bAxisY?"Y":"-")+(manupirator.bAxisZ?"Z":"-") ); 
+						gra.Print( vect2(mouse.pos.x+10,mouse.pos.y-10),string("")+(manupirator.bAxisX?"X":"")+(manupirator.bAxisY?"Y":"")+(manupirator.bAxisZ?"Z":"") ); 
+
+
+
 						// 3Dマーカー移動
 						for ( Marker& m : selector.tblMarker )
 						{
 							Joint3* pj = dynamic_cast<Joint3*>(&m.obj);
 							if ( pj && pj->bSelected )
 							{
-								// 平行移動
-							#if 0 
-								vect3 v = vect3(mouse.mov.x, mouse.mov.y, 0)/pers.height/(pj->disp.z);
-								mat44 mrot = pers.cam.mat;
-								mrot.SetTranslate(vect3(0,0,0));
-								mrot.invers();
-								v = v* mrot;
-								pj->pos += v ;
-							#else
-								{// 3D平面上を触る
-								
-
-									struct Plate
+								// 平行移動 カメラ面
+								if ( manupirator.bAxisX && manupirator.bAxisY && manupirator.bAxisZ )
+								{
+									vect3 v = vect3(mouse.mov.x, mouse.mov.y, 0)/pers.height/(pj->disp.z);
+									mat44 mrot = pers.cam.mat;
+									mrot.SetTranslate(vect3(0,0,0));
+									mrot.invers();
+									v = v* mrot;
+									pj->pos += v ;
+								}
+								else
+								{// 3D 平面上を触る
+									vect3	plate_P = pj->pos;
+									vect3	plate_N;
+									if ( manupirator.bAxisX || manupirator.bAxisZ )
 									{
-										vect3	P;
-										vect3	N;
-									}plate = {vect3(0,pj->pos.y,0),vect3(0,-1,0)};
-
-
-									auto func = [ plate ] (vect3 P , vect3 I, vect3& Q)
+										// X-Z 平面 を仮定する。
+										 plate_N = vect3(0,-1,0);
+									}
+									if ( manupirator.bAxisX || manupirator.bAxisY )
 									{
-										double	f = dot(plate.N, P - plate.P);
-
-//										if ( f > 0 )
-										{
-											double	t = -f/dot( plate.N, I );
-
-											if ( t >= 0 )
-											{
-												Q = I * t + P;
-												return true;
-											}
-										}
-										return false;
-									};
+										// X-Y 平面 を仮定する。
+										 plate_N = vect3(0,0,-1);
+									}
+									if ( manupirator.bAxisZ || manupirator.bAxisY )
+									{
+										// Z-Y 平面 を仮定する。
+										 plate_N = vect3(-1,0,0);
+									}
 
 									vect3 P = pers.calcInvers( vect2( mouse.pos.x, mouse.pos.y ) );
 									vect3 I = pers.calcRayvect( P );
 									vect3 Q;
-									bool b = func( P, I, Q );
+									bool b = funcIntersectPlate( plate_P, plate_N,  P, I, Q );
 									if ( b )
 									{
 										vect3 P = pers.calcInvers( vect2( mouse.prev.x, mouse.prev.y ) );
 										vect3 I = pers.calcRayvect( P );
 										vect3 Q0;
-										bool b = func( P, I, Q0 );
+										bool b = funcIntersectPlate( plate_P, plate_N, P, I, Q0 );
 										if ( b )
 										{
-										
-											circle3d_y( Q, 0.1, rgb(0.8,0.2,0.2) );
-
-											double z  = dot( (Q-Q0), vect3(0,0,1) );
-											pj->pos.z += z;
+											if ( manupirator.bAxisY )
+											{
+												double y  = dot( (Q-Q0), vect3(0,1,0) );
+												pj->pos.y += y;
+											}
+											if ( manupirator.bAxisZ )
+											{
+												double z  = dot( (Q-Q0), vect3(0,0,1) );
+												pj->pos.z += z;
+											}
+											if ( manupirator.bAxisX )
+											{
+												double x  = dot( (Q-Q0), vect3(1,0,0) );
+												pj->pos.x += x;
+											}
+											//circle3d_y( pj->pos, 0.1, rgb(0.8,0.2,0.2) );
 										}
 									}
+
+									{	// ミニグリッド
+											const int NUM = 5;
+											double dt = 0.05;
+											double dl = NUM*dt;
+					//					int col = rgb(0.5,0.5,0.5);
+											vect3 a;
+											vect3 b;
+										int col = rgb(0.2,0.2,0.2);
+										{
+											if ( manupirator.bAxisX && manupirator.bAxisZ )
+											{
+												a=pj->pos+vect3(-dl, 0,-dl);
+												b=pj->pos+vect3( dl, 0,-dl);
+											}
+											if ( manupirator.bAxisX && manupirator.bAxisY )
+											{
+												a=pj->pos+vect3(-dl,-dl,0);
+												b=pj->pos+vect3( dl,-dl,0);
+											}
+											if ( manupirator.bAxisZ && manupirator.bAxisY )
+											{
+												a=pj->pos+vect3( 0,-dl,-dl);
+												b=pj->pos+vect3( 0, dl,-dl);
+											}
+											for ( int i = 0 ; i < NUM*2+1 ; i++ )
+											{
+												line3d( a, b, col*2 );
+												a.z+=dt;
+												b.z+=dt;
+											}
+										}			
+										{
+											if ( manupirator.bAxisX && manupirator.bAxisZ )
+											{
+												a=pj->pos+vect3(-dl, 0, dl);
+												b=pj->pos+vect3(-dl, 0,-dl);
+											}
+											if ( manupirator.bAxisX && manupirator.bAxisY )
+											{
+												a=pj->pos+vect3(-dl, dl, 0);
+												b=pj->pos+vect3(-dl,-dl, 0);
+											}
+											if ( manupirator.bAxisZ && manupirator.bAxisY )
+											{
+												a=pj->pos+vect3( 0,-dl, dl);
+												b=pj->pos+vect3( 0,-dl,-dl);
+											}
+											for ( int i = 0 ; i < NUM*2+1 ; i++ )
+											{
+												line3d( a, b, col );
+												a.x+=dt;
+												b.x+=dt;
+											}
+										}			
+									}
+									
 								}
-							#endif
+
+
 							}
 						}
 						pBone->RefrectKeyframe();
@@ -1633,7 +1733,7 @@ struct Apr : public Sys
 			// マニュピレーター操作
 			if ( manupirator.bActive  ) 
 			{
-				manupirator.manupirator_calc( *this );
+				//manupirator.manupirator_calc( *this );
 
 				// 3Dマーカー移動
 				if ( mouse.L.on  )

@@ -575,12 +575,12 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	}
 
 	//------------------------------------------------------------------------------
-	void Bone::saveMotion( const char* filename )
+	void Bone::saveMotion( const string filename )
 	//------------------------------------------------------------------------------
 	{
 		anim.bPlaying = false;
 
-		fstream fo( filename, ios::out );
+		fstream fo( filename.c_str(), ios::out );
 
 		{
 			fo << "joint" << endl;
@@ -617,7 +617,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 		cout << "SAVED" << endl;
 	}
 	//------------------------------------------------------------------------------
-	void Bone::loadMotion( const char* filename )
+	void Bone::loadMotion( const string filename )
 	//------------------------------------------------------------------------------
 	{
 		anim.bPlaying = false;
@@ -625,7 +625,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 
 	//	Bone*	pNew = new Bone;
 
-		fstream fi( filename, ios::in );
+		fstream fi( filename.c_str(), ios::in );
 		string buf;
 		enum
 		{

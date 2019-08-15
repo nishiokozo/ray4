@@ -86,8 +86,8 @@
 			bool	bPlaying = false;
 		} anim;
 
-		void loadMotion( const char* filename );
-		void saveMotion( const char* filename );
+		void loadMotion( const string filename );
+		void saveMotion( const string filename );
 		void AddAnimation();
 		void NextAnimation();
 		void PrevAnimation();
