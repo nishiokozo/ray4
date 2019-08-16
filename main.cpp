@@ -1011,40 +1011,6 @@ struct Apr : public Sys
 
 		} box;
 
-		// 輪
-		struct
-		{
-			double	rx = rad(0);
-			double	ry = rad(0);
-			double	rz = rad(0);
-
-			vect3 pos = {2.5,-0.5,2.5};
-
-			const double h = 0.1;
-			const double w = 0.25;
-			vector<vect3> vert=
-			{
-				{	-w,	 h,	-w	},
-				{	 w,	 h,	-w	},
-				{	-w,	-h,	-w	},
-				{	 w,	-h,	-w	},
-				{	-w,	 h,	 w	},
-				{	 w,	 h,	 w	},
-				{	-w,	-h,	 w	},
-				{	 w,	-h,	 w	},
-			};
-
-			vector<ivect3>	faces =
-			{
-				{2,3,0},{3,1,0},
-				{3,7,1},{1,7,5},
-				{7,6,5},{5,6,4},
-				{6,2,4},{4,2,0},
-			};
-			
-
-		} ring;
-
 		struct Trigon
 		{
 			double	z;
@@ -1068,7 +1034,103 @@ struct Apr : public Sys
 			{}		
 		};
 		
-		vector<Trigon>	trigons;
+		// 輪
+		struct
+		{
+			vector<Trigon>	trigons;
+			const double h = 0.1;
+			const double w = 0.25;
+			vector<vect3> tbl_vert=
+			{
+				{	-w,	 h,	-w	},
+				{	 w,	 h,	-w	},
+				{	-w,	-h,	-w	},
+				{	 w,	-h,	-w	},
+				{	-w,	 h,	 w	},
+				{	 w,	 h,	 w	},
+				{	-w,	-h,	 w	},
+				{	 w,	-h,	 w	},
+			};
+
+			vector<ivect3>	tbl_faces =
+			{
+				{2,3,0},{3,1,0},
+				{3,7,1},{1,7,5},
+				{7,6,5},{5,6,4},
+				{6,2,4},{4,2,0},
+			};
+		
+			//------------------------------------------------------------------------------
+			void Pers( Pers& pers, vect3 pos, vect3 rot )
+			//------------------------------------------------------------------------------
+			{
+				vect3 l = vect3(0,0,1).normalize();	// 正面ライト
+				for ( ivect3 v : tbl_faces )
+				{
+					mat44	rotx;
+					mat44	roty;
+					mat44	rotz;
+					rotx.setRotateX(rot.x);
+					roty.setRotateY(rot.y);
+					rotz.setRotateZ(rot.z);
+
+					vect3 v0 = tbl_vert[v.n0];
+					vect3 v1 = tbl_vert[v.n1];
+					vect3 v2 = tbl_vert[v.n2];
+
+					v0= rotx * roty * rotz *v0 + pos ;
+					v1= rotx * roty * rotz *v1 + pos ;
+					v2= rotx * roty * rotz *v2 + pos ;
+
+					v0 = v0 * pers.cam.mat.invers();
+					v1 = v1 * pers.cam.mat.invers();
+					v2 = v2 * pers.cam.mat.invers();
+	
+					double d = 0;
+					{
+						vect3 a = (v1-v0); 
+						vect3 b = (v2-v0); 
+						vect3 n = cross(a,b).normalize();
+						d = dot(n,l) + 0.2;
+						if ( d < 0.0 ) d=0;
+						if ( d > 1.0 ) d=1.0;
+					}
+
+					v0 = pers.calcDisp( v0 );
+					v1 = pers.calcDisp( v1 );
+					v2 = pers.calcDisp( v2 );
+					vect2 d0 = vect2(v0.x,v0.y);
+					vect2 d1 = vect2(v1.x,v1.y);
+					vect2 d2 = vect2(v2.x,v2.y);
+
+					{
+						vect2 a = vect2(d1-d0);
+						vect2 b = vect2(d2-d0);
+						double z = a.x*b.y-a.y*b.x;
+						if ( z > 0 ) 
+						{
+							trigons.emplace_back( z, d0, d1, d2, rgb(d,d,d) );
+//							gra.Tri( d0, d1, d2, rgb(d,d,d));
+						}
+					}
+				}
+			}	
+	
+			//------------------------------------------------------------------------------
+			void DrawTrigons( SysGra& gra )
+			//------------------------------------------------------------------------------
+			{
+				// トリゴン描画 trigons	
+				for ( Trigon& t : trigons )
+				{
+						gra.Tri( t.v0, t.v1, t.v2, t.col);
+				}
+				trigons.clear();
+			}
+
+		} ring;
+
+
 
 
 	#if 0
@@ -1479,65 +1541,12 @@ struct Apr : public Sys
 
 			// 輪 ring
 			//calcDisp rotate
-			{
-				vect3 l = vect3(0,0,1).normalize();	// 正面ライト
-				for ( ivect3 v : ring.faces )
-				{
-					mat44	rotx;
-					mat44	roty;
-					mat44	rotz;
-					rotx.setRotateX(ring.rx);
-					roty.setRotateY(ring.ry);
-					rotz.setRotateZ(ring.rz);
+			ring.Pers( pers, vect3(2.5,-0.5,2.5), vect3(rad(10),rad(0),rad(0)) );
+			ring.Pers( pers, vect3(1.5,-0.5,2.5), vect3(rad(210),rad(0),rad(0)) );
+			ring.Pers( pers, vect3(1.5,-0.5,1.5), vect3(rad(210),rad(0),rad(20)) );
 
-					vect3 v0 = ring.vert[v.n0];
-					vect3 v1 = ring.vert[v.n1];
-					vect3 v2 = ring.vert[v.n2];
-
-					v0= rotx * roty * rotz *v0 + ring.pos ;
-					v1= rotx * roty * rotz *v1 + ring.pos ;
-					v2= rotx * roty * rotz *v2 + ring.pos ;
-
-					v0 = v0 * pers.cam.mat.invers();
-					v1 = v1 * pers.cam.mat.invers();
-					v2 = v2 * pers.cam.mat.invers();
-	
-					double d = 0;
-					{
-						vect3 a = (v1-v0); 
-						vect3 b = (v2-v0); 
-						vect3 n = cross(a,b).normalize();
-						d = dot(n,l) + 0.2;
-						if ( d < 0.0 ) d=0;
-						if ( d > 1.0 ) d=1.0;
-					}
-
-					v0 = pers.calcDisp( v0 );
-					v1 = pers.calcDisp( v1 );
-					v2 = pers.calcDisp( v2 );
-					vect2 d0 = vect2(v0.x,v0.y);
-					vect2 d1 = vect2(v1.x,v1.y);
-					vect2 d2 = vect2(v2.x,v2.y);
-
-					{
-						vect2 a = vect2(d1-d0);
-						vect2 b = vect2(d2-d0);
-						double z = a.x*b.y-a.y*b.x;
-						if ( z > 0 ) 
-						{
-							trigons.emplace_back( z, d0, d1, d2, rgb(d,d,d) );
-//							gra.Tri( d0, d1, d2, rgb(d,d,d));
-						}
-					}
-				}
-			}	
-			
-			// トリゴン描画 trigons	
-			for ( Trigon& t : trigons )
-			{
-					gra.Tri( t.v0, t.v1, t.v2, t.col);
-			}
-			trigons.clear();
+				// トリゴン描画 trigons	
+			ring.DrawTrigons( gra );
 
 			// カトマル
 			{
