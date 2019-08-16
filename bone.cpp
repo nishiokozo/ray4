@@ -490,6 +490,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	void Bone::draw( Pers& pers, SysGra& gra )
 	//------------------------------------------------------------------------------
 	{
+		int col = rgb(1,1,1);
 		// Human pers
 		for ( Joint3& j : tblJoint )
 		{

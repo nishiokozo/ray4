@@ -383,20 +383,21 @@ struct Apr : public Sys
 		PinAxis	pinAxisZ;
 
 		//------------------------------------------------------------------------------
-		void manupirator_set( vect3 _pos )
+		void manupirator_setPos( vect3 _pos )
 		//------------------------------------------------------------------------------
 		{
 			pos = _pos;
 			bActive = true;
 		}
 		//------------------------------------------------------------------------------
-		void manupirator_calc( Apr& apr )
+		void manupirator_drawAxis( Apr& apr )
 		//------------------------------------------------------------------------------
 		{
 			{
 					vect3 v0 = apr.pers.calcDisp( pos * apr.pers.cam.mat.invers() );
 					disp = v0;
 				double l = 30;
+				if ( bAxisX  )
 				{
 					vect3 v1 = v0 + vect3( l,0,0) * apr.pers.cam.mat.invers();
 		//			apr.gra.Circle( vect2(v1.x,v1.y), 7, rgb(1,1,0) );
@@ -405,6 +406,7 @@ struct Apr : public Sys
 					pinAxisX.disp = v1;
 	
 				}
+				if ( bAxisY  )
 				{
 //					vect3 v0 = apr.pers.calcDisp( pos * apr.pers.cam.mat.invers() );
 					vect3 v1 = v0 + vect3( 0,l,0) * apr.pers.cam.mat.invers();
@@ -413,6 +415,7 @@ struct Apr : public Sys
 	
 					pinAxisY.disp = v1;
 				}
+				if ( bAxisZ )
 				{
 //					vect3 v0 = apr.pers.calcDisp( pos * apr.pers.cam.mat.invers() );
 					vect3 v1 = v0 + vect3( 0,0,l) * apr.pers.cam.mat.invers();
@@ -461,7 +464,7 @@ struct Apr : public Sys
 				}
 			}	
 
-			if(1)
+			if(0)
 			{
 				double l = 0.15;
 				if ( bAxisZ && bAxisY ) apr.circle3d_x( pos, l, rgb(1,0,0) );
@@ -625,7 +628,7 @@ struct Apr : public Sys
 				}
 				for ( int i = 0 ; i < NUM_V*2+1 ; i++ )
 				{
-					apr.line3d( a, b, col*2 );
+					apr.line3d( a, b, col );
 					a+=vt;
 					b+=vt;
 				}
@@ -985,6 +988,38 @@ struct Apr : public Sys
 
 		} box;
 
+		// 輪
+		struct
+		{
+			double	rx = rad(0);
+			double	ry = rad(0);
+			double	rz = rad(0);
+
+			vect3 pos = {4.5,-0.51,8.5};
+
+			vector<vect3> vert=
+			{
+				{	-0.5,	 0.2,	-0.5	},
+				{	 0.5,	 0.2,	-0.5	},
+				{	-0.5,	-0.2,	-0.5	},
+				{	 0.5,	-0.2,	-0.5	},
+				{	-0.5,	 0.2,	 0.5	},
+				{	 0.5,	 0.2,	 0.5	},
+				{	-0.5,	-0.2,	 0.5	},
+				{	 0.5,	-0.2,	 0.5	},
+			};
+
+			vector<ivect3>	triface =
+			{
+				{2,3,0},{3,1,0},
+				{3,7,1},{1,7,5},
+				{7,6,5},{5,6,4},
+				{6,2,4},{4,2,0},
+			};
+			
+
+		} ring;
+
 
 
 	#if 0
@@ -1115,9 +1150,16 @@ struct Apr : public Sys
 				if ( pBone->anim.bPlaying )	pBone->PlayAnimation();
 
 				// X/Y/Z軸選択モード切替
-				if ( keys.Q.hi ) manupirator.bAxisX = !manupirator.bAxisX;
-				if ( keys.W.hi ) manupirator.bAxisY = !manupirator.bAxisY;
-				if ( keys.E.hi ) manupirator.bAxisZ = !manupirator.bAxisZ;
+			#if 0
+				if ( keys.X.hi ) manupirator.bAxisX = !manupirator.bAxisX;
+				if ( keys.C.hi ) manupirator.bAxisY = !manupirator.bAxisY;
+				if ( keys.Z.hi ) manupirator.bAxisZ = !manupirator.bAxisZ;
+			#else
+				if ( keys.Z.hi ) {manupirator.bAxisZ = true;	manupirator.bAxisX = false;	manupirator.bAxisY = false;}
+				if ( keys.X.hi ) {manupirator.bAxisZ = false;	manupirator.bAxisX = true;	manupirator.bAxisY = false;}
+				if ( keys.C.hi ) {manupirator.bAxisZ = false;	manupirator.bAxisX = false;	manupirator.bAxisY = true;}
+				if ( keys.V.hi ) {manupirator.bAxisZ = true;	manupirator.bAxisX = true;	manupirator.bAxisY = true;}
+			#endif
 			}
 
 
@@ -1136,8 +1178,8 @@ struct Apr : public Sys
 						gra.Print( vect2(10,16*y++),string("pose=")+to_string(pBone->cur.pose) + string(" cnt=")+to_string(pBone->animations[pBone->cur.act].pose.size()) ); 
 					}
 					gra.Print( vect2(10,16*y++),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
-					gra.Print( vect2(10,16*y++),string("axis ")+(manupirator.bAxisX?"X":"-")+(manupirator.bAxisY?"Y":"-")+(manupirator.bAxisZ?"Z":"-") ); 
 				}
+//					gra.Print( vect2(10,16*y++),string("axis ")+(manupirator.bAxisZ?"Z":"-")+(manupirator.bAxisX?"X":"-")+(manupirator.bAxisY?"Y":"-") ); 
 
 			}
 
@@ -1168,6 +1210,10 @@ struct Apr : public Sys
 					}
 				}
 			}
+			
+			
+
+
 
 			// カメラ回転
 			if ( (!keys.ALT.on && mouse.R.on) || (keys.ALT.on && mouse.L.on) ) pers.cam.Rotation( vect3(-mouse.mov.x/28,-mouse.mov.y/28,0) );
@@ -1380,6 +1426,44 @@ struct Apr : public Sys
 				}
 
 			}
+
+			// 輪 rin
+			//calcDisp rotate
+			for ( ivect3 v : ring.triface )
+			{
+				mat44	rotx;
+				mat44	roty;
+				mat44	rotz;
+				rotx.setRotateX(ring.rx);
+				roty.setRotateY(ring.ry);
+				rotz.setRotateZ(ring.rz);
+
+				vect3 v0 = ring.vert[v.n0];
+				vect3 v1 = ring.vert[v.n1];
+				vect3 v2 = ring.vert[v.n2];
+		
+
+				v0= rotx * roty * rotz *v0 + ring.pos ;
+				v1= rotx * roty * rotz *v1 + ring.pos ;
+				v2= rotx * roty * rotz *v2 + ring.pos ;
+
+				v0 = v0 * pers.cam.mat.invers();
+				v1 = v1 * pers.cam.mat.invers();
+				v2 = v2 * pers.cam.mat.invers();
+
+				v0 = pers.calcDisp( v0 );
+				v1 = pers.calcDisp( v1 );
+				v2 = pers.calcDisp( v2 );
+				vect2 d0 = vect2(v0.x,v0.y);
+				vect2 d1 = vect2(v1.x,v1.y);
+				vect2 d2 = vect2(v2.x,v2.y);
+
+				vect2 a(d1-d0);
+				vect2 b(d2-d0);
+				double z = a.x*b.y-a.y*b.x;
+				if ( z > 0 ) gra.Tri( d0, d1, d2, rgb(0.5,0.3,0.2));
+			}
+			
 
 
 			// カトマル
@@ -1600,24 +1684,6 @@ struct Apr : public Sys
 			}
 
 
-			// マニュピレーターとの衝突判定
-			if ( manupirator.bActive )
-			{
-//				manupirator.manupirator_set( pj->pos );
-					vect3 p = pers.calcInvers( vect2( mouse.pos.x, mouse.pos.y ) );
-					vect3 q = pers.calcRay( p, 10 );
-					
-					// 点と直線の距離公式
-					// 点A(x0,y0)と直線L:ax+by+c=0の距離dは
-					// d=(|ax0+by0+c|)/sqet(a^2+b^2)
-					// a,b,cはlの法線ベクトル
-					function<double(vect3,vect3)> func=[](vect3 a, vect3 l )
-					{
-						return 0;
-					//	d = a.x + b.x abs(
-					};
-
-			}
 
 			// マーカー操作	
 			{
@@ -1628,7 +1694,11 @@ struct Apr : public Sys
 				if ( !keys.ALT.on && mouse.L.hi && selector.a.pm == 0 ) selector.beginRectcursor( mouse.pos );
 
 				// マーカー全解除
-				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && !selector.a.pm ) selector.allclear();
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && !selector.a.pm ) 
+				{
+					selector.allclear();
+					manupirator.bAxisZ = true;	manupirator.bAxisX = true;	manupirator.bAxisY = true;
+				}
 
 				// マーカー 反転選択
 				if ( !keys.ALT.on && mouse.L.hi &&  keys.CTRL.on && !keys.SHIFT.on &&  selector.a.pm ) selector.selectReverse();
@@ -1729,12 +1799,12 @@ struct Apr : public Sys
 					}
 				
 				}
+						gra.Print( vect2(mouse.pos.x+10,mouse.pos.y-0),string("")+(manupirator.bAxisX?"X":"")+(manupirator.bAxisY?"Y":"")+(manupirator.bAxisZ?"Z":"") ); 
 				// マーカー移動
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && !selector.rect_bSelect ) 
 				{
 					if ( selector.mode == Selector::MODE_3D )
 					{
-						gra.Print( vect2(mouse.pos.x+10,mouse.pos.y-10),string("")+(manupirator.bAxisX?"X":"")+(manupirator.bAxisY?"Y":"")+(manupirator.bAxisZ?"Z":"") ); 
 
 						// 3Dマーカー移動
 						for ( Marker& m : selector.tblMarker )
@@ -1820,7 +1890,7 @@ struct Apr : public Sys
 										}
 									}
 
-										gridMini.DrawMesh( *this );
+										//gridMini.DrawMesh( *this );
 									
 									
 								}
@@ -1843,36 +1913,6 @@ struct Apr : public Sys
 					}
 				}				
 			}			
-
-			// マニュピレーター操作
-			if ( manupirator.bActive  ) 
-			{
-				//manupirator.manupirator_calc( *this );
-
-				// 3Dマーカー移動
-				if ( mouse.L.on  )
-				{
-					for ( Marker& m : selector.tblMarker )
-					{
-					
-						Manupirator* pj0 = dynamic_cast<Manupirator*>(&m.obj);
-						PinAxis* pj = dynamic_cast<PinAxis*>(&m.obj);
-						if ( (pj0 && pj0->bSelected) || (pj && pj->bSelected))
-						{
-
-								// 平行移動
-//									vect3 v = vect3(mouse.mov.x, mouse.mov.y, 0)/pers.height/(manupirator.disp.z);
-//									mat44 mrot = pers.cam.mat;
-//									mrot.SetTranslate(vect3(0,0,0));
-//									mrot.invers();
-//									v = v* mrot;
-							
-//									manupirator.pos.z += v.length() ;
-						}
-					}
-				}
-			}
-
 
 			
 
@@ -1958,6 +1998,17 @@ struct Apr : public Sys
 			
 			// 原点
 			circle3d_y( vect3(0,0,0), 0.1, rgb(0.2,0.2,0.2) );
+
+
+			// マニュピレーター描画
+			if ( manupirator.bActive  ) 
+			{
+				vect3 p = pers.calcInvers( vect2( mouse.pos.x, mouse.pos.y ) );
+				manupirator.manupirator_setPos( p );
+				manupirator.manupirator_drawAxis( *this );
+
+			}
+
 
 			// マウス座標（投影面座標）を３Ｄ空間座標に逆変換
 			if(0)

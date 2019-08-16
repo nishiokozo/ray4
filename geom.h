@@ -74,13 +74,21 @@ struct	D4
 
 struct	ivect2 : public I2
 {
-//	int	p,n;
 	ivect2( int _p, int _n ) 
 	{
 		x=_p;
 		y=_n;
 	}
-	
+};
+
+struct	ivect3 : public I3
+{
+	ivect3( int _n0,  int _n1, int _n2 ) 
+	{
+		n0 = _n0;
+		n1 = _n1;
+		n2 = _n2;
+	}
 };
 
 class vect2
