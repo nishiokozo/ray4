@@ -3,7 +3,6 @@
 		int id;
 		vect3 pos;
 		vect3 tension;
-//		vect3 world;
 		vect3 disp;
 		double len;
 		int priority;
@@ -36,6 +35,7 @@
 		{
 			return disp.z > 0;
 		}
+
 	};
 
 	struct Bone3
@@ -111,6 +111,10 @@
 //		void drawMotion( Pers& pers, mat44& cam_mat, SysGra& gra );
 		void draw( Pers& pers, SysGra& gra );
 		void drawMotion( Pers& pers, SysGra& gra );
+
+
+		//
+		Ring ring;
 
 	};
 

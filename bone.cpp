@@ -516,8 +516,24 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 				vect2 v0(b.j0.disp.x,b.j0.disp.y);
 				vect2 v1(b.j1.disp.x,b.j1.disp.y);
 				gra.Line( v0,v1, rgb(1,1,1));
+	
+
+				// 肉
+				const int cnt = 4;
+
+				for ( int i = 0 ; i <= cnt ; i++ )
+				{
+					double t = (double)i / (double)cnt;
+
+					vect3 pos = ( b.j1.pos - b.j0.pos )*t + b.j0.pos;
+
+					ring.CalcPers( pers, pos, vect3(rad(0),rad(0),rad(0)) );
+				}
+
 			}
 		}
+
+		ring.DrawTrigons( gra );
 	}
 
 	//------------------------------------------------------------------------------
