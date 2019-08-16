@@ -91,6 +91,17 @@ struct	ivect3 : public I3
 	}
 };
 
+struct	ivect4 : public I4
+{
+	ivect4( int _n0,  int _n1, int _n2, int _n3 ) 
+	{
+		n0 = _n0;
+		n1 = _n1;
+		n2 = _n2;
+		n3 = _n3;
+	}
+};
+
 class vect2
 {
 public:

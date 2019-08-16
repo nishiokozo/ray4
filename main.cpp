@@ -202,7 +202,7 @@ struct Apr : public Sys
 			Marker*	pm;
 			int		cnt;
 		} a = {99999,0,0};
-		int		colNormal = rgb(1,1,0);
+		int		colNormal = rgb(0.5,0.5,0);
 		int		colSelected = rgb(1,0,0);
 
 		//---------------------------------------------------------------------
@@ -689,6 +689,7 @@ struct Apr : public Sys
 	Grid gridGround;
 	Grid gridMini;
 	
+	bool flgInfo = false;
 	
 	//------------------------------------------------------------------------------
 	int main()
@@ -1014,7 +1015,7 @@ struct Apr : public Sys
 
 
 
-		Ring	ring;
+//		Ring	ring;
 
 
 	#if 0
@@ -1159,10 +1160,11 @@ struct Apr : public Sys
 
 
 			{
-				int y = 1;
-				gra.Print(vect2(10,16*y++),string("fovY:")+to_string(int(pers.fovy)));
-				if( keys.F2.on )
+				if( keys.F2.hi ) flgInfo = !flgInfo;
+				if ( flgInfo )
 				{
+				int y = 1;
+					gra.Print(vect2(10,16*y++),string("fovY:")+to_string(int(pers.fovy)));
 					gra.Print(vect2(10,16*y++),string("sz:")+to_string(pers.sz) +string(" fy:")+to_string(pers.fy));
 					gra.Print( vect2(10,16*y++),string("far:")+to_string((pers.cam.pos-pers.cam.at).length())); 
 					gra.Print( vect2(10,16*y++),string("at  x=")+to_string(pers.cam.at.x)+string(" y=")+to_string(pers.cam.at.y)+string(" z=")+to_string(pers.cam.at.z) ); 
@@ -1238,7 +1240,7 @@ struct Apr : public Sys
 
 			// グリッドgridMini
 			{
-				const int NUM = 20;
+				const int NUM = 10;
 
 				gridGround.SetMesh( vect3(0,0,0), 0, NUM, NUM, 1, rgb(0.2,0.2,0.2) );
 				gridGround.DrawMesh( *this );
@@ -1425,12 +1427,10 @@ struct Apr : public Sys
 
 			// 輪 ring
 			//calcDisp rotate
-			ring.CalcPers( pers, vect3(2.5,-0.5,2.5), vect3(rad(10),rad(0),rad(0)) );
-			ring.CalcPers( pers, vect3(1.5,-0.5,2.5), vect3(rad(210),rad(0),rad(0)) );
-			ring.CalcPers( pers, vect3(1.5,-0.5,1.5), vect3(rad(210),rad(0),rad(20)) );
+//			ring.CalcPers( pers, vect3(-1.5,-0.5,1.5), vect3(rad(210),rad(0),rad(20)) );
 
 				// トリゴン描画 trigons	
-			ring.DrawTrigons( gra );
+//			ring.DrawTrigons( gra );
 
 			// カトマル
 			{

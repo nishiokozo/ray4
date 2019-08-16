@@ -487,11 +487,14 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 	}
 
 	//------------------------------------------------------------------------------
-//	void Bone::draw( Pers& pers, mat44& cam_mat, SysGra& gra )
 	void Bone::draw( Pers& pers, SysGra& gra )
 	//------------------------------------------------------------------------------
 	{
-		int col = rgb(1,1,1);
+		// わっか描画
+		ring.DrawTrigons( gra );
+
+
+		int col = rgb(0,0,1);
 		// Human pers
 		for ( Joint3& j : tblJoint )
 		{
@@ -504,8 +507,6 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 
 			v = v * pers.cam.mat.invers();
 
-//			j.world = v;
-
 			j.disp = pers.calcDisp(v);
 		}
 
@@ -516,7 +517,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 			{
 				vect2 v0(b.j0.disp.x,b.j0.disp.y);
 				vect2 v1(b.j1.disp.x,b.j1.disp.y);
-				gra.Line( v0,v1, rgb(1,1,1));
+				gra.Line( v0,v1, col);
 	
 
 				// 肉
@@ -528,18 +529,15 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 
 					vect3 pos = ( b.j1.pos - b.j0.pos )*t + b.j0.pos;
 
-					ring.CalcPers( pers, pos, vect3(rad(0),rad(0),rad(0)) );
+					ring.CalcVert( pers, pos, vect3(rad(0),rad(0),rad(0)) );
 				}
 
 			}
 		}
 
-		// わっか描画
-		ring.DrawTrigons( gra );
 	}
 
 	//------------------------------------------------------------------------------
-//	void Bone::drawMotion( Pers& pers, mat44& cam_mat, SysGra& gra )
 	void Bone::drawMotion( Pers& pers, SysGra& gra )
 	//------------------------------------------------------------------------------
 	{
