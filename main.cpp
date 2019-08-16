@@ -111,6 +111,10 @@ struct Apr : public Sys
 		{
 			return pos;
 		}
+		bool IsVisuable()
+		{
+			return true;
+		}
 		virtual ~Joint2(){}
 	};
 	struct Bone2
@@ -134,6 +138,10 @@ struct Apr : public Sys
 		{
 			return pos;
 		}
+		bool IsVisuable()
+		{
+			return true;
+		}
 
 	};
 	struct Bezier : Obj
@@ -148,6 +156,10 @@ struct Apr : public Sys
 		{
 			return pos;
 		}
+		bool IsVisuable()
+		{
+			return true;
+		}
 	};
 
 	struct PinAxis : Obj
@@ -160,6 +172,10 @@ struct Apr : public Sys
 		vect2 Pos2()
 		{
 			return vect2( disp.x, disp.y );
+		}
+		bool IsVisuable()
+		{
+			return true;
 		}
 	};
 	
@@ -336,20 +352,23 @@ struct Apr : public Sys
 			// コントローラー表示
 			for ( Marker m : tblMarker )
 			{
-				bool flg =  m.obj.bSelected;
-				
-				if ( m.obj.bRectIn )
+				if ( m.obj.IsVisuable() )
 				{
-					flg = m.obj.bRectSelected;
-				}
-				
-				if ( flg )			
-				{
-					gra.Circle( m.obj.Pos2(), 7, colSelected );
-				}
-				else
-				{
-					gra.Circle( m.obj.Pos2(), 7, colNormal );
+					bool flg =  m.obj.bSelected;
+					
+					if ( m.obj.bRectIn )
+					{
+						flg = m.obj.bRectSelected;
+					}
+					
+					if ( flg )			
+					{
+						gra.Circle( m.obj.Pos2(), 7, colSelected );
+					}
+					else
+					{
+						gra.Circle( m.obj.Pos2(), 7, colNormal );
+					}
 				}
 			}
 		}
@@ -369,6 +388,10 @@ struct Apr : public Sys
 		vect2 Pos2()
 		{
 			return vect2( disp.x, disp.y );
+		}
+		bool IsVisuable()
+		{
+			return true;
 		}
 
 		bool bAxisX = true;;
@@ -995,18 +1018,20 @@ struct Apr : public Sys
 			double	ry = rad(0);
 			double	rz = rad(0);
 
-			vect3 pos = {4.5,-0.51,8.5};
+			vect3 pos = {2.5,-0.5,2.5};
 
+			const double h = 0.1;
+			const double w = 0.25;
 			vector<vect3> vert=
 			{
-				{	-0.5,	 0.2,	-0.5	},
-				{	 0.5,	 0.2,	-0.5	},
-				{	-0.5,	-0.2,	-0.5	},
-				{	 0.5,	-0.2,	-0.5	},
-				{	-0.5,	 0.2,	 0.5	},
-				{	 0.5,	 0.2,	 0.5	},
-				{	-0.5,	-0.2,	 0.5	},
-				{	 0.5,	-0.2,	 0.5	},
+				{	-w,	 h,	-w	},
+				{	 w,	 h,	-w	},
+				{	-w,	-h,	-w	},
+				{	 w,	-h,	-w	},
+				{	-w,	 h,	 w	},
+				{	 w,	 h,	 w	},
+				{	-w,	-h,	 w	},
+				{	 w,	-h,	 w	},
 			};
 
 			vector<ivect3>	triface =
@@ -1427,43 +1452,56 @@ struct Apr : public Sys
 
 			}
 
-			// 輪 rin
+			// 輪 ring
 			//calcDisp rotate
-			for ( ivect3 v : ring.triface )
 			{
-				mat44	rotx;
-				mat44	roty;
-				mat44	rotz;
-				rotx.setRotateX(ring.rx);
-				roty.setRotateY(ring.ry);
-				rotz.setRotateZ(ring.rz);
+				vect3 l = vect3(0,0,1).normalize();	// 正面ライト
+				for ( ivect3 v : ring.triface )
+				{
+					mat44	rotx;
+					mat44	roty;
+					mat44	rotz;
+					rotx.setRotateX(ring.rx);
+					roty.setRotateY(ring.ry);
+					rotz.setRotateZ(ring.rz);
 
-				vect3 v0 = ring.vert[v.n0];
-				vect3 v1 = ring.vert[v.n1];
-				vect3 v2 = ring.vert[v.n2];
-		
+					vect3 v0 = ring.vert[v.n0];
+					vect3 v1 = ring.vert[v.n1];
+					vect3 v2 = ring.vert[v.n2];
 
-				v0= rotx * roty * rotz *v0 + ring.pos ;
-				v1= rotx * roty * rotz *v1 + ring.pos ;
-				v2= rotx * roty * rotz *v2 + ring.pos ;
+					v0= rotx * roty * rotz *v0 + ring.pos ;
+					v1= rotx * roty * rotz *v1 + ring.pos ;
+					v2= rotx * roty * rotz *v2 + ring.pos ;
 
-				v0 = v0 * pers.cam.mat.invers();
-				v1 = v1 * pers.cam.mat.invers();
-				v2 = v2 * pers.cam.mat.invers();
+					v0 = v0 * pers.cam.mat.invers();
+					v1 = v1 * pers.cam.mat.invers();
+					v2 = v2 * pers.cam.mat.invers();
+	
+					double d = 0;
+					{
+						vect3 a = (v1-v0); 
+						vect3 b = (v2-v0); 
+						vect3 n = cross(a,b).normalize();
+						d = dot(n,l) + 0.1;
+						if ( d < 0.0 ) d=0;
+						if ( d > 1.0 ) d=1.0;
+					}
 
-				v0 = pers.calcDisp( v0 );
-				v1 = pers.calcDisp( v1 );
-				v2 = pers.calcDisp( v2 );
-				vect2 d0 = vect2(v0.x,v0.y);
-				vect2 d1 = vect2(v1.x,v1.y);
-				vect2 d2 = vect2(v2.x,v2.y);
+					v0 = pers.calcDisp( v0 );
+					v1 = pers.calcDisp( v1 );
+					v2 = pers.calcDisp( v2 );
+					vect2 d0 = vect2(v0.x,v0.y);
+					vect2 d1 = vect2(v1.x,v1.y);
+					vect2 d2 = vect2(v2.x,v2.y);
 
-				vect2 a(d1-d0);
-				vect2 b(d2-d0);
-				double z = a.x*b.y-a.y*b.x;
-				if ( z > 0 ) gra.Tri( d0, d1, d2, rgb(0.5,0.3,0.2));
-			}
-			
+					{
+						vect2 a = vect2(d1-d0);
+						vect2 b = vect2(d2-d0);
+						double z = a.x*b.y-a.y*b.x;
+						if ( z > 0 ) gra.Tri( d0, d1, d2, rgb(d,d,d));
+					}
+				}
+			}		
 
 
 			// カトマル

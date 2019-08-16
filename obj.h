@@ -9,5 +9,6 @@ struct	Obj
 
 	virtual void Move2( vect2 v ) =0;
 	virtual vect2 Pos2() =0;
+	virtual	bool IsVisuable() = 0;
 };
 

@@ -186,12 +186,20 @@ double	dot( vect3 a, vect3 b )
 vect3	cross( vect3 a, vect3 b )
 //-----------------------------------------------------------------------------
 {
+#if 0
 	vect3 v; 
 	v.x = a.y*b.z-a.z*b.y;
 	v.y = a.z*b.x-a.x*b.z;
 	v.z = a.x*b.y-a.y*b.x;
-
 	return v;
+#else
+	return vect3(
+		a.y*b.z-a.z*b.y,
+		a.z*b.x-a.x*b.z,
+		a.x*b.y-a.y*b.x
+	);
+#endif
+
 }
 //-----------------------------------------------------------------------------
 double	length( vect3 a )

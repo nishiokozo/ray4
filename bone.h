@@ -32,6 +32,10 @@
 		{
 			return vect2( disp.x, disp.y );
 		}
+		bool IsVisuable()
+		{
+			return disp.z > 0;
+		}
 	};
 
 	struct Bone3
