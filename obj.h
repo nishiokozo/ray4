@@ -248,6 +248,12 @@ struct Ring
 		v2(_v2),
 		col(_col)
 		{}		
+
+	    bool operator<( const Trigon& a ) const 
+	    {
+	        return z < a.z;
+	    }
+
 	};
 	
 	vector<Trigon>	trigons;
@@ -327,7 +333,9 @@ struct Ring
 				}
 			}
 		}
-	}	
+		sort(trigons.begin(), trigons.end());
+
+	}
 
 	//------------------------------------------------------------------------------
 	void DrawTrigons( SysGra& gra )
@@ -341,5 +349,5 @@ struct Ring
 		trigons.clear();
 	}
 
-};// ring;
+};
 

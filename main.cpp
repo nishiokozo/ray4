@@ -9,6 +9,7 @@
 #include <functional>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 using namespace std;
 
 #include "geom.h"

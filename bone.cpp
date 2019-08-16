@@ -6,6 +6,7 @@
 #include <functional>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 using namespace std;
 
 #include "geom.h"
@@ -533,6 +534,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 			}
 		}
 
+		// わっか描画
 		ring.DrawTrigons( gra );
 	}
 
