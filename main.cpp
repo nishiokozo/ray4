@@ -1034,7 +1034,7 @@ struct Apr : public Sys
 				{	 w,	-h,	 w	},
 			};
 
-			vector<ivect3>	triface =
+			vector<ivect3>	faces =
 			{
 				{2,3,0},{3,1,0},
 				{3,7,1},{1,7,5},
@@ -1045,6 +1045,30 @@ struct Apr : public Sys
 
 		} ring;
 
+		struct Trigon
+		{
+			double	z;
+			vect2	v0;
+			vect2	v1;
+			vect2	v2;
+			int		col;
+			Trigon( 
+				double	_z,
+				vect2	_v0,
+				vect2	_v1,
+				vect2	_v2,
+				int		_col
+			)
+			:
+			z(_z),
+			v0(_v0),
+			v1(_v1),
+			v2(_v2),
+			col(_col)
+			{}		
+		};
+		
+		vector<Trigon>	trigons;
 
 
 	#if 0
@@ -1452,11 +1476,12 @@ struct Apr : public Sys
 
 			}
 
+
 			// 輪 ring
 			//calcDisp rotate
 			{
 				vect3 l = vect3(0,0,1).normalize();	// 正面ライト
-				for ( ivect3 v : ring.triface )
+				for ( ivect3 v : ring.faces )
 				{
 					mat44	rotx;
 					mat44	roty;
@@ -1482,7 +1507,7 @@ struct Apr : public Sys
 						vect3 a = (v1-v0); 
 						vect3 b = (v2-v0); 
 						vect3 n = cross(a,b).normalize();
-						d = dot(n,l) + 0.1;
+						d = dot(n,l) + 0.2;
 						if ( d < 0.0 ) d=0;
 						if ( d > 1.0 ) d=1.0;
 					}
@@ -1498,11 +1523,21 @@ struct Apr : public Sys
 						vect2 a = vect2(d1-d0);
 						vect2 b = vect2(d2-d0);
 						double z = a.x*b.y-a.y*b.x;
-						if ( z > 0 ) gra.Tri( d0, d1, d2, rgb(d,d,d));
+						if ( z > 0 ) 
+						{
+							trigons.emplace_back( z, d0, d1, d2, rgb(d,d,d) );
+//							gra.Tri( d0, d1, d2, rgb(d,d,d));
+						}
 					}
 				}
-			}		
-
+			}	
+			
+			// トリゴン描画 trigons	
+			for ( Trigon& t : trigons )
+			{
+					gra.Tri( t.v0, t.v1, t.v2, t.col);
+			}
+			trigons.clear();
 
 			// カトマル
 			{
