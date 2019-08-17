@@ -204,14 +204,14 @@ void  SysGra::OnPaint()
 					{
 						vect2 v = m.tblVect2[i++];
 						vect2 param = m.tblVect2[i++];
-						double r = param.x;
+						float r = param.x;
 						
 						int s=0;
 						vect2 v0 = v + vect2(r,0);
 						MoveToEx(hDc, (int)v0.x, (int)v0.y, NULL); 
 						for ( int i = 0 ; i < 360 ; i+=45 )
 						{
-							double th = rad(i);
+							float th = rad(i);
 							vect2 v1 = vect2( r*cos(th), r*sin(th) )+v;
 							LineTo(hDc, (int)v1.x, (int)v1.y); 
 							s++;
@@ -342,7 +342,7 @@ int Sys::GetBytePixels()
 
 
 //------------------------------------------------------------------------------
-int	SysGra::Rgb( double r, double g , double b )
+int	SysGra::Rgb( float r, float g , float b )
 //------------------------------------------------------------------------------
 {
 	r = min( 1.0, r );
@@ -371,7 +371,7 @@ void SysGra::Clr( int col)
 }
 /*
 //------------------------------------------------------------------------------
-void SysGra::Circle( vect2 v, double r, int col )
+void SysGra::Circle( vect2 v, float r, int col )
 //------------------------------------------------------------------------------
 {
 	m.tblVect2.emplace_back( TypeCircleOld, col );
@@ -381,7 +381,7 @@ void SysGra::Circle( vect2 v, double r, int col )
 }
 */
 //------------------------------------------------------------------------------
-void SysGra::Circle( vect2 v0, double r, int col )
+void SysGra::Circle( vect2 v0, float r, int col )
 //------------------------------------------------------------------------------
 {
 	m.tblVect2.emplace_back( TypeCircle, col );

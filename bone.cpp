@@ -21,7 +21,7 @@ using namespace std;
 
 	// カトマル曲線3D
 	//------------------------------------------------------------------------------
-static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vect3 P2, const vect3 P3 )
+static	vect3 catmull3d_func( float t, const vect3 P0, const vect3 P1, const vect3 P2, const vect3 P3 )
 	//------------------------------------------------------------------------------
 	{
 		//catmull-Rom 曲線
@@ -449,11 +449,11 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 			for ( Bone3 b : tblBone )
 			{
 				vect3 v = b.j1.pos - b.j0.pos;
-				double l = v.length() - b.length;
+				float l = v.length() - b.length;
 				vect3 va  =	v.normalize()*l;
 
-				double w0 = 0;
-				double w1 = 0;
+				float w0 = 0;
+				float w1 = 0;
 #if 1
 				if ( b.j0.priority ==1 ) 
 				{
@@ -525,7 +525,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 
 				for ( int i = 0 ; i <= cnt ; i++ )
 				{
-					double t = (double)i / (double)cnt;
+					float t = (float)i / (float)cnt;
 
 					vect3 pos = ( b.j1.pos - b.j0.pos )*t + b.j0.pos;
 
@@ -544,8 +544,8 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 		// マーカースプライン変換表示
 		if ( static_cast<signed>(animations.size()) > 0 )
 		{
-			double dt = anim.dt;
-			double div = 1/dt;
+			float dt = anim.dt;
+			float div = 1/dt;
 
 			for ( int n = -1 ; n < static_cast<signed>(animations[cur.act].pose.size())-3+1 ; n++ )
 			{
@@ -565,7 +565,7 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 					vect3 P2 = animations[cur.act].pose[ n2 ].joint[ j ].pos;
 					vect3 P3 = animations[cur.act].pose[ n3 ].joint[ j ].pos;
 
-					double t = dt;
+					float t = dt;
 					vect3 a = catmull3d_func(0, P0,P1,P2,P3 );
 					for ( int i = 0 ; i <div ; i++ )
 					{
@@ -715,9 +715,9 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 				case ModeJoint:
 					{
 						vector<string> v = split( buf, '\t');
-						double x = stod(v[0]);
-						double y = stod(v[1]);
-						double z = stod(v[2]);
+						float x = stod(v[0]);
+						float y = stod(v[1]);
+						float z = stod(v[2]);
 						tblJoint.emplace_back( vect3(x,y,z) );
 						//	cout << x << "," << y << "," << z << endl; 
 					}
@@ -734,9 +734,9 @@ static	vect3 catmull3d_func( double t, const vect3 P0, const vect3 P1, const vec
 				case ModeMotion:
 					{
 						vector<string> v = split( buf, '\t');
-						double x = stod(v[0]);
-						double y = stod(v[1]);
-						double z = stod(v[2]);
+						float x = stod(v[0]);
+						float y = stod(v[1]);
+						float z = stod(v[2]);
 						animations[act].pose[ animations[act].pose.size()-1 ].joint.emplace_back( vect3(x,y,z) );
 						//	cout << x << "," << y << "," << z << endl; 
 					}

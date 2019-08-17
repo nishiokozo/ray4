@@ -27,8 +27,8 @@ struct Pers
 		void Rotation( vect3 mov )
 		//------------------------------------------------------------------------------
 		{
-			double len = (pos-at).length();
-			double l = (pos-at).length()/10;
+			float len = (pos-at).length();
+			float l = (pos-at).length()/10;
 			l=max(l,0.00001);
 			l=min(l,8);
 
@@ -59,7 +59,7 @@ struct Pers
 		}
 
 		//------------------------------------------------------------------------------
-		void Zoom( double step )
+		void Zoom( float step )
 		//------------------------------------------------------------------------------
 		{
 			vect3	v= vect3(0,0,step);
@@ -75,14 +75,14 @@ struct Pers
 	} cam ;
 
 
-	double	fovy;		// 画角
-	double	sz;			// 投影面までの距離
-	double	fy;			// 投影面の高さ/2（描画スケール）
-	double	cx;			// 描画画面の中心W
-	double	cy;			// 描画画面の中心H
-	double	width;		// 描画画面の解像度W/2
-	double	height;		// 描画画面の解像度H/2
-	double	aspect;		// 描画画面のアスペクト比
+	float	fovy;		// 画角
+	float	sz;			// 投影面までの距離
+	float	fy;			// 投影面の高さ/2（描画スケール）
+	float	cx;			// 描画画面の中心W
+	float	cy;			// 描画画面の中心H
+	float	width;		// 描画画面の解像度W/2
+	float	height;		// 描画画面の解像度H/2
+	float	aspect;		// 描画画面のアスペクト比
 
 	//--------------------------------------------------------------------------
 	Pers()
@@ -115,7 +115,7 @@ struct Pers
 	} 
 
 	//--------------------------------------------------------------------------
-	double getW( double z ) const
+	float getW( float z ) const
 	//--------------------------------------------------------------------------
 	{
 		return 1/((fy/sz)*(z+sz));	// 投影面のz位置を0とした場合のzに対するw値を求める。
@@ -128,7 +128,7 @@ struct Pers
 	{
 		vect3 ret;
 		{
-			double w = getW(v.z);
+			float w = getW(v.z);
 			ret.x = v.x* w *width  *aspect	+cx;
 			ret.y = v.y* w *height			+cy;
 			ret.z = w;	// 三次元ベクトルで返す都合上、ZにW値を入れている。
@@ -142,7 +142,7 @@ struct Pers
 	//--------------------------------------------------------------------------
 	{
 		vect3 v;
-		double w = getW(0);
+		float w = getW(0);
 		v.x = (q.x -cx)/(w *width  *aspect);
 		v.y = (q.y -cy)/(w *height);
 		v.z = 0;
@@ -150,7 +150,7 @@ struct Pers
 	}
 	
 	//--------------------------------------------------------------------------
-	vect3 calcRay( vect3 v1, double len ) 
+	vect3 calcRay( vect3 v1, float len ) 
 	//--------------------------------------------------------------------------
 	{
 		vect3 v0 = vect3(0,0,-sz) * cam.mat; // 投影原点
@@ -213,7 +213,7 @@ struct Pers
 	void line3d( SysGra& gra, vect3 p0, vect3 p1, int col )
 	//------------------------------------------------------------------------------
 	{
-		double l = 0.2;
+		float l = 0.2;
 		vect3 a = p0* cam.mat.invers();
 		vect3 b = p1* cam.mat.invers();
 		vect3 v0;

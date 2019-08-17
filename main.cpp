@@ -49,17 +49,17 @@ struct Apr : public Sys
 		int	col;
 		Figure( SysGra& _gra ) : gra(_gra) {}
 
-		void draw( vect2 ofs, double th, int col ) const 
+		void draw( vect2 ofs, float th, int col ) const 
 		{
 			for ( ivect2 e : edge )
 			{
 				const vect2& p = vert[e.p];
 				const vect2& n = vert[e.n];
 
-				double x0=p.x*cos(th) - p.y*sin(th) + ofs.x;
-				double y0=p.x*sin(th) + p.y*cos(th) + ofs.y;
-				double x1=n.x*cos(th) - n.y*sin(th) + ofs.x;
-				double y1=n.x*sin(th) + n.y*cos(th) + ofs.y;
+				float x0=p.x*cos(th) - p.y*sin(th) + ofs.x;
+				float y0=p.x*sin(th) + p.y*cos(th) + ofs.y;
+				float x1=n.x*cos(th) - n.y*sin(th) + ofs.x;
+				float y1=n.x*sin(th) + n.y*cos(th) + ofs.y;
 
 				gra.Line(vect2(x0,y0), vect2(x1,y1),col);
 			}
@@ -97,7 +97,7 @@ struct Apr : public Sys
 	{
 		vect2 pos;
 		vect2 tension;
-		double len;
+		float len;
 		Joint2( vect2 v )
 		{
 			pos = v;
@@ -122,7 +122,7 @@ struct Apr : public Sys
 	{
 		Joint2& j0;
 		Joint2& j1;
-		double length;
+		float length;
 		Bone2( Joint2& _j0, Joint2& _j1 ) :j0(_j0), j1(_j1){}
 		Bone2( Joint2&& _j0, Joint2&& _j1 ) :j0(_j0), j1(_j1){}
 	};
@@ -198,7 +198,7 @@ struct Apr : public Sys
 		bool rect_bSelect = false;	//	矩形選択中フラグ
 		struct
 		{
-			double	len;
+			float	len;
 			Marker*	pm;
 			int		cnt;
 		} a = {99999,0,0};
@@ -216,7 +216,7 @@ struct Apr : public Sys
 			// 最近マーカーを検索
 			for ( Marker& m : tblMarker )
 			{
-				double len = (m.obj.Pos2()-mouse_pos).length();
+				float len = (m.obj.Pos2()-mouse_pos).length();
 				if ( len < 20.0 && a.len > len )
 				{
 					a.len = len;
@@ -286,7 +286,7 @@ struct Apr : public Sys
 			// 矩形カーソル内マーカーを検索
 			for ( Marker& m : tblMarker )
 			{
-				double len = (m.obj.Pos2()-mouse_pos).length();
+				float len = (m.obj.Pos2()-mouse_pos).length();
 				if ( m.obj.Pos2().x > v0.x && m.obj.Pos2().x < v1.x && m.obj.Pos2().y > v0.y && m.obj.Pos2().y < v1.y )
 				{
 					m.obj.bRectIn = true;
@@ -311,7 +311,7 @@ struct Apr : public Sys
 			// 矩形カーソル内マーカーを検索
 			for ( Marker& m : tblMarker )
 			{
-				double len = (m.obj.Pos2()-mouse_pos).length();
+				float len = (m.obj.Pos2()-mouse_pos).length();
 				if ( m.obj.Pos2().x > v0.x && m.obj.Pos2().x < v1.x && m.obj.Pos2().y > v0.y && m.obj.Pos2().y < v1.y )
 				{
 					m.obj.bRectIn = true;
@@ -420,7 +420,7 @@ struct Apr : public Sys
 			{
 					vect3 v0 = apr.pers.calcDisp( pos * apr.pers.cam.mat.invers() );
 					disp = v0;
-				double l = 30;
+				float l = 30;
 				if ( bAxisX  )
 				{
 					vect3 v1 = v0 + vect3( l,0,0) * apr.pers.cam.mat.invers();
@@ -453,7 +453,7 @@ struct Apr : public Sys
 		
 			if(0)
 			{
-				double l = 0.1;
+				float l = 0.1;
 
 				if ( bAxisX ) apr.line3d( (pos + vect3(-l,0,0)), (pos + vect3(l,0,0)), rgb(1,0,0) );
 				if ( bAxisY ) apr.line3d( (pos + vect3(0,-l,0)), (pos + vect3(0,l,0)), rgb(0,1,0) );
@@ -462,7 +462,7 @@ struct Apr : public Sys
 
 			if(0)
 			{
-				double l = 0.1;
+				float l = 0.1;
 				if ( bAxisX && bAxisY )
 				{
 					apr.line3d( (pos + vect3(-l,-l,0)), (pos + vect3( l,-l,0)), rgb(0,0,1) );
@@ -490,7 +490,7 @@ struct Apr : public Sys
 
 			if(0)
 			{
-				double l = 0.15;
+				float l = 0.15;
 				if ( bAxisZ && bAxisY ) apr.circle3d_x( pos, l, rgb(1,0,0) );
 				if ( bAxisX && bAxisZ ) apr.circle3d_y( pos, l, rgb(0,1,0) );
 				if ( bAxisX && bAxisY ) apr.circle3d_z( pos, l, rgb(0,0,1) );
@@ -513,7 +513,7 @@ struct Apr : public Sys
 	void line3d( vect3 p0, vect3 p1, int col )
 	//------------------------------------------------------------------------------
 	{
-		double l = 0.2;
+		float l = 0.2;
 		vect3 a = p0* pers.cam.mat.invers();
 		vect3 b = p1* pers.cam.mat.invers();
 		vect3 v0;
@@ -526,7 +526,7 @@ struct Apr : public Sys
 	void othro_line3d( vect3 p0, vect3 p1, int col )
 	//------------------------------------------------------------------------------
 	{
-		double l = 0.2;
+		float l = 0.2;
 		vect3 a = p0* pers.cam.mat.invers();
 		vect3 b = p1* pers.cam.mat.invers();
 		vect3 v0;
@@ -536,7 +536,7 @@ struct Apr : public Sys
 	}
 
 	//------------------------------------------------------------------------------
-	void circle3d_x( vect3 pos,  double r, int col )
+	void circle3d_x( vect3 pos,  float r, int col )
 	//------------------------------------------------------------------------------
 	{
 		vect2 v0;
@@ -551,7 +551,7 @@ struct Apr : public Sys
 	}
 
 	//------------------------------------------------------------------------------
-	void circle3d_y( vect3 pos,  double r, int col )
+	void circle3d_y( vect3 pos,  float r, int col )
 	//------------------------------------------------------------------------------
 	{
 		vect2 v0;
@@ -566,7 +566,7 @@ struct Apr : public Sys
 	}
 
 	//------------------------------------------------------------------------------
-	void circle3d_z( vect3 pos,  double r, int col )
+	void circle3d_z( vect3 pos,  float r, int col )
 	//------------------------------------------------------------------------------
 	{
 		vect2 v0;
@@ -585,10 +585,10 @@ struct Apr : public Sys
 	bool funcIntersectPlate( vect3 plate_P, vect3 plate_N, vect3 P , vect3 I, vect3& Q)
 	//------------------------------------------------------------------------------
 	{
-		double	f = dot(plate_N, P - plate_P);
+		float	f = dot(plate_N, P - plate_P);
 	//	if ( f > 0 )
 		{
-			double	t = -f/dot( plate_N, I );
+			float	t = -f/dot( plate_N, I );
 
 			if ( t >= 0 )
 			{
@@ -605,11 +605,11 @@ struct Apr : public Sys
 		int		mode;
 		int		NUM_U;
 		int		NUM_V;
-		double	dt;
+		float	dt;
 		int		col;
 	
 		//------------------------------------------------------------------------------
-		void SetMesh( vect3 _pos, int _mode, int _NUM_U, int _NUM_V, double _dt, int _col )
+		void SetMesh( vect3 _pos, int _mode, int _NUM_U, int _NUM_V, float _dt, int _col )
 		//------------------------------------------------------------------------------
 		{	// ミニグリッド
 			pos 	= _pos;
@@ -624,10 +624,10 @@ struct Apr : public Sys
 		//------------------------------------------------------------------------------
 		{	// ミニグリッド
 	//			const int NUM_U = 5;
-	//		double dt = 0.05;
+	//		float dt = 0.05;
 			vect3 vt = vect3(0,0,0);
-			double du = NUM_U*dt;
-			double dv = NUM_V*dt;
+			float du = NUM_U*dt;
+			float dv = NUM_V*dt;
 			vect3 a;
 			vect3 b;
 //			int col = rgb(0.2,0.2,0.2)*2;
@@ -706,7 +706,7 @@ struct Apr : public Sys
 
 		Figure figTriangle=Figure(gra);
 		{
-			const double R=30;
+			const float R=30;
 			figTriangle.vert.emplace_back( (vect2){   0,R*tan(rad(60))	-R*tan(rad(30)) } );
 			figTriangle.vert.emplace_back( (vect2){-R,  0 	    	   	-R*tan(rad(30)) } );
 			figTriangle.vert.emplace_back( (vect2){ R,  0 				-R*tan(rad(30)) } );
@@ -720,8 +720,8 @@ struct Apr : public Sys
 			int s=0;
 			for ( int i = 0 ; i < 360 ; i+=45 )
 			{
-				double th = i*pi/180.0;
-				double r = 7;
+				float th = i*pi/180.0;
+				float r = 7;
 				vect2 v( r*cos(th), r*sin(th) );
 				figCircle.vert.emplace_back( v );
 				s++;
@@ -734,7 +734,7 @@ struct Apr : public Sys
 		}
 
 		// カトマル曲線2D
-		auto catmull_func = []( double t, const vect2 P0, const vect2 P1, const vect2 P2, const vect2 P3 )
+		auto catmull_func = []( float t, const vect2 P0, const vect2 P1, const vect2 P2, const vect2 P3 )
 		{
 			//catmull-Rom 曲線
 			// P(t)=P1*(2t^3-3t^2+1)+m0*(t^3-2t^2+t)+P2*(-2t^3+3t^2)+m1*(t^3-t^2)
@@ -762,7 +762,7 @@ struct Apr : public Sys
 		};
 		
 		//3字曲線
-		auto bezier_func = [] ( double t, vect2 P0, vect2 P1, vect2 P2, vect2 P3 )
+		auto bezier_func = [] ( float t, vect2 P0, vect2 P1, vect2 P2, vect2 P3 )
 		{
 		#if 1
 			vect2 L0=(P1-P0)*t+P0;
@@ -774,8 +774,8 @@ struct Apr : public Sys
 
 			vect2 Q=(M1-M0)*t+M0;
 		#else
-			double tt = t*t;
-			double ttt = tt*t;
+			float tt = t*t;
+			float ttt = tt*t;
 			vect2 Q=
 				 P3*  ttt
 				+P2*(-ttt*3 +tt*3)
@@ -873,7 +873,7 @@ struct Apr : public Sys
 				}
 			};
 
-			double R=80;
+			float R=80;
 			tblJoint_2d.emplace_back( vect2(200+0, 500-R*tan(rad(60))	-R*tan(rad(30)) ));
 			tblJoint_2d.emplace_back( vect2(200-R, 500+  	    	   	-R*tan(rad(30))) );
 			tblJoint_2d.emplace_back( vect2(200+R, 500+  				-R*tan(rad(30))) );
@@ -891,7 +891,7 @@ struct Apr : public Sys
 #if 0 
 		Bone* pPreset = new Bone;
 		{	//	人
-			double cx=0,cy=-160,os=0.01;
+			float cx=0,cy=-160,os=0.01;
 
 			pPreset->tblJoint.emplace_back( os*vect3( cx-10,	cy- 20,	0 )	);//0
 			pPreset->tblJoint.emplace_back( os*vect3( cx+10,	cy- 20,	0 )	);//1
@@ -976,9 +976,9 @@ struct Apr : public Sys
 		// 箱
 		struct
 		{
-			double	rx = rad(0);
-			double	ry = rad(0);
-			double	rz = rad(0);
+			float	rx = rad(0);
+			float	ry = rad(0);
+			float	rz = rad(0);
 
 			vect3 pos = {4.5,-0.51,8.5};
 
@@ -1301,7 +1301,7 @@ struct Apr : public Sys
 								vect3 v0 = pers.calcDisp( vect3(i,0,j)  * pers.cam.mat.invers() );
 								if ( v0.z > 0 ) 
 								{
-									double r = 5* v0.z;
+									float r = 5* v0.z;
 									if ( r < 1.0 )
 									{
 										gra.Pset( vect2(v0.x,v0.y), col);
@@ -1324,7 +1324,7 @@ struct Apr : public Sys
 			{
 
 	#if 0
-				double	x,y,z;
+				float	x,y,z;
 				//box.rz
 				x=v.x*cos(box.rz) - v.y*sin(box.rz) + v.z *0;
 				y=v.x*sin(box.rz) + v.y*cos(box.rz) + v.z *0;
@@ -1436,8 +1436,8 @@ struct Apr : public Sys
 			{
 				// マーカースプライン変換表示
 				{
-					double div = 10;
-					double dt = 1/div;
+					float div = 10;
+					float dt = 1/div;
 
 					for ( int n = -1 ; n < static_cast<signed>(catmull_tbl.size())-3+1 ; n++ )
 					{
@@ -1448,7 +1448,7 @@ struct Apr : public Sys
 						if ( n0 < 0 ) n0 = 0;
 						if ( n3 >= static_cast<signed>(catmull_tbl.size()) ) n3 = n2;
 					
-						double t = dt;
+						float t = dt;
 						vect2 v0 = catmull_func(0, catmull_tbl[n0].pos, catmull_tbl[n1].pos, catmull_tbl[n2].pos, catmull_tbl[n3].pos );
 						for ( int i = 0 ; i <div ; i++ )
 						{
@@ -1470,12 +1470,12 @@ struct Apr : public Sys
 			// ベジェ 三次曲線
 			{
 				{//ベジェ計算＆描画
-					double div = 20;
-					double dt = 1/div;
+					float div = 20;
+					float dt = 1/div;
 
 					for ( int n = 0 ; n < static_cast<signed>(bezier_tbl.size())-3 ; n+=3 )
 					{
-						double t  = dt;
+						float t  = dt;
 						vect2 v0 = bezier_tbl[n+0].pos;
 						for ( int i = 0 ; i < div ; i++ )
 						{
@@ -1510,7 +1510,7 @@ struct Apr : public Sys
 			if(1)
 			{//ベジェアニメーション
 		
-				static	double t = 0;
+				static	float t = 0;
 				static	bool	bForward = true;
 
 				static int n = 0;
@@ -1554,7 +1554,7 @@ struct Apr : public Sys
 			if(1)
 			{//カトマルアニメーション
 		
-				static	double t = 0;
+				static	float t = 0;
 				static	bool	bForward = true;
 
 				static int n = 0;
@@ -1839,17 +1839,17 @@ struct Apr : public Sys
 										{
 											if ( manupirator.bAxisY )
 											{
-												double y  = dot( (Q-Q0), vect3(0,1,0) );
+												float y  = dot( (Q-Q0), vect3(0,1,0) );
 												pj->pos.y += y;
 											}
 											if ( manupirator.bAxisZ )
 											{
-												double z  = dot( (Q-Q0), vect3(0,0,1) );
+												float z  = dot( (Q-Q0), vect3(0,0,1) );
 												pj->pos.z += z;
 											}
 											if ( manupirator.bAxisX )
 											{
-												double x  = dot( (Q-Q0), vect3(1,0,0) );
+												float x  = dot( (Q-Q0), vect3(1,0,0) );
 												pj->pos.x += x;
 											}
 											//circle3d_y( pj->pos, 0.1, rgb(0.8,0.2,0.2) );
@@ -1897,8 +1897,8 @@ struct Apr : public Sys
 					for ( Bone2 b : tblBone_2d )
 					{
 						vect2 v = b.j1.pos - b.j0.pos;
-						double l = v.length() - b.length;
-						double w = 0;
+						float l = v.length() - b.length;
+						float w = 0;
 
 						vect2 va  =	v.normalize()*l;
 						if ( &tar == &b.j0 )
@@ -2005,7 +2005,7 @@ struct Apr : public Sys
 			// 塗りつぶし三角
 			{
 				vect2	ofs = vect2(10,432);
-				double	scale=0.5;
+				float	scale=0.5;
 				vect2	v0 = scale * vect2( 55,0) + ofs;
 				vect2	v1 = scale * vect2( 10,90) + ofs;
 				vect2	v2 = scale * vect2(100,90) + ofs;

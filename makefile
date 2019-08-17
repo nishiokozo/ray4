@@ -17,13 +17,14 @@ SRCS = \
 	SysMouse.cpp \
 
 LIBS = \
-	 -lgdi32
+	-lgdi32 \
+	-lopengl32 \
 
 FLGS = \
 	-c -g \
 	-std=c++14 \
 	-Werror \
-	-Wall -Wno-unused -Wconversion -Wno-sign-conversion -Wno-shorten-64-to-32\
+	-Wall -Wno-unused -Wconversion -Wno-sign-conversion -Wno-shorten-64-to-32 -Wno-implicit-float-conversion
 
 FILE=main.o
 

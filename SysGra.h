@@ -66,10 +66,10 @@ struct SysGra
 	void	Fill( vect2 v0, vect2 v1, int col);
 	void	Line( vect2 v0, vect2 v1, int col);
 	void	Pset( vect2 v0, int col);
-//	void	CircleOld( vect2 v, double r, int col );
-	void	Circle( vect2 v, double r, int col );
+//	void	CircleOld( vect2 v, float r, int col );
+	void	Circle( vect2 v, float r, int col );
 	void	Clr( int col );
-	int 	Rgb(double r, double g , double b );
+	int 	Rgb(float r, float g , float b );
 
 	SysGra();
 	~SysGra();

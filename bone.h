@@ -6,13 +6,13 @@ struct Ring
 	#define	USE_TRIGON	1
 	struct PrimTrigon
 	{
-		double	z;
+		float	z;
 		vect2	v0;
 		vect2	v1;
 		vect2	v2;
 		int		col;
 		PrimTrigon( 
-			double	_z,
+			float	_z,
 			vect2	_v0,
 			vect2	_v1,
 			vect2	_v2,
@@ -53,8 +53,8 @@ struct Ring
 	vector<PrimLine>	lines;
 
 
-	const double h = 0.05;
-	const double w = 0.08;
+	const float h = 0.05;
+	const float w = 0.08;
 	vector<vect3> tbl_vert=
 	{
 		{	-w,	 h,	-w	},
@@ -109,7 +109,7 @@ struct Ring
 			v1 = v1 * pers.cam.mat.invers();
 			v2 = v2 * pers.cam.mat.invers();
 
-			double d = 0;
+			float d = 0;
 			{
 				vect3 a = (v1-v0); 
 				vect3 b = (v2-v0); 
@@ -129,7 +129,7 @@ struct Ring
 			{
 				vect2 a = vect2(d1-d0);
 				vect2 b = vect2(d2-d0);
-				double z = a.x*b.y-a.y*b.x;
+				float z = a.x*b.y-a.y*b.x;
 				if ( z > 0 ) 
 				{
 					trigons.emplace_back( z, d0, d1, d2, rgb(d,d,d) );
@@ -199,7 +199,7 @@ struct Joint3 : Obj
 	vect3 pos;
 	vect3 tension;
 	vect3 disp;
-	double len;
+	float len;
 	int priority;
 	
 	vector<reference_wrapper<Joint3>>	relative;
@@ -239,7 +239,7 @@ struct Bone3
 	int n1;
 	Joint3& j0;
 	Joint3& j1;
-	double length;
+	float length;
 	Bone3( vector<Joint3>& tbl, int _n0, int _n1 ) :n0(_n0), n1(_n1), j0(tbl[_n0]), j1(tbl[_n1]){}
 };
 
@@ -278,8 +278,8 @@ struct Bone
 	} cur;
 	struct
 	{
-		double	t = 0;
-		double	dt = 0.1;
+		float	t = 0;
+		float	dt = 0.1;
 		int n = 0;
 		bool	bForward = true;
 		bool	bPlaying = false;

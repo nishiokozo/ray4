@@ -12,16 +12,16 @@ using namespace std;
 #include "raytrace.h"
 
 
-const	static	double INFINIT =  numeric_limits<double>::max();	//DBL_MAX
+const	static	float INFINIT =  numeric_limits<float>::max();	//DBL_MAX
 
 struct  Material
 {
 	vect3	C;					//	ベースカラー
-	double	valReflectance;		//	反射率
-	double	valRefractive;		//	屈折率
-	double	valPower;			//	スペキュラ強度
-	double	valEmissive;		//	エミッシブ
-	double	valTransmittance;	//	透過率
+	float	valReflectance;		//	反射率
+	float	valRefractive;		//	屈折率
+	float	valPower;			//	スペキュラ強度
+	float	valEmissive;		//	エミッシブ
+	float	valTransmittance;	//	透過率
 };
 
 
@@ -35,7 +35,7 @@ struct	Surface : Material
 		STAT_BACK,
 	};
 
-	double	t;
+	float	t;
 	bool	flg; 
 	int		stat; 
 		// 0:none
@@ -65,9 +65,9 @@ struct	Surface : Material
 struct PrimSphere : public Material
 {
 	vect3	P;
-	double	r;
+	float	r;
 
-	PrimSphere( const vect3& _p, double _r, vect3 _c, double _valReflection, double _valRefractive, double _valPower, double _valEmissive, double _valTransmittance )
+	PrimSphere( const vect3& _p, float _r, vect3 _c, float _valReflection, float _valRefractive, float _valPower, float _valEmissive, float _valTransmittance )
 	{
 		P = _p;
 		r = _r;
@@ -84,7 +84,7 @@ struct PrimPlate : public Material
 	vect3	P;
 	vect3	N;
 
-	PrimPlate( const vect3& _p, const vect3& _n, vect3 _c, double _valReflection, double _valRefractive, double _valPower, double _valEmissive, double _valTransmittance )
+	PrimPlate( const vect3& _p, const vect3& _n, vect3 _c, float _valReflection, float _valRefractive, float _valPower, float _valEmissive, float _valTransmittance )
 	{
 		P = _p;
 		N = _n;
@@ -141,17 +141,17 @@ public:
 			PrimSphere&	obj = m_tblSphere[i];
 
 			vect3	O = obj.P;
-			double	r = obj.r;
+			float	r = obj.r;
 
 			vect3	OP = P-O;
-			double	b = dot( I, OP );
-			double	aa = r*r - dot(OP,OP)+ b*b;
+			float	b = dot( I, OP );
+			float	aa = r*r - dot(OP,OP)+ b*b;
 
 			int	stat = 0;
 
 			if ( aa >= 0 )
 			{
-				double t = - sqrt( aa ) - b;
+				float t = - sqrt( aa ) - b;
 
 				if ( t < 0 )
 				{
@@ -202,10 +202,10 @@ public:
 		{
 			PrimPlate&	obj = m_tblPlate[i];
 
-			double	f = dot(obj.N,P - obj.P);
+			float	f = dot(obj.N,P - obj.P);
 			if ( f > 0 )
 			{
-				double	t = -f/dot(obj.N,I);
+				float	t = -f/dot(obj.N,I);
 
 				if ( sur.t >= t && t >= 0 )
 				{
@@ -265,7 +265,7 @@ public:
 		A = vect3(0,0,0);
 
 
-		double r,s,pw,e,tm,rl,rr;
+		float r,s,pw,e,tm,rl,rr;
 		vect3	P,C,N;
 
 	#define	SCENE 3
@@ -294,11 +294,11 @@ public:
 		int	max = 16*3;
 		for ( int i = 0 ; i < max ; i++ )
 		{
-			double	th  = (double)i *(pi/360)*16 * 3;
-			double	th2 = (double)i *(pi/360)*16 * 0.5;
-			double	x = cos(th);
-			double	z = sin(th) ;
-			double	y = cos(th2) +1.2;
+			float	th  = (float)i *(pi/360)*16 * 3;
+			float	th2 = (float)i *(pi/360)*16 * 0.5;
+			float	x = cos(th);
+			float	z = sin(th) ;
+			float	y = cos(th2) +1.2;
 			m_tblSphere.push_back( PrimSphere(P=vect3( x , y , z ),r=0.2 ,C=vect3( x, y,  z) ,rl=0.2,rr=0.0 ,pw=100,e= 0.0,tm=0.0 ) );
 
 		}
@@ -340,10 +340,10 @@ public:
 		PrimLight&	lgt = m_tblLight[0];
 		vect3	Lc;
 		vect3	L;
-		double	d;
-		double	s=0;
-		double	r=0;
-		double	t=0;
+		float	d;
+		float	s=0;
+		float	r=0;
+		float	t=0;
 		
 		if ( (sur = raycast( P, I )).flg )
 		{
@@ -388,7 +388,7 @@ public:
 		vect3	posScr = vect3(0,1.0,-12+8);
 		vect3	posEye = vect3(0,1.0,-17+8);
 
-		double r,s,p,e,t,rl,rr;
+		float r,s,p,e,t,rl,rr;
 		vect3	C;
 
 		int	cntMax = 0;
@@ -397,12 +397,12 @@ public:
 		{
 			for( int px = 0 ; px < width ; px++ )
 			{
-				double x = ((double)px / width) *2.0-1.0;
-				double y = ((double)py / height) *2.0-1.0;
+				float x = ((float)px / width) *2.0-1.0;
+				float y = ((float)py / height) *2.0-1.0;
 				vect3	P = vect3( x, y, 0 ) + posScr;
 				vect3	I = normalize(P - posEye);
 
-				double	valRefractive = 1.0;
+				float	valRefractive = 1.0;
 
 				m_cntRay = 0;
 				int	cntNext = 0;
@@ -437,13 +437,13 @@ void	raytrace( SysGra& gra )
 		int width	= gra.GetWidth(); 
 		int height	= gra.GetHeight(); 
 
-		double	aspect = (double)width / (double)height;
-		double	center_x = -((double)width / (double)height)/2;
+		float	aspect = (float)width / (float)height;
+		float	center_x = -((float)width / (float)height)/2;
 	
 		vect3	posScr = vect3(center_x,1.0,-12+8);
 		vect3	posEye = vect3(center_x,1.0,-17+8);
 
-		double r,s,p,e,t,rl,rr;
+		float r,s,p,e,t,rl,rr;
 		vect3	C;
 
 		int	cntMax = 0;
@@ -452,12 +452,12 @@ void	raytrace( SysGra& gra )
 		{
 //			for( int px = 0 ; px < width ; px++ )
 			{
-				double x = ((double)px / width) *2.0*aspect-1.0;
-				double y = ((double)py / height) *2.0-1.0;
+				float x = ((float)px / width) *2.0*aspect-1.0;
+				float y = ((float)py / height) *2.0-1.0;
 				vect3	P = vect3( x, y, 0 ) + posScr;
 				vect3	I = normalize(P - posEye);
 
-				double	valRefractive = 1.0;
+				float	valRefractive = 1.0;
 
 				ren.m_cntRay = 0;
 				int	cntNext = 0;

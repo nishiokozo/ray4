@@ -37,7 +37,7 @@ public:
 //	int	mx;	//	マウスカーソル移動量
 //	int	my;
 
-	double	wheel;
+	float	wheel;
 /*
 	struct 
 	{

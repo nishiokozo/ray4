@@ -14,6 +14,7 @@ using namespace std;
 
 
 
+
 static struct
 {
 	function<void()> funcOnCreate;
@@ -110,7 +111,8 @@ static LRESULT CALLBACK WinProc
 	{
 		case WM_CREATE:	// CreateWindowと同時に発行される
 			cout << "WM_CREATE " << endl;
-			g.funcOnCreate();
+		//	g.funcOnCreate();//ここだとinstance経由でhWndが取得できない
+
 			RegisterTouchWindow( hWnd, TWF_WANTPALM );//WM_TOUCH有効、迅速反応、1回タッチで1マウスクリック相当に是正される。必須。
 			return 0;
 
@@ -270,6 +272,7 @@ SysWin::SysWin()
 {
 }
 
+
 //------------------------------------------------------------------------------
 void SysWin::OpenWindow( const char* windowname, int pos_x, int pos_y, int width, int height  )
 //------------------------------------------------------------------------------
@@ -323,6 +326,8 @@ void SysWin::OpenWindow( const char* windowname, int pos_x, int pos_y, int width
 			, 0					// pointer to window-creation data
 		);
 
+		g.funcOnCreate();//WM_CREATEからだと、instance経由でhWndが取得できないのでここから呼び出す。
+
 	}
 
 	g.pos_x		= pos_x;
@@ -352,8 +357,11 @@ void SysWin::OpenWindow( const char* windowname, int pos_x, int pos_y, int width
 		);
 	}
 	
+
+
 	// ウィンドウを表示する
 	ShowWindow( win.hWnd, SW_SHOW );
+
 
 }
 
@@ -374,6 +382,8 @@ bool SysWin::Update()
 
 		g.wheelResult = g.wheelAccum;
 		g.wheelAccum = 0;
+
+
 
 		return true;
 	}
