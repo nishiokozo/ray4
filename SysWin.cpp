@@ -326,7 +326,6 @@ void SysWin::OpenWindow( const char* windowname, int pos_x, int pos_y, int width
 			, 0					// pointer to window-creation data
 		);
 
-		g.funcOnCreate();//WM_CREATEからだと、instance経由でhWndが取得できないのでここから呼び出す。
 
 	}
 
@@ -356,6 +355,7 @@ void SysWin::OpenWindow( const char* windowname, int pos_x, int pos_y, int width
 			,0
 		);
 	}
+		g.funcOnCreate();//WM_CREATEからだと、instance経由でhWndが取得できないのでここから呼び出す。
 	
 
 

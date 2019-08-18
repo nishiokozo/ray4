@@ -42,6 +42,9 @@ struct SysGra
 
 
 	} m;
+
+	bool bGl = false;
+
 //	 BITMAP bmBitmap;
 
 	int GetWidth();
