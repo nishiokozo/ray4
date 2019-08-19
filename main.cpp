@@ -41,31 +41,6 @@ struct Apr : public Sys
 
 	long long	time_peak = 0;
 
-	struct Figure
-	{
-		SysGra&	gra;
-		vector<vect2> vert;
-		vector<ivect2> edge;
-		rgb	col;
-		Figure( SysGra& _gra ) : gra(_gra) {}
-
-		void draw( vect2 ofs, float th, rgb col ) const 
-		{
-			for ( ivect2 e : edge )
-			{
-				const vect2& p = vert[e.p];
-				const vect2& n = vert[e.n];
-
-				float x0=p.x*cos(th) - p.y*sin(th) + ofs.x;
-				float y0=p.x*sin(th) + p.y*cos(th) + ofs.y;
-				float x1=n.x*cos(th) - n.y*sin(th) + ofs.x;
-				float y1=n.x*sin(th) + n.y*cos(th) + ofs.y;
-
-				gra.Line(vect2(x0,y0), vect2(x1,y1),col);
-			}
-		}
-
-	};
 
 	struct Marker
 	{
@@ -92,106 +67,28 @@ struct Apr : public Sys
 	};
 
 
-
-	struct Joint2 : Obj
-	{
-		vect2 pos;
-		vect2 tension;
-		float len;
-		Joint2( vect2 v )
-		{
-			pos = v;
-			tension = 0;
-			len = 0;
-		}
-		void Move2( vect2 v )
-		{
-			pos += v;
-		}
-		vect2 Pos2()
-		{
-			return pos;
-		}
-		bool IsVisuable()
-		{
-			return true;
-		}
-		virtual ~Joint2(){}
-	};
-	struct Bone2
-	{
-		Joint2& j0;
-		Joint2& j1;
-		float length;
-		Bone2( Joint2& _j0, Joint2& _j1 ) :j0(_j0), j1(_j1){}
-		Bone2( Joint2&& _j0, Joint2&& _j1 ) :j0(_j0), j1(_j1){}
-	};
-	struct Catmull : Obj
-	{
-		vect2	pos;
-		Catmull( const vect2& _pos ) : pos(_pos){}
-
-		void Move2( vect2 v )
-		{
-			pos += v;
-		}
-		vect2 Pos2()
-		{
-			return pos;
-		}
-		bool IsVisuable()
-		{
-			return true;
-		}
-
-	};
-	struct Bezier : Obj
-	{
-		vect2	pos;
-		Bezier( const vect2& _pos ) : pos(_pos){}
-		void Move2( vect2 v )
-		{
-			pos += v;
-		}
-		vect2 Pos2()
-		{
-			return pos;
-		}
-		bool IsVisuable()
-		{
-			return true;
-		}
-	};
-
-	struct PinAxis : Obj
-	{
-		
-		vect3 disp;
-		void Move2( vect2 v )
-		{
-		}
-		vect2 Pos2()
-		{
-			return vect2( disp.x, disp.y );
-		}
-		bool IsVisuable()
-		{
-			return true;
-		}
-	};
+//	struct PinAxis : Obj
+//	{
+//		
+//		vect3 disp;
+//		void Move2( vect2 v )
+//		{
+//		}
+//		vect2 Pos2()
+//		{
+//			return vect2( disp.x, disp.y );
+//		}
+//		bool IsVisuable()
+//		{
+//			return true;
+//		}
+//	};
 	
 
 
 	struct Selector
 	{
-		enum MODE
-		{
-			MODE_NONE,
-			MODE_2D,
-			MODE_3D,
-		};
 
-		int mode = MODE_NONE;
 
 		vector<Marker>	tblMarker;
 		vect2 rect_pos = vect2(0,0);			//	矩形選択開始位置
@@ -202,11 +99,11 @@ struct Apr : public Sys
 			Marker*	pm;
 			int		cnt;
 		} a = {99999,0,0};
-		rgb		colNormal = vect3(0.5,0.5,0);
-		rgb		colSelected = vect3(1,0,0);
+		rgb		colNormal = vect3(0.8,0.8,0);
+		rgb		colSelected = vect3(0.8,0,0);
 
 		//---------------------------------------------------------------------
-		void clear( vect2 mouse_pos )
+		void searchNear( vect2 mouse_pos )
 		//---------------------------------------------------------------------
 		{
 			a.len = 9999;
@@ -217,7 +114,7 @@ struct Apr : public Sys
 			for ( Marker& m : tblMarker )
 			{
 				float len = (m.obj.Pos2()-mouse_pos).length();
-				if ( len < 20.0 && a.len > len )
+				if ( len < 20.0f/512.0f && a.len > len )
 				{
 					a.len = len;
 					a.pm = &m;
@@ -364,11 +261,11 @@ struct Apr : public Sys
 					
 					if ( flg )			
 					{
-						gra.Circle( m.obj.Pos2(), 7, colSelected );
+						gra.Pset( m.obj.Pos2(), colSelected,9 );
 					}
 					else
 					{
-						gra.Circle( m.obj.Pos2(), 7, colNormal );
+						gra.Pset( m.obj.Pos2(), colNormal,9 );
 					}
 				}
 			}
@@ -380,129 +277,57 @@ struct Apr : public Sys
 
 	Selector selector;
 
-	struct Manupirator : Obj
+	struct Manupirator
 	{
-		vect3 disp;
-		void Move2( vect2 v )
-		{
-		}
-		vect2 Pos2()
-		{
-			return vect2( disp.x, disp.y );
-		}
-		bool IsVisuable()
-		{
-			return true;
-		}
 
 		bool bAxisX = true;;
 		bool bAxisY = true;;
 		bool bAxisZ = true;;
 
-		vect3	pos = vect3(0,-1,0);
-		bool bActive = true;
-		
-		PinAxis	pinAxisX;
-		PinAxis	pinAxisY;
-		PinAxis	pinAxisZ;
-
 		//------------------------------------------------------------------------------
-		void manupirator_setPos( vect3 _pos )
+		void manupirator_drawAxis( vect3 pos, Apr& apr )
 		//------------------------------------------------------------------------------
 		{
-			pos = _pos;
-			bActive = true;
-		}
-		//------------------------------------------------------------------------------
-		void manupirator_drawAxis( Apr& apr )
-		//------------------------------------------------------------------------------
-		{
+			vect3 v0 = apr.pers.calcDisp( pos * apr.pers.cam.mat.invers() );
+
+
+
+			float l = 0.1;
+			if ( bAxisX  )
 			{
-					vect3 v0 = apr.pers.calcDisp( pos * apr.pers.cam.mat.invers() );
-					disp = v0;
-				float l = 30;
-				if ( bAxisX  )
-				{
-					vect3 v1 = v0 + vect3( l,0,0) * apr.pers.cam.mat.invers();
-					apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(1,0,0) );
-	
-					pinAxisX.disp = v1;
-	
-				}
-				if ( bAxisY  )
-				{
-					vect3 v1 = v0 + vect3( 0,l,0) * apr.pers.cam.mat.invers();
-					apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,1,0) );
-	
-					pinAxisY.disp = v1;
-				}
-				if ( bAxisZ )
-				{
-					vect3 v1 = v0 + vect3( 0,0,l) * apr.pers.cam.mat.invers();
-					apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1) );
-	
-					pinAxisZ.disp = v1;
-				}
+				vect3 v1 = vect3( l,0,0);
+				mat44 mrot = apr.pers.cam.mat;
+				mrot.SetTranslate(vect3(0,0,0));
+				mrot.invers();
+				v1 = v0 + v1* mrot;
+				apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0.8,0.2,0.2) );
+			}
+			if ( bAxisY  )
+			{
+				vect3 v1 = vect3( 0,l,0);
+				mat44 mrot = apr.pers.cam.mat;
+				mrot.SetTranslate(vect3(0,0,0));
+				mrot.invers();
+				v1 = v0 + v1* mrot;
+				apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0.2,0.8,0.2) );
+			}
+			if ( bAxisZ )
+			{
+				vect3 v1 = vect3( 0,0,l);
+				mat44 mrot = apr.pers.cam.mat;
+				mrot.SetTranslate(vect3(0,0,0));
+				mrot.invers();
+				v1 = v0 + v1* mrot;
+				apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0.2,0.2,1) );
+
 			}
 
-		
-			if(0)
-			{
-				float l = 0.1;
 
-				if ( bAxisX ) apr.line3d( (pos + vect3(-l,0,0)), (pos + vect3(l,0,0)), vect3(1,0,0) );
-				if ( bAxisY ) apr.line3d( (pos + vect3(0,-l,0)), (pos + vect3(0,l,0)), vect3(0,1,0) );
-				if ( bAxisZ ) apr.line3d( (pos + vect3(0,0,-l)), (pos + vect3(0,0,l)), vect3(0,0,1) );
-			}
-
-			if(0)
-			{
-				float l = 0.1;
-				if ( bAxisX && bAxisY )
-				{
-					apr.line3d( (pos + vect3(-l,-l,0)), (pos + vect3( l,-l,0)), vect3(0,0,1) );
-					apr.line3d( (pos + vect3(-l, l,0)), (pos + vect3( l, l,0)), vect3(0,0,1) );
-					apr.line3d( (pos + vect3(-l,-l,0)), (pos + vect3(-l, l,0)), vect3(0,0,1) );
-					apr.line3d( (pos + vect3( l,-l,0)), (pos + vect3( l, l,0)), vect3(0,0,1) );
-				}
-
-				if ( bAxisZ && bAxisY )
-				{
-					apr.line3d( (pos + vect3(0,-l,-l)), (pos + vect3(0, l,-l)), vect3(1,0,0) );
-					apr.line3d( (pos + vect3(0,-l, l)), (pos + vect3(0, l, l)), vect3(1,0,0) );
-					apr.line3d( (pos + vect3(0,-l,-l)), (pos + vect3(0,-l, l)), vect3(1,0,0) );
-					apr.line3d( (pos + vect3(0, l,-l)), (pos + vect3(0, l, l)), vect3(1,0,0) );
-				}
-
-				if ( bAxisZ && bAxisX )
-				{
-					apr.line3d( (pos + vect3(-l,0,-l)), (pos + vect3( l,0,-l)), vect3(0,1,0) );
-					apr.line3d( (pos + vect3(-l,0, l)), (pos + vect3( l,0, l)), vect3(0,1,0) );
-					apr.line3d( (pos + vect3(-l,0,-l)), (pos + vect3(-l,0, l)), vect3(0,1,0) );
-					apr.line3d( (pos + vect3( l,0,-l)), (pos + vect3( l,0, l)), vect3(0,1,0) );
-				}
-			}	
-
-			if(0)
-			{
-				float l = 0.15;
-				if ( bAxisZ && bAxisY ) apr.circle3d_x( pos, l, vect3(1,0,0) );
-				if ( bAxisX && bAxisZ ) apr.circle3d_y( pos, l, vect3(0,1,0) );
-				if ( bAxisX && bAxisY ) apr.circle3d_z( pos, l, vect3(0,0,1) );
-			}
 		}
 	} manupirator;
 
-	
-	Figure figCircle=Figure(gra);
-
-
-
-
-
 
 	Pers pers;
-
 
 	//------------------------------------------------------------------------------
 	void line3d( vect3 p0, vect3 p1, rgb col )
@@ -517,18 +342,6 @@ struct Apr : public Sys
 		if ( flg ) gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col );
 	}
 
-	//------------------------------------------------------------------------------
-	void othro_line3d( vect3 p0, vect3 p1, rgb col )
-	//------------------------------------------------------------------------------
-	{
-		float l = 0.2;
-		vect3 a = p0* pers.cam.mat.invers();
-		vect3 b = p1* pers.cam.mat.invers();
-		vect3 v0;
-		vect3 v1;
-		bool flg = pers.calcScissorLine3d( a, b, v0, v1 );
-		if ( flg ) gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col );
-	}
 
 	//------------------------------------------------------------------------------
 	void circle3d_x( vect3 pos,  float r, rgb col )
@@ -597,18 +410,17 @@ struct Apr : public Sys
 	struct Grid
 	{
 		vect3	pos;
-		int		mode;
+//		int		mode;
 		int		NUM_U;
 		int		NUM_V;
 		float	dt;
 		rgb		col;
 	
 		//------------------------------------------------------------------------------
-		void SetMesh( vect3 _pos, int _mode, int _NUM_U, int _NUM_V, float _dt, rgb _col )
+		void SetMesh( vect3 _pos, int _NUM_U, int _NUM_V, float _dt, rgb _col )
 		//------------------------------------------------------------------------------
 		{	// ミニグリッド
 			pos 	= _pos;
-			mode	= _mode;
 			NUM_U	= _NUM_U;
 			NUM_V	= _NUM_V;
 			dt		= _dt;
@@ -618,33 +430,15 @@ struct Apr : public Sys
 		void DrawMesh( Apr& apr )
 		//------------------------------------------------------------------------------
 		{	// ミニグリッド
-	//			const int NUM_U = 5;
-	//		float dt = 0.05;
 			vect3 vt = vect3(0,0,0);
 			float du = NUM_U*dt;
 			float dv = NUM_V*dt;
 			vect3 a;
 			vect3 b;
-//			rgb col = vect3(0.2,0.2,0.2)*2;
 			{
-				if ( mode == 0 )
-				{
-					a = pos+vect3(-du, 0,-du);
-					b = pos+vect3( du, 0,-du);
-					vt = vect3(0,0,dt);
-				}
-				if ( mode == 1 )
-				{
-					a = pos+vect3(-du,-du,0);
-					b = pos+vect3( du,-du,0);
-					vt = vect3(0,dt,0);
-				}
-				if ( mode == 2 )
-				{
-					a = pos+vect3( 0,-du,-du);
-					b = pos+vect3( 0, du,-du);
-					vt = vect3(0,0,dt);
-				}
+				a = pos+vect3(-du, 0,-du);
+				b = pos+vect3( du, 0,-du);
+				vt = vect3(0,0,dt);
 				for ( int i = 0 ; i < NUM_V*2+1 ; i++ )
 				{
 					apr.line3d( a, b, col );
@@ -654,24 +448,9 @@ struct Apr : public Sys
 			}			
 			{
 
-				if ( mode == 0 )
-				{
-					a = pos+vect3(-dv, 0, dv);
-					b = pos+vect3(-dv, 0,-dv);
-					vt = vect3(dt,0,0);
-				}
-				if ( mode == 1 )
-				{
-					a = pos+vect3(-dv, dv, 0);
-					b = pos+vect3(-dv,-dv, 0);
-					vt = vect3(dt,0,0);
-				}
-				if ( mode == 2 )
-				{
-					a = pos+vect3( 0,-dv, dv);
-					b = pos+vect3( 0,-dv,-dv);
-					vt = vect3(0,dt,0);
-				}
+				a = pos+vect3(-dv, 0, dv);
+				b = pos+vect3(-dv, 0,-dv);
+				vt = vect3(dt,0,0);
 				for ( int i = 0 ; i < NUM_U*2+1 ; i++ )
 				{
 					apr.line3d( a, b, col );
@@ -682,7 +461,6 @@ struct Apr : public Sys
 		}
 	};
 	Grid gridGround;
-	Grid gridMini;
 	
 	bool flgInfo = true;
 	
@@ -690,266 +468,10 @@ struct Apr : public Sys
 	int main()
 	//------------------------------------------------------------------------------
 	{
-		Figure figArrow=Figure(gra);
-		figArrow.vert.emplace_back( (vect2){   0,20*tan(rad(60))	-10*tan(rad(30)) } );
-		figArrow.vert.emplace_back( (vect2){-10,  0 	    	   	-10*tan(rad(30)) } );
-		figArrow.vert.emplace_back( (vect2){ 10,  0 				-10*tan(rad(30)) } );
-		figArrow.edge.emplace_back( (ivect2){ 0,1 } );
-		figArrow.edge.emplace_back( (ivect2){ 1,2 } );
-		figArrow.edge.emplace_back( (ivect2){ 2,0 } );
-		figArrow.col = vect3(0,0.5,1);
-
-		Figure figTriangle=Figure(gra);
-		{
-			const float R=30;
-			figTriangle.vert.emplace_back( (vect2){   0,R*tan(rad(60))	-R*tan(rad(30)) } );
-			figTriangle.vert.emplace_back( (vect2){-R,  0 	    	   	-R*tan(rad(30)) } );
-			figTriangle.vert.emplace_back( (vect2){ R,  0 				-R*tan(rad(30)) } );
-			figTriangle.edge.emplace_back( (ivect2){ 0,1 } );
-			figTriangle.edge.emplace_back( (ivect2){ 1,2 } );
-			figTriangle.edge.emplace_back( (ivect2){ 2,0 } );
-			figTriangle.col = rgb(0,1,1);
-		}
-
-		{
-			int s=0;
-			for ( int i = 0 ; i < 360 ; i+=45 )
-			{
-				float th = i*pi/180.0;
-				float r = 7;
-				vect2 v( r*cos(th), r*sin(th) );
-				figCircle.vert.emplace_back( v );
-				s++;
-			}
-			for ( int i = 0 ; i < s-1 ; i++ )
-			{
-				figCircle.edge.emplace_back( (ivect2){ i,i+1 } );
-			}
-			figCircle.edge.emplace_back( (ivect2){ s-1,0 } );
-		}
-
-		// カトマル曲線2D
-		auto catmull_func = []( float t, const vect2 P0, const vect2 P1, const vect2 P2, const vect2 P3 )
-		{
-			//catmull-Rom 曲線
-			// P(t)=P1*(2t^3-3t^2+1)+m0*(t^3-2t^2+t)+P2*(-2t^3+3t^2)+m1*(t^3-t^2)
-			// m0=(P2-P0)/2
-			// m1=(P3-P1)/2
-
-			vect2 m0 = (P2-P0)/2.0;
-			vect2 m1 = (P3-P1)/2.0;
-			vect2 P =  P1*(  2*t*t*t - 3*t*t +1) + m0*( t*t*t -2*t*t +t )
-					 + P2*( -2*t*t*t + 3*t*t   ) + m1*( t*t*t - t*t );
-
-			return P;
-		};
-
-		vector<Catmull> catmull_tbl =
-		{
-			#define X 700
-			#define Y 50
-			Catmull( vect2(X-+ 0,Y +0) ),
-			Catmull( vect2(X+50,Y+ 60) ),
-			Catmull( vect2(X+ 0,Y+120) ),
-			Catmull( vect2(X+50,Y+180) ),
-			#undef X
-			#undef Y
-		};
-		
-		//3字曲線
-		auto bezier_func = [] ( float t, vect2 P0, vect2 P1, vect2 P2, vect2 P3 )
-		{
-		#if 1
-			vect2 L0=(P1-P0)*t+P0;
-			vect2 L1=(P2-P1)*t+P1;
-			vect2 L2=(P3-P2)*t+P2;
-
-			vect2 M0=(L1-L0)*t+L0;
-			vect2 M1=(L2-L1)*t+L1;
-
-			vect2 Q=(M1-M0)*t+M0;
-		#else
-			float tt = t*t;
-			float ttt = tt*t;
-			vect2 Q=
-				 P3*  ttt
-				+P2*(-ttt*3 +tt*3)
-				+P1*( ttt*3 -tt*6 +t*3)
-				+P0*(-ttt   +tt*3 -t*3 +1)
-				;
-		#endif
-
-			return Q;
-		};
-
-		vector<Bezier> bezier_tbl =
-		{
-			#define X 550
-			#define Y 400
-				Bezier( vect2(X+ 00,Y+90) ),
-				Bezier( vect2(X+ 00,Y+20) ),
-				Bezier( vect2(X+100,Y+90) ),
-				Bezier( vect2(X+100,Y+60) ),
-				Bezier( vect2(X+100,Y+20) ),
-				Bezier( vect2(X+200,Y+60) ),
-				Bezier( vect2(X+200,Y+90) ),
-			#undef X
-			#undef Y
-		};
-
-		//骨---------------------------------------
-		vector<Joint2> tblJoint_2d;
-		tblJoint_2d.reserve(1000);
-		vector<Bone2> tblBone_2d;
-		if(1)
-		{	//	対△
-			int cx=200,cy=300;
-
-			tblJoint_2d.emplace_back( vect2( cx,cy) );
-			tblJoint_2d.emplace_back( vect2( cx-20,cy+60) );
-			tblJoint_2d.emplace_back( vect2( cx+20,cy+60) );
-			tblJoint_2d.emplace_back( vect2( cx+0 ,cy+120) );
-
-			tblBone_2d.emplace_back( tblJoint_2d[0], tblJoint_2d[1] );
-			tblBone_2d.emplace_back( tblJoint_2d[0], tblJoint_2d[2] );
-			tblBone_2d.emplace_back( tblJoint_2d[1], tblJoint_2d[2] );
-			tblBone_2d.emplace_back( tblJoint_2d[1], tblJoint_2d[3] );
-			tblBone_2d.emplace_back( tblJoint_2d[2], tblJoint_2d[3] );
-		}
-		if(0)
-		{	//	四角格子メッシュ
-			int cx=200,cy=300;
-			const int  W=40;
-			const int  H=80;
-			const int  X=2;
-			const int  Y=3;
-			for ( int x = 0 ; x < X ; x++ )
-			{
-				for ( int y = 0 ; y < Y ; y++ )
-				{
-					tblJoint_2d.emplace_back( vect2( x*W+cx,y*H+cy) );
-				}
-			}
-			for ( int y=0 ; y < Y-1 ; y++ )
-			{
-				for ( int x=0 ; x < X ; x++ )
-				{
-					tblBone_2d.emplace_back( tblJoint_2d[x*Y+y], tblJoint_2d[x*Y+y+1] );
-				}
-			}
-			for ( int y=0 ; y < Y ; y++ )
-			{
-				for ( int x=0 ; x < X-1 ; x++ )
-				{
-					tblBone_2d.emplace_back( tblJoint_2d[x*Y+y], tblJoint_2d[(x+1)*Y+y] );
-				}
-			}
-		}
-		if(0)
-		{	//	三角形メッシュ
-			function<void(int,int,int,int)> func = [&]( int v0, int v1, int v2, int n )
-			{ 
-				if ( n > 0 )
-				{
-					int ix = static_cast<signed>(tblJoint_2d.size());
-					tblJoint_2d.emplace_back( vect2( (tblJoint_2d[v0].pos + tblJoint_2d[v1].pos )/2 ) );
-					tblJoint_2d.emplace_back( vect2( (tblJoint_2d[v1].pos + tblJoint_2d[v2].pos )/2 ) );
-					tblJoint_2d.emplace_back( vect2( (tblJoint_2d[v2].pos + tblJoint_2d[v0].pos )/2 ) );
-					
-					func( v0, ix+0, ix+2, n-1 );
-					func( v1, ix+1, ix+0, n-1 );
-					func( v2, ix+2, ix+1, n-1 );
-				}
-				else
-				{
-					tblBone_2d.emplace_back( tblJoint_2d[v0], tblJoint_2d[v1] );
-					tblBone_2d.emplace_back( tblJoint_2d[v1], tblJoint_2d[v2] );
-					tblBone_2d.emplace_back( tblJoint_2d[v2], tblJoint_2d[v0] );
-				}
-			};
-
-			float R=80;
-			tblJoint_2d.emplace_back( vect2(200+0, 500-R*tan(rad(60))	-R*tan(rad(30)) ));
-			tblJoint_2d.emplace_back( vect2(200-R, 500+  	    	   	-R*tan(rad(30))) );
-			tblJoint_2d.emplace_back( vect2(200+R, 500+  				-R*tan(rad(30))) );
-
-			func( 0, 1, 2, 3 );
-			cout << tblJoint_2d.size() << endl;
-		}
-		for ( Bone2& b : tblBone_2d )
-		{
-			b.length = (b.j1.pos - b.j0.pos).length();
-		}
-
-		//人
-
-#if 0 
-		Bone* pPreset = new Bone;
-		{	//	人
-			float cx=0,cy=-160,os=0.01;
-
-			pPreset->tblJoint.emplace_back( os*vect3( cx-10,	cy- 20,	0 )	);//0
-			pPreset->tblJoint.emplace_back( os*vect3( cx+10,	cy- 20,	0 )	);//1
-			pPreset->tblJoint.emplace_back( os*vect3( cx+ 0,	cy+  0,	0 )	);//2
-			pPreset->tblJoint.emplace_back( os*vect3( cx-20,	cy+  0,	0 )	);//3
-			pPreset->tblJoint.emplace_back( os*vect3( cx+20,	cy+  0,	0 )	);//4
-			pPreset->tblJoint.emplace_back( os*vect3( cx+ 0,	cy+ 40,	0 )	);//5
-			pPreset->tblJoint.emplace_back( os*vect3( cx-15,	cy+ 70,	0 )	);//6
-			pPreset->tblJoint.emplace_back( os*vect3( cx+15,	cy+ 70,	0 )	);//7
-			pPreset->tblJoint.emplace_back( os*vect3( cx-15,	cy+115,	0 )	);//8
-			pPreset->tblJoint.emplace_back( os*vect3( cx-15,	cy+160,	0 )	);//9
-			pPreset->tblJoint.emplace_back( os*vect3( cx+15,	cy+115,	0 )	);//10
-			pPreset->tblJoint.emplace_back( os*vect3( cx+15,	cy+160,	0 )	);//11
-			pPreset->tblJoint.emplace_back( os*vect3( cx-20,	cy+ 40,	0 )	);//12
-			pPreset->tblJoint.emplace_back( os*vect3( cx-20,	cy+ 80,	0 )	);//13
-			pPreset->tblJoint.emplace_back( os*vect3( cx+20,	cy+ 40,	0 )	);//14
-			pPreset->tblJoint.emplace_back( os*vect3( cx+20,	cy+ 80,	0 )	);//15
-
-		 	pPreset->tblBone.emplace_back( pPreset->tblJoint, 0, 1 );	//head
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 1, 2 );
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 2, 0 );
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 2, 5 ); //chest
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 5, 3 );
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 3, 2 );
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 2, 4 );
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 4, 5 );
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 5, 7 ); //hip
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 7, 6 );
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 6, 5 );
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 6, 8 ); //leg
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 8, 9 );
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 7,10 ); //leg
-			pPreset->tblBone.emplace_back( pPreset->tblJoint,10,11 );
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 3,12 ); //arm
-			pPreset->tblBone.emplace_back( pPreset->tblJoint,12,13 );
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 4,14 ); //arm
-			pPreset->tblBone.emplace_back( pPreset->tblJoint,14,15 );
-		}
-		for ( Bone3& b : pPreset->tblBone )	// 関節の距離を決定する。
-		{
-			b.length = (b.j1.pos - b.j0.pos).length();
-		}
-		{
-			int cnt = 0 ;
-			for ( Joint3& j : pPreset->tblJoint )
-			{
-				j.id = cnt++;				//id登録
-			}
-		}
-		for ( Bone3& b : pPreset->tblBone )	// ジョイントに関節の距離を決定する。
-		{
-			b.j1.relative.emplace_back( b.j0 ); 
-			b.j0.relative.emplace_back( b.j1 ); 
-		}
 
 
-		pPreset->animations.emplace_back();
-
-		Bone* pBone = pPreset;
-
-#else
 		unique_ptr<Bone> pBone(new Bone);
-#endif
+
 				{
 					//読み込み
 					unique_ptr<Bone> pNew(new Bone);
@@ -962,7 +484,7 @@ struct Apr : public Sys
 						{
 							selector.tblMarker.emplace_back( j, id++ );
 						}
-						selector.mode = Selector::MODE_3D;
+//						selector.mode = Selector::MODE_3D;
 					}
 					pBone = move(pNew);
 				}
@@ -975,7 +497,7 @@ struct Apr : public Sys
 			float	ry = rad(0);
 			float	rz = rad(0);
 
-			vect3 pos = {4.5,-0.51,8.5};
+			vect3 pos = {3.5, 0.51,8.5};
 
 			vector<vect3> vert=
 			{
@@ -1009,10 +531,6 @@ struct Apr : public Sys
 		} box;
 
 
-
-//		Ring	ring;
-
-
 	#if 0
 			// レイトレ
 		while( Update() )
@@ -1041,26 +559,26 @@ struct Apr : public Sys
 
 				if ( keys.F1.on )
 				{
-					gra.Print(vect2(10,16*y++),string("[F1] help"));
-					gra.Print(vect2(10,16*y++),string("[Y] pers -"));
-					gra.Print(vect2(10,16*y++),string("[H] pers +"));
-					gra.Print(vect2(10,16*y++),string("[L] Load"));
-					gra.Print(vect2(10,16*y++),string("[S] Save"));
-					gra.Print(vect2(10,16*y++),string("--Keyframe--"));
-					gra.Print(vect2(10,16*y++),string("[K] Insert"));
-					gra.Print(vect2(10,16*y++),string("[X] Cut"));
-					gra.Print(vect2(10,16*y++),string("[C] Copy"));
-					gra.Print(vect2(10,16*y++),string("[V] Past"));
-					gra.Print(vect2(10,16*y++),string("[LEFT]  -"));
-					gra.Print(vect2(10,16*y++),string("[RIGHT] +"));
-					gra.Print(vect2(10,16*y++),string("--Animation--"));
-					gra.Print(vect2(10,16*y++),string("[I] Add"));
-					gra.Print(vect2(10,16*y++),string("[P] Play"));
-					gra.Print(vect2(10,16*y++),string("[UP] -"));
-					gra.Print(vect2(10,16*y++),string("[DOWN] +"));
-					gra.Print(vect2(10,16*y++),string("--Other--"));
-					gra.Print(vect2(10,16*y++),string("[1] select 3d"));
-					gra.Print(vect2(10,16*y++),string("[2] select 2main"));
+					gra.Print(vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("[F1] help"));
+					gra.Print(vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("[Y] pers -"));
+					gra.Print(vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("[H] pers +"));
+					gra.Print(vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("[L] Load"));
+					gra.Print(vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("[S] Save"));
+					gra.Print(vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("--Keyframe--"));
+					gra.Print(vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("[K] Insert"));
+					gra.Print(vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("[X] Cut"));
+					gra.Print(vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("[C] Copy"));
+					gra.Print(vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("[V] Past"));
+					gra.Print(vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("[LEFT]  -"));
+					gra.Print(vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("[RIGHT] +"));
+					gra.Print(vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("--Animation--"));
+					gra.Print(vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("[I] Add"));
+					gra.Print(vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("[P] Play"));
+					gra.Print(vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("[UP] -"));
+					gra.Print(vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("[DOWN] +"));
+					gra.Print(vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("--Other--"));
+					gra.Print(vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("[1] select 3d"));
+					gra.Print(vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("[2] select 2main"));
 				}
 				else
 				{
@@ -1093,7 +611,6 @@ struct Apr : public Sys
 						{
 							selector.tblMarker.emplace_back( j, id++ );
 						}
-						selector.mode = Selector::MODE_3D;
 					}
 					pBone = move(pNew);
 				}
@@ -1141,16 +658,10 @@ struct Apr : public Sys
 				if ( pBone->anim.bPlaying )	pBone->PlayAnimation();
 
 				// X/Y/Z軸選択モード切替
-			#if 0
-				if ( keys.X.hi ) manupirator.bAxisX = !manupirator.bAxisX;
-				if ( keys.C.hi ) manupirator.bAxisY = !manupirator.bAxisY;
-				if ( keys.Z.hi ) manupirator.bAxisZ = !manupirator.bAxisZ;
-			#else
 				if ( keys.Z.hi ) {manupirator.bAxisZ = true;	manupirator.bAxisX = false;	manupirator.bAxisY = false;}
 				if ( keys.X.hi ) {manupirator.bAxisZ = false;	manupirator.bAxisX = true;	manupirator.bAxisY = false;}
 				if ( keys.C.hi ) {manupirator.bAxisZ = false;	manupirator.bAxisX = false;	manupirator.bAxisY = true;}
 				if ( keys.V.hi ) {manupirator.bAxisZ = true;	manupirator.bAxisX = true;	manupirator.bAxisY = true;}
-			#endif
 			}
 
 
@@ -1159,19 +670,18 @@ struct Apr : public Sys
 				if ( flgInfo )
 				{
 				int y = 1;
-					gra.Print(vect2(10,16*y++),string("fovY:")+to_string(int(pers.fovy)));
-					gra.Print(vect2(10,16*y++),string("sz:")+to_string(pers.sz) +string(" fy:")+to_string(pers.fy));
-					gra.Print( vect2(10,16*y++),string("far:")+to_string((pers.cam.pos-pers.cam.at).length())); 
-					gra.Print( vect2(10,16*y++),string("at  x=")+to_string(pers.cam.at.x)+string(" y=")+to_string(pers.cam.at.y)+string(" z=")+to_string(pers.cam.at.z) ); 
-					gra.Print( vect2(10,16*y++),string("pos x=")+to_string(pers.cam.pos.x)+string(" y=")+to_string(pers.cam.pos.y)+string(" z=")+to_string(pers.cam.pos.z) ); 
-					gra.Print( vect2(10,16*y++),string("anim=")+to_string(pBone->cur.act) + string(" cnt=")+to_string(pBone->animations.size()) ); 
+					gra.Print( vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("fovY:")+to_string(int(pers.fovy)));
+					gra.Print( vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("sz:")+to_string(pers.sz) +string(" fy:")+to_string(pers.fy));
+					gra.Print( vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("far:")+to_string((pers.cam.pos-pers.cam.at).length())); 
+					gra.Print( vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("at  x=")+to_string(pers.cam.at.x)+string(" y=")+to_string(pers.cam.at.y)+string(" z=")+to_string(pers.cam.at.z) ); 
+					gra.Print( vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("pos x=")+to_string(pers.cam.pos.x)+string(" y=")+to_string(pers.cam.pos.y)+string(" z=")+to_string(pers.cam.pos.z) ); 
+					gra.Print( vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("anim=")+to_string(pBone->cur.act) + string(" cnt=")+to_string(pBone->animations.size()) ); 
 					if ( pBone->animations.size() > 0 ) 
 					{
-						gra.Print( vect2(10,16*y++),string("pose=")+to_string(pBone->cur.pose) + string(" cnt=")+to_string(pBone->animations[pBone->cur.act].pose.size()) ); 
+						gra.Print( vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("pose=")+to_string(pBone->cur.pose) + string(" cnt=")+to_string(pBone->animations[pBone->cur.act].pose.size()) ); 
 					}
-					gra.Print( vect2(10,16*y++),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
+					gra.Print( vect2(10,16*y++)/vect2(768/2,-512/2)+vect2(-1,1),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 				}
-//					gra.Print( vect2(10,16*y++),string("axis ")+(manupirator.bAxisZ?"Z":"-")+(manupirator.bAxisX?"X":"-")+(manupirator.bAxisY?"Y":"-") ); 
 
 			}
 
@@ -1208,10 +718,10 @@ struct Apr : public Sys
 
 
 			// カメラ回転
-			if ( (!keys.ALT.on && mouse.R.on) || (keys.ALT.on && mouse.L.on) ) pers.cam.Rotation( vect3(-mouse.mov.x/28,-mouse.mov.y/28,0) );
+			if ( (!keys.ALT.on && mouse.R.on) || (keys.ALT.on && mouse.L.on) ) pers.cam.Rotation( vect3(-mouse.mov.x/28,mouse.mov.y/28,0) );
 
 			// カメラ平行移動
-			if ( mouse.M.on ) pers.cam.Move( vect3(-mouse.mov.x,-mouse.mov.y,0)/pers.height/pers.getW((pers.cam.pos-pers.cam.at).length()));
+			if ( mouse.M.on ) pers.cam.Move( vect3(-mouse.mov.x,mouse.mov.y,0)/pers.height/pers.getW((pers.cam.pos-pers.cam.at).length()));
 
 			// マウスホイールZOOM
 			if ( !keys.ALT.on  ) pers.cam.Zoom( -mouse.wheel*1.5 /pers.height/pers.getW((pers.cam.pos-pers.cam.at).length()) );
@@ -1236,79 +746,9 @@ struct Apr : public Sys
 			{
 				const int NUM = 10;
 
-				gridGround.SetMesh( vect3(0,0,0), 0, NUM, NUM, 1, vect3(0.2,0.2,0.2) );
+				gridGround.SetMesh( vect3(0,0,0), NUM, NUM, 1, vect3(0.2,0.2,0.2) );
 				gridGround.DrawMesh( *this );
 
-				if(0)
-				{	// 格子グリッド
-//					rgb col = rgb(0.5,0.5,0.5);
-					rgb col = rgb(0.2,0.2,0.2);
-					{
-						vect3 a(-NUM, 0,-NUM);
-						vect3 b( NUM, 0,-NUM);
-						for ( int i = 0 ; i < NUM*2+1 ; i++ )
-						{
-							line3d( a, b, col );
-/*							vect3 v0;
-							vect3 v1;
-							bool flg = pers.calcScissorLine3d( a* pers.cam.mat.invers(), b* pers.cam.mat.invers(), v0, v1 );
-
-							if ( flg )
-							{
-								gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col );
-							}
-							
-*/
-							a.z+=1.0;
-							b.z+=1.0;
-						}
-					}			
-					{
-						vect3 a(-NUM, 0, NUM);
-						vect3 b(-NUM, 0,-NUM);
-						for ( int i = 0 ; i < NUM*2+1 ; i++ )
-						{
-							line3d( a, b, col );
-/*
-							vect3 v0;
-							vect3 v1;
-							bool flg = pers.calcScissorLine3d( a* pers.cam.mat.invers(), b* pers.cam.mat.invers(), v0, v1 );
-							if ( flg )
-							{
-								gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col);
-							}
-*/
-							a.x+=1.0;
-							b.x+=1.0;
-						}
-					}			
-				}
-
-				if(0)
-				{	// ドットグリッド
-					rgb col = rgb(1,1,1);
-					{
-						for ( int i = -NUM ; i <= NUM ; i++ )
-						{
-							for ( int j = -NUM ; j <= NUM ; j++ )
-							{
-								vect3 v0 = pers.calcDisp( vect3(i,0,j)  * pers.cam.mat.invers() );
-								if ( v0.z > 0 ) 
-								{
-									float r = 5* v0.z;
-									if ( r < 1.0 )
-									{
-										gra.Pset( vect2(v0.x,v0.y), col);
-									}
-									else
-									{
-										gra.Circle( vect2(v0.x,v0.y), r,col);
-									}
-								}
-							}
-						}
-					}
-				}
 			}
 			
 			// 箱
@@ -1418,240 +858,15 @@ struct Apr : public Sys
 
 			}
 
-
-			// 輪 ring
-			//calcDisp rotate
-//			ring.CalcPers( pers, vect3(-1.5,-0.5,1.5), vect3(rad(210),rad(0),rad(20)) );
-
-				// トリゴン描画 trigons	
-//			ring.DrawTrigons( gra );
-
-			// カトマル
-			{
-				// マーカースプライン変換表示
-				{
-					float div = 10;
-					float dt = 1/div;
-
-					for ( int n = -1 ; n < static_cast<signed>(catmull_tbl.size())-3+1 ; n++ )
-					{
-						int n0 = n;
-						int n1 = n+1;
-						int n2 = n+2;
-						int n3 = n+3;
-						if ( n0 < 0 ) n0 = 0;
-						if ( n3 >= static_cast<signed>(catmull_tbl.size()) ) n3 = n2;
-					
-						float t = dt;
-						vect2 v0 = catmull_func(0, catmull_tbl[n0].pos, catmull_tbl[n1].pos, catmull_tbl[n2].pos, catmull_tbl[n3].pos );
-						for ( int i = 0 ; i <div ; i++ )
-						{
-							vect2 v1 = catmull_func(t, catmull_tbl[n0].pos, catmull_tbl[n1].pos, catmull_tbl[n2].pos, catmull_tbl[n3].pos );
-							gra.Line( v1, v0, rgb(1,1,1));
-							gra.Fill( v1-1,v1+2, rgb(1,1,1));
-							v0=v1;
-							t+=dt;
-
-						}	
-							
-					}
-				}
-			}
-
-
-			
-
-			// ベジェ 三次曲線
-			{
-				{//ベジェ計算＆描画
-					float div = 20;
-					float dt = 1/div;
-
-					for ( int n = 0 ; n < static_cast<signed>(bezier_tbl.size())-3 ; n+=3 )
-					{
-						float t  = dt;
-						vect2 v0 = bezier_tbl[n+0].pos;
-						for ( int i = 0 ; i < div ; i++ )
-						{
-							vect2 v1 = bezier_func( t, bezier_tbl[n+0].pos, bezier_tbl[n+1].pos, bezier_tbl[n+2].pos, bezier_tbl[n+3].pos );
-							gra.Line( v0,v1, rgb(1,1,1));
-							gra.Fill( v1-1,v1+2, rgb(1,1,1));
-							v0=v1;
-							t+=dt;
-						}
-					}
-
-				}
-
-				{// 補助ライン描画
-					int cnt = 0;
-					vect2 v0 = bezier_tbl[0].pos;
-					for ( int i = 1 ; i < static_cast<signed>(bezier_tbl.size()) ; i++ )
-					{ 
-						vect2 v1 = bezier_tbl[i].pos;
-						if ( cnt != 1 ) 
-						{
-							gra.Line( v0, v1, rgb(0,1,0));
-						}
-						v0 = v1;
-						cnt = (cnt+1)%3;
-					}
-				}
-
-			}
-
-			static vect2 gv1;
-			if(1)
-			{//ベジェアニメーション
-		
-				static	float t = 0;
-				static	bool	bForward = true;
-
-				static int n = 0;
-				gv1 = bezier_func( t, bezier_tbl[n+0].pos, bezier_tbl[n+1].pos, bezier_tbl[n+2].pos, bezier_tbl[n+3].pos );
-
-				gra.Fill( gv1-4, gv1+4, rgb(1,1,1));
-
-				if ( bForward ) t+=0.01; else t-=0.01;
-
-
-				if ( t >= 1.0 ) 
-				{
-					if ( n+3 < static_cast<signed>(bezier_tbl.size())-3 )
-					{
-						t = 0;
-						n+=3;
-					}
-					else
-					{
-						t = 1.0;
-						bForward = !bForward;
-					}
-				}
-				else
-				if ( t <= 0.0 ) 
-				{
-					if ( n >= 3 )
-					{
-						t = 1.0;
-						n-=3;
-					}
-					else
-					{
-						t = 0.0;
-						bForward = !bForward;
-					}
-				}
-			}
-
-			static vect2 gv2;
-			if(1)
-			{//カトマルアニメーション
-		
-				static	float t = 0;
-				static	bool	bForward = true;
-
-				static int n = 0;
-				int n0 = n-1;
-				int n1 = n;
-				int n2 = n+1;
-				int n3 = n+2;
-				if ( n0<0 ) n0 = 0;
-				if ( n3>=static_cast<signed>(catmull_tbl.size()) ) n3 =n2;
-
-				gv2 = catmull_func( t, catmull_tbl[n0].pos, catmull_tbl[n1].pos, catmull_tbl[n2].pos, catmull_tbl[n3].pos );
-
-				gra.Fill( gv2-4, gv2+4, rgb(1,1,1));
-
-				if ( bForward ) t+=0.01; else t-=0.01;
-
-
-				if ( t >= 1.0 ) 
-				{
-					if ( n+1 < static_cast<signed>(catmull_tbl.size())-1 )
-					{
-						t = 0;
-						n+=1;
-					}
-					else
-					{
-						t = 1.0;
-						bForward = !bForward;
-					}
-				}
-				else
-				if ( t <= 0.0 ) 
-				{
-					if ( n >= 1 )
-					{
-						t = 1.0;
-						n-=1;
-					}
-					else
-					{
-						t = 0.0;
-						bForward = !bForward;
-					}
-				}
-			}
-
-
-			
-
-			// マーカー登録
-			{
-				if ( keys._3.hi )	//マニュピレーター
-				{
-					selector.mode = Selector::MODE_3D;
-					int id = 0;
-					selector.tblMarker.clear();
-											// マニュピレーターのマーカー登録
-							selector.tblMarker.emplace_back( manupirator, id++ );
-							selector.tblMarker.emplace_back( manupirator.pinAxisX, id++ );
-							selector.tblMarker.emplace_back( manupirator.pinAxisY, id++ );
-							selector.tblMarker.emplace_back( manupirator.pinAxisZ, id++ );
-
-
-				}
-				if ( keys._2.hi )	//2D
-				{
-					int id = 0;
-					selector.tblMarker.clear();
-					for ( Catmull& c : catmull_tbl )	// マーカー対象に位置を登録
-					{
-						selector.tblMarker.emplace_back( c, id++ );
-					}
-					for ( Bezier& b : bezier_tbl )	// マーカー対象に位置を登録
-					{
-						selector.tblMarker.emplace_back( b, id++ );
-					}
-					for ( Joint2& j : tblJoint_2d )	//マーカー対象に位置を登録
-					{
-						selector.tblMarker.emplace_back( j, id++ );
-					}
-					selector.mode = Selector::MODE_2D;
-				}
-				if ( keys._1.hi )	//3D human
-				{
-					int id = 0;
-					selector.tblMarker.clear();
-					for ( Joint3& j : pBone->tblJoint )	//マーカー登録
-					{
-						selector.tblMarker.emplace_back( j, id++ );
-					}
-				}
-
-			}
-
-
+	
 
 			// マーカー操作	
 			{
 				// 最近マーカー初期化
-				if ( !keys.ALT.on && mouse.L.hi ) selector.clear( mouse.pos );
+				if ( !keys.ALT.on && mouse.L.hi ) selector.searchNear( mouse.pos/vect2(768/2,-512/2)+vect2(-1,1) );
 
 				// 矩形カーソル開始
-				if ( !keys.ALT.on && mouse.L.hi && selector.a.pm == 0 ) selector.beginRectcursor( mouse.pos );
+				if ( !keys.ALT.on && mouse.L.hi && selector.a.pm == 0 ) selector.beginRectcursor( mouse.pos/vect2(768/2,-512/2)+vect2(-1,1) );
 
 				// マーカー全解除
 				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && !selector.a.pm ) 
@@ -1670,10 +885,10 @@ struct Apr : public Sys
 				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on &&  selector.a.pm && selector.a.pm->obj.bSelected == false ) selector.selectOne();
 
 				// 矩形カーソル 反転 選択	
-				if ( !keys.ALT.on && mouse.L.on &&  keys.CTRL.on && !keys.SHIFT.on &&  selector.rect_bSelect ) selector.rect_selectReverse( mouse.pos );
+				if ( !keys.ALT.on && mouse.L.on &&  keys.CTRL.on && !keys.SHIFT.on &&  selector.rect_bSelect ) selector.rect_selectReverse( mouse.pos/vect2(768/2,-512/2)+vect2(-1,1) );
 
 				// 矩形カーソル 追加選択	
-				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on &&  selector.rect_bSelect ) selector.rect_selectAdd( mouse.pos );
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on &&  selector.rect_bSelect ) selector.rect_selectAdd( mouse.pos/vect2(768/2,-512/2)+vect2(-1,1) );
 
 				// 矩形カーソル解除	
 				if ( !keys.ALT.on && !mouse.L.on &&  selector.rect_bSelect ) selector.endRect();
@@ -1681,7 +896,6 @@ struct Apr : public Sys
 				// マーカー移動準備
 				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && !selector.rect_bSelect ) 
 				{
-					if ( selector.mode == Selector::MODE_3D )
 					{
 
 						#if 1
@@ -1706,232 +920,110 @@ struct Apr : public Sys
 						}
 						#endif
 
-
-						// 3Dマーカー移動
-						for ( Marker& m : selector.tblMarker )
-						{
-							Joint3* pj = dynamic_cast<Joint3*>(&m.obj);
-							if ( pj && pj->bSelected )
-							{
-								// 平行移動 カメラ面
-								if ( manupirator.bAxisX && manupirator.bAxisY && manupirator.bAxisZ )
-								{
-								}
-								else
-								{// 3D 平面上を触る
-									
-									if ( manupirator.bAxisX && manupirator.bAxisZ )
-									{
-										gridMini.SetMesh( pj->pos, 0, 5, 5, 0.05, vect3(0.2,0.2,0.2) );
-									}
-									else
-									if ( manupirator.bAxisX && manupirator.bAxisY )
-									{
-										gridMini.SetMesh( pj->pos, 1, 5, 5, 0.05, vect3(0.2,0.2,0.2) );
-									}
-									else
-									if ( manupirator.bAxisZ && manupirator.bAxisY )
-									{
-										gridMini.SetMesh( pj->pos, 2, 5, 5, 0.05, vect3(0.2,0.2,0.2) );
-									}
-									else
-									if ( manupirator.bAxisX )
-									{
-										gridMini.SetMesh( pj->pos, 0, 1, 5, 0.05, vect3(0.2,0.2,0.2) );
-									}
-									else
-									if ( manupirator.bAxisY )
-									{
-										gridMini.SetMesh( pj->pos, 1, 1, 5, 0.05, vect3(0.2,0.2,0.2) );
-									}
-									else
-									if ( manupirator.bAxisZ )
-									{
-										gridMini.SetMesh( pj->pos, 0, 1, 5, 0.05, vect3(0.2,0.2,0.2) );
-									}
-									
-									
-								}
-
-
-							}
-						}
 					}
 				
 				}
-						gra.Print( vect2(mouse.pos.x+10,mouse.pos.y-0),string("")+(manupirator.bAxisX?"X":"")+(manupirator.bAxisY?"Y":"")+(manupirator.bAxisZ?"Z":"") ); 
+						gra.Print( vect2(mouse.pos.x+10,mouse.pos.y-0)/vect2(768/2,-512/2)+vect2(-1,1), string("")+(manupirator.bAxisX?"X":"")+(manupirator.bAxisY?"Y":"")+(manupirator.bAxisZ?"Z":"") ); 
 				// マーカー移動
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && !selector.rect_bSelect ) 
 				{
-					if ( selector.mode == Selector::MODE_3D )
+					// 3Dマーカー移動
+					for ( Marker& m : selector.tblMarker )
 					{
-
-						// 3Dマーカー移動
-						for ( Marker& m : selector.tblMarker )
+						Joint3* pj = dynamic_cast<Joint3*>(&m.obj);
+						if ( pj && pj->bSelected )
 						{
-							Joint3* pj = dynamic_cast<Joint3*>(&m.obj);
-							if ( pj && pj->bSelected )
+							// 平行移動 カメラ面
+							if ( manupirator.bAxisX && manupirator.bAxisY && manupirator.bAxisZ )
 							{
-								// 平行移動 カメラ面
-								if ( manupirator.bAxisX && manupirator.bAxisY && manupirator.bAxisZ )
+								vect2 mmov = mouse.mov /vect2(768/2,-512/2);//+vect2(-1,1);
+								vect3 v = vect3(mmov.x, mmov.y, 0)/(pj->disp.z);
+								mat44 mrot = pers.cam.mat;
+								mrot.SetTranslate(vect3(0,0,0));
+								mrot.invers();
+								v = v* mrot;
+								pj->pos += v ;
+							}
+							else
+							{// 3D 平面上を触る
+								vect3	plate_P = pj->pos;
+								vect3	plate_N;
+								if ( manupirator.bAxisX && manupirator.bAxisZ )
 								{
-									vect3 v = vect3(mouse.mov.x, mouse.mov.y, 0)/pers.height/(pj->disp.z);
-									mat44 mrot = pers.cam.mat;
-									mrot.SetTranslate(vect3(0,0,0));
-									mrot.invers();
-									v = v* mrot;
-									pj->pos += v ;
+									// X-Z 平面 を仮定する。
+									 plate_N = vect3(0,-1,0);
 								}
 								else
-								{// 3D 平面上を触る
-									vect3	plate_P = pj->pos;
-									vect3	plate_N;
-									if ( manupirator.bAxisX && manupirator.bAxisZ )
-									{
-										// X-Z 平面 を仮定する。
-										 plate_N = vect3(0,-1,0);
-									}
-									else
-									if ( manupirator.bAxisX && manupirator.bAxisY )
-									{
-										// X-Y 平面 を仮定する。
-										 plate_N = vect3(0,0,-1);
-									}
-									else
-									if ( manupirator.bAxisZ && manupirator.bAxisY )
-									{
-										// Z-Y 平面 を仮定する。
-										 plate_N = vect3(-1,0,0);
-									}
-									else
-									if ( manupirator.bAxisX )
-									{
-										 plate_N = vect3(0,-1,0);
-									}
-									else
-									if ( manupirator.bAxisY )
-									{
-										 plate_N = vect3(0,0,-1);
-									}
-									else
-									if ( manupirator.bAxisZ )
-									{
-										 plate_N = vect3(-1,0,0);
-									}
-
-									vect3 P = pers.calcInvers( vect2( mouse.pos.x, mouse.pos.y ) );
-									vect3 I = pers.calcRayvect( P );
-									vect3 Q;
-									bool b = funcIntersectPlate( plate_P, plate_N,  P, I, Q );
-									if ( b )
-									{
-										vect3 P = pers.calcInvers( vect2( mouse.prev.x, mouse.prev.y ) );
-										vect3 I = pers.calcRayvect( P );
-										vect3 Q0;
-										bool b = funcIntersectPlate( plate_P, plate_N, P, I, Q0 );
-										if ( b )
-										{
-											if ( manupirator.bAxisY )
-											{
-												float y  = dot( (Q-Q0), vect3(0,1,0) );
-												pj->pos.y += y;
-											}
-											if ( manupirator.bAxisZ )
-											{
-												float z  = dot( (Q-Q0), vect3(0,0,1) );
-												pj->pos.z += z;
-											}
-											if ( manupirator.bAxisX )
-											{
-												float x  = dot( (Q-Q0), vect3(1,0,0) );
-												pj->pos.x += x;
-											}
-											//circle3d_y( pj->pos, 0.1, vect3(0.8,0.2,0.2) );
-										}
-									}
-
-										//gridMini.DrawMesh( *this );
-									
-									
+								if ( manupirator.bAxisX && manupirator.bAxisY )
+								{
+									// X-Y 平面 を仮定する。
+									 plate_N = vect3(0,0,-1);
+								}
+								else
+								if ( manupirator.bAxisZ && manupirator.bAxisY )
+								{
+									// Z-Y 平面 を仮定する。
+									 plate_N = vect3(-1,0,0);
+								}
+								else
+								if ( manupirator.bAxisX )
+								{
+									 plate_N = vect3(0,-1,0);
+								}
+								else
+								if ( manupirator.bAxisY )
+								{
+									 plate_N = vect3(0,0,-1);
+								}
+								else
+								if ( manupirator.bAxisZ )
+								{
+									 plate_N = vect3(-1,0,0);
 								}
 
+								vect3 P = pers.calcInvers( mouse.pos/vect2(768/2,-512/2)+vect2(-1,1) );
+								vect3 I = pers.calcRayvect( P );
+								vect3 Q;
+								bool b = funcIntersectPlate( plate_P, plate_N,  P, I, Q );
+								if ( b )
+								{
+									vect3 P = pers.calcInvers( mouse.prev/vect2(768/2,-512/2)+vect2(-1,1) );
+									vect3 I = pers.calcRayvect( P );
+									vect3 Q0;
+									bool b = funcIntersectPlate( plate_P, plate_N, P, I, Q0 );
+									if ( b )
+									{
+										if ( manupirator.bAxisY )
+										{
+											float y  = dot( (Q-Q0), vect3(0,1,0) );
+											pj->pos.y += y;
+										}
+										if ( manupirator.bAxisZ )
+										{
+											float z  = dot( (Q-Q0), vect3(0,0,1) );
+											pj->pos.z += z;
+										}
+										if ( manupirator.bAxisX )
+										{
+											float x  = dot( (Q-Q0), vect3(1,0,0) );
+											pj->pos.x += x;
+										}
+										//circle3d_y( pj->pos, 0.1, vect3(0.8,0.2,0.2) );
+									}
+								}
 
+								
+								
 							}
-						}
-						pBone->RefrectKeyframe();
-					}
-					if ( selector.mode == Selector::MODE_2D )
-					{
-						// 2Dマーカー移動
-						for ( Marker& m : selector.tblMarker )
-						{
-							if ( m.obj.bSelected )
-							{
-								m.obj.Move2( mouse.mov );
-							}
+
+
 						}
 					}
+					pBone->RefrectKeyframe();
 				}				
 			}			
 
 			
-
-
-			//=================================
-			// 2D joint
-			//=================================
-			{
-				Joint2& tar = tblJoint_2d[0];
-				tar.pos = gv1;
-
-
-				for ( int i = 0 ; i < 1 ; i++ )
-				{
-					// 骨コリジョン 張力計算
-					for ( Bone2 b : tblBone_2d )
-					{
-						vect2 v = b.j1.pos - b.j0.pos;
-						float l = v.length() - b.length;
-						float w = 0;
-
-						vect2 va  =	v.normalize()*l;
-						if ( &tar == &b.j0 )
-						{
-							b.j1.tension -= va/3;
-						}
-						else
-						if ( &tar == &b.j1 )
-						{
-							b.j0.tension -= va/3;
-						}
-						else
-						{
-							b.j0.tension += va/3;
-							b.j1.tension -= va/3;
-						}
-
-					}
-
-					// 張力解消
-					for ( Joint2& a : tblJoint_2d )
-					{
-						a.pos += a.tension;
-						//a.accell += a.tension;
-						a.tension=0;
-					}
-				}
-
-				// 骨描画
-				for ( Bone2 b : tblBone_2d )
-				{
-					vect2 v0 = b.j0.pos;
-					vect2 v1 = b.j1.pos;
-
-					gra.Line( v0, v1, rgb( 1,1,1 ) );
-				}
-			}
-
-
 
 			//=================================
 			// 3D joint
@@ -1944,13 +1036,13 @@ struct Apr : public Sys
 			pBone->draw( pers, gra );
 
 
-			if ( !(pBone->anim.bPlaying && selector.mode == Selector::MODE_3D) )
+			if ( !pBone->anim.bPlaying  )
 			{
 				// カトマル3D モーション軌跡表示
 				pBone->drawMotion( pers, gra );
 
 				// マーカー表示
-				selector.drawController( mouse.pos, gra );
+				selector.drawController( mouse.pos/vect2(768/2,-512/2)+vect2(-1,1), gra );
 
 			}
 			
@@ -1961,11 +1053,11 @@ struct Apr : public Sys
 
 
 			// マニュピレーター描画
-			if ( manupirator.bActive  ) 
+//			if ( manupirator.bActive  ) 
 			{
-				vect3 p = pers.calcInvers( vect2( mouse.pos.x, mouse.pos.y ) );
-				manupirator.manupirator_setPos( p );
-				manupirator.manupirator_drawAxis( *this );
+				vect3 p = pers.calcInvers( mouse.pos/vect2(768/2,-512/2)+vect2(-1,1) );
+//				manupirator.manupirator_setPos( p );
+				manupirator.manupirator_drawAxis( p, *this );
 
 			}
 
@@ -1973,7 +1065,7 @@ struct Apr : public Sys
 			// マウス座標（投影面座標）を３Ｄ空間座標に逆変換
 			if(0)
 			{
-				vect3 v = pers.calcInvers( vect2( mouse.pos.x, mouse.pos.y ) );
+				vect3 v = pers.calcInvers( mouse.pos/vect2(768/2,-512/2)+vect2(-1,1) );
 				vect3 p = pers.calcRay( v, 10 );
 
 
@@ -1985,39 +1077,8 @@ struct Apr : public Sys
 
 				gra.Print( vect2(10,16*20),string("v x=")+to_string(v.x) + string(" y=")+to_string(v.y) +string(" z=")+to_string(v.z) );
 				gra.Print( vect2(10,16*21),string("p x=")+to_string(p.x) + string(" y=")+to_string(p.y) +string(" z=")+to_string(p.z) );
-//				gra.Print( vect2(10,16*21),string(" x=")+to_string(pers.cam.pos.x) + string(" y=")+to_string(pers.cam.pos.y) +string(" z=")+to_string(pers.cam.pos.z) );
 			}
 
-			// 点 
-			{
-				gra.Pset(vect2(1,1),rgb(1,1,1));
-				gra.Pset(vect2(766,1),rgb(1,1,1));
-				gra.Pset(vect2(1,510),rgb(1,1,1));
-				gra.Pset(vect2(766,510),rgb(1,1,1));
-			}
-			
-			// 塗りつぶし三角
-			{
-				vect2	ofs = vect2(10,432);
-				float	scale=0.5;
-				vect2	v0 = scale * vect2( 55,0) + ofs;
-				vect2	v1 = scale * vect2( 10,90) + ofs;
-				vect2	v2 = scale * vect2(100,90) + ofs;
-				gra.Tri( v0,v1,v2,rgb(0.5,0.3,0.2));
-			}
-
-			// figTriangle
-			{
-				int cx=56,cy=464;
-				int sx =cx-128;
-				int sy =cy-128;
-				int ex =cx+128;
-				int ey =cy+128;
-
-				static int cnt = 0;
-				figTriangle.draw( vect2(cx,cy),rad(cnt), vect3(0,1,1) );
-				cnt++;
-			}
 			
 			// 処理時間表示
 			{

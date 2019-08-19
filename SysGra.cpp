@@ -821,7 +821,7 @@ void SysGra::Circle( vect2 v, float r, vect3 col )
 
 }
 //------------------------------------------------------------------------------
-void SysGra::Pset( vect2 v0, vect3 col )
+void SysGra::Pset( vect2 v0, vect3 col, float wide )
 //------------------------------------------------------------------------------
 {
 //	m.tblVect2.emplace_back( TypePset, col );
@@ -830,7 +830,8 @@ void SysGra::Pset( vect2 v0, vect3 col )
 				//float cg = (float)((col>> 8)&0xff)/255.0f;
 				//float cr = (float)((col>> 0)&0xff)/255.0f;
 
-							v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+//							v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+							glPointSize(wide);
 						    glColor3f( col.r, col.g, col.b );
 						    glBegin(GL_POINTS);
 						    glVertex2f(v0.x, v0.y);
@@ -847,8 +848,8 @@ void SysGra::Box( vect2 v0, vect2 v1,vect3 col)
 				//float cg = (float)((col>> 8)&0xff)/255.0f;
 				//float cr = (float)((col>> 0)&0xff)/255.0f;
 
-							v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-							v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+//							v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+//							v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
 						    glColor3f( col.r, col.g, col.b );
 						    glBegin(GL_LINE_LOOP);
 						    glVertex2f(v1.x, v0.y);
@@ -869,8 +870,8 @@ void SysGra::Fill( vect2 v0, vect2 v1,vect3 col)
 				//float cg = (float)((col>> 8)&0xff)/255.0f;
 				//float cr = (float)((col>> 0)&0xff)/255.0f;
 
-							v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-							v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+//							v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+//							v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
 						    glColor3f( col.r, col.g, col.b );
 						    glBegin(GL_QUADS);
 						    glVertex2f(v1.x, v0.y);
@@ -892,8 +893,8 @@ void SysGra::Line( vect2 v0, vect2 v1,vect3 col)
 				//float cb = (float)((col>>16)&0xff)/255.0f;
 				//float cg = (float)((col>> 8)&0xff)/255.0f;
 				//float cr = (float)((col>> 0)&0xff)/255.0f;
-							v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-							v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+//							v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+//							v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
 						    glColor3f( col.r, col.g, col.b );
 						    glBegin(GL_LINES);
 						    glVertex2f(v0.x, v0.y);
@@ -915,9 +916,9 @@ void SysGra::Tri( vect2 v0, vect2 v1, vect2 v2, vect3 col)
 				//float cg = (float)((col>> 8)&0xff)/255.0f;
 				//float cr = (float)((col>> 0)&0xff)/255.0f;
 
-							v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-							v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-							v2 = v2 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+//							v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+//							v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+//							v2 = v2 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
 						    glColor3f( col.r, col.g, col.b );
 						    glBegin( GL_TRIANGLES );
 						    glVertex2f(v0.x, v0.y);
@@ -951,7 +952,7 @@ if(1)
 //			        TextOut(hDc, (int)v0.x, (int)v0.y, str, lstrlen(str));
 
 					//gl
-					v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+//					v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
 					glRasterPos2f(v0.x, v0.y);
 					font.DrawString( str );
 				}

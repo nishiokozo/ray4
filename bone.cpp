@@ -580,7 +580,7 @@ static	vect3 catmull3d_func( float t, const vect3 P0, const vect3 P1, const vect
 							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1));
 						}
 						
-						if ( v1.z > 0 ) gra.Fill(vect2(v1.x,v1.y)-2, vect2(v1.x,v1.y)+3,rgb(0,0,1));
+						if ( v1.z > 0 ) gra.Pset(vect2(v1.x,v1.y),rgb(0,0,1), 5);
 
 						a=b;
 						t+=dt;

@@ -18,8 +18,8 @@ struct Pers
 	// カメラ
 	struct
 	{
-		vect3	pos = vect3( -2,-2, -2+0.1 );
-		vect3 	at = vect3( 0, -1, 0 );
+		vect3	pos = vect3(  0.5, 1.5, -3+0.1 );
+		vect3 	at = vect3( 0,  1, 0 );
 		vect3	up = vect3( 0, 1, 0);
 	  	mat44	mat;		
 
@@ -129,8 +129,8 @@ struct Pers
 		vect3 ret;
 		{
 			float w = getW(v.z);
-			ret.x = v.x* w *width  *aspect	+cx;
-			ret.y = v.y* w *height			+cy;
+			ret.x = v.x* w   *aspect;
+			ret.y = v.y* w 			;
 			ret.z = w;	// 三次元ベクトルで返す都合上、ZにW値を入れている。
 		}
 
@@ -143,8 +143,8 @@ struct Pers
 	{
 		vect3 v;
 		float w = getW(0);
-		v.x = (q.x -cx)/(w *width  *aspect);
-		v.y = (q.y -cy)/(w *height);
+		v.x = (q.x)/(w   *aspect);
+		v.y = (q.y)/(w );
 		v.z = 0;
 		return v * cam.mat;
 	}
