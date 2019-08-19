@@ -494,7 +494,7 @@ static	vect3 catmull3d_func( float t, const vect3 P0, const vect3 P1, const vect
 		ring.DrawTrigons( gra );
 
 
-		int col = rgb(0,0,1);
+		vect3 col = vect3(0,0,1);
 		// Human pers
 		for ( Joint3& j : tblJoint )
 		{
@@ -577,10 +577,10 @@ static	vect3 catmull3d_func( float t, const vect3 P0, const vect3 P1, const vect
 
 						if ( flg )
 						{
-							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1));
+							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), vect3(0,0,1));
 						}
 						
-						if ( v1.z > 0 ) gra.Fill(vect2(v1.x,v1.y)-2, vect2(v1.x,v1.y)+3,rgb(0,0,1));
+						if ( v1.z > 0 ) gra.Fill(vect2(v1.x,v1.y)-2, vect2(v1.x,v1.y)+3,vect3(0,0,1));
 
 						a=b;
 						t+=dt;

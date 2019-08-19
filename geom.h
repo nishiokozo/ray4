@@ -10,7 +10,7 @@ void	mat4_rotateX( float* m, float th );
 void	mat4_rotateY( float* m, float th );
 void	mat4_rotateZ( float* m, float th );
 
-extern int	rgb( float r, float g , float b );
+//extern int	rgb( float r, float g , float b );
 
 
 //#define	pi	3.141592654

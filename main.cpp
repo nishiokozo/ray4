@@ -46,10 +46,10 @@ struct Apr : public Sys
 		SysGra&	gra;
 		vector<vect2> vert;
 		vector<ivect2> edge;
-		int	col;
+		vect3	col;
 		Figure( SysGra& _gra ) : gra(_gra) {}
 
-		void draw( vect2 ofs, float th, int col ) const 
+		void draw( vect2 ofs, float th, vect3 col ) const 
 		{
 			for ( ivect2 e : edge )
 			{
@@ -202,8 +202,8 @@ struct Apr : public Sys
 			Marker*	pm;
 			int		cnt;
 		} a = {99999,0,0};
-		int		colNormal = rgb(0.5,0.5,0);
-		int		colSelected = rgb(1,0,0);
+		vect3		colNormal = vect3(0.5,0.5,0);
+		vect3		colSelected = vect3(1,0,0);
 
 		//---------------------------------------------------------------------
 		void clear( vect2 mouse_pos )
@@ -347,7 +347,7 @@ struct Apr : public Sys
 			{
 				vect2 v0 = min( rect_pos, mouse_pos );
 				vect2 v1 = max( rect_pos, mouse_pos );
-				gra.Box( v0,v1, rgb(0,0.5,1));
+				gra.Box( v0,v1, vect3(0,0.5,1));
 			}
 
 			// コントローラー表示
@@ -424,8 +424,8 @@ struct Apr : public Sys
 				if ( bAxisX  )
 				{
 					vect3 v1 = v0 + vect3( l,0,0) * apr.pers.cam.mat.invers();
-		//			apr.gra.Circle( vect2(v1.x,v1.y), 7, rgb(1,1,0) );
-					apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(1,0,0) );
+		//			apr.gra.Circle( vect2(v1.x,v1.y), 7, vect3(1,1,0) );
+					apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), vect3(1,0,0) );
 	
 					pinAxisX.disp = v1;
 	
@@ -434,8 +434,8 @@ struct Apr : public Sys
 				{
 //					vect3 v0 = apr.pers.calcDisp( pos * apr.pers.cam.mat.invers() );
 					vect3 v1 = v0 + vect3( 0,l,0) * apr.pers.cam.mat.invers();
-					//apr.gra.Circle( vect2(v1.x,v1.y), 7, rgb(1,1,0) );
-					apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,1,0) );
+					//apr.gra.Circle( vect2(v1.x,v1.y), 7, vect3(1,1,0) );
+					apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), vect3(0,1,0) );
 	
 					pinAxisY.disp = v1;
 				}
@@ -443,8 +443,8 @@ struct Apr : public Sys
 				{
 //					vect3 v0 = apr.pers.calcDisp( pos * apr.pers.cam.mat.invers() );
 					vect3 v1 = v0 + vect3( 0,0,l) * apr.pers.cam.mat.invers();
-				//	apr.gra.Circle( vect2(v1.x,v1.y), 7, rgb(1,1,0) );
-					apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1) );
+				//	apr.gra.Circle( vect2(v1.x,v1.y), 7, vect3(1,1,0) );
+					apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), vect3(0,0,1) );
 	
 					pinAxisZ.disp = v1;
 				}
@@ -455,9 +455,9 @@ struct Apr : public Sys
 			{
 				float l = 0.1;
 
-				if ( bAxisX ) apr.line3d( (pos + vect3(-l,0,0)), (pos + vect3(l,0,0)), rgb(1,0,0) );
-				if ( bAxisY ) apr.line3d( (pos + vect3(0,-l,0)), (pos + vect3(0,l,0)), rgb(0,1,0) );
-				if ( bAxisZ ) apr.line3d( (pos + vect3(0,0,-l)), (pos + vect3(0,0,l)), rgb(0,0,1) );
+				if ( bAxisX ) apr.line3d( (pos + vect3(-l,0,0)), (pos + vect3(l,0,0)), vect3(1,0,0) );
+				if ( bAxisY ) apr.line3d( (pos + vect3(0,-l,0)), (pos + vect3(0,l,0)), vect3(0,1,0) );
+				if ( bAxisZ ) apr.line3d( (pos + vect3(0,0,-l)), (pos + vect3(0,0,l)), vect3(0,0,1) );
 			}
 
 			if(0)
@@ -465,35 +465,35 @@ struct Apr : public Sys
 				float l = 0.1;
 				if ( bAxisX && bAxisY )
 				{
-					apr.line3d( (pos + vect3(-l,-l,0)), (pos + vect3( l,-l,0)), rgb(0,0,1) );
-					apr.line3d( (pos + vect3(-l, l,0)), (pos + vect3( l, l,0)), rgb(0,0,1) );
-					apr.line3d( (pos + vect3(-l,-l,0)), (pos + vect3(-l, l,0)), rgb(0,0,1) );
-					apr.line3d( (pos + vect3( l,-l,0)), (pos + vect3( l, l,0)), rgb(0,0,1) );
+					apr.line3d( (pos + vect3(-l,-l,0)), (pos + vect3( l,-l,0)), vect3(0,0,1) );
+					apr.line3d( (pos + vect3(-l, l,0)), (pos + vect3( l, l,0)), vect3(0,0,1) );
+					apr.line3d( (pos + vect3(-l,-l,0)), (pos + vect3(-l, l,0)), vect3(0,0,1) );
+					apr.line3d( (pos + vect3( l,-l,0)), (pos + vect3( l, l,0)), vect3(0,0,1) );
 				}
 
 				if ( bAxisZ && bAxisY )
 				{
-					apr.line3d( (pos + vect3(0,-l,-l)), (pos + vect3(0, l,-l)), rgb(1,0,0) );
-					apr.line3d( (pos + vect3(0,-l, l)), (pos + vect3(0, l, l)), rgb(1,0,0) );
-					apr.line3d( (pos + vect3(0,-l,-l)), (pos + vect3(0,-l, l)), rgb(1,0,0) );
-					apr.line3d( (pos + vect3(0, l,-l)), (pos + vect3(0, l, l)), rgb(1,0,0) );
+					apr.line3d( (pos + vect3(0,-l,-l)), (pos + vect3(0, l,-l)), vect3(1,0,0) );
+					apr.line3d( (pos + vect3(0,-l, l)), (pos + vect3(0, l, l)), vect3(1,0,0) );
+					apr.line3d( (pos + vect3(0,-l,-l)), (pos + vect3(0,-l, l)), vect3(1,0,0) );
+					apr.line3d( (pos + vect3(0, l,-l)), (pos + vect3(0, l, l)), vect3(1,0,0) );
 				}
 
 				if ( bAxisZ && bAxisX )
 				{
-					apr.line3d( (pos + vect3(-l,0,-l)), (pos + vect3( l,0,-l)), rgb(0,1,0) );
-					apr.line3d( (pos + vect3(-l,0, l)), (pos + vect3( l,0, l)), rgb(0,1,0) );
-					apr.line3d( (pos + vect3(-l,0,-l)), (pos + vect3(-l,0, l)), rgb(0,1,0) );
-					apr.line3d( (pos + vect3( l,0,-l)), (pos + vect3( l,0, l)), rgb(0,1,0) );
+					apr.line3d( (pos + vect3(-l,0,-l)), (pos + vect3( l,0,-l)), vect3(0,1,0) );
+					apr.line3d( (pos + vect3(-l,0, l)), (pos + vect3( l,0, l)), vect3(0,1,0) );
+					apr.line3d( (pos + vect3(-l,0,-l)), (pos + vect3(-l,0, l)), vect3(0,1,0) );
+					apr.line3d( (pos + vect3( l,0,-l)), (pos + vect3( l,0, l)), vect3(0,1,0) );
 				}
 			}	
 
 			if(0)
 			{
 				float l = 0.15;
-				if ( bAxisZ && bAxisY ) apr.circle3d_x( pos, l, rgb(1,0,0) );
-				if ( bAxisX && bAxisZ ) apr.circle3d_y( pos, l, rgb(0,1,0) );
-				if ( bAxisX && bAxisY ) apr.circle3d_z( pos, l, rgb(0,0,1) );
+				if ( bAxisZ && bAxisY ) apr.circle3d_x( pos, l, vect3(1,0,0) );
+				if ( bAxisX && bAxisZ ) apr.circle3d_y( pos, l, vect3(0,1,0) );
+				if ( bAxisX && bAxisY ) apr.circle3d_z( pos, l, vect3(0,0,1) );
 			}
 		}
 	} manupirator;
@@ -510,7 +510,7 @@ struct Apr : public Sys
 
 
 	//------------------------------------------------------------------------------
-	void line3d( vect3 p0, vect3 p1, int col )
+	void line3d( vect3 p0, vect3 p1, vect3 col )
 	//------------------------------------------------------------------------------
 	{
 		float l = 0.2;
@@ -523,7 +523,7 @@ struct Apr : public Sys
 	}
 
 	//------------------------------------------------------------------------------
-	void othro_line3d( vect3 p0, vect3 p1, int col )
+	void othro_line3d( vect3 p0, vect3 p1, vect3 col )
 	//------------------------------------------------------------------------------
 	{
 		float l = 0.2;
@@ -536,7 +536,7 @@ struct Apr : public Sys
 	}
 
 	//------------------------------------------------------------------------------
-	void circle3d_x( vect3 pos,  float r, int col )
+	void circle3d_x( vect3 pos,  float r, vect3 col )
 	//------------------------------------------------------------------------------
 	{
 		vect2 v0;
@@ -551,7 +551,7 @@ struct Apr : public Sys
 	}
 
 	//------------------------------------------------------------------------------
-	void circle3d_y( vect3 pos,  float r, int col )
+	void circle3d_y( vect3 pos,  float r, vect3 col )
 	//------------------------------------------------------------------------------
 	{
 		vect2 v0;
@@ -566,7 +566,7 @@ struct Apr : public Sys
 	}
 
 	//------------------------------------------------------------------------------
-	void circle3d_z( vect3 pos,  float r, int col )
+	void circle3d_z( vect3 pos,  float r, vect3 col )
 	//------------------------------------------------------------------------------
 	{
 		vect2 v0;
@@ -606,10 +606,10 @@ struct Apr : public Sys
 		int		NUM_U;
 		int		NUM_V;
 		float	dt;
-		int		col;
+		vect3		col;
 	
 		//------------------------------------------------------------------------------
-		void SetMesh( vect3 _pos, int _mode, int _NUM_U, int _NUM_V, float _dt, int _col )
+		void SetMesh( vect3 _pos, int _mode, int _NUM_U, int _NUM_V, float _dt, vect3 _col )
 		//------------------------------------------------------------------------------
 		{	// ミニグリッド
 			pos 	= _pos;
@@ -630,7 +630,7 @@ struct Apr : public Sys
 			float dv = NUM_V*dt;
 			vect3 a;
 			vect3 b;
-//			int col = rgb(0.2,0.2,0.2)*2;
+//			vect3 col = vect3(0.2,0.2,0.2)*2;
 			{
 				if ( mode == 0 )
 				{
@@ -702,7 +702,7 @@ struct Apr : public Sys
 		figArrow.edge.emplace_back( (ivect2){ 0,1 } );
 		figArrow.edge.emplace_back( (ivect2){ 1,2 } );
 		figArrow.edge.emplace_back( (ivect2){ 2,0 } );
-		figArrow.col = rgb(0,0.5,1);
+		figArrow.col = vect3(0,0.5,1);
 
 		Figure figTriangle=Figure(gra);
 		{
@@ -713,7 +713,7 @@ struct Apr : public Sys
 			figTriangle.edge.emplace_back( (ivect2){ 0,1 } );
 			figTriangle.edge.emplace_back( (ivect2){ 1,2 } );
 			figTriangle.edge.emplace_back( (ivect2){ 2,0 } );
-			figTriangle.col = rgb(0,1,1);
+			figTriangle.col = vect3(0,1,1);
 		}
 
 		{
@@ -1039,7 +1039,7 @@ struct Apr : public Sys
 			pers.Update( vect2( m.width, m.height ) );
 
 			// 画面クリア
-			gra.Clr(rgb(0.3,0.3,0.3));
+			gra.Clr(vect3(0.3,0.3,0.3));
 
 			{
 				int y = 10;
@@ -1192,17 +1192,17 @@ struct Apr : public Sys
 
 						vect2 v = vect2( x, y )*vect2( 4, 8 ) + vect2(400,16);
 						{
-							gra.Fill( v, v+vect2(3,7), rgb(1,1,1) );
+							gra.Fill( v, v+vect2(3,7), vect3(1,1,1) );
 						}
 
 						if ( y == pBone->cur.act && x == pBone->cur.pose )
 						{
-							gra.Fill( v+vect2(0,4), v+vect2(3,7), rgb(1,0,0) );
+							gra.Fill( v+vect2(0,4), v+vect2(3,7), vect3(1,0,0) );
 						}
 						
 						if ( flg )
 						{
-							gra.Fill( v+vect2(0,4), v+vect2(3,7), rgb(1,0,0) );
+							gra.Fill( v+vect2(0,4), v+vect2(3,7), vect3(1,0,0) );
 						}
 					}
 				}
@@ -1234,7 +1234,7 @@ struct Apr : public Sys
 				vect3 v = pers.calcDisp(pers.cam.at*pers.cam.mat.invers());
 				if ( v.z > 0 ) 
 				{
-					//gra.Circle( vect2(v.x,v.y), 8, rgb(0,1,0));
+					//gra.Circle( vect2(v.x,v.y), 8, vect3(0,1,0));
 				}
 			}
 
@@ -1242,13 +1242,13 @@ struct Apr : public Sys
 			{
 				const int NUM = 10;
 
-				gridGround.SetMesh( vect3(0,0,0), 0, NUM, NUM, 1, rgb(0.2,0.2,0.2) );
+				gridGround.SetMesh( vect3(0,0,0), 0, NUM, NUM, 1, vect3(0.2,0.2,0.2) );
 				gridGround.DrawMesh( *this );
 
 				if(0)
 				{	// 格子グリッド
-//					int col = rgb(0.5,0.5,0.5);
-					int col = rgb(0.2,0.2,0.2);
+//					vect3 col = vect3(0.5,0.5,0.5);
+					vect3 col = vect3(0.2,0.2,0.2);
 					{
 						vect3 a(-NUM, 0,-NUM);
 						vect3 b( NUM, 0,-NUM);
@@ -1292,7 +1292,7 @@ struct Apr : public Sys
 
 				if(0)
 				{	// ドットグリッド
-					int col = rgb(1,1,1);
+					vect3 col = vect3(1,1,1);
 					{
 						for ( int i = -NUM ; i <= NUM ; i++ )
 						{
@@ -1419,7 +1419,7 @@ struct Apr : public Sys
 				bool flg = pers.calcScissorLine3d( a, b, v0, v1 );
 				if ( flg )
 				{
-					gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,1,1));
+					gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), vect3(0,1,1));
 				}
 
 			}
@@ -1453,8 +1453,8 @@ struct Apr : public Sys
 						for ( int i = 0 ; i <div ; i++ )
 						{
 							vect2 v1 = catmull_func(t, catmull_tbl[n0].pos, catmull_tbl[n1].pos, catmull_tbl[n2].pos, catmull_tbl[n3].pos );
-							gra.Line( v1, v0, rgb(1,1,1));
-							gra.Fill( v1-1,v1+2, rgb(1,1,1));
+							gra.Line( v1, v0, vect3(1,1,1));
+							gra.Fill( v1-1,v1+2, vect3(1,1,1));
 							v0=v1;
 							t+=dt;
 
@@ -1480,8 +1480,8 @@ struct Apr : public Sys
 						for ( int i = 0 ; i < div ; i++ )
 						{
 							vect2 v1 = bezier_func( t, bezier_tbl[n+0].pos, bezier_tbl[n+1].pos, bezier_tbl[n+2].pos, bezier_tbl[n+3].pos );
-							gra.Line( v0,v1, rgb(1,1,1));
-							gra.Fill( v1-1,v1+2, rgb(1,1,1));
+							gra.Line( v0,v1, vect3(1,1,1));
+							gra.Fill( v1-1,v1+2, vect3(1,1,1));
 							v0=v1;
 							t+=dt;
 						}
@@ -1497,7 +1497,7 @@ struct Apr : public Sys
 						vect2 v1 = bezier_tbl[i].pos;
 						if ( cnt != 1 ) 
 						{
-							gra.Line( v0, v1, rgb(0,1,0));
+							gra.Line( v0, v1, vect3(0,1,0));
 						}
 						v0 = v1;
 						cnt = (cnt+1)%3;
@@ -1516,7 +1516,7 @@ struct Apr : public Sys
 				static int n = 0;
 				gv1 = bezier_func( t, bezier_tbl[n+0].pos, bezier_tbl[n+1].pos, bezier_tbl[n+2].pos, bezier_tbl[n+3].pos );
 
-				gra.Fill( gv1-4, gv1+4, rgb(1,1,1));
+				gra.Fill( gv1-4, gv1+4, vect3(1,1,1));
 
 				if ( bForward ) t+=0.01; else t-=0.01;
 
@@ -1567,7 +1567,7 @@ struct Apr : public Sys
 
 				gv2 = catmull_func( t, catmull_tbl[n0].pos, catmull_tbl[n1].pos, catmull_tbl[n2].pos, catmull_tbl[n3].pos );
 
-				gra.Fill( gv2-4, gv2+4, rgb(1,1,1));
+				gra.Fill( gv2-4, gv2+4, vect3(1,1,1));
 
 				if ( bForward ) t+=0.01; else t-=0.01;
 
@@ -1728,32 +1728,32 @@ struct Apr : public Sys
 									
 									if ( manupirator.bAxisX && manupirator.bAxisZ )
 									{
-										gridMini.SetMesh( pj->pos, 0, 5, 5, 0.05, rgb(0.2,0.2,0.2) );
+										gridMini.SetMesh( pj->pos, 0, 5, 5, 0.05, vect3(0.2,0.2,0.2) );
 									}
 									else
 									if ( manupirator.bAxisX && manupirator.bAxisY )
 									{
-										gridMini.SetMesh( pj->pos, 1, 5, 5, 0.05, rgb(0.2,0.2,0.2) );
+										gridMini.SetMesh( pj->pos, 1, 5, 5, 0.05, vect3(0.2,0.2,0.2) );
 									}
 									else
 									if ( manupirator.bAxisZ && manupirator.bAxisY )
 									{
-										gridMini.SetMesh( pj->pos, 2, 5, 5, 0.05, rgb(0.2,0.2,0.2) );
+										gridMini.SetMesh( pj->pos, 2, 5, 5, 0.05, vect3(0.2,0.2,0.2) );
 									}
 									else
 									if ( manupirator.bAxisX )
 									{
-										gridMini.SetMesh( pj->pos, 0, 1, 5, 0.05, rgb(0.2,0.2,0.2) );
+										gridMini.SetMesh( pj->pos, 0, 1, 5, 0.05, vect3(0.2,0.2,0.2) );
 									}
 									else
 									if ( manupirator.bAxisY )
 									{
-										gridMini.SetMesh( pj->pos, 1, 1, 5, 0.05, rgb(0.2,0.2,0.2) );
+										gridMini.SetMesh( pj->pos, 1, 1, 5, 0.05, vect3(0.2,0.2,0.2) );
 									}
 									else
 									if ( manupirator.bAxisZ )
 									{
-										gridMini.SetMesh( pj->pos, 0, 1, 5, 0.05, rgb(0.2,0.2,0.2) );
+										gridMini.SetMesh( pj->pos, 0, 1, 5, 0.05, vect3(0.2,0.2,0.2) );
 									}
 									
 									
@@ -1852,7 +1852,7 @@ struct Apr : public Sys
 												float x  = dot( (Q-Q0), vect3(1,0,0) );
 												pj->pos.x += x;
 											}
-											//circle3d_y( pj->pos, 0.1, rgb(0.8,0.2,0.2) );
+											//circle3d_y( pj->pos, 0.1, vect3(0.8,0.2,0.2) );
 										}
 									}
 
@@ -1933,7 +1933,7 @@ struct Apr : public Sys
 					vect2 v0 = b.j0.pos;
 					vect2 v1 = b.j1.pos;
 
-					gra.Line( v0, v1, rgb( 1,1,1 ) );
+					gra.Line( v0, v1, vect3( 1,1,1 ) );
 				}
 			}
 
@@ -1963,7 +1963,7 @@ struct Apr : public Sys
 			
 			
 			// 原点
-			circle3d_y( vect3(0,0,0), 0.1, rgb(0.2,0.2,0.2) );
+			circle3d_y( vect3(0,0,0), 0.1, vect3(0.2,0.2,0.2) );
 
 
 			// マニュピレーター描画
@@ -1983,9 +1983,9 @@ struct Apr : public Sys
 				vect3 p = pers.calcRay( v, 10 );
 
 
-				line3d( v, p, rgb(1,0,0));
-				line3d( vect3(0,0,0), v, rgb(1,1,0));
-				line3d( vect3(0,-1,0), p, rgb(1,0,1));
+				line3d( v, p, vect3(1,0,0));
+				line3d( vect3(0,0,0), v, vect3(1,1,0));
+				line3d( vect3(0,-1,0), p, vect3(1,0,1));
 
 
 
@@ -1996,10 +1996,10 @@ struct Apr : public Sys
 
 			// 点 
 			{
-				gra.Pset(vect2(1,1),rgb(1,1,1));
-				gra.Pset(vect2(766,1),rgb(1,1,1));
-				gra.Pset(vect2(1,510),rgb(1,1,1));
-				gra.Pset(vect2(766,510),rgb(1,1,1));
+				gra.Pset(vect2(1,1),vect3(1,1,1));
+				gra.Pset(vect2(766,1),vect3(1,1,1));
+				gra.Pset(vect2(1,510),vect3(1,1,1));
+				gra.Pset(vect2(766,510),vect3(1,1,1));
 			}
 			
 			// 塗りつぶし三角
@@ -2009,7 +2009,7 @@ struct Apr : public Sys
 				vect2	v0 = scale * vect2( 55,0) + ofs;
 				vect2	v1 = scale * vect2( 10,90) + ofs;
 				vect2	v2 = scale * vect2(100,90) + ofs;
-				gra.Tri( v0,v1,v2,rgb(0.5,0.3,0.2));
+				gra.Tri( v0,v1,v2,vect3(0.5,0.3,0.2));
 			}
 
 			// figTriangle
@@ -2021,7 +2021,7 @@ struct Apr : public Sys
 				int ey =cy+128;
 
 				static int cnt = 0;
-				figTriangle.draw( vect2(cx,cy),rad(cnt), rgb(0,1,1) );
+				figTriangle.draw( vect2(cx,cy),rad(cnt), vect3(0,1,1) );
 				cnt++;
 			}
 			
