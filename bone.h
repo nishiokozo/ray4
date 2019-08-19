@@ -10,7 +10,7 @@ struct Ring
 		vect2	v0;
 		vect2	v1;
 		vect2	v2;
-		vect3	col;
+		rgb	col;
 		PrimTrigon( 
 			float	_z,
 			vect2	_v0,
@@ -38,7 +38,7 @@ struct Ring
 	{
 		vect2	v0;
 		vect2	v1;
-		int		col;
+		rgb		col;
 		PrimLine( 
 			vect2	_v0,
 			vect2	_v1,
@@ -132,8 +132,7 @@ struct Ring
 				float z = a.x*b.y-a.y*b.x;
 				if ( z > 0 ) 
 				{
-					trigons.emplace_back( z, d0, d1, d2, vect3(d,d,d) );
-	//							gra.Tri( d0, d1, d2, vect3(d,d,d));
+					trigons.emplace_back( z, d0, d1, d2, rgb(d,d,d) );
 				}
 			}
 		}

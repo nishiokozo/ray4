@@ -644,7 +644,7 @@ public:
 
 };
 
-
+typedef vect3 rgb;
 void	mat4_Frustum( mat44 m, float l, float r, float b, float t, float n, float f );
 void	mat4_Ortho( float* m, float l, float r, float b, float t, float n, float f );
 
