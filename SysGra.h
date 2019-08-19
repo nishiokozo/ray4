@@ -60,17 +60,25 @@ struct SysGra
 	void Update() ;
 
 
-	void	Print( vect2 v, string str );
 	void	Cls();
 
+	void	Print2d( vect2 v, string str );
+	void	Tri2d( vect2 v0, vect2 v1, vect2 v2, vect3 col);
+	void	Box2d( vect2 v0, vect2 v1, vect3 col);
+	void	Fill2d( vect2 v0, vect2 v1, vect3 col);
+	void	Line2d( vect2 v0, vect2 v1, vect3 col);
+	void	Pset2d( vect2 v0, vect3 col, float w=1.0f);
+	void	Circle2d( vect2 v, float r, vect3 col );
+
+	void	Print( vect2 v, string str );
 	void	Tri( vect2 v0, vect2 v1, vect2 v2, vect3 col);
 	void	Box( vect2 v0, vect2 v1, vect3 col);
 	void	Fill( vect2 v0, vect2 v1, vect3 col);
 	void	Line( vect2 v0, vect2 v1, vect3 col);
-	void	Pset( vect2 v0, vect3 col);
+	void	Pset( vect2 v0, vect3 col, float w=1.0f);
 	void	Circle( vect2 v, float r, vect3 col );
+
 	void	Clr( vect3 col );
-//	int 	Rgb(float r, float g , float b );
 
 	SysGra();
 	~SysGra();

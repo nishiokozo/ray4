@@ -2,8 +2,6 @@
 // 輪
 struct Ring
 {
-	#define	USE_LINE	0
-	#define	USE_TRIGON	1
 	struct PrimTrigon
 	{
 		float	z;
@@ -87,7 +85,6 @@ struct Ring
 	//------------------------------------------------------------------------------
 	{
 		vect3 l = vect3(0,0,1).normalize();	// 正面ライト
-	#if USE_TRIGON
 		for ( ivect3 v : tbl_faces )
 		{
 			mat44	rotx;
@@ -137,35 +134,6 @@ struct Ring
 			}
 		}
 		sort(trigons.begin(), trigons.end());
-	#endif
-	#if USE_LINE
-		for ( ivect2 v : tbl_edge )
-		{
-			mat44	rotx;
-			mat44	roty;
-			mat44	rotz;
-			rotx.setRotateX(rot.x);
-			roty.setRotateY(rot.y);
-			rotz.setRotateZ(rot.z);
-
-			vect3 v0 = tbl_vert[v.n0];
-			vect3 v1 = tbl_vert[v.n1];
-
-			v0= rotx * roty * rotz *v0 + pos ;
-			v1= rotx * roty * rotz *v1 + pos ;
-
-			v0 = v0 * pers.cam.mat.invers();
-			v1 = v1 * pers.cam.mat.invers();
-
-			v0 = pers.calcDisp( v0 );
-			v1 = pers.calcDisp( v1 );
-
-			vect2 d0 = vect2(v0.x,v0.y);
-			vect2 d1 = vect2(v1.x,v1.y);
-
-			lines.emplace_back( d0, d1, vect3(0,1,1) );
-		}
-	#endif
 
 	}
 
@@ -173,21 +141,12 @@ struct Ring
 	void DrawTrigons( SysGra& gra )
 	//------------------------------------------------------------------------------
 	{
-	#if USE_TRIGON
 		// トリゴン描画 trigons	
 		for ( PrimTrigon& t : trigons )
 		{
-				gra.Tri( t.v0, t.v1, t.v2, t.col);
+				gra.Tri2d( t.v0, t.v1, t.v2, t.col);
 		}
 		trigons.clear();
-	#endif
-	#if USE_LINE
-		for ( PrimLine& e : lines )
-		{
-			gra.Line( e.v0, e.v1 , e.col );
-		}
-		lines.clear();
-	#endif
 	}
 
 };

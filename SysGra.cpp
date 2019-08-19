@@ -750,21 +750,6 @@ int Sys::GetBytePixels()
 
 
 
-/*
-//------------------------------------------------------------------------------
-int	SysGra::Rgb( float r, float g , float b )
-//------------------------------------------------------------------------------
-{
-	r = min( 1.0, r );
-	g = min( 1.0, g );
-	b = min( 1.0, b );
-	int	ir = ((int)(r*255))&0xff;
-	int	ig = ((int)(g*255))&0xff;
-	int	ib = ((int)(b*255))&0xff;
-	int	col = RGB(ir,ig,ib);
-	return col ;
-}
-*/
 //------------------------------------------------------------------------------
 void SysGra::Update()
 //------------------------------------------------------------------------------
@@ -775,187 +760,115 @@ void SysGra::Update()
 void SysGra::Clr( vect3 col)
 //------------------------------------------------------------------------------
 {
-//	m.tblVect2.emplace_back( TypeClr, col );
-				//float cb = (float)((col>>16)&0xff)/255.0f;
-				//float cg = (float)((col>> 8)&0xff)/255.0f;
-				//float cr = (float)((col>> 0)&0xff)/255.0f;
-
-						glClearColor( col.r, col.g, col.b, 0.0f );
-						glClear( GL_COLOR_BUFFER_BIT );
+	glClearColor( col.r, col.g, col.b, 0.0f );
+	glClear( GL_COLOR_BUFFER_BIT );
 
 }
 //------------------------------------------------------------------------------
-void SysGra::Circle( vect2 v, float r, vect3 col )
+void SysGra::Circle2d( vect2 v, float r, vect3 col )
 //------------------------------------------------------------------------------
 {
-//	m.tblVect2.emplace_back( TypeCircle, col );
-//	m.tblVect2.emplace_back( v0 );
-//	m.tblVect2.emplace_back( r, 8.0  ); // 半径 , 分割数
+	{
+	    glColor3f( col.r, col.g, col.b );
+	    glBegin(GL_LINE_LOOP);
 
-				//float cb = (float)((col>>16)&0xff)/255.0f;
-				//float cg = (float)((col>> 8)&0xff)/255.0f;
-				//float cr = (float)((col>> 0)&0xff)/255.0f;
-
-							{
-							    glColor3f( col.r, col.g, col.b );
-							    glBegin(GL_LINE_LOOP);
-
-								int s=0;
-								vect2 v0 = v + vect2(r,0);
-								v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-//								MoveToEx(hDc, (int)v0.x, (int)v0.y, NULL); 
-								for ( int i = 0 ; i < 360 ; i+=45 )
-								{
-									float th = rad(i);
-									vect2 v1 = vect2( r*cos(th), r*sin(th) )+v;
-//									LineTo(hDc, (int)v1.x, (int)v1.y); 
-
-									//gl
-									v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-								    glVertex2f(v1.x, v1.y);
-									s++;
-								}
-							    glEnd();
-//								LineTo(hDc, (int)v0.x, (int)v0.y); 
-							}
+		int s=0;
+		vect2 v0 = v + vect2(r,0);
+		v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+		for ( int i = 0 ; i < 360 ; i+=45 )
+		{
+			float th = rad(i);
+			vect2 v1 = vect2( r*cos(th), r*sin(th) )+v;
+			v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+		    glVertex2f(v1.x, v1.y);
+			s++;
+		}
+	    glEnd();
+	}
 
 }
 //------------------------------------------------------------------------------
-void SysGra::Pset( vect2 v0, vect3 col )
+void SysGra::Pset2d( vect2 v0, vect3 col, float w )
 //------------------------------------------------------------------------------
 {
-//	m.tblVect2.emplace_back( TypePset, col );
-//	m.tblVect2.emplace_back( v0 );
-				//float cb = (float)((col>>16)&0xff)/255.0f;
-				//float cg = (float)((col>> 8)&0xff)/255.0f;
-				//float cr = (float)((col>> 0)&0xff)/255.0f;
-
-							v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-						    glColor3f( col.r, col.g, col.b );
-						    glBegin(GL_POINTS);
-						    glVertex2f(v0.x, v0.y);
-						    glEnd();
+	v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+	glPointSize(w);
+    glColor3f( col.r, col.g, col.b );
+    glBegin(GL_POINTS);
+    glVertex2f(v0.x, v0.y);
+    glEnd();
 }
 //------------------------------------------------------------------------------
-void SysGra::Box( vect2 v0, vect2 v1,vect3 col)
+void SysGra::Box2d( vect2 v0, vect2 v1,vect3 col)
 //------------------------------------------------------------------------------
 {
-//	m.tblVect2.emplace_back( TypeBox, col );
-//	m.tblVect2.emplace_back( v0 );
-//	m.tblVect2.emplace_back( v1 );
-				//float cb = (float)((col>>16)&0xff)/255.0f;
-				//float cg = (float)((col>> 8)&0xff)/255.0f;
-				//float cr = (float)((col>> 0)&0xff)/255.0f;
-
-							v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-							v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-						    glColor3f( col.r, col.g, col.b );
-						    glBegin(GL_LINE_LOOP);
-						    glVertex2f(v1.x, v0.y);
-						    glVertex2f(v1.x, v1.y);
-						    glVertex2f(v0.x, v1.y);
-						    glVertex2f(v0.x, v0.y);
-						    glEnd();
+	v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+	v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+    glColor3f( col.r, col.g, col.b );
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(v1.x, v0.y);
+    glVertex2f(v1.x, v1.y);
+    glVertex2f(v0.x, v1.y);
+    glVertex2f(v0.x, v0.y);
+    glEnd();
 
 }
 //------------------------------------------------------------------------------
-void SysGra::Fill( vect2 v0, vect2 v1,vect3 col)
+void SysGra::Fill2d( vect2 v0, vect2 v1,vect3 col)
 //------------------------------------------------------------------------------
 {
-//	m.tblVect2.emplace_back( TypeFill, col );
-//	m.tblVect2.emplace_back( v0 );
-//	m.tblVect2.emplace_back( v1 );
-				//float cb = (float)((col>>16)&0xff)/255.0f;
-				//float cg = (float)((col>> 8)&0xff)/255.0f;
-				//float cr = (float)((col>> 0)&0xff)/255.0f;
-
-							v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-							v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-						    glColor3f( col.r, col.g, col.b );
-						    glBegin(GL_QUADS);
-						    glVertex2f(v1.x, v0.y);
-						    glVertex2f(v1.x, v1.y);
-						    glVertex2f(v0.x, v1.y);
-						    glVertex2f(v0.x, v0.y);
-						    glEnd();
+	v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+	v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+    glColor3f( col.r, col.g, col.b );
+    glBegin(GL_QUADS);
+    glVertex2f(v1.x, v0.y);
+    glVertex2f(v1.x, v1.y);
+    glVertex2f(v0.x, v1.y);
+    glVertex2f(v0.x, v0.y);
+    glEnd();
 
 }
 //------------------------------------------------------------------------------
-void SysGra::Line( vect2 v0, vect2 v1,vect3 col)
+void SysGra::Line2d( vect2 v0, vect2 v1,vect3 col)
 //------------------------------------------------------------------------------
 {
-#if 0
-	m.tblVect2.emplace_back( TypeLine, col );
-	m.tblVect2.emplace_back( v0 );
-	m.tblVect2.emplace_back( v1 );
-#else
-				//float cb = (float)((col>>16)&0xff)/255.0f;
-				//float cg = (float)((col>> 8)&0xff)/255.0f;
-				//float cr = (float)((col>> 0)&0xff)/255.0f;
-							v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-							v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-						    glColor3f( col.r, col.g, col.b );
-						    glBegin(GL_LINES);
-						    glVertex2f(v0.x, v0.y);
-						    glVertex2f(v1.x, v1.y);
-						    glEnd();
-#endif
+	v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+	v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+    glColor3f( col.r, col.g, col.b );
+    glBegin(GL_LINES);
+    glVertex2f(v0.x, v0.y);
+    glVertex2f(v1.x, v1.y);
+    glEnd();
 }
 //------------------------------------------------------------------------------
-void SysGra::Tri( vect2 v0, vect2 v1, vect2 v2, vect3 col)
+void SysGra::Tri2d( vect2 v0, vect2 v1, vect2 v2, vect3 col)
 //------------------------------------------------------------------------------
 {
-#if 0
-	m.tblVect2.emplace_back( TypeTri, col );
-	m.tblVect2.emplace_back( v0 );
-	m.tblVect2.emplace_back( v1 );
-	m.tblVect2.emplace_back( v2 );
-#else
-				//float cb = (float)((col>>16)&0xff)/255.0f;
-				//float cg = (float)((col>> 8)&0xff)/255.0f;
-				//float cr = (float)((col>> 0)&0xff)/255.0f;
-
-							v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-							v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-							v2 = v2 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-						    glColor3f( col.r, col.g, col.b );
-						    glBegin( GL_TRIANGLES );
-						    glVertex2f(v0.x, v0.y);
-						    glVertex2f(v1.x, v1.y);
-						    glVertex2f(v2.x, v2.y);
-						    glEnd();
-#endif
+	v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+	v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+	v2 = v2 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+    glColor3f( col.r, col.g, col.b );
+    glBegin( GL_TRIANGLES );
+    glVertex2f(v0.x, v0.y);
+    glVertex2f(v1.x, v1.y);
+    glVertex2f(v2.x, v2.y);
+    glEnd();
 
 }
 //------------------------------------------------------------------------------
-void SysGra::Print( vect2 v0, string str )
+void SysGra::Print2d( vect2 v0, string str )
 //------------------------------------------------------------------------------
 {
-//	m.tblMessage.emplace_back( str, pos );
+    glBegin(GL_POINTS);
+    glColor3f( 1,1,1 );
+    glEnd();
 
-if(1)
-			{
-//		        SetTextColor(hDc, RGB(0xff, 0xff, 0xff));  // 文字色を設定
-//		        SetBkColor(hDc, RGB(0xf, 0xf, 0xf));    // 背景色を設定
-//		        SetBkMode( hDc, TRANSPARENT ); // 背景を塗りつぶさない
-//2		        g.hfonPrev = (HFONT) SelectObject(hDc, g.hfon);  // フォントを選択
-
-			    glBegin(GL_POINTS);
-			    glColor3f( 1,1,1 );
-			    glEnd();
-
-	//			for ( Message& m : m.tblMessage )
-		        {
-	//				vect2 v0 = m.pos;
-//		        	const char* str = m.str.c_str();
-//			        TextOut(hDc, (int)v0.x, (int)v0.y, str, lstrlen(str));
-
-					//gl
-					v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-					glRasterPos2f(v0.x, v0.y);
-					font.DrawString( str );
-				}
-				
-//		        SelectObject(hDc, g.hfonPrev);      
-			}
+    {
+		v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+		glRasterPos2f(v0.x, v0.y);
+		font.DrawString( str );
+	}
+	
 }
+
+////

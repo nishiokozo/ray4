@@ -517,7 +517,7 @@ static	vect3 catmull3d_func( float t, const vect3 P0, const vect3 P1, const vect
 			{
 				vect2 v0(b.j0.disp.x,b.j0.disp.y);
 				vect2 v1(b.j1.disp.x,b.j1.disp.y);
-				gra.Line( v0,v1, col);
+				gra.Line2d( v0,v1, col);
 	
 
 				// 肉
@@ -577,10 +577,10 @@ static	vect3 catmull3d_func( float t, const vect3 P0, const vect3 P1, const vect
 
 						if ( flg )
 						{
-							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1));
+							gra.Line2d( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1));
 						}
 						
-						if ( v1.z > 0 ) gra.Fill(vect2(v1.x,v1.y)-2, vect2(v1.x,v1.y)+3,rgb(0,0,1));
+						if ( v1.z > 0 ) gra.Pset2d(vect2(v1.x,v1.y), rgb(0,0,1), 5);
 
 						a=b;
 						t+=dt;
