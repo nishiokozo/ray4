@@ -338,7 +338,44 @@ struct Apr : public Sys
 		}
 		
 		//---------------------------------------------------------------------
-		void drawController( vect2 mouse_pos, SysGra& gra )
+		void drawController2d( vect2 mouse_pos, SysGra& gra )
+		//---------------------------------------------------------------------
+		{
+
+			// 矩形エリア表示
+			if ( rect_bSelect )
+			{
+				vect2 v0 = min( rect_pos, mouse_pos );
+				vect2 v1 = max( rect_pos, mouse_pos );
+				gra.Box2d( v0,v1, rgb(0,0.5,1));
+			}
+
+			// コントローラー表示
+			for ( Marker m : tblMarker )
+			{
+				if ( m.obj.IsVisuable() )
+				{
+					bool flg =  m.obj.bSelected;
+					
+					if ( m.obj.bRectIn )
+					{
+						flg = m.obj.bRectSelected;
+					}
+					
+					if ( flg )			
+					{
+						gra.Pset2d( m.obj.Pos2(), colSelected, 9 );
+					}
+					else
+					{
+						gra.Pset2d( m.obj.Pos2(), colNormal, 9 );
+					}
+				}
+			}
+		}
+	
+		//---------------------------------------------------------------------
+		void drawController3d( vect2 mouse_pos, SysGra& gra )
 		//---------------------------------------------------------------------
 		{
 
@@ -445,51 +482,7 @@ struct Apr : public Sys
 				}
 			}
 
-		
-			if(0)
-			{
-				float l = 0.1;
 
-				if ( bAxisX ) apr.line3d( (pos + vect3(-l,0,0)), (pos + vect3(l,0,0)), vect3(1,0,0) );
-				if ( bAxisY ) apr.line3d( (pos + vect3(0,-l,0)), (pos + vect3(0,l,0)), vect3(0,1,0) );
-				if ( bAxisZ ) apr.line3d( (pos + vect3(0,0,-l)), (pos + vect3(0,0,l)), vect3(0,0,1) );
-			}
-
-			if(0)
-			{
-				float l = 0.1;
-				if ( bAxisX && bAxisY )
-				{
-					apr.line3d( (pos + vect3(-l,-l,0)), (pos + vect3( l,-l,0)), vect3(0,0,1) );
-					apr.line3d( (pos + vect3(-l, l,0)), (pos + vect3( l, l,0)), vect3(0,0,1) );
-					apr.line3d( (pos + vect3(-l,-l,0)), (pos + vect3(-l, l,0)), vect3(0,0,1) );
-					apr.line3d( (pos + vect3( l,-l,0)), (pos + vect3( l, l,0)), vect3(0,0,1) );
-				}
-
-				if ( bAxisZ && bAxisY )
-				{
-					apr.line3d( (pos + vect3(0,-l,-l)), (pos + vect3(0, l,-l)), vect3(1,0,0) );
-					apr.line3d( (pos + vect3(0,-l, l)), (pos + vect3(0, l, l)), vect3(1,0,0) );
-					apr.line3d( (pos + vect3(0,-l,-l)), (pos + vect3(0,-l, l)), vect3(1,0,0) );
-					apr.line3d( (pos + vect3(0, l,-l)), (pos + vect3(0, l, l)), vect3(1,0,0) );
-				}
-
-				if ( bAxisZ && bAxisX )
-				{
-					apr.line3d( (pos + vect3(-l,0,-l)), (pos + vect3( l,0,-l)), vect3(0,1,0) );
-					apr.line3d( (pos + vect3(-l,0, l)), (pos + vect3( l,0, l)), vect3(0,1,0) );
-					apr.line3d( (pos + vect3(-l,0,-l)), (pos + vect3(-l,0, l)), vect3(0,1,0) );
-					apr.line3d( (pos + vect3( l,0,-l)), (pos + vect3( l,0, l)), vect3(0,1,0) );
-				}
-			}	
-
-			if(0)
-			{
-				float l = 0.15;
-				if ( bAxisZ && bAxisY ) apr.circle3d_x( pos, l, vect3(1,0,0) );
-				if ( bAxisX && bAxisZ ) apr.circle3d_y( pos, l, vect3(0,1,0) );
-				if ( bAxisX && bAxisY ) apr.circle3d_z( pos, l, vect3(0,0,1) );
-			}
 		}
 	} manupirator;
 
@@ -506,19 +499,6 @@ struct Apr : public Sys
 
 	//------------------------------------------------------------------------------
 	void line3d( vect3 p0, vect3 p1, rgb col )
-	//------------------------------------------------------------------------------
-	{
-		float l = 0.2;
-		vect3 a = p0* pers.cam.mat.invers();
-		vect3 b = p1* pers.cam.mat.invers();
-		vect3 v0;
-		vect3 v1;
-		bool flg = pers.calcScissorLine3d( a, b, v0, v1 );
-		if ( flg ) gra.Line2d( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col );
-	}
-
-	//------------------------------------------------------------------------------
-	void othro_line3d( vect3 p0, vect3 p1, rgb col )
 	//------------------------------------------------------------------------------
 	{
 		float l = 0.2;
@@ -1348,13 +1328,6 @@ struct Apr : public Sys
 			}
 
 
-			// 輪 ring
-			//calcDisp rotate
-//			ring.CalcPers( pers, vect3(-1.5,-0.5,1.5), vect3(rad(210),rad(0),rad(20)) );
-
-				// トリゴン描画 trigons	
-//			ring.DrawTrigons( gra );
-
 			// カトマル
 			{
 				// マーカースプライン変換表示
@@ -1876,7 +1849,15 @@ struct Apr : public Sys
 				pBone->drawMotion( pers, gra );
 
 				// マーカー表示
-				selector.drawController( mouse.pos, gra );
+				if ( selector.mode == Selector::MODE_3D )
+				{
+					selector.drawController3d( mouse.pos, gra );
+				}
+				if ( selector.mode == Selector::MODE_2D )
+				{
+					selector.drawController2d( mouse.pos, gra );
+				}
+				
 
 			}
 			

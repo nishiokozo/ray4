@@ -525,8 +525,8 @@ return;
 
 							//gl
 							{
-							    glColor3f( col.r, col.g, col.b );
-							    glBegin(GL_LINE_LOOP);
+								glColor3f( col.r, col.g, col.b );
+								glBegin(GL_LINE_LOOP);
 
 								int s=0;
 								vect2 v0 = v + vect2(r,0);
@@ -540,10 +540,10 @@ return;
 
 									//gl
 									v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-								    glVertex2f(v1.x, v1.y);
+									glVertex2f(v1.x, v1.y);
 									s++;
 								}
-							    glEnd();
+								glEnd();
 //								LineTo(hDc, (int)v0.x, (int)v0.y); 
 							}
 						}
@@ -556,10 +556,10 @@ return;
 
 							//gl
 							v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-						    glColor3f( col.r, col.g, col.b );
-						    glBegin(GL_POINTS);
-						    glVertex2f(v0.x, v0.y);
-						    glEnd();
+							glColor3f( col.r, col.g, col.b );
+							glBegin(GL_POINTS);
+							glVertex2f(v0.x, v0.y);
+							glEnd();
 						}
 						break;
 
@@ -572,13 +572,13 @@ return;
 							//gl
 							v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
 							v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-						    glColor3f( col.r, col.g, col.b );
-						    glBegin(GL_QUADS);
-						    glVertex2f(v1.x, v0.y);
-						    glVertex2f(v1.x, v1.y);
-						    glVertex2f(v0.x, v1.y);
-						    glVertex2f(v0.x, v0.y);
-						    glEnd();
+							glColor3f( col.r, col.g, col.b );
+							glBegin(GL_QUADS);
+							glVertex2f(v1.x, v0.y);
+							glVertex2f(v1.x, v1.y);
+							glVertex2f(v0.x, v1.y);
+							glVertex2f(v0.x, v0.y);
+							glEnd();
 						}
 						break;
 					
@@ -592,11 +592,11 @@ return;
 							//gl
 							v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
 							v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-						    glColor3f( col.r, col.g, col.b );
-						    glBegin(GL_LINES);
-						    glVertex2f(v0.x, v0.y);
-						    glVertex2f(v1.x, v1.y);
-						    glEnd();
+							glColor3f( col.r, col.g, col.b );
+							glBegin(GL_LINES);
+							glVertex2f(v0.x, v0.y);
+							glVertex2f(v1.x, v1.y);
+							glEnd();
 						}
 						break;
 
@@ -613,13 +613,13 @@ return;
 							//gl
 							v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
 							v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-						    glColor3f( col.r, col.g, col.b );
-						    glBegin(GL_LINE_LOOP);
-						    glVertex2f(v1.x, v0.y);
-						    glVertex2f(v1.x, v1.y);
-						    glVertex2f(v0.x, v1.y);
-						    glVertex2f(v0.x, v0.y);
-						    glEnd();
+							glColor3f( col.r, col.g, col.b );
+							glBegin(GL_LINE_LOOP);
+							glVertex2f(v1.x, v0.y);
+							glVertex2f(v1.x, v1.y);
+							glVertex2f(v0.x, v1.y);
+							glVertex2f(v0.x, v0.y);
+							glEnd();
 
 						}
 						break;
@@ -637,12 +637,12 @@ return;
 							v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
 							v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
 							v2 = v2 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-						    glColor3f( col.r, col.g, col.b );
-						    glBegin( GL_TRIANGLES );
-						    glVertex2f(v0.x, v0.y);
-						    glVertex2f(v1.x, v1.y);
-						    glVertex2f(v2.x, v2.y);
-						    glEnd();
+							glColor3f( col.r, col.g, col.b );
+							glBegin( GL_TRIANGLES );
+							glVertex2f(v0.x, v0.y);
+							glVertex2f(v1.x, v1.y);
+							glVertex2f(v2.x, v2.y);
+							glEnd();
 
 	
 						}
@@ -664,9 +664,9 @@ return;
 //		        SetBkMode( hDc, TRANSPARENT ); // 背景を塗りつぶさない
 //		        g.hfonPrev = (HFONT) SelectObject(hDc, g.hfon);  // フォントを選択
 
-			    glBegin(GL_POINTS);
-			    glColor3f( 1,1,1 );
-			    glEnd();
+				glBegin(GL_POINTS);
+				glColor3f( 1,1,1 );
+				glEnd();
 
 				for ( Message& m : m.tblMessage )
 		        {
@@ -769,8 +769,8 @@ void SysGra::Circle2d( vect2 v, float r, vect3 col )
 //------------------------------------------------------------------------------
 {
 	{
-	    glColor3f( col.r, col.g, col.b );
-	    glBegin(GL_LINE_LOOP);
+		glColor3f( col.r, col.g, col.b );
+		glBegin(GL_LINE_LOOP);
 
 		int s=0;
 		vect2 v0 = v + vect2(r,0);
@@ -780,23 +780,29 @@ void SysGra::Circle2d( vect2 v, float r, vect3 col )
 			float th = rad(i);
 			vect2 v1 = vect2( r*cos(th), r*sin(th) )+v;
 			v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-		    glVertex2f(v1.x, v1.y);
+			glVertex2f(v1.x, v1.y);
 			s++;
 		}
-	    glEnd();
+		glEnd();
 	}
 
+}
+//------------------------------------------------------------------------------
+void SysGra::Pset0( vect2 v0, vect3 col, float w )
+//------------------------------------------------------------------------------
+{
+	glPointSize(w);
+	glColor3f( col.r, col.g, col.b );
+	glBegin(GL_POINTS);
+	glVertex2f(v0.x, v0.y);
+	glEnd();
 }
 //------------------------------------------------------------------------------
 void SysGra::Pset2d( vect2 v0, vect3 col, float w )
 //------------------------------------------------------------------------------
 {
 	v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-	glPointSize(w);
-    glColor3f( col.r, col.g, col.b );
-    glBegin(GL_POINTS);
-    glVertex2f(v0.x, v0.y);
-    glEnd();
+	Pset0( v0, col, w );
 }
 //------------------------------------------------------------------------------
 void SysGra::Box2d( vect2 v0, vect2 v1,vect3 col)
@@ -804,13 +810,13 @@ void SysGra::Box2d( vect2 v0, vect2 v1,vect3 col)
 {
 	v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
 	v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-    glColor3f( col.r, col.g, col.b );
-    glBegin(GL_LINE_LOOP);
-    glVertex2f(v1.x, v0.y);
-    glVertex2f(v1.x, v1.y);
-    glVertex2f(v0.x, v1.y);
-    glVertex2f(v0.x, v0.y);
-    glEnd();
+	glColor3f( col.r, col.g, col.b );
+	glBegin(GL_LINE_LOOP);
+	glVertex2f(v1.x, v0.y);
+	glVertex2f(v1.x, v1.y);
+	glVertex2f(v0.x, v1.y);
+	glVertex2f(v0.x, v0.y);
+	glEnd();
 
 }
 //------------------------------------------------------------------------------
@@ -819,26 +825,43 @@ void SysGra::Fill2d( vect2 v0, vect2 v1,vect3 col)
 {
 	v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
 	v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-    glColor3f( col.r, col.g, col.b );
-    glBegin(GL_QUADS);
-    glVertex2f(v1.x, v0.y);
-    glVertex2f(v1.x, v1.y);
-    glVertex2f(v0.x, v1.y);
-    glVertex2f(v0.x, v0.y);
-    glEnd();
+	glColor3f( col.r, col.g, col.b );
+	glBegin(GL_QUADS);
+	glVertex2f(v1.x, v0.y);
+	glVertex2f(v1.x, v1.y);
+	glVertex2f(v0.x, v1.y);
+	glVertex2f(v0.x, v0.y);
+	glEnd();
 
 }
 //------------------------------------------------------------------------------
-void SysGra::Line2d( vect2 v0, vect2 v1,vect3 col)
+void SysGra::Line0( vect2 v0, vect2 v1,vect3 col)
+//------------------------------------------------------------------------------
+{
+	glColor3f( col.r, col.g, col.b );
+	glBegin(GL_LINES);
+	glVertex2f(v0.x, v0.y);
+	glVertex2f(v1.x, v1.y);
+	glEnd();
+}
+//------------------------------------------------------------------------------
+void SysGra::Line2d( vect2 v0, vect2 v1, vect3 col)
 //------------------------------------------------------------------------------
 {
 	v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
 	v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-    glColor3f( col.r, col.g, col.b );
-    glBegin(GL_LINES);
-    glVertex2f(v0.x, v0.y);
-    glVertex2f(v1.x, v1.y);
-    glEnd();
+	Line0( v0, v1, col );
+}
+//------------------------------------------------------------------------------
+void SysGra::Tri0( vect2 v0, vect2 v1, vect2 v2, vect3 col)
+//------------------------------------------------------------------------------
+{
+	glColor3f( col.r, col.g, col.b );
+	glBegin( GL_TRIANGLES );
+	glVertex2f(v0.x, v0.y);
+	glVertex2f(v1.x, v1.y);
+	glVertex2f(v2.x, v2.y);
+	glEnd();
 }
 //------------------------------------------------------------------------------
 void SysGra::Tri2d( vect2 v0, vect2 v1, vect2 v2, vect3 col)
@@ -847,21 +870,15 @@ void SysGra::Tri2d( vect2 v0, vect2 v1, vect2 v2, vect3 col)
 	v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
 	v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
 	v2 = v2 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-    glColor3f( col.r, col.g, col.b );
-    glBegin( GL_TRIANGLES );
-    glVertex2f(v0.x, v0.y);
-    glVertex2f(v1.x, v1.y);
-    glVertex2f(v2.x, v2.y);
-    glEnd();
-
+	Tri0(v0,v1,v2,col);
 }
 //------------------------------------------------------------------------------
 void SysGra::Print2d( vect2 v0, string str )
 //------------------------------------------------------------------------------
 {
-    glBegin(GL_POINTS);
-    glColor3f( 1,1,1 );
-    glEnd();
+	glBegin(GL_POINTS);
+	glColor3f( 1,1,1 );
+	glEnd();
 
     {
 		v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);

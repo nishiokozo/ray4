@@ -209,19 +209,6 @@ struct Pers
 		return ( va.z > 0 && vb.z > 0 );
 	}			
 
-	//------------------------------------------------------------------------------
-	void line3d( SysGra& gra, vect3 p0, vect3 p1, int col )
-	//------------------------------------------------------------------------------
-	{
-		float l = 0.2;
-		vect3 a = p0* cam.mat.invers();
-		vect3 b = p1* cam.mat.invers();
-		vect3 v0;
-		vect3 v1;
-		bool flg = calcScissorLine3d( a, b, v0, v1 );
-		if ( flg ) gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col );
-	}
-
 };
 
 
