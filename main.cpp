@@ -61,7 +61,7 @@ struct Apr : public Sys
 				float x1=n.x*cos(th) - n.y*sin(th) + ofs.x;
 				float y1=n.x*sin(th) + n.y*cos(th) + ofs.y;
 
-				gra.Line2d(vect2(x0,y0), vect2(x1,y1),col);
+				gra.Line( cv(vect2(x0,y0)), cv(vect2(x1,y1)),col);
 			}
 		}
 
@@ -206,7 +206,7 @@ struct Apr : public Sys
 		rgb		colSelected = vect3(1,0,0);
 
 		//---------------------------------------------------------------------
-		void clear( vect2 mouse_pos )
+		void clear( vect2 mpos )
 		//---------------------------------------------------------------------
 		{
 			a.len = 9999;
@@ -216,7 +216,7 @@ struct Apr : public Sys
 			// 最近マーカーを検索
 			for ( Marker& m : tblMarker )
 			{
-				float len = (m.obj.Pos2()-mouse_pos).length();
+				float len = (m.obj.Pos2()-mpos).length();
 				if ( len < 20.0 && a.len > len )
 				{
 					a.len = len;
@@ -228,11 +228,11 @@ struct Apr : public Sys
 		}
 
 		//---------------------------------------------------------------------
-		void beginRectcursor( vect2 mouse_pos )
+		void beginRectcursor( vect2 mpos )
 		//---------------------------------------------------------------------
 		{
 			rect_bSelect = true;
-			rect_pos = mouse_pos;
+			rect_pos = mpos;
 		}
 
 		//---------------------------------------------------------------------
@@ -271,11 +271,11 @@ struct Apr : public Sys
 		}
 
 		//---------------------------------------------------------------------
-		void rect_selectReverse( vect2 mouse_pos )
+		void rect_selectReverse( vect2 mpos )
 		//---------------------------------------------------------------------
 		{
-			vect2 v0 = min( rect_pos, mouse_pos );
-			vect2 v1 = max( rect_pos, mouse_pos );
+			vect2 v0 = min( rect_pos, mpos );
+			vect2 v1 = max( rect_pos, mpos );
 
 			// 矩形カーソル選択解除
 			for ( Marker& m : tblMarker )
@@ -286,7 +286,7 @@ struct Apr : public Sys
 			// 矩形カーソル内マーカーを検索
 			for ( Marker& m : tblMarker )
 			{
-				float len = (m.obj.Pos2()-mouse_pos).length();
+				float len = (m.obj.Pos2()-mpos).length();
 				if ( m.obj.Pos2().x > v0.x && m.obj.Pos2().x < v1.x && m.obj.Pos2().y > v0.y && m.obj.Pos2().y < v1.y )
 				{
 					m.obj.bRectIn = true;
@@ -296,11 +296,11 @@ struct Apr : public Sys
 		}
 
 		//---------------------------------------------------------------------
-		void rect_selectAdd( vect2 mouse_pos )
+		void rect_selectAdd( vect2 mpos )
 		//---------------------------------------------------------------------
 		{
-			vect2 v0 = min( rect_pos, mouse_pos );
-			vect2 v1 = max( rect_pos, mouse_pos );
+			vect2 v0 = min( rect_pos, mpos );
+			vect2 v1 = max( rect_pos, mpos );
 
 			// 矩形カーソル選択解除
 			for ( Marker& m : tblMarker )
@@ -311,7 +311,7 @@ struct Apr : public Sys
 			// 矩形カーソル内マーカーを検索
 			for ( Marker& m : tblMarker )
 			{
-				float len = (m.obj.Pos2()-mouse_pos).length();
+				float len = (m.obj.Pos2()-mpos).length();
 				if ( m.obj.Pos2().x > v0.x && m.obj.Pos2().x < v1.x && m.obj.Pos2().y > v0.y && m.obj.Pos2().y < v1.y )
 				{
 					m.obj.bRectIn = true;
@@ -338,16 +338,16 @@ struct Apr : public Sys
 		}
 		
 		//---------------------------------------------------------------------
-		void drawController2d( vect2 mouse_pos, SysGra& gra )
+		void drawController2d( vect2 mpos, SysGra& gra )
 		//---------------------------------------------------------------------
 		{
 
 			// 矩形エリア表示
 			if ( rect_bSelect )
 			{
-				vect2 v0 = min( rect_pos, mouse_pos );
-				vect2 v1 = max( rect_pos, mouse_pos );
-				gra.Box2d( v0,v1, rgb(0,0.5,1));
+				vect2 v0 = min( rect_pos, mpos );
+				vect2 v1 = max( rect_pos, mpos );
+				gra.Box( cv(v0), cv(v1), rgb(0,0.5,1));
 			}
 
 			// コントローラー表示
@@ -364,27 +364,27 @@ struct Apr : public Sys
 					
 					if ( flg )			
 					{
-						gra.Pset2d( m.obj.Pos2(), colSelected, 9 );
+						gra.Pset( cv(m.obj.Pos2()), colSelected, 9 );
 					}
 					else
 					{
-						gra.Pset2d( m.obj.Pos2(), colNormal, 9 );
+						gra.Pset( cv(m.obj.Pos2()), colNormal, 9 );
 					}
 				}
 			}
 		}
 	
 		//---------------------------------------------------------------------
-		void drawController3d( vect2 mouse_pos, SysGra& gra )
+		void drawController3d( vect2 mpos, SysGra& gra )
 		//---------------------------------------------------------------------
 		{
 
 			// 矩形エリア表示
 			if ( rect_bSelect )
 			{
-				vect2 v0 = min( rect_pos, mouse_pos );
-				vect2 v1 = max( rect_pos, mouse_pos );
-				gra.Box2d( v0,v1, rgb(0,0.5,1));
+				vect2 v0 = min( rect_pos, mpos );
+				vect2 v1 = max( rect_pos, mpos );
+				gra.Box( cv(v0) ,cv(v1), rgb(0,0.5,1));
 			}
 
 			// コントローラー表示
@@ -401,11 +401,11 @@ struct Apr : public Sys
 					
 					if ( flg )			
 					{
-						gra.Pset2d( m.obj.Pos2(), colSelected, 9 );
+						gra.Pset( cv(m.obj.Pos2()), colSelected, 9 );
 					}
 					else
 					{
-						gra.Pset2d( m.obj.Pos2(), colNormal, 9 );
+						gra.Pset( cv(m.obj.Pos2()), colNormal, 9 );
 					}
 				}
 			}
@@ -461,7 +461,7 @@ struct Apr : public Sys
 				if ( bAxisX  )
 				{
 					vect3 v1 = v0 + vect3( l,0,0) * apr.pers.cam.mat.invers();
-					apr.gra.Line2d( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(1,0,0) );
+					apr.gra.Line( cv(vect2(v0.x,v0.y)), cv(vect2(v1.x,v1.y)), rgb(1,0,0) );
 	
 					pinAxisX.disp = v1;
 	
@@ -469,14 +469,14 @@ struct Apr : public Sys
 				if ( bAxisY  )
 				{
 					vect3 v1 = v0 + vect3( 0,l,0) * apr.pers.cam.mat.invers();
-					apr.gra.Line2d( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,1,0) );
+					apr.gra.Line( cv(vect2(v0.x,v0.y)), cv(vect2(v1.x,v1.y)), rgb(0,1,0) );
 	
 					pinAxisY.disp = v1;
 				}
 				if ( bAxisZ )
 				{
 					vect3 v1 = v0 + vect3( 0,0,l) * apr.pers.cam.mat.invers();
-					apr.gra.Line2d( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1) );
+					apr.gra.Line( cv(vect2(v0.x,v0.y)), cv(vect2(v1.x,v1.y)), rgb(0,0,1) );
 	
 					pinAxisZ.disp = v1;
 				}
@@ -507,7 +507,7 @@ struct Apr : public Sys
 		vect3 v0;
 		vect3 v1;
 		bool flg = pers.calcScissorLine3d( a, b, v0, v1 );
-		if ( flg ) gra.Line2d( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col );
+		if ( flg ) gra.Line( cv(vect2(v0.x,v0.y)), cv(vect2(v1.x,v1.y)), col );
 	}
 
 	//------------------------------------------------------------------------------
@@ -520,7 +520,7 @@ struct Apr : public Sys
 			vect3 p = vect3( 0, r*cos(rad(i)), r*sin(rad(i)) ) + pos;
 			vect3 q = pers.calcDisp( p * pers.cam.mat.invers() );
 			vect2 v1 = vect2( q.x, q.y );
-			if ( i > 0 ) gra.Line2d( v0,v1, col );
+			if ( i > 0 ) gra.Line( cv(v0), cv(v1), col );
 			v0 = v1;
 		}
 	}
@@ -535,7 +535,7 @@ struct Apr : public Sys
 			vect3 p = vect3( r*cos(rad(i)), 0, r*sin(rad(i)) ) + pos;
 			vect3 q = pers.calcDisp( p * pers.cam.mat.invers() );
 			vect2 v1 = vect2( q.x, q.y );
-			if ( i > 0 ) gra.Line2d( v0,v1, col );
+			if ( i > 0 ) gra.Line( cv(v0), cv(v1), col );
 			v0 = v1;
 		}
 	}
@@ -550,7 +550,7 @@ struct Apr : public Sys
 			vect3 p = vect3( r*cos(rad(i)), r*sin(rad(i)), 0 ) + pos;
 			vect3 q = pers.calcDisp( p * pers.cam.mat.invers() );
 			vect2 v1 = vect2( q.x, q.y );
-			if ( i > 0 ) gra.Line2d( v0,v1, col );
+			if ( i > 0 ) gra.Line( cv(v0), cv(v1), col );
 			v0 = v1;
 		}
 
@@ -1021,30 +1021,29 @@ struct Apr : public Sys
 
 				if ( keys.F1.on )
 				{
-					gra.Print2d(vect2(10,16*y++),string("[F1] help"));
-					gra.Print2d(vect2(10,16*y++),string("[Y] pers -"));
-					gra.Print2d(vect2(10,16*y++),string("[H] pers +"));
-					gra.Print2d(vect2(10,16*y++),string("[L] Load"));
-					gra.Print2d(vect2(10,16*y++),string("[S] Save"));
-					gra.Print2d(vect2(10,16*y++),string("--Keyframe--"));
-					gra.Print2d(vect2(10,16*y++),string("[K] Insert"));
-					gra.Print2d(vect2(10,16*y++),string("[X] Cut"));
-					gra.Print2d(vect2(10,16*y++),string("[C] Copy"));
-					gra.Print2d(vect2(10,16*y++),string("[V] Past"));
-					gra.Print2d(vect2(10,16*y++),string("[LEFT]  -"));
-					gra.Print2d(vect2(10,16*y++),string("[RIGHT] +"));
-					gra.Print2d(vect2(10,16*y++),string("--Animation--"));
-					gra.Print2d(vect2(10,16*y++),string("[I] Add"));
-					gra.Print2d(vect2(10,16*y++),string("[P] Play"));
-					gra.Print2d(vect2(10,16*y++),string("[UP] -"));
-					gra.Print2d(vect2(10,16*y++),string("[DOWN] +"));
-					gra.Print2d(vect2(10,16*y++),string("--Other--"));
-					gra.Print2d(vect2(10,16*y++),string("[1] select 3d"));
-					gra.Print2d(vect2(10,16*y++),string("[2] select 2main"));
+					gra.Print(cv(vect2(10,16*y++)),string("[F1] help"));
+					gra.Print(cv(vect2(10,16*y++)),string("[Y] pers -"));
+					gra.Print(cv(vect2(10,16*y++)),string("[H] pers +"));
+					gra.Print(cv(vect2(10,16*y++)),string("[L] Load"));
+					gra.Print(cv(vect2(10,16*y++)),string("[S] Save"));
+					gra.Print(cv(vect2(10,16*y++)),string("--Keyframe--"));
+					gra.Print(cv(vect2(10,16*y++)),string("[K] Insert"));
+					gra.Print(cv(vect2(10,16*y++)),string("[X] Cut"));
+					gra.Print(cv(vect2(10,16*y++)),string("[C] Copy"));
+					gra.Print(cv(vect2(10,16*y++)),string("[V] Past"));
+					gra.Print(cv(vect2(10,16*y++)),string("[LEFT]  -"));
+					gra.Print(cv(vect2(10,16*y++)),string("[RIGHT] +"));
+					gra.Print(cv(vect2(10,16*y++)),string("--Animation--"));
+					gra.Print(cv(vect2(10,16*y++)),string("[I] Add"));
+					gra.Print(cv(vect2(10,16*y++)),string("[P] Play"));
+					gra.Print(cv(vect2(10,16*y++)),string("[UP] -"));
+					gra.Print(cv(vect2(10,16*y++)),string("[DOWN] +"));
+					gra.Print(cv(vect2(10,16*y++)),string("--Other--"));
+					gra.Print(cv(vect2(10,16*y++)),string("[1] select 3d"));
+					gra.Print(cv(vect2(10,16*y++)),string("[2] select 2main"));
 				}
 				else
 				{
-					//gra.Print2d(vect2(10,16*y++),string("[F1] Help"));
 				}
 
 
@@ -1133,25 +1132,23 @@ struct Apr : public Sys
 			#endif
 			}
 
-
 			{
 				if( keys.F2.hi ) flgInfo = !flgInfo;
 				if ( flgInfo )
 				{
 				int y = 1;
-					gra.Print2d(vect2(10,16*y++),string("fovY:")+to_string(int(pers.fovy)));
-					gra.Print2d(vect2(10,16*y++),string("sz:")+to_string(pers.sz) +string(" fy:")+to_string(pers.fy));
-					gra.Print2d( vect2(10,16*y++),string("far:")+to_string((pers.cam.pos-pers.cam.at).length())); 
-					gra.Print2d( vect2(10,16*y++),string("at  x=")+to_string(pers.cam.at.x)+string(" y=")+to_string(pers.cam.at.y)+string(" z=")+to_string(pers.cam.at.z) ); 
-					gra.Print2d( vect2(10,16*y++),string("pos x=")+to_string(pers.cam.pos.x)+string(" y=")+to_string(pers.cam.pos.y)+string(" z=")+to_string(pers.cam.pos.z) ); 
-					gra.Print2d( vect2(10,16*y++),string("anim=")+to_string(pBone->cur.act) + string(" cnt=")+to_string(pBone->animations.size()) ); 
+					gra.Print( cv(vect2(10,16*y++)),string("fovY:")+to_string(int(pers.fovy)));
+					gra.Print( cv(vect2(10,16*y++)),string("sz:")+to_string(pers.sz) +string(" fy:")+to_string(pers.fy));
+					gra.Print( cv(vect2(10,16*y++)),string("far:")+to_string((pers.cam.pos-pers.cam.at).length())); 
+					gra.Print( cv(vect2(10,16*y++)),string("at  x=")+to_string(pers.cam.at.x)+string(" y=")+to_string(pers.cam.at.y)+string(" z=")+to_string(pers.cam.at.z) ); 
+					gra.Print( cv(vect2(10,16*y++)),string("pos x=")+to_string(pers.cam.pos.x)+string(" y=")+to_string(pers.cam.pos.y)+string(" z=")+to_string(pers.cam.pos.z) ); 
+					gra.Print( cv(vect2(10,16*y++)),string("anim=")+to_string(pBone->cur.act) + string(" cnt=")+to_string(pBone->animations.size()) ); 
 					if ( pBone->animations.size() > 0 ) 
 					{
-						gra.Print2d( vect2(10,16*y++),string("pose=")+to_string(pBone->cur.pose) + string(" cnt=")+to_string(pBone->animations[pBone->cur.act].pose.size()) ); 
+						gra.Print( cv(vect2(10,16*y++)),string("pose=")+to_string(pBone->cur.pose) + string(" cnt=")+to_string(pBone->animations[pBone->cur.act].pose.size()) ); 
 					}
-					gra.Print2d( vect2(10,16*y++),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
+					gra.Print( cv(vect2(10,16*y++)),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 				}
-//					gra.Print2d( vect2(10,16*y++),string("axis ")+(manupirator.bAxisZ?"Z":"-")+(manupirator.bAxisX?"X":"-")+(manupirator.bAxisY?"Y":"-") ); 
 
 			}
 
@@ -1167,23 +1164,23 @@ struct Apr : public Sys
 
 						vect2 v = vect2( x, y )*vect2( 4, 8 ) + vect2(400,16);
 						{
-							gra.Fill2d( v, v+vect2(3,7), rgb(1,1,1) );
+							gra.Fill( cv(v), cv(v+vect2(3,7)), rgb(1,1,1) );
 						}
 
 						if ( y == pBone->cur.act && x == pBone->cur.pose )
 						{
-							gra.Fill2d( v+vect2(0,4), v+vect2(3,7), rgb(1,0,0) );
+							gra.Fill( cv(v+vect2(0,4)), cv(v+vect2(3,7)), rgb(1,0,0) );
 						}
 						
 						if ( flg )
 						{
-							gra.Fill2d( v+vect2(0,4), v+vect2(3,7), rgb(1,0,0) );
+							gra.Fill( cv(v+vect2(0,4)), cv(v+vect2(3,7)), rgb(1,0,0) );
 						}
 					}
 				}
 			}
 			
-			
+
 
 
 
@@ -1219,7 +1216,7 @@ struct Apr : public Sys
 				gridGround.SetMesh( vect3(0,0,0), 0, NUM, NUM, 1, vect3(0.2,0.2,0.2) );
 				gridGround.DrawMesh( *this );
 			}
-			
+//===			
 			// 箱
 			//calcDisp rotate
 			box.disp.clear();
@@ -1322,7 +1319,7 @@ struct Apr : public Sys
 				bool flg = pers.calcScissorLine3d( a, b, v0, v1 );
 				if ( flg )
 				{
-					gra.Line2d( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,1,1));
+					gra.Line( cv(vect2(v0.x,v0.y)), cv(vect2(v1.x,v1.y)), rgb(0,1,1));
 				}
 
 			}
@@ -1349,8 +1346,8 @@ struct Apr : public Sys
 						for ( int i = 0 ; i <div ; i++ )
 						{
 							vect2 v1 = catmull_func(t, catmull_tbl[n0].pos, catmull_tbl[n1].pos, catmull_tbl[n2].pos, catmull_tbl[n3].pos );
-							gra.Line2d( v1, v0, rgb(1,1,1));
-							gra.Pset2d( v1, rgb(1,1,1), 3);
+							gra.Line( cv(v1), cv(v0), rgb(1,1,1));
+							gra.Pset( cv(v1), rgb(1,1,1), 3);
 							v0=v1;
 							t+=dt;
 
@@ -1376,8 +1373,8 @@ struct Apr : public Sys
 						for ( int i = 0 ; i < div ; i++ )
 						{
 							vect2 v1 = bezier_func( t, bezier_tbl[n+0].pos, bezier_tbl[n+1].pos, bezier_tbl[n+2].pos, bezier_tbl[n+3].pos );
-							gra.Line2d( v0,v1, rgb(1,1,1));
-							gra.Pset2d( v1, rgb(1,1,1), 3);
+							gra.Line( cv(v0), cv(v1), rgb(1,1,1));
+							gra.Pset( cv(v1), rgb(1,1,1), 3);
 							v0=v1;
 							t+=dt;
 						}
@@ -1393,7 +1390,7 @@ struct Apr : public Sys
 						vect2 v1 = bezier_tbl[i].pos;
 						if ( cnt != 1 ) 
 						{
-							gra.Line2d( v0, v1, rgb(0,1,0));
+							gra.Line( cv(v0), cv(v1), rgb(0,1,0));
 						}
 						v0 = v1;
 						cnt = (cnt+1)%3;
@@ -1412,7 +1409,7 @@ struct Apr : public Sys
 				static int n = 0;
 				gv1 = bezier_func( t, bezier_tbl[n+0].pos, bezier_tbl[n+1].pos, bezier_tbl[n+2].pos, bezier_tbl[n+3].pos );
 
-				gra.Pset2d( gv1, rgb(1,1,1), 5);
+				gra.Pset( cv(gv1), rgb(1,1,1), 5);
 
 				if ( bForward ) t+=0.01; else t-=0.01;
 
@@ -1463,7 +1460,7 @@ struct Apr : public Sys
 
 				gv2 = catmull_func( t, catmull_tbl[n0].pos, catmull_tbl[n1].pos, catmull_tbl[n2].pos, catmull_tbl[n3].pos );
 
-				gra.Pset2d( gv2, rgb(1,1,1), 5);
+				gra.Pset( cv(gv2), rgb(1,1,1), 5);
 
 				if ( bForward ) t+=0.01; else t-=0.01;
 
@@ -1661,7 +1658,7 @@ struct Apr : public Sys
 					}
 				
 				}
-						gra.Print2d( vect2(mouse.pos.x+10,mouse.pos.y-0),string("")+(manupirator.bAxisX?"X":"")+(manupirator.bAxisY?"Y":"")+(manupirator.bAxisZ?"Z":"") ); 
+						gra.Print( cv(vect2(mouse.pos.x+10,mouse.pos.y-0)),string("")+(manupirator.bAxisX?"X":"")+(manupirator.bAxisY?"Y":"")+(manupirator.bAxisZ?"Z":"") ); 
 				// マーカー移動
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && !selector.rect_bSelect ) 
 				{
@@ -1826,7 +1823,7 @@ struct Apr : public Sys
 					vect2 v0 = b.j0.pos;
 					vect2 v1 = b.j1.pos;
 
-					gra.Line2d( v0, v1, rgb( 1,1,1 ) );
+					gra.Line( cv(v0), cv(v1), rgb( 1,1,1 ) );
 				}
 			}
 
@@ -1890,17 +1887,17 @@ struct Apr : public Sys
 
 
 
-				gra.Print2d( vect2(10,16*20),string("v x=")+to_string(v.x) + string(" y=")+to_string(v.y) +string(" z=")+to_string(v.z) );
-				gra.Print2d( vect2(10,16*21),string("p x=")+to_string(p.x) + string(" y=")+to_string(p.y) +string(" z=")+to_string(p.z) );
-//				gra.Print2d( vect2(10,16*21),string(" x=")+to_string(pers.cam.pos.x) + string(" y=")+to_string(pers.cam.pos.y) +string(" z=")+to_string(pers.cam.pos.z) );
+				gra.Print( cv(vect2(10,16*20)),string("v x=")+to_string(v.x) + string(" y=")+to_string(v.y) +string(" z=")+to_string(v.z) );
+				gra.Print( cv(vect2(10,16*21)),string("p x=")+to_string(p.x) + string(" y=")+to_string(p.y) +string(" z=")+to_string(p.z) );
+//				gra.Print( vect2(10,16*21),string(" x=")+to_string(pers.cam.pos.x) + string(" y=")+to_string(pers.cam.pos.y) +string(" z=")+to_string(pers.cam.pos.z) );
 			}
 
 			// 点 
 			{
-				gra.Pset2d(vect2(1,1),rgb(1,1,1));
-				gra.Pset2d(vect2(766,1),rgb(1,1,1));
-				gra.Pset2d(vect2(1,510),rgb(1,1,1));
-				gra.Pset2d(vect2(766,510),rgb(1,1,1));
+				gra.Pset(cv(vect2(  1,  1)),rgb(1,1,1));
+				gra.Pset(cv(vect2(766,  1)),rgb(1,1,1));
+				gra.Pset(cv(vect2(   1,510)),rgb(1,1,1));
+				gra.Pset(cv(vect2(766,510)),rgb(1,1,1));
 			}
 			
 			// 塗りつぶし三角
@@ -1910,7 +1907,7 @@ struct Apr : public Sys
 				vect2	v0 = scale * vect2( 55,0) + ofs;
 				vect2	v1 = scale * vect2( 10,90) + ofs;
 				vect2	v2 = scale * vect2(100,90) + ofs;
-				gra.Tri2d( v0,v1,v2,rgb(0.5,0.3,0.2));
+				gra.Tri( cv(v0), cv(v1), cv(v2), rgb(0.5,0.3,0.2));
 			}
 
 			// figTriangle

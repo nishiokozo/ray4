@@ -144,7 +144,7 @@ struct Ring
 		// トリゴン描画 trigons	
 		for ( PrimTrigon& t : trigons )
 		{
-				gra.Tri2d( t.v0, t.v1, t.v2, t.col);
+				gra.Tri( cv(t.v0), cv(t.v1), cv(t.v2), t.col);
 		}
 		trigons.clear();
 	}

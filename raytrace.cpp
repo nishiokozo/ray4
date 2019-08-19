@@ -465,7 +465,7 @@ void	raytrace( SysGra& gra )
 				if ( ren.m_cntRay > cntMax ) cntMax = ren.m_cntRay;
 				cntRay+= ren.m_cntRay;
 
-				gra.Pset2d( vect2(px,height-py) ,vect3(C.r,C.g,C.b));
+				gra.Pset( cv(vect2(px,height-py)) ,vect3(C.r,C.g,C.b));
 			}
 		}
 		
