@@ -192,7 +192,7 @@ struct Ring
 
 };
 
-struct Joint3 : Obj
+struct Joint3// : Obj
 {
 	int id;
 	vect3 pos;

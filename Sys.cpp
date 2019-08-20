@@ -15,10 +15,6 @@ using namespace std;
 Sys::Sys( const char* name, int pos_x, int pos_y, int width, int height  )
 //------------------------------------------------------------------------------
 {
-//	m.x		= pos_x;
-//	m.y		= pos_y;
-//	m.width		= width;
-//	m.height	= height;
 
 
 	SysWin&	win = SysWin::GetInstance();
@@ -38,8 +34,8 @@ Sys::Sys( const char* name, int pos_x, int pos_y, int width, int height  )
 	{
 		auto func = [&]( int width, int height )
 		{
-			m.width = width;
-			m.height = height;
+///			m.width = width;
+//			m.height = height;
 			gra.OnSize( width, height );
 		};
 		win.SetOnSize( func );
@@ -49,8 +45,8 @@ Sys::Sys( const char* name, int pos_x, int pos_y, int width, int height  )
 	{
 		auto func = [&]( int pos_x, int pos_y )
 		{
-			m.pos_x = pos_x;
-			m.pos_y = pos_y;
+//			m.pos_x = pos_x;
+//			m.pos_y = pos_y;
 			gra.OnMove( pos_x, pos_y );
 //			mouse.OnMove( pos_x, pos_y );
 		};

@@ -43,6 +43,7 @@ struct SysGra
 
 	} m;
 
+	bool bInitialized = false;
 
 //	 BITMAP bmBitmap;
 
@@ -74,5 +75,12 @@ struct SysGra
 
 	SysGra();
 	~SysGra();
+
+
+	vect2 Conv( vect2 pos )
+	{
+		// ピクセル座標(pos)をGL座標に変換する
+		return pos/vect2(GetWidth()/2,-GetHeight()/2)+vect2(-1,1);
+	}
 
 };

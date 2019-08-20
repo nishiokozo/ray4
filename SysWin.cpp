@@ -110,7 +110,7 @@ static LRESULT CALLBACK WinProc
 	switch( uMsg ) 
 	{
 		case WM_CREATE:	// CreateWindowと同時に発行される
-			cout << "WM_CREATE " << endl;
+//			cout << "WM_CREATE " << endl;
 		//	g.funcOnCreate();//ここだとinstance経由でhWndが取得できない
 
 			RegisterTouchWindow( hWnd, TWF_WANTPALM );//WM_TOUCH有効、迅速反応、1回タッチで1マウスクリック相当に是正される。必須。
@@ -248,7 +248,7 @@ int SysWin::GetWidth()
 	return g.width;
 }
 //------------------------------------------------------------------------------
-int SysWin::GetHeigit()
+int SysWin::GetHeight()
 //------------------------------------------------------------------------------
 {
 	return g.height;
@@ -356,7 +356,7 @@ void SysWin::OpenWindow( const char* windowname, int pos_x, int pos_y, int width
 		);
 	}
 		g.funcOnCreate();//WM_CREATEからだと、instance経由でhWndが取得できないのでここから呼び出す。
-	
+//cout<<"	funcOnCreate"<<endl;
 
 
 	// ウィンドウを表示する
