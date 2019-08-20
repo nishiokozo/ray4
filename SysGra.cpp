@@ -307,8 +307,10 @@ void  SysGra::OnSize( int width, int height )
 	}
 
 	// gl
+#if 1
 		glViewport(0,0,width, height);
-if(0)	{
+#else
+	{
 		HDC	hDc = GetDC( hWnd );	// GetDCに対してはReleaseDC
 		if( g.gl_bInitialized )
 		{
@@ -320,6 +322,7 @@ if(0)	{
 		ReleaseDC( hWnd, hDc );
 
 	}
+#endif
 }
 
 //------------------------------------------------------------------------------
