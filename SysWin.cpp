@@ -19,7 +19,7 @@ static struct
 {
 	function<void()> funcOnCreate;
 	function<void( int width, int height)> funcOnSize;
-	function<void( int width, int height)> funcOnMove;
+//	function<void( int width, int height)> funcOnMove;
 	function<void()> funcOnPaint;
 	function<void()> funcOnDestroy;
 
@@ -110,47 +110,32 @@ static LRESULT CALLBACK WinProc
 	switch( uMsg ) 
 	{
 		case WM_CREATE:	// CreateWindowと同時に発行される
-//			cout << "WM_CREATE " << endl;
 		//	g.funcOnCreate();//ここだとinstance経由でhWndが取得できない
 
 			RegisterTouchWindow( hWnd, TWF_WANTPALM );//WM_TOUCH有効、迅速反応、1回タッチで1マウスクリック相当に是正される。必須。
 			return 0;
 
-//		case WM_TOUCH:
-//			cout << "WM_TOUCH " << endl;
-//			return 0;
-
 		case WM_ERASEBKGND:	//	WM_PAINTイベントの途中、及びWM_SHOWWINDOWのあとに発行される。 DefWindowProc()に任せると白いフラッシュが入ってしまうので、0を返す
-			//cout << "WM_ERASEBKGND " << endl;
 			return 0;
 			
 		case WM_SIZE:	// 画面サイズが決定された時に発行される（初期表示含む）
-//			cout << "WM_SIZE " << endl;
 			GetClientRect( hWnd, &g.rect );
-//cout << "1onsize " << g.rect.right << " " << g.rect.bottom << endl;
-
+			g.width		= g.rect.right;
+			g.height	= g.rect.bottom;
 			g.funcOnSize( g.rect.right, g.rect.bottom );
 			return 0;
 
 		case WM_MOVE:	// 画面位置が決定された時に発行される（初期表示含む）
-//			cout << "WM_MOVE " << endl;
 			{
 				RECT	r;
 				SetRect(&r, 0, 0, 0, 0 );
 				AdjustWindowRectEx(&r, WS_OVERLAPPEDWINDOW, FALSE, 0);
-//	cout << r.left << " "  << r.top << " " << endl;
-
 				GetWindowRect( hWnd, &g.rect );
-//	cout << g.rect.left << " "  << g.rect.top << " " << endl;
-//	cout << g.rect.left - r.left << " "  << g.rect.top - r.top << " " << endl;
-
 				int x = g.rect.left - r.left;	//	描画区域の左上原点座標
 				int y = g.rect.top - r.top;		//	描画区域の左上原点座標
-
 				g.pos_x = x;
 				g.pos_y = y;
-
-				g.funcOnMove( x, y );
+//				g.funcOnMove( x, y );
 			}
 			return 0;
 		
@@ -202,12 +187,12 @@ void SysWin::SetOnSize( function<void( int width, int height )> func )
 	g.funcOnSize = func;
 }
 
-//------------------------------------------------------------------------------
-void SysWin::SetOnMove( function<void( int pos_x, int pos_y )> func )
-//------------------------------------------------------------------------------
-{
-	g.funcOnMove = func;
-}
+////------------------------------------------------------------------------------
+//void SysWin::SetOnMove( function<void( int pos_x, int pos_y )> func )
+////------------------------------------------------------------------------------
+//{
+//	g.funcOnMove = func;
+//}
 
 //------------------------------------------------------------------------------
 void SysWin::SetOnDestroy( function<void()> func )
@@ -358,7 +343,7 @@ void SysWin::OpenWindow( const char* windowname, int pos_x, int pos_y, int width
 		g.funcOnCreate();//WM_CREATEからだと、instance経由でhWndが取得できないのでここから呼び出す。
 //cout<<"	funcOnCreate"<<endl;
 
-
+//ShowCursor( FALSE );
 	// ウィンドウを表示する
 	ShowWindow( win.hWnd, SW_SHOW );
 

@@ -109,8 +109,8 @@ static struct G
 	HBITMAP hBitmap;
 	HFONT hfon, hfonPrev;
 	vector<string>tblString;
-	int pos_x;
-	int pos_y;
+//	int pos_x;
+//	int pos_y;
 	int	width;
 	int height;
 	G()
@@ -125,7 +125,7 @@ static struct G
 
 
 //------------------------------------------------------------------------------
-void wgl_Enable(HWND hWnd, HDC * hDc, HGLRC * hGlrc)
+void wgl_Enable( HDC * hDc, HGLRC * hGlrc)
 //------------------------------------------------------------------------------
 {
 	PIXELFORMATDESCRIPTOR pfd;
@@ -151,7 +151,7 @@ void wgl_Enable(HWND hWnd, HDC * hDc, HGLRC * hGlrc)
 }
 
 //------------------------------------------------------------------------------
-void wgl_Disable(HWND hWnd, HGLRC hGlrc)
+void wgl_Disable( HGLRC hGlrc)
 //------------------------------------------------------------------------------
 {
 	wglMakeCurrent( NULL, NULL );
@@ -201,6 +201,15 @@ int SysGra::GetHeight()
 }
 
 //------------------------------------------------------------------------------
+float SysGra::GetAspect()
+//------------------------------------------------------------------------------
+{
+	SysWin& win = SysWin::GetInstance();
+
+	return (float)win.GetWidth()/win.GetHeight();
+}
+
+//------------------------------------------------------------------------------
 void  SysGra::CreatePixelBits(int bpp, int width, int height )
 //------------------------------------------------------------------------------
 {
@@ -242,7 +251,7 @@ void  SysGra::OnCreate()
 
 			if ( g.gl_bInitialized == false )
 			{// gl
-				wgl_Enable( hWnd, &hDc, &g.hGlrc );
+				wgl_Enable( &hDc, &g.hGlrc );
 				wgl_font.Init( hDc );
 				g.gl_bInitialized = true;
 			}
@@ -255,13 +264,11 @@ void  SysGra::OnCreate()
 void  SysGra::OnDestroy() 
 //------------------------------------------------------------------------------
 {
-	HWND hWnd = SysWin::GetInstance().win.hWnd;
-
 
 	if( g.gl_bInitialized )
 	{
 		wgl_font.Delete();
-		wgl_Disable( hWnd, g.hGlrc );
+		wgl_Disable( g.hGlrc );
 	}
 
 	DeleteDC(g.hdcBackbuffer);
@@ -276,8 +283,8 @@ void  SysGra::OnDestroy()
 void  SysGra::OnSize( int width, int height ) 
 //------------------------------------------------------------------------------
 {
-	g.width = width;
-	g.height = height;
+//	g.width = width;
+//	g.height = height;
 
 	HWND hWnd = SysWin::GetInstance().win.hWnd;
 	{
@@ -300,14 +307,15 @@ void  SysGra::OnSize( int width, int height )
 	}
 
 	// gl
-	{
+		glViewport(0,0,width, height);
+if(0)	{
 		HDC	hDc = GetDC( hWnd );	// GetDCに対してはReleaseDC
 		if( g.gl_bInitialized )
 		{
 			wgl_font.Delete();
-			wgl_Disable( hWnd, g.hGlrc );
+			wgl_Disable( g.hGlrc );
 		}
-		wgl_Enable( hWnd, &hDc, &g.hGlrc );
+		wgl_Enable( &hDc, &g.hGlrc );
 		wgl_font.Init( hDc );
 		ReleaseDC( hWnd, hDc );
 
@@ -318,13 +326,17 @@ void  SysGra::OnSize( int width, int height )
 void  SysGra::OnMove( int pos_x, int pos_y ) 
 //------------------------------------------------------------------------------
 {
-	g.pos_x = pos_x;
-	g.pos_y = pos_y;
+//	g.pos_x = pos_x;
+//	g.pos_y = pos_y;
 
 	{
-		HWND hWnd = SysWin::GetInstance().win.hWnd;
+		SysWin& win = SysWin::GetInstance();
+		int w = win.GetWidth();
+		int h = win.GetHeight();
+
+	
 		RECT rect;
-		SetRect(&rect, 0, 0, g.width, g.height );
+		SetRect(&rect, 0, 0, w, h );
 		AdjustWindowRectEx(&rect, WS_OVERLAPPEDWINDOW, FALSE, 0);
 	}
 
@@ -339,7 +351,7 @@ void  SysGra::OnPaint()
 		{// WM_PAINT呼び出しのために空でも必要。
 		    PAINTSTRUCT ps;
 		    HDC hDc = BeginPaint(hWnd, &ps);
-//		    BitBlt(hDc, 0, 0, g.width, g.height, g.hdcBackbuffer, 0, 0, SRCCOPY);
+//		    BitBlt(hDc, 0, 0, gx.width, g.height, g.hdcBackbuffer, 0, 0, SRCCOPY);
 		    EndPaint(hWnd, &ps);
 		}
 
@@ -382,7 +394,7 @@ return;
 				switch ( type )
 				{
 					case TypeClr:
-						PatBlt( hDc , 0 , 0 ,g.width, g.height , PATCOPY);
+						PatBlt( hDc , 0 , 0 ,gx.width, g.height , PATCOPY);
 						break;
 
 
@@ -488,7 +500,7 @@ return;
 		{
 		    PAINTSTRUCT ps;
 		    HDC hDc = BeginPaint(hWnd, &ps);
-		    BitBlt(hDc, 0, 0, g.width, g.height, g.hdcBackbuffer, 0, 0, SRCCOPY);
+		    BitBlt(hDc, 0, 0, gx.width, g.height, g.hdcBackbuffer, 0, 0, SRCCOPY);
 		    EndPaint(hWnd, &ps);
 		}
 	} // dgi
@@ -526,7 +538,7 @@ return;
 				switch ( type )
 				{
 					case TypeClr:
-//						PatBlt( hDc , 0 , 0 ,g.width, g.height , PATCOPY);
+//						PatBlt( hDc , 0 , 0 ,gx.width, g.height , PATCOPY);
 
 						// gl
 						glClearColor( cr, cg, cb, 0.0f );
@@ -722,7 +734,7 @@ return;
 		{// WM_PAINT呼び出しのために空でも必要。
 		    PAINTSTRUCT ps;
 		    HDC hDc = BeginPaint(hWnd, &ps);
-//		    BitBlt(hDc, 0, 0, g.width, g.height, g.hdcBackbuffer, 0, 0, SRCCOPY);
+//		    BitBlt(hDc, 0, 0, gx.width, g.height, g.hdcBackbuffer, 0, 0, SRCCOPY);
 		    EndPaint(hWnd, &ps);
 		}
 

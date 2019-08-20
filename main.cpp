@@ -58,29 +58,29 @@ struct Apr : public Sys
 			float l = 0.1;
 			if ( bAxisX  )
 			{
-				vect3 v1 = vect3( l,0,0);
-				mat44 mrot = apr.pers.cam.mat;
-				mrot.SetTranslate(vect3(0,0,0));
-				mrot.invers();
-				v1 = v0 + v1* mrot;
+				vect3 v1 = v0 + vect3(
+					apr.pers.cam.mat.m[0][0] * apr.pers.aspect,
+					apr.pers.cam.mat.m[1][0],
+					apr.pers.cam.mat.m[2][0]
+				) * l;
 				apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0.8,0.2,0.2) );
 			}
 			if ( bAxisY  )
 			{
-				vect3 v1 = vect3( 0,l,0);
-				mat44 mrot = apr.pers.cam.mat;
-				mrot.SetTranslate(vect3(0,0,0));
-				mrot.invers();
-				v1 = v0 + v1* mrot;
+				vect3 v1 = v0 + vect3(
+					apr.pers.cam.mat.m[0][1] * apr.pers.aspect,
+					apr.pers.cam.mat.m[1][1],
+					apr.pers.cam.mat.m[2][1]
+				) * l;
 				apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0.2,0.8,0.2) );
 			}
 			if ( bAxisZ )
 			{
-				vect3 v1 = vect3( 0,0,l);
-				mat44 mrot = apr.pers.cam.mat;
-				mrot.SetTranslate(vect3(0,0,0));
-				mrot.invers();
-				v1 = v0 + v1* mrot;
+				vect3 v1 = v0 + vect3(
+					apr.pers.cam.mat.m[0][2] * apr.pers.aspect,
+					apr.pers.cam.mat.m[1][2],
+					apr.pers.cam.mat.m[2][2]
+				) * l;
 				apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0.2,0.2,1) );
 
 			}
@@ -117,6 +117,7 @@ struct Apr : public Sys
 
 	}
 
+	
 	//------------------------------------------------------------------------------
 	bool funcIntersectPlate( vect3 plate_P, vect3 plate_N, vect3 P , vect3 I, vect3& Q)
 	//------------------------------------------------------------------------------
@@ -186,6 +187,19 @@ struct Apr : public Sys
 					b+=vt;
 				}
 			}			
+
+			{//原点表示
+				float r = 0.1;
+				vect2 v0;
+				for ( int i = 0 ; i <= 360 ; i+=20 )
+				{
+					vect3 p = vect3( r*cos(rad(i)), 0, r*sin(rad(i)) ) + pos;
+					vect3 q = apr.pers.calcDisp( p * apr.pers.cam.mat.invers() );
+					vect2 v1 = vect2( q.x, q.y );
+					if ( i > 0 ) apr.gra.Line( v0,v1, col );
+					v0 = v1;
+				}
+			}
 		}
 	};
 	Grid gridGround;
@@ -413,22 +427,19 @@ struct Apr : public Sys
 					}
 				}
 			}
-			
-			
-
 
 
 			// カメラ回転
 			if ( (!keys.ALT.on && mouse.R.on) || (keys.ALT.on && mouse.L.on) ) pers.cam.Rotation( vect3(-mouse.mov.x/28,mouse.mov.y/28,0) );
 
 			// カメラ平行移動
-			if ( mouse.M.on ) pers.cam.Move( vect3(-mouse.mov.x,mouse.mov.y,0)/pers.height/pers.getW((pers.cam.pos-pers.cam.at).length()));
+			if ( mouse.M.on ) pers.cam.Move( vect3(-mouse.mov.x,mouse.mov.y,0)*2/gra.GetHeight()/pers.getW((pers.cam.pos-pers.cam.at).length()));
 
 			// マウスホイールZOOM
-			if ( !keys.ALT.on  ) pers.cam.Zoom( -mouse.wheel*1.5 /pers.height/pers.getW((pers.cam.pos-pers.cam.at).length()) );
+			if ( !keys.ALT.on  ) pers.cam.Zoom( -mouse.wheel*2/gra.GetHeight()/pers.getW((pers.cam.pos-pers.cam.at).length()) );
 			
 			// カメラ移動
-			if ( keys.ALT.on && mouse.R.on ) pers.cam.Zoom( mouse.mov.y*3/pers.height/pers.getW((pers.cam.pos-pers.cam.at).length()) );
+			if ( keys.ALT.on && mouse.R.on ) pers.cam.Zoom( mouse.mov.y*2/gra.GetHeight()/pers.getW((pers.cam.pos-pers.cam.at).length()) );
 			
 			// カメラマトリクス計算
 			{

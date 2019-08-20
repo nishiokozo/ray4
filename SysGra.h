@@ -49,6 +49,7 @@ struct SysGra
 
 	int GetWidth();
 	int GetHeight();
+	float GetAspect();
 
 	void ReleasePixelBits();
 	void CreatePixelBits(int bpp, int width, int height );

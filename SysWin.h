@@ -25,7 +25,7 @@ public:
 
 	void SetOnCreate( function<void()> func );
 	void SetOnSize( function<void( int width, int height )> func );
-	void SetOnMove( function<void( int pos_x, int pos_y )> func );
+//	void SetOnMove( function<void( int pos_x, int pos_y )> func );
 	void SetOnPaint( function<void()> func );
 	void SetOnDestroy( function<void()> func );
 

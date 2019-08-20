@@ -80,10 +80,10 @@ struct Pers
 	float	fovy;		// 画角
 	float	sz;			// 投影面までの距離
 	float	fy;			// 投影面の高さ/2（描画スケール）
-	float	cx;			// 描画画面の中心W
-	float	cy;			// 描画画面の中心H
-	float	width;		// 描画画面の解像度W/2
-	float	height;		// 描画画面の解像度H/2
+//	float	cx;			// 描画画面の中心W
+//	float	cy;			// 描画画面の中心H
+//	float	width;		// 描画画面の解像度W/2
+//	float	height;		// 描画画面の解像度H/2
 	float	aspect;		// 描画画面のアスペクト比
 
 	//--------------------------------------------------------------------------
@@ -107,12 +107,11 @@ struct Pers
 		sz = 1.0;								// 投影面までの距離
 		fy = sz*tan(rad(fovy)/2);				// 投影面の高さ/2
 	#endif
-		cx		= screensize.x/2;				// 描画画面の中心W
-		cy		= screensize.y/2;				// 描画画面の中心H
-		width	= screensize.x/2;				// 描画画面の解像度W/2
-		height	= screensize.y/2;				// 描画画面の解像度H/2
+//		cx		= screensize.x/2;				// 描画画面の中心W
+//		cy		= screensize.y/2;				// 描画画面の中心H
+//		width	= screensize.x/2;				// 描画画面の解像度W/2
+//		height	= screensize.y/2;				// 描画画面の解像度H/2
 		aspect	= screensize.y/screensize.x;	// 描画画面のアスペクト比
-
 
 	} 
 
@@ -131,7 +130,7 @@ struct Pers
 		vect3 ret;
 		{
 			float w = getW(v.z);
-			ret.x = v.x* w   *aspect;
+			ret.x = v.x* w * aspect;
 			ret.y = v.y* w 			;
 			ret.z = w;	// 三次元ベクトルで返す都合上、ZにW値を入れている。
 		}
@@ -145,8 +144,8 @@ struct Pers
 	{
 		vect3 v;
 		float w = getW(0);
-		v.x = (q.x)/(w   *aspect);
-		v.y = (q.y)/(w );
+		v.x = q.x/(w *aspect);
+		v.y = q.y/(w);
 		v.z = 0;
 		return v * cam.mat;
 	}

@@ -41,17 +41,17 @@ Sys::Sys( const char* name, int pos_x, int pos_y, int width, int height  )
 		win.SetOnSize( func );
 	}
 
-	// ウィンドウ位置変更関数
-	{
-		auto func = [&]( int pos_x, int pos_y )
-		{
-//			m.pos_x = pos_x;
-//			m.pos_y = pos_y;
-			gra.OnMove( pos_x, pos_y );
-//			mouse.OnMove( pos_x, pos_y );
-		};
-		win.SetOnMove( func );
-	}
+//	// ウィンドウ位置変更関数
+//	{
+//		auto func = [&]( int pos_x, int pos_y )
+//		{
+////			m.pos_x = pos_x;
+////			m.pos_y = pos_y;
+//			gra.OnMove( pos_x, pos_y );
+////			mouse.OnMove( pos_x, pos_y );
+//		};
+//		win.SetOnMove( func );
+//	}
 
 	// ウィンドウペイント関数
 	{

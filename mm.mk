@@ -1,3 +1,5 @@
+main.o: main.cpp geom.h SysKeys.h SysMouse.h SysGra.h Sys.h raytrace.h \
+  obj.h bone.h
 bone.o: bone.cpp geom.h SysGra.h obj.h bone.h
 raytrace.o: raytrace.cpp geom.h SysGra.h raytrace.h
 geom.o: geom.cpp geom.h
