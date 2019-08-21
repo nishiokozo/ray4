@@ -2,7 +2,6 @@
 // 輪
 struct Ring
 {
-	#define	USE_LINE	0
 	#define	USE_TRIGON	1
 	struct PrimTrigon
 	{
@@ -34,24 +33,6 @@ struct Ring
 	};
 	vector<PrimTrigon>	trigons;
 
-	struct PrimLine
-	{
-		vect2	v0;
-		vect2	v1;
-		rgb		col;
-		PrimLine( 
-			vect2	_v0,
-			vect2	_v1,
-			int		_col
-		)
-		:
-		v0(_v0),
-		v1(_v1),
-		col(_col)
-		{}		
-	};
-	vector<PrimLine>	lines;
-
 
 	const float h = 0.05;
 	const float w = 0.08;
@@ -75,19 +56,12 @@ struct Ring
 		{6,2,4},{4,2,0},
 	};
 
-	vector<ivect2>	tbl_edge =
-	{
-		{0,1}, {2,3}, {0,2}, {1,3},
-		{4,5}, {6,7}, {4,6}, {5,7},
-		{2,6}, {3,7}, {0,4}, {1,5},
-	};
 
 	//------------------------------------------------------------------------------
-	void CalcVert( Pers& pers, vect3 pos, vect3 rot )
+	void ring_DrawMesh( SysGra& gra, Pers& pers, vect3 pos, vect3 rot )
 	//------------------------------------------------------------------------------
 	{
 		vect3 l = vect3(0,0,1).normalize();	// 正面ライト
-	#if USE_TRIGON
 		for ( ivect3 v : tbl_faces )
 		{
 			mat44	rotx;
@@ -122,6 +96,7 @@ struct Ring
 			v0 = pers.calcDisp( v0 );
 			v1 = pers.calcDisp( v1 );
 			v2 = pers.calcDisp( v2 );
+/*
 			vect2 d0 = vect2(v0.x,v0.y);
 			vect2 d1 = vect2(v1.x,v1.y);
 			vect2 d2 = vect2(v2.x,v2.y);
@@ -132,62 +107,13 @@ struct Ring
 				float z = a.x*b.y-a.y*b.x;
 				if ( z > 0 ) 
 				{
-					trigons.emplace_back( z, d0, d1, d2, rgb(d,d,d) );
+//						trigons.emplace_back( z, d0, d1, d2, rgb(d,d,d) );
 				}
 			}
+*/
+					gra.Tri( v0, v1, v2, rgb(d,d,d) );
 		}
-		sort(trigons.begin(), trigons.end());
-	#endif
-	#if USE_LINE
-		for ( ivect2 v : tbl_edge )
-		{
-			mat44	rotx;
-			mat44	roty;
-			mat44	rotz;
-			rotx.setRotateX(rot.x);
-			roty.setRotateY(rot.y);
-			rotz.setRotateZ(rot.z);
 
-			vect3 v0 = tbl_vert[v.n0];
-			vect3 v1 = tbl_vert[v.n1];
-
-			v0= rotx * roty * rotz *v0 + pos ;
-			v1= rotx * roty * rotz *v1 + pos ;
-
-			v0 = v0 * pers.cam.mat.invers();
-			v1 = v1 * pers.cam.mat.invers();
-
-			v0 = pers.calcDisp( v0 );
-			v1 = pers.calcDisp( v1 );
-
-			vect2 d0 = vect2(v0.x,v0.y);
-			vect2 d1 = vect2(v1.x,v1.y);
-
-			lines.emplace_back( d0, d1, vect3(0,1,1) );
-		}
-	#endif
-
-	}
-
-	//------------------------------------------------------------------------------
-	void DrawTrigons( SysGra& gra )
-	//------------------------------------------------------------------------------
-	{
-	#if USE_TRIGON
-		// トリゴン描画 trigons	
-		for ( PrimTrigon& t : trigons )
-		{
-				gra.Tri( t.v0, t.v1, t.v2, t.col);
-		}
-		trigons.clear();
-	#endif
-	#if USE_LINE
-		for ( PrimLine& e : lines )
-		{
-			gra.Line( e.v0, e.v1 , e.col );
-		}
-		lines.clear();
-	#endif
 	}
 
 };

@@ -490,7 +490,7 @@ void Bone::draw( Pers& pers, SysGra& gra )
 //------------------------------------------------------------------------------
 {
 	// わっか描画
-	ring.DrawTrigons( gra );
+//	ring.DrawTrigons( gra );
 
 
 	rgb col = rgb(0,0,1);
@@ -514,11 +514,6 @@ void Bone::draw( Pers& pers, SysGra& gra )
 	{
 		if ( b.j0.disp.z > 0 && b.j0.disp.z > 0 )
 		{
-			vect2 v0(b.j0.disp.x,b.j0.disp.y);
-			vect2 v1(b.j1.disp.x,b.j1.disp.y);
-			gra.Line( v0,v1, col);
-
-
 			// 肉
 			const int cnt = 4;
 
@@ -528,8 +523,21 @@ void Bone::draw( Pers& pers, SysGra& gra )
 
 				vect3 pos = ( b.j1.pos - b.j0.pos )*t + b.j0.pos;
 
-				ring.CalcVert( pers, pos, vect3(rad(0),rad(0),rad(0)) );
+				ring.ring_DrawMesh( gra, pers, pos, vect3(rad(0),rad(0),rad(0)) );
 			}
+
+		}
+	}
+
+	// Human 描画
+	for ( Bone3 b : tblBone )
+	{
+		if ( b.j0.disp.z > 0 && b.j0.disp.z > 0 )
+		{
+			// 骨
+			vect2 v0(b.j0.disp.x,b.j0.disp.y);
+			vect2 v1(b.j1.disp.x,b.j1.disp.y);
+			gra.Line( v0,v1, col);
 
 		}
 	}

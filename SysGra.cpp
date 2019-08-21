@@ -317,8 +317,10 @@ void  SysGra::OnSize( int width, int height )
 			wgl_font.Delete();
 			wgl_Disable( g.hGlrc );
 		}
-		wgl_Enable( &hDc, &g.hGlrc );
-		wgl_font.Init( hDc );
+		{
+			wgl_Enable( &hDc, &g.hGlrc );
+			wgl_font.Init( hDc );
+		}
 		ReleaseDC( hWnd, hDc );
 
 	}
@@ -546,6 +548,8 @@ return;
 						// gl
 						glClearColor( cr, cg, cb, 0.0f );
 						glClear( GL_COLOR_BUFFER_BIT );
+
+						 
 						break;
 
 					case TypeCircle:
@@ -820,13 +824,30 @@ void SysGra::Update()
 void SysGra::Clr( vect3 col)
 //------------------------------------------------------------------------------
 {
+//	カラークリア値
 	glClearColor( col.r, col.g, col.b, 0.0f );
-	glClear( GL_COLOR_BUFFER_BIT );
+
+//	深度クリア値
+	glClearDepth(0.0);			// (デフォルト;1.0）
+
+//	深度テスト
+	glEnable(GL_DEPTH_TEST);	// (デフォルト:GL_LESS）
+	glDepthFunc(GL_GEQUAL);		// depth <= 書き込み値 
+
+//	裏面カリング
+	glEnable(GL_CULL_FACE);		// 時計回りが裏、反時計回りが表
+	glCullFace(GL_BACK);		// (デフォルト:GL_BACK）
+
+//	ペイント
+	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
 }
 //------------------------------------------------------------------------------
 void SysGra::Circle( vect2 v, float r, vect3 col )
 //------------------------------------------------------------------------------
 {
+	glDisable(GL_DEPTH_TEST);
+
 	{
 	    glColor3f( col.r, col.g, col.b );
 	    glBegin(GL_LINE_LOOP);
@@ -852,6 +873,8 @@ void SysGra::Circle( vect2 v, float r, vect3 col )
 void SysGra::Pset( vect2 v0, vect3 col, float wide )
 //------------------------------------------------------------------------------
 {
+	glDisable(GL_DEPTH_TEST);
+
 	glPointSize(wide);
     glBegin(GL_POINTS);
     glColor3f( col.r, col.g, col.b );
@@ -862,6 +885,8 @@ void SysGra::Pset( vect2 v0, vect3 col, float wide )
 void SysGra::Box( vect2 v0, vect2 v1,vect3 col)
 //------------------------------------------------------------------------------
 {
+	glDisable(GL_DEPTH_TEST);
+
     glBegin(GL_LINE_LOOP);
     glColor3f( col.r, col.g, col.b );
     glVertex2f(v1.x, v0.y);
@@ -875,12 +900,14 @@ void SysGra::Box( vect2 v0, vect2 v1,vect3 col)
 void SysGra::Fill( vect2 v0, vect2 v1,vect3 col)
 //------------------------------------------------------------------------------
 {
+	glDisable(GL_DEPTH_TEST);
+
     glBegin(GL_QUADS);
     glColor3f( col.r, col.g, col.b );
-    glVertex2f(v1.x, v0.y);
     glVertex2f(v1.x, v1.y);
-    glVertex2f(v0.x, v1.y);
+    glVertex2f(v1.x, v0.y);
     glVertex2f(v0.x, v0.y);
+    glVertex2f(v0.x, v1.y);
     glEnd();
 
 }
@@ -888,6 +915,8 @@ void SysGra::Fill( vect2 v0, vect2 v1,vect3 col)
 void SysGra::Line( vect2 v0, vect2 v1,vect3 col)
 //------------------------------------------------------------------------------
 {
+	glDisable(GL_DEPTH_TEST);
+
     glBegin(GL_LINES);
     glColor3f( col.r, col.g, col.b );
     glVertex2f(v0.x, v0.y);
@@ -898,6 +927,8 @@ void SysGra::Line( vect2 v0, vect2 v1,vect3 col)
 void SysGra::Tri( vect2 v0, vect2 v1, vect2 v2, vect3 col)
 //------------------------------------------------------------------------------
 {
+	glDisable(GL_DEPTH_TEST);
+
     glBegin( GL_TRIANGLES );
     glColor3f( col.r, col.g, col.b );
     glVertex2f(v0.x, v0.y);
@@ -906,9 +937,24 @@ void SysGra::Tri( vect2 v0, vect2 v1, vect2 v2, vect3 col)
     glEnd();
 }
 //------------------------------------------------------------------------------
+void SysGra::Tri( vect3 v0, vect3 v1, vect3 v2, vect3 col)
+ //------------------------------------------------------------------------------
+{
+	glEnable(GL_DEPTH_TEST);	// (デフォルト:GL_LESS）
+
+    glBegin( GL_TRIANGLES );
+    glColor3f( col.r, col.g, col.b );
+    glVertex3f(v0.x, v0.y, v0.z);
+    glVertex3f(v1.x, v1.y, v1.z);
+    glVertex3f(v2.x, v2.y, v2.z);
+    glEnd();
+}
+//------------------------------------------------------------------------------
 void SysGra::Print( vect2 v0, string str )
 //------------------------------------------------------------------------------
 {
+	glDisable(GL_DEPTH_TEST);
+
 	glBegin(GL_POINTS);
 	glColor3f( 1,1,1 );
 	glEnd();

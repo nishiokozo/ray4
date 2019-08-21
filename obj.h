@@ -132,7 +132,7 @@ struct Pers
 			float w = getW(v.z);
 			ret.x = v.x* w * aspect;
 			ret.y = v.y* w 			;
-			ret.z = w;	// 三次元ベクトルで返す都合上、ZにW値を入れている。
+			ret.z = w/4;	// 三次元ベクトルで返す都合上、ZにW値を入れている。
 		}
 
 		return ret;
