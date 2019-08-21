@@ -474,12 +474,8 @@ struct Apr : public Sys
 			// human 描画
 			pBone->draw( pers, gra );
 
-			// ジョイント表示
-			for ( Joint3& j : pBone->tblJoint )
-			{
-				pset3d( j.pos, rgb(1,1,0), 11 );
-			}
-
+			if ( keys._1.hi ) pBone->stat.bShowBone = !pBone->stat.bShowBone;
+			if ( keys._2.hi ) pBone->stat.bShowSkin = !pBone->stat.bShowSkin;
 
 
 			// マニュピレーター描画

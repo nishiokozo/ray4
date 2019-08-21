@@ -210,6 +210,12 @@ struct Bone
 		bool	bPlaying = false;
 	} anim;
 
+	struct
+	{
+		bool	bShowBone = true;
+		bool	bShowSkin = true;
+	} stat;
+
 	void loadMotion( const string filename );
 	void saveMotion( const string filename );
 	void AddAnimation();

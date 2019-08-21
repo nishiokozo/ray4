@@ -882,6 +882,18 @@ void SysGra::Pset( vect2 v0, vect3 col, float wide )
     glEnd();
 }
 //------------------------------------------------------------------------------
+void SysGra::Pset( vect3 v0, vect3 col, float wide )
+//------------------------------------------------------------------------------
+{
+	glDisable(GL_DEPTH_TEST);
+
+	glPointSize(wide);
+    glBegin(GL_POINTS);
+    glColor3f( col.r, col.g, col.b );
+    glVertex3f(v0.x, v0.y, v0.z);
+    glEnd();
+}
+//------------------------------------------------------------------------------
 void SysGra::Box( vect2 v0, vect2 v1,vect3 col)
 //------------------------------------------------------------------------------
 {

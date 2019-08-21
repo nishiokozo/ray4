@@ -71,6 +71,7 @@ struct SysGra
 	void	Fill( vect2 v0, vect2 v1, vect3 col);
 	void	Line( vect2 v0, vect2 v1, vect3 col);
 	void	Pset( vect2 v0, vect3 col, float wide=1.0f);
+	void	Pset( vect3 v0, vect3 col, float wide=1.0f);
 	void	Circle( vect2 v, float r, vect3 col );
 	void	Clr( vect3 col );
 //	int 	Rgb(float r, float g , float b );

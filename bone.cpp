@@ -509,35 +509,47 @@ void Bone::draw( Pers& pers, SysGra& gra )
 		j.disp = pers.calcDisp(v);
 	}
 
-	// Human 描画
-	for ( Bone3 b : tblBone )
+	if ( stat.bShowSkin )
 	{
-		if ( b.j0.disp.z > 0 && b.j0.disp.z > 0 )
+		// Human 描画
+		for ( Bone3 b : tblBone )
 		{
-			// 肉
-			const int cnt = 4;
-
-			for ( int i = 0 ; i <= cnt ; i++ )
+			if ( b.j0.disp.z > 0 && b.j0.disp.z > 0 )
 			{
-				float t = (float)i / (float)cnt;
+				// 肉
+				const int cnt = 4;
 
-				vect3 pos = ( b.j1.pos - b.j0.pos )*t + b.j0.pos;
+				for ( int i = 0 ; i <= cnt ; i++ )
+				{
+					float t = (float)i / (float)cnt;
 
-				ring.ring_DrawMesh( gra, pers, pos, vect3(rad(0),rad(0),rad(0)) );
+					vect3 pos = ( b.j1.pos - b.j0.pos )*t + b.j0.pos;
+
+					ring.ring_DrawMesh( gra, pers, pos, vect3(rad(0),rad(0),rad(0)) );
+				}
+
 			}
-
 		}
 	}
 
-	// Human 描画
-	for ( Bone3 b : tblBone )
+	if ( stat.bShowBone )
 	{
-		if ( b.j0.disp.z > 0 && b.j0.disp.z > 0 )
+		// Human 描画
+		for ( Bone3 b : tblBone )
 		{
-			// 骨
-			vect2 v0(b.j0.disp.x,b.j0.disp.y);
-			vect2 v1(b.j1.disp.x,b.j1.disp.y);
-			gra.Line( v0,v1, col);
+			if ( b.j0.disp.z > 0 && b.j0.disp.z > 0 )
+			{
+				// 骨
+				vect2 v0(b.j0.disp.x,b.j0.disp.y);
+				vect2 v1(b.j1.disp.x,b.j1.disp.y);
+				gra.Line( v0,v1, col);
+
+			}
+		}
+		for ( Joint3& j : tblJoint )
+		{
+			vect3 v = pers.calcDisp( j.pos * pers.cam.mat.invers() );
+			gra.Pset( v, rgb(1,1,0), 11 );
 
 		}
 	}
