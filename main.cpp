@@ -278,35 +278,6 @@ struct Apr : public Sys
 			gra.Clr(rgb(0.3,0.3,0.3));
 
 			{
-				int y = 10;
-
-				if ( keys.F1.on )
-				{
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[F1] help"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[Y] pers -"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[H] pers +"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[L] Load"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[S] Save"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("--Keyframe--"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[K] Insert"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[X] Cut"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[C] Copy"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[V] Past"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[LEFT]  -"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[RIGHT] +"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("--Animation--"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[I] Add"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[P] Play"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[UP] -"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[DOWN] +"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("--Other--"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[1] select 3d"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[2] select 2main"));
-				}
-				else
-				{
-					//gra.Print(vect2(10,16*y++),string("[F1] Help"));
-				}
 
 
 				if ( pBone->cur.bSelecting ==false && keys.SHIFT.on && (keys.UP.hi || keys.DOWN.hi || keys.LEFT.hi ||keys.RIGHT.hi) )
@@ -380,25 +351,6 @@ struct Apr : public Sys
 			}
 
 
-			{
-				if( keys.F2.hi ) flgInfo = !flgInfo;
-				if ( flgInfo )
-				{
-				int y = 1;
-					gra.Print( gra.Conv(vect2(10,16*y++)),string("fovY:")+to_string(int(pers.fovy)));
-					gra.Print( gra.Conv(vect2(10,16*y++)),string("sz:")+to_string(pers.sz) +string(" fy:")+to_string(pers.fy));
-					gra.Print( gra.Conv(vect2(10,16*y++)),string("far:")+to_string((pers.cam.pos-pers.cam.at).length())); 
-					gra.Print( gra.Conv(vect2(10,16*y++)),string("at  x=")+to_string(pers.cam.at.x)+string(" y=")+to_string(pers.cam.at.y)+string(" z=")+to_string(pers.cam.at.z) ); 
-					gra.Print( gra.Conv(vect2(10,16*y++)),string("pos x=")+to_string(pers.cam.pos.x)+string(" y=")+to_string(pers.cam.pos.y)+string(" z=")+to_string(pers.cam.pos.z) ); 
-					gra.Print( gra.Conv(vect2(10,16*y++)),string("anim=")+to_string(pBone->cur.act) + string(" cnt=")+to_string(pBone->animations.size()) ); 
-					if ( pBone->animations.size() > 0 ) 
-					{
-						gra.Print( gra.Conv(vect2(10,16*y++)),string("pose=")+to_string(pBone->cur.pose) + string(" cnt=")+to_string(pBone->animations[pBone->cur.act].pose.size()) ); 
-					}
-					gra.Print( gra.Conv(vect2(10,16*y++)),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
-				}
-
-			}
 
 			// animカーソルビュー cursor
 			{
@@ -497,6 +449,54 @@ struct Apr : public Sys
 				line3d( vect3(0,0,0), v, vect3(1,1,0));
 
 				gra.Print( vect2(10,16*20),string("v x=")+to_string(v.x) + string(" y=")+to_string(v.y) +string(" z=")+to_string(v.z) );
+			}
+
+			{
+				int y = 1;
+				if( keys.F2.hi ) flgInfo = !flgInfo;
+				if ( flgInfo )
+				{
+					gra.Print( gra.Conv(vect2(10,16*y++)),string("fovY:")+to_string(int(pers.fovy)));
+					gra.Print( gra.Conv(vect2(10,16*y++)),string("sz:")+to_string(pers.sz) +string(" fy:")+to_string(pers.fy));
+					gra.Print( gra.Conv(vect2(10,16*y++)),string("far:")+to_string((pers.cam.pos-pers.cam.at).length())); 
+					gra.Print( gra.Conv(vect2(10,16*y++)),string("at  x=")+to_string(pers.cam.at.x)+string(" y=")+to_string(pers.cam.at.y)+string(" z=")+to_string(pers.cam.at.z) ); 
+					gra.Print( gra.Conv(vect2(10,16*y++)),string("pos x=")+to_string(pers.cam.pos.x)+string(" y=")+to_string(pers.cam.pos.y)+string(" z=")+to_string(pers.cam.pos.z) ); 
+					gra.Print( gra.Conv(vect2(10,16*y++)),string("anim=")+to_string(pBone->cur.act) + string(" cnt=")+to_string(pBone->animations.size()) ); 
+					if ( pBone->animations.size() > 0 ) 
+					{
+						gra.Print( gra.Conv(vect2(10,16*y++)),string("pose=")+to_string(pBone->cur.pose) + string(" cnt=")+to_string(pBone->animations[pBone->cur.act].pose.size()) ); 
+					}
+					gra.Print( gra.Conv(vect2(10,16*y++)),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
+				}
+
+
+				if ( keys.F1.on )
+				{
+					gra.Print(gra.Conv(vect2(10,16*y++)),string("[F1] help"));
+					gra.Print(gra.Conv(vect2(10,16*y++)),string("[Y] pers -"));
+					gra.Print(gra.Conv(vect2(10,16*y++)),string("[H] pers +"));
+					gra.Print(gra.Conv(vect2(10,16*y++)),string("[L] Load"));
+					gra.Print(gra.Conv(vect2(10,16*y++)),string("[S] Save"));
+					gra.Print(gra.Conv(vect2(10,16*y++)),string("--Keyframe--"));
+					gra.Print(gra.Conv(vect2(10,16*y++)),string("[K] Insert"));
+					gra.Print(gra.Conv(vect2(10,16*y++)),string("[X] Cut"));
+					gra.Print(gra.Conv(vect2(10,16*y++)),string("[C] Copy"));
+					gra.Print(gra.Conv(vect2(10,16*y++)),string("[V] Past"));
+					gra.Print(gra.Conv(vect2(10,16*y++)),string("[LEFT]  -"));
+					gra.Print(gra.Conv(vect2(10,16*y++)),string("[RIGHT] +"));
+					gra.Print(gra.Conv(vect2(10,16*y++)),string("--Animation--"));
+					gra.Print(gra.Conv(vect2(10,16*y++)),string("[I] Add"));
+					gra.Print(gra.Conv(vect2(10,16*y++)),string("[P] Play"));
+					gra.Print(gra.Conv(vect2(10,16*y++)),string("[UP] -"));
+					gra.Print(gra.Conv(vect2(10,16*y++)),string("[DOWN] +"));
+					gra.Print(gra.Conv(vect2(10,16*y++)),string("--Other--"));
+					gra.Print(gra.Conv(vect2(10,16*y++)),string("[1] select 3d"));
+					gra.Print(gra.Conv(vect2(10,16*y++)),string("[2] select 2main"));
+				}
+				else
+				{
+					//gra.Print(vect2(10,16*y++),string("[F1] Help"));
+				}
 			}
 
 			
