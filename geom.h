@@ -270,6 +270,8 @@ extern vect3	normalize( vect3 a );
 //#define	deg(n)	((n)*180.0f/M_PI)
 extern	float rad( float n );
 extern	float deg( float n );
+extern	float atan2_360( float y, float x );
+extern	float atan2_180( float y, float x );
 
 
 //---

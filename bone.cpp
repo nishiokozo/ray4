@@ -525,7 +525,19 @@ void Bone::draw( Pers& pers, SysGra& gra )
 
 					vect3 pos = ( b.j1.pos - b.j0.pos )*t + b.j0.pos;
 
-					ring.ring_DrawMesh( gra, pers, pos, vect3(rad(0),rad(0),rad(0)) );
+//					ring.ring_DrawMesh( gra, pers, pos, vect3(rad(0),rad(0),rad(0)) );
+					vect3 v = ( b.j1.pos - b.j0.pos ).normalize();
+					float rx = acos(dot(vect3(0,1,0),v));
+					float ry = atan2(v.x,v.z);
+					{
+						mat44	mx;
+						mat44	my;
+						my.setRotateY(-ry);
+						mx.setRotateX(-rx);
+						mat44 m = mx * my;
+						ring.ring_DrawMat( gra, pers, pos, m );
+					}
+
 				}
 
 			}

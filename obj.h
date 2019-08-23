@@ -20,8 +20,13 @@ struct Pers
 	// カメラ
 	struct
 	{
+	#if 1
 		vect3	pos = vect3(  0.5, 1.5, -3+0.1 );
 		vect3 	at = vect3( 0,  1, 0 );
+	#else
+		vect3	pos = vect3(  0.5, 0.5, -1+0.1 );
+		vect3 	at = vect3( 0,  0, 0 );
+	#endif
 		vect3	up = vect3( 0, 1, 0);
 	  	mat44	mat;		
 
@@ -80,10 +85,6 @@ struct Pers
 	float	fovy;		// 画角
 	float	sz;			// 投影面までの距離
 	float	fy;			// 投影面の高さ/2（描画スケール）
-//	float	cx;			// 描画画面の中心W
-//	float	cy;			// 描画画面の中心H
-//	float	width;		// 描画画面の解像度W/2
-//	float	height;		// 描画画面の解像度H/2
 	float	aspect;		// 描画画面のアスペクト比
 
 	//--------------------------------------------------------------------------
@@ -107,10 +108,6 @@ struct Pers
 		sz = 1.0;								// 投影面までの距離
 		fy = sz*tan(rad(fovy)/2);				// 投影面の高さ/2
 	#endif
-//		cx		= screensize.x/2;				// 描画画面の中心W
-//		cy		= screensize.y/2;				// 描画画面の中心H
-//		width	= screensize.x/2;				// 描画画面の解像度W/2
-//		height	= screensize.y/2;				// 描画画面の解像度H/2
 		aspect	= screensize.y/screensize.x;	// 描画画面のアスペクト比
 
 	} 

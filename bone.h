@@ -2,7 +2,6 @@
 // 輪
 struct Ring
 {
-	#define	USE_TRIGON	1
 	struct PrimTrigon
 	{
 		float	z;
@@ -54,30 +53,27 @@ struct Ring
 		{3,7,1},{1,7,5},
 		{7,6,5},{5,6,4},
 		{6,2,4},{4,2,0},
+
+		{0,1,4},{4,1,5},
+		{6,3,2},{6,7,3},
 	};
 
 
 	//------------------------------------------------------------------------------
-	void ring_DrawMesh( SysGra& gra, Pers& pers, vect3 pos, vect3 rot )
+	void ring_DrawMat( SysGra& gra, Pers& pers, vect3 pos, mat44 m )
 	//------------------------------------------------------------------------------
 	{
 		vect3 l = vect3(0,0,1).normalize();	// 正面ライト
 		for ( ivect3 v : tbl_faces )
 		{
-			mat44	rotx;
-			mat44	roty;
-			mat44	rotz;
-			rotx.setRotateX(rot.x);
-			roty.setRotateY(rot.y);
-			rotz.setRotateZ(rot.z);
 
 			vect3 v0 = tbl_vert[v.n0];
 			vect3 v1 = tbl_vert[v.n1];
 			vect3 v2 = tbl_vert[v.n2];
 
-			v0= rotx * roty * rotz *v0 + pos ;
-			v1= rotx * roty * rotz *v1 + pos ;
-			v2= rotx * roty * rotz *v2 + pos ;
+			v0= v0 * m + pos ;
+			v1= v1 * m + pos ;
+			v2= v2 * m + pos ;
 
 			v0 = v0 * pers.cam.mat.invers();
 			v1 = v1 * pers.cam.mat.invers();
@@ -96,21 +92,8 @@ struct Ring
 			v0 = pers.calcDisp( v0 );
 			v1 = pers.calcDisp( v1 );
 			v2 = pers.calcDisp( v2 );
-/*
-			vect2 d0 = vect2(v0.x,v0.y);
-			vect2 d1 = vect2(v1.x,v1.y);
-			vect2 d2 = vect2(v2.x,v2.y);
 
-			{
-				vect2 a = vect2(d1-d0);
-				vect2 b = vect2(d2-d0);
-				float z = a.x*b.y-a.y*b.x;
-				if ( z > 0 ) 
-				{
-//						trigons.emplace_back( z, d0, d1, d2, rgb(d,d,d) );
-				}
-			}
-*/
+
 					gra.Tri( v0, v1, v2, rgb(d,d,d) );
 		}
 

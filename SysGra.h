@@ -51,8 +51,6 @@ struct SysGra
 	int GetHeight();
 	float GetAspect();
 
-	void ReleasePixelBits();
-	void CreatePixelBits(int bpp, int width, int height );
 	void OnSize( int width, int height );
 	void OnMove( int pos_x, int pos_y );
 	void OnDestroy();
@@ -63,7 +61,7 @@ struct SysGra
 
 
 	void	Print( vect2 v, string str );
-	void	Cls();
+///	void	Cls();
 
 	void	Tri( vect2 v0, vect2 v1, vect2 v2, vect3 col);
 	void	Tri( vect3 v0, vect3 v1, vect3 v2, vect3 col);

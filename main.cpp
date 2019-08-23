@@ -206,6 +206,7 @@ struct Apr : public Sys
 	
 	bool flgInfo = true;
 	
+
 	//------------------------------------------------------------------------------
 	int main()
 	//------------------------------------------------------------------------------
@@ -438,6 +439,8 @@ struct Apr : public Sys
 			}
 
 
+
+
 			// マウス座標（投影面座標）を３Ｄ空間座標に逆変換
 			if(0)
 			{
@@ -445,10 +448,31 @@ struct Apr : public Sys
 				vect3 p = pers.calcRay( v, 10 );
 
 
-				line3d( v, p, vect3(1,0,0));
 				line3d( vect3(0,0,0), v, vect3(1,1,0));
 
-				gra.Print( vect2(10,16*20),string("v x=")+to_string(v.x) + string(" y=")+to_string(v.y) +string(" z=")+to_string(v.z) );
+
+
+			#if 0
+				{	//砲台
+					v.normalize();
+					float rx = acos(dot(vect3(0,1,0),v));
+					float ry = atan2(v.x,v.z);
+
+					int ty = 22;
+					gra.Print( gra.Conv(vect2(10,16*(ty++))),string("ry=")+to_string(deg(ry)) );
+					gra.Print( gra.Conv(vect2(10,16*(ty++))),string("v.x=")+to_string(v.x) );
+					gra.Print( gra.Conv(vect2(10,16*(ty++))),string("v.z=")+to_string(v.z) );
+					gra.Print( gra.Conv(vect2(10,16*(ty++))),string("ry=")+to_string(deg(ry)) );
+						
+					mat44	mx;
+					mat44	my;
+					my.setRotateY(-ry);
+					mx.setRotateX(-rx);
+					mat44 m = mx * my;
+
+					ring.ring_DrawMat( gra, pers, vect3(  0,0,0), m );
+				}
+			#endif
 			}
 
 			{
