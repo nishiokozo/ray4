@@ -517,7 +517,7 @@ void Bone::draw( Pers& pers, SysGra& gra )
 			if ( b.j0.disp.z > 0 && b.j0.disp.z > 0 )
 			{
 				// 肉
-				const int cnt = 4;
+				const int cnt = 3;
 
 				for ( int i = 0 ; i <= cnt ; i++ )
 				{
