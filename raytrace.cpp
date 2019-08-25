@@ -12,7 +12,7 @@ using namespace std;
 #include "raytrace.h"
 
 
-const	static	float INFINIT =  numeric_limits<float>::max();	//DBL_MAX
+//const	static	float infinit =  numeric_limits<float>::max();	//FLT_MAX
 
 struct  Material
 {
@@ -50,7 +50,7 @@ struct	Surface : Material
 
 	Surface()
 	{
-		t		= INFINIT;
+		t		= infinit;
 		flg		= false;
 		stat	= 0;
 		Q = vect3(0,0,0);
@@ -132,7 +132,7 @@ public:
 
 		sur.flg = false;
 
-		sur.t  = INFINIT;
+		sur.t  = infinit;
 		sur.stat  = Surface::STAT_NONE;
 		
 		//	球

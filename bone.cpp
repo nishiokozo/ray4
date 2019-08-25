@@ -506,7 +506,7 @@ void Bone::draw( Pers& pers, SysGra& gra )
 
 		v = v * pers.cam.mat.invers();
 
-		j.disp = pers.calcDisp(v);
+		j.disp = pers.calcDisp3(v);
 	}
 
 	if ( stat.bShowSkin )
@@ -560,7 +560,7 @@ void Bone::draw( Pers& pers, SysGra& gra )
 		}
 		for ( Joint3& j : tblJoint )
 		{
-			vect3 v = pers.calcDisp( j.pos * pers.cam.mat.invers() );
+			vect3 v = pers.calcDisp3( j.pos * pers.cam.mat.invers() );
 			gra.Pset( v, rgb(1,1,0), 11 );
 
 		}

@@ -4,6 +4,7 @@
 #include <cmath>
 #ifndef GEOM_H
 #define	GEOM_H
+#include <cfloat>
 typedef	float	MAT4[4][4];
 
 void	mat4_rotateX( float* m, float th );
@@ -15,7 +16,10 @@ void	mat4_rotateZ( float* m, float th );
 
 //#define	pi	3.141592654
 //const static float pi = 3.141592654;
-const static float pi = 3.1415926535897932384626433832795;
+const static float pi = 3.14159265f;//35897932384626433832795;
+const static float infinit =  FLT_MAX;//numeric_limits<float>::max();	//FLT_MAX
+
+
 struct	I2
 {
 	union { int x, n0, p; };
@@ -161,13 +165,12 @@ public:
 	union { float	y, g; }; 
 	union {	float	z, b; };
 
-//	vect3(){};
-//	vect3( float a ) { x = a; y = a; z = a; };
-//	vect3( float _x, float _y, float _z ) { x = _x; y = _y; z = _z; };
 
 	vect3() :x(0),y(0),z(0){};
 	vect3( float f ) :x(f), y(f), z(f){};
 	vect3( float _x, float _y, float _z) :x(_x), y(_y), z(_z){};
+
+	vect3( vect2 v, float _z ) { x = v.x; y = v.y; z = _z;};
 
 //	vect3 abs() { return vect3( std::abs(x) , std::abs(y) ); }
 	vect3 normalize() { return (*this)/length(); }

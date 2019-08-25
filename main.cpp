@@ -51,7 +51,7 @@ struct Apr : public Sys
 		void manupirator_drawAxis( vect3 pos, Apr& apr )
 		//------------------------------------------------------------------------------
 		{
-			vect3 v0 = apr.pers.calcDisp( pos * apr.pers.cam.mat.invers() );
+			vect3 v0 = apr.pers.calcDisp3( pos * apr.pers.cam.mat.invers() );
 
 
 
@@ -109,7 +109,7 @@ struct Apr : public Sys
 	void pset3d( vect3 p0, rgb col, float wide )
 	//------------------------------------------------------------------------------
 	{
-		vect3 v = pers.calcDisp( p0 * pers.cam.mat.invers() );
+		vect3 v = pers.calcDisp3( p0 * pers.cam.mat.invers() );
 		if ( v.z > 0 )
 		{
 			gra.Pset( vect2(v.x,v.y), col, wide );
@@ -134,6 +134,17 @@ struct Apr : public Sys
 			}
 		}
 		return false;
+	};
+
+	//------------------------------------------------------------------------------
+	bool IsIntersectSphereLine( vect3 sphere_P, float sphere_r, vect3 line_P , vect3 line_I )
+	//------------------------------------------------------------------------------
+	{
+		//	球と直線の衝突判定
+		vect3	OP = line_P - sphere_P;
+		float	b = dot( line_I, OP );
+		float	aa = sphere_r*sphere_r - dot(OP,OP)+ b*b;
+		return ( aa>=0 ) ;
 	};
 
 	struct Grid
@@ -194,7 +205,7 @@ struct Apr : public Sys
 				for ( int i = 0 ; i <= 360 ; i+=20 )
 				{
 					vect3 p = vect3( r*cos(rad(i)), 0, r*sin(rad(i)) ) + pos;
-					vect3 q = apr.pers.calcDisp( p * apr.pers.cam.mat.invers() );
+					vect3 q = apr.pers.calcDisp3( p * apr.pers.cam.mat.invers() );
 					vect2 v1 = vect2( q.x, q.y );
 					if ( i > 0 ) apr.gra.Line( v0,v1, col );
 					v0 = v1;
@@ -221,7 +232,7 @@ struct Apr : public Sys
 					pNew->loadMotion( "human.mot" );
 					pBone = move(pNew);
 				}
-
+pBone->stat.bShowSkin = false;
 
 		// 箱
 		struct
@@ -383,7 +394,7 @@ struct Apr : public Sys
 
 
 			// カメラ回転
-			if ( (!keys.ALT.on && mouse.R.on) || (keys.ALT.on && mouse.L.on) ) pers.cam.Rotation( vect3(-mouse.mov.x/28,mouse.mov.y/28,0) );
+			if ( (!keys.ALT.on && mouse.R.on && !mouse.L.on && !mouse.M.on) || (keys.ALT.on && !mouse.R.on && mouse.L.on && !mouse.M.on) ) pers.cam.Rotation( vect3(-mouse.mov.x/28,mouse.mov.y/28,0) );
 
 			// カメラ平行移動
 			if ( mouse.M.on ) pers.cam.Move( vect3(-mouse.mov.x,mouse.mov.y,0)*2/gra.GetHeight()/pers.getW((pers.cam.pos-pers.cam.at).length()));
@@ -392,7 +403,7 @@ struct Apr : public Sys
 			if ( !keys.ALT.on  ) pers.cam.Zoom( -mouse.wheel*2/gra.GetHeight()/pers.getW((pers.cam.pos-pers.cam.at).length()) );
 			
 			// カメラ移動
-			if ( keys.ALT.on && mouse.R.on ) pers.cam.Zoom( mouse.mov.y*2/gra.GetHeight()/pers.getW((pers.cam.pos-pers.cam.at).length()) );
+			if ( (keys.ALT.on && mouse.R.on) || ( mouse.R.on && mouse.L.on ) ) pers.cam.Zoom( mouse.mov.y*2/gra.GetHeight()/pers.getW((pers.cam.pos-pers.cam.at).length()) );
 			
 			// カメラマトリクス計算
 			{
@@ -401,7 +412,7 @@ struct Apr : public Sys
 
 			// カメラ注視点表示
 			{
-				vect3 v = pers.calcDisp(pers.cam.at*pers.cam.mat.invers());
+				vect3 v = pers.calcDisp3(pers.cam.at*pers.cam.mat.invers());
 				if ( v.z > 0 ) 
 				{
 				}
@@ -433,7 +444,8 @@ struct Apr : public Sys
 
 			// マニュピレーター描画
 			{
-				vect3 p = pers.calcInvers( gra.Conv(mouse.pos) );
+//				vect3 p = pers.calcInvers( gra.Conv(mouse.pos) );
+				vect3 p = pers.calcScreenToWorld( vect3(gra.Conv(mouse.pos),0) );
 				manupirator.manupirator_drawAxis( p, *this );
 
 			}
@@ -442,13 +454,22 @@ struct Apr : public Sys
 
 
 			// マウス座標（投影面座標）を３Ｄ空間座標に逆変換
-			if(0)
+			if(1)
 			{
-				vect3 v = pers.calcInvers( gra.Conv(mouse.pos) );
-				vect3 p = pers.calcRay( v, 10 );
+				vect3 P = pers.calcScreenToWorld( vect3(gra.Conv(mouse.pos),0) );
+				vect3 I = pers.calcRayvect( P );
 
 
-				line3d( vect3(0,0,0), v, vect3(1,1,0));
+				line3d( vect3(0,0,0), P, vect3(1,1,0));
+				line3d( vect3(0,0,0), P+I*10.0f, vect3(1,1,1));
+
+				for ( Joint3& j : pBone->tblJoint )
+				{
+					if ( IsIntersectSphereLine( j.pos, 0.1f, P, I ) )
+					{
+						gra.Pset( pers.calcDisp3( j.pos * pers.cam.mat.invers() ), rgb(1,0,0), 20 );
+					}
+				}
 
 
 
@@ -470,7 +491,7 @@ struct Apr : public Sys
 					mx.setRotateX(-rx);
 					mat44 m = mx * my;
 
-					ring.ring_DrawMat( gra, pers, vect3(  0,0,0), m );
+					pBone->ring.ring_DrawMat( gra, pers, vect3(  0,0,0), m );
 				}
 			#endif
 			}

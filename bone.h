@@ -89,9 +89,9 @@ struct Ring
 				if ( d > 1.0 ) d=1.0;
 			}
 
-			v0 = pers.calcDisp( v0 );
-			v1 = pers.calcDisp( v1 );
-			v2 = pers.calcDisp( v2 );
+			v0 = pers.calcDisp3( v0 );
+			v1 = pers.calcDisp3( v1 );
+			v2 = pers.calcDisp3( v2 );
 
 
 					gra.Tri( v0, v1, v2, rgb(d,d,d) );
