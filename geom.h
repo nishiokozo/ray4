@@ -155,6 +155,10 @@ public:
 	{
 		printf("(vect2)%9.6f %9.6f\n", x, y );
 	}
+	void dump( const char* str ) const
+	{
+		printf("%s<%9.6f %9.6f>\n", str, x, y );
+	}
 
 };
 

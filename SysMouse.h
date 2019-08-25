@@ -32,6 +32,10 @@ public:
 	vect2	pos;	//	マウスカーソル位置
 	vect2	mov;	//	マウスカーソル移動量
 
+	vect2	gprev;	//	マウスカーソル位置旧 GL座標
+	vect2	gpos;	//	マウスカーソル位置 GL座標
+	vect2	gmov;	//	マウスカーソル移動量 GL座標
+
 //	int	sx;	//	マウスカーソル位置
 //	int	sy;
 //	int	mx;	//	マウスカーソル移動量

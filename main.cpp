@@ -119,9 +119,10 @@ struct Apr : public Sys
 
 	
 	//------------------------------------------------------------------------------
-	bool funcIntersectPlate( vect3 plate_P, vect3 plate_N, vect3 P , vect3 I, vect3& Q)
+	bool IsIntersectPlate( vect3 plate_P, vect3 plate_N, vect3 P , vect3 I, vect3& Q)
 	//------------------------------------------------------------------------------
 	{
+		// 球と変面殿衝突判定
 		float	f = dot(plate_N, P - plate_P);
 	//	if ( f > 0 )
 		{
@@ -222,6 +223,9 @@ struct Apr : public Sys
 	int main()
 	//------------------------------------------------------------------------------
 	{
+		int text_y = 0;
+//		vector<Joint3> listSelected;
+		vector<reference_wrapper<Joint3>>	list;
 
 
 		unique_ptr<Bone> pBone(new Bone);
@@ -279,6 +283,8 @@ pBone->stat.bShowSkin = false;
 		//===========================================================================
 		while( Update() )
 		{
+			text_y = 0;
+
 			// パースペクティブ
 			if (keys.Y.rep) {pers.fovy-=2;cout << pers.fovy <<" "<<1/tan(rad(pers.fovy)) << endl; }
 			if (keys.H.rep) {pers.fovy+=2;cout << pers.fovy <<" "<<1/tan(rad(pers.fovy)) << endl; }
@@ -463,15 +469,45 @@ pBone->stat.bShowSkin = false;
 				line3d( vect3(0,0,0), P, vect3(1,1,0));
 				line3d( vect3(0,0,0), P+I*10.0f, vect3(1,1,1));
 
-				for ( Joint3& j : pBone->tblJoint )
+
+
+				vect3 mpos = vect3(gra.Conv(mouse.pos),0);
+
+				// 選択リストクリア
+				list.clear();
+
+				// 最近点を一つだけのリストを作成
+//				if ( mouse.L.on ) 
 				{
-					if ( IsIntersectSphereLine( j.pos, 0.1f, P, I ) )
+					struct
 					{
-						gra.Pset( pers.calcDisp3( j.pos * pers.cam.mat.invers() ), rgb(1,0,0), 20 );
+						float	z;
+						Joint3*	p;
+					} a = {0,0};
+
+					for ( Joint3& j : pBone->tblJoint )
+					{
+						vect3 v = pers.calcWorldToScreen3( j.pos );
+
+	//					if ( IsIntersectSphereLine( j.pos, 0.05f, P, I ) )
+						if ( (vect2(v.x,v.y)-gra.Conv(mouse.pos)).length() < 0.05f )
+						{
+							if ( a.z < v.z )
+							{
+								a.z = v.z;
+								a.p = &j;
+							}
+						}
 					}
+					if ( a.p ) list.push_back( *a.p );
 				}
 
 
+				// 選択リスト表示
+				for ( Joint3& j : list )
+				{
+						gra.Pset( pers.calcDisp2( j.pos * pers.cam.mat.invers() ), rgb(1,0,0), 5 );
+				}
 
 			#if 0
 				{	//砲台
@@ -479,11 +515,10 @@ pBone->stat.bShowSkin = false;
 					float rx = acos(dot(vect3(0,1,0),v));
 					float ry = atan2(v.x,v.z);
 
-					int ty = 22;
-					gra.Print( gra.Conv(vect2(10,16*(ty++))),string("ry=")+to_string(deg(ry)) );
-					gra.Print( gra.Conv(vect2(10,16*(ty++))),string("v.x=")+to_string(v.x) );
-					gra.Print( gra.Conv(vect2(10,16*(ty++))),string("v.z=")+to_string(v.z) );
-					gra.Print( gra.Conv(vect2(10,16*(ty++))),string("ry=")+to_string(deg(ry)) );
+					gra.Print( gra.Conv(vect2(10,16*(text_y++))),string("ry=")+to_string(deg(ry)) );
+					gra.Print( gra.Conv(vect2(10,16*(text_y++))),string("v.x=")+to_string(v.x) );
+					gra.Print( gra.Conv(vect2(10,16*(text_y++))),string("v.z=")+to_string(v.z) );
+					gra.Print( gra.Conv(vect2(10,16*(text_y++))),string("ry=")+to_string(deg(ry)) );
 						
 					mat44	mx;
 					mat44	my;
@@ -497,46 +532,45 @@ pBone->stat.bShowSkin = false;
 			}
 
 			{
-				int y = 1;
 				if( keys.F2.hi ) flgInfo = !flgInfo;
 				if ( flgInfo )
 				{
-					gra.Print( gra.Conv(vect2(10,16*y++)),string("fovY:")+to_string(int(pers.fovy)));
-					gra.Print( gra.Conv(vect2(10,16*y++)),string("sz:")+to_string(pers.sz) +string(" fy:")+to_string(pers.fy));
-					gra.Print( gra.Conv(vect2(10,16*y++)),string("far:")+to_string((pers.cam.pos-pers.cam.at).length())); 
-					gra.Print( gra.Conv(vect2(10,16*y++)),string("at  x=")+to_string(pers.cam.at.x)+string(" y=")+to_string(pers.cam.at.y)+string(" z=")+to_string(pers.cam.at.z) ); 
-					gra.Print( gra.Conv(vect2(10,16*y++)),string("pos x=")+to_string(pers.cam.pos.x)+string(" y=")+to_string(pers.cam.pos.y)+string(" z=")+to_string(pers.cam.pos.z) ); 
-					gra.Print( gra.Conv(vect2(10,16*y++)),string("anim=")+to_string(pBone->cur.act) + string(" cnt=")+to_string(pBone->animations.size()) ); 
+					gra.Print( gra.Conv(vect2(10,16*text_y++)),string("fovY:")+to_string(int(pers.fovy)));
+					gra.Print( gra.Conv(vect2(10,16*text_y++)),string("sz:")+to_string(pers.sz) +string(" fy:")+to_string(pers.fy));
+					gra.Print( gra.Conv(vect2(10,16*text_y++)),string("far:")+to_string((pers.cam.pos-pers.cam.at).length())); 
+					gra.Print( gra.Conv(vect2(10,16*text_y++)),string("at  x=")+to_string(pers.cam.at.x)+string(" y=")+to_string(pers.cam.at.y)+string(" z=")+to_string(pers.cam.at.z) ); 
+					gra.Print( gra.Conv(vect2(10,16*text_y++)),string("pos x=")+to_string(pers.cam.pos.x)+string(" y=")+to_string(pers.cam.pos.y)+string(" z=")+to_string(pers.cam.pos.z) ); 
+					gra.Print( gra.Conv(vect2(10,16*text_y++)),string("anim=")+to_string(pBone->cur.act) + string(" cnt=")+to_string(pBone->animations.size()) ); 
 					if ( pBone->animations.size() > 0 ) 
 					{
-						gra.Print( gra.Conv(vect2(10,16*y++)),string("pose=")+to_string(pBone->cur.pose) + string(" cnt=")+to_string(pBone->animations[pBone->cur.act].pose.size()) ); 
+						gra.Print( gra.Conv(vect2(10,16*text_y++)),string("pose=")+to_string(pBone->cur.pose) + string(" cnt=")+to_string(pBone->animations[pBone->cur.act].pose.size()) ); 
 					}
-					gra.Print( gra.Conv(vect2(10,16*y++)),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
+					gra.Print( gra.Conv(vect2(10,16*text_y++)),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 				}
 
 
 				if ( keys.F1.on )
 				{
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[F1] help"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[Y] pers -"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[H] pers +"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[L] Load"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[S] Save"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("--Keyframe--"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[K] Insert"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[X] Cut"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[C] Copy"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[V] Past"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[LEFT]  -"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[RIGHT] +"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("--Animation--"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[I] Add"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[P] Play"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[UP] -"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[DOWN] +"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("--Other--"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[1] select 3d"));
-					gra.Print(gra.Conv(vect2(10,16*y++)),string("[2] select 2main"));
+					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[F1] help"));
+					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[Y] pers -"));
+					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[H] pers +"));
+					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[L] Load"));
+					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[S] Save"));
+					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("--Keyframe--"));
+					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[K] Insert"));
+					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[X] Cut"));
+					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[C] Copy"));
+					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[V] Past"));
+					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[LEFT]  -"));
+					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[RIGHT] +"));
+					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("--Animation--"));
+					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[I] Add"));
+					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[P] Play"));
+					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[UP] -"));
+					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[DOWN] +"));
+					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("--Other--"));
+					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[1] select 3d"));
+					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[2] select 2main"));
 				}
 				else
 				{

@@ -558,10 +558,13 @@ void Bone::draw( Pers& pers, SysGra& gra )
 
 			}
 		}
+
+		// ジョイント表示
 		for ( Joint3& j : tblJoint )
 		{
 			vect3 v = pers.calcDisp3( j.pos * pers.cam.mat.invers() );
-			gra.Pset( v, rgb(1,1,0), 11 );
+//			gra.Pset( v, rgb(1,1,0), 11 );
+			gra.Pset( v, rgb(0,0,1), 5 );
 
 		}
 	}
