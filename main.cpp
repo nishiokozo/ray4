@@ -225,7 +225,10 @@ struct Apr : public Sys
 	{
 		int text_y = 0;
 
-		float select_w = 0;			
+		vect2 rect_pos = vect2(0,0);			//	矩形選択開始位置
+		bool rect_bSelect = false;	//	矩形選択中フラグ
+
+
 		vector<reference_wrapper<Joint3>>	list;
 
 
@@ -488,72 +491,111 @@ pBone->stat.bShowSkin = false;
 
 				vect3 mpos = vect3(mouse.gpos,0);
 
-				// 最近点を一つだけのリストを作成
-				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on ) 
-				{
-					// 選択リストクリア
-					list.clear();
-
-					struct
+					static struct
 					{
 						float	w;
 						Joint3*	p;
-					} a = {0,0};
+						bool	bSelected;
+					} sel = {0,0,false};
+
+				// 最近点検索
+				if ( !keys.ALT.on && mouse.L.hi ) 
+				{
+					sel = {0,0,false};
 
 					for ( Joint3& j : pBone->tblJoint )
 					{
 						vect3 v = pers.calcWorldToScreen3( j.pos );
 
-					//	if ( IsIntersectSphereLine( j.pos, 0.05f, P, I ) )
 						if ( (vect2(v.x,v.y)-mouse.gpos).length() < 0.05f )
 						{
-							if ( a.w < v.z )
+							if ( sel.w < v.z )
 							{
-								a.w = v.z;
-								a.p = &j;
+								sel.w = v.z;
+								sel.p = &j;
 							}
 						}
-//						list.push_back( j );
-//						select_w = v.z;
-
 					}
-					if ( a.p ) 
+					if ( sel.p )
 					{
-						list.push_back( *a.p );
-						select_w = a.w;
-					}
+						#if 1
+						{
+							// 優先度つけ
+							for ( Joint3& j : pBone->tblJoint )
+							{
+								j.priority = 999;
+							}
+							function<void( Joint3&,int)> funcSetPriority = [&funcSetPriority] ( Joint3& j, int prio )
+							{
+								j.priority = prio;
+								for ( Joint3& r : j.relative )
+								{
+									if ( r.priority > prio+1 ) funcSetPriority( r, prio+1 );
+								}
+							};
+							
+							funcSetPriority( *sel.p, 1 );
+						}
+						#endif
 					
-					#if 1
-					if ( a.p )
+						// 選択リスト中に存在するかしないかチェック
+						for ( Joint3& j : list )
+						{
+							if ( sel.p == &j ) 
+							{
+								sel.bSelected = true;
+								break;
+							}
+						}
+					}
+				}
+
+				// 矩形カーソル開始
+				if ( !keys.ALT.on && mouse.L.hi && sel.p == 0 ) 
+				{
+					rect_bSelect = true;
+					rect_pos = mouse.gpos;
+				}
+
+				// 矩形カーソル終了
+				if ( !keys.ALT.on && !mouse.L.on && rect_bSelect ) 
+				{
+					rect_bSelect = false;
+				}
+
+				// 矩形カーソル選択	
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && rect_bSelect ) 
+				{
+					vect2 v0 = min( rect_pos, mouse.gpos );
+					vect2 v1 = max( rect_pos, mouse.gpos );
+
+					list.clear();
+
+					// 矩形カーソル内マーカーを検索
+					for ( Joint3& j : pBone->tblJoint )
 					{
-						// 優先度つけ
 						for ( Joint3& j : pBone->tblJoint )
 						{
-							j.priority = 999;
-						}
-						function<void( Joint3&,int)> funcSetPriority = [&funcSetPriority] ( Joint3& j, int prio )
-						{
-							j.priority = prio;
-							for ( Joint3& r : j.relative )
+							vect2 v = pers.calcWorldToScreen2( j.pos );
+
+							if ( v.x > v0.x && v.x < v1.x && v.y > v0.y && v.y < v1.y )
 							{
-								if ( r.priority > prio+1 ) funcSetPriority( r, prio+1 );
+								list.push_back( j );
 							}
-						};
-						
-						funcSetPriority( *a.p, 1 );
+						}
 					}
-					#endif
-					
 				}
 
-
-				// 選択リスト表示
-				for ( Joint3& j : pBone->tblJoint )
+				// 単独選択
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && sel.p && !sel.bSelected ) 
 				{
-					vect2 pos = pers.calcDisp2( j.pos * pers.cam.mat.invers() );
-					gra.Print( pos, to_string(j.id) + " "+ to_string(j.priority));
+					// 選択リストクリア
+					list.clear();
+
+					list.push_back( *sel.p );
 				}
-				
+
+			
 				// 選択リスト表示
 				for ( Joint3& j : list )
 				{
@@ -561,18 +603,37 @@ pBone->stat.bShowSkin = false;
 				}
 				
 				// 選択リストのJoint3移動
-				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on ) 
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && sel.p ) 
 				{
 					for ( Joint3& j : list )
 					{
-						vect3 v = vect3(mouse.gmov.x*pers.aspect, mouse.gmov.y, 0)/select_w/pers.rate;
+						vect3 v = vect3(mouse.gmov.x*pers.aspect, mouse.gmov.y, 0)/sel.w/pers.rate;
 						mat44 mrot = pers.cam.mat;
 						mrot.SetTranslate(vect3(0,0,0));
-						mrot.invers();
+					//	mrot.invers(); 逆行列にしなくても同じ結果
 						v = v* mrot;
 						j.pos += v ;
+
+
+
 					}
 				}
+				
+				//--
+
+				// 矩形カーソル 表示
+				if ( rect_bSelect )
+				{
+					gra.Box( rect_pos, mouse.gpos, rgb(1,1,0));
+				}
+
+				// Joint3情報表示
+				for ( Joint3& j : pBone->tblJoint )
+				{
+					vect2 pos = pers.calcDisp2( j.pos * pers.cam.mat.invers() );
+					gra.Print( pos, to_string(j.id) + " "+ to_string(j.priority));
+				}
+
 				
 			#if 0
 				{	//砲台
