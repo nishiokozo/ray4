@@ -31,13 +31,9 @@ SysMouse::SysMouse()
 
 	SysWin& win = SysWin::GetInstance();
 
-//	this->sx = point.x - win.GetPosX();
-//	this->sy = point.y - win.GetPosY();
 	this->pos.x = point.x - win.GetPosX();
 	this->pos.y = point.y - win.GetPosY();
 
-//	this->mx = 0;
-//	this->my = 0;
 	this->mov.x = 0;
 	this->mov.y = 0;
 
@@ -53,31 +49,12 @@ SysMouse::SysMouse()
 		gp = gp/vect2(win.GetWidth()/2,-win.GetHeight()/2)+vect2(-1,1);
 	
 		this->gprev = this->gpos;
-		this->gmov.x = gp.x - this->gpos.x;
-		this->gmov.y = gp.y - this->gpos.y;
-		this->gpos.x = gp.x;
-		this->gpos.y = gp.y;
+		this->gmov = 0;
+		this->gpos = gp;
 	}
 
 }
 
-/*
-//-----------------------------------------------------------------------------
-void SysMouse::OnSize( int width, int height )
-//-----------------------------------------------------------------------------
-{
-	m.width = width;
-	m.height = height;
-}
-
-//-----------------------------------------------------------------------------
-void SysMouse::OnMove( int pos_x, int pos_y )
-//-----------------------------------------------------------------------------
-{
-	m.pos_x = pos_x;
-	m.pos_y = pos_y;
-}
-*/
 
 //-----------------------------------------------------------------------------
 void SysMouse::Update()
@@ -144,10 +121,13 @@ void SysMouse::Update()
 		gp = gp/vect2(win.GetWidth()/2,-win.GetHeight()/2)+vect2(-1,1);
 	
 		this->gprev = this->gpos;
-		this->gmov.x = gp.x - this->gpos.x;
-		this->gmov.y = gp.y - this->gpos.y;
-		this->gpos.x = gp.x;
-		this->gpos.y = gp.y;
+		this->gmov = gp - this->gpos;
+		this->gpos = gp;
+
+		if ( win.GetHeight() > 0 )
+		{
+//			this->gmov.x *= 1.0/(win.GetWidth()/win.GetHeight());
+		}
 	}
 
 	this->wheel = win.GetWheel();

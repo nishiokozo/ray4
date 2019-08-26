@@ -61,7 +61,6 @@ struct SysGra
 
 
 	void	Print( vect2 v, string str );
-///	void	Cls();
 
 	void	Tri( vect2 v0, vect2 v1, vect2 v2, vect3 col);
 	void	Tri( vect3 v0, vect3 v1, vect3 v2, vect3 col);
@@ -72,7 +71,6 @@ struct SysGra
 	void	Pset( vect3 v0, vect3 col, float wide=1.0f);
 	void	Circle( vect2 v, float r, vect3 col );
 	void	Clr( vect3 col );
-//	int 	Rgb(float r, float g , float b );
 
 	SysGra();
 	~SysGra();
@@ -82,6 +80,12 @@ struct SysGra
 	{
 		// ピクセル座標(pos)をGL座標に変換する
 		return pos/vect2(GetWidth()/2,-GetHeight()/2)+vect2(-1,1);
+	}
+
+	vect2 Conv( float x, float y )
+	{
+		// ピクセル座標(pos)をGL座標に変換する
+		return vect2(x,y)/vect2(GetWidth()/2,-GetHeight()/2)+vect2(-1,1);
 	}
 
 };

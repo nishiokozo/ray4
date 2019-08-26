@@ -59,7 +59,7 @@ struct Apr : public Sys
 			if ( bAxisX  )
 			{
 				vect3 v1 = v0 + vect3(
-					apr.pers.cam.mat.m[0][0] * apr.pers.aspect,
+					apr.pers.cam.mat.m[0][0] / apr.pers.aspect,
 					apr.pers.cam.mat.m[1][0],
 					apr.pers.cam.mat.m[2][0]
 				) * l;
@@ -68,7 +68,7 @@ struct Apr : public Sys
 			if ( bAxisY  )
 			{
 				vect3 v1 = v0 + vect3(
-					apr.pers.cam.mat.m[0][1] * apr.pers.aspect,
+					apr.pers.cam.mat.m[0][1] / apr.pers.aspect,
 					apr.pers.cam.mat.m[1][1],
 					apr.pers.cam.mat.m[2][1]
 				) * l;
@@ -77,7 +77,7 @@ struct Apr : public Sys
 			if ( bAxisZ )
 			{
 				vect3 v1 = v0 + vect3(
-					apr.pers.cam.mat.m[0][2] * apr.pers.aspect,
+					apr.pers.cam.mat.m[0][2] / apr.pers.aspect,
 					apr.pers.cam.mat.m[1][2],
 					apr.pers.cam.mat.m[2][2]
 				) * l;
@@ -224,7 +224,8 @@ struct Apr : public Sys
 	//------------------------------------------------------------------------------
 	{
 		int text_y = 0;
-//		vector<Joint3> listSelected;
+
+		float select_w = 0;			
 		vector<reference_wrapper<Joint3>>	list;
 
 
@@ -398,7 +399,7 @@ pBone->stat.bShowSkin = false;
 				}
 			}
 
-
+#if 0
 			// カメラ回転
 			if ( (!keys.ALT.on && mouse.R.on && !mouse.L.on && !mouse.M.on) || (keys.ALT.on && !mouse.R.on && mouse.L.on && !mouse.M.on) ) pers.cam.Rotation( vect3(-mouse.mov.x/28,mouse.mov.y/28,0) );
 
@@ -409,7 +410,20 @@ pBone->stat.bShowSkin = false;
 			if ( !keys.ALT.on  ) pers.cam.Zoom( -mouse.wheel*2/gra.GetHeight()/pers.getW((pers.cam.pos-pers.cam.at).length()) );
 			
 			// カメラ移動
-			if ( (keys.ALT.on && mouse.R.on) || ( mouse.R.on && mouse.L.on ) ) pers.cam.Zoom( mouse.mov.y*2/gra.GetHeight()/pers.getW((pers.cam.pos-pers.cam.at).length()) );
+			if ( (keys.ALT.on && mouse.R.on) || ( mouse.R.on && mouse.L.on ) ) pers.cam.Zoom( mouse.gmov.y*2/pers.getW((pers.cam.pos-pers.cam.at).length()) );
+#else
+			// カメラ回転
+			if ( (!keys.ALT.on && mouse.R.on && !mouse.L.on && !mouse.M.on) || (keys.ALT.on && !mouse.R.on && mouse.L.on && !mouse.M.on) ) pers.cam.Rotation( -vect3(mouse.gmov,0)*18.0f );
+
+			// カメラ平行移動
+			if ( mouse.M.on ) pers.cam.Move( -vect3(mouse.gmov,0)/pers.getW((pers.cam.pos-pers.cam.at).length()));
+
+			// マウスホイールZOOM
+			if ( !keys.ALT.on  ) pers.cam.Zoom( -mouse.wheel*2/gra.GetHeight()/pers.getW((pers.cam.pos-pers.cam.at).length()) );
+			
+			// カメラ移動
+			if ( (keys.ALT.on && mouse.R.on) || ( mouse.R.on && mouse.L.on ) ) pers.cam.Zoom( mouse.gmov.y/pers.getW((pers.cam.pos-pers.cam.at).length()) );
+#endif
 			
 			// カメラマトリクス計算
 			{
@@ -450,8 +464,7 @@ pBone->stat.bShowSkin = false;
 
 			// マニュピレーター描画
 			{
-//				vect3 p = pers.calcInvers( gra.Conv(mouse.pos) );
-				vect3 p = pers.calcScreenToWorld( vect3(gra.Conv(mouse.pos),0) );
+				vect3 p = pers.calcScreenToWorld( vect3(mouse.gpos,0) );
 				manupirator.manupirator_drawAxis( p, *this );
 
 			}
@@ -460,28 +473,30 @@ pBone->stat.bShowSkin = false;
 
 
 			// マウス座標（投影面座標）を３Ｄ空間座標に逆変換
-			if(1)
+			if(0)
 			{
-				vect3 P = pers.calcScreenToWorld( vect3(gra.Conv(mouse.pos),0) );
+				vect3 P = pers.calcScreenToWorld( vect3(mouse.gpos,0) );
 				vect3 I = pers.calcRayvect( P );
 
 
 				line3d( vect3(0,0,0), P, vect3(1,1,0));
 				line3d( vect3(0,0,0), P+I*10.0f, vect3(1,1,1));
+			}
+			
+			//ジョイント選択
+			{
 
-
-
-				vect3 mpos = vect3(gra.Conv(mouse.pos),0);
-
-				// 選択リストクリア
-				list.clear();
+				vect3 mpos = vect3(mouse.gpos,0);
 
 				// 最近点を一つだけのリストを作成
-//				if ( mouse.L.on ) 
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on ) 
 				{
+					// 選択リストクリア
+					list.clear();
+
 					struct
 					{
-						float	z;
+						float	w;
 						Joint3*	p;
 					} a = {0,0};
 
@@ -489,26 +504,76 @@ pBone->stat.bShowSkin = false;
 					{
 						vect3 v = pers.calcWorldToScreen3( j.pos );
 
-	//					if ( IsIntersectSphereLine( j.pos, 0.05f, P, I ) )
-						if ( (vect2(v.x,v.y)-gra.Conv(mouse.pos)).length() < 0.05f )
+					//	if ( IsIntersectSphereLine( j.pos, 0.05f, P, I ) )
+						if ( (vect2(v.x,v.y)-mouse.gpos).length() < 0.05f )
 						{
-							if ( a.z < v.z )
+							if ( a.w < v.z )
 							{
-								a.z = v.z;
+								a.w = v.z;
 								a.p = &j;
 							}
 						}
+//						list.push_back( j );
+//						select_w = v.z;
+
 					}
-					if ( a.p ) list.push_back( *a.p );
+					if ( a.p ) 
+					{
+						list.push_back( *a.p );
+						select_w = a.w;
+					}
+					
+					#if 1
+					if ( a.p )
+					{
+						// 優先度つけ
+						for ( Joint3& j : pBone->tblJoint )
+						{
+							j.priority = 999;
+						}
+						function<void( Joint3&,int)> funcSetPriority = [&funcSetPriority] ( Joint3& j, int prio )
+						{
+							j.priority = prio;
+							for ( Joint3& r : j.relative )
+							{
+								if ( r.priority > prio+1 ) funcSetPriority( r, prio+1 );
+							}
+						};
+						
+						funcSetPriority( *a.p, 1 );
+					}
+					#endif
+					
 				}
 
 
 				// 選択リスト表示
+				for ( Joint3& j : pBone->tblJoint )
+				{
+					vect2 pos = pers.calcDisp2( j.pos * pers.cam.mat.invers() );
+					gra.Print( pos, to_string(j.id) + " "+ to_string(j.priority));
+				}
+				
+				// 選択リスト表示
 				for ( Joint3& j : list )
 				{
-						gra.Pset( pers.calcDisp2( j.pos * pers.cam.mat.invers() ), rgb(1,0,0), 5 );
+						gra.Pset( pers.calcDisp2( j.pos * pers.cam.mat.invers() ), rgb(1,0,0), 11 );
 				}
-
+				
+				// 選択リストのJoint3移動
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on ) 
+				{
+					for ( Joint3& j : list )
+					{
+						vect3 v = vect3(mouse.gmov.x*pers.aspect, mouse.gmov.y, 0)/select_w/pers.rate;
+						mat44 mrot = pers.cam.mat;
+						mrot.SetTranslate(vect3(0,0,0));
+						mrot.invers();
+						v = v* mrot;
+						j.pos += v ;
+					}
+				}
+				
 			#if 0
 				{	//砲台
 					v.normalize();
@@ -535,42 +600,42 @@ pBone->stat.bShowSkin = false;
 				if( keys.F2.hi ) flgInfo = !flgInfo;
 				if ( flgInfo )
 				{
-					gra.Print( gra.Conv(vect2(10,16*text_y++)),string("fovY:")+to_string(int(pers.fovy)));
-					gra.Print( gra.Conv(vect2(10,16*text_y++)),string("sz:")+to_string(pers.sz) +string(" fy:")+to_string(pers.fy));
-					gra.Print( gra.Conv(vect2(10,16*text_y++)),string("far:")+to_string((pers.cam.pos-pers.cam.at).length())); 
-					gra.Print( gra.Conv(vect2(10,16*text_y++)),string("at  x=")+to_string(pers.cam.at.x)+string(" y=")+to_string(pers.cam.at.y)+string(" z=")+to_string(pers.cam.at.z) ); 
-					gra.Print( gra.Conv(vect2(10,16*text_y++)),string("pos x=")+to_string(pers.cam.pos.x)+string(" y=")+to_string(pers.cam.pos.y)+string(" z=")+to_string(pers.cam.pos.z) ); 
-					gra.Print( gra.Conv(vect2(10,16*text_y++)),string("anim=")+to_string(pBone->cur.act) + string(" cnt=")+to_string(pBone->animations.size()) ); 
+					gra.Print( gra.Conv(10,16*text_y++),string("fovY:")+to_string(int(pers.fovy)));
+					gra.Print( gra.Conv(10,16*text_y++),string("sz:")+to_string(pers.sz) +string(" fy:")+to_string(pers.fy));
+					gra.Print( gra.Conv(10,16*text_y++),string("far:")+to_string((pers.cam.pos-pers.cam.at).length())); 
+					gra.Print( gra.Conv(10,16*text_y++),string("at  x=")+to_string(pers.cam.at.x)+string(" y=")+to_string(pers.cam.at.y)+string(" z=")+to_string(pers.cam.at.z) ); 
+					gra.Print( gra.Conv(10,16*text_y++),string("pos x=")+to_string(pers.cam.pos.x)+string(" y=")+to_string(pers.cam.pos.y)+string(" z=")+to_string(pers.cam.pos.z) ); 
+					gra.Print( gra.Conv(10,16*text_y++),string("anim=")+to_string(pBone->cur.act) + string(" cnt=")+to_string(pBone->animations.size()) ); 
 					if ( pBone->animations.size() > 0 ) 
 					{
-						gra.Print( gra.Conv(vect2(10,16*text_y++)),string("pose=")+to_string(pBone->cur.pose) + string(" cnt=")+to_string(pBone->animations[pBone->cur.act].pose.size()) ); 
+						gra.Print( gra.Conv(10,16*text_y++),string("pose=")+to_string(pBone->cur.pose) + string(" cnt=")+to_string(pBone->animations[pBone->cur.act].pose.size()) ); 
 					}
-					gra.Print( gra.Conv(vect2(10,16*text_y++)),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
+					gra.Print( gra.Conv(10,16*text_y++),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 				}
 
 
 				if ( keys.F1.on )
 				{
-					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[F1] help"));
-					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[Y] pers -"));
-					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[H] pers +"));
-					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[L] Load"));
-					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[S] Save"));
-					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("--Keyframe--"));
-					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[K] Insert"));
-					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[X] Cut"));
-					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[C] Copy"));
-					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[V] Past"));
-					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[LEFT]  -"));
-					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[RIGHT] +"));
-					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("--Animation--"));
-					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[I] Add"));
-					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[P] Play"));
-					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[UP] -"));
-					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[DOWN] +"));
-					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("--Other--"));
-					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[1] select 3d"));
-					gra.Print(gra.Conv(vect2(10,16*text_y++)),string("[2] select 2main"));
+					gra.Print(gra.Conv(10,16*text_y++),string("[F1] help"));
+					gra.Print(gra.Conv(10,16*text_y++),string("[Y] pers -"));
+					gra.Print(gra.Conv(10,16*text_y++),string("[H] pers +"));
+					gra.Print(gra.Conv(10,16*text_y++),string("[L] Load"));
+					gra.Print(gra.Conv(10,16*text_y++),string("[S] Save"));
+					gra.Print(gra.Conv(10,16*text_y++),string("--Keyframe--"));
+					gra.Print(gra.Conv(10,16*text_y++),string("[K] Insert"));
+					gra.Print(gra.Conv(10,16*text_y++),string("[X] Cut"));
+					gra.Print(gra.Conv(10,16*text_y++),string("[C] Copy"));
+					gra.Print(gra.Conv(10,16*text_y++),string("[V] Past"));
+					gra.Print(gra.Conv(10,16*text_y++),string("[LEFT]  -"));
+					gra.Print(gra.Conv(10,16*text_y++),string("[RIGHT] +"));
+					gra.Print(gra.Conv(10,16*text_y++),string("--Animation--"));
+					gra.Print(gra.Conv(10,16*text_y++),string("[I] Add"));
+					gra.Print(gra.Conv(10,16*text_y++),string("[P] Play"));
+					gra.Print(gra.Conv(10,16*text_y++),string("[UP] -"));
+					gra.Print(gra.Conv(10,16*text_y++),string("[DOWN] +"));
+					gra.Print(gra.Conv(10,16*text_y++),string("--Other--"));
+					gra.Print(gra.Conv(10,16*text_y++),string("[1] select 3d"));
+					gra.Print(gra.Conv(10,16*text_y++),string("[2] select 2main"));
 				}
 				else
 				{
