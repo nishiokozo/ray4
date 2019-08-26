@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <map>
 #include <thread>
 #include <chrono>
 #include <cmath>
@@ -229,7 +230,7 @@ struct Apr : public Sys
 		bool rect_bSelect = false;	//	矩形選択中フラグ
 
 
-		vector<reference_wrapper<Joint3>>	list;
+		vector<reference_wrapper<Joint3>>	listJoint;
 
 
 		unique_ptr<Bone> pBone(new Bone);
@@ -539,7 +540,7 @@ pBone->stat.bShowSkin = false;
 						#endif
 					
 						// 選択リスト中に存在するかしないかチェック
-						for ( Joint3& j : list )
+						for ( Joint3& j : listJoint )
 						{
 							if ( sel.p == &j ) 
 							{
@@ -569,19 +570,15 @@ pBone->stat.bShowSkin = false;
 					vect2 v0 = min( rect_pos, mouse.gpos );
 					vect2 v1 = max( rect_pos, mouse.gpos );
 
-					list.clear();
+					listJoint.clear();
 
-					// 矩形カーソル内マーカーを検索
 					for ( Joint3& j : pBone->tblJoint )
 					{
-						for ( Joint3& j : pBone->tblJoint )
-						{
-							vect2 v = pers.calcWorldToScreen2( j.pos );
+						vect2 v = pers.calcWorldToScreen2( j.pos );
 
-							if ( v.x > v0.x && v.x < v1.x && v.y > v0.y && v.y < v1.y )
-							{
-								list.push_back( j );
-							}
+						if ( v.x > v0.x && v.x < v1.x && v.y > v0.y && v.y < v1.y )
+						{
+							listJoint.push_back( j );
 						}
 					}
 				}
@@ -590,14 +587,14 @@ pBone->stat.bShowSkin = false;
 				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && sel.p && !sel.bSelected ) 
 				{
 					// 選択リストクリア
-					list.clear();
+					listJoint.clear();
 
-					list.push_back( *sel.p );
+					listJoint.push_back( *sel.p );
 				}
 
 			
 				// 選択リスト表示
-				for ( Joint3& j : list )
+				for ( Joint3& j : listJoint )
 				{
 						gra.Pset( pers.calcDisp2( j.pos * pers.cam.mat.invers() ), rgb(1,0,0), 11 );
 				}
@@ -605,13 +602,14 @@ pBone->stat.bShowSkin = false;
 				// 選択リストのJoint3移動
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && sel.p ) 
 				{
-					for ( Joint3& j : list )
+
+					vect3 v = vect3(mouse.gmov.x*pers.aspect, mouse.gmov.y, 0)/sel.w/pers.rate;
+					mat44 mrot = pers.cam.mat;
+					mrot.SetTranslate(vect3(0,0,0));
+					v = v* mrot;
+					for ( Joint3& j : listJoint )
 					{
-						vect3 v = vect3(mouse.gmov.x*pers.aspect, mouse.gmov.y, 0)/sel.w/pers.rate;
-						mat44 mrot = pers.cam.mat;
-						mrot.SetTranslate(vect3(0,0,0));
 					//	mrot.invers(); 逆行列にしなくても同じ結果
-						v = v* mrot;
 						j.pos += v ;
 
 
