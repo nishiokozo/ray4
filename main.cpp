@@ -227,10 +227,21 @@ struct Apr : public Sys
 		int text_y = 0;
 
 		vect2 rect_pos = vect2(0,0);			//	矩形選択開始位置
-		bool rect_bSelect = false;	//	矩形選択中フラグ
+		enum class RECTMODE
+		{
+			NONE,
+			ADD,
+			SUB,
+			COPY,
+			REV,
+		};
+		RECTMODE rect_mode = RECTMODE::NONE;	//	矩形選択中フラグ
 
 
-		vector<reference_wrapper<Joint3>>	listJoint;
+//		vector<reference_wrapper<Joint3>>	listJoint;
+
+		map<Joint3*,reference_wrapper<Joint3>>	mapJoint;
+		map<Joint3*,reference_wrapper<Joint3>>	mapTmp;
 
 
 		unique_ptr<Bone> pBone(new Bone);
@@ -496,7 +507,7 @@ pBone->stat.bShowSkin = false;
 					{
 						float	w;
 						Joint3*	p;
-						bool	bSelected;
+						bool	xx_bSelected;
 					} sel = {0,0,false};
 
 				// 最近点検索
@@ -540,64 +551,130 @@ pBone->stat.bShowSkin = false;
 						#endif
 					
 						// 選択リスト中に存在するかしないかチェック
-						for ( Joint3& j : listJoint )
-						{
-							if ( sel.p == &j ) 
-							{
-								sel.bSelected = true;
-								break;
-							}
-						}
+//						for ( auto j : mapJoint )
+//						{
+//							if ( sel.p == &j.second.get() ) 
+//							{
+//								sel.bSelected = true;
+//								break;
+//							}
+//						}
+//						sel.p->bSelected
+						
+						
 					}
 				}
 
-				// 矩形カーソル開始
-				if ( !keys.ALT.on && mouse.L.hi && sel.p == 0 ) 
+				// 矩形カーソル開始 新規選択
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && sel.p == 0 && rect_mode == RECTMODE::NONE ) 
 				{
-					rect_bSelect = true;
+					rect_mode = RECTMODE::COPY;
 					rect_pos = mouse.gpos;
 				}
 
-				// 矩形カーソル終了
-				if ( !keys.ALT.on && !mouse.L.on && rect_bSelect ) 
+				// 矩形カーソル開始 追加選択
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && keys.SHIFT.on && sel.p == 0 && rect_mode == RECTMODE::NONE ) 
 				{
-					rect_bSelect = false;
+					rect_mode = RECTMODE::ADD;
+					rect_pos = mouse.gpos;
+				}
+
+				// 矩形カーソル開始 反転選択
+				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && !keys.SHIFT.on && sel.p == 0 && rect_mode == RECTMODE::NONE ) 
+				{
+					rect_mode = RECTMODE::REV;
+					rect_pos = mouse.gpos;
+				}
+
+				// 矩形カーソル開始 削除選択
+				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && keys.SHIFT.on && sel.p == 0 && rect_mode == RECTMODE::NONE ) 
+				{
+					rect_mode = RECTMODE::SUB;
+					rect_pos = mouse.gpos;
+				}
+
+
+				// 矩形カーソル終了（選択決定）
+				if ( !keys.ALT.on && !mouse.L.on && rect_mode != RECTMODE::NONE ) 
+				{
+					switch( rect_mode )
+					{
+						case RECTMODE::ADD:
+							for ( Joint3& j : pBone->tblJoint )
+							{
+								if ( j.sel.bPreselect ) j.sel.bSelected = true;
+							}
+							break;
+
+						case RECTMODE::SUB:
+							for ( Joint3& j : pBone->tblJoint )
+							{
+								if ( j.sel.bPreselect ) j.sel.bSelected = false;
+							}
+							break;
+
+						case RECTMODE::COPY:
+							for ( Joint3& j : pBone->tblJoint )
+							{
+								j.sel.bSelected = j.sel.bPreselect;
+							}
+							break;
+
+						case RECTMODE::REV:
+							for ( Joint3& j : pBone->tblJoint )
+							{
+								if ( j.sel.bPreselect ) j.sel.bSelected = !j.sel.bSelected;
+							}
+							break;
+		
+						case RECTMODE::NONE:
+							break;
+					}
+				
+					for ( Joint3& j : pBone->tblJoint )
+					{
+						j.sel.bPreselect = false;
+					}
+
+					rect_mode = RECTMODE::NONE;
+
 				}
 
 				// 矩形カーソル選択	
-				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && rect_bSelect ) 
+				if ( !keys.ALT.on && mouse.L.on && rect_mode != RECTMODE::NONE ) 
 				{
 					vect2 v0 = min( rect_pos, mouse.gpos );
 					vect2 v1 = max( rect_pos, mouse.gpos );
 
-					listJoint.clear();
+//					mapTmp.clear();
 
 					for ( Joint3& j : pBone->tblJoint )
 					{
+						j.sel.bPreselect = false;
+
 						vect2 v = pers.calcWorldToScreen2( j.pos );
 
 						if ( v.x > v0.x && v.x < v1.x && v.y > v0.y && v.y < v1.y )
 						{
-							listJoint.push_back( j );
+							j.sel.bPreselect = true;
+
+//							mapTmp.emplace( &j, j );
 						}
 					}
 				}
 
+
 				// 単独選択
-				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && sel.p && !sel.bSelected ) 
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && sel.p && !sel.p->sel.bSelected ) 
 				{
 					// 選択リストクリア
-					listJoint.clear();
+//					mapJoint.clear();
 
-					listJoint.push_back( *sel.p );
+//					mapJoint.emplace( sel.p, *sel.p );
+					sel.p->sel.bSelected = true;
 				}
 
 			
-				// 選択リスト表示
-				for ( Joint3& j : listJoint )
-				{
-						gra.Pset( pers.calcDisp2( j.pos * pers.cam.mat.invers() ), rgb(1,0,0), 11 );
-				}
 				
 				// 選択リストのJoint3移動
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && sel.p ) 
@@ -606,26 +683,88 @@ pBone->stat.bShowSkin = false;
 					vect3 v = vect3(mouse.gmov.x*pers.aspect, mouse.gmov.y, 0)/sel.w/pers.rate;
 					mat44 mrot = pers.cam.mat;
 					mrot.SetTranslate(vect3(0,0,0));
+				//	mrot.invers(); 逆行列にしなくても同じ結果
 					v = v* mrot;
-					for ( Joint3& j : listJoint )
+//					for ( auto j : mapJoint )
+					for ( Joint3& j : pBone->tblJoint )
 					{
-					//	mrot.invers(); 逆行列にしなくても同じ結果
-						j.pos += v ;
-
-
-
+						if ( j.sel.bSelected )
+						{
+							j.pos += v ;
+						}
 					}
 				}
 				
 				//--
 
+				// 選択リスト表示
+				for ( Joint3& j : pBone->tblJoint )
+				{
+/*
+					if ( j.sel.bPreselect )
+					{
+						gra.Pset( pers.calcDisp2( j.pos * pers.cam.mat.invers() ), rgb(1,0,1), 11 );
+					}
+					
+					if ( j.sel.bSelected )
+					{
+						gra.Pset( pers.calcDisp2( j.pos * pers.cam.mat.invers() ), rgb(1,0,0), 11 );
+					}
+*/
+
+
+					for ( Joint3& j : pBone->tblJoint )
+					{
+						bool bPreselect = j.sel.bPreselect;
+						bool bSelected = j.sel.bSelected;
+						switch( rect_mode )
+						{
+							case RECTMODE::ADD:
+								{
+									if ( bPreselect ) bSelected = true;
+								}
+								break;
+
+							case RECTMODE::SUB:
+								{
+									if ( bPreselect ) bSelected = false;
+								}
+								break;
+
+							case RECTMODE::COPY:
+								{
+									bSelected = bPreselect;
+								}
+								break;
+
+							case RECTMODE::REV:
+								{
+									if ( bPreselect ) bSelected = !bSelected;
+
+								}
+								break;
+			
+							case RECTMODE::NONE:
+								break;
+
+						}
+						if ( bSelected )
+						{
+							gra.Pset( pers.calcDisp2( j.pos * pers.cam.mat.invers() ), rgb(1,0,0), 11 );
+						}
+					}
+
+				}
+
+
+
 				// 矩形カーソル 表示
-				if ( rect_bSelect )
+				if (  rect_mode != RECTMODE::NONE )
 				{
 					gra.Box( rect_pos, mouse.gpos, rgb(1,1,0));
 				}
 
-				// Joint3情報表示
+				// 矩形カーソル 情報表示
 				for ( Joint3& j : pBone->tblJoint )
 				{
 					vect2 pos = pers.calcDisp2( j.pos * pers.cam.mat.invers() );

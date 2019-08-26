@@ -103,6 +103,23 @@ struct Ring
 
 struct Joint3// : Obj
 {
+	struct
+	{
+//		enum class CLAC
+//		{
+//			NONE,
+//			ADD,
+//			SUB,
+//			COPY,
+//			REV,
+//		};
+
+		bool 	bSelected		= false;		//	選択
+		bool 	bPreselect		= false;		//	仮選択
+//		bool 	bCalc			= false;		//	計算結果
+//		CLAC 	modulate		= CLAC::NONE;	//	計算方法
+	}sel;
+
 	int id;
 	vect3 pos;
 	vect3 tension;
