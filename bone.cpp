@@ -140,7 +140,7 @@ void Bone::PrevKeyframe()
 	{
 		// キーフレーム切り替え
 		int i = 0;
-		for ( Joint3& j : tblJoint )
+		for ( Joint& j : tblJoint )
 		{
 			j.pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 			i++;
@@ -164,7 +164,7 @@ void Bone::TopKeyframe()
 	{
 		// キーフレーム切り替え
 		int i = 0;
-		for ( Joint3& j : tblJoint )
+		for ( Joint& j : tblJoint )
 		{
 			j.pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 			i++;
@@ -183,14 +183,14 @@ void Bone::NextKeyframe()
 	if ( animations[cur.act].pose[ 0 ].joint.size()==0 ) return;
 
 	cur.pose++; 
-//		if ( cur.pose > static_cast<signed>(animations[act].pose.size())-1 ) cur.pose = 0;
+//		if ( cur.pose > static_cast<signed>(animations[ act ].pose.size())-1 ) cur.pose = 0;
 	if ( cur.pose > static_cast<signed>(animations[cur.act].pose.size())-1 ) cur.pose = static_cast<signed>(animations[cur.act].pose.size())-1;
 
 	if ( cur.pose >= 0 )
 	{
 		// キーフレーム切り替え
 		int i = 0;
-		for ( Joint3& j : tblJoint )
+		for ( Joint& j : tblJoint )
 		{
 			j.pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 			i++;
@@ -214,7 +214,7 @@ void Bone::LastKeyframe()
 	{
 		// キーフレーム切り替え
 		int i = 0;
-		for ( Joint3& j : tblJoint )
+		for ( Joint& j : tblJoint )
 		{
 			j.pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 			i++;
@@ -246,7 +246,7 @@ void Bone::InsertKeyframe()
 
 
 	animations[cur.act].pose.emplace( animations[cur.act].pose.begin() + cur.pose );
-	for ( const Joint3& j : tblJoint )
+	for ( const Joint& j : tblJoint )
 	{
 		animations[cur.act].pose[ cur.pose ].joint.emplace_back( j.pos );
 	}
@@ -260,7 +260,7 @@ void Bone::CopyKeyframe()
 /*
 struct Bone
 {
-	vector<Joint3>				tblJoint;
+	vector<Joint>				tblJoint;
 	vector<Bone3>				tblBone;
 
 	struct Pos
@@ -276,7 +276,7 @@ struct Bone
 */
 	unique_ptr<Bone> pNew(new Bone);
 	{
-		for ( Joint3& j : tblJoint )
+		for ( Joint& j : tblJoint )
 		{
 			pNew->tblJoint.emplace_back( j.pos );
 		}
@@ -292,15 +292,15 @@ struct Bone
 		{
 			pNew->animations.emplace_back();
 
-			int	cntPose = static_cast<signed>(animations[act].pose.size());
+			int	cntPose = static_cast<signed>(animations[ act ].pose.size());
 			for ( int pose = 0 ; pose < cntPose ; pose++ )
 			{
-				pNew->animations[act].pose.emplace_back();
+				pNew->animations[ act ].pose.emplace_back();
 
 				for ( int j = 0 ; j < static_cast<signed>(tblJoint.size()) ; j++ )
 				{
-					vect3 pos = animations[act].pose[pose].joint[ j ].pos;
-					pNew->animations[act].pose[pose].joint.emplace_back( pos );
+					vect3 pos = animations[ act ].pose[pose].joint[ j ].pos;
+					pNew->animations[ act ].pose[pose].joint.emplace_back( pos );
 				}
 			}
 		}
@@ -352,7 +352,7 @@ void Bone::CutKeyframe()
 		{
 			// キーフレーム切り替え
 			int i = 0;
-			for ( Joint3& j : tblJoint )
+			for ( Joint& j : tblJoint )
 			{
 				j.pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 				i++;
@@ -380,7 +380,7 @@ void Bone::PrevAnimation()
 		{
 			// キーフレーム切り替え
 			int i = 0;
-			for ( Joint3& j : tblJoint )
+			for ( Joint& j : tblJoint )
 			{
 				j.pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 				i++;
@@ -408,7 +408,7 @@ void Bone::NextAnimation()
 		{
 			// キーフレーム切り替え
 			int i = 0;
-			for ( Joint3& j : tblJoint )
+			for ( Joint& j : tblJoint )
 			{
 			
 				j.pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
@@ -431,7 +431,7 @@ void Bone::AddAnimation()
 	{
 
 		animations[cur.act].pose.emplace_back();
-		for ( const Joint3& j : tblJoint )
+		for ( const Joint& j : tblJoint )
 		{
 			animations[cur.act].pose[ cur.pose ].joint.emplace_back( j.pos );
 		}
@@ -477,7 +477,7 @@ void Bone::update()
 		}
 
 		// 張力解消
-		for ( Joint3& a : tblJoint )
+		for ( Joint& a : tblJoint )
 		{
 			a.pos += a.tension;
 			a.tension=0;
@@ -495,7 +495,7 @@ void Bone::draw( Pers& pers, SysGra& gra )
 
 	rgb col = rgb(0,0,1);
 	// Human pers
-	for ( Joint3& j : tblJoint )
+	for ( Joint& j : tblJoint )
 	{
 		//	右手系座標系
 		//	右手ねじ周り
@@ -554,28 +554,27 @@ void Bone::draw( Pers& pers, SysGra& gra )
 				// 骨
 				vect2 v0(b.j0.disp.x,b.j0.disp.y);
 				vect2 v1(b.j1.disp.x,b.j1.disp.y);
-				gra.Line( v0,v1, col);
+				gra.Line( v0,v1, col,2);
 
 			}
 		}
 
 		// ジョイント表示
-		for ( Joint3& j : tblJoint )
+		for ( Joint& j : tblJoint )
 		{
 			vect3 v = pers.calcDisp3( j.pos * pers.cam.mat.invers() );
-//			gra.Pset( v, rgb(1,1,0), 11 );
-			gra.Pset( v, rgb(0,0,1), 11 );
+			gra.Pset( vect2(v.x, v.y), rgb(0,0,1), 11 );
 
 		}
 	}
 
-	if ( stat.bShowLocus )
+if(1)	if ( stat.bShowLocus )
 	{
 		// 軌跡表示
 		if ( static_cast<signed>(animations.size()) > 0 )
 		{
-			float dt = anim.dt;
-			float div = 1/dt;
+			const float dt = anim.dt;
+			const float div = 1/dt;
 
 			for ( int n = -1 ; n < static_cast<signed>(animations[cur.act].pose.size())-3+1 ; n++ )
 			{
@@ -585,7 +584,6 @@ void Bone::draw( Pers& pers, SysGra& gra )
 				int n3 = n+3;
 				if ( n0 < 0 ) n0 = 0;
 				if ( n3 >= static_cast<signed>(animations[cur.act].pose.size()) ) n3 = n2;
-			
 				for ( int j = 0 ;  j < static_cast<signed>(tblJoint.size()) ; j++ )
 				{
 					if ( tblJoint[ j ].stat.bSelected == false ) continue;
@@ -605,16 +603,72 @@ void Bone::draw( Pers& pers, SysGra& gra )
 						vect3 v1;
 						bool flg = pers.calcScissorLine3d( a* pers.cam.mat.invers(), b* pers.cam.mat.invers(), v0, v1 );
 
-						rgb	col = rgb(0.2,0.5,1.0);
+						rgb	col = rgb(1,1,1);
 						if ( flg )
 						{
-//							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0.5,0.5,1));
-							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col);
+							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col,1);
 						}
 						
-						if ( v1.z > 0 ) gra.Pset(vect2(v1.x,v1.y), col, 3);
+//						if ( v1.z > 0 ) gra.Pset(vect2(v1.x,v1.y), col, 4);
 
 						a=b;
+						t+=dt;
+
+					}	
+				}
+			}
+		}
+	}
+
+	if(0) // スネ軌跡実験
+	if ( stat.bShowLocus )
+	{
+		// 軌跡表示
+		if ( static_cast<signed>(animations.size()) > 0 )
+		{
+			const float dt = anim.dt;
+			const float div = 1/dt;
+
+			for ( int n = -1 ; n < static_cast<signed>(animations[cur.act].pose.size())-3+1 ; n++ )
+			{
+				int n0 = n;
+				int n1 = n+1;
+				int n2 = n+2;
+				int n3 = n+3;
+				if ( n0 < 0 ) n0 = 0;
+				if ( n3 >= static_cast<signed>(animations[cur.act].pose.size()) ) n3 = n2;
+
+
+					if ( tblJoint[ 9 ].stat.bSelected == false ) continue;
+
+				int ja = 8;
+				int jb = 9;
+				{
+				
+					vect3 aP0 = animations[cur.act].pose[ n0 ].joint[ ja ].pos;
+					vect3 aP1 = animations[cur.act].pose[ n1 ].joint[ ja ].pos;
+					vect3 aP2 = animations[cur.act].pose[ n2 ].joint[ ja ].pos;
+					vect3 aP3 = animations[cur.act].pose[ n3 ].joint[ ja ].pos;
+
+					vect3 bP0 = animations[cur.act].pose[ n0 ].joint[ jb ].pos;
+					vect3 bP1 = animations[cur.act].pose[ n1 ].joint[ jb ].pos;
+					vect3 bP2 = animations[cur.act].pose[ n2 ].joint[ jb ].pos;
+					vect3 bP3 = animations[cur.act].pose[ n3 ].joint[ jb ].pos;
+
+					float t = 0;
+					for ( int i = 0 ; i <=div ; i++ )
+					{
+
+					vect3 aP = catmull3d_func(t, aP0,aP1,aP2,aP3 );
+					vect3 bP = catmull3d_func(t, bP0,bP1,bP2,bP3 );
+
+						rgb	col = rgb(1,1,1);
+
+						vect2	va = pers.calcWorldToScreen2( aP );
+						vect2	vb = pers.calcWorldToScreen2( bP );
+
+						gra.Line( va,vb, col, 1);
+
 						t+=dt;
 
 					}	
@@ -632,7 +686,7 @@ void Bone::drawMotion( Pers& pers, SysGra& gra )
 }
 
 //------------------------------------------------------------------------------
-void Bone::saveMotion( const string filename )
+void Bone::saveMotion()
 //------------------------------------------------------------------------------
 {
 	anim.bPlaying = false;
@@ -641,7 +695,7 @@ void Bone::saveMotion( const string filename )
 
 	{
 		fo << "joint" << endl;
-		for ( Joint3& j : tblJoint )	// 関節の位置
+		for ( Joint& j : tblJoint )	// 関節の位置
 		{
 			fo << "\t"<< j.pos.x << "\t" << j.pos.y << "\t" << j.pos.z << endl;
 		}
@@ -658,12 +712,12 @@ void Bone::saveMotion( const string filename )
 		for ( int act = 0 ; act < cntAction ; act++ )
 		{
 			fo << "motion" << endl;
-			int	cntPose = static_cast<signed>(animations[act].pose.size());
+			int	cntPose = static_cast<signed>(animations[ act ].pose.size());
 			for ( int pose = 0 ; pose < cntPose ; pose++ )
 			{
 				for ( int j = 0 ; j < static_cast<signed>(tblJoint.size()) ; j++ )
 				{
-					fo  << "\t"<< animations[act].pose[ pose ].joint[ j ].pos.x << "\t" << animations[act].pose[ pose ].joint[ j ].pos.y << "\t" << animations[act].pose[ pose ].joint[ j ].pos.z << endl;
+					fo  << "\t"<< animations[ act ].pose[ pose ].joint[ j ].pos.x << "\t" << animations[ act ].pose[ pose ].joint[ j ].pos.y << "\t" << animations[ act ].pose[ pose ].joint[ j ].pos.z << endl;
 				}
 				if( pose+1 < cntPose ) fo << "," << endl;
 			}
@@ -674,13 +728,13 @@ void Bone::saveMotion( const string filename )
 	cout << "SAVED" << endl;
 }
 //------------------------------------------------------------------------------
-void Bone::loadMotion( const string filename )
+void Bone::loadMotion( const string fn )
 //------------------------------------------------------------------------------
 {
+	filename = fn;
+
 	anim.bPlaying = false;
 
-
-//	Bone*	pNew = new Bone;
 
 	fstream fi( filename.c_str(), ios::in );
 	string buf;
@@ -721,12 +775,12 @@ void Bone::loadMotion( const string filename )
 			mode = ModeMotion;
 			act = static_cast<signed>(animations.size());
 			animations.emplace_back();
-			animations[act].pose.emplace_back();
+			animations[ act ].pose.emplace_back();
 			continue;
 		}
 		if ( string(buf) == "," ) 
 		{
-			animations[act].pose.emplace_back();
+			animations[ act ].pose.emplace_back();
 			continue;
 		}
 		if ( string(buf) == "end" )	
@@ -737,7 +791,7 @@ void Bone::loadMotion( const string filename )
 			}
 			{
 				int cnt = 0 ;
-				for ( Joint3& j : tblJoint )
+				for ( Joint& j : tblJoint )
 				{
 					j.id = cnt++;				//id登録
 				}
@@ -777,7 +831,7 @@ void Bone::loadMotion( const string filename )
 					float x = stod(v[0]);
 					float y = stod(v[1]);
 					float z = stod(v[2]);
-					animations[act].pose[ animations[act].pose.size()-1 ].joint.emplace_back( vect3(x,y,z) );
+					animations[ act ].pose[ animations[ act ].pose.size()-1 ].joint.emplace_back( vect3(x,y,z) );
 					//	cout << x << "," << y << "," << z << endl; 
 				}
 				break;

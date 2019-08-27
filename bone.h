@@ -101,7 +101,7 @@ struct Ring
 
 };
 
-struct Joint3// : Obj
+struct Joint// : Obj
 {
 	struct
 	{
@@ -116,16 +116,16 @@ struct Joint3// : Obj
 	float len;
 	int priority;
 	
-	vector<reference_wrapper<Joint3>>	relative;
-	virtual ~Joint3(){}
-	Joint3()
+	vector<reference_wrapper<Joint>>	relative;
+	virtual ~Joint(){}
+	Joint()
 	{
 		id = 0;
 		pos = vect3(0,0,0);
 		tension = 0;
 		len = 0;
 	}
-	Joint3( vect3 v )
+	Joint( vect3 v )
 	{
 		id = 0;
 		pos = v;
@@ -151,16 +151,18 @@ struct Bone3
 {
 	int n0;
 	int n1;
-	Joint3& j0;
-	Joint3& j1;
+	Joint& j0;
+	Joint& j1;
 	float length;
-	Bone3( vector<Joint3>& tbl, int _n0, int _n1 ) :n0(_n0), n1(_n1), j0(tbl[_n0]), j1(tbl[_n1]){}
+	Bone3( vector<Joint>& tbl, int _n0, int _n1 ) :n0(_n0), n1(_n1), j0(tbl[_n0]), j1(tbl[_n1]){}
 };
 
 
 struct Bone
 {
-	vector<Joint3>			tblJoint;
+	string	filename;
+
+	vector<Joint>			tblJoint;
 	vector<Bone3>			tblBone;
 
 	struct Keyframe
@@ -207,7 +209,7 @@ struct Bone
 	} stat;
 
 	void loadMotion( const string filename );
-	void saveMotion( const string filename );
+	void saveMotion();
 	void AddAnimation();
 	void NextAnimation();
 	void PrevAnimation();

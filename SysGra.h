@@ -61,16 +61,19 @@ struct SysGra
 
 
 	void	Print( vect2 v, string str );
+	void	Print( float x, float y, string str );
 
-	void	Tri( vect2 v0, vect2 v1, vect2 v2, vect3 col);
-	void	Tri( vect3 v0, vect3 v1, vect3 v2, vect3 col);
-	void	Box( vect2 v0, vect2 v1, vect3 col);
-	void	Fill( vect2 v0, vect2 v1, vect3 col);
-	void	Line( vect2 v0, vect2 v1, vect3 col);
-	void	Pset( vect2 v0, vect3 col, float wide=1.0f);
-	void	Pset( vect3 v0, vect3 col, float wide=1.0f);
-	void	Circle( vect2 v, float r, vect3 col );
-	void	Clr( vect3 col );
+	void	Tri( vect2 v0, vect2 v1, vect2 v2, rgb col);
+	void	Tri( vect3 v0, vect3 v1, vect3 v2, rgb col);
+	void	Box( vect2 v0, vect2 v1, rgb col, float wide=1.0f);
+	void	Fill( vect2 v0, vect2 v1, rgb col);
+	void	Line( vect2 v0, vect2 v1, rgb col, float wide=1.0f);
+	void	Line( vect3 v0, vect3 v1, rgb col, float wide=1.0f);
+	void	Pset( vect2 v0, rgb col, float wide=1.0f);
+	void	Pset( vect3 v0, rgb col, float wide=1.0f);
+
+	void	Circle( vect2 v, float r, rgb col );
+	void	Clr( rgb col );
 
 	SysGra();
 	~SysGra();

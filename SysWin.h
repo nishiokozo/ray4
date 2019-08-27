@@ -22,6 +22,7 @@ public:
 	bool	Update();
 
 	void OpenWindow( const char* name, int pos_x, int pos_y, int width, int height  );
+	void SetTitle( string name );
 
 	void SetOnCreate( function<void()> func );
 	void SetOnSize( function<void( int width, int height )> func );
