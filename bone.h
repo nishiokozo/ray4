@@ -105,20 +105,9 @@ struct Joint3// : Obj
 {
 	struct
 	{
-//		enum class CLAC
-//		{
-//			NONE,
-//			ADD,
-//			SUB,
-//			COPY,
-//			REV,
-//		};
-
 		bool 	bSelected		= false;		//	選択
 		bool 	bPreselect		= false;		//	仮選択
-//		bool 	bCalc			= false;		//	計算結果
-//		CLAC 	modulate		= CLAC::NONE;	//	計算方法
-	}sel;
+	} stat;
 
 	int id;
 	vect3 pos;
@@ -212,8 +201,9 @@ struct Bone
 
 	struct
 	{
-		bool	bShowBone = true;
-		bool	bShowSkin = true;
+		bool	bShowBone = true;	//	骨
+		bool	bShowSkin = true;	//	皮
+		bool	bShowLocus = true;	//	軌跡
 	} stat;
 
 	void loadMotion( const string filename );

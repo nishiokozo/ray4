@@ -219,11 +219,13 @@ struct Apr : public Sys
 	bool flgInfo = true;
 	
 
-	//------------------------------------------------------------------------------
-	int main()
-	//------------------------------------------------------------------------------
+	struct S
 	{
-		int text_y = 0;
+		struct
+		{
+			float	w;
+			Joint3*	p;
+		} sel = {0,0};
 
 		vect2 rect_pos = vect2(0,0);			//	矩形選択開始位置
 		enum class RECTMODE
@@ -235,6 +237,255 @@ struct Apr : public Sys
 			REV,
 		};
 		RECTMODE rect_mode = RECTMODE::NONE;	//	矩形選択中フラグ
+
+		//------------------------------------------------------------------------------
+		void begin( Pers& pers, Bone& bone, vect2 mouse_gpos )
+		//------------------------------------------------------------------------------
+		{
+			sel = {0,0};
+
+			for ( Joint3& j : bone.tblJoint )
+			{
+				vect3 v = pers.calcWorldToScreen3( j.pos );
+
+				if ( (vect2(v.x,v.y)-mouse_gpos).length() < 0.05f )
+				{
+					if ( sel.w < v.z )
+					{
+						sel.w = v.z;
+						sel.p = &j;
+					}
+				}
+			}
+			if ( sel.p )
+			{
+				#if 1
+				{
+					// 優先度つけ
+					for ( Joint3& j : bone.tblJoint )
+					{
+						j.priority = 999;
+					}
+					function<void( Joint3&,int)> funcSetPriority = [&funcSetPriority] ( Joint3& j, int prio )
+					{
+						j.priority = prio;
+						for ( Joint3& r : j.relative )
+						{
+							if ( r.priority > prio+1 ) funcSetPriority( r, prio+1 );
+						}
+					};
+					
+					funcSetPriority( *sel.p, 1 );
+				}
+				#endif
+			}
+		}
+
+		// 矩形カーソル開始 新規選択
+		//------------------------------------------------------------------------------
+		void selectRectNew( vect2 mouse_gpos )
+		//------------------------------------------------------------------------------
+		{
+			rect_mode = RECTMODE::COPY;
+			rect_pos = mouse_gpos;
+		}
+
+		// 矩形カーソル開始 追加選択
+		//------------------------------------------------------------------------------
+		void selectRectAdd( vect2 mouse_gpos )
+		//------------------------------------------------------------------------------
+		{
+			rect_mode = RECTMODE::ADD;
+			rect_pos = mouse_gpos;
+		}
+
+		// 矩形カーソル開始 反転選択
+		//------------------------------------------------------------------------------
+		void selectRectRev( vect2 mouse_gpos )
+		//------------------------------------------------------------------------------
+		{
+			rect_mode = RECTMODE::REV;
+			rect_pos = mouse_gpos;
+		}
+
+		// 矩形カーソル開始 削除選択
+		//------------------------------------------------------------------------------
+		void selectRectSub( vect2 mouse_gpos )
+		//------------------------------------------------------------------------------
+		{
+			rect_mode = RECTMODE::SUB;
+			rect_pos = mouse_gpos;
+		}
+		
+		//------------------------------------------------------------------------------
+		void funcRectMode( RECTMODE rect_mode, bool& bPreselect, bool& bSelected )
+		//------------------------------------------------------------------------------
+		{
+			switch( rect_mode )
+			{
+				case RECTMODE::ADD:		if ( bPreselect ) bSelected = true;
+					break;
+
+				case RECTMODE::SUB:		if ( bPreselect ) bSelected = false;
+					break;
+
+				case RECTMODE::COPY:	bSelected = bPreselect;
+					break;
+
+				case RECTMODE::REV:		if ( bPreselect ) bSelected = !bSelected;
+					break;
+
+				case RECTMODE::NONE:
+					break;
+			}
+			bPreselect = false;
+		};
+
+
+		// 矩形カーソル終了（選択決定）
+		//------------------------------------------------------------------------------
+		void selectRectEnd( Bone& bone )
+		//------------------------------------------------------------------------------
+		{
+			for ( Joint3& j : bone.tblJoint )
+			{
+				funcRectMode( rect_mode, j.stat.bPreselect, j.stat.bSelected );
+			}
+
+			rect_mode = RECTMODE::NONE;
+
+		}
+
+		// 矩形カーソル選択	
+		//------------------------------------------------------------------------------
+		void selectRectBegin( Pers& pers, Bone& bone , vect2 mouse_gpos )
+		//------------------------------------------------------------------------------
+		{
+			vect2 v0 = min( rect_pos, mouse_gpos );
+			vect2 v1 = max( rect_pos, mouse_gpos );
+
+			for ( Joint3& j : bone.tblJoint )
+			{
+				j.stat.bPreselect = false;
+
+				vect2 v = pers.calcWorldToScreen2( j.pos );
+
+				if ( v.x > v0.x && v.x < v1.x && v.y > v0.y && v.y < v1.y )
+				{
+					j.stat.bPreselect = true;
+				}
+			}
+		}
+
+		// 単独 新規選択
+		//------------------------------------------------------------------------------
+		void selectOneNew( Bone& bone )
+		//------------------------------------------------------------------------------
+		{
+			// 選択クリア
+			for ( Joint3& j : bone.tblJoint )
+			{
+				j.stat.bSelected = false;
+			}
+			
+			sel.p->stat.bSelected = true;
+		}
+
+		// 単独 追加選択
+		//------------------------------------------------------------------------------
+		void selectOneAdd()
+		//------------------------------------------------------------------------------
+		{
+			sel.p->stat.bSelected = true;
+		}
+
+		// 単独 反転規選択
+		//------------------------------------------------------------------------------
+		void selectOneRev()
+		//------------------------------------------------------------------------------
+		{
+			sel.p->stat.bSelected = !sel.p->stat.bSelected;
+		}
+
+		// 単独 削除選択
+		//------------------------------------------------------------------------------
+		void selectOneSub()
+		//------------------------------------------------------------------------------
+		{
+			sel.p->stat.bSelected = false;
+		}
+
+		
+		// 選択リストのJoint3移動
+		//------------------------------------------------------------------------------
+		void moveSelected( Pers& pers, Bone& bone, vect2 mouse_gmov )
+		//------------------------------------------------------------------------------
+		{
+
+			vect3 v = vect3(mouse_gmov.x*pers.aspect, mouse_gmov.y, 0)/sel.w/pers.rate;
+			mat44 mrot = pers.cam.mat;
+			mrot.SetTranslate(vect3(0,0,0));
+		//	mrot.invers(); 逆行列にしなくても同じ結果
+			v = v* mrot;
+			for ( Joint3& j : bone.tblJoint )
+			{
+				if ( j.stat.bSelected )
+				{
+					j.pos += v ;
+				}
+			}
+			
+			// キーフレームへ反映
+			bone.RefrectKeyframe();
+		}
+		
+		//--
+
+		// 選択リスト表示
+		//------------------------------------------------------------------------------
+		void DrawJoint( Pers& pers, SysGra& gra, Bone& bone , vect2 mouse_gpos )
+		//------------------------------------------------------------------------------
+		{
+			for ( Joint3& j : bone.tblJoint )
+			{
+
+				for ( Joint3& j : bone.tblJoint )
+				{
+					bool bPreselect = j.stat.bPreselect;
+					bool bSelected = j.stat.bSelected;
+					
+					funcRectMode( rect_mode, bPreselect, bSelected );
+
+					if ( bSelected )
+					{
+						gra.Pset( pers.calcDisp2( j.pos * pers.cam.mat.invers() ), rgb(1,0,0), 11 );
+					}
+				}
+
+			}
+
+			// 矩形カーソル 表示
+			if (  rect_mode != RECTMODE::NONE )
+			{
+				gra.Box( rect_pos, mouse_gpos, rgb(1,1,0));
+			}
+
+			// 矩形カーソル 情報表示
+			for ( Joint3& j : bone.tblJoint )
+			{
+				vect2 pos = pers.calcDisp2( j.pos * pers.cam.mat.invers() );
+				gra.Print( pos, to_string(j.id) + " "+ to_string(j.priority));
+			}
+		}
+
+	} selector;
+
+	//------------------------------------------------------------------------------
+	int main()
+	//------------------------------------------------------------------------------
+	{
+		int text_y = 0;
+
 
 
 //		map<Joint3*,reference_wrapper<Joint3>>	mapJoint;
@@ -368,19 +619,6 @@ struct Apr : public Sys
 				}
 			}
 
-#if 0
-			// カメラ回転
-			if ( (!keys.ALT.on && mouse.R.on && !mouse.L.on && !mouse.M.on) || (keys.ALT.on && !mouse.R.on && mouse.L.on && !mouse.M.on) ) pers.cam.Rotation( vect3(-mouse.mov.x/28,mouse.mov.y/28,0) );
-
-			// カメラ平行移動
-			if ( mouse.M.on ) pers.cam.Move( vect3(-mouse.mov.x,mouse.mov.y,0)*2/gra.GetHeight()/pers.getW((pers.cam.pos-pers.cam.at).length()));
-
-			// マウスホイールZOOM
-			if ( !keys.ALT.on  ) pers.cam.Zoom( -mouse.wheel*2/gra.GetHeight()/pers.getW((pers.cam.pos-pers.cam.at).length()) );
-			
-			// カメラ移動
-			if ( (keys.ALT.on && mouse.R.on) || ( mouse.R.on && mouse.L.on ) ) pers.cam.Zoom( mouse.gmov.y*2/pers.getW((pers.cam.pos-pers.cam.at).length()) );
-#else
 			// カメラ回転
 			if ( (!keys.ALT.on && mouse.R.on && !mouse.L.on && !mouse.M.on) || (keys.ALT.on && !mouse.R.on && mouse.L.on && !mouse.M.on) ) pers.cam.Rotation( -vect3(mouse.gmov,0)*18.0f );
 
@@ -392,7 +630,6 @@ struct Apr : public Sys
 			
 			// カメラ移動
 			if ( (keys.ALT.on && mouse.R.on) || ( mouse.R.on && mouse.L.on ) ) pers.cam.Zoom( mouse.gmov.y/pers.getW((pers.cam.pos-pers.cam.at).length()) );
-#endif
 			
 			// カメラマトリクス計算
 			{
@@ -429,6 +666,7 @@ struct Apr : public Sys
 
 			if ( keys._1.hi ) pBone->stat.bShowBone = !pBone->stat.bShowBone;
 			if ( keys._2.hi ) pBone->stat.bShowSkin = !pBone->stat.bShowSkin;
+			if ( keys._3.hi ) pBone->stat.bShowLocus = !pBone->stat.bShowLocus;
 
 
 			// マニュピレーター描画
@@ -455,228 +693,59 @@ struct Apr : public Sys
 			//ジョイント選択
 			{
 
-				vect3 mpos = vect3(mouse.gpos,0);
-
-					static struct
-					{
-						float	w;
-						Joint3*	p;
-						bool	xx_bSelected;
-					} sel = {0,0,false};
-
 				// 最近点検索
 				if ( !keys.ALT.on && mouse.L.hi ) 
-				{
-					sel = {0,0,false};
-
-					for ( Joint3& j : pBone->tblJoint )
-					{
-						vect3 v = pers.calcWorldToScreen3( j.pos );
-
-						if ( (vect2(v.x,v.y)-mouse.gpos).length() < 0.05f )
-						{
-							if ( sel.w < v.z )
-							{
-								sel.w = v.z;
-								sel.p = &j;
-							}
-						}
-					}
-					if ( sel.p )
-					{
-						#if 1
-						{
-							// 優先度つけ
-							for ( Joint3& j : pBone->tblJoint )
-							{
-								j.priority = 999;
-							}
-							function<void( Joint3&,int)> funcSetPriority = [&funcSetPriority] ( Joint3& j, int prio )
-							{
-								j.priority = prio;
-								for ( Joint3& r : j.relative )
-								{
-									if ( r.priority > prio+1 ) funcSetPriority( r, prio+1 );
-								}
-							};
-							
-							funcSetPriority( *sel.p, 1 );
-						}
-						#endif
-					}
-				}
+					selector.begin( pers, *pBone, mouse.gpos );
 
 				// 矩形カーソル開始 新規選択
-				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && sel.p == 0 && rect_mode == RECTMODE::NONE ) 
-				{
-					rect_mode = RECTMODE::COPY;
-					rect_pos = mouse.gpos;
-				}
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && selector.sel.p == 0 && selector.rect_mode == S::RECTMODE::NONE ) 
+					selector.selectRectNew( mouse.gpos );
 
 				// 矩形カーソル開始 追加選択
-				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && keys.SHIFT.on && sel.p == 0 && rect_mode == RECTMODE::NONE ) 
-				{
-					rect_mode = RECTMODE::ADD;
-					rect_pos = mouse.gpos;
-				}
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && keys.SHIFT.on && selector.sel.p == 0 && selector.rect_mode == S::RECTMODE::NONE ) 
+					selector.selectRectAdd( mouse.gpos );
 
 				// 矩形カーソル開始 反転選択
-				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && !keys.SHIFT.on && sel.p == 0 && rect_mode == RECTMODE::NONE ) 
-				{
-					rect_mode = RECTMODE::REV;
-					rect_pos = mouse.gpos;
-				}
+				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && !keys.SHIFT.on && selector.sel.p == 0 && selector.rect_mode == S::RECTMODE::NONE ) 
+					selector.selectRectRev( mouse.gpos );
 
 				// 矩形カーソル開始 削除選択
-				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && keys.SHIFT.on && sel.p == 0 && rect_mode == RECTMODE::NONE ) 
-				{
-					rect_mode = RECTMODE::SUB;
-					rect_pos = mouse.gpos;
-				}
-
+				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && keys.SHIFT.on && selector.sel.p == 0 && selector.rect_mode == S::RECTMODE::NONE ) 
+					selector.selectRectSub( mouse.gpos );
 
 				// 矩形カーソル終了（選択決定）
-				if ( !keys.ALT.on && !mouse.L.on && rect_mode != RECTMODE::NONE ) 
-				{
-
-					for ( Joint3& j : pBone->tblJoint )
-					{
-						switch( rect_mode )
-						{
-							case RECTMODE::ADD:		if ( j.sel.bPreselect ) j.sel.bSelected = true;
-								break;
-
-							case RECTMODE::SUB:		if ( j.sel.bPreselect ) j.sel.bSelected = false;
-								break;
-
-							case RECTMODE::COPY:	j.sel.bSelected = j.sel.bPreselect;
-								break;
-
-							case RECTMODE::REV:		if ( j.sel.bPreselect ) j.sel.bSelected = !j.sel.bSelected;
-								break;
-			
-							case RECTMODE::NONE:
-								break;
-						}
-						j.sel.bPreselect = false;
-					}
-
-					rect_mode = RECTMODE::NONE;
-
-				}
+				if ( !keys.ALT.on && !mouse.L.on && selector.rect_mode != S::RECTMODE::NONE ) 
+					selector.selectRectEnd( (*pBone) );
 
 				// 矩形カーソル選択	
-				if ( !keys.ALT.on && mouse.L.on && rect_mode != RECTMODE::NONE ) 
-				{
-					vect2 v0 = min( rect_pos, mouse.gpos );
-					vect2 v1 = max( rect_pos, mouse.gpos );
-
-					for ( Joint3& j : pBone->tblJoint )
-					{
-						j.sel.bPreselect = false;
-
-						vect2 v = pers.calcWorldToScreen2( j.pos );
-
-						if ( v.x > v0.x && v.x < v1.x && v.y > v0.y && v.y < v1.y )
-						{
-							j.sel.bPreselect = true;
-						}
-					}
-				}
+				if ( !keys.ALT.on && mouse.L.on && selector.rect_mode != S::RECTMODE::NONE ) 
+					selector.selectRectBegin( pers, (*pBone) , mouse.gpos );
 
 				// 単独 新規選択
-				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && sel.p ) 
-				{
-					sel.p->sel.bSelected = true;
-				}
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && selector.sel.p && selector.sel.p->stat.bSelected == false ) 
+					selector.selectOneNew( (*pBone) );
 
 				// 単独 追加選択
-				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && keys.SHIFT.on && sel.p ) 
-				{
-					sel.p->sel.bSelected = true;
-				}
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && keys.SHIFT.on && selector.sel.p ) 
+					selector.selectOneAdd();
 
 				// 単独 反転規選択
-				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && !keys.SHIFT.on && sel.p ) 
-				{
-					sel.p->sel.bSelected = !sel.p->sel.bSelected;
-				}
+				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && !keys.SHIFT.on && selector.sel.p ) 
+					selector.selectOneRev();
 
 				// 単独 削除選択
-				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && keys.SHIFT.on && sel.p  ) 
-				{
-					sel.p->sel.bSelected = false;
-				}
-
+				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && keys.SHIFT.on && selector.sel.p  ) 
+					selector.selectOneSub();
 				
 				// 選択リストのJoint3移動
-				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && sel.p ) 
-				{
-
-					vect3 v = vect3(mouse.gmov.x*pers.aspect, mouse.gmov.y, 0)/sel.w/pers.rate;
-					mat44 mrot = pers.cam.mat;
-					mrot.SetTranslate(vect3(0,0,0));
-				//	mrot.invers(); 逆行列にしなくても同じ結果
-					v = v* mrot;
-					for ( Joint3& j : pBone->tblJoint )
-					{
-						if ( j.sel.bSelected )
-						{
-							j.pos += v ;
-						}
-					}
-				}
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && selector.sel.p ) 
+					selector.moveSelected( pers, (*pBone), mouse.gmov );
 				
 				//--
 
 				// 選択リスト表示
-				for ( Joint3& j : pBone->tblJoint )
-				{
-
-					for ( Joint3& j : pBone->tblJoint )
-					{
-						bool bPreselect = j.sel.bPreselect;
-						bool bSelected = j.sel.bSelected;
-						switch( rect_mode )
-						{
-							case RECTMODE::ADD:		if ( bPreselect ) bSelected = true;
-								break;
-
-							case RECTMODE::SUB:		if ( bPreselect ) bSelected = false;
-								break;
-
-							case RECTMODE::COPY:	bSelected = bPreselect;
-								break;
-
-							case RECTMODE::REV:		if ( bPreselect ) bSelected = !bSelected;
-								break;
-			
-							case RECTMODE::NONE:
-								break;
-
-						}
-						if ( bSelected )
-						{
-							gra.Pset( pers.calcDisp2( j.pos * pers.cam.mat.invers() ), rgb(1,0,0), 11 );
-						}
-					}
-
-				}
-
-
-
-				// 矩形カーソル 表示
-				if (  rect_mode != RECTMODE::NONE )
-				{
-					gra.Box( rect_pos, mouse.gpos, rgb(1,1,0));
-				}
-
-				// 矩形カーソル 情報表示
-				for ( Joint3& j : pBone->tblJoint )
-				{
-					vect2 pos = pers.calcDisp2( j.pos * pers.cam.mat.invers() );
-					gra.Print( pos, to_string(j.id) + " "+ to_string(j.priority));
-				}
+				selector.DrawJoint( pers, gra, (*pBone) , mouse.gpos );
+			}
 
 				
 			#if 0
@@ -699,7 +768,6 @@ struct Apr : public Sys
 					pBone->ring.ring_DrawMat( gra, pers, vect3(  0,0,0), m );
 				}
 			#endif
-			}
 
 			{
 				if( keys.F2.hi ) flgInfo = !flgInfo;

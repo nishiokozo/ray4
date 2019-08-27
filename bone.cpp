@@ -569,60 +569,66 @@ void Bone::draw( Pers& pers, SysGra& gra )
 		}
 	}
 
+	if ( stat.bShowLocus )
+	{
+		// 軌跡表示
+		if ( static_cast<signed>(animations.size()) > 0 )
+		{
+			float dt = anim.dt;
+			float div = 1/dt;
+
+			for ( int n = -1 ; n < static_cast<signed>(animations[cur.act].pose.size())-3+1 ; n++ )
+			{
+				int n0 = n;
+				int n1 = n+1;
+				int n2 = n+2;
+				int n3 = n+3;
+				if ( n0 < 0 ) n0 = 0;
+				if ( n3 >= static_cast<signed>(animations[cur.act].pose.size()) ) n3 = n2;
+			
+				for ( int j = 0 ;  j < static_cast<signed>(tblJoint.size()) ; j++ )
+				{
+					if ( tblJoint[ j ].stat.bSelected == false ) continue;
+				
+					vect3 P0 = animations[cur.act].pose[ n0 ].joint[ j ].pos;
+					vect3 P1 = animations[cur.act].pose[ n1 ].joint[ j ].pos;
+					vect3 P2 = animations[cur.act].pose[ n2 ].joint[ j ].pos;
+					vect3 P3 = animations[cur.act].pose[ n3 ].joint[ j ].pos;
+
+					float t = dt;
+					vect3 a = catmull3d_func(0, P0,P1,P2,P3 );
+					for ( int i = 0 ; i <div ; i++ )
+					{
+						vect3 b = catmull3d_func(t, P0,P1,P2,P3 );
+
+						vect3 v0;
+						vect3 v1;
+						bool flg = pers.calcScissorLine3d( a* pers.cam.mat.invers(), b* pers.cam.mat.invers(), v0, v1 );
+
+						rgb	col = rgb(0.2,0.5,1.0);
+						if ( flg )
+						{
+//							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0.5,0.5,1));
+							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col);
+						}
+						
+						if ( v1.z > 0 ) gra.Pset(vect2(v1.x,v1.y), col, 3);
+
+						a=b;
+						t+=dt;
+
+					}	
+				}
+			}
+		}
+	}
 }
 
 //------------------------------------------------------------------------------
 void Bone::drawMotion( Pers& pers, SysGra& gra )
 //------------------------------------------------------------------------------
 {
-	// マーカースプライン変換表示
-	if ( static_cast<signed>(animations.size()) > 0 )
-	{
-		float dt = anim.dt;
-		float div = 1/dt;
 
-		for ( int n = -1 ; n < static_cast<signed>(animations[cur.act].pose.size())-3+1 ; n++ )
-		{
-			int n0 = n;
-			int n1 = n+1;
-			int n2 = n+2;
-			int n3 = n+3;
-			if ( n0 < 0 ) n0 = 0;
-			if ( n3 >= static_cast<signed>(animations[cur.act].pose.size()) ) n3 = n2;
-		
-			for ( int j = 0 ;  j < static_cast<signed>(tblJoint.size()) ; j++ )
-			{
-//					if ( tblJoint[ j ].bSelected == false ) continue;
-			
-				vect3 P0 = animations[cur.act].pose[ n0 ].joint[ j ].pos;
-				vect3 P1 = animations[cur.act].pose[ n1 ].joint[ j ].pos;
-				vect3 P2 = animations[cur.act].pose[ n2 ].joint[ j ].pos;
-				vect3 P3 = animations[cur.act].pose[ n3 ].joint[ j ].pos;
-
-				float t = dt;
-				vect3 a = catmull3d_func(0, P0,P1,P2,P3 );
-				for ( int i = 0 ; i <div ; i++ )
-				{
-					vect3 b = catmull3d_func(t, P0,P1,P2,P3 );
-
-					vect3 v0;
-					vect3 v1;
-					bool flg = pers.calcScissorLine3d( a* pers.cam.mat.invers(), b* pers.cam.mat.invers(), v0, v1 );
-
-					if ( flg )
-					{
-						gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,0,1));
-					}
-					
-					if ( v1.z > 0 ) gra.Pset(vect2(v1.x,v1.y),rgb(0,0,1), 5);
-
-					a=b;
-					t+=dt;
-
-				}	
-			}
-		}
-	}
 }
 
 //------------------------------------------------------------------------------
