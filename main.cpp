@@ -152,7 +152,6 @@ struct Apr : public Sys
 	struct Grid
 	{
 		vect3	pos;
-//		int		mode;
 		int		NUM_U;
 		int		NUM_V;
 		float	dt;
@@ -238,63 +237,19 @@ struct Apr : public Sys
 		RECTMODE rect_mode = RECTMODE::NONE;	//	矩形選択中フラグ
 
 
-//		vector<reference_wrapper<Joint3>>	listJoint;
-
-		map<Joint3*,reference_wrapper<Joint3>>	mapJoint;
-		map<Joint3*,reference_wrapper<Joint3>>	mapTmp;
+//		map<Joint3*,reference_wrapper<Joint3>>	mapJoint;
+//		map<Joint3*,reference_wrapper<Joint3>>	mapTmp;
 
 
 		unique_ptr<Bone> pBone(new Bone);
 
-				{
-					//読み込み
-					unique_ptr<Bone> pNew(new Bone);
-					pNew->loadMotion( "human.mot" );
-					pBone = move(pNew);
-				}
-pBone->stat.bShowSkin = false;
-
-		// 箱
-		struct
 		{
-			float	rx = rad(0);
-			float	ry = rad(0);
-			float	rz = rad(0);
-
-			vect3 pos = {3.5, 0.51,8.5};
-
-			vector<vect3> vert=
-			{
-				{	-0.5,	 0.5,	-0.5	},
-				{	 0.5,	 0.5,	-0.5	},
-				{	-0.5,	-0.5,	-0.5	},
-				{	 0.5,	-0.5,	-0.5	},
-				{	-0.5,	 0.5,	 0.5	},
-				{	 0.5,	 0.5,	 0.5	},
-				{	-0.5,	-0.5,	 0.5	},
-				{	 0.5,	-0.5,	 0.5	},
-			};
-			vector<vect3> disp;
-
-			vector<ivect2>	edge
-			{
-				{	0,	1	},
-				{	1,	3	},
-				{	3,	2	},
-				{	2,	0	},
-				{	4,	5	},
-				{	5,	7	},
-				{	7,	6	},
-				{	6,	4	},
-				{	0,	4	},
-				{	1,	5	},
-				{	2,	6	},
-				{	3,	7	},
-			};
-
-		} box;
-
-
+			//読み込み
+			unique_ptr<Bone> pNew(new Bone);
+			pNew->loadMotion( "human.mot" );
+			pBone = move(pNew);
+		}
+		pBone->stat.bShowSkin = false;
 
 		//===========================================================================
 		while( Update() )
@@ -312,7 +267,6 @@ pBone->stat.bShowSkin = false;
 			gra.Clr(rgb(0.3,0.3,0.3));
 
 			{
-
 
 				if ( pBone->cur.bSelecting ==false && keys.SHIFT.on && (keys.UP.hi || keys.DOWN.hi || keys.LEFT.hi ||keys.RIGHT.hi) )
 				{
@@ -549,19 +503,6 @@ pBone->stat.bShowSkin = false;
 							funcSetPriority( *sel.p, 1 );
 						}
 						#endif
-					
-						// 選択リスト中に存在するかしないかチェック
-//						for ( auto j : mapJoint )
-//						{
-//							if ( sel.p == &j.second.get() ) 
-//							{
-//								sel.bSelected = true;
-//								break;
-//							}
-//						}
-//						sel.p->bSelected
-						
-						
 					}
 				}
 
@@ -597,42 +538,26 @@ pBone->stat.bShowSkin = false;
 				// 矩形カーソル終了（選択決定）
 				if ( !keys.ALT.on && !mouse.L.on && rect_mode != RECTMODE::NONE ) 
 				{
-					switch( rect_mode )
-					{
-						case RECTMODE::ADD:
-							for ( Joint3& j : pBone->tblJoint )
-							{
-								if ( j.sel.bPreselect ) j.sel.bSelected = true;
-							}
-							break;
 
-						case RECTMODE::SUB:
-							for ( Joint3& j : pBone->tblJoint )
-							{
-								if ( j.sel.bPreselect ) j.sel.bSelected = false;
-							}
-							break;
-
-						case RECTMODE::COPY:
-							for ( Joint3& j : pBone->tblJoint )
-							{
-								j.sel.bSelected = j.sel.bPreselect;
-							}
-							break;
-
-						case RECTMODE::REV:
-							for ( Joint3& j : pBone->tblJoint )
-							{
-								if ( j.sel.bPreselect ) j.sel.bSelected = !j.sel.bSelected;
-							}
-							break;
-		
-						case RECTMODE::NONE:
-							break;
-					}
-				
 					for ( Joint3& j : pBone->tblJoint )
 					{
+						switch( rect_mode )
+						{
+							case RECTMODE::ADD:		if ( j.sel.bPreselect ) j.sel.bSelected = true;
+								break;
+
+							case RECTMODE::SUB:		if ( j.sel.bPreselect ) j.sel.bSelected = false;
+								break;
+
+							case RECTMODE::COPY:	j.sel.bSelected = j.sel.bPreselect;
+								break;
+
+							case RECTMODE::REV:		if ( j.sel.bPreselect ) j.sel.bSelected = !j.sel.bSelected;
+								break;
+			
+							case RECTMODE::NONE:
+								break;
+						}
 						j.sel.bPreselect = false;
 					}
 
@@ -646,8 +571,6 @@ pBone->stat.bShowSkin = false;
 					vect2 v0 = min( rect_pos, mouse.gpos );
 					vect2 v1 = max( rect_pos, mouse.gpos );
 
-//					mapTmp.clear();
-
 					for ( Joint3& j : pBone->tblJoint )
 					{
 						j.sel.bPreselect = false;
@@ -657,24 +580,34 @@ pBone->stat.bShowSkin = false;
 						if ( v.x > v0.x && v.x < v1.x && v.y > v0.y && v.y < v1.y )
 						{
 							j.sel.bPreselect = true;
-
-//							mapTmp.emplace( &j, j );
 						}
 					}
 				}
 
-
-				// 単独選択
-				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && sel.p && !sel.p->sel.bSelected ) 
+				// 単独 新規選択
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && sel.p ) 
 				{
-					// 選択リストクリア
-//					mapJoint.clear();
-
-//					mapJoint.emplace( sel.p, *sel.p );
 					sel.p->sel.bSelected = true;
 				}
 
-			
+				// 単独 追加選択
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && keys.SHIFT.on && sel.p ) 
+				{
+					sel.p->sel.bSelected = true;
+				}
+
+				// 単独 反転規選択
+				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && !keys.SHIFT.on && sel.p ) 
+				{
+					sel.p->sel.bSelected = !sel.p->sel.bSelected;
+				}
+
+				// 単独 削除選択
+				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && keys.SHIFT.on && sel.p  ) 
+				{
+					sel.p->sel.bSelected = false;
+				}
+
 				
 				// 選択リストのJoint3移動
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && sel.p ) 
@@ -685,7 +618,6 @@ pBone->stat.bShowSkin = false;
 					mrot.SetTranslate(vect3(0,0,0));
 				//	mrot.invers(); 逆行列にしなくても同じ結果
 					v = v* mrot;
-//					for ( auto j : mapJoint )
 					for ( Joint3& j : pBone->tblJoint )
 					{
 						if ( j.sel.bSelected )
@@ -700,18 +632,6 @@ pBone->stat.bShowSkin = false;
 				// 選択リスト表示
 				for ( Joint3& j : pBone->tblJoint )
 				{
-/*
-					if ( j.sel.bPreselect )
-					{
-						gra.Pset( pers.calcDisp2( j.pos * pers.cam.mat.invers() ), rgb(1,0,1), 11 );
-					}
-					
-					if ( j.sel.bSelected )
-					{
-						gra.Pset( pers.calcDisp2( j.pos * pers.cam.mat.invers() ), rgb(1,0,0), 11 );
-					}
-*/
-
 
 					for ( Joint3& j : pBone->tblJoint )
 					{
@@ -719,29 +639,16 @@ pBone->stat.bShowSkin = false;
 						bool bSelected = j.sel.bSelected;
 						switch( rect_mode )
 						{
-							case RECTMODE::ADD:
-								{
-									if ( bPreselect ) bSelected = true;
-								}
+							case RECTMODE::ADD:		if ( bPreselect ) bSelected = true;
 								break;
 
-							case RECTMODE::SUB:
-								{
-									if ( bPreselect ) bSelected = false;
-								}
+							case RECTMODE::SUB:		if ( bPreselect ) bSelected = false;
 								break;
 
-							case RECTMODE::COPY:
-								{
-									bSelected = bPreselect;
-								}
+							case RECTMODE::COPY:	bSelected = bPreselect;
 								break;
 
-							case RECTMODE::REV:
-								{
-									if ( bPreselect ) bSelected = !bSelected;
-
-								}
+							case RECTMODE::REV:		if ( bPreselect ) bSelected = !bSelected;
 								break;
 			
 							case RECTMODE::NONE:
