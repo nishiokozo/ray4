@@ -56,8 +56,6 @@ struct Apr : public Sys
 
 			vect3 v0 = apr.pers.calcDisp3( pos * apr.pers.cam.mat.invers() );
 
-			// 軸名表示
-			apr.gra.Print( mpos+0.01f,string("")+(bAxisX?"X":"")+(bAxisY?"Y":"")+(bAxisZ?"Z":"") ); 
 
 
 			// 軸表示
@@ -91,9 +89,12 @@ struct Apr : public Sys
 
 			}
 
+			// 軸名表示
+			apr.gra.Print( mpos+0.01f,string("")+(bAxisX?"X":"")+(bAxisY?"Y":"")+(bAxisZ?"Z":"") ); 
+
 
 		}
-	} manupirator;
+	} axis;
 
 
 	Pers pers;
@@ -154,26 +155,26 @@ struct Apr : public Sys
 		return ( aa>=0 ) ;
 	};
 
-	struct Grid
+	struct
 	{
-		vect3	pos;
-		int		NUM_U;
-		int		NUM_V;
-		float	dt;
-		rgb		col;
-	
+//		vect3	pos;
+//		int		NUM_U;
+//		int		NUM_V;
+//		float	dt;
+//		rgb		col;
+//	
+//		//------------------------------------------------------------------------------
+//		void SetMesh(  )
+//		//------------------------------------------------------------------------------
+//		{	// ミニグリッド
+//			pos 	= _pos;
+//			NUM_U	= _NUM_U;
+//			NUM_V	= _NUM_V;
+//			dt		= _dt;
+//			col	 = _col;
+//		}
 		//------------------------------------------------------------------------------
-		void SetMesh( vect3 _pos, int _NUM_U, int _NUM_V, float _dt, rgb _col )
-		//------------------------------------------------------------------------------
-		{	// ミニグリッド
-			pos 	= _pos;
-			NUM_U	= _NUM_U;
-			NUM_V	= _NUM_V;
-			dt		= _dt;
-			col	 = _col;
-		}
-		//------------------------------------------------------------------------------
-		void DrawMesh( Apr& apr )
+		void DrawGrid( Apr& apr, vect3 pos, int NUM_U, int NUM_V, float dt, rgb col )
 		//------------------------------------------------------------------------------
 		{	// ミニグリッド
 			vect3 vt = vect3(0,0,0);
@@ -218,8 +219,8 @@ struct Apr : public Sys
 				}
 			}
 		}
-	};
-	Grid gridGround;
+	}grid;
+//	Grid gridGround;
 	
 	bool flgInfo = true;
 	
@@ -492,12 +493,6 @@ struct Apr : public Sys
 	{
 		int text_y = 0;
 
-
-
-//		map<Joint*,reference_wrapper<Joint>>	mapJoint;
-//		map<Joint*,reference_wrapper<Joint>>	mapTmp;
-
-
 		unique_ptr<Bone> pBone(new Bone);
 
 		{
@@ -510,20 +505,140 @@ struct Apr : public Sys
 		pBone->stat.bShowSkin = false;
 		pBone->stat.bShowLocus = false;
 
+		// 箱
+		struct
+		{
+
+			vector<vect3> vert=
+			{
+				{	-0.5,	 0.5+1.0,	-0.5	},
+				{	 0.5,	 0.5+1.0,	-0.5	},
+				{	-0.5,	-0.5+1.0,	-0.5	},
+				{	 0.5,	-0.5+1.0,	-0.5	},
+				{	-0.5,	 0.5+1.0,	 0.5	},
+				{	 0.5,	 0.5+1.0,	 0.5	},
+				{	-0.5,	-0.5+1.0,	 0.5	},
+				{	 0.5,	-0.5+1.0,	 0.5	},
+			};
+			vector<vect3> disp;
+
+			vector<ivect2>	edge
+			{
+				{	0,	1	},
+				{	1,	3	},
+				{	3,	2	},
+				{	2,	0	},
+				{	4,	5	},
+				{	5,	7	},
+				{	7,	6	},
+				{	6,	4	},
+				{	0,	4	},
+				{	1,	5	},
+				{	2,	6	},
+				{	3,	7	},
+			};
+
+
+			//------------------------------------------------------------------------------
+			void CalcBox( Pers& pers)
+			//------------------------------------------------------------------------------
+			{
+			}		
+
+
+			//------------------------------------------------------------------------------
+			void DrawBox( Pers& pers, SysGra& gra, vect3 pos, vect3 rot )
+			//------------------------------------------------------------------------------
+			{
+				disp.clear();
+
+				for ( vect3 v : vert )
+				{
+
+					//	右手系座標系
+					//	右手ねじ周り
+					//	roll	:z	奥+
+					//	pitch	:x	右+
+					//	yaw		:y	下+
+					mat44	rotx;
+					mat44	roty;
+					mat44	rotz;
+					rotx.setRotateX(rot.x);
+					roty.setRotateY(rot.y);
+					rotz.setRotateZ(rot.z);
+			
+					v= rotx * roty * rotz *v + pos ;
+
+					v = v * pers.cam.mat.invers();
+
+					disp.emplace_back( v );
+
+				}
+
+				// 箱
+				for ( ivect2 e : edge )
+				{
+					const vect3& a = disp[e.p];
+					const vect3& b = disp[e.n];
+
+
+					vect3 v0;
+					vect3 v1;
+					bool flg = pers.calcScissorLine3d( a, b, v0, v1 );
+					if ( flg )
+					{
+						gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,1,1));
+					}
+
+				}
+			}
+			
+		} box;
+
+
 		//===========================================================================
 		while( Update() )
 		{
 			text_y = 0;
 
+			//=================================
+			// カメラ
+			//=================================
+
+
 			// パースペクティブ
 			if (keys.Y.rep) {pers.fovy-=2;cout << pers.fovy <<" "<<1/tan(rad(pers.fovy)) << endl; }
 			if (keys.H.rep) {pers.fovy+=2;cout << pers.fovy <<" "<<1/tan(rad(pers.fovy)) << endl; }
 
+
 			// パース更新
 			pers.Update( vect2( gra.GetWidth(), gra.GetHeight() ) );
 
-			// 画面クリア
-			gra.Clr(rgb(0.3,0.3,0.3));
+			// カメラ回転
+			if ( (!keys.ALT.on && mouse.R.on && !mouse.L.on && !mouse.M.on) || (keys.ALT.on && !mouse.R.on && mouse.L.on && !mouse.M.on) ) pers.cam.Rotation( -vect3(mouse.gmov,0)*18.0f );
+
+			// カメラ平行移動
+			if ( mouse.M.on ) pers.cam.Move( -vect3(mouse.gmov,0)/pers.getW((pers.cam.pos-pers.cam.at).length()));
+
+			// マウスホイールZOOM
+			if ( !keys.ALT.on  ) pers.cam.Zoom( -mouse.wheel*2/gra.GetHeight()/pers.getW((pers.cam.pos-pers.cam.at).length()) );
+			
+			// カメラ移動
+			if ( (keys.ALT.on && mouse.R.on) || ( mouse.R.on && mouse.L.on ) ) pers.cam.Zoom( mouse.gmov.y/pers.getW((pers.cam.pos-pers.cam.at).length()) );
+			
+
+			// カメラマトリクス計算
+			{
+				pers.cam.mat.LookAt( pers.cam.pos, pers.cam.at, pers.cam.up );
+			}
+
+	
+
+
+			//=================================
+			//入力
+			//=================================
+
 
 			{
 
@@ -591,97 +706,22 @@ struct Apr : public Sys
 				if ( pBone->anim.bPlaying )	pBone->PlayAnimation();
 
 				// X/Y/Z軸選択モード切替
-				if ( keys.Z.hi ) {manupirator.bAxisZ = true;	manupirator.bAxisX = false;	manupirator.bAxisY = false;}
-				if ( keys.X.hi ) {manupirator.bAxisZ = false;	manupirator.bAxisX = true;	manupirator.bAxisY = false;}
-				if ( keys.C.hi ) {manupirator.bAxisZ = false;	manupirator.bAxisX = false;	manupirator.bAxisY = true;}
-				if ( keys.V.hi ) {manupirator.bAxisZ = true;	manupirator.bAxisX = true;	manupirator.bAxisY = true;}
+				if ( keys.Z.hi ) {axis.bAxisZ = true;	axis.bAxisX = false;	axis.bAxisY = false;}
+				if ( keys.X.hi ) {axis.bAxisZ = false;	axis.bAxisX = true;	axis.bAxisY = false;}
+				if ( keys.C.hi ) {axis.bAxisZ = false;	axis.bAxisX = false;	axis.bAxisY = true;}
+				if ( keys.V.hi ) {axis.bAxisZ = true;	axis.bAxisX = true;	axis.bAxisY = true;}
 			}
 
 
 
-			// animカーソルビュー cursor
-			{
-				bool flg = false;
-				for ( int y = 0 ; y < (signed)pBone->animations.size() ; y++ )
-				{
-					for ( int x = 0 ; x < (signed)pBone->animations[y].pose.size() ; x++ )
-					{
-						if ( pBone->cur.bSelecting && ( y == pBone->cur.selecting_act && x == pBone->cur.selecting_pose ) ) flg=!flg;
-						if ( pBone->cur.bSelecting && ( y == pBone->cur.act && x == pBone->cur.pose ) ) flg=!flg;
-
-						vect2 v = vect2( x, y )*vect2( 4, 8 ) + vect2(400,16);
-						{
-							gra.Fill( gra.Conv(v), gra.Conv(v+vect2(3,7)), rgb(1,1,1) );
-						}
-
-						if ( y == pBone->cur.act && x == pBone->cur.pose )
-						{
-							gra.Fill( gra.Conv(v+vect2(0,4)), gra.Conv(v+vect2(3,7)), rgb(1,0,0) );
-						}
-						
-						if ( flg )
-						{
-							gra.Fill( gra.Conv(v+vect2(0,4)), gra.Conv(v+vect2(3,7)), rgb(1,0,0) );
-						}
-					}
-				}
-			}
-
-			// カメラ回転
-			if ( (!keys.ALT.on && mouse.R.on && !mouse.L.on && !mouse.M.on) || (keys.ALT.on && !mouse.R.on && mouse.L.on && !mouse.M.on) ) pers.cam.Rotation( -vect3(mouse.gmov,0)*18.0f );
-
-			// カメラ平行移動
-			if ( mouse.M.on ) pers.cam.Move( -vect3(mouse.gmov,0)/pers.getW((pers.cam.pos-pers.cam.at).length()));
-
-			// マウスホイールZOOM
-			if ( !keys.ALT.on  ) pers.cam.Zoom( -mouse.wheel*2/gra.GetHeight()/pers.getW((pers.cam.pos-pers.cam.at).length()) );
-			
-			// カメラ移動
-			if ( (keys.ALT.on && mouse.R.on) || ( mouse.R.on && mouse.L.on ) ) pers.cam.Zoom( mouse.gmov.y/pers.getW((pers.cam.pos-pers.cam.at).length()) );
-			
-			// カメラマトリクス計算
-			{
-				pers.cam.mat.LookAt( pers.cam.pos, pers.cam.at, pers.cam.up );
-			}
-
-			// カメラ注視点表示
-			{
-				vect3 v = pers.calcDisp3(pers.cam.at*pers.cam.mat.invers());
-				if ( v.z > 0 ) 
-				{
-				}
-			}
-
-			// グリッドgridMini
-			{
-				const int NUM = 10;
-
-				gridGround.SetMesh( vect3(0,0,0), NUM, NUM, 1, vect3(0.2,0.2,0.2) );
-				gridGround.DrawMesh( *this );
-
-			}
 
 
-			//=================================
-			// 3D joint
-			//=================================
-
-			// human 更新
-			pBone->update();
-
-			// human 描画
-			pBone->draw( pers, gra );
 
 			if ( keys._1.hi ) pBone->stat.bShowBone = !pBone->stat.bShowBone;
 			if ( keys._2.hi ) pBone->stat.bShowSkin = !pBone->stat.bShowSkin;
 			if ( keys._3.hi ) pBone->stat.bShowLocus = !pBone->stat.bShowLocus;
 
 
-			// マニュピレーター描画
-			{
-				manupirator.DrawAxis( mouse.gpos, *this );
-
-			}
 
 
 
@@ -770,8 +810,78 @@ struct Apr : public Sys
 				
 				//--
 
-				// 選択リスト表示
-				selector.DrawJoint( pers, gra, (*pBone) , mouse.gpos );
+			}
+
+
+
+
+
+			//=================================
+			// 更新
+			//=================================
+
+			// 画面クリア
+			gra.Clr(rgb(0.3,0.3,0.3));
+
+			pBone->update();
+
+
+
+			// animカーソルビュー cursor
+			{
+				bool flg = false;
+				for ( int y = 0 ; y < (signed)pBone->animations.size() ; y++ )
+				{
+					for ( int x = 0 ; x < (signed)pBone->animations[y].pose.size() ; x++ )
+					{
+						if ( pBone->cur.bSelecting && ( y == pBone->cur.selecting_act && x == pBone->cur.selecting_pose ) ) flg=!flg;
+						if ( pBone->cur.bSelecting && ( y == pBone->cur.act && x == pBone->cur.pose ) ) flg=!flg;
+
+						vect2 v = vect2( x, y )*vect2( 4, 8 ) + vect2(400,16);
+						{
+							gra.Fill( gra.Conv(v), gra.Conv(v+vect2(3,7)), rgb(1,1,1) );
+						}
+
+						if ( y == pBone->cur.act && x == pBone->cur.pose )
+						{
+							gra.Fill( gra.Conv(v+vect2(0,4)), gra.Conv(v+vect2(3,7)), rgb(1,0,0) );
+						}
+						
+						if ( flg )
+						{
+							gra.Fill( gra.Conv(v+vect2(0,4)), gra.Conv(v+vect2(3,7)), rgb(1,0,0) );
+						}
+					}
+				}
+			}
+
+
+
+
+			// 箱
+			//calcDisp rotate
+			vect3 boxpos = {2.5,-0.51,2.5};
+			vect3 boxrot(0,0,0);
+
+			// 床グリッド描画
+			grid.DrawGrid( *this, vect3(0,0,0), 10, 10, 1, vect3(0.2,0.2,0.2) );
+			
+			
+
+			box.DrawBox( pers, gra, boxpos, boxrot );
+
+
+			// human 描画
+			pBone->draw( pers, gra );
+
+			// 選択リスト表示
+			selector.DrawJoint( pers, gra, (*pBone) , mouse.gpos );
+
+
+			// マニュピレーター描画
+			{
+				axis.DrawAxis( mouse.gpos, *this );
+
 			}
 
 				
@@ -780,8 +890,7 @@ struct Apr : public Sys
 					v.normalize();
 					float rx = acos(dot(vect3(0,1,0),v));
 					float ry = atan2(v.x,v.z);
-
-						
+					
 					mat44	mx;
 					mat44	my;
 					my.setRotateY(-ry);
@@ -793,7 +902,6 @@ struct Apr : public Sys
 			#endif
 
 			{
-
 				if( keys.F2.hi ) flgInfo = !flgInfo;
 				if ( flgInfo )
 				{
@@ -810,7 +918,6 @@ struct Apr : public Sys
 					}
 					gra.Print(1,text_y++,string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 				}
-
 
 				if ( keys.F1.on )
 				{

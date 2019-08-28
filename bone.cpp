@@ -68,17 +68,7 @@ void Bone::PlayAnimation()
 
 	for ( int j = 0 ; j < static_cast<signed>(animations[cur.act].pose[0].joint.size()) ; j++ )
 	{
-/*
-		if ( g_flg ) 
-		{
-			if ( j == 3 || j == 4 ) continue;	//肩
-			if ( j == 5 || j == 2 ) continue;	//腹首
-			if ( j == 6 || j == 7) continue;	//腰
-//			if ( j == 12 || j == 14 ) continue;	//肘
-//			if ( j == 8 || j == 10 ) continue;	//足
-//			if ( j == 9 || j == 11 ) continue;	//膝
-		}
-*/
+
 		vect3 P0 = animations[cur.act].pose[ n0 ].joint[ j ].pos;
 		vect3 P1 = animations[cur.act].pose[ n1 ].joint[ j ].pos;
 		vect3 P2 = animations[cur.act].pose[ n2 ].joint[ j ].pos;
