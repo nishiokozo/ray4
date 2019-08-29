@@ -101,7 +101,7 @@ struct Ring
 
 };
 
-struct Joint// : Obj
+struct Joint
 {
 	struct
 	{
@@ -115,6 +115,8 @@ struct Joint// : Obj
 	vect3 disp;
 	float len;
 	int priority;
+//	vect3 bnormal;
+	bool bCtrl;
 	
 	vector<reference_wrapper<Joint>>	relative;
 	virtual ~Joint(){}
@@ -122,16 +124,21 @@ struct Joint// : Obj
 	{
 		id = 0;
 		pos = vect3(0,0,0);
+//		bnormal = vect3(0,0,0);
 		tension = 0;
 		len = 0;
+		bCtrl = false;
 	}
-	Joint( vect3 v )
+	Joint( vect3 v, bool _bCtrl )
 	{
 		id = 0;
 		pos = v;
+//		bnormal = bv;
 		tension = 0;
 		len = 0;
+		bCtrl = _bCtrl;
 	}
+/*
 	void Move2( vect2 v )
 	{
 		//none
@@ -144,41 +151,41 @@ struct Joint// : Obj
 	{
 		return disp.z > 0;
 	}
+*/
 
 };
-
-struct Bone3
-{
-	int n0;
-	int n1;
-	Joint& j0;
-	Joint& j1;
-	float length;
-	Bone3( vector<Joint>& tbl, int _n0, int _n1 ) :n0(_n0), n1(_n1), j0(tbl[_n0]), j1(tbl[_n1]){}
-};
-
 
 struct Bone
+{
+	int		n0;	//	コピーするときに必要
+	int		n1;	//	コピーするときに必要
+	float	length;
+	bool	bBold;
+	Bone( int _n0, int _n1, bool _bBold ) :n0(_n0), n1(_n1), bBold(_bBold){}
+};
+
+
+struct Skeleton
 {
 	string	filename;
 
 	vector<Joint>			tblJoint;
-	vector<Bone3>			tblBone;
+	vector<Bone>			tblBone;
 
-	struct Keyframe
+	struct K
 	{
-		struct Joint
+		struct J
 		{
-			struct Pos
+			struct P
 			{
 				vect3		pos;
-				Pos( const vect3& _pos ) : pos(_pos) {};
+				P( const vect3& _pos ) : pos(_pos) {};
 			};
-			vector<Pos>		joint;
+			vector<P>		joint;
 		};
-		vector<Joint>		pose;
+		vector<J>		pose;
 	};
-	vector<Keyframe>		animations;
+	vector<K>		animations;
 
 	struct
 	{
@@ -186,7 +193,7 @@ struct Bone
 		int	pose = 0;	//	キーフレームカーソル位置
 		int copied_act = 0;
 		int copied_pose = 0;
-		unique_ptr<Bone> pCopybuf;
+		unique_ptr<Skeleton> pCopybuf;
 
 		bool	bSelecting = false;
 		int 	selecting_act = 0;
@@ -227,8 +234,8 @@ struct Bone
 	void update();
 //		void draw( Pers& pers, mat44& cam_mat, SysGra& gra );
 //		void drawMotion( Pers& pers, mat44& cam_mat, SysGra& gra );
-	void draw( Pers& pers, SysGra& gra );
-	void drawMotion( Pers& pers, SysGra& gra );
+	void DrawBone( Pers& pers, SysGra& gra );
+//	void drawMotion( Pers& pers, SysGra& gra );
 
 
 	//

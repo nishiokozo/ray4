@@ -7,7 +7,7 @@ TAR = main.exe
 
 SRCS = \
 	main.cpp \
-	bone.cpp \
+	skeleton.cpp \
 	raytrace.cpp \
 	geom.cpp \
 	Sys.cpp \

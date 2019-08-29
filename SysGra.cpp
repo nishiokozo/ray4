@@ -498,6 +498,7 @@ void SysGra::Print( vect2 v0, string str )
 
 	glBegin(GL_POINTS);
 	glColor3f( 1,1,1 );
+	//glColor3f( 0,0,0 );
 	glEnd();
 
 	glRasterPos2f(v0.x, v0.y);
