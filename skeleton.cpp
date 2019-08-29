@@ -780,7 +780,7 @@ void Skeleton::loadMotion( const string fn )
 					vector<string> v = split( buf, '\t');
 					int n0 = stoi(v[0]);
 					int n1 = stoi(v[1]);
-					bool bBold = (v.size() >2 && v[2]=="B" )?false:true;
+					bool bBold = (v.size() >2 && v[2]=="-" )?false:true;
 					tblBone.emplace_back( n0, n1, bBold );
 					//	cout << x << "," << y << "," << z << endl; 
 				}
