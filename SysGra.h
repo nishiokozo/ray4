@@ -93,4 +93,10 @@ struct SysGra
 		return vect2(x,y)/vect2(GetWidth()/2,-GetHeight()/2)+vect2(-1,1);
 	}
 
+	vect2 Dot( float x, float y )
+	{
+		// ピクセル座標数(pos)をGL座標数に変換する
+		return vect2(x,y)/vect2(GetWidth(),-GetHeight());
+	}
+
 };

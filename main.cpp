@@ -92,7 +92,7 @@ struct Apr : public Sys
 			}
 
 			// 軸名表示
-			apr.gra.Print( mpos+0.01f,string("")+(bAxisX?"X":"")+(bAxisY?"Y":"")+(bAxisZ?"Z":"") ); 
+			apr.gra.Print( mpos+apr.gra.Dot(16,-12),string("")+(bAxisX?"X":"")+(bAxisY?"Y":"")+(bAxisZ?"Z":"") ); 
 
 			apr.gra.SetZTest( true );
 
@@ -486,7 +486,7 @@ struct Apr : public Sys
 			for ( Joint& j : skeleton.tblJoint )
 			{
 				vect2 pos = pers.calcDisp2( j.pos * pers.cam.mat.invers() );
-				gra.Print( pos, to_string(j.id) );
+				gra.Print( pos+gra.Dot(14,0), to_string(j.id) );
 			//	gra.Print( pos, to_string(j.id) + " "+ to_string(j.priority));
 			}
 
