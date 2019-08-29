@@ -254,9 +254,9 @@ struct Apr : public Sys
 			{
 				vect3 v = pers.calcWorldToScreen3( j.pos );
 
-				if ( (vect2(v.x,v.y)-mpos).length() < 0.05f )
+				if ( (vect2(v.x,v.y)-mpos).length() < 0.04f )
 				{
-					if ( one.w < v.z )
+					if ( one.w < v.z ) // 近い場合はより手前が優先
 					{
 						one.w = v.z;
 						one.pj = &j;
@@ -266,15 +266,6 @@ struct Apr : public Sys
 			if ( one.pj )
 			{
 				#if 0
-				{
-					// 優先度つけ
-					for ( Joint& j : skeleton.tblJoint )
-					{
-						j.priority = 999;
-						if ( j.stat.bSelected ) j.priority = 1;
-					}
-				}
-				#else
 				{
 					// 優先度つけ
 					for ( Joint& j : skeleton.tblJoint )

@@ -272,7 +272,7 @@ struct Skeleton
 	{
 		for ( Joint& j : tblJoint )
 		{
-			pNew->tblJoint.emplace_back( j.pos, j.bCtrl );
+			pNew->tblJoint.emplace_back( j.pos, j.weight, j.bCtrl );
 		}
 
 		for ( Bone& b : tblBone )
@@ -436,37 +436,41 @@ void Skeleton::AddAnimation()
 void Skeleton::update()
 //------------------------------------------------------------------------------
 {
-	for ( int i = 0 ; i < 1 ; i++ )
+	for ( int i = 0 ; i < 11 ; i++ )
 	{
 		// 骨コリジョン 張力計算
 		for ( Bone b : tblBone )
 		{
-			vect3 v = tblJoint[b.n1].pos - tblJoint[b.n0].pos;
+			Joint&	j0 = tblJoint[b.n0];
+			Joint&	j1 = tblJoint[b.n1];
+			vect3 v = j1.pos - j0.pos;
 			float l = v.length() - b.length;
 			vect3 va  =	v.normalize()*l;
 
-			float w0 = 0;
-			float w1 = 0;
+
 #if 1
-			if ( tblJoint[b.n0].priority ==1 ) 
-			{
-				w0 = 0.0;
-				w1 = 0.33;
-			}
-			else
-			if ( tblJoint[b.n1].priority ==1 ) 
-			{
-				w0 = 0.33;
-				w1 = 0.0;
-			}
-			else
+			float w0 = 0.33f;
+			float w1 = 0.33f;
+#else
+			float w0 = j0.weight/(j1.weight + j0.weight) * 0.33f;
+			float w1 = j1.weight/(j1.weight + j0.weight) * 0.33f;
 #endif
+
+#if 1
+			if ( j0.priority ==1 ) 
 			{
-				w0 = 0.33;
-				w1 = 0.33;
+				w0 = 0.0f;
+				w1 = 0.33f;
 			}
-			tblJoint[b.n0].tension += va*w0;
-			tblJoint[b.n1].tension -= va*w1;
+			else
+			if ( j1.priority ==1 ) 
+			{
+				w0 = 0.33f;
+				w1 = 0.0f;
+			}
+#endif
+			j0.tension += va*w0;
+			j1.tension -= va*w1;
 
 		}
 
@@ -505,7 +509,9 @@ void Skeleton::DrawBone( Pers& pers, SysGra& gra )
 		// Human 描画
 		for ( Bone b : tblBone )
 		{
-			if ( tblJoint[b.n0].disp.z > 0 && tblJoint[b.n0].disp.z > 0 )
+			Joint&	j0 = tblJoint[b.n0];
+			Joint&	j1 = tblJoint[b.n1];
+			if ( j0.disp.z > 0 && j0.disp.z > 0 )
 			{
 				// 肉
 				const int cnt = 3;
@@ -514,9 +520,9 @@ void Skeleton::DrawBone( Pers& pers, SysGra& gra )
 				{
 					float t = (float)i / (float)cnt;
 
-					vect3 pos = ( tblJoint[b.n1].pos - tblJoint[b.n0].pos )*t + tblJoint[b.n0].pos;
+					vect3 pos = ( j1.pos - j0.pos )*t + j0.pos;
 
-					vect3 v = ( tblJoint[b.n1].pos - tblJoint[b.n0].pos ).normalize();
+					vect3 v = ( j1.pos - j0.pos ).normalize();
 					float rx = acos(dot(vect3(0,1,0),v));
 					float ry = atan2(v.x,v.z);
 					{
@@ -539,15 +545,17 @@ void Skeleton::DrawBone( Pers& pers, SysGra& gra )
 		// Human 描画
 		for ( Bone b : tblBone )
 		{
-			if ( tblJoint[b.n0].disp.z > 0 && tblJoint[b.n0].disp.z > 0 )
+			Joint&	j0 = tblJoint[b.n0];
+			Joint&	j1 = tblJoint[b.n1];
+			if ( j0.disp.z > 0 && j0.disp.z > 0 )
 			{
 				// 骨
-				vect2 v0(tblJoint[b.n0].disp.x,tblJoint[b.n0].disp.y);
-				vect2 v1(tblJoint[b.n1].disp.x,tblJoint[b.n1].disp.y);
+				vect2 v0(j0.disp.x,j0.disp.y);
+				vect2 v1(j1.disp.x,j1.disp.y);
 				if ( b.bBold ) 
-					gra.Line( v0,v1, col,2);
+					gra.Line( v0,v1, col,3);
 				else
-					gra.Line( v0,v1, col,2);
+					gra.Line( v0,v1, col,1);
 
 			}
 		}
@@ -567,7 +575,7 @@ void Skeleton::DrawBone( Pers& pers, SysGra& gra )
 		}
 	}
 
-if(1)	if ( stat.bShowLocus )
+	if ( stat.bShowLocus )
 	{
 		// 軌跡表示
 		if ( static_cast<signed>(animations.size()) > 0 )
@@ -695,7 +703,9 @@ void Skeleton::saveMotion()
 		fo << "bone" << endl;
 		for ( Bone& b : tblBone )	// 骨
 		{
-			b.length = (tblJoint[b.n1].pos - tblJoint[b.n0].pos).length();
+			Joint&	j0 = tblJoint[b.n0];
+			Joint&	j1 = tblJoint[b.n1];
+			b.length = (j1.pos - j0.pos).length();
 			fo  << "\t"<< b.n0 << "\t" << b.n1 << endl;
 		}
 	}
@@ -759,6 +769,7 @@ void Skeleton::loadMotion( const string fn )
 	{
  		if ( *(buf.end()-1) == 0x0d ) buf.pop_back();//CRLF対応
 		if ( buf.size() == 0 ) continue;
+		if ( buf.substr(0,2) == "//" ) continue;
 		cout << buf << endl;
 		if ( string(buf) == "joint" )	{mode = ModeJoint;	continue;}
 		if ( string(buf) == "bone" )	{mode = ModeBone;	continue;}
@@ -779,7 +790,9 @@ void Skeleton::loadMotion( const string fn )
 		{	
 			for ( Bone& b : tblBone )	// 関節の距離を決定する。
 			{
-				b.length = (tblJoint[b.n1].pos - tblJoint[b.n0].pos).length();
+				Joint&	j0 = tblJoint[b.n0];
+				Joint&	j1 = tblJoint[b.n1];
+				b.length = (j1.pos - j0.pos).length();
 			}
 			{
 				int cnt = 0 ;
@@ -790,8 +803,10 @@ void Skeleton::loadMotion( const string fn )
 			}
 			for ( Bone& b : tblBone )	// ジョイントに関節の距離を決定する。
 			{
-				tblJoint[b.n1].relative.emplace_back( tblJoint[b.n0] ); 
-				tblJoint[b.n0].relative.emplace_back( tblJoint[b.n1] ); 
+				Joint&	j0 = tblJoint[b.n0];
+				Joint&	j1 = tblJoint[b.n1];
+				j1.relative.emplace_back( j0 ); 
+				j0.relative.emplace_back( j1 ); 
 			}
 			cur.pose = 0;
 			break;
@@ -804,8 +819,9 @@ void Skeleton::loadMotion( const string fn )
 					float x = stod(v[0]);
 					float y = stod(v[1]);
 					float z = stod(v[2]);
-					bool bCtrl = (v.size() >3 && v[3]=="C" );
-					tblJoint.emplace_back( vect3(x,y,z) , bCtrl );
+					float weight = v.size() >3?stod(v[2]):1.0f;
+					bool bCtrl = (v.size() >4 && v[4]=="C" );
+					tblJoint.emplace_back( vect3(x,y,z) , weight, bCtrl );
 					//	cout << x << "," << y << "," << z << endl; 
 				}
 				break;

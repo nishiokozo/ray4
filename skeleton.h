@@ -117,6 +117,7 @@ struct Joint
 	int priority;
 //	vect3 bnormal;
 	bool bCtrl;
+	float	weight;
 	
 	vector<reference_wrapper<Joint>>	relative;
 	virtual ~Joint(){}
@@ -124,19 +125,21 @@ struct Joint
 	{
 		id = 0;
 		pos = vect3(0,0,0);
+		weight = 1.0;
+		bCtrl = false;
 //		bnormal = vect3(0,0,0);
 		tension = 0;
 		len = 0;
-		bCtrl = false;
 	}
-	Joint( vect3 v, bool _bCtrl )
+	Joint( vect3 v, float _weight, bool _bCtrl )
 	{
 		id = 0;
 		pos = v;
+		weight = _weight;
+		bCtrl = _bCtrl;
 //		bnormal = bv;
 		tension = 0;
 		len = 0;
-		bCtrl = _bCtrl;
 	}
 /*
 	void Move2( vect2 v )
