@@ -52,6 +52,8 @@ struct Apr : public Sys
 		void DrawAxis( vect2 mpos, Apr& apr )
 		//------------------------------------------------------------------------------
 		{
+			apr.gra.SetZTest( false );
+
 			vect3 pos = apr.pers.calcScreenToWorld( vect3(mpos,0) );
 
 			vect3 v0 = apr.pers.calcDisp3( pos * apr.pers.cam.mat.invers() );
@@ -92,6 +94,7 @@ struct Apr : public Sys
 			// 軸名表示
 			apr.gra.Print( mpos+0.01f,string("")+(bAxisX?"X":"")+(bAxisY?"Y":"")+(bAxisZ?"Z":"") ); 
 
+			apr.gra.SetZTest( true );
 
 		}
 	} axis;
@@ -452,7 +455,9 @@ struct Apr : public Sys
 		//------------------------------------------------------------------------------
 		void DrawJoint( Pers& pers, SysGra& gra, Skeleton& skeleton , vect2 mpos )
 		//------------------------------------------------------------------------------
-		{
+		{	
+			gra.SetZTest( false );
+
 			for ( Joint& j : skeleton.tblJoint )
 			{
 
@@ -484,6 +489,8 @@ struct Apr : public Sys
 				gra.Print( pos, to_string(j.id) );
 			//	gra.Print( pos, to_string(j.id) + " "+ to_string(j.priority));
 			}
+
+			gra.SetZTest( true );
 		}
 
 	} selector;
@@ -866,6 +873,8 @@ struct Apr : public Sys
 
 			// animカーソルビュー cursor
 			{
+				gra.SetZTest( false );
+
 				bool flg = false;
 				for ( int y = 0 ; y < (signed)pSkeleton->animations.size() ; y++ )
 				{
@@ -890,6 +899,8 @@ struct Apr : public Sys
 						}
 					}
 				}
+
+				gra.SetZTest( true );
 			}
 
 

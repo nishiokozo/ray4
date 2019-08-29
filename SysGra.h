@@ -75,6 +75,8 @@ struct SysGra
 	void	Circle( vect2 v, float r, rgb col );
 	void	Clr( rgb col );
 
+	void	SetZTest( bool flg );
+
 	SysGra();
 	~SysGra();
 

@@ -357,7 +357,7 @@ void SysGra::Clr( rgb col)
 void SysGra::Circle( vect2 v, float r, rgb col )
 //------------------------------------------------------------------------------
 {
-	glDisable(GL_DEPTH_TEST);
+//	glDisable(GL_DEPTH_TEST);
 
 	{
 	    glColor3f( col.r, col.g, col.b );
@@ -384,7 +384,7 @@ void SysGra::Circle( vect2 v, float r, rgb col )
 void SysGra::Pset( vect2 v0, rgb col, float wide )
 //------------------------------------------------------------------------------
 {
-	glDisable(GL_DEPTH_TEST);
+//	glDisable(GL_DEPTH_TEST);
 
 	glPointSize(wide);
     glBegin(GL_POINTS);
@@ -396,7 +396,7 @@ void SysGra::Pset( vect2 v0, rgb col, float wide )
 void SysGra::Pset( vect3 v0, rgb col, float wide )
 //------------------------------------------------------------------------------
 {
-	glEnable(GL_DEPTH_TEST);	// (デフォルト:GL_LESS）
+//	glEnable(GL_DEPTH_TEST);	// (デフォルト:GL_LESS）
 
 	glPointSize(wide);
     glBegin(GL_POINTS);
@@ -408,7 +408,7 @@ void SysGra::Pset( vect3 v0, rgb col, float wide )
 void SysGra::Box( vect2 v0, vect2 v1,rgb col, float wide)
 //------------------------------------------------------------------------------
 {
-	glDisable(GL_DEPTH_TEST);
+//	glDisable(GL_DEPTH_TEST);
 
   	glLineWidth(wide);
 
@@ -425,7 +425,7 @@ void SysGra::Box( vect2 v0, vect2 v1,rgb col, float wide)
 void SysGra::Fill( vect2 v0, vect2 v1,rgb col)
 //------------------------------------------------------------------------------
 {
-	glDisable(GL_DEPTH_TEST);
+//	glDisable(GL_DEPTH_TEST);
 
     glBegin(GL_QUADS);
     glColor3f( col.r, col.g, col.b );
@@ -440,7 +440,7 @@ void SysGra::Fill( vect2 v0, vect2 v1,rgb col)
 void SysGra::Line( vect2 v0, vect2 v1,rgb col, float wide )
 //------------------------------------------------------------------------------
 {
-	glDisable(GL_DEPTH_TEST);
+//	glDisable(GL_DEPTH_TEST);
 
   	glLineWidth(wide);
   
@@ -454,7 +454,7 @@ void SysGra::Line( vect2 v0, vect2 v1,rgb col, float wide )
 void SysGra::Line( vect3 v0, vect3 v1,rgb col, float wide )
 //------------------------------------------------------------------------------
 {
-	glEnable(GL_DEPTH_TEST);	// (デフォルト:GL_LESS）
+//	glEnable(GL_DEPTH_TEST);	// (デフォルト:GL_LESS）
 
   	glLineWidth(wide);
   
@@ -468,7 +468,7 @@ void SysGra::Line( vect3 v0, vect3 v1,rgb col, float wide )
 void SysGra::Tri( vect2 v0, vect2 v1, vect2 v2, rgb col)
 //------------------------------------------------------------------------------
 {
-	glDisable(GL_DEPTH_TEST);
+//	glDisable(GL_DEPTH_TEST);
 
     glBegin( GL_TRIANGLES );
     glColor3f( col.r, col.g, col.b );
@@ -481,7 +481,7 @@ void SysGra::Tri( vect2 v0, vect2 v1, vect2 v2, rgb col)
 void SysGra::Tri( vect3 v0, vect3 v1, vect3 v2, rgb col)
  //------------------------------------------------------------------------------
 {
-	glEnable(GL_DEPTH_TEST);	// (デフォルト:GL_LESS）
+//	glEnable(GL_DEPTH_TEST);	// (デフォルト:GL_LESS）
 
     glBegin( GL_TRIANGLES );
     glColor3f( col.r, col.g, col.b );
@@ -494,7 +494,7 @@ void SysGra::Tri( vect3 v0, vect3 v1, vect3 v2, rgb col)
 void SysGra::Print( vect2 v0, string str )
 //------------------------------------------------------------------------------
 {
-	glDisable(GL_DEPTH_TEST);
+//	glDisable(GL_DEPTH_TEST);
 
 	glBegin(GL_POINTS);
 	glColor3f( 1,1,1 );
@@ -512,4 +512,22 @@ void SysGra::Print( float x, float y, string str )
 	vect2 v = vect2(x*16,(y+1)*16)/vect2(GetWidth()/2,-GetHeight()/2)+vect2(-1,1);
 
 	Print( v, str );
+}
+
+//------------------------------------------------------------------------------
+void SysGra::SetZTest( bool flg )
+//------------------------------------------------------------------------------
+{
+	if ( flg )
+	{
+		glEnable(GL_DEPTH_TEST);	// (デフォルト:GL_LESS）
+		glDepthFunc(GL_GEQUAL);		// depth <= 書き込み値 
+	}
+	else
+	{
+		glDisable(GL_DEPTH_TEST);
+		glDepthFunc(GL_NEVER);		// 書き込まない
+
+	}
+	
 }

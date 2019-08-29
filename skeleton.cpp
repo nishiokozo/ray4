@@ -542,6 +542,7 @@ void Skeleton::DrawBone( Pers& pers, SysGra& gra )
 
 	if ( stat.bShowBone )
 	{
+		gra.SetZTest( false );
 		// Human 描画
 		for ( Bone b : tblBone )
 		{
@@ -573,10 +574,13 @@ void Skeleton::DrawBone( Pers& pers, SysGra& gra )
 //			gra.Line( v0,v2, rgb(0,1,0) );
 
 		}
+		gra.SetZTest( true );
 	}
 
 	if ( stat.bShowLocus )
 	{
+		gra.SetZTest( false );
+
 		// 軌跡表示
 		if ( static_cast<signed>(animations.size()) > 0 )
 		{
@@ -625,64 +629,10 @@ void Skeleton::DrawBone( Pers& pers, SysGra& gra )
 				}
 			}
 		}
+
+		gra.SetZTest( true );
 	}
 
-	if(0) // スネ軌跡実験
-	if ( stat.bShowLocus )
-	{
-		// 軌跡表示
-		if ( static_cast<signed>(animations.size()) > 0 )
-		{
-			const float dt = anim.dt;
-			const float div = 1/dt;
-
-			for ( int n = -1 ; n < static_cast<signed>(animations[cur.act].pose.size())-3+1 ; n++ )
-			{
-				int n0 = n;
-				int n1 = n+1;
-				int n2 = n+2;
-				int n3 = n+3;
-				if ( n0 < 0 ) n0 = 0;
-				if ( n3 >= static_cast<signed>(animations[cur.act].pose.size()) ) n3 = n2;
-
-
-					if ( tblJoint[ 9 ].stat.bSelected == false ) continue;
-
-				int ja = 8;
-				int jb = 9;
-				{
-				
-					vect3 aP0 = animations[cur.act].pose[ n0 ].joint[ ja ].pos;
-					vect3 aP1 = animations[cur.act].pose[ n1 ].joint[ ja ].pos;
-					vect3 aP2 = animations[cur.act].pose[ n2 ].joint[ ja ].pos;
-					vect3 aP3 = animations[cur.act].pose[ n3 ].joint[ ja ].pos;
-
-					vect3 bP0 = animations[cur.act].pose[ n0 ].joint[ jb ].pos;
-					vect3 bP1 = animations[cur.act].pose[ n1 ].joint[ jb ].pos;
-					vect3 bP2 = animations[cur.act].pose[ n2 ].joint[ jb ].pos;
-					vect3 bP3 = animations[cur.act].pose[ n3 ].joint[ jb ].pos;
-
-					float t = 0;
-					for ( int i = 0 ; i <=div ; i++ )
-					{
-
-					vect3 aP = catmull3d_func(t, aP0,aP1,aP2,aP3 );
-					vect3 bP = catmull3d_func(t, bP0,bP1,bP2,bP3 );
-
-						rgb	col = rgb(1,1,1);
-
-						vect2	va = pers.calcWorldToScreen2( aP );
-						vect2	vb = pers.calcWorldToScreen2( bP );
-
-						gra.Line( va,vb, col, 1);
-
-						t+=dt;
-
-					}	
-				}
-			}
-		}
-	}
 }
 
 //------------------------------------------------------------------------------
@@ -820,7 +770,7 @@ void Skeleton::loadMotion( const string fn )
 					float y = stod(v[1]);
 					float z = stod(v[2]);
 					float weight = v.size() >3?stod(v[2]):1.0f;
-					bool bCtrl = (v.size() >4 && v[4]=="C" );
+					bool bCtrl = (v.size() >4 && v[4]=="-" )?false:true;
 					tblJoint.emplace_back( vect3(x,y,z) , weight, bCtrl );
 					//	cout << x << "," << y << "," << z << endl; 
 				}
@@ -830,7 +780,7 @@ void Skeleton::loadMotion( const string fn )
 					vector<string> v = split( buf, '\t');
 					int n0 = stoi(v[0]);
 					int n1 = stoi(v[1]);
-					bool bBold = (v.size() >2 && v[2]=="B" );
+					bool bBold = (v.size() >2 && v[2]=="B" )?false:true;
 					tblBone.emplace_back( n0, n1, bBold );
 					//	cout << x << "," << y << "," << z << endl; 
 				}
