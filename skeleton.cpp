@@ -540,23 +540,51 @@ void Skeleton::DrawBone( Pers& pers, SysGra& gra )
 		}
 	}
 
+
 	if ( stat.bShowBone )
 	{
 		gra.SetZTest( false );
-		// Human 描画
+
+		rgb col = rgb(0.2,0.2,0.2);
+		// 影 描画
+		for ( Bone b : tblBone )
+		{
+			Joint&	j0 = tblJoint[b.n0];
+			Joint&	j1 = tblJoint[b.n1];
+	
+	
+			vect3 v0= j0.pos;
+			v0.y = 0;
+			v0 = pers.calcWorldToScreen3(v0);
+
+			vect3 v1= j1.pos;
+			v1.y = 0;
+			v1 = pers.calcWorldToScreen3(v1);
+
+	
+			if ( v1.z > 0 && v1.z > 0 )
+			{
+				gra.Line( v0,v1, col,2);
+
+			}
+		}
+		gra.SetZTest( true );
+	}	
+
+	if ( stat.bShowBone )
+	{
+		gra.SetZTest( false );
+		// 骨n 描画
 		for ( Bone b : tblBone )
 		{
 			Joint&	j0 = tblJoint[b.n0];
 			Joint&	j1 = tblJoint[b.n1];
 			if ( j0.disp.z > 0 && j0.disp.z > 0 )
 			{
-				// 骨
-				vect2 v0(j0.disp.x,j0.disp.y);
-				vect2 v1(j1.disp.x,j1.disp.y);
 				if ( b.bBold ) 
-					gra.Line( v0,v1, col,3);
+					gra.Line( j0.disp,j1.disp, col,3);
 				else
-					gra.Line( v0,v1, col,1);
+					gra.Line( j0.disp,j1.disp, col,1);
 
 			}
 		}
@@ -564,18 +592,14 @@ void Skeleton::DrawBone( Pers& pers, SysGra& gra )
 		// ジョイント表示
 		for ( Joint& j : tblJoint )
 		{
-			vect2 v0 = pers.calcDisp2( j.pos * pers.cam.mat.invers() );
+//			vect3 v0 = pers.calcDisp3( j.pos * pers.cam.mat.invers() );
+			vect3 v0 = pers.calcWorldToScreen3( j.pos );
 			if ( j.bCtrl ) gra.Pset( v0, rgb(0,1,0), 11 );
-
-//			vect2 v1 = pers.calcDisp2( (j.pos+j.bnormal) * pers.cam.mat.invers() );
-//			gra.Line( v0,v1, rgb(0,1,0) );
-
-//			vect2 v2 = pers.calcDisp2( (j.pos-j.bnormal) * pers.cam.mat.invers() );
-//			gra.Line( v0,v2, rgb(0,1,0) );
-
 		}
 		gra.SetZTest( true );
 	}
+	
+
 
 	if ( stat.bShowLocus )
 	{

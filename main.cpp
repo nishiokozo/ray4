@@ -470,7 +470,7 @@ struct Apr : public Sys
 
 					if ( bSelected )
 					{
-						gra.Pset( pers.calcDisp2( j.pos * pers.cam.mat.invers() ), rgb(1,0,0), 11 );
+						gra.Pset( pers.calcWorldToScreen3( j.pos ), rgb(1,0,0), 11 );
 					}
 				}
 
@@ -479,13 +479,13 @@ struct Apr : public Sys
 			// 矩形カーソル 表示
 			if (  rect_mode != CALC::NONE )
 			{
-				gra.Box( rect_st, mpos, rgb(1,1,1));
+				gra.Box( rect_st, mpos, rgb(1,1,1)*0.5f);
 			}
 
 			// 矩形カーソル 情報表示
 			for ( Joint& j : skeleton.tblJoint )
 			{
-				vect2 pos = pers.calcDisp2( j.pos * pers.cam.mat.invers() );
+				vect2 pos = pers.calcWorldToScreen2( j.pos );
 				gra.Print( pos+gra.Dot(14,0), to_string(j.id) );
 			//	gra.Print( pos, to_string(j.id) + " "+ to_string(j.priority));
 			}
