@@ -488,59 +488,6 @@ void Skeleton::DrawBone( Pers& pers, SysGra& gra )
 //------------------------------------------------------------------------------
 {
 
-	rgb col = rgb(0,1,0);
-	// Human pers
-	for ( Joint& j : tblJoint )
-	{
-		//	右手系座標系
-		//	右手ねじ周り
-		//	roll	:z	奥+
-		//	pitch	:x	右+
-		//	yaw		:y	下+
-		vect3 v= j.pos;
-
-		v = v * pers.cam.mat.invers();
-
-		j.disp = pers.calcDisp3(v);
-	}
-
-	if ( stat.bShowSkin )
-	{
-		// Human 描画
-		for ( Bone b : tblBone )
-		{
-			Joint&	j0 = tblJoint[b.n0];
-			Joint&	j1 = tblJoint[b.n1];
-			if ( j0.disp.z > 0 && j0.disp.z > 0 )
-			{
-				// 肉
-				const int cnt = 3;
-
-				for ( int i = 0 ; i <= cnt ; i++ )
-				{
-					float t = (float)i / (float)cnt;
-
-					vect3 pos = ( j1.pos - j0.pos )*t + j0.pos;
-
-					vect3 v = ( j1.pos - j0.pos ).normalize();
-					float rx = acos(dot(vect3(0,1,0),v));
-					float ry = atan2(v.x,v.z);
-					{
-						mat44	mx;
-						mat44	my;
-						my.setRotateY(-ry);
-						mx.setRotateX(-rx);
-						mat44 m = mx * my;
-						ring.ring_DrawMat( gra, pers, pos, m );
-					}
-
-				}
-
-			}
-		}
-	}
-
-
 	if ( stat.bShowBone )
 	{
 		gra.SetZTest( false );
@@ -570,21 +517,73 @@ void Skeleton::DrawBone( Pers& pers, SysGra& gra )
 		}
 		gra.SetZTest( true );
 	}	
-
-	if ( stat.bShowBone )
+	
+	rgb col = rgb(0,1,0);
+	// Human pers
+	for ( Joint& j : tblJoint )
 	{
-		gra.SetZTest( false );
-		// 骨n 描画
+		//	右手系座標系
+		//	右手ねじ周り
+		//	roll	:z	奥+
+		//	pitch	:x	右+
+		//	yaw		:y	下+
+//		vect3 v= j.pos;
+
+//		v = v * pers.cam.mat.invers();
+
+		j.disp = pers.calcWorldToScreen3( j.pos );
+	}
+
+	if ( stat.bShowSkin )
+	{
+		// 肉 描画
 		for ( Bone b : tblBone )
 		{
 			Joint&	j0 = tblJoint[b.n0];
 			Joint&	j1 = tblJoint[b.n1];
 			if ( j0.disp.z > 0 && j0.disp.z > 0 )
 			{
-				if ( b.bBold ) 
-					gra.Line( j0.disp,j1.disp, col,3);
-				else
-					gra.Line( j0.disp,j1.disp, col,1);
+				// 
+				const int cnt = 3;
+
+				for ( int i = 0 ; i <= cnt ; i++ )
+				{
+					float t = (float)i / (float)cnt;
+
+					vect3 pos = ( j1.pos - j0.pos )*t + j0.pos;
+
+					vect3 v = ( j1.pos - j0.pos ).normalize();
+					float rx = acos(dot(vect3(0,1,0),v));
+					float ry = atan2(v.x,v.z);
+					{
+						mat44	mx;
+						mat44	my;
+						my.setRotateY(-ry);
+						mx.setRotateX(-rx);
+						mat44 m = mx * my;
+						ring.ring_DrawMat( gra, pers, pos, m );
+					}
+
+				}
+
+			}
+		}
+	}
+
+
+
+
+	if ( stat.bShowBone )
+	{
+		gra.SetZTest( false );
+		// 骨 描画
+		for ( Bone b : tblBone )
+		{
+			Joint&	j0 = tblJoint[b.n0];
+			Joint&	j1 = tblJoint[b.n1];
+			if ( j0.disp.z > 0 && j0.disp.z > 0 )
+			{
+				gra.Line( j0.disp,j1.disp, col, b.bBold?3:1);
 
 			}
 		}
@@ -592,13 +591,47 @@ void Skeleton::DrawBone( Pers& pers, SysGra& gra )
 		// ジョイント表示
 		for ( Joint& j : tblJoint )
 		{
-//			vect3 v0 = pers.calcDisp3( j.pos * pers.cam.mat.invers() );
 			vect3 v0 = pers.calcWorldToScreen3( j.pos );
 			if ( j.bCtrl ) gra.Pset( v0, rgb(0,1,0), 11 );
 		}
 		gra.SetZTest( true );
 	}
 	
+	// 補助骨
+	{
+		Joint&	j = tblJoint[2];
+
+		static vect3 v = vect3(-0.2, 0, 0);
+	
+		vect3 p1 = (tblJoint[1].pos-tblJoint[2].pos).normalize();
+		vect3 p2 = cross(p1,v).normalize();
+		vect3 p3 = cross(p2,p1);
+		mat44	m( 
+			p1.x, p1.y, p1.z,	0,
+			p2.x, p2.y, p2.z,	0,
+			p3.x, p3.y, p3.z,	0,
+			0,	0,	0,	1
+		);
+
+
+		vect3 va = -v * m;
+		vect3 vb =  v * m;
+		vect3 v0 = pers.calcWorldToScreen3( j.pos-p3 );
+		vect3 v1 = pers.calcWorldToScreen3( j.pos+p3 );
+		gra.Line(v0,v1,rgb(1,0,0));
+
+
+
+		vect3 vj0 = pers.calcWorldToScreen3( j.pos );
+		vect3 vj1 = pers.calcWorldToScreen3( j.pos+p1 );
+		vect3 vj2 = pers.calcWorldToScreen3( j.pos+p2 );
+		vect3 vj3 = pers.calcWorldToScreen3( j.pos+p3 );
+		gra.Line(vj0,vj1,rgb(1,0,1));
+		gra.Line(vj0,vj2,rgb(1,1,0));
+		gra.Line(vj0,vj3,rgb(0,1,1));
+
+	
+	}
 
 
 	if ( stat.bShowLocus )

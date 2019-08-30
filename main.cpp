@@ -56,7 +56,7 @@ struct Apr : public Sys
 
 			vect3 pos = apr.pers.calcScreenToWorld( vect3(mpos,0) );
 
-			vect3 v0 = apr.pers.calcDisp3( pos * apr.pers.cam.mat.invers() );
+			vect3 v0 = apr.pers.calcWorldToScreen3( pos  );
 
 
 
@@ -119,7 +119,7 @@ struct Apr : public Sys
 	void pset3d( vect3 p0, rgb col, float wide )
 	//------------------------------------------------------------------------------
 	{
-		vect3 v = pers.calcDisp3( p0 * pers.cam.mat.invers() );
+		vect3 v = pers.calcWorldToScreen3( p0 );
 		if ( v.z > 0 )
 		{
 			gra.Pset( vect2(v.x,v.y), col, wide );
@@ -215,7 +215,7 @@ struct Apr : public Sys
 				for ( int i = 0 ; i <= 360 ; i+=20 )
 				{
 					vect3 p = vect3( r*cos(rad(i)), 0, r*sin(rad(i)) ) + pos;
-					vect3 q = apr.pers.calcDisp3( p * apr.pers.cam.mat.invers() );
+					vect3 q = apr.pers.calcWorldToScreen3( p );
 					vect2 v1 = vect2( q.x, q.y );
 					if ( i > 0 ) apr.gra.Line( v0,v1, col );
 					v0 = v1;
@@ -831,15 +831,15 @@ struct Apr : public Sys
 			// 画面クリア
 			gra.Clr(rgb(0.3,0.3,0.3));
 
+			// 優先度つけ
+			for ( Joint& j : pSkeleton->tblJoint )
+			{
+				j.priority = 999;
+				if ( j.stat.bSelected ) j.priority = 1;
+			}
+
 			pSkeleton->update();
-				{
-					// 優先度つけ
-					for ( Joint& j : pSkeleton->tblJoint )
-					{
-						j.priority = 999;
-						if ( j.stat.bSelected ) j.priority = 1;
-					}
-				}
+
 
 
 
@@ -870,6 +870,26 @@ struct Apr : public Sys
 				axis.DrawAxis( mouse.gpos, *this );
 
 			}
+			
+
+/*
+			for ( float a = 0 ; a < 4 ; a += 0.1 )
+			{
+				gra.SetZTest( false );
+					gra.Print(1,text_y++,to_string(a));
+
+				rgb col = rgb(0,1,0); 
+				float w = 1.0;
+				
+				if ( a > 1-0.1/2 &&  a < 1+0.1/2 ) {col = rgb(1,1,1); w=3;}
+				if ( a > 2-0.1/2 &&  a < 2+0.1/2 ) {col = rgb(1,1,1); w=3;}
+				if ( a > 3-0.1/2 &&  a < 3+0.1/2 ) {col = rgb(1,1,1); w=3;}
+				if ( a > 4-0.1/2 &&  a < 4+0.1/2 ) {col = rgb(1,1,1); w=3;}
+				if ( a > 5-0.1/2 &&  a < 5+0.1/2 ) {col = rgb(1,1,1); w=3;}
+				gra.Pset( vect2(a, pow(a,a))*0.1*0.5+vect2(0,-0.5) , col, w);
+				gra.SetZTest( true );
+			}
+*/
 
 			// animカーソルビュー cursor
 			{
