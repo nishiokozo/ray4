@@ -115,46 +115,34 @@ struct Joint
 	vect3 disp;
 	float len;
 	int priority;
-//	vect3 bnormal;
 	bool bCtrl;
 	float	weight;
+	vect3 prev;
+	vect3 prev2;
+	vect3 prev3;
+	vect3 prev4;
+	vect3 prev5;
+	vect3 prev6;
+	vect3 prev7;
+	vect3 prev8;
+	vect3 binormal;
 	
 	vector<reference_wrapper<Joint>>	relative;
 	virtual ~Joint(){}
-	Joint()
-	{
-		id = 0;
-		pos = vect3(0,0,0);
-		weight = 1.0;
-		bCtrl = false;
-//		bnormal = vect3(0,0,0);
-		tension = 0;
-		len = 0;
-	}
 	Joint( vect3 v, float _weight, bool _bCtrl )
 	{
 		id = 0;
 		pos = v;
 		weight = _weight;
 		bCtrl = _bCtrl;
-//		bnormal = bv;
 		tension = 0;
 		len = 0;
+		prev = pos;
+		prev2 = pos;
+		prev3 = pos;
+		prev4 = pos;
+		binormal = vect3(1,0,0);
 	}
-/*
-	void Move2( vect2 v )
-	{
-		//none
-	}
-	vect2 Pos2()
-	{
-		return vect2( disp.x, disp.y );
-	}
-	bool IsVisuable()
-	{
-		return disp.z > 0;
-	}
-*/
 
 };
 
@@ -172,6 +160,7 @@ struct Skeleton
 {
 	string	filename;
 
+	vector<Joint>			tblPrevJoint;
 	vector<Joint>			tblJoint;
 	vector<Bone>			tblBone;
 
@@ -218,8 +207,8 @@ struct Skeleton
 		bool	bShowLocus = true;	//	軌跡
 	} stat;
 
-	void loadMotion( const string filename );
-	void saveMotion();
+	void LoadSkeleton( const string filename );
+	void SaveSkeleton();
 	void AddAnimation();
 	void NextAnimation();
 	void PrevAnimation();
@@ -234,11 +223,8 @@ struct Skeleton
 	void PrevKeyframe();
 	void PlayAnimation();
 	void ReqAnimation();
-	void update();
-//		void draw( Pers& pers, mat44& cam_mat, SysGra& gra );
-//		void drawMotion( Pers& pers, mat44& cam_mat, SysGra& gra );
-	void DrawBone( Pers& pers, SysGra& gra );
-//	void drawMotion( Pers& pers, SysGra& gra );
+	void UpdateSkeleton();
+	void DrawSkeleton( Pers& pers, SysGra& gra );
 
 
 	//

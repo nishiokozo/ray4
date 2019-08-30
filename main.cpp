@@ -11,6 +11,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <iomanip>
 using namespace std;
 
 #include "geom.h"
@@ -160,22 +161,6 @@ struct Apr : public Sys
 
 	struct
 	{
-//		vect3	pos;
-//		int		NUM_U;
-//		int		NUM_V;
-//		float	dt;
-//		rgb		col;
-//	
-//		//------------------------------------------------------------------------------
-//		void SetMesh(  )
-//		//------------------------------------------------------------------------------
-//		{	// ミニグリッド
-//			pos 	= _pos;
-//			NUM_U	= _NUM_U;
-//			NUM_V	= _NUM_V;
-//			dt		= _dt;
-//			col	 = _col;
-//		}
 		//------------------------------------------------------------------------------
 		void DrawGrid( Apr& apr, vect3 pos, int NUM_U, int NUM_V, float dt, rgb col )
 		//------------------------------------------------------------------------------
@@ -211,21 +196,19 @@ struct Apr : public Sys
 
 			{//原点表示
 				float r = 0.1;
-				vect2 v0;
+				vect3 v0;
 				for ( int i = 0 ; i <= 360 ; i+=20 )
 				{
 					vect3 p = vect3( r*cos(rad(i)), 0, r*sin(rad(i)) ) + pos;
-					vect3 q = apr.pers.calcWorldToScreen3( p );
-					vect2 v1 = vect2( q.x, q.y );
+					vect3 v1 = apr.pers.calcWorldToScreen3( p );
 					if ( i > 0 ) apr.gra.Line( v0,v1, col );
 					v0 = v1;
 				}
 			}
 		}
-	}grid;
-//	Grid gridGround;
+
+	} grid;
 	
-	bool flgInfo = true;
 	
 
 	struct Select
@@ -506,8 +489,8 @@ struct Apr : public Sys
 		{
 			//読み込み
 			unique_ptr<Skeleton> pNew(new Skeleton);
-//			pNew->loadMotion( "human.mot" );
-			pNew->loadMotion( "bone.mot" );
+//			pNew->LoadSkeleton( "human.mot" );
+			pNew->LoadSkeleton( "bone.mot" );
 			pSkeleton = move(pNew);
 		}
 		pSkeleton->stat.bShowSkin = false;
@@ -604,6 +587,15 @@ struct Apr : public Sys
 		} box;
 
 
+		// 箱
+		//calcDisp rotate
+		vect3 boxpos = {6.5,-0.51,8.5};
+		vect3 boxrot(0,0,0);
+//			box.DrawBox( pers, gra, boxpos, boxrot );
+
+
+		cout<<fixed<<setprecision(24);
+
 		//===========================================================================
 		while( Update() )
 		{
@@ -640,14 +632,9 @@ struct Apr : public Sys
 				pers.cam.mat.LookAt( pers.cam.pos, pers.cam.at, pers.cam.up );
 			}
 
-	
-
-
 			//=================================
 			//入力
 			//=================================
-
-
 			{
 
 				if ( pSkeleton->cur.bSelecting ==false && keys.SHIFT.on && (keys.UP.hi || keys.DOWN.hi || keys.LEFT.hi ||keys.RIGHT.hi) )
@@ -666,13 +653,13 @@ struct Apr : public Sys
 				{
 					//読み込み
 					unique_ptr<Skeleton> pNew(new Skeleton);
-					pNew->loadMotion( "human.mot" );
+					pNew->LoadSkeleton( "human.mot" );
 
 					pSkeleton = move(pNew);
 				}
 
 				// キーフレームセーブ
-				if ( keys.CTRL.on && keys.S.hi ) pSkeleton->saveMotion();
+				if ( keys.CTRL.on && keys.S.hi ) pSkeleton->SaveSkeleton();
 
 				// キーフレームペースト
 				if ( keys.CTRL.on && keys.V.hi ) pSkeleton->PastKeyframe();
@@ -721,15 +708,9 @@ struct Apr : public Sys
 			}
 
 
-
-
-
-
 			if ( keys._1.hi ) pSkeleton->stat.bShowBone = !pSkeleton->stat.bShowBone;
 			if ( keys._2.hi ) pSkeleton->stat.bShowSkin = !pSkeleton->stat.bShowSkin;
 			if ( keys._3.hi ) pSkeleton->stat.bShowLocus = !pSkeleton->stat.bShowLocus;
-
-
 
 
 
@@ -794,7 +775,6 @@ struct Apr : public Sys
 				
 				// 選択リストのJoint移動
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && selector.one.pj ) 
-//					selector.MoveSelected( pers, (*pSkeleton), mouse.gmov );
 				{
 					Skeleton& skeleton = (*pSkeleton);
 					vect2 gmov = mouse.gmov;
@@ -815,9 +795,6 @@ struct Apr : public Sys
 					// キーフレームへ反映
 					skeleton.RefrectKeyframe();
 				}
-				
-				//--
-
 			}
 
 
@@ -838,32 +815,17 @@ struct Apr : public Sys
 				if ( j.stat.bSelected ) j.priority = 1;
 			}
 
-			pSkeleton->update();
-
-
-
-
-
-
+			//スケルトン更新
+			pSkeleton->UpdateSkeleton();
 
 			// 床グリッド描画
 			grid.DrawGrid( *this, vect3(0,0,0), 10, 10, 1, vect3(0.2,0.2,0.2) );
-			
-			
 
-			// 箱
-			//calcDisp rotate
-			vect3 boxpos = {6.5,-0.51,8.5};
-			vect3 boxrot(0,0,0);
-//			box.DrawBox( pers, gra, boxpos, boxrot );
-
-
-			// human 描画
-			pSkeleton->DrawBone( pers, gra );
+			// スケルトン 描画
+			pSkeleton->DrawSkeleton( pers, gra );
 
 			// 選択リスト表示
 			selector.DrawJoint( pers, gra, (*pSkeleton) , mouse.gpos );
-
 
 			// マニュピレーター描画
 			{
@@ -942,6 +904,7 @@ struct Apr : public Sys
 			#endif
 
 			{
+				static bool flgInfo = true;
 				if( keys.F2.hi ) flgInfo = !flgInfo;
 				if ( flgInfo )
 				{

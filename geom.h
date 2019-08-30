@@ -180,6 +180,9 @@ public:
 	vect3 normalize() { return (*this)/length(); }
 	float length() { return sqrt( x*x + y*y + z*z ); }
 
+	bool operator==( vect3 v ) { return ( x == v.x &&  y == v.y &&  z == v.z); }
+	bool operator!=( vect3 v ) { return !( x == v.x &&  y == v.y &&  z == v.z); }
+
 	vect3 operator*=( vect3 v ) { x *= v.x; y *= v.y; z *= v.z;  return *this; }
 	vect3 operator/=( vect3 v ) { x /= v.x; y /= v.y; z /= v.z;  return *this; }
 	vect3 operator+=( vect3 v ) { x += v.x; y += v.y; z += v.z;  return *this; }

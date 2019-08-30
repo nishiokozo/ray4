@@ -7,16 +7,183 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+
 using namespace std;
 
 #include "geom.h"
-//#include "SysKeys.h"
-//#include "SysMouse.h"
 #include "SysGra.h"
-//#include "Sys.h"
-
 #include "obj.h"
 #include "skeleton.h"
+
+
+//------------------------------------------------------------------------------
+void Skeleton::SaveSkeleton()
+//------------------------------------------------------------------------------
+{
+	anim.bPlaying = false;
+
+	fstream fo( filename.c_str(), ios::out );
+
+	{
+		fo << "joint" << endl;
+		for ( Joint& j : tblJoint )	// 関節の位置
+		{
+			fo << "\t"<< j.pos.x << "\t" << j.pos.y << "\t" << j.pos.z << endl;
+		}
+
+		fo << "bone" << endl;
+		for ( Bone& b : tblBone )	// 骨
+		{
+			Joint&	j0 = tblJoint[b.n0];
+			Joint&	j1 = tblJoint[b.n1];
+			b.length = (j1.pos - j0.pos).length();
+			fo  << "\t"<< b.n0 << "\t" << b.n1 << endl;
+		}
+	}
+	{
+		int	cntAction = static_cast<signed>(animations.size());
+		for ( int act = 0 ; act < cntAction ; act++ )
+		{
+			fo << "motion" << endl;
+			int	cntPose = static_cast<signed>(animations[ act ].pose.size());
+			for ( int pose = 0 ; pose < cntPose ; pose++ )
+			{
+				for ( int j = 0 ; j < static_cast<signed>(tblJoint.size()) ; j++ )
+				{
+					fo  << "\t"<< animations[ act ].pose[ pose ].joint[ j ].pos.x << "\t" << animations[ act ].pose[ pose ].joint[ j ].pos.y << "\t" << animations[ act ].pose[ pose ].joint[ j ].pos.z << endl;
+				}
+				if( pose+1 < cntPose ) fo << "," << endl;
+			}
+		}
+	}
+	fo << "end" << endl;
+
+	cout << "SAVED" << endl;
+}
+//------------------------------------------------------------------------------
+void Skeleton::LoadSkeleton( const string fn )
+//------------------------------------------------------------------------------
+{
+	filename = fn;
+
+	anim.bPlaying = false;
+
+
+	fstream fi( filename.c_str(), ios::in );
+	string buf;
+	enum
+	{
+		ModeNone,
+		ModeJoint,
+		ModeBone,
+		ModeMotion,
+	} mode = ModeNone;
+	
+	function<vector<string>(const string&, char)> split = [] (const string &s, char delimiter ) 
+	{
+		vector<string> elems;
+		stringstream ss(s);
+		string item;
+		while (getline(ss, item, delimiter )) 
+		{
+			if (!item.empty()) 
+			{
+				elems.push_back(item);
+			}
+		}
+		return elems;
+	};
+
+	int act = 0;
+
+	while ( getline( fi, buf ) )
+	{
+ 		if ( *(buf.end()-1) == 0x0d ) buf.pop_back();//CRLF対応
+		if ( buf.size() == 0 ) continue;
+		if ( buf.substr(0,2) == "//" ) continue;
+		cout << buf << endl;
+		if ( string(buf) == "joint" )	{mode = ModeJoint;	continue;}
+		if ( string(buf) == "bone" )	{mode = ModeBone;	continue;}
+		if ( string(buf) == "motion" )	
+		{
+			mode = ModeMotion;
+			act = static_cast<signed>(animations.size());
+			animations.emplace_back();
+			animations[ act ].pose.emplace_back();
+			continue;
+		}
+		if ( string(buf) == "," ) 
+		{
+			animations[ act ].pose.emplace_back();
+			continue;
+		}
+		if ( string(buf) == "end" )	
+		{	
+			for ( Bone& b : tblBone )	// 関節の距離を決定する。
+			{
+				Joint&	j0 = tblJoint[b.n0];
+				Joint&	j1 = tblJoint[b.n1];
+				b.length = (j1.pos - j0.pos).length();
+			}
+			{
+				int cnt = 0 ;
+				for ( Joint& j : tblJoint )
+				{
+					j.id = cnt++;				//id登録
+				}
+			}
+			for ( Bone& b : tblBone )	// ジョイントに関節の距離を決定する。
+			{
+				Joint&	j0 = tblJoint[b.n0];
+				Joint&	j1 = tblJoint[b.n1];
+				j1.relative.emplace_back( j0 ); 
+				j0.relative.emplace_back( j1 ); 
+			}
+			cur.pose = 0;
+			break;
+		}
+		switch( mode )
+		{
+			case ModeJoint:
+				{
+					vector<string> v = split( buf, '\t');
+					float x = stod(v[0]);
+					float y = stod(v[1]);
+					float z = stod(v[2]);
+					float weight = v.size() >3?stod(v[2]):1.0f;
+					bool bCtrl = (v.size() >4 && v[4]=="-" )?false:true;
+					tblJoint.emplace_back( vect3(x,y,z) , weight, bCtrl );
+					//	cout << x << "," << y << "," << z << endl; 
+				}
+				break;
+			case ModeBone:
+				{
+					vector<string> v = split( buf, '\t');
+					int n0 = stoi(v[0]);
+					int n1 = stoi(v[1]);
+					bool bBold = (v.size() >2 && v[2]=="-" )?false:true;
+					tblBone.emplace_back( n0, n1, bBold );
+					//	cout << x << "," << y << "," << z << endl; 
+				}
+				break;
+			case ModeMotion:
+				{
+					vector<string> v = split( buf, '\t');
+					float x = stod(v[0]);
+					float y = stod(v[1]);
+					float z = stod(v[2]);
+					animations[ act ].pose[ animations[ act ].pose.size()-1 ].joint.emplace_back( vect3(x,y,z) );
+					//	cout << x << "," << y << "," << z << endl; 
+				}
+				break;
+			default:
+				break;
+		}
+
+	}
+	cout << "LOADED" << endl;
+//	return pNew;
+}
 
 // カトマル曲線3D
 //------------------------------------------------------------------------------
@@ -433,10 +600,29 @@ void Skeleton::AddAnimation()
 }
 
 //------------------------------------------------------------------------------
-void Skeleton::update()
+void Skeleton::UpdateSkeleton()
 //------------------------------------------------------------------------------
 {
-	for ( int i = 0 ; i < 11 ; i++ )
+	// 保管
+	for ( Joint& a : tblJoint )
+	{
+//		a.prev = (a.prev+a.pos)/2.0;
+
+		if ( a.prev != a.pos )
+		{
+			a.prev8 = (a.prev7+a.prev)/2;
+			a.prev7 = (a.prev6+a.prev)/2;
+			a.prev6 = (a.prev5+a.prev)/2;
+			a.prev5 = (a.prev4+a.prev)/2;
+			a.prev4 = (a.prev3+a.prev)/2;
+			a.prev3 = (a.prev2+a.prev)/2;
+			a.prev2 = (a.prev+a.prev)/2;
+		}
+		a.prev = a.pos;
+	}
+
+
+	for ( int i = 0 ; i < 11 ; i++ )	// 収束回数多いほど収束数る
 	{
 		// 骨コリジョン 張力計算
 		for ( Bone b : tblBone )
@@ -481,19 +667,20 @@ void Skeleton::update()
 			a.tension=0;
 		}
 	}
+	
 }
 
 //------------------------------------------------------------------------------
-void Skeleton::DrawBone( Pers& pers, SysGra& gra )
+void Skeleton::DrawSkeleton( Pers& pers, SysGra& gra )
 //------------------------------------------------------------------------------
 {
 
+	// 影 描画
 	if ( stat.bShowBone )
 	{
 		gra.SetZTest( false );
 
 		rgb col = rgb(0.2,0.2,0.2);
-		// 影 描画
 		for ( Bone b : tblBone )
 		{
 			Joint&	j0 = tblJoint[b.n0];
@@ -519,7 +706,9 @@ void Skeleton::DrawBone( Pers& pers, SysGra& gra )
 	}	
 	
 	rgb col = rgb(0,1,0);
-	// Human pers
+
+
+	// 透視投影変換
 	for ( Joint& j : tblJoint )
 	{
 		//	右手系座標系
@@ -527,16 +716,12 @@ void Skeleton::DrawBone( Pers& pers, SysGra& gra )
 		//	roll	:z	奥+
 		//	pitch	:x	右+
 		//	yaw		:y	下+
-//		vect3 v= j.pos;
-
-//		v = v * pers.cam.mat.invers();
-
 		j.disp = pers.calcWorldToScreen3( j.pos );
 	}
 
+	// 肉 描画
 	if ( stat.bShowSkin )
 	{
-		// 肉 描画
 		for ( Bone b : tblBone )
 		{
 			Joint&	j0 = tblJoint[b.n0];
@@ -572,11 +757,10 @@ void Skeleton::DrawBone( Pers& pers, SysGra& gra )
 
 
 
-
+	// 骨 描画
 	if ( stat.bShowBone )
 	{
 		gra.SetZTest( false );
-		// 骨 描画
 		for ( Bone b : tblBone )
 		{
 			Joint&	j0 = tblJoint[b.n0];
@@ -597,14 +781,26 @@ void Skeleton::DrawBone( Pers& pers, SysGra& gra )
 		gra.SetZTest( true );
 	}
 	
-	// 補助骨
+	// 剛体実験
 	{
 		Joint&	j = tblJoint[2];
 
 		static vect3 v = vect3(-0.2, 0, 0);
 	
+		vect3 p0 = (tblJoint[1].prev8-tblJoint[2].prev8).normalize();
 		vect3 p1 = (tblJoint[1].pos-tblJoint[2].pos).normalize();
-		vect3 p2 = cross(p1,v).normalize();
+		float d = dot(p0,p1); 
+//cout << fixed<< d << endl;
+//if ( dot(p0,p1) == 1.0f ) cout << "a"<<endl;
+		vect3 p2 = cross(p1,p0).normalize();
+		float a = dot( p2, tblJoint[2].binormal);
+		float b = dot( -p2, tblJoint[2].binormal);
+		if ( a < b  ) p2 = -p2;
+
+//		if ( d > 0.9999999 ) p2 = tblJoint[2].binormal;
+//		if ( d > 0.999 ) p2 = tblJoint[2].binormal;
+		tblJoint[2].binormal = p2;
+
 		vect3 p3 = cross(p2,p1);
 		mat44	m( 
 			p1.x, p1.y, p1.z,	0,
@@ -614,11 +810,11 @@ void Skeleton::DrawBone( Pers& pers, SysGra& gra )
 		);
 
 
-		vect3 va = -v * m;
-		vect3 vb =  v * m;
-		vect3 v0 = pers.calcWorldToScreen3( j.pos-p3 );
-		vect3 v1 = pers.calcWorldToScreen3( j.pos+p3 );
-		gra.Line(v0,v1,rgb(1,0,0));
+//		vect3 va = -v * m;
+//		vect3 vb =  v * m;
+//		vect3 v0 = pers.calcWorldToScreen3( j.pos-p3 );
+//		vect3 v1 = pers.calcWorldToScreen3( j.pos+p3 );
+//		gra.Line(v0,v1,rgb(1,0,0));
 
 
 
@@ -690,173 +886,4 @@ void Skeleton::DrawBone( Pers& pers, SysGra& gra )
 		gra.SetZTest( true );
 	}
 
-}
-
-//------------------------------------------------------------------------------
-void Skeleton::saveMotion()
-//------------------------------------------------------------------------------
-{
-	anim.bPlaying = false;
-
-	fstream fo( filename.c_str(), ios::out );
-
-	{
-		fo << "joint" << endl;
-		for ( Joint& j : tblJoint )	// 関節の位置
-		{
-			fo << "\t"<< j.pos.x << "\t" << j.pos.y << "\t" << j.pos.z << endl;
-		}
-
-		fo << "bone" << endl;
-		for ( Bone& b : tblBone )	// 骨
-		{
-			Joint&	j0 = tblJoint[b.n0];
-			Joint&	j1 = tblJoint[b.n1];
-			b.length = (j1.pos - j0.pos).length();
-			fo  << "\t"<< b.n0 << "\t" << b.n1 << endl;
-		}
-	}
-	{
-		int	cntAction = static_cast<signed>(animations.size());
-		for ( int act = 0 ; act < cntAction ; act++ )
-		{
-			fo << "motion" << endl;
-			int	cntPose = static_cast<signed>(animations[ act ].pose.size());
-			for ( int pose = 0 ; pose < cntPose ; pose++ )
-			{
-				for ( int j = 0 ; j < static_cast<signed>(tblJoint.size()) ; j++ )
-				{
-					fo  << "\t"<< animations[ act ].pose[ pose ].joint[ j ].pos.x << "\t" << animations[ act ].pose[ pose ].joint[ j ].pos.y << "\t" << animations[ act ].pose[ pose ].joint[ j ].pos.z << endl;
-				}
-				if( pose+1 < cntPose ) fo << "," << endl;
-			}
-		}
-	}
-	fo << "end" << endl;
-
-	cout << "SAVED" << endl;
-}
-//------------------------------------------------------------------------------
-void Skeleton::loadMotion( const string fn )
-//------------------------------------------------------------------------------
-{
-	filename = fn;
-
-	anim.bPlaying = false;
-
-
-	fstream fi( filename.c_str(), ios::in );
-	string buf;
-	enum
-	{
-		ModeNone,
-		ModeJoint,
-		ModeBone,
-		ModeMotion,
-	} mode = ModeNone;
-	
-	function<vector<string>(const string&, char)> split = [] (const string &s, char delimiter ) 
-	{
-		vector<string> elems;
-		stringstream ss(s);
-		string item;
-		while (getline(ss, item, delimiter )) 
-		{
-			if (!item.empty()) 
-			{
-				elems.push_back(item);
-			}
-		}
-		return elems;
-	};
-
-	int act = 0;
-
-	while ( getline( fi, buf ) )
-	{
- 		if ( *(buf.end()-1) == 0x0d ) buf.pop_back();//CRLF対応
-		if ( buf.size() == 0 ) continue;
-		if ( buf.substr(0,2) == "//" ) continue;
-		cout << buf << endl;
-		if ( string(buf) == "joint" )	{mode = ModeJoint;	continue;}
-		if ( string(buf) == "bone" )	{mode = ModeBone;	continue;}
-		if ( string(buf) == "motion" )	
-		{
-			mode = ModeMotion;
-			act = static_cast<signed>(animations.size());
-			animations.emplace_back();
-			animations[ act ].pose.emplace_back();
-			continue;
-		}
-		if ( string(buf) == "," ) 
-		{
-			animations[ act ].pose.emplace_back();
-			continue;
-		}
-		if ( string(buf) == "end" )	
-		{	
-			for ( Bone& b : tblBone )	// 関節の距離を決定する。
-			{
-				Joint&	j0 = tblJoint[b.n0];
-				Joint&	j1 = tblJoint[b.n1];
-				b.length = (j1.pos - j0.pos).length();
-			}
-			{
-				int cnt = 0 ;
-				for ( Joint& j : tblJoint )
-				{
-					j.id = cnt++;				//id登録
-				}
-			}
-			for ( Bone& b : tblBone )	// ジョイントに関節の距離を決定する。
-			{
-				Joint&	j0 = tblJoint[b.n0];
-				Joint&	j1 = tblJoint[b.n1];
-				j1.relative.emplace_back( j0 ); 
-				j0.relative.emplace_back( j1 ); 
-			}
-			cur.pose = 0;
-			break;
-		}
-		switch( mode )
-		{
-			case ModeJoint:
-				{
-					vector<string> v = split( buf, '\t');
-					float x = stod(v[0]);
-					float y = stod(v[1]);
-					float z = stod(v[2]);
-					float weight = v.size() >3?stod(v[2]):1.0f;
-					bool bCtrl = (v.size() >4 && v[4]=="-" )?false:true;
-					tblJoint.emplace_back( vect3(x,y,z) , weight, bCtrl );
-					//	cout << x << "," << y << "," << z << endl; 
-				}
-				break;
-			case ModeBone:
-				{
-					vector<string> v = split( buf, '\t');
-					int n0 = stoi(v[0]);
-					int n1 = stoi(v[1]);
-					bool bBold = (v.size() >2 && v[2]=="-" )?false:true;
-					tblBone.emplace_back( n0, n1, bBold );
-					//	cout << x << "," << y << "," << z << endl; 
-				}
-				break;
-			case ModeMotion:
-				{
-					vector<string> v = split( buf, '\t');
-					float x = stod(v[0]);
-					float y = stod(v[1]);
-					float z = stod(v[2]);
-					animations[ act ].pose[ animations[ act ].pose.size()-1 ].joint.emplace_back( vect3(x,y,z) );
-					//	cout << x << "," << y << "," << z << endl; 
-				}
-				break;
-			default:
-				break;
-		}
-
-	}
-	cout << "LOADED" << endl;
-//	return pNew;
 }
