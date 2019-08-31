@@ -118,21 +118,21 @@ void Skeleton::LoadSkeleton( const string fn )
 		{	
 			for ( Bone& b : tblBone )	// 関節の距離を決定する。
 			{
-				Joint&	j0 = tblJoint[b.n0];
-				Joint&	j1 = tblJoint[b.n1];
+				Joint&	j0 = tblJointForm[b.n0];
+				Joint&	j1 = tblJointForm[b.n1];
 				b.length = (j1.pos - j0.pos).abs();
 			}
 			{
 				int cnt = 0 ;
-				for ( Joint& j : tblJoint )
+				for ( Joint& j : tblJointForm )
 				{
 					j.id = cnt++;				//id登録
 				}
 			}
 			for ( Bone& b : tblBone )	// ジョイントに関節の距離を決定する。
 			{
-				Joint&	j0 = tblJoint[b.n0];
-				Joint&	j1 = tblJoint[b.n1];
+				Joint&	j0 = tblJointForm[b.n0];
+				Joint&	j1 = tblJointForm[b.n1];
 				j1.relative.emplace_back( j0 ); 
 				j0.relative.emplace_back( j1 ); 
 			}
@@ -149,7 +149,7 @@ void Skeleton::LoadSkeleton( const string fn )
 					float z = stod(v[2]);
 					float weight = v.size() >3?stod(v[2]):1.0f;
 					bool bCtrl = (v.size() >4 && v[4]=="-" )?false:true;
-					tblJoint.emplace_back( vect3(x,y,z) , weight, bCtrl );
+					tblJointForm.emplace_back( vect3(x,y,z) , weight, bCtrl );
 					//	cout << x << "," << y << "," << z << endl; 
 				}
 				break;
@@ -180,7 +180,18 @@ void Skeleton::LoadSkeleton( const string fn )
 	}
 	cout << "LOADED" << endl;
 
-	tblJointForm = tblJoint;
+	// カーソル更新
+	tblJoint = tblJointForm;
+	if ( animations.size() > cur.act )
+	{
+		// キーフレーム切り替え
+		int i = 0;
+		for ( Joint& j : tblJoint )
+		{
+			j.pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
+			i++;
+		}
+	}
 
 }
 
