@@ -7,6 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <iomanip>
 
 using namespace std;
 
@@ -20,16 +21,24 @@ using namespace std;
 void Skeleton::SaveSkeleton()
 //------------------------------------------------------------------------------
 {
+
 	anim.bPlaying = false;
 
 	fstream fo( filename.c_str(), ios::out );
 
+
 	{
 		fo << "joint" << endl;
+		fo << fixed;
+		fo << showpoint;
+		fo << showpos;
 		for ( Joint& j : tblJointForm )	// 関節の位置
 		{
 			fo << "\t"<< j.pos.x << "\t" << j.pos.y << "\t" << j.pos.z << endl;
 		}
+		fo << noshowpoint;
+		fo << noshowpos;
+
 
 		fo << "bone" << endl;
 		for ( Bone& b : tblBone )	// 骨
@@ -715,7 +724,7 @@ void Skeleton::DrawSkeleton( Pers& pers, SysGra& gra )
 		gra.SetZTest( true );
 	}	
 	
-	rgb col = rgb(0,1,0);
+//	rgb col = rgb(0,1,0);
 
 
 	// 透視投影変換
@@ -770,6 +779,8 @@ void Skeleton::DrawSkeleton( Pers& pers, SysGra& gra )
 	// 骨 描画
 	if ( stat.bShowBone )
 	{
+		rgb col = rgb(0,0,1);
+		
 		gra.SetZTest( false );
 		for ( Bone b : tblBone )
 		{
@@ -786,12 +797,13 @@ void Skeleton::DrawSkeleton( Pers& pers, SysGra& gra )
 		for ( Joint& j : tblJoint )
 		{
 			vect3 v0 = pers.calcWorldToScreen3( j.pos );
-			if ( j.bCtrl ) gra.Pset( v0, rgb(0,1,0), 11 );
+			if ( j.bCtrl ) gra.Pset( v0, col, 11 );
 		}
 		gra.SetZTest( true );
 	}
 	
 	// 剛体実験
+//	if (0)
 	{
 		Joint&	j = tblJoint[2];
 
@@ -883,12 +895,24 @@ void Skeleton::DrawSkeleton( Pers& pers, SysGra& gra )
 							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col,1);
 						}
 						
-//						if ( v1.z > 0 ) gra.Pset(vect2(v1.x,v1.y), col, 4);
+//						if ( v1.z > 0 ) gra.Pset(v1, col, 4);
 
 						a=b;
 						t+=dt;
 
 					}	
+
+					// キーフレーム表示
+					{
+						vect3 v0 = pers.calcWorldToScreen3(P0);
+						vect3 v1 = pers.calcWorldToScreen3(P1);
+						vect3 v2 = pers.calcWorldToScreen3(P2);
+						vect3 v3 = pers.calcWorldToScreen3(P3);
+						gra.Pset(v0, rgb(0,0,1), 11);
+						gra.Pset(v1, rgb(0,0,1), 11);
+						gra.Pset(v2, rgb(0,0,1), 11);
+						gra.Pset(v3, rgb(0,0,1), 11);
+					}
 				}
 			}
 		}
