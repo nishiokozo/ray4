@@ -500,16 +500,17 @@ struct Apr : public Sys
 		struct
 		{
 
+			const float s = 0.05f;
 			vector<vect3> vert=
 			{
-				{	-0.5,	 0.5+1.0,	-0.5	},
-				{	 0.5,	 0.5+1.0,	-0.5	},
-				{	-0.5,	-0.5+1.0,	-0.5	},
-				{	 0.5,	-0.5+1.0,	-0.5	},
-				{	-0.5,	 0.5+1.0,	 0.5	},
-				{	 0.5,	 0.5+1.0,	 0.5	},
-				{	-0.5,	-0.5+1.0,	 0.5	},
-				{	 0.5,	-0.5+1.0,	 0.5	},
+				{	-s,	 s,	-s	},
+				{	 s,	 s,	-s	},
+				{	-s,	-s,	-s	},
+				{	 s,	-s,	-s	},
+				{	-s,	 s,	 s	},
+				{	 s,	 s,	 s	},
+				{	-s,	-s,	 s	},
+				{	 s,	-s,	 s	},
 			};
 			vector<vect3> disp;
 
@@ -531,14 +532,7 @@ struct Apr : public Sys
 
 
 			//------------------------------------------------------------------------------
-			void CalcBox( Pers& pers)
-			//------------------------------------------------------------------------------
-			{
-			}		
-
-
-			//------------------------------------------------------------------------------
-			void DrawBox( Pers& pers, SysGra& gra, vect3 pos, vect3 rot )
+			void DrawBox( Pers& pers, SysGra& gra, vect3 pos, vect3 rot, mat44 m  )
 			//------------------------------------------------------------------------------
 			{
 				disp.clear();
@@ -558,7 +552,8 @@ struct Apr : public Sys
 					roty.setRotateY(rot.y);
 					rotz.setRotateZ(rot.z);
 			
-					v= rotx * roty * rotz *v + pos ;
+//					v= rotx * roty * rotz *v + pos ;
+					v= v * m + pos ;
 
 					v = v * pers.cam.mat.invers();
 
@@ -587,11 +582,6 @@ struct Apr : public Sys
 		} box;
 
 
-		// 箱
-		//calcDisp rotate
-		vect3 boxpos = {6.5,-0.51,8.5};
-		vect3 boxrot(0,0,0);
-//			box.DrawBox( pers, gra, boxpos, boxrot );
 
 
 		cout<<fixed<<setprecision(24);
@@ -823,6 +813,30 @@ struct Apr : public Sys
 
 			// スケルトン 描画
 			pSkeleton->DrawSkeleton( pers, gra );
+
+			// 箱
+			{
+				vect3 p0 = pSkeleton->tblJoint[0].pos;
+				vect3 p2 = pSkeleton->tblJoint[2].pos;
+				vect3 p3 = pSkeleton->tblJoint[3].pos;
+				vect3 nx = (p0-p2).normalize();
+//				vect3 nz = cross(nx,(p3-p2).normalize()).normalize();
+				vect3 nz = cross((p0-p2).normalize(),(p3-p2).normalize());
+				vect3 ny = cross(nx,nz).normalize();
+
+				line3d( p2,p2+nx*0.2, rgb(1,0,0) );
+				line3d( p2,p2+ny*0.2, rgb(0,1,0) );
+				line3d( p2,p2+nz*0.2, rgb(0,0,1) );
+				
+				mat44	m(
+					nx.x,	nx.y,	nx.z,	0,	
+					ny.x,	ny.y,	ny.z,	0,	
+					nz.x,	nz.y,	nz.z,	0,	
+					0,		0,		0,		1
+				);	
+				vect3 rot(0,0,0);
+				box.DrawBox( pers, gra, p2, rot, m );
+			}
 
 			// 選択リスト表示
 			selector.DrawJoint( pers, gra, (*pSkeleton) , mouse.gpos );

@@ -359,7 +359,6 @@ void Skeleton::NextKeyframe()
 	if ( animations[cur.act].pose[ 0 ].joint.size()==0 ) return;
 
 	cur.pose++; 
-//		if ( cur.pose > static_cast<signed>(animations[ act ].pose.size())-1 ) cur.pose = 0;
 	if ( cur.pose > static_cast<signed>(animations[cur.act].pose.size())-1 ) cur.pose = static_cast<signed>(animations[cur.act].pose.size())-1;
 
 	if ( cur.pose >= 0 )
@@ -803,7 +802,8 @@ void Skeleton::DrawSkeleton( Pers& pers, SysGra& gra )
 	}
 	
 	// 剛体実験
-//	if (0)
+
+	if (0)
 	{
 		Joint&	j = tblJoint[2];
 

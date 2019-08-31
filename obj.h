@@ -21,12 +21,12 @@ struct Pers
 	// カメラ
 	struct
 	{
-	#if 1
+	#if 0
 		vect3	pos = vect3(  0.5, 1.5, -3+0.1 );
 		vect3 	at = vect3( 0,  1, 0 );
 	#else
-		vect3	pos = vect3(  0.5, 0.5, -1+0.1 );
-		vect3 	at = vect3( 0,  0, 0 );
+		vect3	pos = vect3(  0.5, 1.5, -1+0.1 );
+		vect3 	at = vect3( 0,  1.5, 0 );
 	#endif
 		vect3	up = vect3( 0, 1, 0);
 	  	mat44	mat;		
@@ -37,7 +37,7 @@ struct Pers
 		{
 			float len = (pos-at).abs();
 			float l = (pos-at).abs()/10;
-			l=max(l,0.00001);
+			l=max(l,0.00001f/8);
 			l=min(l,8);
 
 			// 回転
