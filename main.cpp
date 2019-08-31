@@ -240,7 +240,7 @@ struct Apr : public Sys
 			{
 				vect3 v = pers.calcWorldToScreen3( j.pos );
 
-				if ( (vect2(v.x,v.y)-mpos).length() < 0.04f )
+				if ( (vect2(v.x,v.y)-mpos).abs() < 0.04f )
 				{
 					if ( one.w < v.z ) // 近い場合はより手前が優先
 					{
@@ -618,13 +618,13 @@ struct Apr : public Sys
 			if ( (!keys.ALT.on && mouse.R.on && !mouse.L.on && !mouse.M.on) || (keys.ALT.on && !mouse.R.on && mouse.L.on && !mouse.M.on) ) pers.cam.Rotation( -vect3(mouse.gmov,0)*18.0f );
 
 			// カメラ平行移動
-			if ( mouse.M.on ) pers.cam.Move( -vect3(mouse.gmov,0)/pers.getW((pers.cam.pos-pers.cam.at).length()));
+			if ( mouse.M.on ) pers.cam.Move( -vect3(mouse.gmov,0)/pers.getW((pers.cam.pos-pers.cam.at).abs()));
 
 			// マウスホイールZOOM
-			if ( !keys.ALT.on  ) pers.cam.Zoom( -mouse.wheel*2/gra.GetHeight()/pers.getW((pers.cam.pos-pers.cam.at).length()) );
+			if ( !keys.ALT.on  ) pers.cam.Zoom( -mouse.wheel*2/gra.GetHeight()/pers.getW((pers.cam.pos-pers.cam.at).abs()) );
 			
 			// カメラ移動
-			if ( (keys.ALT.on && mouse.R.on) || ( mouse.R.on && mouse.L.on ) ) pers.cam.Zoom( mouse.gmov.y/pers.getW((pers.cam.pos-pers.cam.at).length()) );
+			if ( (keys.ALT.on && mouse.R.on) || ( mouse.R.on && mouse.L.on ) ) pers.cam.Zoom( mouse.gmov.y/pers.getW((pers.cam.pos-pers.cam.at).abs()) );
 			
 
 			// カメラマトリクス計算
@@ -911,7 +911,7 @@ struct Apr : public Sys
 					gra.Print(1,text_y++,string("[ ")+pSkeleton->filename+" ]");
 					gra.Print(1,text_y++,string("fovY:")+to_string(int(pers.fovy)));
 					gra.Print(1,text_y++,string("sz:")+to_string(pers.sz) +string(" fy:")+to_string(pers.fy));
-					gra.Print(1,text_y++,string("far:")+to_string((pers.cam.pos-pers.cam.at).length())); 
+					gra.Print(1,text_y++,string("far:")+to_string((pers.cam.pos-pers.cam.at).abs())); 
 					gra.Print(1,text_y++,string("at  x=")+to_string(pers.cam.at.x)+string(" y=")+to_string(pers.cam.at.y)+string(" z=")+to_string(pers.cam.at.z) ); 
 					gra.Print(1,text_y++,string("pos x=")+to_string(pers.cam.pos.x)+string(" y=")+to_string(pers.cam.pos.y)+string(" z=")+to_string(pers.cam.pos.z) ); 
 					gra.Print(1,text_y++,string("anim=")+to_string(pSkeleton->cur.act) + string(" cnt=")+to_string(pSkeleton->animations.size()) ); 

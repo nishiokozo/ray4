@@ -160,7 +160,7 @@ struct Skeleton
 {
 	string	filename;
 
-	vector<Joint>			tblPrevJoint;
+	vector<Joint>			tblJointForm;
 	vector<Joint>			tblJoint;
 	vector<Bone>			tblBone;
 

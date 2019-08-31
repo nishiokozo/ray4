@@ -118,8 +118,8 @@ public:
 	vect2( float _x, float _y) :x(_x),y(_y){}
 
 //	vect2 abs() { return vect2( std::abs(x) , std::abs(y) ); }
-	vect2 normalize() { return (*this)/length(); }
-	float length() { return sqrt( x*x + y*y ); }
+	vect2 normalize() { return (*this)/abs(); }
+	float abs() { return sqrt( x*x + y*y ); }
 
 	void operator= ( vect2 v )  { x =  v.x; y =  v.y; }
 	void operator*=( vect2 v )  { x *= v.x; y *= v.y; }
@@ -177,8 +177,8 @@ public:
 	vect3( vect2 v, float _z ) { x = v.x; y = v.y; z = _z;};
 
 //	vect3 abs() { return vect3( std::abs(x) , std::abs(y) ); }
-	vect3 normalize() { return (*this)/length(); }
-	float length() { return sqrt( x*x + y*y + z*z ); }
+	vect3 normalize() { return (*this)/abs(); }
+	float abs() { return sqrt( x*x + y*y + z*z ); }
 
 	bool operator==( vect3 v ) { return ( x == v.x &&  y == v.y &&  z == v.z); }
 	bool operator!=( vect3 v ) { return !( x == v.x &&  y == v.y &&  z == v.z); }

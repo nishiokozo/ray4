@@ -35,8 +35,8 @@ struct Pers
 		void Rotation( vect3 mov )
 		//------------------------------------------------------------------------------
 		{
-			float len = (pos-at).length();
-			float l = (pos-at).length()/10;
+			float len = (pos-at).abs();
+			float l = (pos-at).abs()/10;
 			l=max(l,0.00001);
 			l=min(l,8);
 
@@ -77,7 +77,7 @@ struct Pers
 
 			vect3 r = pos;
 			pos += v;
-			if( (pos-at).length() <= v.length() ) pos = (r-at).normalize()*0.00001+at;
+			if( (pos-at).abs() <= v.abs() ) pos = (r-at).normalize()*0.00001+at;
 		}
 
 	} cam ;

@@ -26,7 +26,7 @@ void Skeleton::SaveSkeleton()
 
 	{
 		fo << "joint" << endl;
-		for ( Joint& j : tblJoint )	// 関節の位置
+		for ( Joint& j : tblJointForm )	// 関節の位置
 		{
 			fo << "\t"<< j.pos.x << "\t" << j.pos.y << "\t" << j.pos.z << endl;
 		}
@@ -34,9 +34,6 @@ void Skeleton::SaveSkeleton()
 		fo << "bone" << endl;
 		for ( Bone& b : tblBone )	// 骨
 		{
-			Joint&	j0 = tblJoint[b.n0];
-			Joint&	j1 = tblJoint[b.n1];
-			b.length = (j1.pos - j0.pos).length();
 			fo  << "\t"<< b.n0 << "\t" << b.n1 << endl;
 		}
 	}
@@ -48,7 +45,7 @@ void Skeleton::SaveSkeleton()
 			int	cntPose = static_cast<signed>(animations[ act ].pose.size());
 			for ( int pose = 0 ; pose < cntPose ; pose++ )
 			{
-				for ( int j = 0 ; j < static_cast<signed>(tblJoint.size()) ; j++ )
+				for ( int j = 0 ; j < static_cast<signed>(tblJointForm.size()) ; j++ )
 				{
 					fo  << "\t"<< animations[ act ].pose[ pose ].joint[ j ].pos.x << "\t" << animations[ act ].pose[ pose ].joint[ j ].pos.y << "\t" << animations[ act ].pose[ pose ].joint[ j ].pos.z << endl;
 				}
@@ -123,7 +120,7 @@ void Skeleton::LoadSkeleton( const string fn )
 			{
 				Joint&	j0 = tblJoint[b.n0];
 				Joint&	j1 = tblJoint[b.n1];
-				b.length = (j1.pos - j0.pos).length();
+				b.length = (j1.pos - j0.pos).abs();
 			}
 			{
 				int cnt = 0 ;
@@ -182,7 +179,9 @@ void Skeleton::LoadSkeleton( const string fn )
 
 	}
 	cout << "LOADED" << endl;
-//	return pNew;
+
+	tblJointForm = tblJoint;
+
 }
 
 // カトマル曲線3D
@@ -630,7 +629,7 @@ void Skeleton::UpdateSkeleton()
 			Joint&	j0 = tblJoint[b.n0];
 			Joint&	j1 = tblJoint[b.n1];
 			vect3 v = j1.pos - j0.pos;
-			float l = v.length() - b.length;
+			float l = v.abs() - b.length;
 			vect3 va  =	v.normalize()*l;
 
 
