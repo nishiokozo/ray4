@@ -156,7 +156,7 @@ void Skeleton::LoadSkeleton( const string fn )
 					float x = stod(v[0]);
 					float y = stod(v[1]);
 					float z = stod(v[2]);
-					float weight = v.size() >3?stod(v[2]):1.0f;
+					float weight = v.size() >3?stod(v[2]):0.33f;
 					bool bCtrl = (v.size() >4 && v[4]=="-" )?false:true;
 					tblJointForm.emplace_back( vect3(x,y,z) , weight, bCtrl );
 					//	cout << x << "," << y << "," << z << endl; 
@@ -652,30 +652,13 @@ void Skeleton::UpdateSkeleton()
 			vect3 va  =	v.normalize()*l;
 
 
-#if 1
 			float w0 = 0.33f;
 			float w1 = 0.33f;
-#else
-			float w0 = j0.weight/(j1.weight + j0.weight) * 0.33f;
-			float w1 = j1.weight/(j1.weight + j0.weight) * 0.33f;
-#endif
+			w0 = j0.weight;
+			w1 = j1.weight;
 
-#if 1
-			if ( j0.priority ==1 ) 
-			{
-				w0 = 0.0f;
-				w1 = 0.33f;
-			}
-			else
-			if ( j1.priority ==1 ) 
-			{
-				w0 = 0.33f;
-				w1 = 0.0f;
-			}
-#endif
 			j0.tension += va*w0;
 			j1.tension -= va*w1;
-
 		}
 
 		// 張力解消

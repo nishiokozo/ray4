@@ -21,7 +21,7 @@ struct Pers
 	// カメラ
 	struct
 	{
-	#if 0
+	#if 1
 		vect3	pos = vect3(  0.5, 1.5, -3+0.1 );
 		vect3 	at = vect3( 0,  1, 0 );
 	#else

@@ -501,16 +501,33 @@ struct Apr : public Sys
 		{
 
 			const float s = 0.05f;
+			const float l = 0.03f;
+			const float m = 0.02f;
+			const float n = 0.02f;
 			vector<vect3> vert=
 			{
-				{	-s,	 s,	-s	},
-				{	 s,	 s,	-s	},
-				{	-s,	-s,	-s	},
-				{	 s,	-s,	-s	},
-				{	-s,	 s,	 s	},
-				{	 s,	 s,	 s	},
-				{	-s,	-s,	 s	},
-				{	 s,	-s,	 s	},
+				{	-s,		 s,		-s	},
+				{	 s,		 s,		-s	},
+				{	-s,		-s,		-s	},
+				{	 s,		-s,		-s	},
+				{	-s,		 s,		 s	},
+				{	 s,		 s,		 s	},
+				{	-s,		-s,		 s	},
+				{	 s,		-s,		 s	},
+
+				{	-l,		-s-l, 	-l	},	//yマーク
+				{	 l,		-s-l, 	-l	},
+				{	-l,		-s-l, 	 l	},
+				{	 l,		-s-l, 	 l	},
+
+				{	s+m,	+m, 	-m	},	//xマーク
+				{	s+m,	+m, 	+m	},
+				{	s+m,	-m, 	 0	},
+
+				{	-n,	 -n, 	s+n	},	//zマーク
+				{	+n,	 -n, 	s+n	},
+				{	-n,	 +n, 	s+n	},
+				{	+n,	 +n, 	s+n	},
 			};
 			vector<vect3> disp;
 
@@ -528,11 +545,24 @@ struct Apr : public Sys
 				{	1,	5	},
 				{	2,	6	},
 				{	3,	7	},
+				
+				{	8,	9	},
+				{	9,	11	},
+				{	11,	10	},
+				{	10,	8	},
+
+				{	12,	13	},
+				{	13,	14	},
+				{	14,	12	},
+
+				{	15,	18	},
+				{	17,	16	},
+				
 			};
 
 
 			//------------------------------------------------------------------------------
-			void DrawBox( Pers& pers, SysGra& gra, vect3 pos, vect3 rot, mat44 m  )
+			void DrawBox( Pers& pers, SysGra& gra,  mat44 m  )
 			//------------------------------------------------------------------------------
 			{
 				disp.clear();
@@ -545,15 +575,7 @@ struct Apr : public Sys
 					//	roll	:z	奥+
 					//	pitch	:x	右+
 					//	yaw		:y	下+
-					mat44	rotx;
-					mat44	roty;
-					mat44	rotz;
-					rotx.setRotateX(rot.x);
-					roty.setRotateY(rot.y);
-					rotz.setRotateZ(rot.z);
-			
-//					v= rotx * roty * rotz *v + pos ;
-					v= v * m + pos ;
+					v= v * m ;
 
 					v = v * pers.cam.mat.invers();
 
@@ -586,6 +608,10 @@ struct Apr : public Sys
 
 		cout<<fixed<<setprecision(24);
 
+#if 1
+		pers.cam.pos = vect3(  0.0, 1.5, -1+0.1 );
+		pers.cam.at = vect3( 0,  1.5, 0 );
+#endif
 		//===========================================================================
 		while( Update() )
 		{
@@ -798,13 +824,18 @@ struct Apr : public Sys
 			// 画面クリア
 			gra.Clr(rgb(0.3,0.3,0.3));
 
+#if 1 	//剛体実験
 			// 優先度つけ
 			for ( Joint& j : pSkeleton->tblJoint )
 			{
-				j.priority = 999;
-				if ( j.stat.bSelected ) j.priority = 1;
+				j.weight = 0.33;
+				if ( j.id == 2  ) j.weight = 0.05;
+				if ( j.id == 0  ) j.weight = 0.025;
+				if ( j.id == 1  ) j.weight = 0.0;
+				if ( j.id == 3  ) j.weight = 0.0;
+				if ( j.stat.bSelected ) j.weight = 0.0;
 			}
-
+#endif
 			//スケルトン更新
 			pSkeleton->UpdateSkeleton();
 
@@ -819,11 +850,18 @@ struct Apr : public Sys
 				vect3 p0 = pSkeleton->tblJoint[0].pos;
 				vect3 p2 = pSkeleton->tblJoint[2].pos;
 				vect3 p3 = pSkeleton->tblJoint[3].pos;
-				vect3 nx = (p0-p2).normalize();
-//				vect3 nz = cross(nx,(p3-p2).normalize()).normalize();
-				vect3 nz = cross((p0-p2).normalize(),(p3-p2).normalize());
-				vect3 ny = cross(nx,nz).normalize();
+				vect3 p4 = pSkeleton->tblJoint[4].pos;
+				vect3 nx,ny,nz;
+				nx = (p0-p2).normalize();
+				nz = cross(nx,(p3-p2).normalize()).normalize();
+				ny = cross(nx,nz).normalize();
 
+				nz = cross((p0-p2),((p3+p4)/2-p2)).normalize();
+				nx = (p0-p2).normalize();
+				ny = ((cross(nx,nz).normalize() - (p4-p2).normalize())/2).normalize();
+				nx = -cross(nz,ny);
+				nz = cross(ny,nx);
+				
 				line3d( p2,p2+nx*0.2, rgb(1,0,0) );
 				line3d( p2,p2+ny*0.2, rgb(0,1,0) );
 				line3d( p2,p2+nz*0.2, rgb(0,0,1) );
@@ -832,10 +870,9 @@ struct Apr : public Sys
 					nx.x,	nx.y,	nx.z,	0,	
 					ny.x,	ny.y,	ny.z,	0,	
 					nz.x,	nz.y,	nz.z,	0,	
-					0,		0,		0,		1
+					p2.x,	p2.y,	p2.z,	1
 				);	
-				vect3 rot(0,0,0);
-				box.DrawBox( pers, gra, p2, rot, m );
+				box.DrawBox( pers, gra, m );
 			}
 
 			// 選択リスト表示
