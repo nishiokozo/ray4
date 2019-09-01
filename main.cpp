@@ -562,7 +562,7 @@ struct Apr : public Sys
 
 
 			//------------------------------------------------------------------------------
-			void DrawBox( Pers& pers, SysGra& gra,  mat44 m  )
+			void DrawBox( Apr& apr, Pers& pers, SysGra& gra,  vect3 pos, mat44 m  )
 			//------------------------------------------------------------------------------
 			{
 				disp.clear();
@@ -575,7 +575,7 @@ struct Apr : public Sys
 					//	roll	:z	奥+
 					//	pitch	:x	右+
 					//	yaw		:y	下+
-					v= v * m ;
+					v= v * m + pos;
 
 					v = v * pers.cam.mat.invers();
 
@@ -583,6 +583,17 @@ struct Apr : public Sys
 
 				}
 
+
+				// 軸
+				{
+					vect3	nx = vect3( m.m[0][0], m.m[0][1], m.m[0][2] );
+					vect3	ny = vect3( m.m[1][0], m.m[1][1], m.m[1][2] );
+					vect3	nz = vect3( m.m[2][0], m.m[2][1], m.m[2][2] );
+					apr.line3d( pos,pos+nx*0.2, rgb(1,0,0) );
+					apr.line3d( pos,pos+ny*0.2, rgb(0,1,0) );
+					apr.line3d( pos,pos+nz*0.2, rgb(0,0,1) );
+				}
+				
 				// 箱
 				for ( ivect2 e : edge )
 				{
@@ -833,7 +844,7 @@ struct Apr : public Sys
 				if ( j.id == 0  ) j.weight = 0.025;
 				if ( j.id == 1  ) j.weight = 0.0;
 				if ( j.id == 3  ) j.weight = 0.0;
-				if ( j.stat.bSelected ) j.weight = 0.0;
+				if ( j.stat.bSelected && mouse.L.on ) j.weight = 0.0;
 			}
 #endif
 			//スケルトン更新
@@ -845,34 +856,54 @@ struct Apr : public Sys
 			// スケルトン 描画
 			pSkeleton->DrawSkeleton( pers, gra );
 
-			// 箱
 			{
-				vect3 p0 = pSkeleton->tblJoint[0].pos;
-				vect3 p2 = pSkeleton->tblJoint[2].pos;
-				vect3 p3 = pSkeleton->tblJoint[3].pos;
-				vect3 p4 = pSkeleton->tblJoint[4].pos;
-				vect3 nx,ny,nz;
-				nx = (p0-p2).normalize();
-				nz = cross(nx,(p3-p2).normalize()).normalize();
-				ny = cross(nx,nz).normalize();
+				mat44	mkata;
+				mat44	mhiji;
+				// 箱 肩
+				{
+					vect3 p0 = pSkeleton->tblJoint[0].pos;
+					vect3 p2 = pSkeleton->tblJoint[2].pos;
+					vect3 p3 = pSkeleton->tblJoint[3].pos;
+					vect3 p4 = pSkeleton->tblJoint[4].pos;
+					vect3 nx,ny,nz;
+					ny = (p2-p4).normalize();
+					nx = (p2-p0).normalize();
+					nz = cross(nx,ny).normalize();
+					nx = cross(ny,nz).normalize();
+					nz = cross(nx,ny).normalize();
 
-				nz = cross((p0-p2),((p3+p4)/2-p2)).normalize();
-				nx = (p0-p2).normalize();
-				ny = ((cross(nx,nz).normalize() - (p4-p2).normalize())/2).normalize();
-				nx = -cross(nz,ny);
-				nz = cross(ny,nx);
-				
-				line3d( p2,p2+nx*0.2, rgb(1,0,0) );
-				line3d( p2,p2+ny*0.2, rgb(0,1,0) );
-				line3d( p2,p2+nz*0.2, rgb(0,0,1) );
-				
-				mat44	m(
-					nx.x,	nx.y,	nx.z,	0,	
-					ny.x,	ny.y,	ny.z,	0,	
-					nz.x,	nz.y,	nz.z,	0,	
-					p2.x,	p2.y,	p2.z,	1
-				);	
-				box.DrawBox( pers, gra, m );
+					mat44	m(
+						nx.x,	nx.y,	nx.z,	0,	
+						ny.x,	ny.y,	ny.z,	0,	
+						nz.x,	nz.y,	nz.z,	0,	
+						0,		0,		0,		1
+					);
+					mkata = m;	
+					box.DrawBox( (*this), pers, gra, p2, mkata );
+				}
+				// 箱 肘
+				{
+					vect3 p0 = pSkeleton->tblJoint[0].pos;
+					vect3 p2 = pSkeleton->tblJoint[2].pos;
+					vect3 p3 = pSkeleton->tblJoint[3].pos;
+					vect3 p4 = pSkeleton->tblJoint[4].pos;
+					vect3 nx,ny,nz;
+					ny = (p2-p4).normalize();
+					nx = (p2-p0).normalize();
+					nz = cross(nx,ny).normalize();
+					nx = cross(ny,nz).normalize();
+					nz = cross(nx,ny).normalize();
+
+					mat44	m(
+						nx.x,	nx.y,	nx.z,	0,	
+						ny.x,	ny.y,	ny.z,	0,	
+						nz.x,	nz.y,	nz.z,	0,	
+						0,		0,		0,		1
+					);	
+	//				mhiji.identity();
+					mhiji = mkata;
+					box.DrawBox( (*this), pers, gra, p4, mhiji );
+				}
 			}
 
 			// 選択リスト表示
