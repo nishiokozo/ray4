@@ -480,6 +480,69 @@ struct Apr : public Sys
 
 	} selector;
 
+		function<mat33(float)> mrotx = []( float f)
+		{
+			float	c = cos(f);
+			float	s = sin(f);
+			return mat33(
+				1,  0,  0,
+				0,  c, -s,
+				0,  s,  c
+			);
+		};
+		function<mat33(float)> mroty = []( float f)
+		{
+			float	c = cos(f);
+			float	s = sin(f);
+			return mat33(
+				c,  0, -s,
+				0,  1,  0,
+				s,  0,  c
+			);
+		};
+		function<mat33(float)> mrotz = []( float f)
+		{
+			float	c = cos(f);
+			float	s = sin(f);
+			return mat33(
+				c, -s,  0,
+				s,	c,  0,
+				0,  0,  1
+			);
+		};
+
+	// 軸回りの回転マトリクスを取得
+	//------------------------------------------------------------------------------
+	mat33 GetRotateAxis( vect3 axis, float th )
+	//------------------------------------------------------------------------------
+	{
+		vect3 nx,ny,nz;
+
+/*		ny = axis;
+		nx = vect3(1,0,0);
+		nz = cross(nx,ny).normalize();
+		nx = cross(nx,ny).normalize();
+*/
+		float ry	= atan2(axis.z,axis.x);
+		float lxz	= sqrt( axis.z*axis.z + axis.x*axis.x );
+		float rz	= atan2(axis.y,lxz);
+
+
+
+		return mrotz( rz )  * mroty( ry );
+
+		float	c = cos(th);
+		float	s = sin(th);
+		mat33 rot = mat33(
+			1,  0,  0,
+			0,  c, -s,
+			0,  s,  c
+		);
+
+		return rot * mrotz( rz )  * mroty( ry );
+		
+	}
+	
 	//------------------------------------------------------------------------------
 	int main()
 	//------------------------------------------------------------------------------
@@ -742,8 +805,9 @@ struct Apr : public Sys
 			{
 			}
 
+
 			//------------------------------------------------------------------------------
-			void DrawBox( Apr& apr, Pers& pers, SysGra& gra,  vect3 pos, mat33 m  )
+			void DrawBox( Apr& apr, Pers& pers, SysGra& gra,  vect3 pos, mat33 m , bool bAxis = true, bool bTri = true )
 			//------------------------------------------------------------------------------
 			{
 				disp.clear();
@@ -766,7 +830,7 @@ struct Apr : public Sys
 
 
 				// 軸
-				if(1)
+				if( bAxis )
 				{
 					vect3	nx = vect3( m.m[0][0], m.m[0][1], m.m[0][2] );
 					vect3	ny = vect3( m.m[1][0], m.m[1][1], m.m[1][2] );
@@ -777,17 +841,20 @@ struct Apr : public Sys
 				}
 				
 				// Tri
-				for ( ivect3 t : tri )
+				if ( bTri )
 				{
-					vect3 v0 = pers.calcViewScreen3( disp[t.n0] );
-					vect3 v1 = pers.calcViewScreen3( disp[t.n1] );
-					vect3 v2 = pers.calcViewScreen3( disp[t.n2] );
-//					if ( v0.z>0 )
+					for ( ivect3 t : tri )
 					{
-						gra.Tri( v0,v1,v2, rgb(1,0,1));
-						gra.Tri( v2,v1,v0, rgb(1,0,1)/2);
-					}
+						vect3 v0 = pers.calcViewScreen3( disp[t.n0] );
+						vect3 v1 = pers.calcViewScreen3( disp[t.n1] );
+						vect3 v2 = pers.calcViewScreen3( disp[t.n2] );
+	//					if ( v0.z>0 )
+						{
+							gra.Tri( v0,v1,v2, rgb(1,0,1));
+							gra.Tri( v2,v1,v0, rgb(1,0,1)/2);
+						}
 
+					}
 				}
 				for ( ivect2 e : edge )
 				{
@@ -806,7 +873,7 @@ struct Apr : public Sys
 			
 		} box;
 
-
+	
 
 
 		cout<<fixed<<setprecision(24);
@@ -1050,10 +1117,11 @@ struct Apr : public Sys
 
 			{
 				mat33	mmune;
-				mat33	mkata;
+				static mat33	mkata;
 				mat33	mhiji;
 				mat33	mte;
 				vect3 p0 = pSkeleton->tblJoint[0].pos;
+				vect3 p1 = pSkeleton->tblJoint[1].pos;
 				vect3 p2 = pSkeleton->tblJoint[2].pos;
 				vect3 p3 = pSkeleton->tblJoint[3].pos;
 				vect3 p4 = pSkeleton->tblJoint[4].pos;
@@ -1061,8 +1129,20 @@ struct Apr : public Sys
 				// 箱 胸
 				if(1)
 				{
-					mmune = pSkeleton->tblJoint[0].mat;
-					box.DrawBox( (*this), pers, gra, p0, mmune );
+					vect3 nx,ny,nz;
+					ny = (p0-p3).normalize();
+					nx = (p1-p2).normalize();
+					nz = cross(ny,nx).normalize();
+					nx = cross(ny,nz).normalize();
+
+					mmune = mat33(
+						nx.x,	nx.y,	nx.z,
+						ny.x,	ny.y,	ny.z,
+						nz.x,	nz.y,	nz.z
+					);
+
+//					mmune = pSkeleton->tblJoint[0].mat;
+					box.DrawBox( (*this), pers, gra, p0, mmune, false, false );
 				}
 				// 箱 肩
 				if(1)
@@ -1080,8 +1160,20 @@ struct Apr : public Sys
 						nz.x,	nz.y,	nz.z
 					);
 					m.identity();
-					mkata = m;	
-					mkata = pSkeleton->tblJoint[2].mat;
+//					mkata = m;	
+//					mkata = pSkeleton->tblJoint[2].mat;
+//					mkata = mmune * mkata;
+					
+//					mkata = GetRotateAxis( vect3(1,0,0)*mrotz(rad(20))*mroty(rad(45)) , rad(0.2) );
+
+
+					mat33 mrot;
+					
+					mrot = mrotx(rad(1));
+
+					mkata *= mrot.invers();
+					
+					
 					box.DrawBox( (*this), pers, gra, p2, mkata );
 				}
 				// 箱 肘
