@@ -95,7 +95,7 @@ struct Pers
 	{
 		fovy=90/2;
 //		sz = 1/tan(rad(fovy)/2);				// 投影面までの距離
-		rate = 4.0f;
+		rate = 8.0f;
 
 	}
 
@@ -125,7 +125,7 @@ struct Pers
 
 
 	//--------------------------------------------------------------------------
-	vect3 calcDisp3( vect3 v )	// 透視変換
+	vect3 calcViewScreen3( vect3 v )	// 透視変換
 	//--------------------------------------------------------------------------
 	{
 		vect3 ret;
@@ -143,7 +143,7 @@ struct Pers
 	vect2 calcDisp2( vect3 v )	// 透視変換
 	//--------------------------------------------------------------------------
 	{
-		v = calcDisp3(v);
+		v = calcViewScreen3(v);
 		return vect2( v.x, v.y );
 	}
 	
@@ -152,7 +152,7 @@ struct Pers
 	//--------------------------------------------------------------------------
 	{
 		v = v * cam.mat.invers();
-		return calcDisp3(v);
+		return calcViewScreen3(v);
 	}
 
 	//--------------------------------------------------------------------------
@@ -191,8 +191,8 @@ struct Pers
 	bool calcScissorLine3d( vect3 v0, vect3 v1, vect3& va, vect3& vb )	// 3D 空間座標のままシザリングを行う。
 	//--------------------------------------------------------------------------
 	{
-		va = calcDisp3(v0);
-		vb = calcDisp3(v1);
+		va = calcViewScreen3(v0);
+		vb = calcViewScreen3(v1);
 
 		{//シザリング ニアクリップ
 			function<vect3(vect3,vect3,int)>nearclip = [ this,&nearclip ]( vect3 a, vect3 b, int n )
@@ -216,12 +216,12 @@ struct Pers
 				if ( va.z < 0 )
 				{
 					vect3 c = nearclip(v1,v0,8);
-					va = calcDisp3(c);
+					va = calcViewScreen3(c);
 				}
 				if ( vb.z < 0 )
 				{
 					vect3 c = nearclip(v0,v1,8);
-					vb = calcDisp3(c);
+					vb = calcViewScreen3(c);
 				}
 			}
 		}

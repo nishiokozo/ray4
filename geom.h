@@ -6,6 +6,7 @@
 #define	GEOM_H
 #include <cfloat>
 typedef	float	MAT4[4][4];
+typedef	float	MAT3[3][3];
 
 void	mat4_rotateX( float* m, float th );
 void	mat4_rotateY( float* m, float th );
@@ -283,6 +284,89 @@ extern	float deg( float n );
 extern	float atan2_360( float y, float x );
 extern	float atan2_180( float y, float x );
 
+
+
+class	mat33
+{
+public:
+	float m[3][3];
+	mat33()
+	{
+		//	m[行][列]
+		m[0][0] = 1.0f;	m[0][1] = 0.0f;	m[0][2] = 0.0f;
+		m[1][0] = 0.0f;	m[1][1] = 1.0f;	m[1][2] = 0.0f;
+		m[2][0] = 0.0f;	m[2][1] = 0.0f;	m[2][2] = 1.0f;
+	}
+
+	mat33(
+		float m00, float m01, float m02,
+		float m10, float m11, float m12,
+		float m20, float m21, float m22
+	)
+	{
+		//	m[行][列]
+		m[0][0] = m00;	m[0][1] = m01;	m[0][2] = m02;
+		m[1][0] = m10;	m[1][1] = m11;	m[1][2] = m12;
+		m[2][0] = m20;	m[2][1] = m21;	m[2][2] = m22;
+	}
+
+	vect3 operator*( vect3 v ) const
+	{
+		//	m[行][列] x v[列]
+		return vect3(
+			m[0][0]*v.x + m[0][1]*v.y + m[0][2]*v.z ,
+			m[1][0]*v.x + m[1][1]*v.y + m[1][2]*v.z ,
+			m[2][0]*v.x + m[2][1]*v.y + m[2][2]*v.z 
+		);
+	}
+
+	friend	vect3 operator*( vect3 v, const mat33 m )
+	{
+		//	v[行] x m[行][列]
+		return vect3(
+			v.x*m.m[0][0] + v.y*m.m[1][0] + v.z*m.m[2][0] ,
+			v.x*m.m[0][1] + v.y*m.m[1][1] + v.z*m.m[2][1] ,
+			v.x*m.m[0][2] + v.y*m.m[1][2] + v.z*m.m[2][2]
+		);
+	}
+
+	mat33 operator*( const mat33 m ) const
+	{
+		const MAT3&	a = this->m;
+		const MAT3&	b = m.m;
+
+		//	a[行][列] x b[行][列]
+		return mat33(
+			a[0][0] * b[0][0] +  a[0][1] * b[1][0] +  a[0][2] * b[2][0],
+			a[0][0] * b[0][1] +  a[0][1] * b[1][1] +  a[0][2] * b[2][1],
+			a[0][0] * b[0][2] +  a[0][1] * b[1][2] +  a[0][2] * b[2][2],
+
+			a[1][0] * b[0][0] +  a[1][1] * b[1][0] +  a[1][2] * b[2][0],
+			a[1][0] * b[0][1] +  a[1][1] * b[1][1] +  a[1][2] * b[2][1],
+			a[1][0] * b[0][2] +  a[1][1] * b[1][2] +  a[1][2] * b[2][2],
+
+			a[2][0] * b[0][0] +  a[2][1] * b[1][0] +  a[2][2] * b[2][0],
+			a[2][0] * b[0][1] +  a[2][1] * b[1][1] +  a[2][2] * b[2][1],
+			a[2][0] * b[0][2] +  a[2][1] * b[1][2] +  a[2][2] * b[2][2]
+		);
+	}
+
+	mat33 operator*=( const mat33 a ) 
+	{
+
+		*this = *this * a;
+		
+		return *this;
+	}
+
+	void identity()
+	{
+		m[0][0] = 1.0f;	m[0][1] = 0.0f;	m[0][2] = 0.0f;
+		m[1][0] = 0.0f;	m[1][1] = 1.0f;	m[1][2] = 0.0f;
+		m[2][0] = 0.0f;	m[2][1] = 0.0f;	m[2][2] = 1.0f;
+	}
+
+};
 
 //---
 class	mat44

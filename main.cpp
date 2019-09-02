@@ -238,6 +238,8 @@ struct Apr : public Sys
 
 			for ( Joint& j : skeleton.tblJoint )
 			{
+				if ( j.bCtrl == false ) continue;
+
 				vect3 v = pers.calcWorldToScreen3( j.pos );
 
 				if ( (vect2(v.x,v.y)-mpos).abs() < 0.04f )
@@ -359,6 +361,8 @@ struct Apr : public Sys
 
 			for ( Joint& j : skeleton.tblJoint )
 			{
+				if ( j.bCtrl == false ) continue;
+			
 				j.stat.bPreselect = false;
 
 				vect2 v = pers.calcWorldToScreen2( j.pos );
@@ -444,17 +448,14 @@ struct Apr : public Sys
 			for ( Joint& j : skeleton.tblJoint )
 			{
 
-				for ( Joint& j : skeleton.tblJoint )
-				{
-					bool bPreselect = j.stat.bPreselect;
-					bool bSelected = j.stat.bSelected;
-					
-					calcRectMode( rect_mode, bPreselect, bSelected );
+				bool bPreselect = j.stat.bPreselect;
+				bool bSelected = j.stat.bSelected;
+				
+				calcRectMode( rect_mode, bPreselect, bSelected );
 
-					if ( bSelected )
-					{
-						gra.Pset( pers.calcWorldToScreen3( j.pos ), rgb(1,0,0), 11 );
-					}
+				if ( bSelected )
+				{
+					gra.Pset( pers.calcWorldToScreen3( j.pos ), rgb(1,0,0), 11 );
 				}
 
 			}
@@ -468,9 +469,10 @@ struct Apr : public Sys
 			// 矩形カーソル 情報表示
 			for ( Joint& j : skeleton.tblJoint )
 			{
+				if ( j.bCtrl == false ) continue;
+
 				vect2 pos = pers.calcWorldToScreen2( j.pos );
 				gra.Print( pos+gra.Dot(14,0), to_string(j.id) );
-			//	gra.Print( pos, to_string(j.id) + " "+ to_string(j.priority));
 			}
 
 			gra.SetZTest( true );
@@ -496,11 +498,180 @@ struct Apr : public Sys
 		pSkeleton->stat.bShowSkin = false;
 		pSkeleton->stat.bShowLocus = false;
 
-		// 箱
-		struct
+		// ドラム
+		struct Drum
 		{
 
 			const float s = 0.05f;
+			const float l = 0.03f;
+			const float m = 0.02f;
+			const float n = 0.02f;
+			vector<vect3> vert=
+			{
+				{	-s,		 s,		-s	},
+				{	 s,		 s,		-s	},
+				{	-s,		-s,		-s	},
+				{	 s,		-s,		-s	},
+				{	-s,		 s,		 s	},
+				{	 s,		 s,		 s	},
+				{	-s,		-s,		 s	},
+				{	 s,		-s,		 s	},
+
+				{	-l,		-s-l, 	-l	},	//yマーク
+				{	 l,		-s-l, 	-l	},
+				{	-l,		-s-l, 	 l	},
+				{	 l,		-s-l, 	 l	},
+
+				{	s+m,	+m, 	-m	},	//xマーク
+				{	s+m,	+m, 	+m	},
+				{	s+m,	-m, 	 0	},
+
+				{	-n,	 -n, 	s+n	},	//zマーク
+				{	+n,	 -n, 	s+n	},
+				{	-n,	 +n, 	s+n	},
+				{	+n,	 +n, 	s+n	},
+			};
+			vector<vect3> disp;
+
+			vector<ivect2>	edge
+			{
+/*				{	0,	1	},
+				{	1,	3	},
+				{	3,	2	},
+				{	2,	0	},
+				{	4,	5	},
+				{	5,	7	},
+				{	7,	6	},
+				{	6,	4	},
+				{	0,	4	},
+				{	1,	5	},
+				{	2,	6	},
+				{	3,	7	},
+*/				
+#if 0
+				{	8,	9	},	//yマーク
+				{	9,	11	},
+				{	11,	10	},
+				{	10,	8	},
+
+//				{	12,	13	},	//xマーク
+//				{	13,	14	},
+//				{	14,	12	},
+
+				{	15,	18	},	//zマーク
+				{	17,	16	},
+#endif
+				
+			};
+			vector<ivect3>	tri
+			{
+//				{	14,	13, 12	},	// xマーク
+			};
+
+			Drum()
+			{
+				{
+					int	ofs = vert.size();
+					int cnt = 0;
+					float r = 0.05;
+					float w = 0.05;
+					for ( int i = 0 ; i < 360 ; i+= 30 )
+					{
+						float z = r*cos(rad(i));
+						float y = r*sin(rad(i));
+						vert.emplace_back(-w,y,z);
+						vert.emplace_back( w,y,z);
+						vert.emplace_back( w,y*0.5,z*0.5);
+						cnt++;
+					}
+					
+					for ( int i = 0 ; i < cnt ; i++ )
+					{
+						
+						int st = i;
+						int en = i+1;
+						if ( i+1 == cnt ) en = 0;
+						
+						const int n = 3;
+
+						edge.emplace_back(ofs+st*n  ,ofs+en*n);
+						edge.emplace_back(ofs+st*n+1,ofs+en*n+1);
+						edge.emplace_back(ofs+st*n+2,ofs+en*n+2);
+						if ( i%3 == 0 ) edge.emplace_back(ofs+st*n  ,ofs+st*n+1);
+					}
+				}
+			}
+
+			//------------------------------------------------------------------------------
+			void DrawDrum( Apr& apr, Pers& pers, SysGra& gra,  vect3 pos, mat33 m  )
+			//------------------------------------------------------------------------------
+			{
+				disp.clear();
+
+				for ( vect3 v : vert )
+				{
+
+					//	右手系座標系
+					//	右手ねじ周り
+					//	roll	:z	奥+
+					//	pitch	:x	右+
+					//	yaw		:y	下+
+					v= v * m + pos;
+
+					v = v * pers.cam.mat.invers();
+
+					disp.emplace_back( v );
+
+				}
+
+
+				// 軸
+				if(0)
+				{
+					vect3	nx = vect3( m.m[0][0], m.m[0][1], m.m[0][2] );
+					vect3	ny = vect3( m.m[1][0], m.m[1][1], m.m[1][2] );
+					vect3	nz = vect3( m.m[2][0], m.m[2][1], m.m[2][2] );
+					apr.line3d( pos,pos+nx*0.2, rgb(1,0,0) );
+					apr.line3d( pos,pos+ny*0.2, rgb(0,1,0) );
+					apr.line3d( pos,pos+nz*0.2, rgb(0,0,1) );
+				}
+				
+				// Tri
+				for ( ivect3 t : tri )
+				{
+					vect3 v0 = pers.calcViewScreen3( disp[t.n0] );
+					vect3 v1 = pers.calcViewScreen3( disp[t.n1] );
+					vect3 v2 = pers.calcViewScreen3( disp[t.n2] );
+//					if ( v0.z>0 )
+					{
+						gra.Tri( v0,v1,v2, rgb(1,0,1));
+						gra.Tri( v2,v1,v0, rgb(1,0,1)/2);
+					}
+
+				}
+				for ( ivect2 e : edge )
+				{
+					const vect3& a = disp[e.p];
+					const vect3& b = disp[e.n];
+
+					vect3 v0;
+					vect3 v1;
+					bool flg = pers.calcScissorLine3d( a, b, v0, v1 );
+					if ( flg )
+					{
+						gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,1,1));
+					}
+				}
+			}
+			
+		} drum;
+
+
+		// ドラム
+		struct Box
+		{
+
+			const float s = 0.04f;
 			const float l = 0.03f;
 			const float m = 0.02f;
 			const float n = 0.02f;
@@ -546,23 +717,33 @@ struct Apr : public Sys
 				{	2,	6	},
 				{	3,	7	},
 				
-				{	8,	9	},
+				{	8,	9	},	//yマーク
 				{	9,	11	},
 				{	11,	10	},
 				{	10,	8	},
+#if 0
 
-				{	12,	13	},
+				{	12,	13	},	//xマーク
 				{	13,	14	},
 				{	14,	12	},
 
-				{	15,	18	},
+
+				{	15,	18	},	//zマーク
 				{	17,	16	},
+#endif
 				
 			};
+			vector<ivect3>	tri
+			{
+				{	14,	13, 12	},	// xマーク
+			};
 
+			Box()
+			{
+			}
 
 			//------------------------------------------------------------------------------
-			void DrawBox( Apr& apr, Pers& pers, SysGra& gra,  vect3 pos, mat44 m  )
+			void DrawBox( Apr& apr, Pers& pers, SysGra& gra,  vect3 pos, mat33 m  )
 			//------------------------------------------------------------------------------
 			{
 				disp.clear();
@@ -585,6 +766,7 @@ struct Apr : public Sys
 
 
 				// 軸
+				if(1)
 				{
 					vect3	nx = vect3( m.m[0][0], m.m[0][1], m.m[0][2] );
 					vect3	ny = vect3( m.m[1][0], m.m[1][1], m.m[1][2] );
@@ -594,12 +776,23 @@ struct Apr : public Sys
 					apr.line3d( pos,pos+nz*0.2, rgb(0,0,1) );
 				}
 				
-				// 箱
+				// Tri
+				for ( ivect3 t : tri )
+				{
+					vect3 v0 = pers.calcViewScreen3( disp[t.n0] );
+					vect3 v1 = pers.calcViewScreen3( disp[t.n1] );
+					vect3 v2 = pers.calcViewScreen3( disp[t.n2] );
+//					if ( v0.z>0 )
+					{
+						gra.Tri( v0,v1,v2, rgb(1,0,1));
+						gra.Tri( v2,v1,v0, rgb(1,0,1)/2);
+					}
+
+				}
 				for ( ivect2 e : edge )
 				{
 					const vect3& a = disp[e.p];
 					const vect3& b = disp[e.n];
-
 
 					vect3 v0;
 					vect3 v1;
@@ -608,7 +801,6 @@ struct Apr : public Sys
 					{
 						gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,1,1));
 					}
-
 				}
 			}
 			
@@ -619,9 +811,9 @@ struct Apr : public Sys
 
 		cout<<fixed<<setprecision(24);
 
-#if 1
-		pers.cam.pos = vect3(  0.0, 1.5, -1+0.1 );
-		pers.cam.at = vect3( 0,  1.5, 0 );
+#if 1 // camera
+		pers.cam.pos = vect3(  0.3, 0.7, -1.2 );
+		pers.cam.at = vect3( 0,  0.7, 0 );
 #endif
 		//===========================================================================
 		while( Update() )
@@ -840,10 +1032,10 @@ struct Apr : public Sys
 			for ( Joint& j : pSkeleton->tblJoint )
 			{
 				j.weight = 0.33;
-				if ( j.id == 2  ) j.weight = 0.05;
-				if ( j.id == 0  ) j.weight = 0.025;
-				if ( j.id == 1  ) j.weight = 0.0;
-				if ( j.id == 3  ) j.weight = 0.0;
+				if ( j.id == 2  ) j.weight = 0.000;
+				if ( j.id == 0  ) j.weight = 0.000;
+				if ( j.id == 1  ) j.weight = 0.000;
+				if ( j.id == 3  ) j.weight = 0.000;
 				if ( j.stat.bSelected && mouse.L.on ) j.weight = 0.0;
 			}
 #endif
@@ -857,14 +1049,24 @@ struct Apr : public Sys
 			pSkeleton->DrawSkeleton( pers, gra );
 
 			{
-				mat44	mkata;
-				mat44	mhiji;
-				// 箱 肩
+				mat33	mmune;
+				mat33	mkata;
+				mat33	mhiji;
+				mat33	mte;
+				vect3 p0 = pSkeleton->tblJoint[0].pos;
+				vect3 p2 = pSkeleton->tblJoint[2].pos;
+				vect3 p3 = pSkeleton->tblJoint[3].pos;
+				vect3 p4 = pSkeleton->tblJoint[4].pos;
+				vect3 p5 = pSkeleton->tblJoint[5].pos;
+				// 箱 胸
+				if(1)
 				{
-					vect3 p0 = pSkeleton->tblJoint[0].pos;
-					vect3 p2 = pSkeleton->tblJoint[2].pos;
-					vect3 p3 = pSkeleton->tblJoint[3].pos;
-					vect3 p4 = pSkeleton->tblJoint[4].pos;
+					mmune = pSkeleton->tblJoint[0].mat;
+					box.DrawBox( (*this), pers, gra, p0, mmune );
+				}
+				// 箱 肩
+				if(1)
+				{
 					vect3 nx,ny,nz;
 					ny = (p2-p4).normalize();
 					nx = (p2-p0).normalize();
@@ -872,37 +1074,49 @@ struct Apr : public Sys
 					nx = cross(ny,nz).normalize();
 					nz = cross(nx,ny).normalize();
 
-					mat44	m(
-						nx.x,	nx.y,	nx.z,	0,	
-						ny.x,	ny.y,	ny.z,	0,	
-						nz.x,	nz.y,	nz.z,	0,	
-						0,		0,		0,		1
+					mat33	m(
+						nx.x,	nx.y,	nx.z,
+						ny.x,	ny.y,	ny.z,
+						nz.x,	nz.y,	nz.z
 					);
+					m.identity();
 					mkata = m;	
+					mkata = pSkeleton->tblJoint[2].mat;
 					box.DrawBox( (*this), pers, gra, p2, mkata );
 				}
 				// 箱 肘
 				{
-					vect3 p0 = pSkeleton->tblJoint[0].pos;
-					vect3 p2 = pSkeleton->tblJoint[2].pos;
-					vect3 p3 = pSkeleton->tblJoint[3].pos;
-					vect3 p4 = pSkeleton->tblJoint[4].pos;
 					vect3 nx,ny,nz;
 					ny = (p2-p4).normalize();
+					nx = cross((p2-p4).normalize(),(p4-p5).normalize()).normalize();
+					nz = cross(nx,ny).normalize();
+
+					mat33	m(
+						nx.x,	nx.y,	nx.z,
+						ny.x,	ny.y,	ny.z,
+						nz.x,	nz.y,	nz.z
+					);	
+					mhiji = m;
+//					mhiji = pSkeleton->tblJoint[4].mat;
+					drum.DrawDrum( (*this), pers, gra, p4, mhiji );
+				}
+				// 箱 手
+				if(0){
+					vect3 nx,ny
+					,nz;
+					ny = (p4-p5).normalize();
 					nx = (p2-p0).normalize();
 					nz = cross(nx,ny).normalize();
 					nx = cross(ny,nz).normalize();
 					nz = cross(nx,ny).normalize();
 
-					mat44	m(
-						nx.x,	nx.y,	nx.z,	0,	
-						ny.x,	ny.y,	ny.z,	0,	
-						nz.x,	nz.y,	nz.z,	0,	
-						0,		0,		0,		1
+					mat33	m(
+						nx.x,	nx.y,	nx.z,
+						ny.x,	ny.y,	ny.z,
+						nz.x,	nz.y,	nz.z
 					);	
-	//				mhiji.identity();
-					mhiji = mkata;
-					box.DrawBox( (*this), pers, gra, p4, mhiji );
+					mte = m;
+					drum.DrawDrum( (*this), pers, gra, p5, mte );
 				}
 			}
 

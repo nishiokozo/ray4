@@ -89,9 +89,9 @@ struct Ring
 				if ( d > 1.0 ) d=1.0;
 			}
 
-			v0 = pers.calcDisp3( v0 );
-			v1 = pers.calcDisp3( v1 );
-			v2 = pers.calcDisp3( v2 );
+			v0 = pers.calcViewScreen3( v0 );
+			v1 = pers.calcViewScreen3( v1 );
+			v2 = pers.calcViewScreen3( v2 );
 
 
 					gra.Tri( v0, v1, v2, rgb(d,d,d) );
@@ -117,6 +117,9 @@ struct Joint
 	int priority;
 	bool bCtrl;
 	float	weight;
+
+	mat33	mat;
+
 	vect3 prev;
 	vect3 prev2;
 	vect3 prev3;
@@ -142,6 +145,7 @@ struct Joint
 		prev3 = pos;
 		prev4 = pos;
 		binormal = vect3(1,0,0);
+		mat.identity();
 	}
 
 };

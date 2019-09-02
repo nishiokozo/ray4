@@ -94,6 +94,7 @@ void Skeleton::LoadSkeleton( const string fn )
 		{
 			if (!item.empty()) 
 			{
+				if ( item.substr(0,2) == "//" ) break;
 				elems.push_back(item);
 			}
 		}
@@ -156,8 +157,8 @@ void Skeleton::LoadSkeleton( const string fn )
 					float x = stod(v[0]);
 					float y = stod(v[1]);
 					float z = stod(v[2]);
-					float weight = v.size() >3?stod(v[2]):0.33f;
-					bool bCtrl = (v.size() >4 && v[4]=="-" )?false:true;
+					float weight	= (v.size() >3 && v[3]!="-"  )?stod(v[3]):0.33f;
+					bool bCtrl 		= (v.size() >4 && v[4]=="-" )?false:true;
 					tblJointForm.emplace_back( vect3(x,y,z) , weight, bCtrl );
 					//	cout << x << "," << y << "," << z << endl; 
 				}
@@ -640,7 +641,7 @@ void Skeleton::UpdateSkeleton()
 	}
 
 
-	for ( int i = 0 ; i < 11 ; i++ )	// 収束回数多いほど収束数る
+	for ( int i = 0 ; i < 111 ; i++ )	// 収束回数多いほど収束数る
 	{
 		// 骨コリジョン 張力計算
 		for ( Bone b : tblBone )
@@ -770,6 +771,7 @@ void Skeleton::DrawSkeleton( Pers& pers, SysGra& gra )
 			Joint&	j1 = tblJoint[b.n1];
 			if ( j0.disp.z > 0 && j0.disp.z > 0 )
 			{
+				if ( b.bBold )
 				gra.Line( j0.disp,j1.disp, col, b.bBold?3:1);
 
 			}
