@@ -712,28 +712,28 @@ struct Apr : public Sys
 			const float n = 0.02f;
 			vector<vect3> vert=
 			{
-				{	-s,		 s,		-s	},
-				{	 s,		 s,		-s	},
-				{	-s,		-s,		-s	},
-				{	 s,		-s,		-s	},
-				{	-s,		 s,		 s	},
-				{	 s,		 s,		 s	},
-				{	-s,		-s,		 s	},
-				{	 s,		-s,		 s	},
+				{	-s,		 s,		-s	},//0
+				{	 s,		 s,		-s	},//1
+				{	-s,		-s,		-s	},//2
+				{	 s,		-s,		-s	},//3
+				{	-s,		 s,		 s	},//4
+				{	 s,		 s,		 s	},//5
+				{	-s,		-s,		 s	},//6
+				{	 s,		-s,		 s	},//7
 
-				{	-l,		-s-l, 	-l	},	//yマーク
-				{	 l,		-s-l, 	-l	},
-				{	-l,		-s-l, 	 l	},
-				{	 l,		-s-l, 	 l	},
+				{	-l,		-s-l, 	-l	},//8	//yマーク
+				{	 l,		-s-l, 	-l	},//9
+				{	-l,		-s-l, 	 l	},//10
+				{	 l,		-s-l, 	 l	},//11
 
-				{	s+m,	+m, 	-m	},	//xマーク
-				{	s+m,	+m, 	+m	},
-				{	s+m,	-m, 	 0	},
+				{	s+m,	+m, 	-m	},//	//xマーク
+				{	s+m,	+m, 	+m	},//
+				{	s+m,	-m, 	 0	},//
 
-				{	-n,	 -n, 	s+n	},	//zマーク
-				{	+n,	 -n, 	s+n	},
-				{	-n,	 +n, 	s+n	},
-				{	+n,	 +n, 	s+n	},
+				{	-n,		 -n, 	s+n	},//	//zマーク
+				{	+n,		 -n, 	s+n	},//
+				{	-n,		 +n, 	s+n	},//
+				{	+n,		 +n, 	s+n	},//
 			};
 			vector<vect3> disp;
 
@@ -770,6 +770,7 @@ struct Apr : public Sys
 			};
 			vector<ivect3>	tri
 			{
+				{	8,10,9	},{	9,10,11	},	// yマーク
 				{	14,	13, 12	},	// xマーク
 			};
 

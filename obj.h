@@ -95,7 +95,7 @@ struct Pers
 	{
 		fovy=90/2;
 //		sz = 1/tan(rad(fovy)/2);				// 投影面までの距離
-		rate = 8.0f;
+		rate = 8.0f*8;
 
 	}
 
