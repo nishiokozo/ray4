@@ -118,7 +118,7 @@ struct Joint
 	bool bCtrl;
 	float	weight;
 
-	mat33	mat;
+	mat33	mat=mat33(1,0,0, 0,1,0, 0,0,1);
 
 	vect3 prev;
 	vect3 prev2;
@@ -145,7 +145,7 @@ struct Joint
 		prev3 = pos;
 		prev4 = pos;
 		binormal = vect3(1,0,0);
-		mat.identity();
+		//mat.identity();
 	}
 
 };

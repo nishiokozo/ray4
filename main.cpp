@@ -480,40 +480,12 @@ struct Apr : public Sys
 
 	} selector;
 
-		function<mat33(float)> mrotx = []( float f)
-		{
-			float	c = cos(f);
-			float	s = sin(f);
-			return mat33(
-				1,  0,  0,
-				0,  c, -s,
-				0,  s,  c
-			);
-		};
-		function<mat33(float)> mroty = []( float f)
-		{
-			float	c = cos(f);
-			float	s = sin(f);
-			return mat33(
-				c,  0, -s,
-				0,  1,  0,
-				s,  0,  c
-			);
-		};
-		function<mat33(float)> mrotz = []( float f)
-		{
-			float	c = cos(f);
-			float	s = sin(f);
-			return mat33(
-				c, -s,  0,
-				s,	c,  0,
-				0,  0,  1
-			);
-		};
+
 
 	// 軸回りの回転マトリクスを取得
 	//------------------------------------------------------------------------------
-	mat33 GetRotateAxis( vect3 axis, float th )
+//	mat33 GetRotateAxis( vect3 axis, float th )
+	mat33 GetRotateAxis( vect3 axis )
 	//------------------------------------------------------------------------------
 	{
 		vect3 nx,ny,nz;
@@ -530,7 +502,7 @@ struct Apr : public Sys
 
 
 		return mrotz( rz )  * mroty( ry );
-
+/*
 		float	c = cos(th);
 		float	s = sin(th);
 		mat33 rot = mat33(
@@ -540,7 +512,7 @@ struct Apr : public Sys
 		);
 
 		return rot * mrotz( rz )  * mroty( ry );
-		
+*/		
 	}
 	
 	//------------------------------------------------------------------------------
@@ -882,6 +854,24 @@ struct Apr : public Sys
 		pers.cam.pos = vect3(  0.3, 0.7, -1.2 );
 		pers.cam.at = vect3( 0,  0.7, 0 );
 #endif
+
+if(0)
+{
+	mat33 m1 = mrotx(rad(30)) * mroty(rad(15)) * mrotz(rad(8));
+	m1.dump();	
+	m1.invers().dump();
+	m1.dump();	
+
+	(m1*m1.invers()).dump();
+
+
+	mat33 m2 = mrotz(rad(8)) * mroty(rad(15)) * mrotx(rad(30));
+	m2.dump();	
+
+	(m1*m2).invers();
+
+	return 0 ;				
+}
 		//===========================================================================
 		while( Update() )
 		{
@@ -910,7 +900,7 @@ struct Apr : public Sys
 			if ( !keys.ALT.on  ) pers.cam.Zoom( -mouse.wheel*2/gra.GetHeight()/pers.getW((pers.cam.pos-pers.cam.at).abs()) );
 			
 			// カメラ移動
-			if ( (keys.ALT.on && mouse.R.on) || ( mouse.R.on && mouse.L.on ) ) pers.cam.Zoom( mouse.gmov.y/pers.getW((pers.cam.pos-pers.cam.at).abs()) );
+			if ( (keys.ALT.on && mouse.R.on) || ( mouse.R.on && mouse.L.on ) ) pers.cam.Zoom( -mouse.gmov.y/pers.getW((pers.cam.pos-pers.cam.at).abs()) );
 			
 
 			// カメラマトリクス計算
@@ -1116,16 +1106,16 @@ struct Apr : public Sys
 			pSkeleton->DrawSkeleton( pers, gra );
 
 			{
-				mat33	mmune;
-				static mat33	mkata;
-				mat33	mhiji;
-				mat33	mte;
-				vect3 p0 = pSkeleton->tblJoint[0].pos;
-				vect3 p1 = pSkeleton->tblJoint[1].pos;
-				vect3 p2 = pSkeleton->tblJoint[2].pos;
-				vect3 p3 = pSkeleton->tblJoint[3].pos;
-				vect3 p4 = pSkeleton->tblJoint[4].pos;
-				vect3 p5 = pSkeleton->tblJoint[5].pos;
+				mat33	mmune = midentity();
+				static mat33	mkata = midentity();;
+				mat33	mhiji = midentity();;
+				mat33	mte = midentity() ;
+				vect3	p0 = pSkeleton->tblJoint[0].pos;
+				vect3	p1 = pSkeleton->tblJoint[1].pos;
+				vect3	p2 = pSkeleton->tblJoint[2].pos;
+				vect3	p3 = pSkeleton->tblJoint[3].pos;
+				vect3	p4 = pSkeleton->tblJoint[4].pos;
+				vect3	p5 = pSkeleton->tblJoint[5].pos;
 				// 箱 胸
 				if(1)
 				{
@@ -1159,20 +1149,17 @@ struct Apr : public Sys
 						ny.x,	ny.y,	ny.z,
 						nz.x,	nz.y,	nz.z
 					);
-					m.identity();
-//					mkata = m;	
-//					mkata = pSkeleton->tblJoint[2].mat;
-//					mkata = mmune * mkata;
-					
-//					mkata = GetRotateAxis( vect3(1,0,0)*mrotz(rad(20))*mroty(rad(45)) , rad(0.2) );
 
+/*
+					mat33 mr = GetRotateAxis( (p4-p2).normalize() );
 
-					mat33 mrot;
-					
-					mrot = mrotx(rad(1));
-
-					mkata *= mrot.invers();
-					
+					mkata *= mr;
+					if ( keys.CTRL.on )		mkata *= mrotx(rad(0.5));
+					if ( keys.SHIFT.on )	mkata *= mrotx(rad(-0.5));
+					mkata *= mr.invers();
+*/
+					if ( keys.CTRL.on )		mkata.rotateByAxis( (p4-p2).normalize(), rad(0.5));
+					if ( keys.SHIFT.on )	mkata.rotateByAxis( (p4-p2).normalize(), rad(-0.5));
 					
 					box.DrawBox( (*this), pers, gra, p2, mkata );
 				}
