@@ -162,6 +162,8 @@ struct Bone
 
 struct Skeleton
 {
+	bool	bActive = false;	//	使用可能
+
 	string	filename;
 
 	vector<Joint>			tblJointForm;
@@ -233,6 +235,8 @@ struct Skeleton
 
 	//
 	Ring ring;
+
+//	void UtilUpdate( Pers& pers, SysGra& gra, SysMouse& mouse );
 
 };
 

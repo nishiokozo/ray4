@@ -189,6 +189,8 @@ void Skeleton::LoadSkeleton( const string fn )
 
 	}
 	cout << "LOADED" << endl;
+	this->bActive = true;
+
 
 	// カーソル更新
 	tblJoint = tblJointForm;
@@ -906,3 +908,4 @@ void Skeleton::DrawSkeleton( Pers& pers, SysGra& gra )
 	}
 
 }
+
