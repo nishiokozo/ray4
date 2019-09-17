@@ -422,6 +422,23 @@ void SysGra::Box( vect2 v0, vect2 v1,rgb col, float wide)
 
 }
 //------------------------------------------------------------------------------
+void SysGra::Box( vect3 v0, vect3 v1,rgb col, float wide)
+//------------------------------------------------------------------------------
+{
+//	glDisable(GL_DEPTH_TEST);
+
+  	glLineWidth(wide);
+
+    glBegin(GL_LINE_LOOP);
+    glColor3f( col.r, col.g, col.b );
+    glVertex3f(v1.x, v0.y, 0);
+    glVertex3f(v1.x, v1.y, 0);
+    glVertex3f(v0.x, v1.y, 0);
+    glVertex3f(v0.x, v0.y, 0);
+    glEnd();
+
+}
+//------------------------------------------------------------------------------
 void SysGra::Fill( vect2 v0, vect2 v1,rgb col)
 //------------------------------------------------------------------------------
 {

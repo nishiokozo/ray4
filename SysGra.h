@@ -66,6 +66,7 @@ struct SysGra
 	void	Tri( vect2 v0, vect2 v1, vect2 v2, rgb col);
 	void	Tri( vect3 v0, vect3 v1, vect3 v2, rgb col);
 	void	Box( vect2 v0, vect2 v1, rgb col, float wide=1.0f);
+	void	Box( vect3 v0, vect3 v1, rgb col, float wide=1.0f);
 	void	Fill( vect2 v0, vect2 v1, rgb col);
 	void	Line( vect2 v0, vect2 v1, rgb col, float wide=1.0f);
 	void	Line( vect3 v0, vect3 v1, rgb col, float wide=1.0f);

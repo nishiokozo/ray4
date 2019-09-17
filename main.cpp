@@ -399,7 +399,7 @@ struct Apr : public Sys
 				one.pj->stat.bSelected = true;
 			}
 
-			// 単独 反転規選択
+			// 単独 反転選択
 			//------------------------------------------------------------------------------
 			void SelectOneRev()
 			//------------------------------------------------------------------------------
@@ -802,15 +802,15 @@ struct Apr : public Sys
 				}
 				
 				// キーフレームロード
+/*
 				if ( keys.CTRL.on && keys.L.hi ) 
 				{
 					//読み込み
 					unique_ptr<Skeleton> pNew(new Skeleton);
-					pNew->LoadSkeleton( "human.mot" );
-
-	//					&skeleton = move(pNew);
+					//pNew->LoadSkeleton( "human.mot" );
+					pNew->LoadSkeleton( "bone.mot" );
 				}
-
+*/
 				// キーフレームセーブ
 				if ( keys.CTRL.on && keys.S.hi ) skeleton.SaveSkeleton();
 
@@ -1196,6 +1196,7 @@ struct Apr : public Sys
 	#if 1 // camera
 		pers.cam.pos = vect3(  0.3, 0.7, -1.2 );
 		pers.cam.at = vect3( 0,  0.7, 0 );
+		pers.cam.at = vect3( 0,  0.0, 0 );
 	#endif
 
 		//===========================================================================
@@ -1251,8 +1252,8 @@ struct Apr : public Sys
 			{
 				//読み込み
 				unique_ptr<Skeleton> pNew(new Skeleton);
-				pNew->LoadSkeleton( "human.mot" );
-				//pNew->LoadSkeleton( "bone.mot" );
+				//pNew->LoadSkeleton( "human.mot" );
+				pNew->LoadSkeleton( "bone.mot" );
 				pNew->stat.bShowSkin = false;
 				pNew->stat.bShowLocus = false;
 				pSkeleton = move(pNew);
@@ -1274,7 +1275,7 @@ struct Apr : public Sys
 			//=================================
 			// マウス座標（投影面座標）を３Ｄ空間座標に逆変換＆描画
 			//=================================
-			if(1)
+			if(0)
 			{
 				vect3 P = pers.calcScreenToWorld( vect3(mouse.gpos,0) );
 				vect3 I = pers.calcRayvect( P );
@@ -1282,37 +1283,58 @@ struct Apr : public Sys
 				g_line3d( gra, pers, vect3(0,0,0), P, vect3(1,1,0));
 				g_line3d( gra, pers, vect3(0,0,0), P+I*10.0f, vect3(1,1,1));
 			}
-			
 
 			//=================================
 			// コース描画
 			//=================================
-			vector<vect3>	cource_pos =
 			{
-				{	-1,	0,	-1},
-				{	+1,	0,	-1},
-				{	+1,	0,	1},
-				{	-1,	0,	1},
-			};
-			int size = (signed)cource_pos.size();
-			for ( int i = 0 ; i < size ; i++ )
-			{
-				vect3 P0 = cource_pos[i];
-				vect3 P1 = cource_pos[(i+1)%size];
-				vect3 P2 = cource_pos[(i+2)%size];
-				vect3 P3 = cource_pos[(i+3)%size];
-				
-				for ( float t = 0.0 ; t < 1.0 ; t+=0.2 )
+				struct Rect
 				{
-					vect3 P = catmull3d_func(t, P0,P1,P2,P3 );
+					int id;
+					vect3 st;
+					vect3 en;
+					Rect( int _id, vect3 _st, vect3 _en ) : id(_id), st(_st), en(_en) {} 
+				};
+				vector<Rect>	rect;
+				vector<vect3>	cource_pos =
+				{
+					{	-0.5,	0,	-0.5},
+					{	+0.5,	0,	-0.5},
+					{	+0.5,	0,	0.5},
+					{	-0.5,	0,	0.5},
+				};
+				rgb	col(1,1,1);
+				int size = (signed)cource_pos.size();
+				vect3 r = vect3( gra.Dot(16,16), 0 );
+				vect3	v0;
+				vect3	v2;
+				for ( int i = 0 ; i < size ; i++ )
+				{
+					vect3 P0 = cource_pos[i];
+					vect3 P1 = cource_pos[(i+1)%size];
+					vect3 P2 = cource_pos[(i+2)%size];
+					vect3 P3 = cource_pos[(i+3)%size];
 					
-					
-					vect3 v = pers.calcWorldToScreen3( P );
-					gra.Pset( v, rgb(1,1,1), 4 );
+					for ( float t = 0.0 ; t < 1.0 ; t+=0.05 )
+					{
+						vect3 P = catmull3d_func(t, P0,P1,P2,P3 );
+						vect3 v1 = pers.calcWorldToScreen3( P );
+						if (t==0.0)	gra.Pset( v1, rgb(0,0,1), 11);
+						//else		gra.Pset( v1, rgb(1,1,1), 3 );
+						if ( t==0 ) rect.emplace_back( i, v1-r, v1+r );
+						if ( (i==0 && t==0) ) v2=v1;
+						else gra.Line( v0, v1, col);
+						v0 = v1;
+					}
+				}
+				gra.Line( v0, v2, col);
+
+				for ( Rect& r : rect )
+				{
+					gra.Box( r.st, r.en, rgb( 1,1,0) ); 
 				}
 			}
-
-
+			
 			//=================================
 			// 情報表示
 			//=================================
@@ -1337,32 +1359,32 @@ struct Apr : public Sys
 			// 処理時間表示
 			//=================================
 			{
-				static chrono::system_clock::duration dime_a;
-				static chrono::system_clock::duration dime_b;
-				static chrono::system_clock::duration dime_sec;
-				static chrono::system_clock::duration dime_now;
-				static chrono::system_clock::duration dime_max;
+				static chrono::system_clock::duration time_a;
+				static chrono::system_clock::duration time_b;
+				static chrono::system_clock::duration time_sec;
+				static chrono::system_clock::duration time_now;
+				static chrono::system_clock::duration time_max;
 
-				dime_b = chrono::system_clock::now().time_since_epoch(); 
-				if ( dime_max < dime_b-dime_a ) dime_max = dime_b-dime_a;
+				time_b = chrono::system_clock::now().time_since_epoch(); 
+				if ( time_max < time_b-time_a ) time_max = time_b-time_a;
 
 				// ウェイト(60fps)
-				while( chrono::system_clock::now().time_since_epoch()-dime_a < chrono::microseconds(16666) )
+				while( chrono::system_clock::now().time_since_epoch()-time_a < chrono::microseconds(16666) )
 				{
 	 				this_thread::sleep_for(chrono::microseconds(100));
 				}
 
 				// 表示
-			    dime_now = chrono::system_clock::now().time_since_epoch();
-				if ( dime_now-dime_sec > chrono::seconds(2) ) // n sec毎表示
+			    time_now = chrono::system_clock::now().time_since_epoch();
+				if ( time_now-time_sec > chrono::seconds(2) ) // n sec毎表示
 				{
-					dime_sec = chrono::system_clock::now().time_since_epoch();
+					time_sec = chrono::system_clock::now().time_since_epoch();
 
-					long long f2 = chrono::duration_cast<chrono::microseconds>(dime_max).count();
+					long long f2 = chrono::duration_cast<chrono::microseconds>(time_max).count();
 					time_peak = f2;
-					dime_max = chrono::seconds(0);
+					time_max = chrono::seconds(0);
 				}
-				dime_a = chrono::system_clock::now().time_since_epoch();  
+				time_a = chrono::system_clock::now().time_since_epoch();  
 			}
 
 		}
