@@ -12,9 +12,12 @@
 using namespace std;
 
 #include "geom.h"
+
 #include "SysGra.h"
+
 #include "obj.h"
 #include "skeleton.h"
+#include "func.h"
 
 
 //------------------------------------------------------------------------------
@@ -207,6 +210,7 @@ void Skeleton::LoadSkeleton( const string fn )
 
 }
 
+/*
 // カトマル曲線3D
 //------------------------------------------------------------------------------
 static	vect3 catmull3d_func( float t, const vect3 P0, const vect3 P1, const vect3 P2, const vect3 P3 )
@@ -225,6 +229,7 @@ static	vect3 catmull3d_func( float t, const vect3 P0, const vect3 P1, const vect
 	return P;
 };
 
+*/
 
 //------------------------------------------------------------------------------
 void Skeleton::ReqAnimation()
@@ -872,16 +877,7 @@ void Skeleton::DrawSkeleton( Pers& pers, SysGra& gra )
 					{
 						vect3 b = catmull3d_func(t, P0,P1,P2,P3 );
 
-						vect3 v0;
-						vect3 v1;
-						bool flg = pers.calcScissorLine3d( a* pers.cam.mat.invers(), b* pers.cam.mat.invers(), v0, v1 );
-
-						rgb	col = rgb(1,1,1);
-						if ( flg )
-						{
-							gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col,1);
-						}
-						
+						g_line3d( gra, pers, a, b, vect3(1,1,1));
 //						if ( v1.z > 0 ) gra.Pset(v1, col, 4);
 
 						a=b;

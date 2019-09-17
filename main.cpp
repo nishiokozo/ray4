@@ -22,22 +22,13 @@ using namespace std;
 #include "SysGra.h"
 #include "Sys.h"
 
-#include "raytrace.h"
 #include "obj.h"
+#include "func.h"
+
+#include "raytrace.h"
 #include "skeleton.h"
 
-//------------------------------------------------------------------------------
-void g_line3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col )
-//------------------------------------------------------------------------------
-{
-	float l = 0.2;
-	vect3 a = p0* pers.cam.mat.invers();
-	vect3 b = p1* pers.cam.mat.invers();
-	vect3 v0;
-	vect3 v1;
-	bool flg = pers.calcScissorLine3d( a, b, v0, v1 );
-	if ( flg ) gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col );
-}
+
 
 struct Apr : public Sys
 {
@@ -69,7 +60,8 @@ struct Apr : public Sys
 
 			vect3 pos = apr.pers.calcScreenToWorld( vect3(mpos,0) );
 
-			vect3 v0 = apr.pers.calcWorldToScreen3( pos  );
+			vect3 v0 = apr.pers.calcWorldToScreen3( pos );
+//			vect3 v2 = apr.pers.calcWorldToScreen3( vect3(0,0,0) );
 
 
 
@@ -82,7 +74,8 @@ struct Apr : public Sys
 					apr.pers.cam.mat.m[1][0],
 					apr.pers.cam.mat.m[2][0]
 				) * l;
-				apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0.8,0.2,0.2), 2.0 );
+//				apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0.8,0.2,0.2), 2.0 );
+				apr.gra.Line( v0, v1, rgb(0.8,0.2,0.2), 2.0 );
 			}
 			if ( bAxisY  )
 			{
@@ -91,7 +84,8 @@ struct Apr : public Sys
 					apr.pers.cam.mat.m[1][1],
 					apr.pers.cam.mat.m[2][1]
 				) * l;
-				apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0.2,0.8,0.2), 2.0 );
+//				apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0.2,0.8,0.2), 2.0 );
+				apr.gra.Line( v0, v1, rgb(0.2,0.8,0.2), 2.0 );
 			}
 			if ( bAxisZ )
 			{
@@ -100,7 +94,8 @@ struct Apr : public Sys
 					apr.pers.cam.mat.m[1][2],
 					apr.pers.cam.mat.m[2][2]
 				) * l;
-				apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0.1,0.3,1), 2.0 );
+//				apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0.1,0.3,1), 2.0 );
+				apr.gra.Line( v0, v1, rgb(0.1,0.3,1), 2.0 );
 
 			}
 
@@ -114,19 +109,6 @@ struct Apr : public Sys
 
 
 	Pers pers;
-
-	//------------------------------------------------------------------------------
-	void line3d( vect3 p0, vect3 p1, rgb col )
-	//------------------------------------------------------------------------------
-	{
-		float l = 0.2;
-		vect3 a = p0* pers.cam.mat.invers();
-		vect3 b = p1* pers.cam.mat.invers();
-		vect3 v0;
-		vect3 v1;
-		bool flg = pers.calcScissorLine3d( a, b, v0, v1 );
-		if ( flg ) gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col );
-	}
 
 	//------------------------------------------------------------------------------
 	void pset3d( vect3 p0, rgb col, float wide )
@@ -188,7 +170,8 @@ struct Apr : public Sys
 				vt = vect3(0,0,dt);
 				for ( int i = 0 ; i < NUM_V*2+1 ; i++ )
 				{
-					apr.line3d( a, b, col );
+//					apr.line3d( a, b, col );
+					g_line3d( apr.gra, apr.pers, a, b, col, true );
 					a+=vt;
 					b+=vt;
 				}
@@ -200,7 +183,8 @@ struct Apr : public Sys
 				vt = vect3(dt,0,0);
 				for ( int i = 0 ; i < NUM_U*2+1 ; i++ )
 				{
-					apr.line3d( a, b, col );
+//					apr.line3d( a, b, col );
+					g_line3d( apr.gra, apr.pers, a, b, col, true );
 					a+=vt;
 					b+=vt;
 				}
@@ -592,8 +576,6 @@ struct Apr : public Sys
 					//	yaw		:y	下+
 					v= v * m + pos;
 
-					v = v * pers.cam.mat.invers();
-
 					disp.emplace_back( v );
 
 				}
@@ -615,9 +597,9 @@ struct Apr : public Sys
 				{
 					for ( ivect3 t : tri )
 					{
-						vect3 v0 = pers.calcViewScreen3( disp[t.n0] );
-						vect3 v1 = pers.calcViewScreen3( disp[t.n1] );
-						vect3 v2 = pers.calcViewScreen3( disp[t.n2] );
+						vect3 v0 = pers.calcWorldToScreen3( disp[t.n0] );
+						vect3 v1 = pers.calcWorldToScreen3( disp[t.n1] );
+						vect3 v2 = pers.calcWorldToScreen3( disp[t.n2] );
 	//					if ( v0.z>0 )
 						{
 							gra.Tri( v0,v1,v2, rgb(1,0,1));
@@ -630,14 +612,10 @@ struct Apr : public Sys
 				{
 					const vect3& a = disp[e.p];
 					const vect3& b = disp[e.n];
+					const rgb col = rgb(0,1,1);
 
-					vect3 v0;
-					vect3 v1;
-					bool flg = pers.calcScissorLine3d( a, b, v0, v1 );
-					if ( flg )
-					{
-						gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,1,1));
-					}
+					g_line3d( gra, pers, a, b, col, false );
+
 				}
 			}
 			
@@ -763,8 +741,6 @@ struct Apr : public Sys
 					//	yaw		:y	下+
 					v= v * m + pos;
 
-					v = v * pers.cam.mat.invers();
-
 					disp.emplace_back( v );
 
 				}
@@ -784,9 +760,9 @@ struct Apr : public Sys
 				// Tri
 				for ( ivect3 t : tri )
 				{
-					vect3 v0 = pers.calcViewScreen3( disp[t.n0] );
-					vect3 v1 = pers.calcViewScreen3( disp[t.n1] );
-					vect3 v2 = pers.calcViewScreen3( disp[t.n2] );
+					vect3 v0 = pers.calcWorldToScreen3( disp[t.n0] );
+					vect3 v1 = pers.calcWorldToScreen3( disp[t.n1] );
+					vect3 v2 = pers.calcWorldToScreen3( disp[t.n2] );
 	//					if ( v0.z>0 )
 					{
 						gra.Tri( v0,v1,v2, rgb(1,0,1));
@@ -798,14 +774,9 @@ struct Apr : public Sys
 				{
 					const vect3& a = disp[e.p];
 					const vect3& b = disp[e.n];
+					const rgb col = rgb(0,1,1);
 
-					vect3 v0;
-					vect3 v1;
-					bool flg = pers.calcScissorLine3d( a, b, v0, v1 );
-					if ( flg )
-					{
-						gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0,1,1));
-					}
+					g_line3d( gra, pers, a, b, col, false );
 				}
 			}
 			
@@ -1280,23 +1251,15 @@ struct Apr : public Sys
 			{
 				//読み込み
 				unique_ptr<Skeleton> pNew(new Skeleton);
-				//pNew->LoadSkeleton( "human.mot" );
-				pNew->LoadSkeleton( "bone.mot" );
+				pNew->LoadSkeleton( "human.mot" );
+				//pNew->LoadSkeleton( "bone.mot" );
 				pNew->stat.bShowSkin = false;
 				pNew->stat.bShowLocus = false;
 				pSkeleton = move(pNew);
 			}
 
 
-			// マウス座標（投影面座標）を３Ｄ空間座標に逆変換
-			if(0)
-			{
-				vect3 P = pers.calcScreenToWorld( vect3(mouse.gpos,0) );
-				vect3 I = pers.calcRayvect( P );
-				line3d( vect3(0,0,0), P, vect3(1,1,0));
-				line3d( vect3(0,0,0), P+I*10.0f, vect3(1,1,1));
-			}
-			
+
 			//=================================
 			// 画面クリア
 			//=================================
@@ -1306,6 +1269,49 @@ struct Apr : public Sys
 			// 床グリッド描画
 			//=================================
 			grid.DrawGrid( *this, vect3(0,0,0), 10, 10, 1, vect3(0.2,0.2,0.2) );
+
+
+			//=================================
+			// マウス座標（投影面座標）を３Ｄ空間座標に逆変換＆描画
+			//=================================
+			if(1)
+			{
+				vect3 P = pers.calcScreenToWorld( vect3(mouse.gpos,0) );
+				vect3 I = pers.calcRayvect( P );
+
+				g_line3d( gra, pers, vect3(0,0,0), P, vect3(1,1,0));
+				g_line3d( gra, pers, vect3(0,0,0), P+I*10.0f, vect3(1,1,1));
+			}
+			
+
+			//=================================
+			// コース描画
+			//=================================
+			vector<vect3>	cource_pos =
+			{
+				{	-1,	0,	-1},
+				{	+1,	0,	-1},
+				{	+1,	0,	1},
+				{	-1,	0,	1},
+			};
+			int size = (signed)cource_pos.size();
+			for ( int i = 0 ; i < size ; i++ )
+			{
+				vect3 P0 = cource_pos[i];
+				vect3 P1 = cource_pos[(i+1)%size];
+				vect3 P2 = cource_pos[(i+2)%size];
+				vect3 P3 = cource_pos[(i+3)%size];
+				
+				for ( float t = 0.0 ; t < 1.0 ; t+=0.2 )
+				{
+					vect3 P = catmull3d_func(t, P0,P1,P2,P3 );
+					
+					
+					vect3 v = pers.calcWorldToScreen3( P );
+					gra.Pset( v, rgb(1,1,1), 4 );
+				}
+			}
+
 
 			//=================================
 			// 情報表示
