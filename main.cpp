@@ -867,23 +867,23 @@ struct Apr : public Sys
 
 				// 最近点検索
 				if ( !keys.ALT.on && mouse.L.hi ) 
-					selector.Setup( pers, skeleton, mouse.gpos );
+					selector.Setup( pers, skeleton, mouse.pos );
 
 				// 矩形カーソル開始 新規選択
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && selector.one.pj == 0 && selector.rect_mode == Selector::CALC::NONE ) 
-					selector.SelectRectNew( mouse.gpos );
+					selector.SelectRectNew( mouse.pos );
 
 				// 矩形カーソル開始 追加選択
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && keys.SHIFT.on && selector.one.pj == 0 && selector.rect_mode == Selector::CALC::NONE ) 
-					selector.SelectRectAdd( mouse.gpos );
+					selector.SelectRectAdd( mouse.pos );
 
 				// 矩形カーソル開始 反転選択
 				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && !keys.SHIFT.on && selector.one.pj == 0 && selector.rect_mode == Selector::CALC::NONE ) 
-					selector.SelectRectRev( mouse.gpos );
+					selector.SelectRectRev( mouse.pos );
 
 				// 矩形カーソル開始 削除選択
 				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && keys.SHIFT.on && selector.one.pj == 0 && selector.rect_mode == Selector::CALC::NONE ) 
-					selector.SelectRectSub( mouse.gpos );
+					selector.SelectRectSub( mouse.pos );
 
 				// 矩形カーソル終了（選択決定）
 				if ( !keys.ALT.on && !mouse.L.on && selector.rect_mode != Selector::CALC::NONE ) 
@@ -891,7 +891,7 @@ struct Apr : public Sys
 
 				// 矩形カーソル選択	
 				if ( !keys.ALT.on && mouse.L.on && selector.rect_mode != Selector::CALC::NONE ) 
-					selector.SelectRectBegin( pers, skeleton , mouse.gpos );
+					selector.SelectRectBegin( pers, skeleton , mouse.pos );
 
 				// 単独 新規選択
 				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && selector.one.pj && selector.one.pj->stat.bSelected == false ) 
@@ -913,7 +913,7 @@ struct Apr : public Sys
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && selector.one.pj ) 
 				{
 	//					Skeleton& skeleton = skeleton;
-					vect2 gmov = mouse.gmov;
+					vect2 gmov = mouse.mov;
 
 					vect3 v = vect3(gmov.x*pers.aspect, gmov.y, 0)/selector.one.w/pers.rate;
 					mat44 mrot = pers.cam.mat;
@@ -1047,7 +1047,7 @@ struct Apr : public Sys
 			}
 
 			// 選択されたジョイント表示
-			selector.DrawJoint( pers, gra, skeleton , mouse.gpos );
+			selector.DrawJoint( pers, gra, skeleton , mouse.pos );
 
 			
 
@@ -1216,16 +1216,16 @@ struct Apr : public Sys
 				pers.Update( vect2( gra.GetWidth(), gra.GetHeight() ) );
 
 				// カメラ回転
-				if ( (!keys.ALT.on && mouse.R.on && !mouse.L.on && !mouse.M.on) || (keys.ALT.on && !mouse.R.on && mouse.L.on && !mouse.M.on) ) pers.cam.Rotation( -vect3(mouse.gmov,0)*18.0f );
+				if ( (!keys.ALT.on && mouse.R.on && !mouse.L.on && !mouse.M.on) || (keys.ALT.on && !mouse.R.on && mouse.L.on && !mouse.M.on) ) pers.cam.Rotation( -vect3(mouse.mov,0)*18.0f );
 
 				// カメラ平行移動
-				if ( mouse.M.on ) pers.cam.Move( -vect3(mouse.gmov,0)/pers.getW((pers.cam.pos-pers.cam.at).abs()));
+				if ( mouse.M.on ) pers.cam.Move( -vect3(mouse.mov,0)/pers.getW((pers.cam.pos-pers.cam.at).abs()));
 
 				// マウスホイールZOOM
 				if ( !keys.ALT.on  ) pers.cam.Zoom( -mouse.wheel*2/gra.GetHeight()/pers.getW((pers.cam.pos-pers.cam.at).abs()) );
 				
 				// カメラ移動
-				if ( (keys.ALT.on && mouse.R.on) || ( mouse.R.on && mouse.L.on ) ) pers.cam.Zoom( -mouse.gmov.y/pers.getW((pers.cam.pos-pers.cam.at).abs()) );
+				if ( (keys.ALT.on && mouse.R.on) || ( mouse.R.on && mouse.L.on ) ) pers.cam.Zoom( -mouse.mov.y/pers.getW((pers.cam.pos-pers.cam.at).abs()) );
 				
 				// カメラマトリクス計算
 				pers.cam.mat.LookAt( pers.cam.pos, pers.cam.at, pers.cam.up );
@@ -1277,7 +1277,7 @@ struct Apr : public Sys
 			//=================================
 			if(0)
 			{
-				vect3 P = pers.calcScreenToWorld( vect3(mouse.gpos,0) );
+				vect3 P = pers.calcScreenToWorld( vect3(mouse.pos,0) );
 				vect3 I = pers.calcRayvect( P );
 
 				g_line3d( gra, pers, vect3(0,0,0), P, vect3(1,1,0));
@@ -1291,9 +1291,8 @@ struct Apr : public Sys
 				struct Rect
 				{
 					int id;
-					vect3 st;
-					vect3 en;
-					Rect( int _id, vect3 _st, vect3 _en ) : id(_id), st(_st), en(_en) {} 
+					vect3 pos;
+					Rect( int _id, vect3 _pos ) : id(_id), pos(_pos) {} 
 				};
 				vector<Rect>	rect;
 				vector<vect3>	cource_pos =
@@ -1305,7 +1304,7 @@ struct Apr : public Sys
 				};
 				rgb	col(1,1,1);
 				int size = (signed)cource_pos.size();
-				vect3 r = vect3( gra.Dot(16,16), 0 );
+				//vect3 r = vect3( gra.Dot(16,16), 0 );
 				vect3	v0;
 				vect3	v2;
 				for ( int i = 0 ; i < size ; i++ )
@@ -1319,9 +1318,9 @@ struct Apr : public Sys
 					{
 						vect3 P = catmull3d_func(t, P0,P1,P2,P3 );
 						vect3 v1 = pers.calcWorldToScreen3( P );
-						if (t==0.0)	gra.Pset( v1, rgb(0,0,1), 11);
+						//if (t==0.0)	gra.Pset( v1, rgb(0,0,1), 11);
 						//else		gra.Pset( v1, rgb(1,1,1), 3 );
-						if ( t==0 ) rect.emplace_back( i, v1-r, v1+r );
+						if ( t==0 ) rect.emplace_back( i, v1 );
 						if ( (i==0 && t==0) ) v2=v1;
 						else gra.Line( v0, v1, col);
 						v0 = v1;
@@ -1329,9 +1328,10 @@ struct Apr : public Sys
 				}
 				gra.Line( v0, v2, col);
 
+				// コントローラ描画
 				for ( Rect& r : rect )
 				{
-					gra.Box( r.st, r.en, rgb( 1,1,0) ); 
+					gra.Pset( r.pos, rgb( 1,1,0), 11 ); 
 				}
 			}
 			
@@ -1353,7 +1353,7 @@ struct Apr : public Sys
 			//=================================
 			// マニュピレーター描画
 			//=================================
-			axis.DrawAxis( mouse.gpos, *this );
+			axis.DrawAxis( mouse.pos, *this );
 
 			//=================================
 			// 処理時間表示
