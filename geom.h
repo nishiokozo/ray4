@@ -178,6 +178,8 @@ public:
 
 	vect3( vect2 v, float _z ) { x = v.x; y = v.y; z = _z;};
 
+	vect2 xy() {return vect2(x,y);}
+	
 //	vect3 abs() { return vect3( std::abs(x) , std::abs(y) ); }
 	vect3 normalize() { return (*this)/abs(); }
 	float abs() { return sqrt( x*x + y*y + z*z ); }

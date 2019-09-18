@@ -31,6 +31,7 @@ SysMouse::SysMouse()
 
 	SysWin& win = SysWin::GetInstance();
 
+#if 0
 	this->pos.x = point.x - win.GetPosX();
 	this->pos.y = point.y - win.GetPosY();
 
@@ -38,6 +39,7 @@ SysMouse::SysMouse()
 	this->mov.y = 0;
 
 	this->prev = this->pos;
+#endif
 
 	this->wheel = 0;
 
@@ -48,9 +50,9 @@ SysMouse::SysMouse()
 		vect2	gp( point.x, point.y );
 		gp = gp/vect2(win.GetWidth()/2,-win.GetHeight()/2)+vect2(-1,1);
 	
-		this->gprev = this->gpos;
-		this->gmov = 0;
-		this->gpos = gp;
+		this->prev = this->pos;
+		this->mov = 0;
+		this->pos = gp;
 	}
 
 }
@@ -107,11 +109,13 @@ void SysMouse::Update()
 //	this->sx = point.x;
 //	this->sy = point.y;
 
+#if 0
 	this->prev = this->pos;
 	this->mov.x = point.x - this->pos.x;
 	this->mov.y = point.y - this->pos.y;
 	this->pos.x = point.x;
 	this->pos.y = point.y;
+#endif
 	
 	// GL座標系
 	{
@@ -120,9 +124,9 @@ void SysMouse::Update()
 		vect2	gp( point.x, point.y );
 		gp = gp/vect2(win.GetWidth()/2,-win.GetHeight()/2)+vect2(-1,1);
 	
-		this->gprev = this->gpos;
-		this->gmov = gp - this->gpos;
-		this->gpos = gp;
+		this->prev = this->pos;
+		this->mov = gp - this->pos;
+		this->pos = gp;
 
 		if ( win.GetHeight() > 0 )
 		{

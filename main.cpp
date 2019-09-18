@@ -1215,6 +1215,7 @@ struct Apr : public Sys
 				// パース更新
 				pers.Update( vect2( gra.GetWidth(), gra.GetHeight() ) );
 
+				
 				// カメラ回転
 				if ( (!keys.ALT.on && mouse.R.on && !mouse.L.on && !mouse.M.on) || (keys.ALT.on && !mouse.R.on && mouse.L.on && !mouse.M.on) ) pers.cam.Rotation( -vect3(mouse.mov,0)*18.0f );
 
@@ -1295,7 +1296,7 @@ struct Apr : public Sys
 					Rect( int _id, vect3 _pos ) : id(_id), pos(_pos) {} 
 				};
 				vector<Rect>	rect;
-				vector<vect3>	cource_pos =
+				static vector<vect3>	cource_pos =
 				{
 					{	-0.5,	0,	-0.5},
 					{	+0.5,	0,	-0.5},
@@ -1305,6 +1306,8 @@ struct Apr : public Sys
 				rgb	col(1,1,1);
 				int size = (signed)cource_pos.size();
 				//vect3 r = vect3( gra.Dot(16,16), 0 );
+				static int		g_idSelected = -1;
+				static float	g_wSelected = 0;
 				vect3	v0;
 				vect3	v2;
 				for ( int i = 0 ; i < size ; i++ )
@@ -1316,22 +1319,52 @@ struct Apr : public Sys
 					
 					for ( float t = 0.0 ; t < 1.0 ; t+=0.05 )
 					{
-						vect3 P = catmull3d_func(t, P0,P1,P2,P3 );
-						vect3 v1 = pers.calcWorldToScreen3( P );
-						//if (t==0.0)	gra.Pset( v1, rgb(0,0,1), 11);
-						//else		gra.Pset( v1, rgb(1,1,1), 3 );
-						if ( t==0 ) rect.emplace_back( i, v1 );
+						vect3 v1 = catmull3d_func(t, P0,P1,P2,P3 );
+						if ( t==0 ) rect.emplace_back( (i+1)%size, pers.calcWorldToScreen3( v1 ) );
 						if ( (i==0 && t==0) ) v2=v1;
-						else gra.Line( v0, v1, col);
+						else g_line3d( gra, pers, v0, v1, col, true );
 						v0 = v1;
 					}
 				}
-				gra.Line( v0, v2, col);
+				g_line3d( gra, pers, v0, v2, col, true );
+
+				// コントローラ選択
+				if ( mouse.L.hi )
+				{
+					g_idSelected = -1;
+
+					for ( Rect& r : rect )
+					{
+						if ( gra.Pixel(mouse.pos-r.pos.xy()).abs() < 16 )
+						{
+							g_idSelected = r.id;
+							g_wSelected = r.pos.z;
+						}
+					}
+				}
+				
+				// 移動 （スクリーン並行）
+				if ( mouse.L.on )
+				{
+					if ( g_idSelected != -1 )
+					{
+						vect2 gmov = mouse.mov;
+
+						vect3 v = vect3(gmov.x*pers.aspect, gmov.y, 0)/g_wSelected/pers.rate;
+						mat44 mrot = pers.cam.mat;
+						mrot.SetTranslate(vect3(0,0,0));
+						v = v* mrot;
+						cource_pos[g_idSelected] += v;
+						
+					}
+				}
 
 				// コントローラ描画
 				for ( Rect& r : rect )
 				{
-					gra.Pset( r.pos, rgb( 1,1,0), 11 ); 
+					if ( r.id == g_idSelected )
+							gra.Pset( r.pos, rgb(1,0,0), 11 ); 
+					else	gra.Pset( r.pos, rgb(0,0,1), 11 ); 
 				}
 			}
 			

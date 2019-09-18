@@ -47,4 +47,3 @@ void g_line3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col, bool bSciss
 		gra.Line( v0, v1, col );
 	}
 }
-

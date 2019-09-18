@@ -99,5 +99,10 @@ struct SysGra
 		// ピクセル座標数(pos)をGL座標数に変換する
 		return vect2(x,y)/vect2(GetWidth(),-GetHeight());
 	}
-
+	
+	vect2 Pixel( vect2 v )
+	{
+		// ピクセル座標数(mov)に変換したGL座標数に変換する
+		return	v*vect2(GetWidth(),GetHeight());
+	}
 };
