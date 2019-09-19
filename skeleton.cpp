@@ -878,7 +878,6 @@ void Skeleton::DrawSkeleton( Pers& pers, SysGra& gra )
 						vect3 b = catmull3d_func(t, P0,P1,P2,P3 );
 
 						g_line3d( gra, pers, a, b, vect3(1,1,1));
-//						if ( v1.z > 0 ) gra.Pset(v1, col, 4);
 
 						a=b;
 						t+=dt;

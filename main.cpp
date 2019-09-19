@@ -29,6 +29,215 @@ using namespace std;
 #include "skeleton.h"
 
 
+struct Square
+{
+
+	const float s = 0.04f;
+	vector<vect3> vert=
+	{
+		{	-s,		 s,		0	},//0
+		{	 s,		 s,		0	},//1
+		{	-s,		-s,		0	},//2
+		{	 s,		-s,		0	},//3
+
+	};
+	vector<vect3> disp;
+
+	vector<ivect2>	edge
+	{
+		{	0,	1	},
+		{	1,	3	},
+		{	3,	2	},
+		{	2,	0	},
+	};
+
+	//------------------------------------------------------------------------------
+	void DrawSquare( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAxis = true, bool bTri = true )
+	//------------------------------------------------------------------------------
+	{
+		disp.clear();
+
+		for ( vect3 v : vert )
+		{
+
+			//	右手系座標系
+			//	右手ねじ周り
+			//	roll	:z	奥+
+			//	pitch	:x	右+
+			//	yaw		:y	下+
+			v= v * m + pos;
+
+			disp.emplace_back( v );
+
+		}
+
+
+		// 軸
+		if( bAxis )
+		{
+			vect3	nx = vect3( m.m[0][0], m.m[0][1], m.m[0][2] );
+			vect3	ny = vect3( m.m[1][0], m.m[1][1], m.m[1][2] );
+			vect3	nz = vect3( m.m[2][0], m.m[2][1], m.m[2][2] );
+			g_line3d( gra, pers, pos, pos+nx*0.2, rgb(1,0,0) );
+			g_line3d( gra, pers, pos, pos+ny*0.2, rgb(0,1,0) );
+			g_line3d( gra, pers, pos, pos+nz*0.2, rgb(0,0,1) );
+		}
+		
+		int cnt = 0;
+		for ( ivect2 e : edge )
+		{
+			const vect3& a = disp[e.p];
+			const vect3& b = disp[e.n];
+			rgb col = rgb(0,1,1);
+			if ( cnt == 0 ) col = rgb(1,0,0);
+			//if ( cnt == 1 ) col = rgb(0,1,0);
+			cnt++;
+			g_line3d( gra, pers, a, b, col, false );
+
+		}
+	}
+	
+} square;
+
+
+struct Box
+{
+
+	const float s = 0.04f;
+	const float l = 0.03f;
+	const float m = 0.02f;
+	const float n = 0.02f;
+	vector<vect3> vert=
+	{
+		{	-s,		 s,		-s	},//0
+		{	 s,		 s,		-s	},//1
+		{	-s,		-s,		-s	},//2
+		{	 s,		-s,		-s	},//3
+		{	-s,		 s,		 s	},//4
+		{	 s,		 s,		 s	},//5
+		{	-s,		-s,		 s	},//6
+		{	 s,		-s,		 s	},//7
+
+		{	-l,		-s-l, 	-l	},//8	//yマーク
+		{	 l,		-s-l, 	-l	},//9
+		{	-l,		-s-l, 	 l	},//10
+		{	 l,		-s-l, 	 l	},//11
+
+		{	s+m,	+m, 	-m	},//	//xマーク
+		{	s+m,	+m, 	+m	},//
+		{	s+m,	-m, 	 0	},//
+
+		{	-n,		 -n, 	s+n	},//	//zマーク
+		{	+n,		 -n, 	s+n	},//
+		{	-n,		 +n, 	s+n	},//
+		{	+n,		 +n, 	s+n	},//
+	};
+	vector<vect3> disp;
+
+	vector<ivect2>	edge
+	{
+		{	0,	1	},
+		{	1,	3	},
+		{	3,	2	},
+		{	2,	0	},
+		{	4,	5	},
+		{	5,	7	},
+		{	7,	6	},
+		{	6,	4	},
+		{	0,	4	},
+		{	1,	5	},
+		{	2,	6	},
+		{	3,	7	},
+		
+		{	8,	9	},	//yマーク
+		{	9,	11	},
+		{	11,	10	},
+		{	10,	8	},
+#if 0
+
+		{	12,	13	},	//xマーク
+		{	13,	14	},
+		{	14,	12	},
+
+
+		{	15,	18	},	//zマーク
+		{	17,	16	},
+#endif
+		
+	};
+	vector<ivect3>	tri
+	{
+		{	8,10,9	},{	9,10,11	},	// yマーク
+		{	14,	13, 12	},	// xマーク
+	};
+
+	Box()
+	{
+	}
+
+
+	//------------------------------------------------------------------------------
+	void DrawBox( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAxis = true, bool bTri = true )
+	//------------------------------------------------------------------------------
+	{
+		disp.clear();
+
+		for ( vect3 v : vert )
+		{
+
+			//	右手系座標系
+			//	右手ねじ周り
+			//	roll	:z	奥+
+			//	pitch	:x	右+
+			//	yaw		:y	下+
+			v= v * m + pos;
+
+			disp.emplace_back( v );
+
+		}
+
+
+		// 軸
+		if( bAxis )
+		{
+			vect3	nx = vect3( m.m[0][0], m.m[0][1], m.m[0][2] );
+			vect3	ny = vect3( m.m[1][0], m.m[1][1], m.m[1][2] );
+			vect3	nz = vect3( m.m[2][0], m.m[2][1], m.m[2][2] );
+			g_line3d( gra, pers, pos, pos+nx*0.2, rgb(1,0,0) );
+			g_line3d( gra, pers, pos, pos+ny*0.2, rgb(0,1,0) );
+			g_line3d( gra, pers, pos, pos+nz*0.2, rgb(0,0,1) );
+		}
+		
+		// Tri
+		if ( bTri )
+		{
+			for ( ivect3 t : tri )
+			{
+				vect3 v0 = pers.calcWorldToScreen3( disp[t.n0] );
+				vect3 v1 = pers.calcWorldToScreen3( disp[t.n1] );
+				vect3 v2 = pers.calcWorldToScreen3( disp[t.n2] );
+//					if ( v0.z>0 )
+				{
+					gra.Tri( v0,v1,v2, rgb(1,0,1));
+					gra.Tri( v2,v1,v0, rgb(1,0,1)/2);
+				}
+
+			}
+		}
+		for ( ivect2 e : edge )
+		{
+			const vect3& a = disp[e.p];
+			const vect3& b = disp[e.n];
+			const rgb col = rgb(0,1,1);
+
+			g_line3d( gra, pers, a, b, col, false );
+
+		}
+	}
+	
+};
+Box box;
+
 
 struct Apr : public Sys
 {
@@ -483,144 +692,6 @@ struct Apr : public Sys
 
 		} selector;
 
-		// 箱
-		struct Box
-		{
-
-			const float s = 0.04f;
-			const float l = 0.03f;
-			const float m = 0.02f;
-			const float n = 0.02f;
-			vector<vect3> vert=
-			{
-				{	-s,		 s,		-s	},//0
-				{	 s,		 s,		-s	},//1
-				{	-s,		-s,		-s	},//2
-				{	 s,		-s,		-s	},//3
-				{	-s,		 s,		 s	},//4
-				{	 s,		 s,		 s	},//5
-				{	-s,		-s,		 s	},//6
-				{	 s,		-s,		 s	},//7
-
-				{	-l,		-s-l, 	-l	},//8	//yマーク
-				{	 l,		-s-l, 	-l	},//9
-				{	-l,		-s-l, 	 l	},//10
-				{	 l,		-s-l, 	 l	},//11
-
-				{	s+m,	+m, 	-m	},//	//xマーク
-				{	s+m,	+m, 	+m	},//
-				{	s+m,	-m, 	 0	},//
-
-				{	-n,		 -n, 	s+n	},//	//zマーク
-				{	+n,		 -n, 	s+n	},//
-				{	-n,		 +n, 	s+n	},//
-				{	+n,		 +n, 	s+n	},//
-			};
-			vector<vect3> disp;
-
-			vector<ivect2>	edge
-			{
-				{	0,	1	},
-				{	1,	3	},
-				{	3,	2	},
-				{	2,	0	},
-				{	4,	5	},
-				{	5,	7	},
-				{	7,	6	},
-				{	6,	4	},
-				{	0,	4	},
-				{	1,	5	},
-				{	2,	6	},
-				{	3,	7	},
-				
-				{	8,	9	},	//yマーク
-				{	9,	11	},
-				{	11,	10	},
-				{	10,	8	},
-	#if 0
-
-				{	12,	13	},	//xマーク
-				{	13,	14	},
-				{	14,	12	},
-
-
-				{	15,	18	},	//zマーク
-				{	17,	16	},
-	#endif
-				
-			};
-			vector<ivect3>	tri
-			{
-				{	8,10,9	},{	9,10,11	},	// yマーク
-				{	14,	13, 12	},	// xマーク
-			};
-
-			Box()
-			{
-			}
-
-
-			//------------------------------------------------------------------------------
-			void DrawBox( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAxis = true, bool bTri = true )
-			//------------------------------------------------------------------------------
-			{
-				disp.clear();
-
-				for ( vect3 v : vert )
-				{
-
-					//	右手系座標系
-					//	右手ねじ周り
-					//	roll	:z	奥+
-					//	pitch	:x	右+
-					//	yaw		:y	下+
-					v= v * m + pos;
-
-					disp.emplace_back( v );
-
-				}
-
-
-				// 軸
-				if( bAxis )
-				{
-					vect3	nx = vect3( m.m[0][0], m.m[0][1], m.m[0][2] );
-					vect3	ny = vect3( m.m[1][0], m.m[1][1], m.m[1][2] );
-					vect3	nz = vect3( m.m[2][0], m.m[2][1], m.m[2][2] );
-					g_line3d( gra, pers, pos, pos+nx*0.2, rgb(1,0,0) );
-					g_line3d( gra, pers, pos, pos+ny*0.2, rgb(0,1,0) );
-					g_line3d( gra, pers, pos, pos+nz*0.2, rgb(0,0,1) );
-				}
-				
-				// Tri
-				if ( bTri )
-				{
-					for ( ivect3 t : tri )
-					{
-						vect3 v0 = pers.calcWorldToScreen3( disp[t.n0] );
-						vect3 v1 = pers.calcWorldToScreen3( disp[t.n1] );
-						vect3 v2 = pers.calcWorldToScreen3( disp[t.n2] );
-	//					if ( v0.z>0 )
-						{
-							gra.Tri( v0,v1,v2, rgb(1,0,1));
-							gra.Tri( v2,v1,v0, rgb(1,0,1)/2);
-						}
-
-					}
-				}
-				for ( ivect2 e : edge )
-				{
-					const vect3& a = disp[e.p];
-					const vect3& b = disp[e.n];
-					const rgb col = rgb(0,1,1);
-
-					g_line3d( gra, pers, a, b, col, false );
-
-				}
-			}
-			
-		} box;
-
 		// ドラム
 		struct Drum
 		{
@@ -963,7 +1034,7 @@ struct Apr : public Sys
 
 			{
 				mat33	mmune = midentity();
-				static mat33	mkata = midentity();;
+				static mat33	mkata = midentity();
 				mat33	mhiji = midentity();;
 				mat33	mte = midentity() ;
 				vect3	p0 = skeleton.tblJoint[0].pos;
@@ -1048,27 +1119,6 @@ struct Apr : public Sys
 
 			// 選択されたジョイント表示
 			selector.DrawJoint( pers, gra, skeleton , mouse.pos );
-
-			
-
-	/*
-			for ( float a = 0 ; a < 4 ; a += 0.1 )
-			{
-				gra.SetZTest( false );
-					gra.Print(1,text_y++,to_string(a));
-
-				rgb col = rgb(0,1,0); 
-				float w = 1.0;
-				
-				if ( a > 1-0.1/2 &&  a < 1+0.1/2 ) {col = rgb(1,1,1); w=3;}
-				if ( a > 2-0.1/2 &&  a < 2+0.1/2 ) {col = rgb(1,1,1); w=3;}
-				if ( a > 3-0.1/2 &&  a < 3+0.1/2 ) {col = rgb(1,1,1); w=3;}
-				if ( a > 4-0.1/2 &&  a < 4+0.1/2 ) {col = rgb(1,1,1); w=3;}
-				if ( a > 5-0.1/2 &&  a < 5+0.1/2 ) {col = rgb(1,1,1); w=3;}
-				gra.Pset( vect2(a, pow(a,a))*0.1*0.5+vect2(0,-0.5) , col, w);
-				gra.SetZTest( true );
-			}
-	*/
 
 			// animカーソルビュー cursor
 			{
@@ -1196,7 +1246,7 @@ struct Apr : public Sys
 	#if 1 // camera
 		pers.cam.pos = vect3(  0.3, 0.7, -1.2 );
 		pers.cam.at = vect3( 0,  0.7, 0 );
-		pers.cam.at = vect3( 0,  0.0, 0 );
+//		pers.cam.at = vect3( 0,  0.0, 0 );
 	#endif
 
 		//===========================================================================
@@ -1299,10 +1349,26 @@ struct Apr : public Sys
 				{
 					vect3(	-0.5,	0.12,	-0.5),
 					vect3(	+0.5,	0.12,	-0.5),
-					vect3(	+0.5,	0.12,	 0.5),
-					vect3(	-0.5,	0.12,	 0.5),
-					//vect3(	-0.25,	0,	 0.25),
+					vect3(	+0.9,	0.12,	 0.5),
+					vect3(	 0.0,	0.12,	 0.5),
+					vect3(	-0.9,	0.12,	 0.5),
+
+					vect3(	-0.5,	0.12,	-0.5)*1.2,
+					vect3(	+0.5,	0.12,	-0.5)*1.2,
+					vect3(	+0.9,	0.12,	 0.5)*1.2,
+					vect3(	0.0,	0.12,	 0.5)*1.2,
+					vect3(	-0.9,	0.12,	 0.5)*1.2,
 				};
+				
+				static vector<ivect2>	idx =
+				{
+					{0,5},
+					{1,6},
+					{2,7},
+					{3,8},
+					{4,9},
+				};
+				
 				static Cource* pLast = 0;			//	最後の選択
 
 				// 選択
@@ -1362,37 +1428,100 @@ struct Apr : public Sys
 				// 描画
 				{
 					// 描画 カーブ
+					function<void()> func = [&]()
 					{
 						rgb	col(1,1,1);
-						int size = (signed)cource.size();
+						int size = (signed)idx.size();
 						vect3	v0;
 						vect3	v2;
+						vect3	w0;
+						vect3	w2;
 						for ( int i = 0 ; i < size ; i++ )
 						{
-							vect3 P0 = cource[i].pos;
-							vect3 P1 = cource[(i+1)%size].pos;
-							vect3 P2 = cource[(i+2)%size].pos;
-							vect3 P3 = cource[(i+3)%size].pos;
+							int n0 = idx[i].n0;
+							int n1 = idx[(i+1)%size].n0;
+							int n2 = idx[(i+2)%size].n0;
+							int n3 = idx[(i+3)%size].n0;
+
+							int m0 = idx[i].n1;
+							int m1 = idx[(i+1)%size].n1;
+							int m2 = idx[(i+2)%size].n1;
+							int m3 = idx[(i+3)%size].n1;
+						
+							vect3 P0 = cource[n0].pos;
+							vect3 P1 = cource[n1].pos;
+							vect3 P2 = cource[n2].pos;
+							vect3 P3 = cource[n3].pos;
+
+							vect3 Q0 = cource[m0].pos;
+							vect3 Q1 = cource[m1].pos;
+							vect3 Q2 = cource[m2].pos;
+							vect3 Q3 = cource[m3].pos;
 							
-							for ( float t = 0.0 ; t < 1.0 ; t+=0.05 )
+							for ( float t = 0.0 ; t < 1.0 ; t+=0.1 )
 							{
 								vect3 v1 = catmull3d_func(t, P0,P1,P2,P3 );
-								if ( (i==0 && t==0) ) v2=v1;
+								vect3 w1 = catmull3d_func(t, Q0,Q1,Q2,Q3 );
+								if ( (i==0 && t==0) ) 
+								{
+									v2=v1;
+									w2=w1;
+								}
 								else 
 								{
 									g_line3d( gra, pers, v0, v1, col, true );
-									vect3 a = v0;a.y=0;
-									vect3 b = v1;b.y=0;
-									g_line3d( gra, pers, a, b, rgb(0.2,0.2,0.2), true );
+									g_line3d( gra, pers, w0, w1, col, true );
+									g_line3d( gra, pers, w1, v1, col, true );
+
+									{
+										vect3 a = v0;a.y=0;
+										vect3 b = v1;b.y=0;
+										g_line3d( gra, pers, a, b, rgb(0.2,0.2,0.2), true );
+									}
+									{
+										vect3 a = w0;a.y=0;
+										vect3 b = w1;b.y=0;
+										g_line3d( gra, pers, a, b, rgb(0.2,0.2,0.2), true );
+									}
+
 								}
+
+									{
+										vect3 nx,ny,nz;
+										nz = (v1-v0).normalize();
+										ny = vect3(0,1,0);
+										nx = cross(nz,ny).normalize();
+										ny = cross(nx,nz).normalize();
+
+										mat33	m(
+											nx.x,	nx.y,	nx.z,
+											ny.x,	ny.y,	ny.z,
+											nz.x,	nz.y,	nz.z
+										);
+
+										//square.DrawSquare( gra, pers, v1, m, false  );
+									}
+
+
 								v0 = v1;
+								w0 = w1;
 							}
 						}
 						g_line3d( gra, pers, v0, v2, col, true );
-						vect3 a = v0;a.y=0;
-						vect3 b = v2;b.y=0;
-						g_line3d( gra, pers, a, b, rgb(0.2,0.2,0.2), true );
-					}
+						g_line3d( gra, pers, w0, w2, col, true );
+						g_line3d( gra, pers, w2, v2, col, true );
+						{
+							vect3 a = v0;a.y=0;
+							vect3 b = v2;b.y=0;
+							g_line3d( gra, pers, a, b, rgb(0.2,0.2,0.2), true );
+						}
+						{
+							vect3 a = w0;a.y=0;
+							vect3 b = w2;b.y=0;
+							g_line3d( gra, pers, a, b, rgb(0.2,0.2,0.2), true );
+						}
+					};
+					func();
 
 					// 描画 コントローラ
 					{
@@ -1403,6 +1532,7 @@ struct Apr : public Sys
 							if ( c.bSelected ) 
 									gra.Pset( v, rgb(1,0,0), 11 ); 
 							else	gra.Pset( v, rgb(0,0,1), 11 ); 
+
 						}
 						gra.SetZTest(true);
 					}
