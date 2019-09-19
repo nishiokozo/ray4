@@ -1289,83 +1289,125 @@ struct Apr : public Sys
 			// コース描画
 			//=================================
 			{
-				struct Rect
+				struct Cource
 				{
-					int id;
-					vect3 pos;
-					Rect( int _id, vect3 _pos ) : id(_id), pos(_pos) {} 
+					bool	bSelected = false;	//	選択番号。0は非選択
+					vect3	pos;
+					Cource( vect3 _pos ) : pos(_pos) {}
 				};
-				vector<Rect>	rect;
-				static vector<vect3>	cource_pos =
+				static vector<Cource>	cource =
 				{
-					{	-0.5,	0,	-0.5},
-					{	+0.5,	0,	-0.5},
-					{	+0.5,	0,	0.5},
-					{	-0.5,	0,	0.5},
+					vect3(	-0.5,	0.12,	-0.5),
+					vect3(	+0.5,	0.12,	-0.5),
+					vect3(	+0.5,	0.12,	 0.5),
+					vect3(	-0.5,	0.12,	 0.5),
+					//vect3(	-0.25,	0,	 0.25),
 				};
-				rgb	col(1,1,1);
-				int size = (signed)cource_pos.size();
-				//vect3 r = vect3( gra.Dot(16,16), 0 );
-				static int		g_idSelected = -1;
-				static float	g_wSelected = 0;
-				vect3	v0;
-				vect3	v2;
-				for ( int i = 0 ; i < size ; i++ )
-				{
-					vect3 P0 = cource_pos[i];
-					vect3 P1 = cource_pos[(i+1)%size];
-					vect3 P2 = cource_pos[(i+2)%size];
-					vect3 P3 = cource_pos[(i+3)%size];
-					
-					for ( float t = 0.0 ; t < 1.0 ; t+=0.05 )
-					{
-						vect3 v1 = catmull3d_func(t, P0,P1,P2,P3 );
-						if ( t==0 ) rect.emplace_back( (i+1)%size, pers.calcWorldToScreen3( v1 ) );
-						if ( (i==0 && t==0) ) v2=v1;
-						else g_line3d( gra, pers, v0, v1, col, true );
-						v0 = v1;
-					}
-				}
-				g_line3d( gra, pers, v0, v2, col, true );
+				static Cource* pLast = 0;			//	最後の選択
 
-				// コントローラ選択
+				// 選択
 				if ( mouse.L.hi )
 				{
-					g_idSelected = -1;
+					pLast = 0;
 
-					for ( Rect& r : rect )
+					for ( Cource& c : cource )
 					{
-						if ( gra.Pixel(mouse.pos-r.pos.xy()).abs() < 16 )
+						c.bSelected = false;
+					}
+
+					for ( Cource& c : cource )
+					{
+						vect3 v = pers.calcWorldToScreen3( c.pos );
+
+						if ( gra.Pixel(mouse.pos-v.xy()).abs() < 16 )
 						{
-							g_idSelected = r.id;
-							g_wSelected = r.pos.z;
+							c.bSelected = true;
+							pLast = &c;
 						}
 					}
+					if ( pLast == 0 )
+					{
+					}
 				}
-				
+
 				// 移動 （スクリーン並行）
 				if ( mouse.L.on )
 				{
-					if ( g_idSelected != -1 )
+					vect2 scale;
 					{
-						vect2 gmov = mouse.mov;
+						// 最終選択を求める
+						if ( pLast )
+						{
+							// 最終選択から移動スケールを求める
+							vect3 v = pers.calcWorldToScreen3( pLast->pos );
+							scale = vect2(pers.aspect, 1)/v.z/pers.rate;
+						}
+					}
 
-						vect3 v = vect3(gmov.x*pers.aspect, gmov.y, 0)/g_wSelected/pers.rate;
-						mat44 mrot = pers.cam.mat;
-						mrot.SetTranslate(vect3(0,0,0));
-						v = v* mrot;
-						cource_pos[g_idSelected] += v;
-						
+					// 移動
+					for ( Cource& c : cource )
+					{
+						if ( c.bSelected )
+						{
+							vect3 v = vect3( mouse.mov * scale, 0 );
+							mat44 mrot = pers.cam.mat;
+							mrot.SetTranslate(vect3(0,0,0));
+							v = v* mrot;
+							c.pos += v;
+							
+						}
 					}
 				}
 
-				// コントローラ描画
-				for ( Rect& r : rect )
+				// 描画
 				{
-					if ( r.id == g_idSelected )
-							gra.Pset( r.pos, rgb(1,0,0), 11 ); 
-					else	gra.Pset( r.pos, rgb(0,0,1), 11 ); 
+					// 描画 カーブ
+					{
+						rgb	col(1,1,1);
+						int size = (signed)cource.size();
+						vect3	v0;
+						vect3	v2;
+						for ( int i = 0 ; i < size ; i++ )
+						{
+							vect3 P0 = cource[i].pos;
+							vect3 P1 = cource[(i+1)%size].pos;
+							vect3 P2 = cource[(i+2)%size].pos;
+							vect3 P3 = cource[(i+3)%size].pos;
+							
+							for ( float t = 0.0 ; t < 1.0 ; t+=0.05 )
+							{
+								vect3 v1 = catmull3d_func(t, P0,P1,P2,P3 );
+								if ( (i==0 && t==0) ) v2=v1;
+								else 
+								{
+									g_line3d( gra, pers, v0, v1, col, true );
+									vect3 a = v0;a.y=0;
+									vect3 b = v1;b.y=0;
+									g_line3d( gra, pers, a, b, rgb(0.2,0.2,0.2), true );
+								}
+								v0 = v1;
+							}
+						}
+						g_line3d( gra, pers, v0, v2, col, true );
+						vect3 a = v0;a.y=0;
+						vect3 b = v2;b.y=0;
+						g_line3d( gra, pers, a, b, rgb(0.2,0.2,0.2), true );
+					}
+
+					// 描画 コントローラ
+					{
+						gra.SetZTest(false);
+						for ( Cource c : cource )
+						{
+							vect3 v = pers.calcWorldToScreen3( c.pos );
+							if ( c.bSelected ) 
+									gra.Pset( v, rgb(1,0,0), 11 ); 
+							else	gra.Pset( v, rgb(0,0,1), 11 ); 
+						}
+						gra.SetZTest(true);
+					}
 				}
+				
 			}
 			
 			//=================================

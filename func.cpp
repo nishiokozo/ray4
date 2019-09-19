@@ -38,7 +38,8 @@ void g_line3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col, bool bSciss
 		vect3 v0;
 		vect3 v1;
 		bool flg = pers.calcScissorLine3d( a, b, v0, v1 );
-		if ( flg ) gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col );
+//		if ( flg ) gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col );
+		if ( flg ) gra.Line( v0, v1, col );
 	}
 	else
 	{

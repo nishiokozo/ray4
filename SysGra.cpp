@@ -477,8 +477,8 @@ void SysGra::Line( vect3 v0, vect3 v1,rgb col, float wide )
   
     glBegin(GL_LINES);
     glColor3f( col.r, col.g, col.b );
-    glVertex2f(v0.x, v0.y);
-    glVertex2f(v1.x, v1.y);
+    glVertex3f(v0.x, v0.y, v0.z);
+    glVertex3f(v1.x, v1.y, v1.z);
     glEnd();
 }
 //------------------------------------------------------------------------------
