@@ -1336,6 +1336,110 @@ struct Apr : public Sys
 			}
 
 			//=================================
+			//3字曲線
+			//=================================
+			{
+				struct Bezier
+				{
+					vect3	pos;
+					Bezier( const vect3& _pos ) : pos(_pos){}
+				};
+				vector<Bezier> bezier_tbl =
+				{
+					Bezier( vect3( 0.0,0.9,0) ),
+					Bezier( vect3( 0.0,0.4,0) ),
+					Bezier( vect3( 0.4,0.9,0) ),
+					Bezier( vect3( 0.4,0.6,0) ),
+					Bezier( vect3( 0.4,0.4,0) ),
+					Bezier( vect3( 0.8,0.6,0) ),
+					Bezier( vect3( 0.8,0.9,0) ),
+				};
+
+				// ベジェ 三次曲線
+				{
+					{//ベジェ計算＆描画
+						float div = 20;
+						float dt = 1/div;
+
+						for ( int n = 0 ; n < static_cast<signed>(bezier_tbl.size())-3 ; n+=3 )
+						{
+							float t  = dt;
+							vect3 p0 = bezier_tbl[n+0].pos;
+							for ( int i = 0 ; i < div ; i++ )
+							{
+								vect3 p1 = bezier_func( t, bezier_tbl[n+0].pos, bezier_tbl[n+1].pos, bezier_tbl[n+2].pos, bezier_tbl[n+3].pos );
+
+								vect3 v0 = pers.calcWorldToScreen3( p0 );
+								vect3 v1 = pers.calcWorldToScreen3( p1 );
+								gra.Line( v0, v1, rgb(1,1,1));
+//								gra.Pset( (p1), rgb(1,1,1), 3);
+								p0=p1;
+								t+=dt;
+							}
+						}
+
+					}
+
+					// 制御点表示
+					{
+						gra.SetZTest(false);
+						for ( Bezier b : bezier_tbl )
+						{
+							vect3 v0 = pers.calcWorldToScreen3( b.pos );
+							gra.Pset( v0, rgb(0,0,1), 11 ); 
+						}
+						gra.SetZTest(true);
+					}
+					// 制御線表示
+					{
+						gra.SetZTest(false);
+						int cnt = 0;
+						vect3 p0;
+						for ( Bezier b : bezier_tbl )
+						{
+							vect3 p1 = b.pos;
+							if ( cnt > 0 && (cnt % 3 ) != 2  )
+							{
+								vect3 v0 = pers.calcWorldToScreen3( p0 );
+								vect3 v1 = pers.calcWorldToScreen3( p1 );
+								gra.Line( v0, v1, rgb(0,1,0));
+							}
+							p0 = p1;
+							cnt++;
+//							cnt = (cnt+1)%3;
+						}
+						gra.SetZTest(true);
+					}
+					if(0)
+					{// 補助ライン描画
+						gra.SetZTest(false);
+
+						int cnt = 0;
+						vect3 p0 = bezier_tbl[0].pos;
+						for ( int i = 1 ; i < static_cast<signed>(bezier_tbl.size()) ; i++ )
+						{ 
+							vect3 p1 = bezier_tbl[i].pos;
+							if ( cnt != 1 ) 
+							{
+								vect3 v0 = pers.calcWorldToScreen3( p0 );
+								vect3 v1 = pers.calcWorldToScreen3( p1 );
+
+								gra.Line( v0, v1, rgb(0,1,0));
+								
+								gra.Pset( v0, rgb(0,0,1), 7 ); 
+								gra.Pset( v1, rgb(1,0,0), 11 ); 
+
+							}
+							p0 = p1;
+							cnt = (cnt+1)%3;
+						}
+						gra.SetZTest(true);
+					}
+
+				}
+
+			}
+			//=================================
 			// コース描画
 			//=================================
 			{
