@@ -37,15 +37,15 @@ using namespace std;
 				};
 
 				//------------------------------------------------------------------------------
-				auto curce_select = []( SysGra& gra, Pers& pers, vector<Point3>& cource, vect2& mpos )
+				auto curce_select = []( SysGra& gra, Pers& pers, vector<Point3>& tbl, vect2& mpos )
 				//------------------------------------------------------------------------------
 				{
-					for ( Point3& c : cource )
+					for ( Point3& c : tbl )
 					{
 						c.bSelected = false;
 					}
 
-					for ( Point3& c : cource )
+					for ( Point3& c : tbl )
 					{
 						vect3 v = pers.calcWorldToScreen3( c.pos );
 
@@ -57,13 +57,13 @@ using namespace std;
 				};
 
 				//------------------------------------------------------------------------------
-				void courcr_move( Pers& pers, vector<Point3>& cource, vect2& mmov )
+				void courcr_move( Pers& pers, vector<Point3>& tbl, vect2& mmov )
 				//------------------------------------------------------------------------------
 				{
 					vect2 scale;
 					{
 						// 最終選択を求める
-						for ( Point3& c : cource )
+						for ( Point3& c : tbl )
 						{
 							if ( c.bSelected )
 							{
@@ -76,7 +76,7 @@ using namespace std;
 					}
 
 					// 移動
-					for ( Point3& c : cource )
+					for ( Point3& c : tbl )
 					{
 						if ( c.bSelected )
 						{
@@ -91,11 +91,11 @@ using namespace std;
 				}
 
 				//------------------------------------------------------------------------------
-				void cource_drawPoint( SysGra& gra, Pers& pers, vector<Point3>& cource )
+				void cource_drawPoint( SysGra& gra, Pers& pers, vector<Point3>& tbl )
 				//------------------------------------------------------------------------------
 				{
 					gra.SetZTest(false);
-					for ( Point3 c : cource )
+					for ( Point3 c : tbl )
 					{
 						vect3 v = pers.calcWorldToScreen3( c.pos );
 						if ( c.bSelected ) 
@@ -106,37 +106,59 @@ using namespace std;
 				}
 			
 				//------------------------------------------------------------------------------
-				auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& bezier_tbl )
+				auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& tbl, vector<int>& idx )
 				//------------------------------------------------------------------------------
 				{
 					{//ベジェ計算＆描画
 						float div = 20;
 						float dt = 1/div;
 
-						for ( int n = 0 ; n < static_cast<signed>(bezier_tbl.size())-3 ; n+=3 )
+						int size = static_cast<signed>(idx.size());
+						for ( int n = 0 ; n < size-3 ; n+=3 )
 						{
+							int n0 = idx[(n+0)%size];
+							int n1 = idx[(n+1)%size];
+							int n2 = idx[(n+2)%size];
+							int n3 = idx[(n+3)%size];
+
+							vect3 P0 = tbl[n0].pos;
+							vect3 P1 = tbl[n1].pos;
+							vect3 P2 = tbl[n2].pos;
+							vect3 P3 = tbl[n3].pos;
+
 							float t  = dt;
-							vect3 p0 = bezier_tbl[n+0].pos;
+							vect3 p0 = tbl[n+0].pos;
 							for ( int i = 0 ; i < div ; i++ )
 							{
-								vect3 p1 = bezier_func( t, bezier_tbl[n+0].pos, bezier_tbl[n+1].pos, bezier_tbl[n+2].pos, bezier_tbl[n+3].pos );
-
+								vect3 p1 = bezier_func( t, P0, P1, P2, P3 );
 								vect3 v0 = pers.calcWorldToScreen3( p0 );
 								vect3 v1 = pers.calcWorldToScreen3( p1 );
 								gra.Line( v0, v1, rgb(1,1,1));
 								p0=p1;
 								t+=dt;
 							}
+
+							// 制御線表示
+							{
+								vect3 v0 = pers.calcWorldToScreen3( P0 );
+								vect3 v1 = pers.calcWorldToScreen3( P1 );
+								gra.Line( v0, v1, rgb(0,1,0));
+							}
+							{
+								vect3 v0 = pers.calcWorldToScreen3( P2 );
+								vect3 v1 = pers.calcWorldToScreen3( P3 );
+								gra.Line( v0, v1, rgb(0,1,0));
+							}
 						}
 
 					}
 
 					// 制御線表示
-					{
+					if(0){
 						gra.SetZTest(false);
 						int cnt = 0;
 						vect3 p0;
-						for ( Point3 b : bezier_tbl )
+						for ( Point3 b : tbl )
 						{
 							vect3 p1 = b.pos;
 							if ( cnt > 0 && (cnt % 3 ) != 2  )
@@ -154,7 +176,7 @@ using namespace std;
 				};
 
 				//------------------------------------------------------------------------------
-				void cource_drawCutmull( SysGra& gra, Pers& pers, vector<Point3>& cource, vector<ivect2>idx )
+				void cource_drawCutmull( SysGra& gra, Pers& pers, vector<Point3>& tbl, vector<ivect2>idx )
 				//------------------------------------------------------------------------------
 				{
 					// 描画 カーブ
@@ -178,15 +200,15 @@ using namespace std;
 							int m2 = idx[(i+2)%size].n1;
 							int m3 = idx[(i+3)%size].n1;
 						
-							vect3 P0 = cource[n0].pos;
-							vect3 P1 = cource[n1].pos;
-							vect3 P2 = cource[n2].pos;
-							vect3 P3 = cource[n3].pos;
+							vect3 P0 = tbl[n0].pos;
+							vect3 P1 = tbl[n1].pos;
+							vect3 P2 = tbl[n2].pos;
+							vect3 P3 = tbl[n3].pos;
 
-							vect3 Q0 = cource[m0].pos;
-							vect3 Q1 = cource[m1].pos;
-							vect3 Q2 = cource[m2].pos;
-							vect3 Q3 = cource[m3].pos;
+							vect3 Q0 = tbl[m0].pos;
+							vect3 Q1 = tbl[m1].pos;
+							vect3 Q2 = tbl[m2].pos;
+							vect3 Q3 = tbl[m3].pos;
 							
 							for ( float t = 0.0 ; t < 1.0 ; t+=0.1 )
 							{
@@ -1471,7 +1493,9 @@ struct Apr : public Sys
 	#if 1 // camera
 		pers.cam.pos = vect3(  0.3, 0.7, -1.2 );
 		pers.cam.at = vect3( 0,  0.7, 0 );
-//		pers.cam.at = vect3( 0,  0.0, 0 );
+
+		pers.cam.pos = vect3(  0.3, 0.7, -1.5 );
+		pers.cam.at = vect3( 0,  0.0, 0 );
 	#endif
 
 		//===========================================================================
@@ -1566,14 +1590,21 @@ struct Apr : public Sys
 			{
 				static vector<Point3> bezier_tbl =
 				{
-					Point3( vect3( 0.0,0.9,0) ),
-					Point3( vect3( 0.0,0.4,0) ),
-					Point3( vect3( 0.4,0.9,0) ),
-					Point3( vect3( 0.4,0.6,0) ),
-					Point3( vect3( 0.4,0.4,0) ),
-					Point3( vect3( 0.8,0.6,0) ),
-					Point3( vect3( 0.8,0.9,0) ),
+					vect3(-1.0, 0, 0.0 ),
+					vect3(-1.0, 0,-1.0 ),
+					vect3( 1.0, 0,-1.0 ),
+					vect3( 1.0, 0, 0.0 ),
+					vect3( 1.0, 0, 1.0 ),
+					vect3(-1.0, 0, 1.0 ),
+
+				//	Point3( vect3( 0.8,0.9,0) ),
 				};
+				static vector<int>	idx =
+				{
+					0,1,2,3,4,5,0
+
+				};
+				
 
 				// 選択 制御点
 				if ( mouse.L.hi ) curce_select( gra, pers, bezier_tbl, mouse.pos );
@@ -1582,7 +1613,7 @@ struct Apr : public Sys
 				if ( mouse.L.on ) courcr_move( pers, bezier_tbl, mouse.mov );
 
 				// 表示 ベジェ 三次曲線
-				cource_drawBezier( gra, pers, bezier_tbl );
+				cource_drawBezier( gra, pers, bezier_tbl, idx );
 
 				// 表示 制御点
 				cource_drawPoint( gra, pers, bezier_tbl );
@@ -1623,10 +1654,10 @@ struct Apr : public Sys
 				if ( mouse.L.on ) courcr_move( pers, cource, mouse.mov );
 
 				// 描画
-				cource_drawCutmull( gra, pers, cource, idx );
+//				cource_drawCutmull( gra, pers, cource, idx );
 
 				// 表示 制御点
-				cource_drawPoint( gra, pers, cource );
+//				cource_drawPoint( gra, pers, cource );
 
 				
 			}
