@@ -1,6 +1,6 @@
 #include <iostream>
 #include <functional>
-//#include <tuple>
+#include <tuple>
 
 #include "geom.h"
 
@@ -13,8 +13,9 @@
 using namespace std;
 
 
+
 //------------------------------------------------------------------------------
-bool lengthLineLine_func( vect3 P0, vect3 I0, vect3 P1, vect3 I1, vect3& Q0, vect3& Q1, float& d )
+tuple<bool,float,vect3,vect3>lengthLineLine_func( vect3 P0, vect3 I0, vect3 P1, vect3 I1 )
 //------------------------------------------------------------------------------
 {
 	// 直線と直線の距離
@@ -23,14 +24,19 @@ bool lengthLineLine_func( vect3 P0, vect3 I0, vect3 P1, vect3 I1, vect3& Q0, vec
 	// 距離 : d = |Q1-Q0|
 	// 戻り値 : 二本の直線が並行のとき、falseが変える。距離は求まる。
 
+	vect3 Q0;
+	vect3 Q1;
+	float d;
+
 	float d0 = dot( P1 - P0, I0 );
 	float d1 = dot( P1 - P0, I1 );
 	float d2 = dot( I0, I1 );
 
-	if ( cross( I0, I1 ).abs() < 0.000001f) 
+	if ( cross( I0, I1 ).abs() < 0.000001f ) 
 	{
 	    d = cross( (P1 - P0), I0 ).abs();
-	    return false;
+	//    return false;
+		return {false,d,Q0,Q1};
 	}
 
 	float t0 = ( d0 - d1 * d2 ) / ( 1.0f - d2 * d2 );
@@ -40,8 +46,8 @@ bool lengthLineLine_func( vect3 P0, vect3 I0, vect3 P1, vect3 I1, vect3& Q0, vec
 	Q1 = P1 + t1 * I1;
 	d =  (Q1 - Q0).abs();
 
-	return true;
-};
+	return {true,d,Q0,Q1};
+}
 
 //------------------------------------------------------------------------------
 bool IsIntersectPlate( vect3 plate_P, vect3 plate_N, vect3 P, vect3 I, vect3& Q)

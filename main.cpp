@@ -1510,9 +1510,9 @@ struct Apr : public Sys
 			// カーソルモード X/Y/Z軸選択モード切替
 			//=================================
 			if ( keys.Z.hi ) {axis.bAxisZ = true;	axis.bAxisX = false;	axis.bAxisY = false;}
-			if ( keys.X.hi ) {axis.bAxisZ = false;	axis.bAxisX = true;	axis.bAxisY = false;}
+			if ( keys.X.hi ) {axis.bAxisZ = false;	axis.bAxisX = true;		axis.bAxisY = false;}
 			if ( keys.C.hi ) {axis.bAxisZ = false;	axis.bAxisX = false;	axis.bAxisY = true;}
-			if ( keys.V.hi ) {axis.bAxisZ = true;	axis.bAxisX = true;	axis.bAxisY = true;}
+			if ( keys.V.hi ) {axis.bAxisZ = true;	axis.bAxisX = true;		axis.bAxisY = true;}
 
 			//=================================
 			// skeleton 入力
@@ -1556,14 +1556,10 @@ struct Apr : public Sys
 				vect3 P = pers.calcScreenToWorld( vect3(mouse.pos,0) );
 				vect3 I = pers.calcRayvect( P );
 
-				vect3 P2 = vect3(0,1,0);
+				vect3 P2 = vect3(0,0.4,0);
 				vect3 I2 = vect3(0.5,1,0.5).normalize();
 
-				vect3 Q0 = vect3(1,0,0);
-				vect3 Q1 = vect3(0,1,0);
-				float d; 
-
-				bool b = lengthLineLine_func( P, I, P2, I2, Q0, Q1, d );
+				auto[b,d,Q0,Q1] = lengthLineLine_func( P, I, P2, I2 );
 
 				
 				g_line3d( gra, pers, Q0, Q1,  vect3(0,1,0));
