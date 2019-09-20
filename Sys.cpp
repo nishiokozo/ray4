@@ -1,14 +1,15 @@
 #include <iostream>
 #include <functional>
-using namespace std;
 
 #include "SysKeys.h"
 #include "SysMouse.h"
-#include "SysGra.h"
-#include "Sys.h"
 
 #include <windows.h>
+#include "SysGra.h"
+#include "Sys.h"
 #include "SysWin.h"
+
+using namespace std;
 
 
 //------------------------------------------------------------------------------

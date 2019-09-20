@@ -181,7 +181,7 @@ struct Pers
 	{
 		vect3 v0 = vect3(0,0,-sz) * cam.mat; // 投影原点
 
-		vect3 v = (v1-v0).normalize();
+		vect3 v = (v1-v0).normalize(); // 正規化
 
 		return v;
 	}

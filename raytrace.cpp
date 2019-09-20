@@ -4,12 +4,13 @@
 #include <chrono>
 #include <cmath>
 #include <functional>
-using namespace std;
 
 #include "geom.h"
 
 #include "SysGra.h"
 #include "raytrace.h"
+
+using namespace std;
 
 
 //const	static	float infinit =  numeric_limits<float>::max();	//FLT_MAX

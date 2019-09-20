@@ -1,8 +1,9 @@
 #include <iostream>
-using namespace std;
 #include "SysKeys.h"
 
 #include <windows.h>
+
+using namespace std;
 
 // WinAPI由来の情報。表に出さないためにここで定義
 static struct Winapi_key

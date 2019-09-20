@@ -1,6 +1,9 @@
 #include <vector>
 #include <string>
 #include "geom.h"
+
+using namespace std;
+
 struct SysGra
 {
 

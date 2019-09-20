@@ -5,16 +5,17 @@
 #include <vector>
 #include <chrono>
 #include <thread>       // sleep_for
-using namespace std;
 
-#include "SysGra.h"
 
 #include <windows.h>
 #include <windowsx.h>
 #include <functional>
+#include "SysGra.h"
 #include "SysWin.h"
 
 #include <gl/gl.h>
+
+using namespace std;
 
 struct  wgl_Font
 {

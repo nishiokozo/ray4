@@ -9,7 +9,6 @@
 #include <algorithm>
 #include <iomanip>
 
-using namespace std;
 
 #include "geom.h"
 
@@ -19,6 +18,7 @@ using namespace std;
 #include "skeleton.h"
 #include "func.h"
 
+using namespace std;
 
 //------------------------------------------------------------------------------
 void Skeleton::SaveSkeleton()

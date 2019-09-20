@@ -1,6 +1,6 @@
 #include <iostream>
 #include <functional>
-using namespace std;
+//#include <tuple>
 
 #include "geom.h"
 
@@ -10,10 +10,74 @@ using namespace std;
 
 #include "func.h"
 
+using namespace std;
+
+
+//------------------------------------------------------------------------------
+bool lengthLineLine_func( vect3 P0, vect3 I0, vect3 P1, vect3 I1, vect3& Q0, vect3& Q1, float& d )
+//------------------------------------------------------------------------------
+{
+	// 直線と直線の距離
+	// 直線0: P0+I0
+	// 直線1: P1+I1
+	// 距離 : d = |Q1-Q0|
+	// 戻り値 : 二本の直線が並行のとき、falseが変える。距離は求まる。
+
+	float d0 = dot( P1 - P0, I0 );
+	float d1 = dot( P1 - P0, I1 );
+	float d2 = dot( I0, I1 );
+
+	if ( cross( I0, I1 ).abs() < 0.000001f) 
+	{
+	    d = cross( (P1 - P0), I0 ).abs();
+	    return false;
+	}
+
+	float t0 = ( d0 - d1 * d2 ) / ( 1.0f - d2 * d2 );
+	float t1 = ( d1 - d0 * d2 ) / ( d2 * d2 - 1.0f );
+
+	Q0 = P0 + t0 * I0;
+	Q1 = P1 + t1 * I1;
+	d =  (Q1 - Q0).abs();
+
+	return true;
+};
+
+//------------------------------------------------------------------------------
+bool IsIntersectPlate( vect3 plate_P, vect3 plate_N, vect3 P, vect3 I, vect3& Q)
+//------------------------------------------------------------------------------
+{
+	// 球と変面殿衝突判定
+	float	f = dot(plate_N, P - plate_P);
+//	if ( f > 0 )
+	{
+		float	t = -f/dot( plate_N, I );
+
+		if ( t >= 0 )
+		{
+			Q = I * t + P;
+			return true;
+		}
+	}
+	return false;
+};
+
+//------------------------------------------------------------------------------
+bool IsIntersectSphereLine( vect3 sphere_P, float sphere_r, vect3 line_P , vect3 line_I )
+//------------------------------------------------------------------------------
+{
+	//	球と直線の衝突判定
+	vect3	OP = line_P - sphere_P;
+	float	b = dot( line_I, OP );
+	float	aa = sphere_r*sphere_r - dot(OP,OP)+ b*b;
+	return ( aa>=0 ) ;
+};
+
 //------------------------------------------------------------------------------
 vect3 bezier_func( float t, vect3 P0, vect3 P1, vect3 P2, vect3 P3 )
 //------------------------------------------------------------------------------
 {
+	//ベジェ 曲線
 #if 1
 	vect3 L0=(P1-P0)*t+P0;
 	vect3 L1=(P2-P1)*t+P1;

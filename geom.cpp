@@ -1,8 +1,9 @@
 #include <iostream>
-using namespace std;
 #include <stdio.h>
 #include <math.h>
 #include "geom.h"
+
+using namespace std;
 
 //-----------------------------------------------------------------------------
 float	mod( float a, float b )

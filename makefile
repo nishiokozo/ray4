@@ -23,7 +23,7 @@ LIBS = \
 
 FLGS = \
 	-c -g \
-	-std=c++14 \
+	-std=c++17 \
 	-Werror \
 	-Wall -Wno-unused -Wconversion -Wno-sign-conversion -Wno-shorten-64-to-32 -Wno-implicit-float-conversion
 

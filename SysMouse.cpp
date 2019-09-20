@@ -1,11 +1,12 @@
 #include <iostream>
-using namespace std;
 
 #include "SysMouse.h"
 
 #include <windows.h>
 #include <functional>
 #include "SysWin.h"
+
+using namespace std;
 
 //-----------------------------------------------------------------------------
 SysMouse& SysMouse::GetInstance()
