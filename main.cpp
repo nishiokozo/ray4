@@ -113,84 +113,65 @@ auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& tbl, vect
 {
 
 
-	{//ベジェ計算＆描画
-		float div = 20;
-		float dt = 1/div;
+	//ベジェ計算＆描画
+	float div = 20;
+	float dt = 1/div;
 
-		int size = static_cast<signed>(idx.size());
-		for ( int n = 0 ; n < size-3 ; n+=3 )
+	int size = static_cast<signed>(idx.size());
+
+	float mind = infinit;
+	vect3 minQ;
+
+	for ( int n = 0 ; n < size-3 ; n+=3 )
+	{
+		int n0 = idx[(n+0)%size];
+		int n1 = idx[(n+1)%size];
+		int n2 = idx[(n+2)%size];
+		int n3 = idx[(n+3)%size];
+
+		vect3 P0 = tbl[n0].pos;
+		vect3 P1 = tbl[n1].pos;
+		vect3 P2 = tbl[n2].pos;
+		vect3 P3 = tbl[n3].pos;
+
+		float t  = dt;
+		vect3 p0 = tbl[n+0].pos;
+		for ( int i = 0 ; i < div ; i++ )
 		{
-			int n0 = idx[(n+0)%size];
-			int n1 = idx[(n+1)%size];
-			int n2 = idx[(n+2)%size];
-			int n3 = idx[(n+3)%size];
+			vect3 p1 = bezier_func( t, P0, P1, P2, P3 );
+			g_line3d( gra, pers, p0, p1, rgb(1,1,1) );
 
-			vect3 P0 = tbl[n0].pos;
-			vect3 P1 = tbl[n1].pos;
-			vect3 P2 = tbl[n2].pos;
-			vect3 P3 = tbl[n3].pos;
-
-			float t  = dt;
-			vect3 p0 = tbl[n+0].pos;
-			for ( int i = 0 ; i < div ; i++ )
 			{
-				vect3 p1 = bezier_func( t, P0, P1, P2, P3 );
-//				vect3 v0 = pers.calcWorldToScreen3( p0 );
-//				vect3 v1 = pers.calcWorldToScreen3( p1 );
-//				gra.Line( v0, v1, rgb(1,1,1));
-				g_line3d( gra, pers, p0, p1, rgb(1,1,1) );
+				vect3 Pt = p0;
+				vect3 It = (p1-p0).normalize();
+				auto[b,d,Q0,Q1] = lengthLineLine_func( P, I, Pt, It );
 
+				if ( b ) 
 				{
-					vect3 Pt = P0;
-					vect3 It = (p1-p0).normalize();
-					auto[b,d,Q0,Q1] = lengthLineLine_func( P, I, Pt, It );
-
-					vect3 v0 = pers.calcWorldToScreen3( Q0 );
-					vect3 v1 = pers.calcWorldToScreen3( Q1 );
-//					g_line3d( gra, pers, v0, v1,  vect3(0,1,1));
+					if ( mind > d )
+					{
+						mind = d;
+						minQ = Q1;
+					}
 				}
-
-				g_pset3d( gra, pers, P0, rgb(1,1,0), 5 );
-				p0=p1;
-				t+=dt;
 			}
 
-			// 制御線表示
-			{
-//				vect3 v0 = pers.calcWorldToScreen3( P0 );
-//				vect3 v1 = pers.calcWorldToScreen3( P1 );
-//				gra.Line( v0, v1, rgb(0,1,0));
-				g_line3d( gra, pers, P0, P1, rgb(0,1,0) );
-			}
-			{
-//				vect3 v0 = pers.calcWorldToScreen3( P2 );
-//				vect3 v1 = pers.calcWorldToScreen3( P3 );
-//				gra.Line( v0, v1, rgb(0,1,0));
-				g_line3d( gra, pers, P2, P3, rgb(0,1,0) );
-			}
+//			g_pset3d( gra, pers, p0, rgb(1,1,0), 5 );
+
+			p0=p1;
+			t+=dt;
 		}
 
+		// 制御線表示
+		g_line3d( gra, pers, P0, P1, rgb(0,1,0) );
+		g_line3d( gra, pers, P2, P3, rgb(0,1,0) );
 	}
 
-	// 制御線表示
-	if(0){
-		gra.SetZTest(false);
-		int cnt = 0;
-		vect3 p0;
-		for ( Point3 b : tbl )
-		{
-			vect3 p1 = b.pos;
-			if ( cnt > 0 && (cnt % 3 ) != 2  )
-			{
-				vect3 v0 = pers.calcWorldToScreen3( p0 );
-				vect3 v1 = pers.calcWorldToScreen3( p1 );
-				gra.Line( v0, v1, rgb(0,1,0));
-			}
-			p0 = p1;
-			cnt++;
-		}
-		gra.SetZTest(true);
-	}
+
+	gra.SetZTest( false );
+	// g_line3d( gra, pers, minQ, P,  vect3(0,1,1));
+	if ( mind < 0.1 ) g_pset3d( gra, pers, minQ, rgb(1,0,0), 11 );
+	gra.SetZTest( true );
 
 };
 
@@ -1567,7 +1548,7 @@ struct Apr : public Sys
 			// マウス座標（投影面座標）を３Ｄ空間座標に逆変換＆描画
 			//=================================
 
-			if(1)
+			if(0)
 			{
 				vect3 P = pers.calcScreenToWorld( vect3(mouse.pos,0) );
 				vect3 I = pers.calcRayvect( P );
