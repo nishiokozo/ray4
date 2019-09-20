@@ -29,6 +29,231 @@ using namespace std;
 #include "skeleton.h"
 
 
+				struct Point3
+				{
+					bool	bSelected = false;	//	選択番号。0は非選択
+					vect3	pos;
+					Point3( vect3 _pos ) : pos(_pos) {}
+				};
+
+				//------------------------------------------------------------------------------
+				auto curce_select = []( SysGra& gra, Pers& pers, vector<Point3>& cource, vect2& mpos )
+				//------------------------------------------------------------------------------
+				{
+					for ( Point3& c : cource )
+					{
+						c.bSelected = false;
+					}
+
+					for ( Point3& c : cource )
+					{
+						vect3 v = pers.calcWorldToScreen3( c.pos );
+
+						if ( gra.Pixel(mpos-v.xy()).abs() < 16 )
+						{
+							c.bSelected = true;
+						}
+					}
+				};
+
+				//------------------------------------------------------------------------------
+				void courcr_move( Pers& pers, vector<Point3>& cource, vect2& mmov )
+				//------------------------------------------------------------------------------
+				{
+					vect2 scale;
+					{
+						// 最終選択を求める
+						for ( Point3& c : cource )
+						{
+							if ( c.bSelected )
+							{
+								// 適当な一つから移動スケールを求める
+								vect3 v = pers.calcWorldToScreen3( c.pos );
+								scale = vect2(pers.aspect, 1)/v.z/pers.rate;
+								break;
+							}
+						}
+					}
+
+					// 移動
+					for ( Point3& c : cource )
+					{
+						if ( c.bSelected )
+						{
+							vect3 v = vect3( mmov * scale, 0 );
+							mat44 mrot = pers.cam.mat;
+							mrot.SetTranslate(vect3(0,0,0));
+							v = v* mrot;
+							c.pos += v;
+							
+						}
+					}
+				}
+
+				//------------------------------------------------------------------------------
+				void cource_drawPoint( SysGra& gra, Pers& pers, vector<Point3>& cource )
+				//------------------------------------------------------------------------------
+				{
+					gra.SetZTest(false);
+					for ( Point3 c : cource )
+					{
+						vect3 v = pers.calcWorldToScreen3( c.pos );
+						if ( c.bSelected ) 
+								gra.Pset( v, rgb(1,0,0), 11 ); 
+						else	gra.Pset( v, rgb(0,0,1), 11 ); 
+					}
+					gra.SetZTest(true);
+				}
+			
+				//------------------------------------------------------------------------------
+				auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& bezier_tbl )
+				//------------------------------------------------------------------------------
+				{
+					{//ベジェ計算＆描画
+						float div = 20;
+						float dt = 1/div;
+
+						for ( int n = 0 ; n < static_cast<signed>(bezier_tbl.size())-3 ; n+=3 )
+						{
+							float t  = dt;
+							vect3 p0 = bezier_tbl[n+0].pos;
+							for ( int i = 0 ; i < div ; i++ )
+							{
+								vect3 p1 = bezier_func( t, bezier_tbl[n+0].pos, bezier_tbl[n+1].pos, bezier_tbl[n+2].pos, bezier_tbl[n+3].pos );
+
+								vect3 v0 = pers.calcWorldToScreen3( p0 );
+								vect3 v1 = pers.calcWorldToScreen3( p1 );
+								gra.Line( v0, v1, rgb(1,1,1));
+								p0=p1;
+								t+=dt;
+							}
+						}
+
+					}
+
+					// 制御線表示
+					{
+						gra.SetZTest(false);
+						int cnt = 0;
+						vect3 p0;
+						for ( Point3 b : bezier_tbl )
+						{
+							vect3 p1 = b.pos;
+							if ( cnt > 0 && (cnt % 3 ) != 2  )
+							{
+								vect3 v0 = pers.calcWorldToScreen3( p0 );
+								vect3 v1 = pers.calcWorldToScreen3( p1 );
+								gra.Line( v0, v1, rgb(0,1,0));
+							}
+							p0 = p1;
+							cnt++;
+						}
+						gra.SetZTest(true);
+					}
+
+				};
+
+				//------------------------------------------------------------------------------
+				void cource_drawCutmull( SysGra& gra, Pers& pers, vector<Point3>& cource, vector<ivect2>idx )
+				//------------------------------------------------------------------------------
+				{
+					// 描画 カーブ
+					function<void()> func = [&]()
+					{
+						rgb	col(1,1,1);
+						int size = (signed)idx.size();
+						vect3	v0;
+						vect3	v2;
+						vect3	w0;
+						vect3	w2;
+						for ( int i = 0 ; i < size ; i++ )
+						{
+							int n0 = idx[i].n0;
+							int n1 = idx[(i+1)%size].n0;
+							int n2 = idx[(i+2)%size].n0;
+							int n3 = idx[(i+3)%size].n0;
+
+							int m0 = idx[i].n1;
+							int m1 = idx[(i+1)%size].n1;
+							int m2 = idx[(i+2)%size].n1;
+							int m3 = idx[(i+3)%size].n1;
+						
+							vect3 P0 = cource[n0].pos;
+							vect3 P1 = cource[n1].pos;
+							vect3 P2 = cource[n2].pos;
+							vect3 P3 = cource[n3].pos;
+
+							vect3 Q0 = cource[m0].pos;
+							vect3 Q1 = cource[m1].pos;
+							vect3 Q2 = cource[m2].pos;
+							vect3 Q3 = cource[m3].pos;
+							
+							for ( float t = 0.0 ; t < 1.0 ; t+=0.1 )
+							{
+								vect3 v1 = catmull3d_func(t, P0,P1,P2,P3 );
+								vect3 w1 = catmull3d_func(t, Q0,Q1,Q2,Q3 );
+								if ( (i==0 && t==0) ) 
+								{
+									v2=v1;
+									w2=w1;
+								}
+								else 
+								{
+									g_line3d( gra, pers, v0, v1, col, true );
+									g_line3d( gra, pers, w0, w1, col, true );
+									g_line3d( gra, pers, w1, v1, col, true );
+
+									{
+										vect3 a = v0;a.y=0;
+										vect3 b = v1;b.y=0;
+										g_line3d( gra, pers, a, b, rgb(0.2,0.2,0.2), true );
+									}
+									{
+										vect3 a = w0;a.y=0;
+										vect3 b = w1;b.y=0;
+										g_line3d( gra, pers, a, b, rgb(0.2,0.2,0.2), true );
+									}
+
+								}
+
+									{
+										vect3 nx,ny,nz;
+										nz = (v1-v0).normalize();
+										ny = vect3(0,1,0);
+										nx = cross(nz,ny).normalize();
+										ny = cross(nx,nz).normalize();
+
+										mat33	m(
+											nx.x,	nx.y,	nx.z,
+											ny.x,	ny.y,	ny.z,
+											nz.x,	nz.y,	nz.z
+										);
+
+										//square.DrawSquare( gra, pers, v1, m, false  );
+									}
+
+
+								v0 = v1;
+								w0 = w1;
+							}
+						}
+						g_line3d( gra, pers, v0, v2, col, true );
+						g_line3d( gra, pers, w0, w2, col, true );
+						g_line3d( gra, pers, w2, v2, col, true );
+						{
+							vect3 a = v0;a.y=0;
+							vect3 b = v2;b.y=0;
+							g_line3d( gra, pers, a, b, rgb(0.2,0.2,0.2), true );
+						}
+						{
+							vect3 a = w0;a.y=0;
+							vect3 b = w2;b.y=0;
+							g_line3d( gra, pers, a, b, rgb(0.2,0.2,0.2), true );
+						}
+					};
+					func();
+
+				}
 struct Square
 {
 
@@ -1339,117 +1564,35 @@ struct Apr : public Sys
 			//3字曲線
 			//=================================
 			{
-				struct Bezier
+				static vector<Point3> bezier_tbl =
 				{
-					vect3	pos;
-					Bezier( const vect3& _pos ) : pos(_pos){}
-				};
-				vector<Bezier> bezier_tbl =
-				{
-					Bezier( vect3( 0.0,0.9,0) ),
-					Bezier( vect3( 0.0,0.4,0) ),
-					Bezier( vect3( 0.4,0.9,0) ),
-					Bezier( vect3( 0.4,0.6,0) ),
-					Bezier( vect3( 0.4,0.4,0) ),
-					Bezier( vect3( 0.8,0.6,0) ),
-					Bezier( vect3( 0.8,0.9,0) ),
+					Point3( vect3( 0.0,0.9,0) ),
+					Point3( vect3( 0.0,0.4,0) ),
+					Point3( vect3( 0.4,0.9,0) ),
+					Point3( vect3( 0.4,0.6,0) ),
+					Point3( vect3( 0.4,0.4,0) ),
+					Point3( vect3( 0.8,0.6,0) ),
+					Point3( vect3( 0.8,0.9,0) ),
 				};
 
-				// ベジェ 三次曲線
-				{
-					{//ベジェ計算＆描画
-						float div = 20;
-						float dt = 1/div;
+				// 選択 制御点
+				if ( mouse.L.hi ) curce_select( gra, pers, bezier_tbl, mouse.pos );
 
-						for ( int n = 0 ; n < static_cast<signed>(bezier_tbl.size())-3 ; n+=3 )
-						{
-							float t  = dt;
-							vect3 p0 = bezier_tbl[n+0].pos;
-							for ( int i = 0 ; i < div ; i++ )
-							{
-								vect3 p1 = bezier_func( t, bezier_tbl[n+0].pos, bezier_tbl[n+1].pos, bezier_tbl[n+2].pos, bezier_tbl[n+3].pos );
+				// 移動 制御点（スクリーン並行）
+				if ( mouse.L.on ) courcr_move( pers, bezier_tbl, mouse.mov );
 
-								vect3 v0 = pers.calcWorldToScreen3( p0 );
-								vect3 v1 = pers.calcWorldToScreen3( p1 );
-								gra.Line( v0, v1, rgb(1,1,1));
-//								gra.Pset( (p1), rgb(1,1,1), 3);
-								p0=p1;
-								t+=dt;
-							}
-						}
+				// 表示 ベジェ 三次曲線
+				cource_drawBezier( gra, pers, bezier_tbl );
 
-					}
-
-					// 制御点表示
-					{
-						gra.SetZTest(false);
-						for ( Bezier b : bezier_tbl )
-						{
-							vect3 v0 = pers.calcWorldToScreen3( b.pos );
-							gra.Pset( v0, rgb(0,0,1), 11 ); 
-						}
-						gra.SetZTest(true);
-					}
-					// 制御線表示
-					{
-						gra.SetZTest(false);
-						int cnt = 0;
-						vect3 p0;
-						for ( Bezier b : bezier_tbl )
-						{
-							vect3 p1 = b.pos;
-							if ( cnt > 0 && (cnt % 3 ) != 2  )
-							{
-								vect3 v0 = pers.calcWorldToScreen3( p0 );
-								vect3 v1 = pers.calcWorldToScreen3( p1 );
-								gra.Line( v0, v1, rgb(0,1,0));
-							}
-							p0 = p1;
-							cnt++;
-//							cnt = (cnt+1)%3;
-						}
-						gra.SetZTest(true);
-					}
-					if(0)
-					{// 補助ライン描画
-						gra.SetZTest(false);
-
-						int cnt = 0;
-						vect3 p0 = bezier_tbl[0].pos;
-						for ( int i = 1 ; i < static_cast<signed>(bezier_tbl.size()) ; i++ )
-						{ 
-							vect3 p1 = bezier_tbl[i].pos;
-							if ( cnt != 1 ) 
-							{
-								vect3 v0 = pers.calcWorldToScreen3( p0 );
-								vect3 v1 = pers.calcWorldToScreen3( p1 );
-
-								gra.Line( v0, v1, rgb(0,1,0));
-								
-								gra.Pset( v0, rgb(0,0,1), 7 ); 
-								gra.Pset( v1, rgb(1,0,0), 11 ); 
-
-							}
-							p0 = p1;
-							cnt = (cnt+1)%3;
-						}
-						gra.SetZTest(true);
-					}
-
-				}
+				// 表示 制御点
+				cource_drawPoint( gra, pers, bezier_tbl );
 
 			}
 			//=================================
 			// コース描画
 			//=================================
 			{
-				struct Cource
-				{
-					bool	bSelected = false;	//	選択番号。0は非選択
-					vect3	pos;
-					Cource( vect3 _pos ) : pos(_pos) {}
-				};
-				static vector<Cource>	cource =
+				static vector<Point3>	cource =
 				{
 					vect3(	-0.5,	0.12,	-0.5),
 					vect3(	+0.5,	0.12,	-0.5),
@@ -1473,174 +1616,18 @@ struct Apr : public Sys
 					{4,9},
 				};
 				
-				static Cource* pLast = 0;			//	最後の選択
+				// 選択 制御点
+				if ( mouse.L.hi ) curce_select( gra, pers, cource, mouse.pos );
 
-				// 選択
-				if ( mouse.L.hi )
-				{
-					pLast = 0;
-
-					for ( Cource& c : cource )
-					{
-						c.bSelected = false;
-					}
-
-					for ( Cource& c : cource )
-					{
-						vect3 v = pers.calcWorldToScreen3( c.pos );
-
-						if ( gra.Pixel(mouse.pos-v.xy()).abs() < 16 )
-						{
-							c.bSelected = true;
-							pLast = &c;
-						}
-					}
-					if ( pLast == 0 )
-					{
-					}
-				}
-
-				// 移動 （スクリーン並行）
-				if ( mouse.L.on )
-				{
-					vect2 scale;
-					{
-						// 最終選択を求める
-						if ( pLast )
-						{
-							// 最終選択から移動スケールを求める
-							vect3 v = pers.calcWorldToScreen3( pLast->pos );
-							scale = vect2(pers.aspect, 1)/v.z/pers.rate;
-						}
-					}
-
-					// 移動
-					for ( Cource& c : cource )
-					{
-						if ( c.bSelected )
-						{
-							vect3 v = vect3( mouse.mov * scale, 0 );
-							mat44 mrot = pers.cam.mat;
-							mrot.SetTranslate(vect3(0,0,0));
-							v = v* mrot;
-							c.pos += v;
-							
-						}
-					}
-				}
+				// 移動 制御点（スクリーン並行）
+				if ( mouse.L.on ) courcr_move( pers, cource, mouse.mov );
 
 				// 描画
-				{
-					// 描画 カーブ
-					function<void()> func = [&]()
-					{
-						rgb	col(1,1,1);
-						int size = (signed)idx.size();
-						vect3	v0;
-						vect3	v2;
-						vect3	w0;
-						vect3	w2;
-						for ( int i = 0 ; i < size ; i++ )
-						{
-							int n0 = idx[i].n0;
-							int n1 = idx[(i+1)%size].n0;
-							int n2 = idx[(i+2)%size].n0;
-							int n3 = idx[(i+3)%size].n0;
+				cource_drawCutmull( gra, pers, cource, idx );
 
-							int m0 = idx[i].n1;
-							int m1 = idx[(i+1)%size].n1;
-							int m2 = idx[(i+2)%size].n1;
-							int m3 = idx[(i+3)%size].n1;
-						
-							vect3 P0 = cource[n0].pos;
-							vect3 P1 = cource[n1].pos;
-							vect3 P2 = cource[n2].pos;
-							vect3 P3 = cource[n3].pos;
+				// 表示 制御点
+				cource_drawPoint( gra, pers, cource );
 
-							vect3 Q0 = cource[m0].pos;
-							vect3 Q1 = cource[m1].pos;
-							vect3 Q2 = cource[m2].pos;
-							vect3 Q3 = cource[m3].pos;
-							
-							for ( float t = 0.0 ; t < 1.0 ; t+=0.1 )
-							{
-								vect3 v1 = catmull3d_func(t, P0,P1,P2,P3 );
-								vect3 w1 = catmull3d_func(t, Q0,Q1,Q2,Q3 );
-								if ( (i==0 && t==0) ) 
-								{
-									v2=v1;
-									w2=w1;
-								}
-								else 
-								{
-									g_line3d( gra, pers, v0, v1, col, true );
-									g_line3d( gra, pers, w0, w1, col, true );
-									g_line3d( gra, pers, w1, v1, col, true );
-
-									{
-										vect3 a = v0;a.y=0;
-										vect3 b = v1;b.y=0;
-										g_line3d( gra, pers, a, b, rgb(0.2,0.2,0.2), true );
-									}
-									{
-										vect3 a = w0;a.y=0;
-										vect3 b = w1;b.y=0;
-										g_line3d( gra, pers, a, b, rgb(0.2,0.2,0.2), true );
-									}
-
-								}
-
-									{
-										vect3 nx,ny,nz;
-										nz = (v1-v0).normalize();
-										ny = vect3(0,1,0);
-										nx = cross(nz,ny).normalize();
-										ny = cross(nx,nz).normalize();
-
-										mat33	m(
-											nx.x,	nx.y,	nx.z,
-											ny.x,	ny.y,	ny.z,
-											nz.x,	nz.y,	nz.z
-										);
-
-										//square.DrawSquare( gra, pers, v1, m, false  );
-									}
-
-
-								v0 = v1;
-								w0 = w1;
-							}
-						}
-						g_line3d( gra, pers, v0, v2, col, true );
-						g_line3d( gra, pers, w0, w2, col, true );
-						g_line3d( gra, pers, w2, v2, col, true );
-						{
-							vect3 a = v0;a.y=0;
-							vect3 b = v2;b.y=0;
-							g_line3d( gra, pers, a, b, rgb(0.2,0.2,0.2), true );
-						}
-						{
-							vect3 a = w0;a.y=0;
-							vect3 b = w2;b.y=0;
-							g_line3d( gra, pers, a, b, rgb(0.2,0.2,0.2), true );
-						}
-					};
-					func();
-
-					// 描画 コントローラ
-					{
-						gra.SetZTest(false);
-						for ( Cource c : cource )
-						{
-							vect3 v = pers.calcWorldToScreen3( c.pos );
-							if ( c.bSelected ) 
-									gra.Pset( v, rgb(1,0,0), 11 ); 
-							else	gra.Pset( v, rgb(0,0,1), 11 ); 
-
-						}
-						gra.SetZTest(true);
-					}
-				}
 				
 			}
 			
