@@ -125,10 +125,9 @@ vect3 catmull3d_func( float t, const vect3 P0, const vect3 P1, const vect3 P2, c
 };
 
 //------------------------------------------------------------------------------
-void g_line3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col, bool bScissor )
+void g_line3d_scissor( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col, float wide )
 //------------------------------------------------------------------------------
 {
-	if ( bScissor )
 	{
 		vect3 a = p0* pers.cam.mat.invers();
 		vect3 b = p1* pers.cam.mat.invers();
@@ -136,12 +135,23 @@ void g_line3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col, bool bSciss
 		vect3 v1;
 		bool flg = pers.calcScissorLine3d( a, b, v0, v1 );
 //		if ( flg ) gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col );
-		if ( flg ) gra.Line( v0, v1, col );
+		if ( flg ) gra.Line( v0, v1, col, wide );
 	}
-	else
+}
+//------------------------------------------------------------------------------
+void g_line3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col, float wide )
+//------------------------------------------------------------------------------
+{
 	{
 		vect3 v0 = pers.calcWorldToScreen3( p0 );
 		vect3 v1 = pers.calcWorldToScreen3( p1 );
-		gra.Line( v0, v1, col );
+		if ( v0.z > 0 && v1.z > 0 ) gra.Line( v0, v1, col, wide );
 	}
+}
+//------------------------------------------------------------------------------
+void g_pset3d( SysGra& gra, Pers& pers, vect3 p0, rgb col, float wide )
+//------------------------------------------------------------------------------
+{
+	vect3 v0 = pers.calcWorldToScreen3( p0 );
+	if ( v0.z > 0 ) gra.Pset( v0, col, wide);
 }

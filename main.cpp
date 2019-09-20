@@ -108,9 +108,11 @@ void cource_drawPoint( SysGra& gra, Pers& pers, vector<Point3>& tbl )
 }
 
 //------------------------------------------------------------------------------
-auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& tbl, vector<int>& idx )
+auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& tbl, vector<int>& idx, vect3& P, vect3& I )
 //------------------------------------------------------------------------------
 {
+
+
 	{//ベジェ計算＆描画
 		float div = 20;
 		float dt = 1/div;
@@ -133,24 +135,38 @@ auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& tbl, vect
 			for ( int i = 0 ; i < div ; i++ )
 			{
 				vect3 p1 = bezier_func( t, P0, P1, P2, P3 );
-				vect3 v0 = pers.calcWorldToScreen3( p0 );
-				vect3 v1 = pers.calcWorldToScreen3( p1 );
-				gra.Line( v0, v1, rgb(1,1,1));
-				gra.Pset( v0, rgb(1,1,0), 5);
+//				vect3 v0 = pers.calcWorldToScreen3( p0 );
+//				vect3 v1 = pers.calcWorldToScreen3( p1 );
+//				gra.Line( v0, v1, rgb(1,1,1));
+				g_line3d( gra, pers, p0, p1, rgb(1,1,1) );
+
+				{
+					vect3 Pt = P0;
+					vect3 It = (p1-p0).normalize();
+					auto[b,d,Q0,Q1] = lengthLineLine_func( P, I, Pt, It );
+
+					vect3 v0 = pers.calcWorldToScreen3( Q0 );
+					vect3 v1 = pers.calcWorldToScreen3( Q1 );
+//					g_line3d( gra, pers, v0, v1,  vect3(0,1,1));
+				}
+
+				g_pset3d( gra, pers, P0, rgb(1,1,0), 5 );
 				p0=p1;
 				t+=dt;
 			}
 
 			// 制御線表示
 			{
-				vect3 v0 = pers.calcWorldToScreen3( P0 );
-				vect3 v1 = pers.calcWorldToScreen3( P1 );
-				gra.Line( v0, v1, rgb(0,1,0));
+//				vect3 v0 = pers.calcWorldToScreen3( P0 );
+//				vect3 v1 = pers.calcWorldToScreen3( P1 );
+//				gra.Line( v0, v1, rgb(0,1,0));
+				g_line3d( gra, pers, P0, P1, rgb(0,1,0) );
 			}
 			{
-				vect3 v0 = pers.calcWorldToScreen3( P2 );
-				vect3 v1 = pers.calcWorldToScreen3( P3 );
-				gra.Line( v0, v1, rgb(0,1,0));
+//				vect3 v0 = pers.calcWorldToScreen3( P2 );
+//				vect3 v1 = pers.calcWorldToScreen3( P3 );
+//				gra.Line( v0, v1, rgb(0,1,0));
+				g_line3d( gra, pers, P2, P3, rgb(0,1,0) );
 			}
 		}
 
@@ -224,19 +240,19 @@ void cource_drawCutmull( SysGra& gra, Pers& pers, vector<Point3>& tbl, vector<iv
 				}
 				else 
 				{
-					g_line3d( gra, pers, v0, v1, col, true );
-					g_line3d( gra, pers, w0, w1, col, true );
-					g_line3d( gra, pers, w1, v1, col, true );
+					g_line3d( gra, pers, v0, v1, col);
+					g_line3d( gra, pers, w0, w1, col);
+					g_line3d( gra, pers, w1, v1, col);
 
 					{
 						vect3 a = v0;a.y=0;
 						vect3 b = v1;b.y=0;
-						g_line3d( gra, pers, a, b, rgb(0.2,0.2,0.2), true );
+						g_line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
 					}
 					{
 						vect3 a = w0;a.y=0;
 						vect3 b = w1;b.y=0;
-						g_line3d( gra, pers, a, b, rgb(0.2,0.2,0.2), true );
+						g_line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
 					}
 
 				}
@@ -262,18 +278,18 @@ void cource_drawCutmull( SysGra& gra, Pers& pers, vector<Point3>& tbl, vector<iv
 				w0 = w1;
 			}
 		}
-		g_line3d( gra, pers, v0, v2, col, true );
-		g_line3d( gra, pers, w0, w2, col, true );
-		g_line3d( gra, pers, w2, v2, col, true );
+		g_line3d( gra, pers, v0, v2, col);
+		g_line3d( gra, pers, w0, w2, col);
+		g_line3d( gra, pers, w2, v2, col);
 		{
 			vect3 a = v0;a.y=0;
 			vect3 b = v2;b.y=0;
-			g_line3d( gra, pers, a, b, rgb(0.2,0.2,0.2), true );
+			g_line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
 		}
 		{
 			vect3 a = w0;a.y=0;
 			vect3 b = w2;b.y=0;
-			g_line3d( gra, pers, a, b, rgb(0.2,0.2,0.2), true );
+			g_line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
 		}
 	};
 	func();
@@ -602,7 +618,7 @@ struct Apr : public Sys
 				for ( int i = 0 ; i < NUM_V*2+1 ; i++ )
 				{
 //					apr.line3d( a, b, col );
-					g_line3d( apr.gra, apr.pers, a, b, col, true );
+					g_line3d_scissor( apr.gra, apr.pers, a, b, col );
 					a+=vt;
 					b+=vt;
 				}
@@ -615,7 +631,7 @@ struct Apr : public Sys
 				for ( int i = 0 ; i < NUM_U*2+1 ; i++ )
 				{
 //					apr.line3d( a, b, col );
-					g_line3d( apr.gra, apr.pers, a, b, col, true );
+					g_line3d_scissor( apr.gra, apr.pers, a, b, col );
 					a+=vt;
 					b+=vt;
 				}
@@ -1561,7 +1577,6 @@ struct Apr : public Sys
 
 				auto[b,d,Q0,Q1] = lengthLineLine_func( P, I, P2, I2 );
 
-				
 				g_line3d( gra, pers, Q0, Q1,  vect3(0,1,0));
 				g_line3d( gra, pers, P, P+I,  vect3(1,0,0));
 				g_line3d( gra, pers, P2, P2+I2, vect3(1,1,1));
@@ -1595,8 +1610,12 @@ struct Apr : public Sys
 				// 移動 制御点（スクリーン並行）
 				if ( mouse.L.on ) courcr_move( pers, bezier_tbl, mouse.mov );
 
+				vect3 P = pers.calcScreenToWorld( vect3(mouse.pos,0) );
+				vect3 I = pers.calcRayvect( P );
+
+
 				// 表示 ベジェ 三次曲線
-				cource_drawBezier( gra, pers, bezier_tbl, idx );
+				cource_drawBezier( gra, pers, bezier_tbl, idx, P, I );
 
 				// 表示 制御点
 				cource_drawPoint( gra, pers, bezier_tbl );
