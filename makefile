@@ -9,6 +9,7 @@ SRCS = \
 	main.cpp \
 	skeleton.cpp \
 	raytrace.cpp \
+	pers.cpp \
 	func.cpp \
 	geom.cpp \
 	Sys.cpp \

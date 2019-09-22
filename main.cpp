@@ -22,7 +22,7 @@
 #include "SysGra.h"
 #include "Sys.h"
 
-#include "obj.h"
+#include "pers.h"
 #include "func.h"
 
 #include "raytrace.h"
@@ -96,23 +96,27 @@ void courcr_move( Pers& pers, vector<Point3>& tbl, vect2& mmov )
 void cource_drawPoint( SysGra& gra, Pers& pers, vector<Point3>& tbl )
 //------------------------------------------------------------------------------
 {
+	int cnt = 0 ;
 	gra.SetZTest(false);
 	for ( Point3 c : tbl )
 	{
 		vect3 v = pers.calcWorldToScreen3( c.pos );
-		if ( c.bSelected ) 
-				gra.Pset( v, rgb(1,0,0), 11 ); 
-		else	gra.Pset( v, rgb(0,0,1), 11 ); 
+		if ( v.z > 0 )
+		{
+			if ( c.bSelected ) 
+					gra.Pset( v, rgb(1,0,0), 11 ); 
+			else	gra.Pset( v, rgb(0,0,1), 11 ); 
+
+			gra.Print( v.xy() + gra.Dot(16,-12), to_string(cnt++) ); 
+		}
 	}
 	gra.SetZTest(true);
 }
 
 //------------------------------------------------------------------------------
-auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& tbl, vector<int>& idx, vect3& P, vect3& I )
+auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& tbl, vector<int>& idx, vect3& P, vect3& I, bool bCut )
 //------------------------------------------------------------------------------
 {
-
-
 	//ベジェ計算＆描画
 	float div = 20;
 	float dt = 1/div;
@@ -121,6 +125,8 @@ auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& tbl, vect
 
 	float mind = infinit;
 	vect3 minQ;
+	int	  minn;
+	float mint;
 
 	for ( int n = 0 ; n < size-3 ; n+=3 )
 	{
@@ -135,28 +141,26 @@ auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& tbl, vect
 		vect3 P3 = tbl[n3].pos;
 
 		float t  = dt;
-		vect3 p0 = tbl[n+0].pos;
+		vect3 p0 = tbl[n0].pos;
 		for ( int i = 0 ; i < div ; i++ )
 		{
 			vect3 p1 = bezier_func( t, P0, P1, P2, P3 );
 			g_line3d( gra, pers, p0, p1, rgb(1,1,1) );
 
+			// マウスベクトルとの最近点
 			{
-				vect3 Pt = p0;
-				vect3 It = (p1-p0).normalize();
-				auto[b,d,Q0,Q1] = lengthLineLine_func( P, I, Pt, It );
-
+				auto[b,d,Q0,Q1,t0,t1] = distanceLineSegline_func( P, I, p0, p1 );
 				if ( b ) 
 				{
 					if ( mind > d )
 					{
 						mind = d;
 						minQ = Q1;
+						minn = n;
+						mint = t;
 					}
 				}
 			}
-
-//			g_pset3d( gra, pers, p0, rgb(1,1,0), 5 );
 
 			p0=p1;
 			t+=dt;
@@ -165,14 +169,32 @@ auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& tbl, vect
 		// 制御線表示
 		g_line3d( gra, pers, P0, P1, rgb(0,1,0) );
 		g_line3d( gra, pers, P2, P3, rgb(0,1,0) );
+		g_line3d( gra, pers, P1, P2, rgb(0.5,0.5,0.5) );
 	}
 
-
+	// マウスベクトルとの最近点表示
 	gra.SetZTest( false );
-	// g_line3d( gra, pers, minQ, P,  vect3(0,1,1));
-	if ( mind < 0.1 ) g_pset3d( gra, pers, minQ, rgb(1,0,0), 11 );
+	if ( mind < 0.1/2 ) g_pset3d( gra, pers, minQ, rgb(1,1,0), 11 );
 	gra.SetZTest( true );
 
+	//--------
+	// 切断
+	//--------
+
+	if ( bCut )
+	{
+		tbl.emplace_back( minQ+vect3(0.2,0,0) );
+		idx.insert( idx.begin()+minn+2, idx.size()-1);
+		tbl.emplace_back( minQ );
+		idx.insert( idx.begin()+minn+2, idx.size()-1);
+		tbl.emplace_back( minQ-vect3(0.2,0,0) );
+		idx.insert( idx.begin()+minn+2, idx.size()-1);
+	}
+
+	{
+		vect3 v = pers.calcWorldToScreen3( minQ );
+		gra.Print( v.xy() + gra.Dot(-26,-12), to_string(minn) ); 
+	}
 };
 
 //------------------------------------------------------------------------------
@@ -1467,7 +1489,7 @@ struct Apr : public Sys
 		pers.cam.at = vect3( 0,  0.7, 0 );
 
 		pers.cam.pos = vect3(  0.3, 0.7, -1.5 );
-		pers.cam.at = vect3( 0,  0.0, 0 );
+		pers.cam.at = vect3( 0,  0.4, 0 );
 	#endif
 
 		//===========================================================================
@@ -1553,14 +1575,17 @@ struct Apr : public Sys
 				vect3 P = pers.calcScreenToWorld( vect3(mouse.pos,0) );
 				vect3 I = pers.calcRayvect( P );
 
-				vect3 P2 = vect3(0,0.4,0);
-				vect3 I2 = vect3(0.5,1,0.5).normalize();
+				vect3 P2 = vect3( 0, 0.4, 0 );
+//				vect3 I2 = vect3( 0.5, 1, 0.5 ).normalize();
+				vect3 P3 = vect3( 0.5, 0.6, 0.4 );
 
-				auto[b,d,Q0,Q1] = lengthLineLine_func( P, I, P2, I2 );
+				auto[b,d,Q0,Q1,t0,t1] = distanceLineSegline_func( P, I, P2, P3 );
 
-				g_line3d( gra, pers, Q0, Q1,  vect3(0,1,0));
+				if ( b ) g_line3d( gra, pers, Q0, Q1,  vect3(0,1,0));
+				else g_line3d( gra, pers, Q0, Q1,  vect3(1,0,0));
+
 				g_line3d( gra, pers, P, P+I,  vect3(1,0,0));
-				g_line3d( gra, pers, P2, P2+I2, vect3(1,1,1));
+				g_line3d( gra, pers, P2, P3, vect3(1,1,1));
 			}
 
 			//=================================
@@ -1569,12 +1594,12 @@ struct Apr : public Sys
 			{
 				static vector<Point3> bezier_tbl =
 				{
-					vect3(-1.0, 0, 0.0 ),
-					vect3(-1.0, 0,-1.0 ),
-					vect3( 1.0, 0,-1.0 ),
-					vect3( 1.0, 0, 0.0 ),
-					vect3( 1.0, 0, 1.0 ),
-					vect3(-1.0, 0, 1.0 ),
+					vect3(-1.0, 0.5, 0.0 ),
+					vect3(-1.0, 0.5,-1.0 ),
+					vect3( 1.0, 0.5,-1.0 ),
+					vect3( 1.0, 0.5, 0.0 ),
+					vect3( 1.0, 0.5, 1.0 ),
+					vect3(-1.0, 0.5, 1.0 ),
 
 				//	Point3( vect3( 0.8,0.9,0) ),
 				};
@@ -1594,9 +1619,17 @@ struct Apr : public Sys
 				vect3 P = pers.calcScreenToWorld( vect3(mouse.pos,0) );
 				vect3 I = pers.calcRayvect( P );
 
+				if ( mouse.R.hi )
+				{
+					cout << "--" << endl;
+					for ( int v : idx )
+					{
+						cout << v << endl;
+					}
+				}
 
 				// 表示 ベジェ 三次曲線
-				cource_drawBezier( gra, pers, bezier_tbl, idx, P, I );
+				cource_drawBezier( gra, pers, bezier_tbl, idx, P, I, mouse.B.hi );
 
 				// 表示 制御点
 				cource_drawPoint( gra, pers, bezier_tbl );

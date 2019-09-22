@@ -14,7 +14,7 @@
 
 #include "SysGra.h"
 
-#include "obj.h"
+#include "pers.h"
 #include "skeleton.h"
 #include "func.h"
 

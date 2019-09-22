@@ -4,9 +4,9 @@
 
 #include "geom.h"
 
-#include "SysGra.h"
+//#include "SysGra.h"
 
-#include "obj.h"
+//#include "pers.h"
 
 #include "func.h"
 
@@ -14,40 +14,77 @@ using namespace std;
 
 
 
+
 //------------------------------------------------------------------------------
-tuple<bool,float,vect3,vect3>lengthLineLine_func( vect3 P0, vect3 I0, vect3 P1, vect3 I1 )
+tuple<bool,float,vect3,vect3,float,float>distanceLineLine0( vect3 P0, vect3 I0, vect3 P1, vect3 I1 )
+//------------------------------------------------------------------------------
+{
+	// 直線/線分距離、共通ルーチン
+
+	if ( cross( I0, I1 ).abs() < 0.000001f ) 
+	{
+		vect3 Q0;
+		vect3 Q1;
+		float d = cross( (P1 - P0), I0 ).abs();
+		return {false,d,Q0,Q1,0,0};
+	}
+
+	float d0 = dot( P1 - P0, I0 );
+	float d1 = dot( P1 - P0, I1 );
+	float d2 = dot( I0, I1 );
+
+
+	float t0 = ( d0 - d1 * d2 ) / ( 1.0f - d2 * d2 );
+	float t1 = ( d1 - d0 * d2 ) / ( d2 * d2 - 1.0f );
+
+	vect3	Q0 = P0 + t0 * I0;
+	vect3	Q1 = P1 + t1 * I1;
+	float	d =  (Q1 - Q0).abs();
+
+	return {true,d,Q0,Q1,t0,t1};
+}
+
+//------------------------------------------------------------------------------
+tuple<bool,float,vect3,vect3,float,float>distanceLineSegline_func( vect3 P0, vect3 I0, vect3 s1, vect3 e1 )
+//------------------------------------------------------------------------------
+{
+	// 直線と線分の距離
+	// 直線     : P0+I0
+	// 線分開始 : s1
+	// 線分終了 : e1
+	// 距離     : d = |Q1-Q0|
+	// 戻り値   : d距離 Q0,Q1	※false でもdだけは取得できる
+	
+	vect3	P1 = s1;
+	vect3	I1 = (e1-s1).normalize();
+
+	auto[b,d,Q0,Q1,t0,t1] = distanceLineLine0( P0, I0, P1, I1 );
+
+	// 線分処理
+	if ( b )
+	{
+		if ( t1 < 0 ) b = false;
+		if ( t1 > (e1-s1).abs() ) b = false;
+	}
+
+	return {b,d,Q0,Q1,t0,t1};
+}
+
+//------------------------------------------------------------------------------
+tuple<bool,float,vect3,vect3>distanceLineLine_func( vect3 P0, vect3 I0, vect3 P1, vect3 I1 )
 //------------------------------------------------------------------------------
 {
 	// 直線と直線の距離
 	// 直線0: P0+I0
 	// 直線1: P1+I1
 	// 距離 : d = |Q1-Q0|
-	// 戻り値 : 二本の直線が並行のとき、falseが変える。距離は求まる。
+	// 戻り値 : d距離 Q0,Q1	※false でもdだけは取得できる
 
-	vect3 Q0;
-	vect3 Q1;
-	float d;
-
-	float d0 = dot( P1 - P0, I0 );
-	float d1 = dot( P1 - P0, I1 );
-	float d2 = dot( I0, I1 );
-
-	if ( cross( I0, I1 ).abs() < 0.000001f ) 
-	{
-	    d = cross( (P1 - P0), I0 ).abs();
-	//    return false;
-		return {false,d,Q0,Q1};
-	}
-
-	float t0 = ( d0 - d1 * d2 ) / ( 1.0f - d2 * d2 );
-	float t1 = ( d1 - d0 * d2 ) / ( d2 * d2 - 1.0f );
-
-	Q0 = P0 + t0 * I0;
-	Q1 = P1 + t1 * I1;
-	d =  (Q1 - Q0).abs();
+	auto[b,d,Q0,Q1,t0,t1] = distanceLineLine0( P0, I0, P1, I1 );
 
 	return {true,d,Q0,Q1};
 }
+
 
 //------------------------------------------------------------------------------
 bool IsIntersectPlate( vect3 plate_P, vect3 plate_N, vect3 P, vect3 I, vect3& Q)
@@ -123,35 +160,3 @@ vect3 catmull3d_func( float t, const vect3 P0, const vect3 P1, const vect3 P2, c
 
 	return P;
 };
-
-//------------------------------------------------------------------------------
-void g_line3d_scissor( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col, float wide )
-//------------------------------------------------------------------------------
-{
-	{
-		vect3 a = p0* pers.cam.mat.invers();
-		vect3 b = p1* pers.cam.mat.invers();
-		vect3 v0;
-		vect3 v1;
-		bool flg = pers.calcScissorLine3d( a, b, v0, v1 );
-//		if ( flg ) gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), col );
-		if ( flg ) gra.Line( v0, v1, col, wide );
-	}
-}
-//------------------------------------------------------------------------------
-void g_line3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col, float wide )
-//------------------------------------------------------------------------------
-{
-	{
-		vect3 v0 = pers.calcWorldToScreen3( p0 );
-		vect3 v1 = pers.calcWorldToScreen3( p1 );
-		if ( v0.z > 0 && v1.z > 0 ) gra.Line( v0, v1, col, wide );
-	}
-}
-//------------------------------------------------------------------------------
-void g_pset3d( SysGra& gra, Pers& pers, vect3 p0, rgb col, float wide )
-//------------------------------------------------------------------------------
-{
-	vect3 v0 = pers.calcWorldToScreen3( p0 );
-	if ( v0.z > 0 ) gra.Pset( v0, col, wide);
-}
