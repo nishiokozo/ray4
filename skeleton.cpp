@@ -210,27 +210,6 @@ void Skeleton::LoadSkeleton( const string fn )
 
 }
 
-/*
-// カトマル曲線3D
-//------------------------------------------------------------------------------
-static	vect3 catmull3d_func( float t, const vect3 P0, const vect3 P1, const vect3 P2, const vect3 P3 )
-//------------------------------------------------------------------------------
-{
-	//catmull-Rom 曲線
-	// P(t)=P1*(2t^3-3t^2+1)+m0*(t^3-2t^2+t)+P2*(-2t^3+3t^2)+m1*(t^3-t^2)
-	// m0=(P2-P0)/2
-	// m1=(P3-P1)/2
-
-	vect3 m0 = (P2-P0)/2.0;
-	vect3 m1 = (P3-P1)/2.0;
-	vect3 P =  P1*(  2*t*t*t - 3*t*t +1) + m0*( t*t*t -2*t*t +t )
-			 + P2*( -2*t*t*t + 3*t*t   ) + m1*( t*t*t - t*t );
-
-	return P;
-};
-
-*/
-
 //------------------------------------------------------------------------------
 void Skeleton::ReqAnimation()
 //------------------------------------------------------------------------------
@@ -267,7 +246,7 @@ void Skeleton::PlayAnimation()
 		vect3 P1 = animations[cur.act].pose[ n1 ].joint[ j ].pos;
 		vect3 P2 = animations[cur.act].pose[ n2 ].joint[ j ].pos;
 		vect3 P3 = animations[cur.act].pose[ n3 ].joint[ j ].pos;
-		vect3 b = catmull3d_func(anim.t, P0,P1,P2,P3 );
+		vect3 b = catmull3_func(anim.t, P0,P1,P2,P3 );
 
 		tblJoint[ j ].pos = b;
 
@@ -872,10 +851,10 @@ void Skeleton::DrawSkeleton( Pers& pers, SysGra& gra )
 					vect3 P3 = animations[cur.act].pose[ n3 ].joint[ j ].pos;
 
 					float t = dt;
-					vect3 a = catmull3d_func(0, P0,P1,P2,P3 );
+					vect3 a = catmull3_func(0, P0,P1,P2,P3 );
 					for ( int i = 0 ; i <div ; i++ )
 					{
-						vect3 b = catmull3d_func(t, P0,P1,P2,P3 );
+						vect3 b = catmull3_func(t, P0,P1,P2,P3 );
 
 						g_line3d( gra, pers, a, b, vect3(1,1,1));
 

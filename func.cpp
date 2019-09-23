@@ -117,7 +117,7 @@ bool IsIntersectSphereLine( vect3 sphere_P, float sphere_r, vect3 line_P , vect3
 };
 
 //------------------------------------------------------------------------------
-vect3 bezier_func( float t, vect3 P0, vect3 P1, vect3 P2, vect3 P3 )
+vect3 bezier3_func( float t, vect3 P0, vect3 P1, vect3 P2, vect3 P3 )
 //------------------------------------------------------------------------------
 {
 	//ベジェ 曲線
@@ -145,7 +145,30 @@ vect3 bezier_func( float t, vect3 P0, vect3 P1, vect3 P2, vect3 P3 )
 };
 
 //------------------------------------------------------------------------------
-vect3 catmull3d_func( float t, const vect3 P0, const vect3 P1, const vect3 P2, const vect3 P3 )
+vect3 bezier3_delta_func( float t, vect3 P0, vect3 P1, vect3 P2, vect3 P3 )
+//------------------------------------------------------------------------------
+{
+	//ベジェ 曲線	接線	bezier3_funcを一回微分した物
+	float tt = t*t;
+	vect3 Q=
+		 P3*  3*tt
+		+P2*(-3*tt*3 +2*t*3)
+		+P1*( 3*tt*3 -2*t*6 +3)
+		+P0*(-3*tt   +2*t*3 -3)
+		;
+/*
+	Q=
+		 P3*  tt
+		+P2*(-tt*3 +2*t)
+		+P1*( tt*3 -2*t*2 +1)
+		+P0*(-tt   +2*t -1)
+		;
+*/
+	return Q;
+};
+
+//------------------------------------------------------------------------------
+vect3 catmull3_func( float t, const vect3 P0, const vect3 P1, const vect3 P2, const vect3 P3 )
 //------------------------------------------------------------------------------
 {
 	//catmull-Rom 曲線

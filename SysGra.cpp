@@ -512,7 +512,7 @@ void SysGra::Tri( vect3 v0, vect3 v1, vect3 v2, rgb col)
 void SysGra::Print( vect2 v0, string str )
 //------------------------------------------------------------------------------
 {
-//	glDisable(GL_DEPTH_TEST);
+	glDepthFunc(GL_ALWAYS);
 
 	glBegin(GL_POINTS);
 	glColor3f( 1,1,1 );
@@ -521,6 +521,8 @@ void SysGra::Print( vect2 v0, string str )
 
 	glRasterPos2f(v0.x, v0.y);
 	wgl_font.DrawString( str );
+
+	glDepthFunc(GL_GEQUAL);		// depth <= 書き込み値 
 }
 
 //------------------------------------------------------------------------------

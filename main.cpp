@@ -118,7 +118,7 @@ auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& tbl, vect
 //------------------------------------------------------------------------------
 {
 	//ベジェ計算＆描画
-	float div = 20;
+	float div =5;
 	float dt = 1/div;
 
 	int size = static_cast<signed>(idx.size());
@@ -127,6 +127,7 @@ auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& tbl, vect
 	vect3 minQ;
 	int	  minn;
 	float mint;
+	vect3 mindt;
 
 	for ( int n = 0 ; n < size-3 ; n+=3 )
 	{
@@ -144,7 +145,7 @@ auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& tbl, vect
 		vect3 p0 = tbl[n0].pos;
 		for ( int i = 0 ; i < div ; i++ )
 		{
-			vect3 p1 = bezier_func( t, P0, P1, P2, P3 );
+			vect3 p1 = bezier3_func( t, P0, P1, P2, P3 );
 			g_line3d( gra, pers, p0, p1, rgb(1,1,1) );
 
 			// マウスベクトルとの最近点
@@ -155,9 +156,11 @@ auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& tbl, vect
 					if ( mind > d )
 					{
 						mind = d;
-						minQ = Q1;
 						minn = n;
-						mint = t;
+
+						mint	= t-(1/div) + (t1/(p1-p0).abs())/(div);
+						minQ	= bezier3_func( mint, P0, P1, P2, P3 );
+						mindt	= bezier3_delta_func( mint, P0, P1, P2, P3 );
 					}
 				}
 			}
@@ -174,7 +177,7 @@ auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& tbl, vect
 
 	// マウスベクトルとの最近点表示
 	gra.SetZTest( false );
-	if ( mind < 0.1/2 ) g_pset3d( gra, pers, minQ, rgb(1,1,0), 11 );
+	if ( mind < 0.1/2 ) g_pset3d( gra, pers, minQ, rgb(1,0,0), 7 );
 	gra.SetZTest( true );
 
 	//--------
@@ -183,17 +186,35 @@ auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& tbl, vect
 
 	if ( bCut )
 	{
-		tbl.emplace_back( minQ+vect3(0.2,0,0) );
+		vect3	p = minQ;
+		vect3	v = mindt/3;
+		float	t0 = mint;
+		float	t1 = 1.0-mint;
+
+		tbl.emplace_back( p+v*t1 );
 		idx.insert( idx.begin()+minn+2, idx.size()-1);
-		tbl.emplace_back( minQ );
+		tbl.emplace_back( p );
 		idx.insert( idx.begin()+minn+2, idx.size()-1);
-		tbl.emplace_back( minQ-vect3(0.2,0,0) );
+		tbl.emplace_back( p-v*t0 );
 		idx.insert( idx.begin()+minn+2, idx.size()-1);
+
+		int a0 = idx[minn+0];
+		int a1 = idx[minn+1];
+		int b0 = idx[minn+6];
+		int b1 = idx[minn+5];
+
+		vect3 va = tbl[a1].pos - tbl[a0].pos; 
+		vect3 vb = tbl[b1].pos - tbl[b0].pos; 
+
+		tbl[a1].pos = tbl[a0].pos + va * t0;
+		tbl[b1].pos = tbl[b0].pos + vb * t1;
 	}
 
 	{
+		gra.SetZTest( false );
 		vect3 v = pers.calcWorldToScreen3( minQ );
-		gra.Print( v.xy() + gra.Dot(-26,-12), to_string(minn) ); 
+		gra.Print( v.xy() + gra.Dot(-26,-32-20), to_string(mint) ); 
+		gra.SetZTest( true );
 	}
 };
 
@@ -234,8 +255,8 @@ void cource_drawCutmull( SysGra& gra, Pers& pers, vector<Point3>& tbl, vector<iv
 			
 			for ( float t = 0.0 ; t < 1.0 ; t+=0.1 )
 			{
-				vect3 v1 = catmull3d_func(t, P0,P1,P2,P3 );
-				vect3 w1 = catmull3d_func(t, Q0,Q1,Q2,Q3 );
+				vect3 v1 = catmull3_func(t, P0,P1,P2,P3 );
+				vect3 w1 = catmull3_func(t, Q0,Q1,Q2,Q3 );
 				if ( (i==0 && t==0) ) 
 				{
 					v2=v1;
@@ -540,9 +561,6 @@ struct Apr : public Sys
 			vect3 pos = apr.pers.calcScreenToWorld( vect3(mpos,0) );
 
 			vect3 v0 = apr.pers.calcWorldToScreen3( pos );
-//			vect3 v2 = apr.pers.calcWorldToScreen3( vect3(0,0,0) );
-
-
 
 			// 軸表示
 			float l = 0.1;
@@ -553,7 +571,6 @@ struct Apr : public Sys
 					apr.pers.cam.mat.m[1][0],
 					apr.pers.cam.mat.m[2][0]
 				) * l;
-//				apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0.8,0.2,0.2), 2.0 );
 				apr.gra.Line( v0, v1, rgb(0.8,0.2,0.2), 2.0 );
 			}
 			if ( bAxisY  )
@@ -563,7 +580,6 @@ struct Apr : public Sys
 					apr.pers.cam.mat.m[1][1],
 					apr.pers.cam.mat.m[2][1]
 				) * l;
-//				apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0.2,0.8,0.2), 2.0 );
 				apr.gra.Line( v0, v1, rgb(0.2,0.8,0.2), 2.0 );
 			}
 			if ( bAxisZ )
@@ -573,7 +589,6 @@ struct Apr : public Sys
 					apr.pers.cam.mat.m[1][2],
 					apr.pers.cam.mat.m[2][2]
 				) * l;
-//				apr.gra.Line( vect2(v0.x,v0.y), vect2(v1.x,v1.y), rgb(0.1,0.3,1), 2.0 );
 				apr.gra.Line( v0, v1, rgb(0.1,0.3,1), 2.0 );
 
 			}
@@ -620,7 +635,6 @@ struct Apr : public Sys
 				vt = vect3(0,0,dt);
 				for ( int i = 0 ; i < NUM_V*2+1 ; i++ )
 				{
-//					apr.line3d( a, b, col );
 					g_line3d_scissor( apr.gra, apr.pers, a, b, col );
 					a+=vt;
 					b+=vt;
@@ -633,7 +647,6 @@ struct Apr : public Sys
 				vt = vect3(dt,0,0);
 				for ( int i = 0 ; i < NUM_U*2+1 ; i++ )
 				{
-//					apr.line3d( a, b, col );
 					g_line3d_scissor( apr.gra, apr.pers, a, b, col );
 					a+=vt;
 					b+=vt;
@@ -1075,7 +1088,7 @@ struct Apr : public Sys
 					vect3 v0 = pers.calcWorldToScreen3( disp[t.n0] );
 					vect3 v1 = pers.calcWorldToScreen3( disp[t.n1] );
 					vect3 v2 = pers.calcWorldToScreen3( disp[t.n2] );
-	//					if ( v0.z>0 )
+					if ( v0.z>0 )
 					{
 						gra.Tri( v0,v1,v2, rgb(1,0,1));
 						gra.Tri( v2,v1,v0, rgb(1,0,1)/2);
@@ -1488,8 +1501,8 @@ struct Apr : public Sys
 		pers.cam.pos = vect3(  0.3, 0.7, -1.2 );
 		pers.cam.at = vect3( 0,  0.7, 0 );
 
-		pers.cam.pos = vect3(  0.3, 0.7, -1.5 );
-		pers.cam.at = vect3( 0,  0.4, 0 );
+		pers.cam.pos = vect3(  0.3, 1.7, -1.7 );
+		pers.cam.at = vect3( 0,  0.0, 0 );
 	#endif
 
 		//===========================================================================
@@ -1532,6 +1545,7 @@ struct Apr : public Sys
 			if ( keys.X.hi ) {axis.bAxisZ = false;	axis.bAxisX = true;		axis.bAxisY = false;}
 			if ( keys.C.hi ) {axis.bAxisZ = false;	axis.bAxisX = false;	axis.bAxisY = true;}
 			if ( keys.V.hi ) {axis.bAxisZ = true;	axis.bAxisX = true;		axis.bAxisY = true;}
+			if ( keys.V.hi && keys.SHIFT.on ) {axis.bAxisZ = false;	axis.bAxisX = false;	axis.bAxisY = false;}
 
 			//=================================
 			// skeleton 入力
@@ -1594,12 +1608,12 @@ struct Apr : public Sys
 			{
 				static vector<Point3> bezier_tbl =
 				{
-					vect3(-1.0, 0.5, 0.0 ),
-					vect3(-1.0, 0.5,-1.0 ),
-					vect3( 1.0, 0.5,-1.0 ),
-					vect3( 1.0, 0.5, 0.0 ),
-					vect3( 1.0, 0.5, 1.0 ),
-					vect3(-1.0, 0.5, 1.0 ),
+					vect3(-1.0, 0.0, 0.0 ),
+					vect3(-1.0, 0.0,-1.0 ),
+					vect3( 1.0, 0.0,-1.0 ),
+					vect3( 1.0, 0.0, 0.0 ),
+					vect3( 1.0, 0.0, 1.0 ),
+					vect3(-1.0, 0.0, 1.0 ),
 
 				//	Point3( vect3( 0.8,0.9,0) ),
 				};
@@ -1696,7 +1710,7 @@ struct Apr : public Sys
 			//=================================
 			// マニュピレーター描画
 			//=================================
-			axis.DrawAxis( mouse.pos, *this );
+//			axis.DrawAxis( mouse.pos, *this );
 
 			//=================================
 			// 処理時間表示
