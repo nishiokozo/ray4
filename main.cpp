@@ -93,6 +93,40 @@ void courcr_move( Pers& pers, vector<Point3>& tbl, vect2& mmov )
 }
 
 //------------------------------------------------------------------------------
+void courcr_moveBezier( Pers& pers, vector<Point3>& tbl, vect2& mmov )
+//------------------------------------------------------------------------------
+{
+	vect2 scale;
+	{
+		// 最終選択を求める
+		for ( Point3& c : tbl )
+		{
+			if ( c.bSelected )
+			{
+				// 適当な一つから移動スケールを求める
+				vect3 v = pers.calcWorldToScreen3( c.pos );
+				scale = vect2(pers.aspect, 1)/v.z/pers.rate;
+				break;
+			}
+		}
+	}
+
+	// 移動
+	for ( Point3& c : tbl )
+	{
+		if ( c.bSelected )
+		{
+			vect3 v = vect3( mmov * scale, 0 );
+			mat44 mrot = pers.cam.mat;
+			mrot.SetTranslate(vect3(0,0,0));
+			v = v* mrot;
+			c.pos += v;
+			
+		}
+	}
+}
+
+//------------------------------------------------------------------------------
 void cource_drawPoint( SysGra& gra, Pers& pers, vector<Point3>& tbl )
 //------------------------------------------------------------------------------
 {
@@ -115,7 +149,7 @@ void cource_drawPoint( SysGra& gra, Pers& pers, vector<Point3>& tbl )
 }
 
 //------------------------------------------------------------------------------
-auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& tbl, vector<int>& idx, vect3& P, vect3& I, bool bCut )
+auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& tbl, vector<int>& idx, vect3& P, vect3& I, bool bSerch, bool bCut )
 //------------------------------------------------------------------------------
 {
 	//ベジェ計算＆描画
@@ -125,11 +159,14 @@ auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& tbl, vect
 	int size = static_cast<signed>(idx.size());
 
 	float	mind = infinit;
+	vect3	minQ1;
+	vect3	minQ0;
 	vect3	minQ;
 	int		minn;
 	float	mint;
 	vect3	mindt;
 	bool	minb = false;
+	vect3	minv;
 
 	for ( int n = 0 ; n < size-3 ; n+=3 )
 	{
@@ -151,21 +188,29 @@ auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& tbl, vect
 			g_line3d( gra, pers, p0, p1, rgb(1,1,1) );
 
 			// マウスベクトルとの最近点
+			if ( bSerch )
 			{
 				auto[b,d,Q0,Q1,t0,t1] = distanceLineSegline_func( P, I, p0, p1 );
 				if ( b ) 
 				{
-					if ( mind > d )
+					if ( mind > d && 0.2 > d )
 					{
-						mind = d;
-						minn = n;
+						minb	= true;
+						mind	= d;
+						minn	= n;
+
+						minQ0 = Q0;
+						minQ1 = Q1;
 
 						mint	= t-(1/div) + (t1/(p1-p0).abs())/(div);
 						minQ	= bezier3_func( mint, P0, P1, P2, P3 );
 						mindt	= bezier3_delta_func( mint, P0, P1, P2, P3 );
-						minb	= true;
+
+
+						minv = (minQ-Q0).normalize();
 					}
 				}
+
 			}
 
 			p0=p1;
@@ -180,7 +225,14 @@ auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& tbl, vect
 
 	// マウスベクトルとの最近点表示
 	gra.SetZTest( false );
-	if ( mind < 0.1/2 ) g_pset3d( gra, pers, minQ, rgb(1,0,0), 7 );
+	if ( minb ) 
+	{
+		g_pset3d( gra, pers, minQ, rgb(1,0,0), 5 );
+
+//		g_line3d( gra, pers, minQ-minv*0.1, minQ+minv*0.1, rgb(1,0,0) );
+		
+//		g_line3d( gra, pers, minQ0, minQ1, rgb(1,0,0) );
+	}
 	gra.SetZTest( true );
 
 	//--------
@@ -234,9 +286,12 @@ auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& tbl, vect
 			vect3 v = pers.calcWorldToScreen3( c.pos );
 			if ( v.z > 0 )
 			{
-				if ( c.bSelected ) 
-						gra.Pset( v, rgb(1,0,0), 11 ); 
-				else	gra.Pset( v, rgb(0,0,1), 11 ); 
+				float wide = 11;
+				rgb	col = rgb(0,0,1);
+				if ( i % 3 != 0 ) {col = rgb(0,1,0);wide = 7;}
+				if ( c.bSelected ) col = rgb(1,0,0);
+
+				gra.Pset( v, col, wide ); 
 
 				gra.Print( v.xy() + gra.Dot(16,-12), to_string(n) ); 
 			}
@@ -1656,13 +1711,13 @@ struct Apr : public Sys
 				if ( mouse.L.hi ) curce_select( gra, pers, bezier_tbl, mouse.pos );
 
 				// 移動 制御点（スクリーン並行）
-				if ( mouse.L.on ) courcr_move( pers, bezier_tbl, mouse.mov );
+				if ( mouse.L.on ) courcr_moveBezier( pers, bezier_tbl, mouse.mov );
 
 				vect3 P = pers.calcScreenToWorld( vect3(mouse.pos,0) );
 				vect3 I = pers.calcRayvect( P );
 
 				// 表示 ベジェ 三次曲線
-				cource_drawBezier( gra, pers, bezier_tbl, idx, P, I, mouse.B.hi );
+				cource_drawBezier( gra, pers, bezier_tbl, idx, P, I, keys.E.on, mouse.L.hi );
 
 				// 表示 制御点
 //				cource_drawPoint_bezier( gra, pers, bezier_tbl );
