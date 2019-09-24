@@ -1,3 +1,4 @@
+extern float distanceLinePoint( vect3 P0, vect3 I0, vect3 P1 );
 extern std::tuple<bool,float,vect3,vect3,float,float>distanceLineLine0( vect3 P0, vect3 I0, vect3 P1, vect3 I1 );
 extern std::tuple<bool,float,vect3,vect3,float,float>distanceLineSegline_func( vect3 P0, vect3 I0, vect3 s1, vect3 e1 );
 extern std::tuple<bool,float,vect3,vect3>distanceLineLine_func( vect3 P0, vect3 I0, vect3 P1, vect3 I1 );

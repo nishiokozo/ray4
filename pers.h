@@ -150,7 +150,7 @@ struct Pers
 	}
 
 	//--------------------------------------------------------------------------
-	vect3 calcScreenToWorld( vect3 q )	// 透視変換後の画面座標から空間座標を求める。
+	vect3 calcScreenToWorld3( vect3 q )	// 透視変換後の画面座標から空間座標を求める。
 	//--------------------------------------------------------------------------
 	{
 		vect3 v;
@@ -159,6 +159,13 @@ struct Pers
 		v.y = q.y/(w);
 		v.z = q.z/(w);
 		return v * cam.mat;
+	}
+
+	//--------------------------------------------------------------------------
+	vect3 calcScreenToWorld2( vect2 q )	// 透視変換後の画面座標から空間座標を求める。
+	//--------------------------------------------------------------------------
+	{
+		return calcScreenToWorld3( vect3(q,0) );
 	}
 	
 	//--------------------------------------------------------------------------
@@ -222,3 +229,4 @@ struct Pers
 extern void g_pset3d( SysGra& gra, Pers& pers, vect3 p0, rgb col, float wide = 1.0f );
 extern void g_line3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col, float wide = 1.0f );
 extern void g_line3d_scissor( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col, float wide = 1.0f );
+extern void g_print3d( SysGra& gra, Pers& pers, vect3 p0, float x, float y, string str );

@@ -38,3 +38,12 @@ void g_pset3d( SysGra& gra, Pers& pers, vect3 p0, rgb col, float wide )
 	vect3 v0 = pers.calcWorldToScreen3( p0 );
 	if ( v0.z > 0 ) gra.Pset( v0, col, wide);
 }
+
+//------------------------------------------------------------------------------
+void g_print3d( SysGra& gra, Pers& pers, vect3 p0, float x, float y, string str )
+//------------------------------------------------------------------------------
+{
+	vect3 v0 = pers.calcWorldToScreen3( p0 );
+	if ( v0.z > 0 ) gra.Print( v0.xy() + gra.Dot(x,y), str ); 
+
+}
