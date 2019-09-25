@@ -197,7 +197,7 @@ void Skeleton::LoadSkeleton( const string fn )
 
 	// カーソル更新
 	tblJoint = tblJointForm;
-	if ( animations.size() > cur.act )
+	if ( (signed)animations.size() > cur.act )
 	{
 		// キーフレーム切り替え
 		int i = 0;

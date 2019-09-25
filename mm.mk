@@ -1,5 +1,5 @@
 main.o: main.cpp geom.h SysKeys.h SysMouse.h SysGra.h Sys.h pers.h func.h \
-  raytrace.h skeleton.h
+ raytrace.h skeleton.h
 skeleton.o: skeleton.cpp geom.h SysGra.h pers.h skeleton.h func.h
 raytrace.o: raytrace.cpp geom.h SysGra.h raytrace.h
 pers.o: pers.cpp geom.h SysGra.h pers.h func.h
