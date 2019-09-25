@@ -36,7 +36,6 @@ struct Point3
 	bool	bSelected = false;
 	vect3	pos;
 	chrono::system_clock::duration time_pos;
-//	int		numSelected = 0;
 	Point3( vect3 _pos ) : pos(_pos) {}
 	vect3	a;
 	vect3	b;
@@ -102,178 +101,472 @@ void courcr_move( Pers& pers, vector<Point3>& tbl, vect2& mmov )
 }
 
 
-//------------------------------------------------------------------------------
-auto curce_selectBezier = []( SysGra& gra, Pers& pers, vector<Point3>& tbl, vect2& mpos )
-//------------------------------------------------------------------------------
+struct
 {
-	chrono::system_clock::duration time = chrono::system_clock::now().time_since_epoch();
-
-	bool bFind = false;
-
-	for ( Point3& c : tbl )
+	vector<Point3> tbl =
 	{
-		if ( c.bSelected )
-		{
-			{
-				vect3 v = pers.calcWorldToScreen3( c.pos+c.a );
-				if ( gra.Pixel(mpos-v.xy()).abs() < 16 )
-				{
-					c.bSelected_a = true;
-					c.time_a = time;
-					bFind = true;
-				}
-			}
+		{vect3(-1.0, 0.0, 0.0 ),vect3( 0.0, 0.0, 1.0 ),vect3( 0.0, 0.0,-1.0 )},
+		{vect3( 1.0, 0.0, 0.0 ),vect3( 0.0, 0.0,-1.0 ),vect3( 0.0, 0.0, 1.0 )},
 
+	};
+	vector<int>	idx =
+	{
+		0,1,0
+
+	};
+	struct
+	{
+		bool	bTouch = false;
+
+		bool	bRect = false;
+		vect2	rect_st;
+
+		bool	bSelectedOnlyOne = false;	// 一つだけ選択フラグ
+	} stat;
+	
+	//------------------------------------------------------------------------------
+	void selectBeginRect( vect2& mpos )
+	//------------------------------------------------------------------------------
+	{
+		stat.rect_st = mpos;
+		stat.bRect = true; 
+	}
+	//------------------------------------------------------------------------------
+	void selectEndRect()
+	//------------------------------------------------------------------------------
+	{
+		stat.bRect = false;
+	}
+	//------------------------------------------------------------------------------
+	void selectDragRect( SysGra& gra, Pers& pers, vect2& mpos )
+	//------------------------------------------------------------------------------
+	{
+		gra.Box( stat.rect_st, mpos, rgb(0,1,1));
+
+		float x0 = min( stat.rect_st.x, mpos.x ); 
+		float x1 = max( stat.rect_st.x, mpos.x ); 
+		float y0 = min( stat.rect_st.y, mpos.y ); 
+		float y1 = max( stat.rect_st.y, mpos.y ); 
+
+		for ( Point3& c : tbl )
+		{
+			vect3 v = pers.calcWorldToScreen3( c.pos );
+			
+			if ( v.z > 0 )
 			{
-				vect3 v = pers.calcWorldToScreen3( c.pos+c.b );
-				if ( gra.Pixel(mpos-v.xy()).abs() < 16 )
+				if ( x0 < v.x && x1 > v.x && y0 < v.y && y1 > v.y )
 				{
-					c.bSelected_b = true;
-					c.time_b = time;
-					bFind = true;
+					c.bSelected = true;
+			//		c.time_pos = 0;
 				}
 			}
 		}
 
+	}
+	
+	//------------------------------------------------------------------------------
+	void curce_selectClear()
+	//------------------------------------------------------------------------------
+	{
+		// 全解除
 		{
+			for ( Point3& c : tbl )
+			{
+				c.bSelected = false;
+				c.bSelected_a = false;
+				c.bSelected_b = false;
+			}
+		}
+	}
+	//------------------------------------------------------------------------------
+	void IsTouchNode( SysGra& gra, Pers& pers, vect2& mpos )
+	//------------------------------------------------------------------------------
+	{
+		//カーソルが特定ノードに触れてイルカどうかを判断
+
+		bool bTouch = false;
+
+		for ( Point3& c : tbl )
+		{
+			if ( c.bSelected )
+			{
+				{
+					vect3 v = pers.calcWorldToScreen3( c.pos+c.a );
+					if ( gra.Pixel(mpos-v.xy()).abs() < 16 )
+					{
+						bTouch = true;
+						break;
+					}
+				}
+
+				{
+					vect3 v = pers.calcWorldToScreen3( c.pos+c.b );
+					if ( gra.Pixel(mpos-v.xy()).abs() < 16 )
+					{
+						bTouch = true;
+						break;
+					}
+				}
+
+			}
+				{
+					vect3 v = pers.calcWorldToScreen3( c.pos );
+					if ( gra.Pixel(mpos-v.xy()).abs() < 16 )
+					{
+						bTouch = true;
+						break;
+					}
+				}
+		}
+
+		stat.bTouch = bTouch;
+	}
+
+	//------------------------------------------------------------------------------
+	bool curce_selectOnlyOne( SysGra& gra, Pers& pers, vect2& mpos )
+	//------------------------------------------------------------------------------
+	{
+		chrono::system_clock::duration time = chrono::system_clock::now().time_since_epoch();
+
+		for ( Point3& c : tbl )
+		{
+			c.bSelected_a = false;
+			c.bSelected_b = false;
+		}
+
+		bool bTouch = false;
+
+		for ( Point3& c : tbl )
+		{
+			if ( c.bSelected )
+			{
+				{
+					vect3 v = pers.calcWorldToScreen3( c.pos+c.a );
+					if ( gra.Pixel(mpos-v.xy()).abs() < 16 )
+					{
+						c.bSelected_a = true;
+						c.time_a = time;
+						bTouch = true;
+						break;
+					}
+				}
+
+				{
+					vect3 v = pers.calcWorldToScreen3( c.pos+c.b );
+					if ( gra.Pixel(mpos-v.xy()).abs() < 16 )
+					{
+						c.bSelected_b = true;
+						c.time_b = time;
+						bTouch = true;
+						break;
+					}
+				}
+			}
+		}
+		
+		if ( bTouch == false )
+		{
+			Point3* pHit = 0;
+			for ( Point3& c : tbl )
 			{
 				vect3 v = pers.calcWorldToScreen3( c.pos );
 				if ( gra.Pixel(mpos-v.xy()).abs() < 16 )
 				{
+					pHit = &c;
+				}
+			}
+
+			if ( pHit )
+			{
+				Point3& c = *pHit;
+				if ( c.bSelected == false )
+				{
+					// 新規選択
+					for ( Point3& c : tbl )
+					{
+						c.bSelected = false;
+					}
 					c.bSelected = true;
 					c.time_pos = time;
-					bFind = true;
 				}
+					bTouch = true;
+				
 			}
+			
 		}
-	}
-
-	// 一つも選択されてなければ全解除
-	if ( bFind == false )
-	{
-		for ( Point3& c : tbl )
-		{
-			c.bSelected = false;
-			c.bSelected_a = false;
-			c.bSelected_b = false;
-		}
-	}
-};
-//------------------------------------------------------------------------------
-void courcr_moveBezier( SysGra& gra, Pers& pers, vector<Point3>& tbl, vect2& mmov )
-//------------------------------------------------------------------------------
-{
-	enum Element
-	{
-		Element_none,
-		Element_a,
-		Element_b,
-		Element_pos,
+		
+		return bTouch;	
 	};
 	
-	Element	elem = Element_none;
 
-	Point3*	pLast = 0;
-
-	vect2	scale;
+	//------------------------------------------------------------------------------
+	void courcr_moveBezier( SysGra& gra, Pers& pers, vect2& mmov, bool bCtrl, bool bShfit, bool bAlt )
+	//------------------------------------------------------------------------------
 	{
-		chrono::system_clock::duration time_max;
-		// 最終選択を求める
-		for ( Point3& c : tbl )
+//	cout << "a" << endl;
+		enum Element
 		{
-			if ( c.bSelected )
+			Element_none,
+			Element_a,
+			Element_b,
+			Element_pos,
+		};
+		
+		Element	elem = Element_none;
+
+		Point3*	pLast = 0;
+
+		vect2	scale;
+		{
+			chrono::system_clock::duration time_max;
+			// 最終選択を求める
+			for ( Point3& c : tbl )
 			{
-				if ( time_max < c.time_pos ) 
+				if ( c.bSelected )
 				{
-					time_max = c.time_pos;	
-
-					vect3 v = pers.calcWorldToScreen3( c.pos );
-					scale = vect2(pers.aspect, 1)/v.z/pers.rate;
-					elem = Element_pos;
-
-					pLast = &c;
-				}
-				if ( c.bSelected_a )
-				{
-					if ( time_max < c.time_a ) 
+					if ( time_max < c.time_pos ) 
 					{
-						time_max = c.time_a;	
+						time_max = c.time_pos;	
 
-						vect3 v = pers.calcWorldToScreen3( c.pos + c.a );
+						vect3 v = pers.calcWorldToScreen3( c.pos );
 						scale = vect2(pers.aspect, 1)/v.z/pers.rate;
-						elem = Element_a;
+						elem = Element_pos;
 
 						pLast = &c;
 					}
-				}
-				if ( c.bSelected_b )
-				{
-					if ( time_max < c.time_b ) 
-					{
-						time_max = c.time_b;	
-
-						vect3 v = pers.calcWorldToScreen3( c.pos + c.b );
-						scale = vect2(pers.aspect, 1)/v.z/pers.rate;
-						elem = Element_b;
-
-						pLast = &c;
-					}
-				}
-			}
-		}
-
-	}
-
-	if ( pLast && ( elem == Element_a || elem == Element_b ) )
-	{
-		Point3&c = *pLast;
-				if ( elem == Element_a )
-				{
 					if ( c.bSelected_a )
 					{
-						vect3 v = vect3( mmov * scale, 0 );
-						mat44 mrot = pers.cam.mat;
-						mrot.SetTranslate(vect3(0,0,0));
-						v = v* mrot;
-						c.a += v;
-						c.b = -c.a.normalize()*c.b.abs();
+						if ( time_max < c.time_a ) 
+						{
+							time_max = c.time_a;	
+
+							vect3 v = pers.calcWorldToScreen3( c.pos + c.a );
+							scale = vect2(pers.aspect, 1)/v.z/pers.rate;
+							elem = Element_a;
+
+							pLast = &c;
+						}
+					}
+					if ( c.bSelected_b )
+					{
+						if ( time_max < c.time_b ) 
+						{
+							time_max = c.time_b;	
+
+							vect3 v = pers.calcWorldToScreen3( c.pos + c.b );
+							scale = vect2(pers.aspect, 1)/v.z/pers.rate;
+							elem = Element_b;
+
+							pLast = &c;
+						}
 					}
 				}
-				if ( elem == Element_b )
+			}
+
+		}
+
+		if ( pLast && ( elem == Element_a || elem == Element_b ) )
+		{
+			Point3&c = *pLast;
+					if ( elem == Element_a )
+					{
+						if ( c.bSelected_a )
+						{
+							vect3 v = vect3( mmov * scale, 0 );
+							mat33 mrot = pers.cam.mat.GetRotate();
+							v = v* mrot;
+							c.a += v;
+		if(bAlt)
+							c.b = -c.a.normalize()*c.b.abs();
+						}
+					}
+					if ( elem == Element_b )
+					{
+						if ( c.bSelected_b )
+						{
+							vect3 v = vect3( mmov * scale, 0 );
+							mat33 mrot = pers.cam.mat.GetRotate();
+							v = v* mrot;
+							c.b += v;
+		if(bAlt)
+							c.a = -c.b.normalize()*c.a.abs();
+						}
+					}
+		}
+		else
+		{
+		// 移動
+			int i=0;
+			for ( Point3& c : tbl )
+			{
+				if ( c.bSelected )
 				{
-					if ( c.bSelected_b )
+
+					if ( elem == Element_pos )
 					{
 						vect3 v = vect3( mmov * scale, 0 );
 						mat44 mrot = pers.cam.mat;
 						mrot.SetTranslate(vect3(0,0,0));
 						v = v* mrot;
-						c.b += v;
-						c.a = -c.b.normalize()*c.a.abs();
+						c.pos += v;
 					}
 				}
-	}
-	else
-	{
-	// 移動
-		int i=0;
-		for ( Point3& c : tbl )
-		{
-			if ( c.bSelected )
-			{
-
-				if ( elem == Element_pos )
-				{
-					vect3 v = vect3( mmov * scale, 0 );
-					mat44 mrot = pers.cam.mat;
-					mrot.SetTranslate(vect3(0,0,0));
-					v = v* mrot;
-					c.pos += v;
-				}
+				i++;
 			}
-			i++;
 		}
 	}
-}
+
+
+	//------------------------------------------------------------------------------
+	void cource_drawBezier( SysGra& gra, Pers& pers, vect3& P, vect3& I, bool bSerch, bool bCut )
+	//------------------------------------------------------------------------------
+	{
+		//ベジェ計算＆描画
+		float div = 10;
+		float dt = 1/div;
+
+		int size = static_cast<signed>(idx.size());
+
+		float	mind = infinit;
+		vect3	minQ1;
+		vect3	minQ0;
+		vect3	minQ;
+		int		minn;
+		float	mint;
+		vect3	mindt;
+		bool	minb = false;
+		vect3	minv;
+
+		for ( int n = 0 ; n < size-1 ; n++ )
+		{
+			int n0 = idx[n];
+			int n1 = idx[n+1];
+			vect3 P0 =    tbl[n0].pos;
+			vect3 P1 = P0+tbl[n0].b;
+			vect3 P3 =    tbl[n1].pos;
+			vect3 P2 = P3+tbl[n1].a;
+
+			float t  = dt;
+			vect3 p0 = tbl[n0].pos;
+			for ( int i = 0 ; i < div ; i++ )
+			{
+				vect3 p1 = bezier3_func( t, P0, P1, P2, P3 );
+				g_line3d( gra, pers, p0, p1, rgb(1,1,1) );
+
+				// マウスベクトルとの最近点
+				if ( bSerch )
+				{
+					auto[b,d,Q0,Q1,t0,t1] = distanceLineSegline_func( P, I, p0, p1 );
+					if ( b ) 
+					{
+						if ( mind > d && 0.2 > d )
+						{
+							minb	= true;
+							mind	= d;
+							minn	= n;
+
+							minQ0 = Q0;
+							minQ1 = Q1;
+
+							mint	= t-(1/div) + (t1/(p1-p0).abs())/(div);
+							minQ	= bezier3_func( mint, P0, P1, P2, P3 );
+							mindt	= bezier3_delta_func( mint, P0, P1, P2, P3 );
+
+							minv = (minQ-Q0).normalize();
+						}
+					}
+
+				}
+
+				p0=p1;
+				t+=dt;
+			}
+
+		}
+
+		// マウスベクトルとの最近点表示
+		gra.SetZTest( false );
+		if ( minb ) 
+		{
+			g_pset3d( gra, pers, minQ, rgb(1,0,0), 5 );
+		}
+		gra.SetZTest( true );
+
+		//--------
+		// 切断
+		//--------
+		if ( minb )
+		{
+
+			if ( bCut )
+			{
+				vect3	p = minQ;
+				vect3	v = mindt/3;
+				float	t0 = mint;
+				float	t1 = 1.0-mint;
+
+				tbl.emplace_back( p, -v*t0, v*t1  );
+				idx.insert( idx.begin()+minn+1, tbl.size()-1);
+
+				tbl[idx[minn+0]].b *= t0;
+				tbl[idx[minn+2]].a *= t1;
+				tbl[idx[minn+1]].bSelected = true;
+			}
+
+			{
+				gra.SetZTest( false );
+	//			vect3 v = pers.calcWorldToScreen3( minQ );
+				g_print3d( gra, pers, minQ, -26,-32-20, to_string(mint) ); 
+	//			gra.Print( v.xy() + gra.Dot(-26,-32-20), to_string(mint) ); 
+				gra.SetZTest( true );
+			}
+		}
+
+		// 表示 制御点 	制御線
+
+		{
+			gra.SetZTest(false);
+			
+			int n = 0;
+			for ( Point3 c : tbl )
+			{	
+				float wide = 11;
+				float wide2 = 7;
+				rgb	col = rgb(0,0,1);
+				rgb	col2 = rgb(0,1,0);
+				rgb	col2a = rgb(0,1,0);
+				rgb	col2b = rgb(0,1,0);
+				if ( c.bSelected || c.bSelected_a || c.bSelected_b ) 
+				{
+					if ( c.bSelected ) 
+					{
+						col = rgb(1,0,0);
+					}
+					if ( c.bSelected_a ) 
+					{
+						col2a = rgb(1,0,0);
+					}
+					if ( c.bSelected_b ) 
+					{
+						col2b = rgb(1,0,0);
+					}
+					g_line3d( gra, pers, c.pos, c.pos+c.a, col2 );
+					g_line3d( gra, pers, c.pos, c.pos+c.b, col2 );
+					g_pset3d( gra, pers, c.pos+c.a, col2a, wide2 ); 
+					g_pset3d( gra, pers, c.pos+c.b, col2b, wide2 ); 
+				}
+
+				g_pset3d( gra, pers, c.pos, col, wide ); 
+
+				g_print3d( gra, pers, c.pos, 16,12, to_string(n) ); 
+				n++;
+			}
+			gra.SetZTest(true);
+		}
+
+
+	};
+} bezier;
 
 //------------------------------------------------------------------------------
 void cource_drawPoint( SysGra& gra, Pers& pers, vector<Point3>& tbl )
@@ -296,154 +589,6 @@ void cource_drawPoint( SysGra& gra, Pers& pers, vector<Point3>& tbl )
 	}
 	gra.SetZTest(true);
 }
-
-//------------------------------------------------------------------------------
-auto cource_drawBezier = [] ( SysGra& gra, Pers& pers, vector<Point3>& tbl, vector<int>& idx, vect3& P, vect3& I, bool bSerch, bool bCut )
-//------------------------------------------------------------------------------
-{
-	//ベジェ計算＆描画
-	float div = 10;
-	float dt = 1/div;
-
-	int size = static_cast<signed>(idx.size());
-
-	float	mind = infinit;
-	vect3	minQ1;
-	vect3	minQ0;
-	vect3	minQ;
-	int		minn;
-	float	mint;
-	vect3	mindt;
-	bool	minb = false;
-	vect3	minv;
-
-	for ( int n = 0 ; n < size-1 ; n++ )
-	{
-		int n0 = idx[n];
-		int n1 = idx[n+1];
-		vect3 P0 =    tbl[n0].pos;
-		vect3 P1 = P0+tbl[n0].b;
-		vect3 P3 =    tbl[n1].pos;
-		vect3 P2 = P3+tbl[n1].a;
-
-		float t  = dt;
-		vect3 p0 = tbl[n0].pos;
-		for ( int i = 0 ; i < div ; i++ )
-		{
-			vect3 p1 = bezier3_func( t, P0, P1, P2, P3 );
-			g_line3d( gra, pers, p0, p1, rgb(1,1,1) );
-
-			// マウスベクトルとの最近点
-			if ( bSerch )
-			{
-				auto[b,d,Q0,Q1,t0,t1] = distanceLineSegline_func( P, I, p0, p1 );
-				if ( b ) 
-				{
-					if ( mind > d && 0.2 > d )
-					{
-						minb	= true;
-						mind	= d;
-						minn	= n;
-
-						minQ0 = Q0;
-						minQ1 = Q1;
-
-						mint	= t-(1/div) + (t1/(p1-p0).abs())/(div);
-						minQ	= bezier3_func( mint, P0, P1, P2, P3 );
-						mindt	= bezier3_delta_func( mint, P0, P1, P2, P3 );
-
-						minv = (minQ-Q0).normalize();
-					}
-				}
-
-			}
-
-			p0=p1;
-			t+=dt;
-		}
-
-	}
-
-	// マウスベクトルとの最近点表示
-	gra.SetZTest( false );
-	if ( minb ) 
-	{
-		g_pset3d( gra, pers, minQ, rgb(1,0,0), 5 );
-	}
-	gra.SetZTest( true );
-
-	//--------
-	// 切断
-	//--------
-	if ( minb )
-	{
-
-		if ( bCut )
-		{
-			vect3	p = minQ;
-			vect3	v = mindt/3;
-			float	t0 = mint;
-			float	t1 = 1.0-mint;
-
-			tbl.emplace_back( p, -v*t0, v*t1  );
-			idx.insert( idx.begin()+minn+1, tbl.size()-1);
-
-			tbl[idx[minn+0]].b *= t0;
-			tbl[idx[minn+2]].a *= t1;
-		}
-
-		{
-			gra.SetZTest( false );
-			vect3 v = pers.calcWorldToScreen3( minQ );
-			gra.Print( v.xy() + gra.Dot(-26,-32-20), to_string(mint) ); 
-			gra.SetZTest( true );
-		}
-	}
-
-	// 表示 制御点 	制御線
-
-	{
-		gra.SetZTest(false);
-		
-		int n = 0;
-		for ( Point3 c : tbl )
-		{	
-			float wide = 11;
-			float wide2 = 7;
-			rgb	col = rgb(0,0,1);
-			rgb	col2 = rgb(0,1,0);
-			rgb	col2a = rgb(0,1,0);
-			rgb	col2b = rgb(0,1,0);
-			if ( c.bSelected || c.bSelected_a || c.bSelected_b ) 
-			{
-				if ( c.bSelected ) 
-				{
-					col = rgb(1,0,0);
-				}
-				if ( c.bSelected_a ) 
-				{
-					col2a = rgb(1,0,0);
-				}
-				if ( c.bSelected_b ) 
-				{
-					col2b = rgb(1,0,0);
-				}
-				g_line3d( gra, pers, c.pos, c.pos+c.a, col2 );
-				g_line3d( gra, pers, c.pos, c.pos+c.b, col2 );
-				g_pset3d( gra, pers, c.pos+c.a, col2a, wide2 ); 
-				g_pset3d( gra, pers, c.pos+c.b, col2b, wide2 ); 
-			}
-
-			g_pset3d( gra, pers, c.pos, col, wide ); 
-
-			g_print3d( gra, pers, c.pos, 16,12, to_string(n) ); 
-			n++;
-		}
-		gra.SetZTest(true);
-	}
-
-
-};
 
 //------------------------------------------------------------------------------
 void cource_drawCutmull( SysGra& gra, Pers& pers, vector<Point3>& tbl, vector<ivect2>idx )
@@ -1832,33 +1977,31 @@ struct Apr : public Sys
 			//3字曲線
 			//=================================
 			{
-				static vector<Point3> bezier_tbl =
-				{
-					{vect3(-1.0, 0.0, 0.0 ),vect3( 0.0, 0.0, 1.0 ),vect3( 0.0, 0.0,-1.0 )},
-					{vect3( 1.0, 0.0, 0.0 ),vect3( 0.0, 0.0,-1.0 ),vect3( 0.0, 0.0, 1.0 )},
+				// 最初のチェック
+				if ( mouse.L.hi ) bezier.IsTouchNode( gra, pers, mouse.pos );
 
-				};
-				static vector<int>	idx =
-				{
-					0,1,0
-
-				};
-
+				gra.Print(1,text_y++,string("bezier.stat.bTouch:")+to_string(int(bezier.stat.bTouch)));
 
 				// 選択 制御点
-				if ( mouse.L.hi ) curce_selectBezier( gra, pers, bezier_tbl, mouse.pos );
+				if ( mouse.L.hi && !keys.SHIFT.on ) bezier.curce_selectOnlyOne( gra, pers, mouse.pos );
+
+				// 矩形選択
+				if ( mouse.L.hi && !bezier.stat.bTouch ) bezier.selectBeginRect( mouse.pos );
+				if ( !mouse.L.on && bezier.stat.bRect ) bezier.selectEndRect();
+				if ( mouse.L.on && bezier.stat.bRect ) bezier.selectDragRect( gra, pers, mouse.pos );
+
+				// 全解除
+//				if ( bezier.stat.bTouch == false .bRect == false ) bezier.curce_selectClear();
 
 				// 移動 制御点（スクリーン並行）
-				if ( mouse.L.on ) courcr_moveBezier( gra, pers, bezier_tbl, mouse.mov );
+				if ( mouse.L.on && bezier.stat.bTouch )  bezier.courcr_moveBezier( gra, pers, mouse.mov, keys.CTRL.on, keys.SHIFT.on, keys.ALT.on );
 
 				vect3 P = pers.calcScreenToWorld3( vect3(mouse.pos,0) );
 				vect3 I = pers.calcRayvect( P );
 
 				// 表示 ベジェ 三次曲線
-				cource_drawBezier( gra, pers, bezier_tbl, idx, P, I, keys.E.on, mouse.L.hi );
+				 bezier.cource_drawBezier( gra, pers, P, I, keys.E.on, mouse.L.hi );
 
-				// 表示 制御点
-//				cource_drawPoint_bezier( gra, pers, bezier_tbl );
 
 			}
 			//=================================
