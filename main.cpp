@@ -69,7 +69,7 @@ enum class g_CALC
 g_CALC g_rect_mode = g_CALC::NONE;	//	矩形選択中フラグ
 
 //------------------------------------------------------------------------------
-auto curce_select = []( SysGra& gra, Pers& pers, vector<Point3>& tbl, vect2& mpos )
+auto cource_selectCutmull = []( SysGra& gra, Pers& pers, vector<Point3>& tbl, vect2& mpos )
 //------------------------------------------------------------------------------
 {
 	for ( Point3& c : tbl )
@@ -89,7 +89,7 @@ auto curce_select = []( SysGra& gra, Pers& pers, vector<Point3>& tbl, vect2& mpo
 };
 
 //------------------------------------------------------------------------------
-void courcr_move( Pers& pers, vector<Point3>& tbl, vect2& mmov )
+void cource_moveCutmull( Pers& pers, vector<Point3>& tbl, vect2& mmov )
 //------------------------------------------------------------------------------
 {
 	vect2 scale;
@@ -113,8 +113,7 @@ void courcr_move( Pers& pers, vector<Point3>& tbl, vect2& mmov )
 		if ( c.bSelected )
 		{
 			vect3 v = vect3( mmov * scale, 0 );
-			mat44 mrot = pers.cam.mat;
-			mrot.SetTranslate(vect3(0,0,0));
+			mat33 mrot = pers.cam.mat.GetRotate();
 			v = v* mrot;
 			c.pos += v;
 			
@@ -349,22 +348,6 @@ struct Bezier
 			//------------------------------------------------------------------------------
 			{	
 				gra.SetZTest( false );
-/*
-				for ( Point3& j : infCource.tbl )
-				{
-
-					bool bPreselect = j.bPreselect;
-					bool bSelected = j.bSelected;
-					
-					calcRectMode( g_rect_mode, bPreselect, bSelected );
-
-					if ( bSelected )
-					{
-						gra.Pset( pers.calcWorldToScreen3( j.pos ), rgb(1,0,0), 11 );
-					}
-
-				}
-*/
 				// 矩形カーソル 表示
 				if (  g_rect_mode != g_CALC::NONE )
 				{
@@ -372,10 +355,12 @@ struct Bezier
 				}
 
 				// 矩形カーソル 情報表示
+				int n = 0;
 				for ( Point3& j : infCource.tbl )
 				{
 					vect2 pos = pers.calcWorldToScreen2( j.pos );
-//					gra.Print( pos+gra.Dot(14,0), to_string(j.id) );
+					gra.Print( pos+gra.Dot(14,0), to_string(n) );
+					n++;
 				}
 
 				gra.SetZTest( true );
@@ -384,7 +369,7 @@ struct Bezier
 		} selector;
 
 	//------------------------------------------------------------------------------
-	void courcr_moveBezier( SysGra& gra, Pers& pers, Cource& infCource, vect2& mmov, bool bCtrl, bool bShfit, bool bAlt )
+	void courcr_moveBezier( SysGra& gra, Pers& pers, Cource& infCource, vect2& mmov, bool bSame )
 	//------------------------------------------------------------------------------
 	{
 		bool bsel = false;
@@ -400,7 +385,7 @@ struct Bezier
 				mat33 mrot = pers.cam.mat.GetRotate();
 				v = v* mrot;
 				c.a += v;
-if(bAlt)	c.b = -c.a.normalize()*c.b.abs();
+				if(bSame)	c.b = -c.a.normalize()*c.b.abs();
 				
 				bsel = true;
 			}
@@ -410,7 +395,7 @@ if(bAlt)	c.b = -c.a.normalize()*c.b.abs();
 				mat33 mrot = pers.cam.mat.GetRotate();
 				v = v* mrot;
 				c.b += v;
-if(bAlt) c.a = -c.b.normalize()*c.a.abs();
+				if(bSame) c.a = -c.b.normalize()*c.a.abs();
 
 				bsel = true;
 			}
@@ -419,8 +404,7 @@ if(bAlt) c.a = -c.b.normalize()*c.a.abs();
 		if ( !bsel )
 		{
 			vect3 v = vect3(mmov.x*pers.aspect, mmov.y, 0)/g_one.w/pers.rate;
-			mat44 mrot = pers.cam.mat;
-			mrot.SetTranslate(vect3(0,0,0));
+			mat33 mrot = pers.cam.mat.GetRotate();
 			v = v* mrot;
 			for ( Point3& j : infCource.tbl )
 			{
@@ -437,7 +421,7 @@ if(bAlt) c.a = -c.b.normalize()*c.a.abs();
 
 
 	//------------------------------------------------------------------------------
-	void cource_drawBezier( SysGra& gra, Pers& pers, Cource& infCource, vect3& P, vect3& I, bool bSerch, bool bCut )
+	void cource_exec_drawBezier( SysGra& gra, Pers& pers, Cource& infCource, vect3& P, vect3& I, bool bSerch, bool bCut )
 	//------------------------------------------------------------------------------
 	{
 		//ベジェ計算＆描画
@@ -529,16 +513,18 @@ if(bAlt) c.a = -c.b.normalize()*c.a.abs();
 
 				infCource.tbl[infCource.idx[minn+0]].b *= t0;
 				infCource.tbl[infCource.idx[minn+2]].a *= t1;
-				infCource.tbl[infCource.idx[minn+1]].bSelected = true;
-				infCource.tbl[infCource.idx[minn+1]].bPreselect = false;
 				g_rect_mode = g_CALC::NONE;
 
 
-				if(0)
+				// 追加したポイントを選択状態にする
 				{
 					vect3 v = pers.calcWorldToScreen3( minQ );
 					g_one.w = v.z;
 					g_one.pj = &infCource.tbl[infCource.idx[minn+1]];
+					g_one.pj->bSelected = true;
+					g_one.pj->bPreselect = false;
+					g_one.bSelected_a = false;
+					g_one.bSelected_b = false;
 				}
 			}
 
@@ -550,47 +536,6 @@ if(bAlt) c.a = -c.b.normalize()*c.a.abs();
 		}
 
 		// 表示 制御点 	制御線
-#if 0
-		{
-			gra.SetZTest(false);
-			
-			int n = 0;
-			for ( Point3 c : infCource.tbl )
-			{	
-				float wide = 11;
-				float wide2 = 7;
-				rgb	col = rgb(0,0,1);
-				rgb	col2 = rgb(0,1,0);
-				rgb	col2a = rgb(0,1,0);
-				rgb	col2b = rgb(0,1,0);
-				if ( c.bSelected || c.bSelected_a || c.bSelected_b ) 
-				{
-					if ( c.bSelected ) 
-					{
-						col = rgb(1,0,0);
-					}
-					if ( c.bSelected_a ) 
-					{
-						col2a = rgb(1,0,0);
-					}
-					if ( c.bSelected_b ) 
-					{
-						col2b = rgb(1,0,0);
-					}
-					g_line3d( gra, pers, c.pos, c.pos+c.a, col2 );
-					g_line3d( gra, pers, c.pos, c.pos+c.b, col2 );
-					g_pset3d( gra, pers, c.pos+c.a, col2a, wide2 ); 
-					g_pset3d( gra, pers, c.pos+c.b, col2b, wide2 ); 
-				}
-
-				g_pset3d( gra, pers, c.pos, col, wide ); 
-
-				g_print3d( gra, pers, c.pos, 16,12, to_string(n) ); 
-				n++;
-			}
-			gra.SetZTest(true);
-		}
-#else
 		{
 			gra.SetZTest(false);
 
@@ -625,7 +570,6 @@ if(bAlt) c.a = -c.b.normalize()*c.a.abs();
 			}
 			gra.SetZTest(true);
 		}
-#endif
 
 	};
 } bezier;
@@ -1312,32 +1256,6 @@ struct Apr : public Sys
 				one.pj->stat.bSelected = false;
 			}
 
-/*			
-			// 選択リストのJoint移動
-			//------------------------------------------------------------------------------
-			void MoveSelected( Pers& pers, Skeleton& skeleton, vect2 gmov )
-			//------------------------------------------------------------------------------
-			{
-
-				vect3 v = vect3(gmov.x*pers.aspect, gmov.y, 0)/one.w/pers.rate;
-				mat44 mrot = pers.cam.mat;
-				mrot.SetTranslate(vect3(0,0,0));
-			//	mrot.invers(); 逆行列にしなくても同じ結果
-				v = v* mrot;
-				for ( Joint& j : skeleton.tblJoint )
-				{
-					if ( j.stat.bSelected )
-					{
-						j.pos += v ;
-					}
-				}
-				
-				// キーフレームへ反映
-				skeleton.RefrectKeyframe();
-			}
-			
-			//--
-*/
 			// 選択リスト表示
 			//------------------------------------------------------------------------------
 			void DrawRect( Pers& pers, SysGra& gra, Skeleton& skeleton , vect2 mpos )
@@ -1671,13 +1589,10 @@ struct Apr : public Sys
 				// 選択リストのJoint移動
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && selector.one.pj ) 
 				{
-	//					Skeleton& skeleton = skeleton;
 					vect2 gmov = mouse.mov;
 
 					vect3 v = vect3(gmov.x*pers.aspect, gmov.y, 0)/selector.one.w/pers.rate;
-					mat44 mrot = pers.cam.mat;
-					mrot.SetTranslate(vect3(0,0,0));
-				//	mrot.invers(); 逆行列にしなくても同じ結果
+					mat33 mrot = pers.cam.mat.GetRotate();
 					v = v* mrot;
 					for ( Joint& j : skeleton.tblJoint )
 					{
@@ -2085,14 +2000,14 @@ struct Apr : public Sys
 
 				// 移動
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && g_one.pj ) 
-					bezier.courcr_moveBezier( gra, pers, infCource, mouse.mov, keys.CTRL.on, keys.SHIFT.on, keys.ALT.on );
+					bezier.courcr_moveBezier( gra, pers, infCource, mouse.mov, keys.T.on );
 
 				// マウスベクトル
 				vect3 P = pers.calcScreenToWorld3( vect3(mouse.pos,0) );
 				vect3 I = pers.calcRayvect( P );
 
 				// 表示 加工 ベジェ 三次曲線
-				bezier.cource_drawBezier( gra, pers, infCource, P, I, keys.E.on, mouse.L.hi );
+				bezier.cource_exec_drawBezier( gra, pers, infCource, P, I, keys.E.on, mouse.L.hi );
 
 				// 表示 制御
 				bezier.selector.DrawRect( pers, gra, infCource , mouse.pos );
@@ -2128,17 +2043,18 @@ struct Apr : public Sys
 				};
 				
 				// 選択 制御点
-				if ( mouse.L.hi ) curce_select( gra, pers, cource, mouse.pos );
+				if ( mouse.L.hi ) cource_selectCutmull( gra, pers, cource, mouse.pos );
 
 				// 移動 制御点（スクリーン並行）
-				if ( mouse.L.on ) courcr_move( pers, cource, mouse.mov );
+				if ( mouse.L.on ) cource_moveCutmull( pers, cource, mouse.mov );
 
 				// 描画
-			//	cource_drawCutmull( gra, pers, cource, idx );
+			#if 0
+				cource_drawCutmull( gra, pers, cource, idx );
 
 				// 表示 制御点
-			//	cource_drawPoint( gra, pers, cource );
-
+				cource_drawPoint( gra, pers, cource );
+			#endif
 				
 			}
 			
