@@ -843,7 +843,7 @@ void Skeleton::DrawSkeleton( Pers& pers, SysGra& gra )
 				if ( n3 >= static_cast<signed>(animations[cur.act].pose.size()) ) n3 = n2;
 				for ( int j = 0 ;  j < static_cast<signed>(tblJoint.size()) ; j++ )
 				{
-					if ( tblJoint[ j ].stat.bSelected == false ) continue;
+					if ( tblJoint[ j ].bSelected == false ) continue;
 				
 					vect3 P0 = animations[cur.act].pose[ n0 ].joint[ j ].pos;
 					vect3 P1 = animations[cur.act].pose[ n1 ].joint[ j ].pos;

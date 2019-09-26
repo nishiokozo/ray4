@@ -103,11 +103,8 @@ struct Ring
 
 struct Joint
 {
-	struct
-	{
-		bool 	bSelected		= false;		//	選択
-		bool 	bPreselect		= false;		//	仮選択
-	} stat;
+	bool 	bSelected		= false;		//	選択
+	bool 	bPreselect		= false;		//	仮選択
 
 	int id;
 	vect3 pos;
