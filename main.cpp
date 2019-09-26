@@ -31,22 +31,42 @@
 using namespace std;
 
 
+
 struct Point3
 {
 	bool	bSelected = false;
 	bool 	bPreselect		= false;		//	仮選択
 
 	vect3	pos;
-	chrono::system_clock::duration time_pos;
+//	chrono::system_clock::duration time_pos;
 	Point3( vect3 _pos ) : pos(_pos) {}
 	vect3	a;
 	vect3	b;
-	bool	bSelected_a = false;
-	bool	bSelected_b = false;
-	chrono::system_clock::duration time_a;
-	chrono::system_clock::duration time_b;
+//	bool	bSelected_a = false;
+//	bool	bSelected_b = false;
+//	chrono::system_clock::duration time_a;
+//	chrono::system_clock::duration time_b;
 	Point3( vect3 _pos, vect3 _a, vect3 _b ) : pos(_pos) , a(_a), b(_b){}
 };
+struct
+{
+	float	w;
+	Point3*	pj;
+	//--
+	bool	bSelected_a = false;
+	bool	bSelected_b = false;
+} g_one = {0,0,0,0};
+
+vect2 g_rect_st = vect2(0,0);			//	矩形選択開始位置
+enum class g_CALC
+{
+	NONE,
+	ADD,
+	SUB,
+	COPY,
+	REV,
+};
+g_CALC g_rect_mode = g_CALC::NONE;	//	矩形選択中フラグ
 
 //------------------------------------------------------------------------------
 auto curce_select = []( SysGra& gra, Pers& pers, vector<Point3>& tbl, vect2& mpos )
@@ -103,8 +123,6 @@ void courcr_move( Pers& pers, vector<Point3>& tbl, vect2& mmov )
 }
 struct Cource
 {
-//	vector<Point3> tbl;
-//	vector<int>	idx;
 	vector<Point3> tbl =
 	{
 		{vect3(-1.0, 0.0, 0.0 ),vect3( 0.0, 0.0, 1.0 ),vect3( 0.0, 0.0,-1.0 )},
@@ -120,18 +138,7 @@ struct Cource
 
 struct Bezier
 {
-/*	vector<Point3> tbl =
-	{
-		{vect3(-1.0, 0.0, 0.0 ),vect3( 0.0, 0.0, 1.0 ),vect3( 0.0, 0.0,-1.0 )},
-		{vect3( 1.0, 0.0, 0.0 ),vect3( 0.0, 0.0,-1.0 ),vect3( 0.0, 0.0, 1.0 )},
 
-	};
-	vector<int>	idx =
-	{
-		0,1,0
-
-	};
-*/
 	struct
 	{
 
@@ -143,42 +150,60 @@ struct Bezier
 
 		struct Selector
 		{
-			struct
-			{
-				float	w;
-				Point3*	pj;
-			} one = {0,0};
-
-			vect2 rect_st = vect2(0,0);			//	矩形選択開始位置
-			enum class CALC
-			{
-				NONE,
-				ADD,
-				SUB,
-				COPY,
-				REV,
-			};
-			CALC rect_mode = CALC::NONE;	//	矩形選択中フラグ
 
 			//------------------------------------------------------------------------------
 			void Setup( Pers& pers, Cource& skeleton, vect2 mpos )
 			//------------------------------------------------------------------------------
 			{
-				one = {0,0};
+				g_one = {0,0,0,0};
 
-				for ( Point3& j : skeleton.tbl )
+				for ( Point3& c : skeleton.tbl )
 				{
-//					if ( j.bCtrl == false ) continue;
-
-					vect3 v = pers.calcWorldToScreen3( j.pos );
-
-					if ( (vect2(v.x,v.y)-mpos).abs() < 0.04f )
+					// ポインターのエレメント選択
+					if ( c.bSelected )
 					{
-						if ( one.w < v.z ) // 近い場合はより手前が優先
 						{
-							one.w = v.z;
-							one.pj = &j;
+							vect3 v = pers.calcWorldToScreen3( c.pos+c.a );
+							if ( (v.xy()-mpos).abs() < 0.04f )
+							{
+								if ( g_one.w < v.z ) // 近い場合はより手前が優先
+								{
+									g_one.w = v.z;
+									g_one.pj = &c;
+			
+									g_one.bSelected_a = true;
+									g_one.bSelected_b = false;
+								}
+							}
 						}
+						{
+							vect3 v = pers.calcWorldToScreen3( c.pos+c.b );
+							if ( (v.xy()-mpos).abs() < 0.04f )
+							{
+								if ( g_one.w < v.z ) // 近い場合はより手前が優先
+								{
+									g_one.w = v.z;
+									g_one.pj = &c;
+			
+									g_one.bSelected_a = false;
+									g_one.bSelected_b = true;
+								}
+							}
+						}
+					}
+					
+					// ポインター選択
+					if ( g_one.pj == nullptr )
+					{
+							vect3 v = pers.calcWorldToScreen3( c.pos );
+							if ( (v.xy()-mpos).abs() < 0.04f )
+							{
+								if ( g_one.w < v.z ) // 近い場合はより手前が優先
+								{
+									g_one.w = v.z;
+									g_one.pj = &c;
+								}
+							}
 					}
 				}
 			}
@@ -188,8 +213,8 @@ struct Bezier
 			void SelectRectNew( vect2 mpos )
 			//------------------------------------------------------------------------------
 			{
-				rect_mode = CALC::COPY;
-				rect_st = mpos;
+				g_rect_mode = g_CALC::COPY;
+				g_rect_st = mpos;
 			}
 
 			// 矩形カーソル開始 追加選択
@@ -197,8 +222,8 @@ struct Bezier
 			void SelectRectAdd( vect2 mpos )
 			//------------------------------------------------------------------------------
 			{
-				rect_mode = CALC::ADD;
-				rect_st = mpos;
+				g_rect_mode = g_CALC::ADD;
+				g_rect_st = mpos;
 			}
 
 			// 矩形カーソル開始 反転選択
@@ -206,8 +231,8 @@ struct Bezier
 			void SelectRectRev( vect2 mpos )
 			//------------------------------------------------------------------------------
 			{
-				rect_mode = CALC::REV;
-				rect_st = mpos;
+				g_rect_mode = g_CALC::REV;
+				g_rect_st = mpos;
 			}
 
 			// 矩形カーソル開始 削除選択
@@ -215,29 +240,29 @@ struct Bezier
 			void SelectRectSub( vect2 mpos )
 			//------------------------------------------------------------------------------
 			{
-				rect_mode = CALC::SUB;
-				rect_st = mpos;
+				g_rect_mode = g_CALC::SUB;
+				g_rect_st = mpos;
 			}
 			
 			//------------------------------------------------------------------------------
-			void calcRectMode( CALC rect_mode, bool& bPreselect, bool& bSelected )
+			void calcRectMode( g_CALC g_rect_mode, bool& bPreselect, bool& bSelected )
 			//------------------------------------------------------------------------------
 			{
-				switch( rect_mode )
+				switch( g_rect_mode )
 				{
-					case CALC::ADD:		if ( bPreselect ) bSelected = true;
+					case g_CALC::ADD:		if ( bPreselect ) bSelected = true;
 						break;
 
-					case CALC::SUB:		if ( bPreselect ) bSelected = false;
+					case g_CALC::SUB:		if ( bPreselect ) bSelected = false;
 						break;
 
-					case CALC::COPY:	bSelected = bPreselect;
+					case g_CALC::COPY:	bSelected = bPreselect;
 						break;
 
-					case CALC::REV:		if ( bPreselect ) bSelected = !bSelected;
+					case g_CALC::REV:		if ( bPreselect ) bSelected = !bSelected;
 						break;
 
-					case CALC::NONE:
+					case g_CALC::NONE:
 						break;
 				}
 				bPreselect = false;
@@ -251,10 +276,10 @@ struct Bezier
 			{
 				for ( Point3& j : skeleton.tbl )
 				{
-					calcRectMode( rect_mode, j.bPreselect, j.bSelected );
+					calcRectMode( g_rect_mode, j.bPreselect, j.bSelected );
 				}
 
-				rect_mode = CALC::NONE;
+				g_rect_mode = g_CALC::NONE;
 
 			}
 
@@ -263,13 +288,12 @@ struct Bezier
 			void SelectRectBegin( Pers& pers, Cource& skeleton , vect2 mpos )
 			//------------------------------------------------------------------------------
 			{
-				vect2 v0 = min( rect_st, mpos );
-				vect2 v1 = max( rect_st, mpos );
+				vect2 v0 = min( g_rect_st, mpos );
+				vect2 v1 = max( g_rect_st, mpos );
 
 				for ( Point3& j : skeleton.tbl )
 				{
-//					if ( j.bCtrl == false ) continue;
-				
+			
 					j.bPreselect = false;
 
 					vect2 v = pers.calcWorldToScreen2( j.pos );
@@ -292,7 +316,7 @@ struct Bezier
 					j.bSelected = false;
 				}
 				
-				one.pj->bSelected = true;
+				g_one.pj->bSelected = true;
 			}
 
 			// 単独 追加選択
@@ -300,7 +324,7 @@ struct Bezier
 			void SelectOneAdd()
 			//------------------------------------------------------------------------------
 			{
-				one.pj->bSelected = true;
+				g_one.pj->bSelected = true;
 			}
 
 			// 単独 反転選択
@@ -308,7 +332,7 @@ struct Bezier
 			void SelectOneRev()
 			//------------------------------------------------------------------------------
 			{
-				one.pj->bSelected = !one.pj->bSelected;
+				g_one.pj->bSelected = !g_one.pj->bSelected;
 			}
 
 			// 単独 削除選択
@@ -316,40 +340,12 @@ struct Bezier
 			void SelectOneSub()
 			//------------------------------------------------------------------------------
 			{
-				one.pj->bSelected = false;
+				g_one.pj->bSelected = false;
 			}
 
-			
-/*
-			// 選択リストのPoint3移動
+			// 表示
 			//------------------------------------------------------------------------------
-			void MoveSelected( Pers& pers, Cource& skeleton, vect2 gmov )
-			//------------------------------------------------------------------------------
-			{
-
-				vect3 v = vect3(gmov.x*pers.aspect, gmov.y, 0)/one.w/pers.rate;
-				mat44 mrot = pers.cam.mat;
-				mrot.SetTranslate(vect3(0,0,0));
-			//	mrot.invers(); 逆行列にしなくても同じ結果
-				v = v* mrot;
-				for ( Point3& j : skeleton.tbl )
-				{
-					if ( j.bSelected )
-					{
-						j.pos += v ;
-					}
-				}
-				
-				// キーフレームへ反映
-//				skeleton.RefrectKeyframe();
-			}
-
-			//--
-*/			
-
-			// 選択リスト表示
-			//------------------------------------------------------------------------------
-			void DrawPoint( Pers& pers, SysGra& gra, Cource& infCource , vect2 mpos )
+			void DrawRect( Pers& pers, SysGra& gra, Cource& infCource , vect2 mpos )
 			//------------------------------------------------------------------------------
 			{	
 				gra.SetZTest( false );
@@ -360,7 +356,7 @@ struct Bezier
 					bool bPreselect = j.bPreselect;
 					bool bSelected = j.bSelected;
 					
-					calcRectMode( rect_mode, bPreselect, bSelected );
+					calcRectMode( g_rect_mode, bPreselect, bSelected );
 
 					if ( bSelected )
 					{
@@ -370,16 +366,14 @@ struct Bezier
 				}
 */
 				// 矩形カーソル 表示
-				if (  rect_mode != CALC::NONE )
+				if (  g_rect_mode != g_CALC::NONE )
 				{
-					gra.Box( rect_st, mpos, rgb(1,1,1)*0.5f);
+					gra.Box( g_rect_st, mpos, rgb(1,1,1)*0.5f);
 				}
 
 				// 矩形カーソル 情報表示
 				for ( Point3& j : infCource.tbl )
 				{
-//					if ( j.bCtrl == false ) continue;
-
 					vect2 pos = pers.calcWorldToScreen2( j.pos );
 //					gra.Print( pos+gra.Dot(14,0), to_string(j.id) );
 				}
@@ -388,312 +382,57 @@ struct Bezier
 			}
 
 		} selector;
-/*	
-	//------------------------------------------------------------------------------
-	void selectBeginRect( vect2& mpos )
-	//------------------------------------------------------------------------------
-	{
-		stat.rect_st = mpos;
-		stat.bRect = true; 
-	}
-	//------------------------------------------------------------------------------
-	void selectEndRect()
-	//------------------------------------------------------------------------------
-	{
-		stat.bRect = false;
-	}
-	//------------------------------------------------------------------------------
-	void selectDragRect( SysGra& gra, Pers& pers, vect2& mpos )
-	//------------------------------------------------------------------------------
-	{
-		gra.Box( stat.rect_st, mpos, rgb(0,1,1));
-
-		float x0 = min( stat.rect_st.x, mpos.x ); 
-		float x1 = max( stat.rect_st.x, mpos.x ); 
-		float y0 = min( stat.rect_st.y, mpos.y ); 
-		float y1 = max( stat.rect_st.y, mpos.y ); 
-
-		for ( Point3& c : tbl )
-		{
-			vect3 v = pers.calcWorldToScreen3( c.pos );
-			
-			if ( v.z > 0 )
-			{
-				if ( x0 < v.x && x1 > v.x && y0 < v.y && y1 > v.y )
-				{
-					c.bSelected = true;
-			//		c.time_pos = 0;
-				}
-			}
-		}
-
-	}
-	
-	//------------------------------------------------------------------------------
-	void curce_selectClear()
-	//------------------------------------------------------------------------------
-	{
-		// 全解除
-		{
-			for ( Point3& c : tbl )
-			{
-				c.bSelected = false;
-				c.bSelected_a = false;
-				c.bSelected_b = false;
-			}
-		}
-	}
-	//------------------------------------------------------------------------------
-	bool IsTouchNode( SysGra& gra, Pers& pers, vect2& mpos )
-	//------------------------------------------------------------------------------
-	{
-		//カーソルが特定ノードに触れてイルカどうかを判断
-
-		bool bTouch = false;
-
-		for ( Point3& c : tbl )
-		{
-			if ( c.bSelected )
-			{
-				{
-					vect3 v = pers.calcWorldToScreen3( c.pos+c.a );
-					if ( gra.Pixel(mpos-v.xy()).abs() < 16 )
-					{
-						bTouch = true;
-						break;
-					}
-				}
-
-				{
-					vect3 v = pers.calcWorldToScreen3( c.pos+c.b );
-					if ( gra.Pixel(mpos-v.xy()).abs() < 16 )
-					{
-						bTouch = true;
-						break;
-					}
-				}
-
-			}
-				{
-					vect3 v = pers.calcWorldToScreen3( c.pos );
-					if ( gra.Pixel(mpos-v.xy()).abs() < 16 )
-					{
-						bTouch = true;
-						break;
-					}
-				}
-		}
-
-		return bTouch = bTouch;
-	}
-
-
-*/	
-
-	//------------------------------------------------------------------------------
-	bool curce_selectOnlyOne( SysGra& gra, Pers& pers, Cource& infCource, vect2& mpos )
-	//------------------------------------------------------------------------------
-	{
-		chrono::system_clock::duration time = chrono::system_clock::now().time_since_epoch();
-
-		for ( Point3& c : infCource.tbl )
-		{
-			c.bSelected_a = false;
-			c.bSelected_b = false;
-		}
-
-		bool bTouch = false;
-
-		for ( Point3& c : infCource.tbl )
-		{
-			if ( c.bSelected )
-			{
-				{
-					vect3 v = pers.calcWorldToScreen3( c.pos+c.a );
-					if ( gra.Pixel(mpos-v.xy()).abs() < 16 )
-					{
-						c.bSelected_a = true;
-						c.time_a = time;
-						bTouch = true;
-						break;
-					}
-				}
-
-				{
-					vect3 v = pers.calcWorldToScreen3( c.pos+c.b );
-					if ( gra.Pixel(mpos-v.xy()).abs() < 16 )
-					{
-						c.bSelected_b = true;
-						c.time_b = time;
-						bTouch = true;
-						break;
-					}
-				}
-			}
-		}
-		
-		if ( bTouch == false )
-		{
-			Point3* pHit = 0;
-			for ( Point3& c : infCource.tbl )
-			{
-				vect3 v = pers.calcWorldToScreen3( c.pos );
-				if ( gra.Pixel(mpos-v.xy()).abs() < 16 )
-				{
-					pHit = &c;
-				}
-			}
-
-			if ( pHit )
-			{
-				Point3& c = *pHit;
-				if ( c.bSelected == false )
-				{
-					// 新規選択
-					for ( Point3& c : infCource.tbl )
-					{
-						c.bSelected = false;
-					}
-					c.bSelected = true;
-					c.time_pos = time;
-				}
-					bTouch = true;
-				
-			}
-			
-		}
-		
-		return bTouch;	
-	};
 
 	//------------------------------------------------------------------------------
 	void courcr_moveBezier( SysGra& gra, Pers& pers, Cource& infCource, vect2& mmov, bool bCtrl, bool bShfit, bool bAlt )
 	//------------------------------------------------------------------------------
 	{
-					vect3 v = vect3(mmov.x*pers.aspect, mmov.y, 0)/selector.one.w/pers.rate;
-					mat44 mrot = pers.cam.mat;
-					mrot.SetTranslate(vect3(0,0,0));
-					v = v* mrot;
-					for ( Point3& j : infCource.tbl )
-					{
-						if ( j.bSelected )
-						{
-							j.pos += v ;
-						}
-					}
-return;
-
-//	cout << "a" << endl;
-		enum Element
-		{
-			Element_none,
-			Element_a,
-			Element_b,
-			Element_pos,
-		};
+		bool bsel = false;
 		
-		Element	elem = Element_none;
-
-		Point3*	pLast = 0;
-
-		vect2	scale;
+		if ( g_one.pj )
 		{
-			chrono::system_clock::duration time_max;
-			// 最終選択を求める
-			for ( Point3& c : infCource.tbl )
+			Point3& c = *g_one.pj;
+			vect2	scale = vect2(pers.aspect, 1)/g_one.w/pers.rate;
+
+			if ( g_one.bSelected_a )
 			{
-				if ( c.bSelected )
-				{
-					if ( time_max < c.time_pos ) 
-					{
-						time_max = c.time_pos;	
-
-						vect3 v = pers.calcWorldToScreen3( c.pos );
-						scale = vect2(pers.aspect, 1)/v.z/pers.rate;
-						elem = Element_pos;
-
-						pLast = &c;
-					}
-					if ( c.bSelected_a )
-					{
-						if ( time_max < c.time_a ) 
-						{
-							time_max = c.time_a;	
-
-							vect3 v = pers.calcWorldToScreen3( c.pos + c.a );
-							scale = vect2(pers.aspect, 1)/v.z/pers.rate;
-							elem = Element_a;
-
-							pLast = &c;
-						}
-					}
-					if ( c.bSelected_b )
-					{
-						if ( time_max < c.time_b ) 
-						{
-							time_max = c.time_b;	
-
-							vect3 v = pers.calcWorldToScreen3( c.pos + c.b );
-							scale = vect2(pers.aspect, 1)/v.z/pers.rate;
-							elem = Element_b;
-
-							pLast = &c;
-						}
-					}
-				}
+				vect3 v = vect3( mmov * scale, 0 );
+				mat33 mrot = pers.cam.mat.GetRotate();
+				v = v* mrot;
+				c.a += v;
+if(bAlt)	c.b = -c.a.normalize()*c.b.abs();
+				
+				bsel = true;
 			}
-
-		}
-
-		if ( pLast && ( elem == Element_a || elem == Element_b ) )
-		{
-			Point3&c = *pLast;
-					if ( elem == Element_a )
-					{
-						if ( c.bSelected_a )
-						{
-							vect3 v = vect3( mmov * scale, 0 );
-							mat33 mrot = pers.cam.mat.GetRotate();
-							v = v* mrot;
-							c.a += v;
-		if(bAlt)
-							c.b = -c.a.normalize()*c.b.abs();
-						}
-					}
-					if ( elem == Element_b )
-					{
-						if ( c.bSelected_b )
-						{
-							vect3 v = vect3( mmov * scale, 0 );
-							mat33 mrot = pers.cam.mat.GetRotate();
-							v = v* mrot;
-							c.b += v;
-		if(bAlt)
-							c.a = -c.b.normalize()*c.a.abs();
-						}
-					}
-		}
-		else
-		{
-		// 移動
-			int i=0;
-			for ( Point3& c : infCource.tbl )
+			if ( g_one.bSelected_b )
 			{
-				if ( c.bSelected )
-				{
+				vect3 v = vect3( mmov * scale, 0 );
+				mat33 mrot = pers.cam.mat.GetRotate();
+				v = v* mrot;
+				c.b += v;
+if(bAlt) c.a = -c.b.normalize()*c.a.abs();
 
-					if ( elem == Element_pos )
-					{
-						vect3 v = vect3( mmov * scale, 0 );
-						mat44 mrot = pers.cam.mat;
-						mrot.SetTranslate(vect3(0,0,0));
-						v = v* mrot;
-						c.pos += v;
-					}
-				}
-				i++;
+				bsel = true;
 			}
 		}
+
+		if ( !bsel )
+		{
+			vect3 v = vect3(mmov.x*pers.aspect, mmov.y, 0)/g_one.w/pers.rate;
+			mat44 mrot = pers.cam.mat;
+			mrot.SetTranslate(vect3(0,0,0));
+			v = v* mrot;
+			for ( Point3& j : infCource.tbl )
+			{
+				if ( j.bSelected )
+				{
+					j.pos += v ;
+				}
+			}
+		}
+
+		return;
+
 	}
 
 
@@ -791,13 +530,21 @@ return;
 				infCource.tbl[infCource.idx[minn+0]].b *= t0;
 				infCource.tbl[infCource.idx[minn+2]].a *= t1;
 				infCource.tbl[infCource.idx[minn+1]].bSelected = true;
+				infCource.tbl[infCource.idx[minn+1]].bPreselect = false;
+				g_rect_mode = g_CALC::NONE;
+
+
+				if(0)
+				{
+					vect3 v = pers.calcWorldToScreen3( minQ );
+					g_one.w = v.z;
+					g_one.pj = &infCource.tbl[infCource.idx[minn+1]];
+				}
 			}
 
 			{
 				gra.SetZTest( false );
-	//			vect3 v = pers.calcWorldToScreen3( minQ );
 				g_print3d( gra, pers, minQ, -26,-32-20, to_string(mint) ); 
-	//			gra.Print( v.xy() + gra.Dot(-26,-32-20), to_string(mint) ); 
 				gra.SetZTest( true );
 			}
 		}
@@ -844,24 +591,40 @@ return;
 			gra.SetZTest(true);
 		}
 #else
-				for ( Point3& j : infCource.tbl )
+		{
+			gra.SetZTest(false);
+
+			for ( Point3& c : infCource.tbl )
+			{
+				float wide = 11;
+				float wide2 = 7;
+				rgb	col = rgb(0,0,1);
+				rgb	col2 = rgb(0,1,0);
+				rgb	col2a = rgb(0,1,0);
+				rgb	col2b = rgb(0,1,0);
+
+				bool bPreselect = c.bPreselect;
+				bool bSelected = c.bSelected;
+				
+				selector.calcRectMode( g_rect_mode, bPreselect, bSelected );
+
+				if ( bSelected )
 				{
+					gra.Pset( pers.calcWorldToScreen3( c.pos ), rgb(1,0,0), 11 );
 
-					bool bPreselect = j.bPreselect;
-					bool bSelected = j.bSelected;
-					
-					selector.calcRectMode( selector.rect_mode, bPreselect, bSelected );
-
-					if ( bSelected )
-					{
-						gra.Pset( pers.calcWorldToScreen3( j.pos ), rgb(1,0,0), 11 );
-					}
-					else
-					{
-						gra.Pset( pers.calcWorldToScreen3( j.pos ), rgb(0,0,1), 11 );
-					}
-
+					g_line3d( gra, pers, c.pos, c.pos+c.a, col2 );
+					g_line3d( gra, pers, c.pos, c.pos+c.b, col2 );
+					g_pset3d( gra, pers, c.pos+c.a, col2a, wide2 ); 
+					g_pset3d( gra, pers, c.pos+c.b, col2b, wide2 ); 
 				}
+				else
+				{
+					gra.Pset( pers.calcWorldToScreen3( c.pos ), rgb(0,0,1), 11 );
+				}
+
+			}
+			gra.SetZTest(true);
+		}
 #endif
 
 	};
@@ -1577,7 +1340,7 @@ struct Apr : public Sys
 */
 			// 選択リスト表示
 			//------------------------------------------------------------------------------
-			void DrawPoint( Pers& pers, SysGra& gra, Skeleton& skeleton , vect2 mpos )
+			void DrawRect( Pers& pers, SysGra& gra, Skeleton& skeleton , vect2 mpos )
 			//------------------------------------------------------------------------------
 			{	
 				gra.SetZTest( false );
@@ -2043,7 +1806,7 @@ struct Apr : public Sys
 			}
 
 			// 表示
-			selector.DrawPoint( pers, gra, skeleton , mouse.pos );
+			selector.DrawRect( pers, gra, skeleton , mouse.pos );
 
 			// animカーソルビュー cursor
 			{
@@ -2276,81 +2039,53 @@ struct Apr : public Sys
 			//3字曲線
 			//=================================
 			{
-/*				// 最初のチェック
-				if ( mouse.L.hi ) bezier.IsTouchNode( gra, pers, mouse.pos );
-
-				gra.Print(1,text_y++,string("bTouch:")+to_string(int(bTouch)));
-
-				// 選択 制御点
-				if ( mouse.L.hi && !keys.SHIFT.on ) bezier.curce_selectOnlyOne( gra, pers, mouse.pos );
-
-				// 矩形選択
-				if ( mouse.L.hi && !bTouch ) bezier.selectBeginRect( mouse.pos );
-				if ( !mouse.L.on && bezier.stat.bRect ) bezier.selectEndRect();
-				if ( mouse.L.on && bezier.stat.bRect ) bezier.selectDragRect( gra, pers, mouse.pos );
-
-				// 全解除
-//				if ( bTouch == false .bRect == false ) bezier.curce_selectClear();
-
-				// 移動 制御点（スクリーン並行）
-				if ( mouse.L.on && bTouch )  bezier.courcr_moveBezier( gra, pers, mouse.mov, keys.CTRL.on, keys.SHIFT.on, keys.ALT.on );
-*/
-
-#if 0
-				if ( mouse.L.hi ) bezier.curce_selectOnlyOne( gra, pers, infCource, mouse.pos );
-				if ( mouse.L.on )  bezier.courcr_moveBezier( gra, pers, infCource, mouse.mov, keys.CTRL.on, keys.SHIFT.on, keys.ALT.on );
-#else
 				// 最近点検索
 				if ( !keys.ALT.on && mouse.L.hi ) 
 					bezier.selector.Setup( pers, infCource, mouse.pos );
 
 				// 矩形カーソル開始 新規選択
-				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && bezier.selector.one.pj == 0 && bezier.selector.rect_mode == Bezier::Selector::CALC::NONE ) 
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && g_one.pj == 0 && g_rect_mode == g_CALC::NONE ) 
 					bezier.selector.SelectRectNew( mouse.pos );
 
 				// 矩形カーソル開始 追加選択
-				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && keys.SHIFT.on && bezier.selector.one.pj == 0 && bezier.selector.rect_mode == Bezier::Selector::CALC::NONE ) 
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && keys.SHIFT.on && g_one.pj == 0 && g_rect_mode == g_CALC::NONE ) 
 					bezier.selector.SelectRectAdd( mouse.pos );
 
 				// 矩形カーソル開始 反転選択
-				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && !keys.SHIFT.on && bezier.selector.one.pj == 0 && bezier.selector.rect_mode == Bezier::Selector::CALC::NONE ) 
+				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && !keys.SHIFT.on && g_one.pj == 0 && g_rect_mode == g_CALC::NONE ) 
 					bezier.selector.SelectRectRev( mouse.pos );
 
 				// 矩形カーソル開始 削除選択
-				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && keys.SHIFT.on && bezier.selector.one.pj == 0 && bezier.selector.rect_mode == Bezier::Selector::CALC::NONE ) 
+				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && keys.SHIFT.on && g_one.pj == 0 && g_rect_mode == g_CALC::NONE ) 
 					bezier.selector.SelectRectSub( mouse.pos );
 
 				// 矩形カーソル終了（選択決定）
-				if ( !keys.ALT.on && !mouse.L.on && bezier.selector.rect_mode != Bezier::Selector::CALC::NONE ) 
+				if ( !keys.ALT.on && !mouse.L.on && g_rect_mode != g_CALC::NONE ) 
 					bezier.selector.SelectRectEnd( infCource );
 
 				// 矩形カーソル選択	
-				if ( !keys.ALT.on && mouse.L.on && bezier.selector.rect_mode != Bezier::Selector::CALC::NONE ) 
+				if ( !keys.ALT.on && mouse.L.on && g_rect_mode != g_CALC::NONE ) 
 					bezier.selector.SelectRectBegin( pers, infCource , mouse.pos );
 
 				// 単独 新規選択
-				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && bezier.selector.one.pj && bezier.selector.one.pj->bSelected == false ) 
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && g_one.pj && g_one.pj->bSelected == false ) 
 					bezier.selector.SelectOneOnly( infCource );
 
 				// 単独 追加選択
-				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && keys.SHIFT.on && bezier.selector.one.pj ) 
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && keys.SHIFT.on && g_one.pj ) 
 					bezier.selector.SelectOneAdd();
 
 				// 単独 反転選択
-				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && !keys.SHIFT.on && bezier.selector.one.pj ) 
+				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && !keys.SHIFT.on && g_one.pj ) 
 					bezier.selector.SelectOneRev();
 
 				// 単独 削除選択
-				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && keys.SHIFT.on && bezier.selector.one.pj ) 
+				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && keys.SHIFT.on && g_one.pj ) 
 					bezier.selector.SelectOneSub();
 
 				// 移動
-				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && bezier.selector.one.pj ) 
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && g_one.pj ) 
 					bezier.courcr_moveBezier( gra, pers, infCource, mouse.mov, keys.CTRL.on, keys.SHIFT.on, keys.ALT.on );
-
-				// 表示 制御
-				bezier.selector.DrawPoint( pers, gra, infCource , mouse.pos );
-#endif
 
 				// マウスベクトル
 				vect3 P = pers.calcScreenToWorld3( vect3(mouse.pos,0) );
@@ -2358,6 +2093,9 @@ struct Apr : public Sys
 
 				// 表示 加工 ベジェ 三次曲線
 				bezier.cource_drawBezier( gra, pers, infCource, P, I, keys.E.on, mouse.L.hi );
+
+				// 表示 制御
+				bezier.selector.DrawRect( pers, gra, infCource , mouse.pos );
 
 
 			}
