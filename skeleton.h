@@ -106,7 +106,7 @@ struct Joint
 	bool 	bSelected		= false;		//	選択
 	bool 	bPreselect		= false;		//	仮選択
 
-	int id;
+//	int id;
 	vect3 pos;
 	vect3 tension;
 	vect3 disp;
@@ -131,7 +131,7 @@ struct Joint
 	virtual ~Joint(){}
 	Joint( vect3 v, float _weight, bool _bCtrl )
 	{
-		id = 0;
+//		id = 0;
 		pos = v;
 		weight = _weight;
 		bCtrl = _bCtrl;
@@ -164,7 +164,7 @@ struct Skeleton
 	string	filename;
 
 	vector<Joint>			tblJointForm;
-	vector<Joint>			tblJoint;
+	vector<Joint>			tblPoint;	//joint
 	vector<Bone>			tblBone;
 
 	struct K

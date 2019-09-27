@@ -398,8 +398,8 @@ public:
 		{
 			for( int px = 0 ; px < width ; px++ )
 			{
-				float x = ((float)px / width) *2.0-1.0;
-				float y = ((float)py / height) *2.0-1.0;
+				float x = ((float)px / (float)width) *2.0-1.0;
+				float y = ((float)py / (float)height) *2.0-1.0;
 				vect3	P = vect3( x, y, 0 ) + posScr;
 				vect3	I = normalize(P - posEye);
 
@@ -453,8 +453,8 @@ void	raytrace( SysGra& gra )
 		{
 			for( int px = 0 ; px < width ; px++ )
 			{
-				float x = ((float)px / width) *2.0-1.0;
-				float y = ((float)py / height) *2.0-1.0;
+				float x = ((float)px / (float)width) *2.0-1.0;
+				float y = ((float)py / (float)height) *2.0-1.0;
 				vect3	P = vect3( x, y, 0 ) + posScr;
 				vect3	I = normalize(P - posEye);
 

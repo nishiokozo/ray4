@@ -19,8 +19,8 @@ using namespace std;
 
 struct  wgl_Font
 {
-	const int count = 255;
-	int font_base;
+	const DWORD count = 255;
+	GLuint font_base;
 
 	HFONT	hFont;
 	
@@ -82,7 +82,7 @@ struct  wgl_Font
 	void Delete( )
 	//------------------------------------------------------------------------------
 	{
-		glDeleteLists( font_base, count);
+		glDeleteLists( font_base, (GLsizei)count);
 	}
 
 
@@ -95,7 +95,7 @@ struct  wgl_Font
 
 		glListBase( font_base );
 
-		glCallLists( str.size(), GL_UNSIGNED_BYTE, str.c_str() );
+		glCallLists( (signed)str.size(), GL_UNSIGNED_BYTE, str.c_str() );
 
 		glPopAttrib();
 
@@ -170,21 +170,21 @@ SysGra::SysGra()
 }
 
 //------------------------------------------------------------------------------
-int SysGra::GetWidth()
+float SysGra::GetWidth()
 //------------------------------------------------------------------------------
 {
 	SysWin& win = SysWin::GetInstance();
 
-	return win.GetWidth();
+	return (float)win.GetWidth();
 }
 
 //------------------------------------------------------------------------------
-int SysGra::GetHeight()
+float SysGra::GetHeight()
 //------------------------------------------------------------------------------
 {
 	SysWin& win = SysWin::GetInstance();
 
-	return win.GetHeight();
+	return (float)win.GetHeight();
 }
 
 //------------------------------------------------------------------------------
@@ -193,7 +193,7 @@ float SysGra::GetAspect()
 {
 	SysWin& win = SysWin::GetInstance();
 
-	return (float)win.GetWidth()/win.GetHeight();
+	return (float)win.GetWidth()/(float)win.GetHeight();
 }
 
 //------------------------------------------------------------------------------
@@ -369,7 +369,7 @@ void SysGra::Circle( vect2 v, float r, rgb col )
 		v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
 		for ( int i = 0 ; i < 360 ; i+=45 )
 		{
-			float th = rad(i);
+			float th = rad((float)i);
 			vect2 v1 = vect2( r*cos(th), r*sin(th) )+v;
 
 			//gl

@@ -48,8 +48,8 @@ SysMouse::SysMouse()
 	{
 		SysWin& win = SysWin::GetInstance();
 
-		vect2	gp( point.x, point.y );
-		gp = gp/vect2(win.GetWidth()/2,-win.GetHeight()/2)+vect2(-1,1);
+		vect2	gp( (float)point.x, (float)point.y );
+		gp = gp/vect2((float)win.GetWidth()/2,-(float)win.GetHeight()/2)+vect2(-1,1);
 	
 		this->prev = this->pos;
 		this->mov = 0;
@@ -122,8 +122,8 @@ void SysMouse::Update()
 	{
 		SysWin& win = SysWin::GetInstance();
 
-		vect2	gp( point.x, point.y );
-		gp = gp/vect2(win.GetWidth()/2,-win.GetHeight()/2)+vect2(-1,1);
+		vect2	gp( (float)point.x, (float)point.y );
+		gp = gp/vect2((float)win.GetWidth()/2,-(float)win.GetHeight()/2)+vect2(-1,1);
 	
 		this->prev = this->pos;
 		this->mov = gp - this->pos;
@@ -135,7 +135,7 @@ void SysMouse::Update()
 		}
 	}
 
-	this->wheel = win.GetWheel();
+	this->wheel = (float)win.GetWheel();
 
 //cout << wheel << endl;
 

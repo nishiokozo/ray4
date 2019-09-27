@@ -44,17 +44,31 @@ struct Point3
 
 	Point3( vect3 _pos, vect3 _a, vect3 _b ) : pos(_pos) , a(_a), b(_b){}
 };
-struct
+struct One
 {
-	float	w;
-	Point3*	pj;
+	bool	bEnable;
+	float	w;	// wバッファ値
+//	Point3*	pj;
+	int		idx;	// オブジェクト番号
 	//--
 	bool	bSelected_a = false;
 	bool	bSelected_b = false;
-} g_one = {0,0,0,0};
+
+
+	One(){clear();}
+	void clear()
+	{
+		bEnable = false;
+		w = 0.0;
+		idx = 0;
+		bSelected_a = false;
+		bSelected_b = false;
+	}
+	
+} g_one;// = {0,0,0,0,0};
 
 vect2 g_rect_st = vect2(0,0);			//	矩形選択開始位置
-enum class g_CALC
+enum class G_CALC
 {
 	NONE,
 	ADD,
@@ -62,7 +76,7 @@ enum class g_CALC
 	COPY,
 	REV,
 };
-g_CALC g_rect_mode = g_CALC::NONE;	//	矩形選択中フラグ
+G_CALC g_rect_mode = G_CALC::NONE;	//	矩形選択中フラグ
 
 //------------------------------------------------------------------------------
 auto cource_selectCutmull = []( SysGra& gra, Pers& pers, vector<Point3>& tbl, vect2& mpos )
@@ -138,12 +152,13 @@ struct Bezier
 	{
 
 		//------------------------------------------------------------------------------
-		void Setup( Pers& pers, Cource& skeleton, vect2 mpos )
+		void Setup( Pers& pers, Cource& infCource, vect2 mpos )
 		//------------------------------------------------------------------------------
 		{
-			g_one = {0,0,0,0};
-
-			for ( Point3& c : skeleton.tbl )
+//			g_one = {0,0,0,0,0};
+			g_one.clear();
+			int n = 0;
+			for ( Point3& c : infCource.tbl )
 			{
 				// ポインターのエレメント選択
 				if ( c.bSelected )
@@ -155,7 +170,9 @@ struct Bezier
 							if ( g_one.w < v.z ) // 近い場合はより手前が優先
 							{
 								g_one.w = v.z;
-								g_one.pj = &c;
+								//g_one.bEnable = &c;
+								g_one.bEnable = true;
+								g_one.idx = n;
 		
 								g_one.bSelected_a = true;
 								g_one.bSelected_b = false;
@@ -169,7 +186,9 @@ struct Bezier
 							if ( g_one.w < v.z ) // 近い場合はより手前が優先
 							{
 								g_one.w = v.z;
-								g_one.pj = &c;
+//								g_one.bEnable = &c;
+								g_one.bEnable = true;
+								g_one.idx = n;
 		
 								g_one.bSelected_a = false;
 								g_one.bSelected_b = true;
@@ -179,7 +198,7 @@ struct Bezier
 				}
 				
 				// ポインター選択
-				if ( g_one.pj == nullptr )
+				if ( g_one.bEnable == false )
 				{
 						vect3 v = pers.calcWorldToScreen3( c.pos );
 						if ( (v.xy()-mpos).abs() < 0.04f )
@@ -187,19 +206,21 @@ struct Bezier
 							if ( g_one.w < v.z ) // 近い場合はより手前が優先
 							{
 								g_one.w = v.z;
-								g_one.pj = &c;
+								g_one.bEnable = true;
+								g_one.idx = n;
 							}
 						}
 				}
+				n++;
 			}
 		}
 
 		// 矩形カーソル開始 新規選択
 		//------------------------------------------------------------------------------
-		void SelectRectNew( vect2 mpos )
+		void SelectRectOnly( vect2 mpos )
 		//------------------------------------------------------------------------------
 		{
-			g_rect_mode = g_CALC::COPY;
+			g_rect_mode = G_CALC::COPY;
 			g_rect_st = mpos;
 		}
 
@@ -208,7 +229,7 @@ struct Bezier
 		void SelectRectAdd( vect2 mpos )
 		//------------------------------------------------------------------------------
 		{
-			g_rect_mode = g_CALC::ADD;
+			g_rect_mode = G_CALC::ADD;
 			g_rect_st = mpos;
 		}
 
@@ -217,7 +238,7 @@ struct Bezier
 		void SelectRectRev( vect2 mpos )
 		//------------------------------------------------------------------------------
 		{
-			g_rect_mode = g_CALC::REV;
+			g_rect_mode = G_CALC::REV;
 			g_rect_st = mpos;
 		}
 
@@ -226,29 +247,29 @@ struct Bezier
 		void SelectRectSub( vect2 mpos )
 		//------------------------------------------------------------------------------
 		{
-			g_rect_mode = g_CALC::SUB;
+			g_rect_mode = G_CALC::SUB;
 			g_rect_st = mpos;
 		}
 		
 		//------------------------------------------------------------------------------
-		void calcRectMode( g_CALC g_rect_mode, bool& bPreselect, bool& bSelected )
+		void calcRectMode( G_CALC g_rect_mode, bool& bPreselect, bool& bSelected )
 		//------------------------------------------------------------------------------
 		{
 			switch( g_rect_mode )
 			{
-				case g_CALC::ADD:		if ( bPreselect ) bSelected = true;
+				case G_CALC::ADD:		if ( bPreselect ) bSelected = true;
 					break;
 
-				case g_CALC::SUB:		if ( bPreselect ) bSelected = false;
+				case G_CALC::SUB:		if ( bPreselect ) bSelected = false;
 					break;
 
-				case g_CALC::COPY:	bSelected = bPreselect;
+				case G_CALC::COPY:	bSelected = bPreselect;
 					break;
 
-				case g_CALC::REV:		if ( bPreselect ) bSelected = !bSelected;
+				case G_CALC::REV:		if ( bPreselect ) bSelected = !bSelected;
 					break;
 
-				case g_CALC::NONE:
+				case G_CALC::NONE:
 					break;
 			}
 			bPreselect = false;
@@ -257,27 +278,27 @@ struct Bezier
 
 		// 矩形カーソル終了（選択決定）
 		//------------------------------------------------------------------------------
-		void SelectRectEnd( Cource& skeleton )
+		void SelectRectEnd( Cource& infCource )
 		//------------------------------------------------------------------------------
 		{
-			for ( Point3& j : skeleton.tbl )
+			for ( Point3& j : infCource.tbl )
 			{
 				calcRectMode( g_rect_mode, j.bPreselect, j.bSelected );
 			}
 
-			g_rect_mode = g_CALC::NONE;
+			g_rect_mode = G_CALC::NONE;
 
 		}
 
 		// 矩形カーソル選択	
 		//------------------------------------------------------------------------------
-		void SelectRectBegin( Pers& pers, Cource& skeleton , vect2 mpos )
+		void SelectRectBegin( Pers& pers, Cource& infCource , vect2 mpos )
 		//------------------------------------------------------------------------------
 		{
 			vect2 v0 = min( g_rect_st, mpos );
 			vect2 v1 = max( g_rect_st, mpos );
 
-			for ( Point3& j : skeleton.tbl )
+			for ( Point3& j : infCource.tbl )
 			{
 		
 				j.bPreselect = false;
@@ -293,16 +314,17 @@ struct Bezier
 
 		// 単独 新規選択
 		//------------------------------------------------------------------------------
-		void SelectOneOnly( Cource& skeleton )
+		void SelectOneOnly( Cource& infCource )
 		//------------------------------------------------------------------------------
 		{
 			// 選択クリア
-			for ( Point3& j : skeleton.tbl )
+			
+			for ( int n = 0 ; n < (signed)infCource.tbl.size() ; n++ )
 			{
-				j.bSelected = false;
+				infCource.tbl[n].bSelected = false;
 			}
 			
-			g_one.pj->bSelected = true;
+			infCource.tbl[ g_one.idx ].bSelected = true;
 		}
 
 		// 単独 追加選択
@@ -310,7 +332,8 @@ struct Bezier
 		void SelectOneAdd()
 		//------------------------------------------------------------------------------
 		{
-			g_one.pj->bSelected = true;
+//			g_one.bEnable->bSelected = true;
+			infCource.tbl[ g_one.idx ].bSelected = false;
 		}
 
 		// 単独 反転選択
@@ -318,7 +341,8 @@ struct Bezier
 		void SelectOneRev()
 		//------------------------------------------------------------------------------
 		{
-			g_one.pj->bSelected = !g_one.pj->bSelected;
+//			g_one.bEnable->bSelected = !g_one.bEnable->bSelected;
+			infCource.tbl[ g_one.idx ].bSelected = !infCource.tbl[ g_one.idx ].bSelected;
 		}
 
 		// 単独 削除選択
@@ -326,7 +350,8 @@ struct Bezier
 		void SelectOneSub()
 		//------------------------------------------------------------------------------
 		{
-			g_one.pj->bSelected = false;
+//			g_one.bEnable->bSelected = false;
+			infCource.tbl[ g_one.idx ].bSelected = false;
 		}
 
 		// 表示
@@ -336,7 +361,7 @@ struct Bezier
 		{	
 			gra.SetZTest( false );
 			// 矩形カーソル 表示
-			if (  g_rect_mode != g_CALC::NONE )
+			if (  g_rect_mode != G_CALC::NONE )
 			{
 				gra.Box( g_rect_st, mpos, rgb(1,1,1)*0.5f);
 			}
@@ -361,9 +386,11 @@ struct Bezier
 	{
 		bool bsel = false;
 		
-		if ( g_one.pj )
+		if ( g_one.bEnable )
 		{
-			Point3& c = *g_one.pj;
+//			Point3& c = *g_one.bEnable;
+			Point3& c = infCource.tbl[ g_one.idx ];
+
 			vect2	scale = vect2(pers.aspect, 1)/g_one.w/pers.rate;
 
 			if ( g_one.bSelected_a )
@@ -412,8 +439,8 @@ struct Bezier
 	//------------------------------------------------------------------------------
 	{
 		//ベジェ計算＆描画
-		float div = 10;
-		float dt = 1/div;
+		int div = 10;
+		float dt = 1/(float)div;
 
 		int size = static_cast<signed>(infCource.idx.size());
 
@@ -458,7 +485,7 @@ struct Bezier
 							minQ0 = Q0;
 							minQ1 = Q1;
 
-							mint	= t-(1/div) + (t1/(p1-p0).abs())/(div);
+							mint	= t-(1/(float)div) + (t1/(p1-p0).abs())/((float)div);
 							minQ	= bezier3_func( mint, P0, P1, P2, P3 );
 							mindt	= bezier3_delta_func( mint, P0, P1, P2, P3 );
 
@@ -496,20 +523,24 @@ struct Bezier
 				float	t1 = 1.0-mint;
 
 				infCource.tbl.emplace_back( p, -v*t0, v*t1  );
-				infCource.idx.insert( infCource.idx.begin()+minn+1, infCource.tbl.size()-1);
+				infCource.idx.insert( infCource.idx.begin()+minn+1, (signed)infCource.tbl.size()-1);
 
 				infCource.tbl[infCource.idx[minn+0]].b *= t0;
 				infCource.tbl[infCource.idx[minn+2]].a *= t1;
-				g_rect_mode = g_CALC::NONE;
+				g_rect_mode = G_CALC::NONE;
 
 
 				// 追加したポイントを選択状態にする
 				{
+					int idx = infCource.idx[minn+1];
 					vect3 v = pers.calcWorldToScreen3( minQ );
 					g_one.w = v.z;
-					g_one.pj = &infCource.tbl[infCource.idx[minn+1]];
-					g_one.pj->bSelected = true;
-					g_one.pj->bPreselect = false;
+					g_one.idx = idx;
+					g_one.bEnable = true;//&infCource.tbl[ idx ];
+					infCource.tbl[ idx ].bSelected = true;
+					infCource.tbl[ idx ].bPreselect = false;
+//					g_one.bEnable->bSelected = true;
+//					g_one.bEnable->bPreselect = false;
 					g_one.bSelected_a = false;
 					g_one.bSelected_b = false;
 				}
@@ -542,7 +573,7 @@ struct Bezier
 
 				if ( bSelected )
 				{
-					gra.Pset( pers.calcWorldToScreen3( c.pos ), rgb(1,0,0), 11 );
+					gra.Pset( pers.calcWorldToScreen3( c.pos ), rgb(1,0,0), wide );
 
 					g_line3d( gra, pers, c.pos, c.pos+c.a, col2 );
 					g_line3d( gra, pers, c.pos, c.pos+c.b, col2 );
@@ -551,7 +582,7 @@ struct Bezier
 				}
 				else
 				{
-					gra.Pset( pers.calcWorldToScreen3( c.pos ), rgb(0,0,1), 11 );
+					gra.Pset( pers.calcWorldToScreen3( c.pos ), rgb(0,0,1), wide );
 				}
 
 			}
@@ -990,8 +1021,8 @@ struct Apr : public Sys
 		//------------------------------------------------------------------------------
 		{	// ミニグリッド
 			vect3 vt = vect3(0,0,0);
-			float du = NUM_U*dt;
-			float dv = NUM_V*dt;
+			float du = (float)NUM_U*dt;
+			float dv = (float)NUM_V*dt;
 			vect3 a;
 			vect3 b;
 			{
@@ -1023,7 +1054,7 @@ struct Apr : public Sys
 				vect3 v0;
 				for ( int i = 0 ; i <= 360 ; i+=20 )
 				{
-					vect3 p = vect3( r*cos(rad(i)), 0, r*sin(rad(i)) ) + pos;
+					vect3 p = vect3( r*cos(rad((float)i)), 0, r*sin(rad((float)i)) ) + pos;
 					vect3 v1 = apr.pers.calcWorldToScreen3( p );
 					if ( i > 0 ) apr.gra.Line( v0,v1, col );
 					v0 = v1;
@@ -1046,12 +1077,24 @@ struct Apr : public Sys
 		{
 			struct
 			{
+				bool	bEnable;
 				float	w;
 				Joint*	pj;
-			} one = {0,0};
+				int		idx;
+			
+				void clear()
+				{
+					bEnable = false;
+					w = 0;
+					pj = 0;
+					idx = 0;
+				}
+			
+			} one;// = {0,0};
 
 			vect2 rect_st = vect2(0,0);			//	矩形選択開始位置
-			enum class CALC
+/*
+			enum class G_CALC
 			{
 				NONE,
 				ADD,
@@ -1059,16 +1102,19 @@ struct Apr : public Sys
 				COPY,
 				REV,
 			};
-			CALC rect_mode = CALC::NONE;	//	矩形選択中フラグ
+*/
+			G_CALC rect_mode = G_CALC::NONE;	//	矩形選択中フラグ
 
 			//------------------------------------------------------------------------------
 			void Setup( Pers& pers, Skeleton& skeleton, vect2 mpos )
 			//------------------------------------------------------------------------------
 			{
-				one = {0,0};
+				one.clear();// = {0,0};
 
-				for ( Joint& j : skeleton.tblJoint )
+//				for ( Joint& j : skeleton.tblPoint )
+				for ( int i = 0 ; i < (signed)skeleton.tblPoint.size() ; i++ )
 				{
+					Joint& j = skeleton.tblPoint[i];
 					if ( j.bCtrl == false ) continue;
 
 					vect3 v = pers.calcWorldToScreen3( j.pos );
@@ -1079,6 +1125,10 @@ struct Apr : public Sys
 						{
 							one.w = v.z;
 							one.pj = &j;
+							one.bEnable = true;
+							one.idx = i;
+cout << ">> " << i << endl;
+cout << ">> " << one.idx << endl;
 						}
 					}
 				}
@@ -1087,7 +1137,7 @@ struct Apr : public Sys
 					#if 0
 					{
 						// 優先度つけ
-						for ( Joint& j : skeleton.tblJoint )
+						for ( Joint& j : skeleton.tblPoint )
 						{
 							j.priority = 999;
 						}
@@ -1109,10 +1159,10 @@ struct Apr : public Sys
 
 			// 矩形カーソル開始 新規選択
 			//------------------------------------------------------------------------------
-			void SelectRectNew( vect2 mpos )
+			void SelectRectOnly( vect2 mpos )
 			//------------------------------------------------------------------------------
 			{
-				rect_mode = CALC::COPY;
+				rect_mode = G_CALC::COPY;
 				rect_st = mpos;
 			}
 
@@ -1121,7 +1171,7 @@ struct Apr : public Sys
 			void SelectRectAdd( vect2 mpos )
 			//------------------------------------------------------------------------------
 			{
-				rect_mode = CALC::ADD;
+				rect_mode = G_CALC::ADD;
 				rect_st = mpos;
 			}
 
@@ -1130,7 +1180,7 @@ struct Apr : public Sys
 			void SelectRectRev( vect2 mpos )
 			//------------------------------------------------------------------------------
 			{
-				rect_mode = CALC::REV;
+				rect_mode = G_CALC::REV;
 				rect_st = mpos;
 			}
 
@@ -1139,29 +1189,29 @@ struct Apr : public Sys
 			void SelectRectSub( vect2 mpos )
 			//------------------------------------------------------------------------------
 			{
-				rect_mode = CALC::SUB;
+				rect_mode = G_CALC::SUB;
 				rect_st = mpos;
 			}
 			
 			//------------------------------------------------------------------------------
-			void calcRectMode( CALC rect_mode, bool& bPreselect, bool& bSelected )
+			void calcRectMode( G_CALC rect_mode, bool& bPreselect, bool& bSelected )
 			//------------------------------------------------------------------------------
 			{
 				switch( rect_mode )
 				{
-					case CALC::ADD:		if ( bPreselect ) bSelected = true;
+					case G_CALC::ADD:		if ( bPreselect ) bSelected = true;
 						break;
 
-					case CALC::SUB:		if ( bPreselect ) bSelected = false;
+					case G_CALC::SUB:		if ( bPreselect ) bSelected = false;
 						break;
 
-					case CALC::COPY:	bSelected = bPreselect;
+					case G_CALC::COPY:	bSelected = bPreselect;
 						break;
 
-					case CALC::REV:		if ( bPreselect ) bSelected = !bSelected;
+					case G_CALC::REV:		if ( bPreselect ) bSelected = !bSelected;
 						break;
 
-					case CALC::NONE:
+					case G_CALC::NONE:
 						break;
 				}
 				bPreselect = false;
@@ -1173,12 +1223,12 @@ struct Apr : public Sys
 			void SelectRectEnd( Skeleton& skeleton )
 			//------------------------------------------------------------------------------
 			{
-				for ( Joint& j : skeleton.tblJoint )
+				for ( Joint& j : skeleton.tblPoint )
 				{
 					calcRectMode( rect_mode, j.bPreselect, j.bSelected );
 				}
 
-				rect_mode = CALC::NONE;
+				rect_mode = G_CALC::NONE;
 
 			}
 
@@ -1190,7 +1240,7 @@ struct Apr : public Sys
 				vect2 v0 = min( rect_st, mpos );
 				vect2 v1 = max( rect_st, mpos );
 
-				for ( Joint& j : skeleton.tblJoint )
+				for ( Joint& j : skeleton.tblPoint )
 				{
 					if ( j.bCtrl == false ) continue;
 				
@@ -1211,36 +1261,41 @@ struct Apr : public Sys
 			//------------------------------------------------------------------------------
 			{
 				// 選択クリア
-				for ( Joint& j : skeleton.tblJoint )
+				for ( Joint& j : skeleton.tblPoint )
 				{
 					j.bSelected = false;
 				}
 				
-				one.pj->bSelected = true;
+//				one.pj->bSelected = true;
+				skeleton.tblPoint[ one.idx ].bSelected = true;
+cout << "> " << one.idx << endl;
 			}
 
 			// 単独 追加選択
 			//------------------------------------------------------------------------------
-			void SelectOneAdd()
+			void SelectOneAdd( Skeleton& skeleton )
 			//------------------------------------------------------------------------------
 			{
-				one.pj->bSelected = true;
+//				one.pj->bSelected = true;
+				skeleton.tblPoint[ one.idx ].bSelected = true;
 			}
 
 			// 単独 反転選択
 			//------------------------------------------------------------------------------
-			void SelectOneRev()
+			void SelectOneRev( Skeleton& skeleton )
 			//------------------------------------------------------------------------------
 			{
-				one.pj->bSelected = !one.pj->bSelected;
+//				one.pj->bSelected = !one.pj->bSelected;
+				skeleton.tblPoint[ one.idx ].bSelected = !skeleton.tblPoint[ one.idx ].bSelected;
 			}
 
 			// 単独 削除選択
 			//------------------------------------------------------------------------------
-			void SelectOneSub()
+			void SelectOneSub( Skeleton& skeleton )
 			//------------------------------------------------------------------------------
 			{
-				one.pj->bSelected = false;
+//				one.pj->bSelected = false;
+				skeleton.tblPoint[ one.idx ].bSelected = false;
 			}
 
 			// 選択リスト表示
@@ -1250,7 +1305,7 @@ struct Apr : public Sys
 			{	
 				gra.SetZTest( false );
 
-				for ( Joint& j : skeleton.tblJoint )
+				for ( Joint& j : skeleton.tblPoint )
 				{
 
 					bool bPreselect = j.bPreselect;
@@ -1266,18 +1321,21 @@ struct Apr : public Sys
 				}
 
 				// 矩形カーソル 表示
-				if (  rect_mode != CALC::NONE )
+				if (  rect_mode != G_CALC::NONE )
 				{
 					gra.Box( rect_st, mpos, rgb(1,1,1)*0.5f);
 				}
 
 				// 矩形カーソル 情報表示
-				for ( Joint& j : skeleton.tblJoint )
 				{
-					if ( j.bCtrl == false ) continue;
+					int n = 0;
+					for ( Joint& j : skeleton.tblPoint )
+					{
+						if ( j.bCtrl == false ) continue;
 
-					vect2 pos = pers.calcWorldToScreen2( j.pos );
-					gra.Print( pos+gra.Dot(14,0), to_string(j.id) );
+						vect2 pos = pers.calcWorldToScreen2( j.pos );
+						gra.Print( pos+gra.Dot(14,0), to_string(n++) );
+					}
 				}
 
 				gra.SetZTest( true );
@@ -1358,14 +1416,14 @@ struct Apr : public Sys
 			Drum()
 			{
 				{
-					int	ofs = vert.size();
+					int	ofs = (signed)vert.size();
 					int cnt = 0;
 					float r = 0.05;
 					float w = 0.05;
 					for ( int i = 0 ; i < 360 ; i+= 30 )
 					{
-						float z = r*cos(rad(i));
-						float y = r*sin(rad(i));
+						float z = r*cos(rad((float)i));
+						float y = r*sin(rad((float)i));
 						vert.emplace_back(-w,y,z);
 						vert.emplace_back( w,y,z);
 						vert.emplace_back( w,y*0.5,z*0.5);
@@ -1534,44 +1592,44 @@ struct Apr : public Sys
 					selector.Setup( pers, skeleton, mouse.pos );
 
 				// 矩形カーソル開始 新規選択
-				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && selector.one.pj == 0 && selector.rect_mode == Selector::CALC::NONE ) 
-					selector.SelectRectNew( mouse.pos );
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && selector.one.pj == 0 && selector.rect_mode == G_CALC::NONE ) 
+					selector.SelectRectOnly( mouse.pos );
 
 				// 矩形カーソル開始 追加選択
-				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && keys.SHIFT.on && selector.one.pj == 0 && selector.rect_mode == Selector::CALC::NONE ) 
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && keys.SHIFT.on && selector.one.pj == 0 && selector.rect_mode == G_CALC::NONE ) 
 					selector.SelectRectAdd( mouse.pos );
 
 				// 矩形カーソル開始 反転選択
-				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && !keys.SHIFT.on && selector.one.pj == 0 && selector.rect_mode == Selector::CALC::NONE ) 
+				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && !keys.SHIFT.on && selector.one.pj == 0 && selector.rect_mode == G_CALC::NONE ) 
 					selector.SelectRectRev( mouse.pos );
 
 				// 矩形カーソル開始 削除選択
-				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && keys.SHIFT.on && selector.one.pj == 0 && selector.rect_mode == Selector::CALC::NONE ) 
+				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && keys.SHIFT.on && selector.one.pj == 0 && selector.rect_mode == G_CALC::NONE ) 
 					selector.SelectRectSub( mouse.pos );
 
 				// 矩形カーソル終了（選択決定）
-				if ( !keys.ALT.on && !mouse.L.on && selector.rect_mode != Selector::CALC::NONE ) 
+				if ( !keys.ALT.on && !mouse.L.on && selector.rect_mode != G_CALC::NONE ) 
 					selector.SelectRectEnd( skeleton );
 
 				// 矩形カーソル選択	
-				if ( !keys.ALT.on && mouse.L.on && selector.rect_mode != Selector::CALC::NONE ) 
+				if ( !keys.ALT.on && mouse.L.on && selector.rect_mode != G_CALC::NONE ) 
 					selector.SelectRectBegin( pers, skeleton , mouse.pos );
 
 				// 単独 新規選択
-				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && selector.one.pj && selector.one.pj->bSelected == false ) 
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && selector.one.pj && skeleton.tblPoint[ selector.one.idx ].bSelected == false ) 
 					selector.SelectOneOnly( skeleton );
 
 				// 単独 追加選択
 				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && keys.SHIFT.on && selector.one.pj ) 
-					selector.SelectOneAdd();
+					selector.SelectOneAdd( skeleton );
 
 				// 単独 反転選択
 				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && !keys.SHIFT.on && selector.one.pj ) 
-					selector.SelectOneRev();
+					selector.SelectOneRev( skeleton );
 
 				// 単独 削除選択
 				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && keys.SHIFT.on && selector.one.pj ) 
-					selector.SelectOneSub();
+					selector.SelectOneSub( skeleton );
 				
 				// 選択リストのJoint移動
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && selector.one.pj ) 
@@ -1581,7 +1639,7 @@ struct Apr : public Sys
 					vect3 v = vect3(gmov.x*pers.aspect, gmov.y, 0)/selector.one.w/pers.rate;
 					mat33 mrot = pers.cam.mat.GetRotate();
 					v = v* mrot;
-					for ( Joint& j : skeleton.tblJoint )
+					for ( Joint& j : skeleton.tblPoint )
 					{
 						if ( j.bSelected )
 						{
@@ -1604,14 +1662,18 @@ struct Apr : public Sys
 
 		#if 1 	//剛体実験
 			// 優先度つけ
-			for ( Joint& j : skeleton.tblJoint )
 			{
-				j.weight = 0.33;
-				if ( j.id == 2  ) j.weight = 0.000;
-				if ( j.id == 0  ) j.weight = 0.000;
-				if ( j.id == 1  ) j.weight = 0.000;
-				if ( j.id == 3  ) j.weight = 0.000;
-				if ( j.bSelected && mouse.L.on ) j.weight = 0.0;
+				int n = 0;
+				for ( Joint& j : skeleton.tblPoint )
+				{
+					j.weight = 0.33;
+					if ( n == 2  ) j.weight = 0.000;
+					if ( n == 0  ) j.weight = 0.000;
+					if ( n == 1  ) j.weight = 0.000;
+					if ( n == 3  ) j.weight = 0.000;
+					if ( j.bSelected && mouse.L.on ) j.weight = 0.0;
+					n++;
+				}
 			}
 		#endif
 
@@ -1627,12 +1689,12 @@ struct Apr : public Sys
 				static mat33	mkata = midentity();
 				mat33	mhiji = midentity();;
 				mat33	mte = midentity() ;
-				vect3	p0 = skeleton.tblJoint[0].pos;
-				vect3	p1 = skeleton.tblJoint[1].pos;
-				vect3	p2 = skeleton.tblJoint[2].pos;
-				vect3	p3 = skeleton.tblJoint[3].pos;
-				vect3	p4 = skeleton.tblJoint[4].pos;
-				vect3	p5 = skeleton.tblJoint[5].pos;
+				vect3	p0 = skeleton.tblPoint[0].pos;
+				vect3	p1 = skeleton.tblPoint[1].pos;
+				vect3	p2 = skeleton.tblPoint[2].pos;
+				vect3	p3 = skeleton.tblPoint[3].pos;
+				vect3	p4 = skeleton.tblPoint[4].pos;
+				vect3	p5 = skeleton.tblPoint[5].pos;
 				// 箱 胸
 				if(1)
 				{
@@ -1684,7 +1746,7 @@ struct Apr : public Sys
 						nz.x,	nz.y,	nz.z
 					);	
 					mhiji = m;
-	//					mhiji = skeleton.tblJoint[4].mat;
+	//					mhiji = skeleton.tblPoint[4].mat;
 					drum.DrawDrum( gra, pers, p4, mhiji );
 				}
 				// 箱 手
@@ -1722,7 +1784,7 @@ struct Apr : public Sys
 						if ( skeleton.cur.bSelecting && ( y == skeleton.cur.selecting_act && x == skeleton.cur.selecting_pose ) ) flg=!flg;
 						if ( skeleton.cur.bSelecting && ( y == skeleton.cur.act && x == skeleton.cur.pose ) ) flg=!flg;
 
-						vect2 v = vect2( x, y )*vect2( 4, 8 ) + vect2(400,16);
+						vect2 v = vect2( (float)x, (float)y )*vect2( 4, 8 ) + vect2(400,16);
 						{
 							gra.Fill( gra.Conv(v), gra.Conv(v+vect2(3,7)), rgb(1,1,1) );
 						}
@@ -1766,36 +1828,36 @@ struct Apr : public Sys
 				if ( flgInfo )
 				{
 
-					gra.Print(1,text_y++,string("[ ")+skeleton.filename+" ]");
-					gra.Print(1,text_y++,string("anim=")+to_string(skeleton.cur.act) + string(" cnt=")+to_string(skeleton.animations.size()) ); 
+					gra.Print(1,(float)text_y++,string("[ ")+skeleton.filename+" ]");
+					gra.Print(1,(float)text_y++,string("anim=")+to_string(skeleton.cur.act) + string(" cnt=")+to_string(skeleton.animations.size()) ); 
 					if ( skeleton.animations.size() > 0 ) 
 					{
-						gra.Print(1,text_y++,string("pose=")+to_string(skeleton.cur.pose) + string(" cnt=")+to_string(skeleton.animations[skeleton.cur.act].pose.size()) ); 
+						gra.Print(1,(float)text_y++,string("pose=")+to_string(skeleton.cur.pose) + string(" cnt=")+to_string(skeleton.animations[skeleton.cur.act].pose.size()) ); 
 					}
 				}
 
 				if ( keys.F1.on )
 				{
-					gra.Print(1,text_y++,string("[F1] help"));
-					gra.Print(1,text_y++,string("[Y] pers -"));
-					gra.Print(1,text_y++,string("[H] pers +"));
-					gra.Print(1,text_y++,string("[L] Load"));
-					gra.Print(1,text_y++,string("[S] Save"));
-					gra.Print(1,text_y++,string("--Keyframe--"));
-					gra.Print(1,text_y++,string("[K] Insert"));
-					gra.Print(1,text_y++,string("[X] Cut"));
-					gra.Print(1,text_y++,string("[C] Copy"));
-					gra.Print(1,text_y++,string("[V] Past"));
-					gra.Print(1,text_y++,string("[LEFT]  -"));
-					gra.Print(1,text_y++,string("[RIGHT] +"));
-					gra.Print(1,text_y++,string("--Animation--"));
-					gra.Print(1,text_y++,string("[I] Add"));
-					gra.Print(1,text_y++,string("[P] Play"));
-					gra.Print(1,text_y++,string("[UP] -"));
-					gra.Print(1,text_y++,string("[DOWN] +"));
-					gra.Print(1,text_y++,string("--Other--"));
-					gra.Print(1,text_y++,string("[1] select 3d"));
-					gra.Print(1,text_y++,string("[2] select 2main"));
+					gra.Print(1,(float)text_y++,string("[F1] help"));
+					gra.Print(1,(float)text_y++,string("[Y] pers -"));
+					gra.Print(1,(float)text_y++,string("[H] pers +"));
+					gra.Print(1,(float)text_y++,string("[L] Load"));
+					gra.Print(1,(float)text_y++,string("[S] Save"));
+					gra.Print(1,(float)text_y++,string("--Keyframe--"));
+					gra.Print(1,(float)text_y++,string("[K] Insert"));
+					gra.Print(1,(float)text_y++,string("[X] Cut"));
+					gra.Print(1,(float)text_y++,string("[C] Copy"));
+					gra.Print(1,(float)text_y++,string("[V] Past"));
+					gra.Print(1,(float)text_y++,string("[LEFT]  -"));
+					gra.Print(1,(float)text_y++,string("[RIGHT] +"));
+					gra.Print(1,(float)text_y++,string("--Animation--"));
+					gra.Print(1,(float)text_y++,string("[I] Add"));
+					gra.Print(1,(float)text_y++,string("[P] Play"));
+					gra.Print(1,(float)text_y++,string("[UP] -"));
+					gra.Print(1,(float)text_y++,string("[DOWN] +"));
+					gra.Print(1,(float)text_y++,string("--Other--"));
+					gra.Print(1,(float)text_y++,string("[1] select 3d"));
+					gra.Print(1,(float)text_y++,string("[2] select 2main"));
 				}
 				else
 				{
@@ -1946,47 +2008,48 @@ struct Apr : public Sys
 					bezier.selector.Setup( pers, infCource, mouse.pos );
 
 				// 矩形カーソル開始 新規選択
-				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && g_one.pj == 0 && g_rect_mode == g_CALC::NONE ) 
-					bezier.selector.SelectRectNew( mouse.pos );
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && g_one.bEnable == false && g_rect_mode == G_CALC::NONE ) 
+					bezier.selector.SelectRectOnly( mouse.pos );
 
 				// 矩形カーソル開始 追加選択
-				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && keys.SHIFT.on && g_one.pj == 0 && g_rect_mode == g_CALC::NONE ) 
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && keys.SHIFT.on && g_one.bEnable == false && g_rect_mode == G_CALC::NONE ) 
 					bezier.selector.SelectRectAdd( mouse.pos );
 
 				// 矩形カーソル開始 反転選択
-				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && !keys.SHIFT.on && g_one.pj == 0 && g_rect_mode == g_CALC::NONE ) 
+				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && !keys.SHIFT.on && g_one.bEnable == false && g_rect_mode == G_CALC::NONE ) 
 					bezier.selector.SelectRectRev( mouse.pos );
 
 				// 矩形カーソル開始 削除選択
-				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && keys.SHIFT.on && g_one.pj == 0 && g_rect_mode == g_CALC::NONE ) 
+				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && keys.SHIFT.on && g_one.bEnable == false && g_rect_mode == G_CALC::NONE ) 
 					bezier.selector.SelectRectSub( mouse.pos );
 
 				// 矩形カーソル終了（選択決定）
-				if ( !keys.ALT.on && !mouse.L.on && g_rect_mode != g_CALC::NONE ) 
+				if ( !keys.ALT.on && !mouse.L.on && g_rect_mode != G_CALC::NONE ) 
 					bezier.selector.SelectRectEnd( infCource );
 
 				// 矩形カーソル選択	
-				if ( !keys.ALT.on && mouse.L.on && g_rect_mode != g_CALC::NONE ) 
+				if ( !keys.ALT.on && mouse.L.on && g_rect_mode != G_CALC::NONE ) 
 					bezier.selector.SelectRectBegin( pers, infCource , mouse.pos );
 
 				// 単独 新規選択
-				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && g_one.pj && g_one.pj->bSelected == false ) 
+//				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && g_one.bEnable && g_one.bEnable->bSelected == false ) 
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && g_one.bEnable && infCource.tbl[ g_one.idx ].bSelected == false ) 
 					bezier.selector.SelectOneOnly( infCource );
 
 				// 単独 追加選択
-				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && keys.SHIFT.on && g_one.pj ) 
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && keys.SHIFT.on && g_one.bEnable ) 
 					bezier.selector.SelectOneAdd();
 
 				// 単独 反転選択
-				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && !keys.SHIFT.on && g_one.pj ) 
+				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && !keys.SHIFT.on && g_one.bEnable ) 
 					bezier.selector.SelectOneRev();
 
 				// 単独 削除選択
-				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && keys.SHIFT.on && g_one.pj ) 
+				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && keys.SHIFT.on && g_one.bEnable ) 
 					bezier.selector.SelectOneSub();
 
 				// 移動
-				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && g_one.pj ) 
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && g_one.bEnable ) 
 					bezier.courcr_moveBezier( gra, pers, infCource, mouse.mov, keys.T.on );
 
 				// マウスベクトル
@@ -2048,12 +2111,12 @@ struct Apr : public Sys
 			//=================================
 			// 情報表示
 			//=================================
-			gra.Print(1,text_y++,string("fovY:")+to_string(int(pers.fovy)));
-			gra.Print(1,text_y++,string("sz:")+to_string(pers.sz) +string(" fy:")+to_string(pers.fy));
-			gra.Print(1,text_y++,string("far:")+to_string((pers.cam.pos-pers.cam.at).abs())); 
-			gra.Print(1,text_y++,string("at  x=")+to_string(pers.cam.at.x)+string(" y=")+to_string(pers.cam.at.y)+string(" z=")+to_string(pers.cam.at.z) ); 
-			gra.Print(1,text_y++,string("pos x=")+to_string(pers.cam.pos.x)+string(" y=")+to_string(pers.cam.pos.y)+string(" z=")+to_string(pers.cam.pos.z) ); 
-			gra.Print(1,text_y++,string("peak=")+to_string(time_peak/1000)+string("msec") ); 
+			gra.Print(1,(float)text_y++,string("fovY:")+to_string(int(pers.fovy)));
+			gra.Print(1,(float)text_y++,string("sz:")+to_string(pers.sz) +string(" fy:")+to_string(pers.fy));
+			gra.Print(1,(float)text_y++,string("far:")+to_string((pers.cam.pos-pers.cam.at).abs())); 
+			gra.Print(1,(float)text_y++,string("at  x=")+to_string(pers.cam.at.x)+string(" y=")+to_string(pers.cam.at.y)+string(" z=")+to_string(pers.cam.at.z) ); 
+			gra.Print(1,(float)text_y++,string("pos x=")+to_string(pers.cam.pos.x)+string(" y=")+to_string(pers.cam.pos.y)+string(" z=")+to_string(pers.cam.pos.z) ); 
+			gra.Print(1,(float)text_y++,string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 
 			//=================================
 			// skeleton 更新

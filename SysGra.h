@@ -50,8 +50,8 @@ struct SysGra
 
 //	 BITMAP bmBitmap;
 
-	int GetWidth();
-	int GetHeight();
+	float GetWidth();
+	float GetHeight();
 	float GetAspect();
 
 	void OnSize( int width, int height );
