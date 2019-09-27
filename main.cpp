@@ -1079,14 +1079,14 @@ struct Apr : public Sys
 			{
 				bool	bEnable;
 				float	w;
-				Joint*	pj;
+//				Joint*	pj;
 				int		idx;
 			
 				void clear()
 				{
 					bEnable = false;
 					w = 0;
-					pj = 0;
+//					pj = 0;
 					idx = 0;
 				}
 			
@@ -1124,15 +1124,13 @@ struct Apr : public Sys
 						if ( one.w < v.z ) // 近い場合はより手前が優先
 						{
 							one.w = v.z;
-							one.pj = &j;
+							//one.bEnable = &j;
 							one.bEnable = true;
 							one.idx = i;
-cout << ">> " << i << endl;
-cout << ">> " << one.idx << endl;
 						}
 					}
 				}
-				if ( one.pj )
+				if ( one.bEnable )
 				{
 					#if 0
 					{
@@ -1150,7 +1148,7 @@ cout << ">> " << one.idx << endl;
 							}
 						};
 						
-						funcSetPriority( *one.pj, 1 );
+						funcSetPriority( *one.bEnable, 1 );
 					}
 					#endif
 
@@ -1266,9 +1264,7 @@ cout << ">> " << one.idx << endl;
 					j.bSelected = false;
 				}
 				
-//				one.pj->bSelected = true;
 				skeleton.tblPoint[ one.idx ].bSelected = true;
-cout << "> " << one.idx << endl;
 			}
 
 			// 単独 追加選択
@@ -1276,7 +1272,6 @@ cout << "> " << one.idx << endl;
 			void SelectOneAdd( Skeleton& skeleton )
 			//------------------------------------------------------------------------------
 			{
-//				one.pj->bSelected = true;
 				skeleton.tblPoint[ one.idx ].bSelected = true;
 			}
 
@@ -1285,7 +1280,6 @@ cout << "> " << one.idx << endl;
 			void SelectOneRev( Skeleton& skeleton )
 			//------------------------------------------------------------------------------
 			{
-//				one.pj->bSelected = !one.pj->bSelected;
 				skeleton.tblPoint[ one.idx ].bSelected = !skeleton.tblPoint[ one.idx ].bSelected;
 			}
 
@@ -1294,7 +1288,6 @@ cout << "> " << one.idx << endl;
 			void SelectOneSub( Skeleton& skeleton )
 			//------------------------------------------------------------------------------
 			{
-//				one.pj->bSelected = false;
 				skeleton.tblPoint[ one.idx ].bSelected = false;
 			}
 
@@ -1592,19 +1585,19 @@ cout << "> " << one.idx << endl;
 					selector.Setup( pers, skeleton, mouse.pos );
 
 				// 矩形カーソル開始 新規選択
-				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && selector.one.pj == 0 && selector.rect_mode == G_CALC::NONE ) 
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && selector.one.bEnable == false && selector.rect_mode == G_CALC::NONE ) 
 					selector.SelectRectOnly( mouse.pos );
 
 				// 矩形カーソル開始 追加選択
-				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && keys.SHIFT.on && selector.one.pj == 0 && selector.rect_mode == G_CALC::NONE ) 
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && keys.SHIFT.on && selector.one.bEnable == false && selector.rect_mode == G_CALC::NONE ) 
 					selector.SelectRectAdd( mouse.pos );
 
 				// 矩形カーソル開始 反転選択
-				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && !keys.SHIFT.on && selector.one.pj == 0 && selector.rect_mode == G_CALC::NONE ) 
+				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && !keys.SHIFT.on && selector.one.bEnable == false && selector.rect_mode == G_CALC::NONE ) 
 					selector.SelectRectRev( mouse.pos );
 
 				// 矩形カーソル開始 削除選択
-				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && keys.SHIFT.on && selector.one.pj == 0 && selector.rect_mode == G_CALC::NONE ) 
+				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && keys.SHIFT.on && selector.one.bEnable == false && selector.rect_mode == G_CALC::NONE ) 
 					selector.SelectRectSub( mouse.pos );
 
 				// 矩形カーソル終了（選択決定）
@@ -1616,23 +1609,23 @@ cout << "> " << one.idx << endl;
 					selector.SelectRectBegin( pers, skeleton , mouse.pos );
 
 				// 単独 新規選択
-				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && selector.one.pj && skeleton.tblPoint[ selector.one.idx ].bSelected == false ) 
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && selector.one.bEnable && skeleton.tblPoint[ selector.one.idx ].bSelected == false ) 
 					selector.SelectOneOnly( skeleton );
 
 				// 単独 追加選択
-				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && keys.SHIFT.on && selector.one.pj ) 
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && keys.SHIFT.on && selector.one.bEnable ) 
 					selector.SelectOneAdd( skeleton );
 
 				// 単独 反転選択
-				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && !keys.SHIFT.on && selector.one.pj ) 
+				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && !keys.SHIFT.on && selector.one.bEnable ) 
 					selector.SelectOneRev( skeleton );
 
 				// 単独 削除選択
-				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && keys.SHIFT.on && selector.one.pj ) 
+				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && keys.SHIFT.on && selector.one.bEnable ) 
 					selector.SelectOneSub( skeleton );
 				
 				// 選択リストのJoint移動
-				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && selector.one.pj ) 
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && selector.one.bEnable ) 
 				{
 					vect2 gmov = mouse.mov;
 
