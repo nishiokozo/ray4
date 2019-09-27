@@ -106,7 +106,6 @@ struct Joint
 	bool 	bSelected		= false;		//	選択
 	bool 	bPreselect		= false;		//	仮選択
 
-//	int id;
 	vect3 pos;
 	vect3 tension;
 	vect3 disp;
@@ -131,7 +130,6 @@ struct Joint
 	virtual ~Joint(){}
 	Joint( vect3 v, float _weight, bool _bCtrl )
 	{
-//		id = 0;
 		pos = v;
 		weight = _weight;
 		bCtrl = _bCtrl;
@@ -142,7 +140,6 @@ struct Joint
 		prev3 = pos;
 		prev4 = pos;
 		binormal = vect3(1,0,0);
-		//mat.identity();
 	}
 
 };
