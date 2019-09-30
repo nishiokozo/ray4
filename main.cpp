@@ -168,12 +168,12 @@ struct Bezier
 	{
 
 		//------------------------------------------------------------------------------
-		void Setup( Pers& pers, Cource& infCource, vect2 mpos )
+		void Setup( Pers& pers, vector<Point3>& tblPoint, vect2 mpos )
 		//------------------------------------------------------------------------------
 		{
 			g_one.clear();
 			int n = 0;
-			for ( Point3& c : infCource.tblPoint )
+			for ( Point3& c : tblPoint )
 			{
 				// ポインターのエレメント選択
 				if ( c.bSelected )
@@ -291,10 +291,10 @@ struct Bezier
 
 		// 矩形カーソル終了（選択決定）
 		//------------------------------------------------------------------------------
-		void SelectRectEnd( Cource& infCource )
+		void SelectRectEnd( vector<Point3>& tblPoint ) //Cource& infCource )
 		//------------------------------------------------------------------------------
 		{
-			for ( Point3& j : infCource.tblPoint )
+			for ( Point3& j : tblPoint )
 			{
 				calcRectMode( g_rect_mode, j.bPreselect, j.bSelected );
 			}
@@ -305,13 +305,13 @@ struct Bezier
 
 		// 矩形カーソル選択	
 		//------------------------------------------------------------------------------
-		void SelectRectBegin( Pers& pers, Cource& infCource , vect2 mpos )
+		void SelectRectBegin( Pers& pers, vector<Point3>& tblPoint , vect2 mpos )
 		//------------------------------------------------------------------------------
 		{
 			vect2 v0 = min( g_rect_st, mpos );
 			vect2 v1 = max( g_rect_st, mpos );
 
-			for ( Point3& j : infCource.tblPoint )
+			for ( Point3& j : tblPoint )
 			{
 		
 				j.bPreselect = false;
@@ -327,46 +327,46 @@ struct Bezier
 
 		// 単独 新規選択
 		//------------------------------------------------------------------------------
-		void SelectOneOnly( Cource& infCource )
+		void SelectOneOnly( vector<Point3>& tblPoint )
 		//------------------------------------------------------------------------------
 		{
 			// 選択クリア
 			
-			for ( int n = 0 ; n < (signed)infCource.tblPoint.size() ; n++ )
+			for ( int n = 0 ; n < (signed)tblPoint.size() ; n++ )
 			{
-				infCource.tblPoint[n].bSelected = false;
+				tblPoint[n].bSelected = false;
 			}
 			
-			infCource.tblPoint[ g_one.idx ].bSelected = true;
+			tblPoint[ g_one.idx ].bSelected = true;
 		}
 
 		// 単独 追加選択
 		//------------------------------------------------------------------------------
-		void SelectOneAdd( Cource& infCource )
+		void SelectOneAdd( vector<Point3>& tblPoint )
 		//------------------------------------------------------------------------------
 		{
-			infCource.tblPoint[ g_one.idx ].bSelected = false;
+			tblPoint[ g_one.idx ].bSelected = false;
 		}
 
 		// 単独 反転選択
 		//------------------------------------------------------------------------------
-		void SelectOneRev( Cource& infCource )
+		void SelectOneRev( vector<Point3>& tblPoint )
 		//------------------------------------------------------------------------------
 		{
-			infCource.tblPoint[ g_one.idx ].bSelected = !infCource.tblPoint[ g_one.idx ].bSelected;
+			tblPoint[ g_one.idx ].bSelected = !tblPoint[ g_one.idx ].bSelected;
 		}
 
 		// 単独 削除選択
 		//------------------------------------------------------------------------------
-		void SelectOneSub( Cource& infCource )
+		void SelectOneSub( vector<Point3>& tblPoint )
 		//------------------------------------------------------------------------------
 		{
-			infCource.tblPoint[ g_one.idx ].bSelected = false;
+			tblPoint[ g_one.idx ].bSelected = false;
 		}
 
 		// 表示
 		//------------------------------------------------------------------------------
-		void DrawRect( Pers& pers, SysGra& gra, Cource& infCource , vect2 mpos )
+		void DrawRect( Pers& pers, SysGra& gra, vector<Point3>& tblPoint , vect2 mpos )
 		//------------------------------------------------------------------------------
 		{	
 			gra.SetZTest( false );
@@ -378,7 +378,7 @@ struct Bezier
 
 			// 矩形カーソル 情報表示
 			int n = 0;
-			for ( Point3& j : infCource.tblPoint )
+			for ( Point3& j : tblPoint )
 			{
 				vect2 pos = pers.calcWorldToScreen2( j.pos );
 				gra.Print( pos+gra.Dot(14,0), to_string(n) );
@@ -391,14 +391,14 @@ struct Bezier
 	} selector;
 
 	//------------------------------------------------------------------------------
-	void courcr_moveBezier( SysGra& gra, Pers& pers, Cource& infCource, vect2& mmov, bool bSame )
+	void courcr_moveBezier( SysGra& gra, Pers& pers, vector<Point3>& tblPoint, vect2& mmov, bool bSame )
 	//------------------------------------------------------------------------------
 	{
 		bool bsel = false;
 		
 		if ( g_one.bEnable )
 		{
-			Point3& c = infCource.tblPoint[ g_one.idx ];
+			Point3& c = tblPoint[ g_one.idx ];
 
 			vect2	scale = vect2(pers.aspect, 1)/g_one.w/pers.rate;
 
@@ -429,7 +429,7 @@ struct Bezier
 			vect3 v = vect3(mmov.x*pers.aspect, mmov.y, 0)/g_one.w/pers.rate;
 			mat33 mrot = pers.cam.mat.GetRotate();
 			v = v* mrot;
-			for ( Point3& j : infCource.tblPoint )
+			for ( Point3& j : tblPoint )
 			{
 				if ( j.bSelected )
 				{
@@ -444,14 +444,14 @@ struct Bezier
 
 
 	//------------------------------------------------------------------------------
-	void cource_exec_drawBezier( SysGra& gra, Pers& pers, Cource& infCource, vect3& P, vect3& I, bool bSerch, bool bCut )
+	void cource_exec_drawBezier( SysGra& gra, Pers& pers, vector<Point3>& tblPoint, vector<int>& idxPoint, vect3& P, vect3& I, bool bSerch, bool bCut )
 	//------------------------------------------------------------------------------
 	{
 		//ベジェ計算＆描画
 		int div = 10;
 		float dt = 1/(float)div;
 
-		int size = static_cast<signed>(infCource.idx.size());
+		int size = static_cast<signed>(idxPoint.size());
 
 		float	mind = infinit;
 		vect3	minQ1;
@@ -465,15 +465,15 @@ struct Bezier
 
 		for ( int n = 0 ; n < size-1 ; n++ )
 		{
-			int n0 = infCource.idx[n];
-			int n1 = infCource.idx[n+1];
-			vect3 P0 =    infCource.tblPoint[n0].pos;
-			vect3 P1 = P0+infCource.tblPoint[n0].b;
-			vect3 P3 =    infCource.tblPoint[n1].pos;
-			vect3 P2 = P3+infCource.tblPoint[n1].a;
+			int n0 = idxPoint[n];
+			int n1 = idxPoint[n+1];
+			vect3 P0 =    tblPoint[n0].pos;
+			vect3 P1 = P0+tblPoint[n0].b;
+			vect3 P3 =    tblPoint[n1].pos;
+			vect3 P2 = P3+tblPoint[n1].a;
 
 			float t  = dt;
-			vect3 p0 = infCource.tblPoint[n0].pos;
+			vect3 p0 = tblPoint[n0].pos;
 			for ( int i = 0 ; i < div ; i++ )
 			{
 				vect3 p1 = bezier3_func( t, P0, P1, P2, P3 );
@@ -531,23 +531,23 @@ struct Bezier
 				float	t0 = mint;
 				float	t1 = 1.0-mint;
 
-				infCource.tblPoint.emplace_back( p, -v*t0, v*t1  );
-				infCource.idx.insert( infCource.idx.begin()+minn+1, (signed)infCource.tblPoint.size()-1);
+				tblPoint.emplace_back( p, -v*t0, v*t1  );
+				idxPoint.insert( idxPoint.begin()+minn+1, (signed)tblPoint.size()-1);
 
-				infCource.tblPoint[infCource.idx[minn+0]].b *= t0;
-				infCource.tblPoint[infCource.idx[minn+2]].a *= t1;
+				tblPoint[idxPoint[minn+0]].b *= t0;
+				tblPoint[idxPoint[minn+2]].a *= t1;
 				g_rect_mode = G_CALC::NONE;
 
 
 				// 追加したポイントを選択状態にする
 				{
-					int idx = infCource.idx[minn+1];
+					int idx = idxPoint[minn+1];
 					vect3 v = pers.calcWorldToScreen3( minQ );
 					g_one.w = v.z;
 					g_one.idx = idx;
 					g_one.bEnable = true;
-					infCource.tblPoint[ idx ].bSelected = true;
-					infCource.tblPoint[ idx ].bPreselect = false;
+					tblPoint[ idx ].bSelected = true;
+					tblPoint[ idx ].bPreselect = false;
 					g_one.bSelected_a = false;
 					g_one.bSelected_b = false;
 				}
@@ -564,7 +564,7 @@ struct Bezier
 		{
 			gra.SetZTest(false);
 
-			for ( Point3& c : infCource.tblPoint )
+			for ( Point3& c : tblPoint )
 			{
 				float wide = 11;
 				float wide2 = 7;
@@ -1084,14 +1084,14 @@ struct Apr : public Sys
 		{
 
 			//------------------------------------------------------------------------------
-			void Setup( Pers& pers, Skeleton& skeleton, vect2 mpos )
+			void Setup( Pers& pers, vector<Joint>& tblPoint, vect2 mpos )
 			//------------------------------------------------------------------------------
 			{
 				g_one2.clear();
 
-				for ( int i = 0 ; i < (signed)skeleton.tblPoint.size() ; i++ )
+				for ( int i = 0 ; i < (signed)tblPoint.size() ; i++ )
 				{
-					Joint& j = skeleton.tblPoint[i];
+					Joint& j = tblPoint[i];
 					if ( j.bCtrl == false ) continue;
 
 					vect3 v = pers.calcWorldToScreen3( j.pos );
@@ -1111,7 +1111,7 @@ struct Apr : public Sys
 					#if 0
 					{
 						// 優先度つけ
-						for ( Joint& j : skeleton.tblPoint )
+						for ( Joint& j : tblPoint )
 						{
 							j.priority = 999;
 						}
@@ -1194,10 +1194,10 @@ struct Apr : public Sys
 
 			// 矩形カーソル終了（選択決定）
 			//------------------------------------------------------------------------------
-			void SelectRectEnd( Skeleton& skeleton )
+			void SelectRectEnd( vector<Joint>& tblPoint )
 			//------------------------------------------------------------------------------
 			{
-				for ( Joint& j : skeleton.tblPoint )
+				for ( Joint& j : tblPoint )
 				{
 					calcRectMode( g_rect_mode2, j.bPreselect, j.bSelected );
 				}
@@ -1208,13 +1208,13 @@ struct Apr : public Sys
 
 			// 矩形カーソル選択	
 			//------------------------------------------------------------------------------
-			void SelectRectBegin( Pers& pers, Skeleton& skeleton , vect2 mpos )
+			void SelectRectBegin( Pers& pers, vector<Joint>& tblPoint , vect2 mpos )
 			//------------------------------------------------------------------------------
 			{
 				vect2 v0 = min( g_rect_st2, mpos );
 				vect2 v1 = max( g_rect_st2, mpos );
 
-				for ( Joint& j : skeleton.tblPoint )
+				for ( Joint& j : tblPoint )
 				{
 					if ( j.bCtrl == false ) continue;
 				
@@ -1231,50 +1231,50 @@ struct Apr : public Sys
 
 			// 単独 新規選択
 			//------------------------------------------------------------------------------
-			void SelectOneOnly( Skeleton& skeleton )
+			void SelectOneOnly( vector<Joint>& tblPoint )
 			//------------------------------------------------------------------------------
 			{
 				// 選択クリア
-				for ( Joint& j : skeleton.tblPoint )
+				for ( Joint& j : tblPoint )
 				{
 					j.bSelected = false;
 				}
 				
-				skeleton.tblPoint[ g_one2.idx ].bSelected = true;
+				tblPoint[ g_one2.idx ].bSelected = true;
 			}
 
 			// 単独 追加選択
 			//------------------------------------------------------------------------------
-			void SelectOneAdd( Skeleton& skeleton )
+			void SelectOneAdd( vector<Joint>& tblPoint )
 			//------------------------------------------------------------------------------
 			{
-				skeleton.tblPoint[ g_one2.idx ].bSelected = true;
+				tblPoint[ g_one2.idx ].bSelected = true;
 			}
 
 			// 単独 反転選択
 			//------------------------------------------------------------------------------
-			void SelectOneRev( Skeleton& skeleton )
+			void SelectOneRev( vector<Joint>& tblPoint )
 			//------------------------------------------------------------------------------
 			{
-				skeleton.tblPoint[ g_one2.idx ].bSelected = !skeleton.tblPoint[ g_one2.idx ].bSelected;
+				tblPoint[ g_one2.idx ].bSelected = !tblPoint[ g_one2.idx ].bSelected;
 			}
 
 			// 単独 削除選択
 			//------------------------------------------------------------------------------
-			void SelectOneSub( Skeleton& skeleton )
+			void SelectOneSub( vector<Joint>& tblPoint )
 			//------------------------------------------------------------------------------
 			{
-				skeleton.tblPoint[ g_one2.idx ].bSelected = false;
+				tblPoint[ g_one2.idx ].bSelected = false;
 			}
 
 			// 選択リスト表示
 			//------------------------------------------------------------------------------
-			void DrawRect( Pers& pers, SysGra& gra, Skeleton& skeleton , vect2 mpos )
+			void DrawRect( Pers& pers, SysGra& gra, vector<Joint>& tblPoint , vect2 mpos )
 			//------------------------------------------------------------------------------
 			{	
 				gra.SetZTest( false );
 
-				for ( Joint& j : skeleton.tblPoint )
+				for ( Joint& j : tblPoint )
 				{
 
 					bool bPreselect = j.bPreselect;
@@ -1298,7 +1298,7 @@ struct Apr : public Sys
 				// 矩形カーソル 情報表示
 				{
 					int n = 0;
-					for ( Joint& j : skeleton.tblPoint )
+					for ( Joint& j : tblPoint )
 					{
 						if ( j.bCtrl == false ) continue;
 
@@ -1558,7 +1558,7 @@ struct Apr : public Sys
 
 				// 最近点検索
 				if ( !keys.ALT.on && mouse.L.hi ) 
-					selector.Setup( pers, skeleton, mouse.pos );
+					selector.Setup( pers, skeleton.tblPoint, mouse.pos );
 
 				// 矩形カーソル開始 新規選択
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && g_one2.bEnable == false && g_rect_mode2 == G_CALC::NONE ) 
@@ -1578,27 +1578,27 @@ struct Apr : public Sys
 
 				// 矩形カーソル終了（選択決定）
 				if ( !keys.ALT.on && !mouse.L.on && g_rect_mode2 != G_CALC::NONE ) 
-					selector.SelectRectEnd( skeleton );
+					selector.SelectRectEnd( skeleton.tblPoint );
 
 				// 矩形カーソル選択	
 				if ( !keys.ALT.on && mouse.L.on && g_rect_mode2 != G_CALC::NONE ) 
-					selector.SelectRectBegin( pers, skeleton , mouse.pos );
+					selector.SelectRectBegin( pers, skeleton.tblPoint , mouse.pos );
 
 				// 単独 新規選択
 				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && g_one2.bEnable && skeleton.tblPoint[ g_one2.idx ].bSelected == false ) 
-					selector.SelectOneOnly( skeleton );
+					selector.SelectOneOnly( skeleton.tblPoint );
 
 				// 単独 追加選択
 				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && keys.SHIFT.on && g_one2.bEnable ) 
-					selector.SelectOneAdd( skeleton );
+					selector.SelectOneAdd( skeleton.tblPoint );
 
 				// 単独 反転選択
 				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && !keys.SHIFT.on && g_one2.bEnable ) 
-					selector.SelectOneRev( skeleton );
+					selector.SelectOneRev( skeleton.tblPoint );
 
 				// 単独 削除選択
 				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && keys.SHIFT.on && g_one2.bEnable ) 
-					selector.SelectOneSub( skeleton );
+					selector.SelectOneSub( skeleton.tblPoint );
 				
 				// 選択リストのJoint移動
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && g_one2.bEnable ) 
@@ -1720,8 +1720,7 @@ struct Apr : public Sys
 				}
 				// 箱 手
 				if(0){
-					vect3 nx,ny
-					,nz;
+					vect3 nx,ny,nz;
 					ny = (p4-p5).normalize();
 					nx = (p2-p0).normalize();
 					nz = cross(nx,ny).normalize();
@@ -1739,7 +1738,7 @@ struct Apr : public Sys
 			}
 
 			// 表示
-			selector.DrawRect( pers, gra, skeleton , mouse.pos );
+			selector.DrawRect( pers, gra, skeleton.tblPoint , mouse.pos );
 
 			// animカーソルビュー cursor
 			{
@@ -1851,7 +1850,7 @@ struct Apr : public Sys
 		//=================================
 		// skeleton ロード
 		//=================================
-		if(0)
+		if(1)
 		{
 			//読み込み
 			unique_ptr<Skeleton> pNew(new Skeleton);
@@ -1974,7 +1973,7 @@ struct Apr : public Sys
 			{
 				// 最近点検索
 				if ( !keys.ALT.on && mouse.L.hi ) 
-					bezier.selector.Setup( pers, infCource, mouse.pos );
+					bezier.selector.Setup( pers, infCource.tblPoint, mouse.pos );
 
 				// 矩形カーソル開始 新規選択
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && g_one.bEnable == false && g_rect_mode == G_CALC::NONE ) 
@@ -1994,41 +1993,41 @@ struct Apr : public Sys
 
 				// 矩形カーソル終了（選択決定）
 				if ( !keys.ALT.on && !mouse.L.on && g_rect_mode != G_CALC::NONE ) 
-					bezier.selector.SelectRectEnd( infCource );
+					bezier.selector.SelectRectEnd( infCource.tblPoint );
 
 				// 矩形カーソル選択	
 				if ( !keys.ALT.on && mouse.L.on && g_rect_mode != G_CALC::NONE ) 
-					bezier.selector.SelectRectBegin( pers, infCource , mouse.pos );
+					bezier.selector.SelectRectBegin( pers, infCource.tblPoint , mouse.pos );
 
 				// 単独 新規選択
 				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && g_one.bEnable && infCource.tblPoint[ g_one.idx ].bSelected == false ) 
-					bezier.selector.SelectOneOnly( infCource );
+					bezier.selector.SelectOneOnly( infCource.tblPoint );
 
 				// 単独 追加選択
 				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && keys.SHIFT.on && g_one.bEnable ) 
-					bezier.selector.SelectOneAdd( infCource );
+					bezier.selector.SelectOneAdd( infCource.tblPoint );
 
 				// 単独 反転選択
 				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && !keys.SHIFT.on && g_one.bEnable ) 
-					bezier.selector.SelectOneRev( infCource );
+					bezier.selector.SelectOneRev( infCource.tblPoint );
 
 				// 単独 削除選択
 				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && keys.SHIFT.on && g_one.bEnable ) 
-					bezier.selector.SelectOneSub( infCource );
+					bezier.selector.SelectOneSub( infCource.tblPoint );
 
 				// 移動
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && g_one.bEnable ) 
-					bezier.courcr_moveBezier( gra, pers, infCource, mouse.mov, keys.T.on );
+					bezier.courcr_moveBezier( gra, pers, infCource.tblPoint, mouse.mov, keys.T.on );
 
 				// マウスベクトル
 				vect3 P = pers.calcScreenToWorld3( vect3(mouse.pos,0) );
 				vect3 I = pers.calcRayvect( P );
 
 				// 表示 加工 ベジェ 三次曲線
-				bezier.cource_exec_drawBezier( gra, pers, infCource, P, I, keys.E.on, mouse.L.hi );
+				bezier.cource_exec_drawBezier( gra, pers, infCource.tblPoint, infCource.idx, P, I, keys.E.on, mouse.L.hi );
 
 				// 表示 制御
-				bezier.selector.DrawRect( pers, gra, infCource , mouse.pos );
+				bezier.selector.DrawRect( pers, gra, infCource.tblPoint , mouse.pos );
 
 
 			}
