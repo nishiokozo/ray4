@@ -42,14 +42,13 @@ enum class G_CALC
 
 struct Point3 : Obj
 {
-
-	vect3	pos;
-	Point3( vect3 _pos ) : pos(_pos) {}
+	Point3( vect3 _pos ) { pos = _pos;}
 	vect3	a;
 	vect3	b;
 
-	Point3( vect3 _pos, vect3 _a, vect3 _b ) : pos(_pos) , a(_a), b(_b){}
+	Point3( vect3 _pos, vect3 _a, vect3 _b ) { pos=_pos; a=_a; b=_b;}
 };
+
 struct One
 {
 	bool	bEnable;
@@ -145,7 +144,7 @@ void cource_moveCutmull( Pers& pers, vector<Point3>& tbl, vect2& mmov )
 }
 struct Cource
 {
-	vector<Point3*> tblPoint =
+	vector<Obj*> tblPoint =
 	{
 		new Point3(vect3(-1.0, 0.0, 0.0 ),vect3( 0.0, 0.0, 1.0 ),vect3( 0.0, 0.0,-1.0 )),
 		new Point3(vect3( 1.0, 0.0, 0.0 ),vect3( 0.0, 0.0,-1.0 ),vect3( 0.0, 0.0, 1.0 )),
@@ -158,7 +157,7 @@ struct Cource
 
 	~Cource()
 	{
-		for ( Point3* p : tblPoint )
+		for ( Obj* p : tblPoint )
 		{
 			delete p;
 		}	
@@ -173,18 +172,19 @@ struct Bezier
 	{
 
 		//------------------------------------------------------------------------------
-		void Setup( Pers& pers, vector<Point3*>& tblPoint, vect2 mpos )
+		void Setup( Pers& pers, vector<Obj*>& tblPoint, vect2 mpos )
 		//------------------------------------------------------------------------------
 		{
 			g_one.clear();
 			int n = 0;
-			for ( Point3* p : tblPoint )
+			for ( Obj* p : tblPoint )
 			{
 				// ポインターのエレメント選択
 				if ( p->bSelected )
 				{
+					Point3* p2 = dynamic_cast<Point3*>(p);
 					{
-						vect3 v = pers.calcWorldToScreen3( p->pos+p->a );
+						vect3 v = pers.calcWorldToScreen3( p2->pos+p2->a );
 						if ( (v.xy()-mpos).abs() < 0.04f )
 						{
 							if ( g_one.w < v.z ) // 近い場合はより手前が優先
@@ -199,7 +199,7 @@ struct Bezier
 						}
 					}
 					{
-						vect3 v = pers.calcWorldToScreen3( p->pos+p->b );
+						vect3 v = pers.calcWorldToScreen3( p2->pos+p2->b );
 						if ( (v.xy()-mpos).abs() < 0.04f )
 						{
 							if ( g_one.w < v.z ) // 近い場合はより手前が優先
@@ -296,10 +296,10 @@ struct Bezier
 
 		// 矩形カーソル終了（選択決定）
 		//------------------------------------------------------------------------------
-		void SelectRectEnd( vector<Point3*>& tblPoint ) //Cource& infCource )
+		void SelectRectEnd( vector<Obj*>& tblPoint ) //Cource& infCource )
 		//------------------------------------------------------------------------------
 		{
-			for ( Point3*p : tblPoint )
+			for ( Obj* p : tblPoint )
 			{
 				calcRectMode( g_rect_mode, p->bPreselect, p->bSelected );
 			}
@@ -310,13 +310,13 @@ struct Bezier
 
 		// 矩形カーソル選択	
 		//------------------------------------------------------------------------------
-		void SelectRectBegin( Pers& pers, vector<Point3*>& tblPoint , vect2 mpos )
+		void SelectRectBegin( Pers& pers, vector<Obj*>& tblPoint , vect2 mpos )
 		//------------------------------------------------------------------------------
 		{
 			vect2 v0 = min( g_rect_st, mpos );
 			vect2 v1 = max( g_rect_st, mpos );
 
-			for ( Point3* p : tblPoint )
+			for ( Obj* p : tblPoint )
 			{
 		
 				p->bPreselect = false;
@@ -332,7 +332,7 @@ struct Bezier
 
 		// 単独 新規選択
 		//------------------------------------------------------------------------------
-		void SelectOneOnly( vector<Point3*>& tblPoint )
+		void SelectOneOnly( vector<Obj*>& tblPoint )
 		//------------------------------------------------------------------------------
 		{
 			// 選択クリア
@@ -347,7 +347,7 @@ struct Bezier
 
 		// 単独 追加選択
 		//------------------------------------------------------------------------------
-		void SelectOneAdd( vector<Point3*>& tblPoint )
+		void SelectOneAdd( vector<Obj*>& tblPoint )
 		//------------------------------------------------------------------------------
 		{
 			tblPoint[ g_one.idx ]->bSelected = false;
@@ -355,7 +355,7 @@ struct Bezier
 
 		// 単独 反転選択
 		//------------------------------------------------------------------------------
-		void SelectOneRev( vector<Point3*>& tblPoint )
+		void SelectOneRev( vector<Obj*>& tblPoint )
 		//------------------------------------------------------------------------------
 		{
 			tblPoint[ g_one.idx ]->bSelected = !tblPoint[ g_one.idx ]->bSelected;
@@ -363,7 +363,7 @@ struct Bezier
 
 		// 単独 削除選択
 		//------------------------------------------------------------------------------
-		void SelectOneSub( vector<Point3*>& tblPoint )
+		void SelectOneSub( vector<Obj*>& tblPoint )
 		//------------------------------------------------------------------------------
 		{
 			tblPoint[ g_one.idx ]->bSelected = false;
@@ -371,7 +371,7 @@ struct Bezier
 
 		// 表示
 		//------------------------------------------------------------------------------
-		void DrawRect( Pers& pers, SysGra& gra, vector<Point3*>& tblPoint , vect2 mpos )
+		void DrawRect( Pers& pers, SysGra& gra, vector<Obj*>& tblPoint , vect2 mpos )
 		//------------------------------------------------------------------------------
 		{	
 			gra.SetZTest( false );
@@ -383,7 +383,7 @@ struct Bezier
 
 			// 矩形カーソル 情報表示
 			int n = 0;
-			for ( Point3* p : tblPoint )
+			for ( Obj* p : tblPoint )
 			{
 				vect2 pos = pers.calcWorldToScreen2( p->pos );
 				gra.Print( pos+gra.Dot(14,0), to_string(n) );
@@ -396,14 +396,16 @@ struct Bezier
 	} selector;
 
 	//------------------------------------------------------------------------------
-	void courcr_moveBezier( SysGra& gra, Pers& pers, vector<Point3*>& tblPoint, vect2& mmov, bool bSame )
+	void courcr_moveBezier( SysGra& gra, Pers& pers, vector<Obj*>& tblPoint, vect2& mmov, bool bSame )
 	//------------------------------------------------------------------------------
 	{
 		bool bsel = false;
 		
 		if ( g_one.bEnable )
 		{
-			Point3* p = tblPoint[ g_one.idx ];
+//			Obj* p = tblPoint[ g_one.idx ];
+
+			Point3* p = dynamic_cast<Point3*>(tblPoint[ g_one.idx ]);
 
 			vect2	scale = vect2(pers.aspect, 1)/g_one.w/pers.rate;
 
@@ -434,7 +436,7 @@ struct Bezier
 			vect3 v = vect3(mmov.x*pers.aspect, mmov.y, 0)/g_one.w/pers.rate;
 			mat33 mrot = pers.cam.mat.GetRotate();
 			v = v* mrot;
-			for ( Point3* p : tblPoint )
+			for ( Obj* p : tblPoint )
 			{
 				if ( p->bSelected )
 				{
@@ -449,7 +451,7 @@ struct Bezier
 
 
 	//------------------------------------------------------------------------------
-	void cource_exec_drawBezier( SysGra& gra, Pers& pers, vector<Point3*>& tblPoint, vector<int>& idxPoint, vect3& P, vect3& I, bool bSerch, bool bCut )
+	void cource_exec_drawBezier( SysGra& gra, Pers& pers, vector<Obj*>& tblPoint, vector<int>& idxPoint, vect3& P, vect3& I, bool bSerch, bool bCut )
 	//------------------------------------------------------------------------------
 	{
 		//ベジェ計算＆描画
@@ -472,22 +474,26 @@ struct Bezier
 		{
 			int n0 = idxPoint[n];
 			int n1 = idxPoint[n+1];
-			vect3 P0 =    tblPoint[n0]->pos;
-			vect3 P1 = P0+tblPoint[n0]->b;
-			vect3 P3 =    tblPoint[n1]->pos;
-			vect3 P2 = P3+tblPoint[n1]->a;
+
+			Point3* p0 = dynamic_cast<Point3*>(tblPoint[n0]);
+			Point3* p1 = dynamic_cast<Point3*>(tblPoint[n1]);
+
+			vect3 P0 =     p0->pos;
+			vect3 P1 = P0 +p0->b;
+			vect3 P3 =     p1->pos;
+			vect3 P2 = P3 +p1->a;
 
 			float t  = dt;
-			vect3 p0 = tblPoint[n0]->pos;
+			vect3 pos0 = p0->pos;
 			for ( int i = 0 ; i < div ; i++ )
 			{
-				vect3 p1 = bezier3_func( t, P0, P1, P2, P3 );
-				g_line3d( gra, pers, p0, p1, rgb(1,1,1) );
+				vect3 pos1 = bezier3_func( t, P0, P1, P2, P3 );
+				g_line3d( gra, pers, pos0, pos1, rgb(1,1,1) );
 
 				// マウスベクトルとの最近点
 				if ( bSerch )
 				{
-					auto[b,d,Q0,Q1,t0,t1] = distanceLineSegline_func( P, I, p0, p1 );
+					auto[b,d,Q0,Q1,t0,t1] = distanceLineSegline_func( P, I, pos0, pos1 );
 					if ( b ) 
 					{
 						if ( mind > d && 0.2 > d )
@@ -499,7 +505,7 @@ struct Bezier
 							minQ0 = Q0;
 							minQ1 = Q1;
 
-							mint	= t-(1/(float)div) + (t1/(p1-p0).abs())/((float)div);
+							mint	= t-(1/(float)div) + (t1/(pos1-pos0).abs())/((float)div);
 							minQ	= bezier3_func( mint, P0, P1, P2, P3 );
 							mindt	= bezier3_delta_func( mint, P0, P1, P2, P3 );
 
@@ -509,7 +515,7 @@ struct Bezier
 
 				}
 
-				p0=p1;
+				pos0=pos1;
 				t+=dt;
 			}
 
@@ -531,7 +537,7 @@ struct Bezier
 
 			if ( bCut )
 			{
-				vect3	p = minQ;
+				vect3	q = minQ;
 				vect3	v = mindt/3;
 				float	t0 = mint;
 				float	t1 = 1.0-mint;
@@ -539,12 +545,19 @@ struct Bezier
 				// 頂点生成
 				{
 					
-					tblPoint.emplace_back( new Point3( p, -v*t0, v*t1 ) );
+					tblPoint.emplace_back( new Point3( q, -v*t0, v*t1 ) );
 					idxPoint.insert( idxPoint.begin()+minn+1, (signed)tblPoint.size()-1);
 				}
 
-				tblPoint[idxPoint[minn+0]]->b *= t0;
-				tblPoint[idxPoint[minn+2]]->a *= t1;
+				{
+					Point3* p0 = dynamic_cast<Point3*>(tblPoint[idxPoint[minn+0]]);
+					Point3* p2 = dynamic_cast<Point3*>(tblPoint[idxPoint[minn+2]]);
+					p0->b *= t0;
+					p2->a *= t1;
+
+				//	tblPoint[idxPoint[minn+0]]->b *= t0;
+				//	tblPoint[idxPoint[minn+2]]->a *= t1;
+				}
 				g_rect_mode = G_CALC::NONE;
 
 
@@ -573,8 +586,10 @@ struct Bezier
 		{
 			gra.SetZTest(false);
 
-			for ( Point3* p : tblPoint )
+			for ( Obj* po : tblPoint )
 			{
+				Point3* p = dynamic_cast<Point3*>(po);
+
 				float wide = 11;
 				float wide2 = 7;
 				rgb	col = rgb(0,0,1);
@@ -591,8 +606,8 @@ struct Bezier
 				{
 					gra.Pset( pers.calcWorldToScreen3( p->pos ), rgb(1,0,0), wide );
 
-					g_line3d( gra, pers, p->pos, p->pos+p->a, col2 );
-					g_line3d( gra, pers, p->pos, p->pos+p->b, col2 );
+					g_line3d( gra, pers, p->pos, p->pos +p->a, col2 );
+					g_line3d( gra, pers, p->pos, p->pos +p->b, col2 );
 					g_pset3d( gra, pers, p->pos+p->a, col2a, wide2 ); 
 					g_pset3d( gra, pers, p->pos+p->b, col2b, wide2 ); 
 				}
@@ -609,12 +624,12 @@ struct Bezier
 } bezier;
 
 //------------------------------------------------------------------------------
-void cource_drawPoint( SysGra& gra, Pers& pers, vector<Point3*>& tblPoint )
+void cource_drawPoint( SysGra& gra, Pers& pers, vector<Obj*>& tblPoint )
 //------------------------------------------------------------------------------
 {
 	int cnt = 0 ;
 	gra.SetZTest(false);
-	for ( Point3* p : tblPoint )
+	for ( Obj* p : tblPoint )
 	{
 		vect3 v = pers.calcWorldToScreen3( p->pos );
 		if ( v.z > 0 )
@@ -1017,10 +1032,10 @@ struct Apr : public Sys
 	Pers pers;
 
 	//------------------------------------------------------------------------------
-	void pset3d( vect3 p0, rgb col, float wide )
+	void pset3d( vect3 pos0, rgb col, float wide )
 	//------------------------------------------------------------------------------
 	{
-		vect3 v = pers.calcWorldToScreen3( p0 );
+		vect3 v = pers.calcWorldToScreen3( pos0 );
 		if ( v.z > 0 )
 		{
 			gra.Pset( vect2(v.x,v.y), col, wide );
@@ -1093,15 +1108,15 @@ struct Apr : public Sys
 		{
 
 			//------------------------------------------------------------------------------
-			void Setup( Pers& pers, vector<Joint*>& tblPoint, vect2 mpos )
+			void Setup( Pers& pers, vector<Obj*>& tblPoint, vect2 mpos )
 			//------------------------------------------------------------------------------
 			{
 				g_one2.clear();
 
 				for ( int i = 0 ; i < (signed)tblPoint.size() ; i++ )
 				{
-					Joint* p = tblPoint[i];
-					if ( p->bCtrl == false ) continue;
+					Obj* p = tblPoint[i];
+//					if ( p->bCtrl == false ) continue;
 
 					vect3 v = pers.calcWorldToScreen3( p->pos );
 
@@ -1120,7 +1135,7 @@ struct Apr : public Sys
 					#if 0
 					{
 						// 優先度つけ
-						for ( Joint* p : tblPoint )
+						for ( Obj* p : tblPoint )
 						{
 							p->priority = 999;
 						}
@@ -1203,10 +1218,10 @@ struct Apr : public Sys
 
 			// 矩形カーソル終了（選択決定）
 			//------------------------------------------------------------------------------
-			void SelectRectEnd( vector<Joint*>& tblPoint )
+			void SelectRectEnd( vector<Obj*>& tblPoint )
 			//------------------------------------------------------------------------------
 			{
-				for ( Joint* p : tblPoint )
+				for ( Obj* p : tblPoint )
 				{
 					calcRectMode( g_rect_mode2, p->bPreselect, p->bSelected );
 				}
@@ -1217,15 +1232,15 @@ struct Apr : public Sys
 
 			// 矩形カーソル選択	
 			//------------------------------------------------------------------------------
-			void SelectRectBegin( Pers& pers, vector<Joint*>& tblPoint , vect2 mpos )
+			void SelectRectBegin( Pers& pers, vector<Obj*>& tblPoint , vect2 mpos )
 			//------------------------------------------------------------------------------
 			{
 				vect2 v0 = min( g_rect_st2, mpos );
 				vect2 v1 = max( g_rect_st2, mpos );
 
-				for ( Joint* p : tblPoint )
+				for ( Obj* p : tblPoint )
 				{
-					if ( p->bCtrl == false ) continue;
+//					if ( p->bCtrl == false ) continue;
 				
 					p->bPreselect = false;
 
@@ -1240,11 +1255,11 @@ struct Apr : public Sys
 
 			// 単独 新規選択
 			//------------------------------------------------------------------------------
-			void SelectOneOnly( vector<Joint*>& tblPoint )
+			void SelectOneOnly( vector<Obj*>& tblPoint )
 			//------------------------------------------------------------------------------
 			{
 				// 選択クリア
-				for ( Joint* p : tblPoint )
+				for ( Obj* p : tblPoint )
 				{
 					p->bSelected = false;
 				}
@@ -1254,7 +1269,7 @@ struct Apr : public Sys
 
 			// 単独 追加選択
 			//------------------------------------------------------------------------------
-			void SelectOneAdd( vector<Joint*>& tblPoint )
+			void SelectOneAdd( vector<Obj*>& tblPoint )
 			//------------------------------------------------------------------------------
 			{
 				tblPoint[ g_one2.idx ]->bSelected = true;
@@ -1262,7 +1277,7 @@ struct Apr : public Sys
 
 			// 単独 反転選択
 			//------------------------------------------------------------------------------
-			void SelectOneRev( vector<Joint*>& tblPoint )
+			void SelectOneRev( vector<Obj*>& tblPoint )
 			//------------------------------------------------------------------------------
 			{
 				tblPoint[ g_one2.idx ]->bSelected = !tblPoint[ g_one2.idx ]->bSelected;
@@ -1270,7 +1285,7 @@ struct Apr : public Sys
 
 			// 単独 削除選択
 			//------------------------------------------------------------------------------
-			void SelectOneSub( vector<Joint*>& tblPoint )
+			void SelectOneSub( vector<Obj*>& tblPoint )
 			//------------------------------------------------------------------------------
 			{
 				tblPoint[ g_one2.idx ]->bSelected = false;
@@ -1278,12 +1293,12 @@ struct Apr : public Sys
 
 			// 選択リスト表示
 			//------------------------------------------------------------------------------
-			void DrawRect( Pers& pers, SysGra& gra, vector<Joint*>& tblPoint , vect2 mpos )
+			void DrawRect( Pers& pers, SysGra& gra, vector<Obj*>& tblPoint , vect2 mpos )
 			//------------------------------------------------------------------------------
 			{	
 				gra.SetZTest( false );
 
-				for ( Joint* p : tblPoint )
+				for ( Obj* p : tblPoint )
 				{
 
 					bool bPreselect = p->bPreselect;
@@ -1307,9 +1322,9 @@ struct Apr : public Sys
 				// 矩形カーソル 情報表示
 				{
 					int n = 0;
-					for ( Joint* p : tblPoint )
+					for ( Obj* p : tblPoint )
 					{
-						if ( p->bCtrl == false ) continue;
+//						if ( p->bCtrl == false ) continue;
 
 						vect2 pos = pers.calcWorldToScreen2( p->pos );
 						gra.Print( pos+gra.Dot(14,0), to_string(n++) );
@@ -1617,7 +1632,7 @@ struct Apr : public Sys
 					vect3 v = vect3(gmov.x*pers.aspect, gmov.y, 0)/g_one2.w/pers.rate;
 					mat33 mrot = pers.cam.mat.GetRotate();
 					v = v* mrot;
-					for ( Joint* p : skeleton.tblPoint )
+					for ( Obj* p : skeleton.tblPoint )
 					{
 						if ( p->bSelected )
 						{
@@ -1642,8 +1657,10 @@ struct Apr : public Sys
 			// 優先度つけ
 			{
 				int n = 0;
-				for ( Joint* p : skeleton.tblPoint )
+				for ( Obj* po : skeleton.tblPoint )
 				{
+					Joint* p = dynamic_cast<Joint*>(po);
+
 					p->weight = 0.33;
 					if ( n == 2  ) p->weight = 0.000;
 					if ( n == 0  ) p->weight = 0.000;
@@ -1667,8 +1684,8 @@ struct Apr : public Sys
 				static mat33	mkata = midentity();
 				mat33	mhiji = midentity();;
 				mat33	mte = midentity() ;
-				vect3	p0 = skeleton.tblPoint[0]->pos;
-				vect3	p1 = skeleton.tblPoint[1]->pos;
+				vect3	pos0 = skeleton.tblPoint[0]->pos;
+				vect3	pos1 = skeleton.tblPoint[1]->pos;
 				vect3	p2 = skeleton.tblPoint[2]->pos;
 				vect3	p3 = skeleton.tblPoint[3]->pos;
 				vect3	p4 = skeleton.tblPoint[4]->pos;
@@ -1677,8 +1694,8 @@ struct Apr : public Sys
 				if(1)
 				{
 					vect3 nx,ny,nz;
-					ny = (p0-p3).normalize();
-					nx = (p1-p2).normalize();
+					ny = (pos0-p3).normalize();
+					nx = (pos1-p2).normalize();
 					nz = cross(ny,nx).normalize();
 					nx = cross(ny,nz).normalize();
 
@@ -1688,14 +1705,14 @@ struct Apr : public Sys
 						nz.x,	nz.y,	nz.z
 					);
 
-					box.DrawBox( gra, pers, p0, mmune, false, false );
+					box.DrawBox( gra, pers, pos0, mmune, false, false );
 				}
 				// 箱 肩
 				if(1)
 				{
 					vect3 nx,ny,nz;
 					ny = (p2-p4).normalize();
-					nx = (p2-p0).normalize();
+					nx = (p2-pos0).normalize();
 					nz = cross(nx,ny).normalize();
 					nx = cross(ny,nz).normalize();
 					nz = cross(nx,ny).normalize();
@@ -1731,7 +1748,7 @@ struct Apr : public Sys
 				if(0){
 					vect3 nx,ny,nz;
 					ny = (p4-p5).normalize();
-					nx = (p2-p0).normalize();
+					nx = (p2-pos0).normalize();
 					nz = cross(nx,ny).normalize();
 					nx = cross(ny,nz).normalize();
 					nz = cross(nx,ny).normalize();
@@ -1937,6 +1954,16 @@ struct Apr : public Sys
 				unique_ptr<Skeleton> pNew(new Skeleton);
 				//pNew->LoadSkeleton( "human.mot" );
 				pNew->LoadSkeleton( "bone.mot" );
+				pNew->stat.bShowSkin = false;
+				pNew->stat.bShowLocus = false;
+				pSkeleton = move(pNew);
+			}
+			if ( keys.CTRL.on && keys.SEMICOLON.hi ) 
+			{
+				//読み込み
+				unique_ptr<Skeleton> pNew(new Skeleton);
+				pNew->LoadSkeleton( "human.mot" );
+				//pNew->LoadSkeleton( "bone.mot" );
 				pNew->stat.bShowSkin = false;
 				pNew->stat.bShowLocus = false;
 				pSkeleton = move(pNew);

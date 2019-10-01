@@ -106,6 +106,8 @@ struct Obj
 	bool	bSelected	 = false;
 	bool 	bPreselect	= false;		//	仮選択
 
+	vect3	pos;
+
 	virtual ~Obj(){};
 };
 
@@ -115,7 +117,7 @@ struct Joint : Obj
 //	bool 	bSelected		= false;		//	選択
 //	bool 	bPreselect		= false;		//	仮選択
 
-	vect3 pos;
+//	vect3 pos;
 	vect3 tension;
 	vect3 disp;
 	float len;
@@ -170,7 +172,7 @@ struct Skeleton
 	string	filename;
 
 	vector<Joint>			tblJointForm;	// 基本フォーム
-	vector<Joint*>			tblPoint;	//joint	継承クラスとして使うためポインタ型
+	vector<Obj*>			tblPoint;	//joint	継承クラスとして使うためポインタ型
 	vector<Bone>			tblBone;
 
 	struct K
@@ -219,7 +221,7 @@ struct Skeleton
 	Skeleton(){};
 	~Skeleton()
 	{
-		for ( Joint* p : tblPoint )
+		for ( Obj* p : tblPoint )
 		{
 			delete p;
 		}
