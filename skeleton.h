@@ -101,10 +101,19 @@ struct Ring
 
 };
 
-struct Joint
+struct Obj
 {
-	bool 	bSelected		= false;		//	選択
-	bool 	bPreselect		= false;		//	仮選択
+	bool	bSelected	 = false;
+	bool 	bPreselect	= false;		//	仮選択
+
+	virtual ~Obj(){};
+};
+
+
+struct Joint : Obj
+{
+//	bool 	bSelected		= false;		//	選択
+//	bool 	bPreselect		= false;		//	仮選択
 
 	vect3 pos;
 	vect3 tension;
@@ -126,7 +135,7 @@ struct Joint
 	vect3 prev8;
 	vect3 binormal;
 	
-	vector<reference_wrapper<Joint>>	relative;
+//	vector<reference_wrapper<Joint>>	relative;
 	virtual ~Joint(){}
 	Joint( vect3 v, float _weight, bool _bCtrl )
 	{
@@ -160,8 +169,8 @@ struct Skeleton
 
 	string	filename;
 
-	vector<Joint>			tblJointForm;
-	vector<Joint>			tblPoint;	//joint
+	vector<Joint>			tblJointForm;	// 基本フォーム
+	vector<Joint*>			tblPoint;	//joint	継承クラスとして使うためポインタ型
 	vector<Bone>			tblBone;
 
 	struct K
@@ -177,7 +186,7 @@ struct Skeleton
 		};
 		vector<J>		pose;
 	};
-	vector<K>		animations;
+	vector<K>		animations;	// アニメーションキーフレーム
 
 	struct
 	{
@@ -206,6 +215,15 @@ struct Skeleton
 		bool	bShowSkin = true;	//	皮
 		bool	bShowLocus = true;	//	軌跡
 	} stat;
+
+	Skeleton(){};
+	~Skeleton()
+	{
+		for ( Joint* p : tblPoint )
+		{
+			delete p;
+		}
+	};
 
 	void LoadSkeleton( const string filename );
 	void SaveSkeleton();
