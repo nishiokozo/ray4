@@ -399,6 +399,9 @@ struct
 		
 		if ( one.bEnable )
 		{
+//		cout << "tbl" << one.idxTbl << endl;
+//		cout << "obj" << one.idxObj << endl;
+
 			// タンジェントベクトル操作
 			Point3* p = dynamic_cast<Point3*>(tbls[ one.idxTbl ][ one.idxObj ]);
 			if ( p )
@@ -506,13 +509,14 @@ void cource_moveCutmull( Pers& pers, vector<Point3>& tbl, vect2& mmov )
 }
 struct Cource
 {
+	int idxTbl = 0;
 	vector<Obj*> tblPoint =
 	{
 		new Point3(vect3(-1.0, 0.0, 0.0 ),vect3( 0.0, 0.0, 1.0 ),vect3( 0.0, 0.0,-1.0 )),
 		new Point3(vect3( 1.0, 0.0, 0.0 ),vect3( 0.0, 0.0,-1.0 ),vect3( 0.0, 0.0, 1.0 )),
 
 	};
-	vector<int>	idx =
+	vector<int>	idxPoint =
 	{
 		0,1,0
 	};
@@ -585,7 +589,7 @@ struct Bezier
 
 
 	//------------------------------------------------------------------------------
-	void cource_exec_drawBezier( SysGra& gra, Pers& pers, vector<Obj*>& tblPoint, vector<int>& idxPoint, vect3& P, vect3& I, bool bSerch, bool bCut )
+	void cource_exec_drawBezier( SysGra& gra, Pers& pers, vector<Obj*>& tblPoint, vector<int>& idxPoint, int idxTbl , vect3& P, vect3& I, bool bSerch, bool bCut )
 	//------------------------------------------------------------------------------
 	{
 		//ベジェ計算＆描画
@@ -688,9 +692,6 @@ struct Bezier
 					Point3* p2 = dynamic_cast<Point3*>(tblPoint[idxPoint[minn+2]]);
 					p0->b *= t0;
 					p2->a *= t1;
-
-				//	tblPoint[idxPoint[minn+0]]->b *= t0;
-				//	tblPoint[idxPoint[minn+2]]->a *= t1;
 				}
 				gui.rect_mode = G_CALC::NONE;
 
@@ -699,7 +700,9 @@ struct Bezier
 				{
 					int idx = idxPoint[minn+1];
 					vect3 v = pers.calcWorldToScreen3( minQ );
+					//
 					gui.one.w = v.z;
+					gui.one.idxTbl = idxTbl;
 					gui.one.idxObj = idx;
 					gui.one.bEnable = true;
 					tblPoint[ idx ]->bSelected = true;
@@ -1840,6 +1843,8 @@ struct Apr : public Sys
 				infCource.tblPoint,
 				(*pSkeleton).tblPoint,
 			};
+			(*pSkeleton).idxTbl = 2,
+			infCource.idxTbl = 1;
 			//=================================
 			//	GUI操作
 			//=================================
@@ -1890,14 +1895,14 @@ struct Apr : public Sys
 					gui.SelectOneSub( tbls );
 
 				// 移動
+
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && gui.one.bEnable ) 
 				{
 					gui.MoveObj( gra, pers, tbls, mouse.mov, keys.T.on );
 
 					if ( (*pSkeleton).bActive )
 					{
-						Joint* p = dynamic_cast<Joint*>(tbls[ gui.one.idxTbl ][ gui.one.idxObj ]);
-						if ( p )
+						if ( (*pSkeleton).idxTbl ==  gui.one.idxTbl )
 						{
 							// キーフレームへ反映
 							(*pSkeleton).RefrectKeyframe();
@@ -1919,7 +1924,8 @@ struct Apr : public Sys
 				util.skeleton_draw( gra, keys, mouse, pers, (*pSkeleton), text_y );
 
 				// 表示 加工 ベジェ 三次曲線
-				bezier.cource_exec_drawBezier( gra, pers, infCource.tblPoint, infCource.idx, P, I, keys.E.on, mouse.L.hi );
+				bezier.cource_exec_drawBezier( gra, pers, infCource.tblPoint, infCource.idxPoint, infCource.idxTbl, P, I, keys.E.on, mouse.L.hi );
+	//			bezier.cource_exec_drawBezier( gra, pers, infCource.tblPoint, infCource.idxPoint, P, I, keys.E.on, mouse.L.hi );
 
 				// 表示 矩形カーソル、制御点
 				gui.DrawController( pers, gra, tbls, mouse.pos );
@@ -1983,6 +1989,10 @@ struct Apr : public Sys
 
 			gra.Print(1,(float)text_y++,string("idxTbl=")+to_string(gui.one.idxTbl) ); 
 			gra.Print(1,(float)text_y++,string("idxObj=")+to_string(gui.one.idxObj) ); 
+
+//			gra.Print(1,(float)text_y++,string("tbl size=")+to_string(infCource.tblPoint.size()) ); 
+//			gra.Print(1,(float)text_y++,string("idx size=")+to_string(infCource.idxPoint.size()) ); 
+
 
 			//=================================
 			// マニュピレーター描画

@@ -168,6 +168,8 @@ struct Bone
 struct Skeleton
 {
 	bool	bActive = false;	//	使用可能
+	int		idxTbl = 0;
+
 
 	string	filename;
 
