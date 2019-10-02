@@ -314,9 +314,9 @@ struct
 
 	// 選択リスト表示
 	//------------------------------------------------------------------------------
-	void DrawController( Pers& pers, SysGra& gra, vector<vector<Obj*>>& tbls , vect2 mpos )
+	void DrawController( Pers& pers, SysGra& gra, vector<vector<Obj*>>& tbls, vect2 mpos )
 	//------------------------------------------------------------------------------
-	{	
+	{
 		gra.SetZTest( false );
 
 		{
@@ -399,9 +399,6 @@ struct
 		
 		if ( one.bEnable )
 		{
-//		cout << "tbl" << one.idxTbl << endl;
-//		cout << "obj" << one.idxObj << endl;
-
 			// タンジェントベクトル操作
 			Point3* p = dynamic_cast<Point3*>(tbls[ one.idxTbl ][ one.idxObj ]);
 			if ( p )
@@ -534,60 +531,6 @@ struct Cource
 vector<Obj*>	dummy_tblPoint = { new Obj };
 struct Bezier
 {
-
-
-	//------------------------------------------------------------------------------
-	void courcr_moveBezier( SysGra& gra, Pers& pers, vector<Obj*>& tblPoint,One& one, vect2& mmov, bool bSame )
-	//------------------------------------------------------------------------------
-	{
-		bool bsel = false;
-		
-		if ( one.bEnable )
-		{
-			Point3* p = dynamic_cast<Point3*>(tblPoint[ one.idxObj ]);
-
-			vect2	scale = vect2(pers.aspect, 1)/one.w/pers.rate;
-
-			if ( one.bSelected_a )
-			{
-				vect3 v = vect3( mmov * scale, 0 );
-				mat33 mrot = pers.cam.mat.GetRotate();
-				v = v* mrot;
-				p->a += v;
-				if(bSame)	p->b = -p->a.normalize()*p->b.abs();
-				
-				bsel = true;
-			}
-			if ( one.bSelected_b )
-			{
-				vect3 v = vect3( mmov * scale, 0 );
-				mat33 mrot = pers.cam.mat.GetRotate();
-				v = v* mrot;
-				p->b += v;
-				if(bSame) p->a = -p->b.normalize()*p->a.abs();
-
-				bsel = true;
-			}
-		}
-
-		if ( !bsel )
-		{
-			vect3 v = vect3(mmov.x*pers.aspect, mmov.y, 0)/one.w/pers.rate;
-			mat33 mrot = pers.cam.mat.GetRotate();
-			v = v* mrot;
-			for ( Obj* p : tblPoint )
-			{
-				if ( p->bSelected )
-				{
-					p->pos += v ;
-				}
-			}
-		}
-
-
-	}
-
-
 	//------------------------------------------------------------------------------
 	void cource_exec_drawBezier( SysGra& gra, Pers& pers, vector<Obj*>& tblPoint, vector<int>& idxPoint, int idxTbl , vect3& P, vect3& I, bool bSerch, bool bCut )
 	//------------------------------------------------------------------------------
@@ -719,44 +662,6 @@ struct Bezier
 			}
 		}
 
-		// 表示 制御点 	制御線
-if(0)
-		{
-			gra.SetZTest(false);
-
-			for ( Obj* po : tblPoint )
-			{
-				Point3* p = dynamic_cast<Point3*>(po);
-
-				float wide = 11;
-				float wide2 = 7;
-				rgb	col = rgb(0,0,1);
-				rgb	col2 = rgb(0,1,0);
-				rgb	col2a = rgb(0,1,0);
-				rgb	col2b = rgb(0,1,0);
-
-				bool bPreselect = p->bPreselect;
-				bool bSelected = p->bSelected;
-				
-				gui.calcRectMode( gui.rect_mode, bPreselect, bSelected );
-
-				if ( bSelected )
-				{
-					gra.Pset( pers.calcWorldToScreen3( p->pos ), rgb(1,0,0), wide );
-
-					g_line3d( gra, pers, p->pos, p->pos +p->a, col2 );
-					g_line3d( gra, pers, p->pos, p->pos +p->b, col2 );
-					g_pset3d( gra, pers, p->pos+p->a, col2a, wide2 ); 
-					g_pset3d( gra, pers, p->pos+p->b, col2b, wide2 ); 
-				}
-				else
-				{
-					gra.Pset( pers.calcWorldToScreen3( p->pos ), rgb(0,0,1), wide );
-				}
-
-			}
-			gra.SetZTest(true);
-		}
 
 	};
 } bezier;
@@ -1516,6 +1421,7 @@ struct Apr : public Sys
 			// スケルトン 描画
 			skeleton.DrawSkeleton( pers, gra );
 
+			if(0)
 			{
 				mat33	mmune = midentity();
 				static mat33	mkata = midentity();
@@ -1582,7 +1488,8 @@ struct Apr : public Sys
 					drum.DrawDrum( gra, pers, p4, mhiji );
 				}
 				// 箱 手
-				if(0){
+				if(0)
+				{
 					vect3 nx,ny,nz;
 					ny = (p4-p5).normalize();
 					nx = (p2-pos0).normalize();
@@ -1714,10 +1621,10 @@ struct Apr : public Sys
 		{
 			//読み込み
 			unique_ptr<Skeleton> pNew(new Skeleton);
-		//	pNew->LoadSkeleton( "human.mot" );
-			pNew->LoadSkeleton( "bone.mot" );
+			pNew->LoadSkeleton( "human.mot" );
+		//	pNew->LoadSkeleton( "bone.mot" );
 			pNew->stat.bShowSkin = false;
-			pNew->stat.bShowLocus = false;
+			pNew->stat.bShowLocus = true;
 			pSkeleton = move(pNew);
 		}
 
@@ -1728,7 +1635,7 @@ struct Apr : public Sys
 		pers.cam.at = vect3( 0,  0.7, 0 );
 
 		pers.cam.pos = vect3(  0.3, 1.7, -1.7 );
-		pers.cam.at = vect3( 0,  0.0, 0 );
+		pers.cam.at = vect3( 0,  0.7, 0 );
 	#endif
 
 		//===========================================================================
@@ -1837,14 +1744,18 @@ struct Apr : public Sys
 				g_line3d( gra, pers, P2, P3, vect3(1,1,1));
 			}
 
+			//=================================
+			//	登録
+			//=================================
 			vector<vector<Obj*>> tbls = 
 			{
 				dummy_tblPoint,	// 0 はダミー
 				infCource.tblPoint,
 				(*pSkeleton).tblPoint,
 			};
-			(*pSkeleton).idxTbl = 2,
 			infCource.idxTbl = 1;
+			(*pSkeleton).idxTbl = 2;
+
 			//=================================
 			//	GUI操作
 			//=================================
@@ -1925,7 +1836,6 @@ struct Apr : public Sys
 
 				// 表示 加工 ベジェ 三次曲線
 				bezier.cource_exec_drawBezier( gra, pers, infCource.tblPoint, infCource.idxPoint, infCource.idxTbl, P, I, keys.E.on, mouse.L.hi );
-	//			bezier.cource_exec_drawBezier( gra, pers, infCource.tblPoint, infCource.idxPoint, P, I, keys.E.on, mouse.L.hi );
 
 				// 表示 矩形カーソル、制御点
 				gui.DrawController( pers, gra, tbls, mouse.pos );
