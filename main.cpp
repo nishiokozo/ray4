@@ -71,239 +71,6 @@ struct One
 	}
 	
 };
-//--
-/*
-struct Selector
-{
-	vect2 rect_st = vect2(0,0);			//	矩形選択開始位置
-	G_CALC rect_mode = G_CALC::NONE;	//	矩形選択中フラグ
-	One one;
-
-	//------------------------------------------------------------------------------
-	void TouchFirst( Pers& pers, vector<Obj*>& tblPoint, vect2 mpos )
-	//------------------------------------------------------------------------------
-	{
-//		One one;
-		one.clear();
-		int n = 0;
-		for ( Obj* p : tblPoint )
-		{
-			// ポインターのエレメント選択
-			if ( p->bSelected )
-			{
-				Point3* p2 = dynamic_cast<Point3*>(p);
-				{
-					vect3 v = pers.calcWorldToScreen3( p2->pos+p2->a );
-					if ( (v.xy()-mpos).abs() < 0.04f )
-					{
-						if ( one.w < v.z ) // 近い場合はより手前が優先
-						{
-							one.w = v.z;
-							one.bEnable = true;
-							one.idxObj = n;
-	
-							one.bSelected_a = true;
-							one.bSelected_b = false;
-						}
-					}
-				}
-				{
-					vect3 v = pers.calcWorldToScreen3( p2->pos+p2->b );
-					if ( (v.xy()-mpos).abs() < 0.04f )
-					{
-						if ( one.w < v.z ) // 近い場合はより手前が優先
-						{
-							one.w = v.z;
-							one.bEnable = true;
-							one.idxObj = n;
-	
-							one.bSelected_a = false;
-							one.bSelected_b = true;
-						}
-					}
-				}
-			}
-			
-			// ポインター選択
-			if ( one.bEnable == false )
-			{
-					vect3 v = pers.calcWorldToScreen3( p->pos );
-					if ( (v.xy()-mpos).abs() < 0.04f )
-					{
-						if ( one.w < v.z ) // 近い場合はより手前が優先
-						{
-							one.w = v.z;
-							one.bEnable = true;
-							one.idxObj = n;
-						}
-					}
-			}
-			n++;
-		}
-	}
-
-	// 矩形カーソル開始 新規選択
-	//------------------------------------------------------------------------------
-	void SelectRectOnly( vect2 mpos )
-	//------------------------------------------------------------------------------
-	{
-		rect_mode = G_CALC::COPY;
-		rect_st = mpos;
-	}
-
-	// 矩形カーソル開始 追加選択
-	//------------------------------------------------------------------------------
-	void SelectRectAdd( vect2 mpos )
-	//------------------------------------------------------------------------------
-	{
-		rect_mode = G_CALC::ADD;
-		rect_st = mpos;
-	}
-
-	// 矩形カーソル開始 反転選択
-	//------------------------------------------------------------------------------
-	void SelectRectRev( vect2 mpos )
-	//------------------------------------------------------------------------------
-	{
-		rect_mode = G_CALC::REV;
-		rect_st = mpos;
-	}
-
-	// 矩形カーソル開始 削除選択
-	//------------------------------------------------------------------------------
-	void SelectRectSub( vect2 mpos )
-	//------------------------------------------------------------------------------
-	{
-		rect_mode = G_CALC::SUB;
-		rect_st = mpos;
-	}
-	
-	//------------------------------------------------------------------------------
-	void calcRectMode( G_CALC rect_mode, bool& bPreselect, bool& bSelected )
-	//------------------------------------------------------------------------------
-	{
-		switch( rect_mode )
-		{
-			case G_CALC::ADD:	if ( bPreselect ) bSelected = true;
-				break;
-
-			case G_CALC::SUB:	if ( bPreselect ) bSelected = false;
-				break;
-
-			case G_CALC::COPY:	bSelected = bPreselect;
-				break;
-
-			case G_CALC::REV:	if ( bPreselect ) bSelected = !bSelected;
-				break;
-
-			case G_CALC::NONE:
-				break;
-		}
-		bPreselect = false;
-	};
-
-
-	// 矩形カーソル終了（選択決定）
-	//------------------------------------------------------------------------------
-	void SelectRectEnd( vector<Obj*>& tblPoint ) //Cource& infCource )
-	//------------------------------------------------------------------------------
-	{
-		for ( Obj* p : tblPoint )
-		{
-			calcRectMode( rect_mode, p->bPreselect, p->bSelected );
-		}
-
-		rect_mode = G_CALC::NONE;
-
-	}
-
-	// 矩形カーソル選択	
-	//------------------------------------------------------------------------------
-	void SelectRectBegin( Pers& pers, vector<Obj*>& tblPoint , vect2 mpos )
-	//------------------------------------------------------------------------------
-	{
-		vect2 v0 = min( rect_st, mpos );
-		vect2 v1 = max( rect_st, mpos );
-
-		for ( Obj* p : tblPoint )
-		{
-	
-			p->bPreselect = false;
-
-			vect2 v = pers.calcWorldToScreen2( p->pos );
-
-			if ( v.x > v0.x && v.x < v1.x && v.y > v0.y && v.y < v1.y )
-			{
-				p->bPreselect = true;
-			}
-		}
-	}
-
-	// 単独 新規選択
-	//------------------------------------------------------------------------------
-	void SelectOneOnly( vector<Obj*>& tblPoint )
-	//------------------------------------------------------------------------------
-	{
-		// 選択クリア
-		
-		for ( int n = 0 ; n < (signed)tblPoint.size() ; n++ )
-		{
-			tblPoint[n]->bSelected = false;
-		}
-		
-		tblPoint[ one.idxObj ]->bSelected = true;
-	}
-
-	// 単独 追加選択
-	//------------------------------------------------------------------------------
-	void SelectOneAdd( vector<Obj*>& tblPoint )
-	//------------------------------------------------------------------------------
-	{
-		tblPoint[ one.idxObj ]->bSelected = false;
-	}
-
-	// 単独 反転選択
-	//------------------------------------------------------------------------------
-	void SelectOneRev( vector<Obj*>& tblPoint )
-	//------------------------------------------------------------------------------
-	{
-		tblPoint[ one.idxObj ]->bSelected = !tblPoint[ one.idxObj ]->bSelected;
-	}
-
-	// 単独 削除選択
-	//------------------------------------------------------------------------------
-	void SelectOneSub( vector<Obj*>& tblPoint )
-	//------------------------------------------------------------------------------
-	{
-		tblPoint[ one.idxObj ]->bSelected = false;
-	}
-
-	// 表示
-	//------------------------------------------------------------------------------
-	void DrawRect( Pers& pers, SysGra& gra, vector<Obj*>& tblPoint , vect2 mpos )
-	//------------------------------------------------------------------------------
-	{	
-		gra.SetZTest( false );
-		// 矩形カーソル 表示
-		if (  rect_mode != G_CALC::NONE )
-		{
-			gra.Box( rect_st, mpos, rgb(1,1,1)*0.5f);
-		}
-
-		// 矩形カーソル 情報表示
-		int n = 0;
-		for ( Obj* p : tblPoint )
-		{
-			vect2 pos = pers.calcWorldToScreen2( p->pos );
-			gra.Print( pos+gra.Dot(14,0), to_string(n) );
-			n++;
-		}
-
-		gra.SetZTest( true );
-	}
-
-};
-*/
 
 struct
 {
@@ -547,15 +314,46 @@ struct
 
 	// 選択リスト表示
 	//------------------------------------------------------------------------------
-	void DrawRect( Pers& pers, SysGra& gra, vector<vector<Obj*>>& tbls , vect2 mpos )
+	void DrawController( Pers& pers, SysGra& gra, vector<vector<Obj*>>& tbls , vect2 mpos )
 	//------------------------------------------------------------------------------
 	{	
 		gra.SetZTest( false );
 
 		{
+			int n = 0;
 			int n2 = 0;
 			for ( vector<Obj*>& tblPoint : tbls )
 			{
+				// ベジェ制御点
+				for ( Obj* po : tblPoint )
+				{
+					Point3* p = dynamic_cast<Point3*>(po);
+					if ( p ) 
+					{
+
+						float wide = 11;
+						float wide2 = 7;
+						rgb	col = rgb(0,0,1);
+						rgb	col2 = rgb(0,1,0);
+						rgb	col2a = rgb(0,1,0);
+						rgb	col2b = rgb(0,1,0);
+
+						bool bPreselect = p->bPreselect;
+						bool bSelected = p->bSelected;
+						
+						calcRectMode( rect_mode, bPreselect, bSelected );
+
+						if ( bSelected )
+						{
+							g_line3d( gra, pers, p->pos, p->pos +p->a, col2 );
+							g_line3d( gra, pers, p->pos, p->pos +p->b, col2 );
+							g_pset3d( gra, pers, p->pos+p->a, col2a, wide2 ); 
+							g_pset3d( gra, pers, p->pos+p->b, col2b, wide2 ); 
+						}
+					}
+				}
+
+				// 汎用制御点
 				for ( Obj* p : tblPoint )
 				{
 
@@ -568,18 +366,17 @@ struct
 					{
 						gra.Pset( pers.calcWorldToScreen3( p->pos ), rgb(1,0,0), 11 );
 					}
+					else
+					{
+						gra.Pset( pers.calcWorldToScreen3( p->pos ), rgb(0,0,1), 11 );
+					}
 
-				}
-
-				// 情報表示
-				{
-					int n = 0;
-					for ( Obj* p : tblPoint )
 					{
 						vect2 pos = pers.calcWorldToScreen2( p->pos );
-						gra.Print( pos+gra.Dot(14,0), to_string(n2) +":"+to_string(n++) );
+						gra.Print( pos+gra.Dot(14,0), to_string(n++) );
 					}
 				}
+
 				n2++;
 			}
 		}
@@ -653,7 +450,7 @@ struct
 
 	}
 
-} selector;
+} gui;
 
 //------------------------------------------------------------------------------
 auto cource_selectCutmull = []( SysGra& gra, Pers& pers, vector<Point3>& tbl, vect2& mpos )
@@ -730,6 +527,7 @@ struct Cource
 	
 } infCource;
 
+vector<Obj*>	dummy_tblPoint = { new Obj };
 struct Bezier
 {
 
@@ -894,20 +692,20 @@ struct Bezier
 				//	tblPoint[idxPoint[minn+0]]->b *= t0;
 				//	tblPoint[idxPoint[minn+2]]->a *= t1;
 				}
-				selector.rect_mode = G_CALC::NONE;
+				gui.rect_mode = G_CALC::NONE;
 
 
 				// 追加したポイントを選択状態にする
 				{
 					int idx = idxPoint[minn+1];
 					vect3 v = pers.calcWorldToScreen3( minQ );
-					selector.one.w = v.z;
-					selector.one.idxObj = idx;
-					selector.one.bEnable = true;
+					gui.one.w = v.z;
+					gui.one.idxObj = idx;
+					gui.one.bEnable = true;
 					tblPoint[ idx ]->bSelected = true;
 					tblPoint[ idx ]->bPreselect = false;
-					selector.one.bSelected_a = false;
-					selector.one.bSelected_b = false;
+					gui.one.bSelected_a = false;
+					gui.one.bSelected_b = false;
 				}
 			}
 
@@ -919,6 +717,7 @@ struct Bezier
 		}
 
 		// 表示 制御点 	制御線
+if(0)
 		{
 			gra.SetZTest(false);
 
@@ -936,7 +735,7 @@ struct Bezier
 				bool bPreselect = p->bPreselect;
 				bool bSelected = p->bSelected;
 				
-				selector.calcRectMode( selector.rect_mode, bPreselect, bSelected );
+				gui.calcRectMode( gui.rect_mode, bPreselect, bSelected );
 
 				if ( bSelected )
 				{
@@ -2035,176 +1834,97 @@ struct Apr : public Sys
 				g_line3d( gra, pers, P2, P3, vect3(1,1,1));
 			}
 
+			vector<vector<Obj*>> tbls = 
 			{
-				vector<vector<Obj*>> tbls = 
+				dummy_tblPoint,	// 0 はダミー
+				infCource.tblPoint,
+				(*pSkeleton).tblPoint,
+			};
+			//=================================
+			//	GUI操作
+			//=================================
+			{
+
+				// 最近点検索
+				if ( !keys.ALT.on && mouse.L.hi ) 
+					gui.TouchFirst( pers, tbls, mouse.pos );
+
+				// 矩形カーソル開始 新規選択
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && gui.one.bEnable == false && gui.rect_mode == G_CALC::NONE ) 
+					gui.SelectRectOnly( mouse.pos );
+
+				// 矩形カーソル開始 追加選択
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && keys.SHIFT.on && gui.one.bEnable == false && gui.rect_mode == G_CALC::NONE ) 
+					gui.SelectRectAdd( mouse.pos );
+
+				// 矩形カーソル開始 反転選択
+				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && !keys.SHIFT.on && gui.one.bEnable == false && gui.rect_mode == G_CALC::NONE ) 
+					gui.SelectRectRev( mouse.pos );
+
+				// 矩形カーソル開始 削除選択
+				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && keys.SHIFT.on && gui.one.bEnable == false && gui.rect_mode == G_CALC::NONE ) 
+					gui.SelectRectSub( mouse.pos );
+
+				// 矩形カーソル終了（選択決定）
+				if ( !keys.ALT.on && !mouse.L.on && gui.rect_mode != G_CALC::NONE ) 
+					gui.SelectRectEnd( tbls );
+
+				// 矩形カーソル選択	
+				if ( !keys.ALT.on && mouse.L.on && gui.rect_mode != G_CALC::NONE ) 
+					gui.SelectRectBegin( pers, tbls , mouse.pos );
+
+				// 単独 新規選択
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && gui.one.bEnable && tbls[ gui.one.idxTbl ][ gui.one.idxObj ]->bSelected == false ) 
+					gui.SelectOneOnly( tbls );
+
+				// 単独 追加選択
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && keys.SHIFT.on && gui.one.bEnable ) 
+					gui.SelectOneAdd( tbls );
+
+				// 単独 反転選択
+				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && !keys.SHIFT.on && gui.one.bEnable ) 
+					gui.SelectOneRev( tbls );
+
+				// 単独 削除選択
+				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && keys.SHIFT.on && gui.one.bEnable ) 
+					gui.SelectOneSub( tbls );
+
+				// 移動
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && gui.one.bEnable ) 
 				{
-					(*pSkeleton).tblPoint,
-					infCource.tblPoint,
-				};
-				//=================================
-				// skeleton ジョイント選択
-				//=================================
-				if ( (*pSkeleton).bActive )
-				{
-//					Skeleton& skeleton = (*pSkeleton);
+					gui.MoveObj( gra, pers, tbls, mouse.mov, keys.T.on );
 
-					// 最近点検索
-					if ( !keys.ALT.on && mouse.L.hi ) 
-						selector.TouchFirst( pers, tbls, mouse.pos );
-
-					// 矩形カーソル開始 新規選択
-					if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && selector.one.bEnable == false && selector.rect_mode == G_CALC::NONE ) 
-						selector.SelectRectOnly( mouse.pos );
-
-					// 矩形カーソル開始 追加選択
-					if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && keys.SHIFT.on && selector.one.bEnable == false && selector.rect_mode == G_CALC::NONE ) 
-						selector.SelectRectAdd( mouse.pos );
-
-					// 矩形カーソル開始 反転選択
-					if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && !keys.SHIFT.on && selector.one.bEnable == false && selector.rect_mode == G_CALC::NONE ) 
-						selector.SelectRectRev( mouse.pos );
-
-					// 矩形カーソル開始 削除選択
-					if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && keys.SHIFT.on && selector.one.bEnable == false && selector.rect_mode == G_CALC::NONE ) 
-						selector.SelectRectSub( mouse.pos );
-
-					// 矩形カーソル終了（選択決定）
-					if ( !keys.ALT.on && !mouse.L.on && selector.rect_mode != G_CALC::NONE ) 
-						selector.SelectRectEnd( tbls );
-
-					// 矩形カーソル選択	
-					if ( !keys.ALT.on && mouse.L.on && selector.rect_mode != G_CALC::NONE ) 
-						selector.SelectRectBegin( pers, tbls , mouse.pos );
-
-					// 単独 新規選択
-					if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && selector.one.bEnable && tbls[ selector.one.idxTbl ][ selector.one.idxObj ]->bSelected == false ) 
-						selector.SelectOneOnly( tbls );
-
-					// 単独 追加選択
-					if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && keys.SHIFT.on && selector.one.bEnable ) 
-						selector.SelectOneAdd( tbls );
-
-					// 単独 反転選択
-					if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && !keys.SHIFT.on && selector.one.bEnable ) 
-						selector.SelectOneRev( tbls );
-
-					// 単独 削除選択
-					if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && keys.SHIFT.on && selector.one.bEnable ) 
-						selector.SelectOneSub( tbls );
-
-					
-/*
-					// 選択リストのJoint移動
-					if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && selector.one.bEnable ) 
+					if ( (*pSkeleton).bActive )
 					{
-						if ( selector.one.idxTbl == 0 )
-						{
-							vect2 gmov = mouse.mov;
-
-							vect3 v = vect3(gmov.x*pers.aspect, gmov.y, 0)/selector.one.w/pers.rate;
-							mat33 mrot = pers.cam.mat.GetRotate();
-							v = v* mrot;
-							for ( Obj* p : skeleton.tblPoint )
-							{
-								if ( p->bSelected )
-								{
-									p->pos += v ;
-								}
-							}
-							
-							// キーフレームへ反映
-							skeleton.RefrectKeyframe();
-						}
-					}
-*/
-	
-
-				}
-				//=================================
-				//3字曲線
-				//=================================
-				{
-					// 最近点検索
-//					if ( !keys.ALT.on && mouse.L.hi ) 
-//						selector.TouchFirst( pers, infCource.tblPoint, mouse.pos );
-/*
-					// 矩形カーソル開始 新規選択
-					if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && selector.one.bEnable == false && selector.rect_mode == G_CALC::NONE ) 
-						selector.SelectRectOnly( mouse.pos );
-
-					// 矩形カーソル開始 追加選択
-					if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && keys.SHIFT.on && selector.one.bEnable == false && selector.rect_mode == G_CALC::NONE ) 
-						selector.SelectRectAdd( mouse.pos );
-
-					// 矩形カーソル開始 反転選択
-					if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && !keys.SHIFT.on && selector.one.bEnable == false && selector.rect_mode == G_CALC::NONE ) 
-						selector.SelectRectRev( mouse.pos );
-
-					// 矩形カーソル開始 削除選択
-					if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && keys.SHIFT.on && selector.one.bEnable == false && selector.rect_mode == G_CALC::NONE ) 
-						selector.SelectRectSub( mouse.pos );
-
-					// 矩形カーソル終了（選択決定）
-					if ( !keys.ALT.on && !mouse.L.on && selector.rect_mode != G_CALC::NONE ) 
-						selector.SelectRectEnd( infCource.tblPoint );
-
-					// 矩形カーソル選択	
-					if ( !keys.ALT.on && mouse.L.on && selector.rect_mode != G_CALC::NONE ) 
-						selector.SelectRectBegin( pers, infCource.tblPoint , mouse.pos );
-
-					// 単独 新規選択
-					if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && selector.one.bEnable && infCource.tblPoint[ selector.one.idxObj ]->bSelected == false ) 
-						selector.SelectOneOnly( infCource.tblPoint );
-
-					// 単独 追加選択
-					if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && keys.SHIFT.on && selector.one.bEnable ) 
-						selector.SelectOneAdd( infCource.tblPoint );
-
-					// 単独 反転選択
-					if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && !keys.SHIFT.on && selector.one.bEnable ) 
-						selector.SelectOneRev( infCource.tblPoint );
-
-					// 単独 削除選択
-					if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && keys.SHIFT.on && selector.one.bEnable ) 
-						selector.SelectOneSub( infCource.tblPoint );
-*/
-
-					// 移動
-/*
-					if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && selector.one.bEnable ) 
-					{
-						if ( selector.one.idxTbl == 1 )
-						{
-							bezier.courcr_moveBezier( gra, pers, infCource.tblPoint, selector.one, mouse.mov, keys.T.on );
-						}
-					}
-*/
-					// 移動
-					if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && selector.one.bEnable ) 
-					{
-						selector.MoveObj( gra, pers, tbls, mouse.mov, keys.T.on );
-
-						if ( selector.one.idxTbl == 0 )
+						Joint* p = dynamic_cast<Joint*>(tbls[ gui.one.idxTbl ][ gui.one.idxObj ]);
+						if ( p )
 						{
 							// キーフレームへ反映
 							(*pSkeleton).RefrectKeyframe();
 						}
 					}
-
-					// マウスベクトル
-					vect3 P = pers.calcScreenToWorld3( vect3(mouse.pos,0) );
-					vect3 I = pers.calcRayvect( P );
-
-					// skeleton 描画
-					util.skeleton_draw( gra, keys, mouse, pers, (*pSkeleton), text_y );
-
-					// 表示 加工 ベジェ 三次曲線
-					bezier.cource_exec_drawBezier( gra, pers, infCource.tblPoint, infCource.idx, P, I, keys.E.on, mouse.L.hi );
-					// 表示 制御
-					selector.DrawRect( pers, gra, tbls, mouse.pos );
-
-
 				}
+
+			}
+
+			//=================================
+			//	表示
+			//=================================
+			{
+				// マウスベクトル
+				vect3 P = pers.calcScreenToWorld3( vect3(mouse.pos,0) );
+				vect3 I = pers.calcRayvect( P );
+
+				// skeleton 描画
+				util.skeleton_draw( gra, keys, mouse, pers, (*pSkeleton), text_y );
+
+				// 表示 加工 ベジェ 三次曲線
+				bezier.cource_exec_drawBezier( gra, pers, infCource.tblPoint, infCource.idx, P, I, keys.E.on, mouse.L.hi );
+
+				// 表示 矩形カーソル、制御点
+				gui.DrawController( pers, gra, tbls, mouse.pos );
+
+
 			}
 			
 			//=================================
@@ -2260,6 +1980,9 @@ struct Apr : public Sys
 			gra.Print(1,(float)text_y++,string("at  x=")+to_string(pers.cam.at.x)+string(" y=")+to_string(pers.cam.at.y)+string(" z=")+to_string(pers.cam.at.z) ); 
 			gra.Print(1,(float)text_y++,string("pos x=")+to_string(pers.cam.pos.x)+string(" y=")+to_string(pers.cam.pos.y)+string(" z=")+to_string(pers.cam.pos.z) ); 
 			gra.Print(1,(float)text_y++,string("peak=")+to_string(time_peak/1000)+string("msec") ); 
+
+			gra.Print(1,(float)text_y++,string("idxTbl=")+to_string(gui.one.idxTbl) ); 
+			gra.Print(1,(float)text_y++,string("idxObj=")+to_string(gui.one.idxObj) ); 
 
 			//=================================
 			// マニュピレーター描画

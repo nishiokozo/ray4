@@ -755,15 +755,15 @@ void Skeleton::DrawSkeleton( Pers& pers, SysGra& gra )
 			}
 		}
 
-		// ジョイント表示
-		for ( Obj* po : tblPoint )
-		{
-			Joint* p = dynamic_cast<Joint*>(po);
-
-			vect3 v0 = pers.calcWorldToScreen3( p->pos );
-			if ( p->bCtrl ) gra.Pset( v0, col, 11 );
-		}
-		gra.SetZTest( true );
+//		// ジョイント表示
+//		for ( Obj* po : tblPoint )
+//		{
+//			Joint* p = dynamic_cast<Joint*>(po);
+//
+//			vect3 v0 = pers.calcWorldToScreen3( p->pos );
+//			if ( p->bCtrl ) gra.Pset( v0, col, 11 );
+//		}
+//		gra.SetZTest( true );
 	}
 	
 	// 剛体実験
