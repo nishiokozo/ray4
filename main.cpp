@@ -776,7 +776,7 @@ void cource_drawCutmull( SysGra& gra, Pers& pers, vector<Point3>& tbl, vector<iv
 		}
 		g_line3d( gra, pers, v0, v2, col);
 		g_line3d( gra, pers, w0, w2, col);
-		g_line3d( gra, pers, w2, v2, col);
+		g_line3d( gra, pers, w2, v2, col );
 		{
 			vect3 a = v0;a.y=0;
 			vect3 b = v2;b.y=0;
@@ -1093,7 +1093,7 @@ struct Apr : public Sys
 	struct
 	{
 		//------------------------------------------------------------------------------
-		void DrawGrid( Apr& apr, vect3 pos, int NUM_U, int NUM_V, float dt, rgb col )
+		void DrawGrid( SysGra& gra, Pers& pers, vect3 pos, int NUM_U, int NUM_V, float dt, rgb col )
 		//------------------------------------------------------------------------------
 		{	// ミニグリッド
 			vect3 vt = vect3(0,0,0);
@@ -1107,7 +1107,7 @@ struct Apr : public Sys
 				vt = vect3(0,0,dt);
 				for ( int i = 0 ; i < NUM_V*2+1 ; i++ )
 				{
-					g_line3d_scissor( apr.gra, apr.pers, a, b, col );
+					g_line3d_scissor( gra, pers, a, b, col );
 					a+=vt;
 					b+=vt;
 				}
@@ -1119,7 +1119,7 @@ struct Apr : public Sys
 				vt = vect3(dt,0,0);
 				for ( int i = 0 ; i < NUM_U*2+1 ; i++ )
 				{
-					g_line3d_scissor( apr.gra, apr.pers, a, b, col );
+					g_line3d_scissor( gra, pers, a, b, col );
 					a+=vt;
 					b+=vt;
 				}
@@ -1131,11 +1131,28 @@ struct Apr : public Sys
 				for ( int i = 0 ; i <= 360 ; i+=20 )
 				{
 					vect3 p = vect3( r*cos(rad((float)i)), 0, r*sin(rad((float)i)) ) + pos;
-					vect3 v1 = apr.pers.calcWorldToScreen3( p );
-					if ( i > 0 ) apr.gra.Line( v0,v1, col );
+					vect3 v1 = pers.calcWorldToScreen3( p );
+					if ( i > 0 ) gra.Line( v0,v1, col );
 					v0 = v1;
 				}
 			}
+		}
+
+		void Draw2D( SysGra& gra, Pers& pers, vect2 pos, rgb col )
+		{
+			gra.Line( vect2(-1,pos.y), vect2(1,pos.y), col*0);
+			gra.Line( vect2(pos.x,-1), vect2(pos.x,1), col*0);
+			for ( float x = -10 ; x < 10 ; x += 1 )
+			{
+				gra.Line( vect2(pos.x+x/pers.aspect,-1), vect2(pos.x+x/pers.aspect,1), col );
+			}
+			for ( float y = -10 ; y < 10 ; y += 1 )
+			{
+				gra.Line( vect2(-1,pos.y+y), vect2(1,pos.y+y), col );
+			}
+
+			gra.Circle( pos, 0.05, col );
+		
 		}
 
 	} grid;
@@ -1735,23 +1752,35 @@ struct Apr : public Sys
 			//=================================
 			// 床グリッド描画
 			//=================================
-			grid.DrawGrid( *this, vect3(0,0,0), 10, 10, 1, vect3(0.2,0.2,0.2) );
+			grid.DrawGrid( gra, pers, vect3(0,0,0), 10, 10, 1, vect3(0.2,0.2,0.2) );
 
 	{
-		float scale = 1/40.0;
+		vect2 sc = vect2(1/pers.aspect,1);
+		vect2 pos = vect2(-0.55,-0.5);
+		rgb	col = vect3(0.2,0.2,0.2);
+
+		gra.Clr(rgb(0.3,0.3,0.3));
+		grid.Draw2D( gra, pers, pos, col );
+
+
+		float n = 30;
+		float scale = 0.2;
+		float a = 0.1;
+
 		{
-			float a = 1;
 			float v = 0;
 			float s = 0;
 			
 
-			for ( float t = 0 ; t < 10 ; t+=1 )
+			for ( float t = 0 ; t < n ; t+=1 )
 			{
 
 				v += a;
 				s += v;
 
-				gra.Pset( vect2(t,s)*scale, rgb(0,1,1), 3 );
+				vect2 v = vect2(t/pers.aspect,s)*scale+pos;
+				gra.Pset( v, rgb(0,1,0), 3 );
+				gra.Print( v, to_string(s) );
 				
 			}
 		
@@ -1759,16 +1788,17 @@ struct Apr : public Sys
 
 		float dt = 1.0;
 		{
-			float a = 1;
 			float v = 0;
 			float s = 0;
 
-			for ( float t = 0 ; t < 10 ; t+=dt )
+			for ( float t = 0 ; t < n ; t+=dt )
 			{
 				v = a * t;
 				s = v * t/2;
 
-				gra.Pset( vect2(t,s)*scale, rgb(1,1,0), 2 );
+				vect2 v = vect2(t/pers.aspect,s)*scale+pos;
+				gra.Pset( v, rgb(1,0,0), 3 );
+				gra.Print( v, to_string(s) );
 
 			}
 
@@ -2008,6 +2038,7 @@ int main()
 {
 	cout << "start" << endl;
 	Apr	apr("Ray4 " __DATE__, 300,300,768, 512 );
+//	Apr	apr("Ray4 " __DATE__, 300,300,320, 200 );
 	return apr.main();
 }
 

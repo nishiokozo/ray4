@@ -333,7 +333,7 @@ void SysGra::Update()
 
 }
 //------------------------------------------------------------------------------
-void SysGra::Clr( rgb col)
+void SysGra::Clr( rgb col )
 //------------------------------------------------------------------------------
 {
 //	カラークリア値
@@ -360,20 +360,21 @@ void SysGra::Circle( vect2 v, float r, rgb col )
 {
 //	glDisable(GL_DEPTH_TEST);
 
+	float aspect = GetAspect();
 	{
 	    glColor3f( col.r, col.g, col.b );
 	    glBegin(GL_LINE_LOOP);
 
 		int s=0;
-		vect2 v0 = v + vect2(r,0);
-		v0 = v0 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
-		for ( int i = 0 ; i < 360 ; i+=45 )
+		vect2 v0 = v + vect2(r/aspect,0);
+//		v0 = v0/ aspect;
+		for ( int i = 0 ; i < 360 ; i+=30 )
 		{
 			float th = rad((float)i);
-			vect2 v1 = vect2( r*cos(th), r*sin(th) )+v;
+			vect2 v1 = vect2( r*cos(th)/aspect, r*sin(th) )+v;
 
 			//gl
-			v1 = v1 / vect2(768/2,-512/2) -vect2(1.0f, -1.0f);
+//			v1 = v1 / aspect;
 		    glVertex2f(v1.x, v1.y);
 			s++;
 		}
@@ -387,7 +388,7 @@ void SysGra::Pset( vect2 v0, rgb col, float wide )
 {
 //	glDisable(GL_DEPTH_TEST);
 
-	glPointSize(wide);
+	glPointSize(wide );
     glBegin(GL_POINTS);
     glColor3f( col.r, col.g, col.b );
     glVertex2f(v0.x, v0.y);
@@ -399,19 +400,19 @@ void SysGra::Pset( vect3 v0, rgb col, float wide )
 {
 //	glEnable(GL_DEPTH_TEST);	// (デフォルト:GL_LESS）
 
-	glPointSize(wide);
+	glPointSize(wide );
     glBegin(GL_POINTS);
     glColor3f( col.r, col.g, col.b );
     glVertex3f(v0.x, v0.y, v0.z);
     glEnd();
 }
 //------------------------------------------------------------------------------
-void SysGra::Box( vect2 v0, vect2 v1,rgb col, float wide)
+void SysGra::Box( vect2 v0, vect2 v1,rgb col, float wide )
 //------------------------------------------------------------------------------
 {
 //	glDisable(GL_DEPTH_TEST);
 
-  	glLineWidth(wide);
+  	glLineWidth(wide );
 
     glBegin(GL_LINE_LOOP);
     glColor3f( col.r, col.g, col.b );
@@ -423,12 +424,12 @@ void SysGra::Box( vect2 v0, vect2 v1,rgb col, float wide)
 
 }
 //------------------------------------------------------------------------------
-void SysGra::Box( vect3 v0, vect3 v1,rgb col, float wide)
+void SysGra::Box( vect3 v0, vect3 v1,rgb col, float wide )
 //------------------------------------------------------------------------------
 {
 //	glDisable(GL_DEPTH_TEST);
 
-  	glLineWidth(wide);
+  	glLineWidth(wide );
 
     glBegin(GL_LINE_LOOP);
     glColor3f( col.r, col.g, col.b );
@@ -440,7 +441,7 @@ void SysGra::Box( vect3 v0, vect3 v1,rgb col, float wide)
 
 }
 //------------------------------------------------------------------------------
-void SysGra::Fill( vect2 v0, vect2 v1,rgb col)
+void SysGra::Fill( vect2 v0, vect2 v1,rgb col )
 //------------------------------------------------------------------------------
 {
 //	glDisable(GL_DEPTH_TEST);
@@ -460,7 +461,7 @@ void SysGra::Line( vect2 v0, vect2 v1,rgb col, float wide )
 {
 //	glDisable(GL_DEPTH_TEST);
 
-  	glLineWidth(wide);
+  	glLineWidth(wide );
   
     glBegin(GL_LINES);
     glColor3f( col.r, col.g, col.b );
@@ -474,7 +475,7 @@ void SysGra::Line( vect3 v0, vect3 v1,rgb col, float wide )
 {
 //	glEnable(GL_DEPTH_TEST);	// (デフォルト:GL_LESS）
 
-  	glLineWidth(wide);
+  	glLineWidth(wide );
   
     glBegin(GL_LINES);
     glColor3f( col.r, col.g, col.b );
@@ -483,7 +484,7 @@ void SysGra::Line( vect3 v0, vect3 v1,rgb col, float wide )
     glEnd();
 }
 //------------------------------------------------------------------------------
-void SysGra::Tri( vect2 v0, vect2 v1, vect2 v2, rgb col)
+void SysGra::Tri( vect2 v0, vect2 v1, vect2 v2, rgb col )
 //------------------------------------------------------------------------------
 {
 //	glDisable(GL_DEPTH_TEST);
@@ -496,7 +497,7 @@ void SysGra::Tri( vect2 v0, vect2 v1, vect2 v2, rgb col)
     glEnd();
 }
 //------------------------------------------------------------------------------
-void SysGra::Tri( vect3 v0, vect3 v1, vect3 v2, rgb col)
+void SysGra::Tri( vect3 v0, vect3 v1, vect3 v2, rgb col )
  //------------------------------------------------------------------------------
 {
 //	glEnable(GL_DEPTH_TEST);	// (デフォルト:GL_LESS）
