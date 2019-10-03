@@ -852,7 +852,8 @@ void Skeleton::DrawSkeleton( Pers& pers, SysGra& gra )
 					{
 						vect3 b = catmull3_func(t, P0,P1,P2,P3 );
 
-						g_line3d( gra, pers, a, b, vect3(1,1,1));
+						rgb col = rgb(0,1,0);
+						g_line3d( gra, pers, a, b, col);
 
 						a=b;
 						t+=dt;
@@ -865,10 +866,12 @@ void Skeleton::DrawSkeleton( Pers& pers, SysGra& gra )
 						vect3 v1 = pers.calcWorldToScreen3(P1);
 						vect3 v2 = pers.calcWorldToScreen3(P2);
 						vect3 v3 = pers.calcWorldToScreen3(P3);
-						gra.Pset(v0, rgb(0,0,1), 11);
-						gra.Pset(v1, rgb(0,0,1), 11);
-						gra.Pset(v2, rgb(0,0,1), 11);
-						gra.Pset(v3, rgb(0,0,1), 11);
+						float wide = 7;
+						rgb col = rgb(0,1,0);
+						gra.Pset(v0, col, wide);
+						gra.Pset(v1, col, wide);
+						gra.Pset(v2, col, wide);
+						gra.Pset(v3, col, wide);
 					}
 				}
 			}

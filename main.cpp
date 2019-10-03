@@ -1395,7 +1395,7 @@ struct Apr : public Sys
 		{
 			if ( skeleton.bActive == false ) return;
 
-		#if 1 	//剛体実験
+		#if 0 	//剛体実験
 			// 優先度つけ
 			{
 				int n = 0;
