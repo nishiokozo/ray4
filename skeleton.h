@@ -177,20 +177,20 @@ struct Skeleton
 	vector<Obj*>			tblPoint;	//joint	継承クラスとして使うためポインタ型
 	vector<Bone>			tblBone;
 
-	struct K
+	struct A
 	{
-		struct J
+		struct P
 		{
-			struct P
+			struct J
 			{
 				vect3		pos;
-				P( const vect3& _pos ) : pos(_pos) {};
+				J( const vect3& _pos ) : pos(_pos) {};
 			};
-			vector<P>		joint;
+			vector<J>		joint;
 		};
-		vector<J>		pose;
+		vector<P>		pose;
 	};
-	vector<K>		animations;	// アニメーションキーフレーム
+	vector<A>		animations;	// アニメーションキーフレーム
 
 	struct
 	{

@@ -1412,6 +1412,19 @@ struct Apr : public Sys
 					n++;
 				}
 			}
+		#else
+			// 優先度つけ
+			{
+				int n = 0;
+				for ( Obj* po : skeleton.tblPoint )
+				{
+					Joint* p = dynamic_cast<Joint*>(po);
+
+					p->weight = 0.33;
+					if ( p->bSelected && mouse.L.on ) p->weight = 0.0;
+					n++;
+				}
+			}
 		#endif
 
 			//スケルトン更新
@@ -1621,8 +1634,8 @@ struct Apr : public Sys
 		{
 			//読み込み
 			unique_ptr<Skeleton> pNew(new Skeleton);
-			pNew->LoadSkeleton( "human.mot" );
-		//	pNew->LoadSkeleton( "bone.mot" );
+		//	pNew->LoadSkeleton( "human.mot" );
+			pNew->LoadSkeleton( "bone.mot" );
 			pNew->stat.bShowSkin = false;
 			pNew->stat.bShowLocus = true;
 			pSkeleton = move(pNew);
