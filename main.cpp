@@ -324,19 +324,40 @@ struct
 			int n2 = 0;
 			for ( vector<Obj*>& tblPoint : tbls )
 			{
-				// ベジェ制御点
-				for ( Obj* po : tblPoint )
+				if ( n2 > 0 ) 
 				{
-					Point3* p = dynamic_cast<Point3*>(po);
-					if ( p ) 
+					// ベジェ制御点
+					for ( Obj* po : tblPoint )
 					{
+						Point3* p = dynamic_cast<Point3*>(po);
+						if ( p ) 
+						{
 
-						float wide = 11;
-						float wide2 = 7;
-						rgb	col = rgb(0,0,1);
-						rgb	col2 = rgb(0,1,0);
-						rgb	col2a = rgb(0,1,0);
-						rgb	col2b = rgb(0,1,0);
+							float wide = 11;
+							float wide2 = 7;
+							rgb	col = rgb(0,0,1);
+							rgb	col2 = rgb(0,1,0);
+							rgb	col2a = rgb(0,1,0);
+							rgb	col2b = rgb(0,1,0);
+
+							bool bPreselect = p->bPreselect;
+							bool bSelected = p->bSelected;
+							
+							calcRectMode( rect_mode, bPreselect, bSelected );
+
+							if ( bSelected )
+							{
+								g_line3d( gra, pers, p->pos, p->pos +p->a, col2 );
+								g_line3d( gra, pers, p->pos, p->pos +p->b, col2 );
+								g_pset3d( gra, pers, p->pos+p->a, col2a, wide2 ); 
+								g_pset3d( gra, pers, p->pos+p->b, col2b, wide2 ); 
+							}
+						}
+					}
+
+					// 汎用制御点
+					for ( Obj* p : tblPoint )
+					{
 
 						bool bPreselect = p->bPreselect;
 						bool bSelected = p->bSelected;
@@ -345,38 +366,19 @@ struct
 
 						if ( bSelected )
 						{
-							g_line3d( gra, pers, p->pos, p->pos +p->a, col2 );
-							g_line3d( gra, pers, p->pos, p->pos +p->b, col2 );
-							g_pset3d( gra, pers, p->pos+p->a, col2a, wide2 ); 
-							g_pset3d( gra, pers, p->pos+p->b, col2b, wide2 ); 
+							gra.Pset( pers.calcWorldToScreen3( p->pos ), rgb(1,0,0), 11 );
+						}
+						else
+						{
+							gra.Pset( pers.calcWorldToScreen3( p->pos ), rgb(0,0,1), 11 );
+						}
+
+						{
+							vect2 pos = pers.calcWorldToScreen2( p->pos );
+							gra.Print( pos+gra.Dot(14,0), to_string(n++) );
 						}
 					}
 				}
-
-				// 汎用制御点
-				for ( Obj* p : tblPoint )
-				{
-
-					bool bPreselect = p->bPreselect;
-					bool bSelected = p->bSelected;
-					
-					calcRectMode( rect_mode, bPreselect, bSelected );
-
-					if ( bSelected )
-					{
-						gra.Pset( pers.calcWorldToScreen3( p->pos ), rgb(1,0,0), 11 );
-					}
-					else
-					{
-						gra.Pset( pers.calcWorldToScreen3( p->pos ), rgb(0,0,1), 11 );
-					}
-
-					{
-						vect2 pos = pers.calcWorldToScreen2( p->pos );
-						gra.Print( pos+gra.Dot(14,0), to_string(n++) );
-					}
-				}
-
 				n2++;
 			}
 		}
@@ -1630,7 +1632,7 @@ struct Apr : public Sys
 		//=================================
 		// skeleton ロード
 		//=================================
-		if(1)
+		if(0)
 		{
 			//読み込み
 			unique_ptr<Skeleton> pNew(new Skeleton);
@@ -1734,6 +1736,44 @@ struct Apr : public Sys
 			// 床グリッド描画
 			//=================================
 			grid.DrawGrid( *this, vect3(0,0,0), 10, 10, 1, vect3(0.2,0.2,0.2) );
+
+	{
+		float scale = 1/40.0;
+		{
+			float a = 1;
+			float v = 0;
+			float s = 0;
+			
+
+			for ( float t = 0 ; t < 10 ; t+=1 )
+			{
+
+				v += a;
+				s += v;
+
+				gra.Pset( vect2(t,s)*scale, rgb(0,1,1), 3 );
+				
+			}
+		
+		}
+
+		float dt = 1.0;
+		{
+			float a = 1;
+			float v = 0;
+			float s = 0;
+
+			for ( float t = 0 ; t < 10 ; t+=dt )
+			{
+				v = a * t;
+				s = v * t/2;
+
+				gra.Pset( vect2(t,s)*scale, rgb(1,1,0), 2 );
+
+			}
+
+		}	
+	}
 
 
 			//=================================
