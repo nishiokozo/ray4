@@ -1092,6 +1092,7 @@ struct Apr : public Sys
 
 	struct
 	{
+/*
 		//------------------------------------------------------------------------------
 		void DrawGrid( SysGra& gra, Pers& pers, vect3 pos, int NUM_U, int NUM_V, float dt, rgb col )
 		//------------------------------------------------------------------------------
@@ -1137,8 +1138,63 @@ struct Apr : public Sys
 				}
 			}
 		}
+*/
+		//------------------------------------------------------------------------------
+		void DrawGrid3d( SysGra& gra, Pers& pers,  vect3 pos, mat33 m, int NUM_U, int NUM_V, float dt, rgb col  )
+		//------------------------------------------------------------------------------
+		{	// ミニグリッド
+			vect3 vt = vect3(0,0,0);
+			float du = (float)NUM_U*dt;
+			float dv = (float)NUM_V*dt;
+			vect3 a;
+			vect3 b;
+			{
+				a = pos+vect3(-du, 0,-du);
+				b = pos+vect3( du, 0,-du);
+				vt = vect3(0,0,dt);
+				for ( int i = 0 ; i < NUM_V*2+1 ; i++ )
+				{
+					vect3 v0 = a * m;
+					vect3 v1 = b * m;
+					g_line3d_scissor( gra, pers, v0, v1, col );
+					a+=vt;
+					b+=vt;
+				}
+			}			
+			{
 
+				a = pos+vect3(-dv, 0, dv);
+				b = pos+vect3(-dv, 0,-dv);
+				vt = vect3(dt,0,0);
+				for ( int i = 0 ; i < NUM_U*2+1 ; i++ )
+				{
+					vect3 v0 = a * m;
+					vect3 v1 = b * m;
+					g_line3d_scissor( gra, pers, v0, v1, col );
+					a+=vt;
+					b+=vt;
+				}
+			}			
+
+			{//原点表示
+				float r = 0.1;
+				vect3 a;
+				for ( int i = 0 ; i <= 360 ; i+=20 )
+				{
+					vect3 b = vect3( r*cos(rad((float)i)), 0, r*sin(rad((float)i)) ) + pos;
+					if ( i > 0 ) 
+					{
+						vect3 v0 = a * m;
+						vect3 v1 = b * m;
+						g_line3d( gra, pers, v0,v1, col );
+					}
+					a = b;
+				}
+			}
+		}
+		//------------------------------------------------------------------------------
 		void Draw2D( SysGra& gra, Pers& pers, vect2 pos, rgb col )
+		//------------------------------------------------------------------------------
 		{
 			gra.Line( vect2(-1,pos.y), vect2(1,pos.y), col*0);
 			gra.Line( vect2(pos.x,-1), vect2(pos.x,1), col*0);
@@ -1237,7 +1293,9 @@ struct Apr : public Sys
 	//				{	14,	13, 12	},	// xマーク
 			};
 
+			//------------------------------------------------------------------------------
 			Drum()
+			//------------------------------------------------------------------------------
 			{
 				{
 					int	ofs = (signed)vert.size();
@@ -1668,6 +1726,9 @@ struct Apr : public Sys
 
 		pers.cam.pos = vect3(  0.3, 1.7, -1.7 );
 		pers.cam.at = vect3( 0,  0.7, 0 );
+
+		pers.cam.pos = vect3(  0.0, 0.7, -10.0 );
+		pers.cam.at = vect3( 0,  0.7, 0 );
 	#endif
 
 		//===========================================================================
@@ -1752,58 +1813,8 @@ struct Apr : public Sys
 			//=================================
 			// 床グリッド描画
 			//=================================
-			grid.DrawGrid( gra, pers, vect3(0,0,0), 10, 10, 1, vect3(0.2,0.2,0.2) );
+			grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 
-	{
-		vect2 sc = vect2(1/pers.aspect,1);
-		vect2 pos = vect2(-0.55,-0.5);
-		rgb	col = vect3(0.2,0.2,0.2);
-
-		gra.Clr(rgb(0.3,0.3,0.3));
-		grid.Draw2D( gra, pers, pos, col );
-
-
-		float n = 30;
-		float scale = 0.2;
-		float a = 0.1;
-
-		{
-			float v = 0;
-			float s = 0;
-			
-
-			for ( float t = 0 ; t < n ; t+=1 )
-			{
-
-				v += a;
-				s += v;
-
-				vect2 v = vect2(t/pers.aspect,s)*scale+pos;
-				gra.Pset( v, rgb(0,1,0), 3 );
-				gra.Print( v, to_string(s) );
-				
-			}
-		
-		}
-
-		float dt = 1.0;
-		{
-			float v = 0;
-			float s = 0;
-
-			for ( float t = 0 ; t < n ; t+=dt )
-			{
-				v = a * t;
-				s = v * t/2;
-
-				vect2 v = vect2(t/pers.aspect,s)*scale+pos;
-				gra.Pset( v, rgb(1,0,0), 3 );
-				gra.Print( v, to_string(s) );
-
-			}
-
-		}	
-	}
 
 
 			//=================================
@@ -1991,6 +2002,65 @@ struct Apr : public Sys
 			// マニュピレーター描画
 			//=================================
 //			axis.DrawAxis( mouse.pos, *this );
+
+			//=================================
+			// グラフ実験
+			//=================================
+			{
+				rgb	col = vect3(0.2,0.2,0.2);
+
+				gra.Clr(rgb(0.3,0.3,0.3));
+				grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
+//				grid.Draw2D( gra, pers, vect2(0,0), rgb(0.2,0.2,0.2) );
+
+
+				float n = 10;
+				{
+					float dt = 0.2;
+					float a = 1*dt*dt;
+					float v = 0;
+					float s = 0;
+
+					for ( float t = 0 ; t < n ; t+=dt )
+					{
+						g_pset2d( gra, pers, vect2(t,s), rgb(1,0,0), 5 );
+						g_print2d( gra, pers, vect2(t,s), to_string(s) );
+
+						v += a;
+						s += v;
+					}
+				}
+
+				{
+					float a = 1.0;
+					float v = 0;
+					float s = 0;
+
+					float t0 = 0;
+					float v0 = v;
+					float s0 = s;
+
+					for ( float t = 0 ; t < n ; t+=0.1 )
+					{
+						v = a * t;
+						s = v * t * 0.5f;
+
+						g_line2d( gra, pers, vect2(t0,s0), vect2(t,s), rgb(0,0.5,1), 1 );
+						g_line2d( gra, pers, vect2(t0,v0), vect2(t,v), rgb(0,1,0), 1 );
+
+						g_pset2d( gra, pers, vect2(t,s), rgb(0,0.5,1), 3 );
+						g_pset2d( gra, pers, vect2(t,v), rgb(0,1,0), 3 );
+						g_print2d( gra, pers, vect2(t,s), to_string(s) );
+					
+						t0 = t;
+						v0 = v;
+						s0 = s;
+
+
+					}
+				}
+
+			}
 
 			//=================================
 			// 処理時間表示
