@@ -1090,7 +1090,7 @@ struct Apr : public Sys
 
 	
 
-	struct
+	struct Grid
 	{
 /*
 		//------------------------------------------------------------------------------
@@ -1693,10 +1693,74 @@ struct Apr : public Sys
 	} util;
 
 
+	struct
+	{
+		void graph( SysGra& gra, Pers& pers, Grid& grid )
+		{
+	//		pers.cam.at = pers.cam.pos;
+	//		pers.cam.at.z = 0;
+
+			rgb	col = vect3(0.2,0.2,0.2);
+
+			gra.Clr(rgb(0.3,0.3,0.3));
+			grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
+//				grid.Draw2D( gra, pers, vect2(0,0), rgb(0.2,0.2,0.2) );
+
+
+			float n = 10;
+			{
+				float dt = 0.2;
+				float a = 1*dt*dt;
+				float v = 0;
+				float s = 0;
+
+				for ( float t = 0 ; t < n ; t+=dt )
+				{
+		//			g_pset2d( gra, pers, vect2(t,s), rgb(1,0,0), 5 );
+		//			g_print2d( gra, pers, vect2(t,s), to_string(s) );
+
+					v += a;
+					s += v;
+				}
+			}
+
+			{
+				float a = 0.5;
+				float v = 0;
+				float s = 0;
+
+				float t0 = 0;
+				float v0 = v;
+				float s0 = s;
+
+				for ( float t = 0 ; t < n ; t+=0.1 )
+				{
+					v = a * t;
+					s = v * t * 0.5f;
+
+					g_line2d( gra, pers, vect2(t0,s0), vect2(t,s), rgb(0,0.5,1), 1 );
+					g_line2d( gra, pers, vect2(t0,v0), vect2(t,v), rgb(0,1,0), 1 );
+
+					g_pset2d( gra, pers, vect2(t,s), rgb(0,0.5,1), 3 );
+					g_pset2d( gra, pers, vect2(t,v), rgb(0,1,0), 3 );
+					g_print2d( gra, pers, vect2(t,s), to_string(s) );
+				
+					t0 = t;
+					v0 = v;
+					s0 = s;
+
+
+				}
+			}
+
+		}
+	} test;
+
 	//------------------------------------------------------------------------------
 	int main()
 	//------------------------------------------------------------------------------
 	{
+
 		int text_y = 0;
 
 		//=================================
@@ -1730,6 +1794,7 @@ struct Apr : public Sys
 		pers.cam.pos = vect3(  0.0, 0.7, -10.0 );
 		pers.cam.at = vect3( 0,  0.7, 0 );
 	#endif
+
 
 		//===========================================================================
 		while( Update() )
@@ -2001,66 +2066,14 @@ struct Apr : public Sys
 			//=================================
 			// マニュピレーター描画
 			//=================================
-//			axis.DrawAxis( mouse.pos, *this );
+			axis.DrawAxis( mouse.pos, *this );
 
 			//=================================
 			// グラフ実験
 			//=================================
-			{
-				rgb	col = vect3(0.2,0.2,0.2);
 
-				gra.Clr(rgb(0.3,0.3,0.3));
-				grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
-//				grid.Draw2D( gra, pers, vect2(0,0), rgb(0.2,0.2,0.2) );
+//			test.graph( gra, pers, grid );
 
-
-				float n = 10;
-				{
-					float dt = 0.2;
-					float a = 1*dt*dt;
-					float v = 0;
-					float s = 0;
-
-					for ( float t = 0 ; t < n ; t+=dt )
-					{
-						g_pset2d( gra, pers, vect2(t,s), rgb(1,0,0), 5 );
-						g_print2d( gra, pers, vect2(t,s), to_string(s) );
-
-						v += a;
-						s += v;
-					}
-				}
-
-				{
-					float a = 1.0;
-					float v = 0;
-					float s = 0;
-
-					float t0 = 0;
-					float v0 = v;
-					float s0 = s;
-
-					for ( float t = 0 ; t < n ; t+=0.1 )
-					{
-						v = a * t;
-						s = v * t * 0.5f;
-
-						g_line2d( gra, pers, vect2(t0,s0), vect2(t,s), rgb(0,0.5,1), 1 );
-						g_line2d( gra, pers, vect2(t0,v0), vect2(t,v), rgb(0,1,0), 1 );
-
-						g_pset2d( gra, pers, vect2(t,s), rgb(0,0.5,1), 3 );
-						g_pset2d( gra, pers, vect2(t,v), rgb(0,1,0), 3 );
-						g_print2d( gra, pers, vect2(t,s), to_string(s) );
-					
-						t0 = t;
-						v0 = v;
-						s0 = s;
-
-
-					}
-				}
-
-			}
 
 			//=================================
 			// 処理時間表示
