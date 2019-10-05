@@ -370,7 +370,7 @@ void SysGra::Circle( vect2 v, float r, rgb col )
 //		v0 = v0/ aspect;
 		for ( int i = 0 ; i < 360 ; i+=30 )
 		{
-			float th = rad((float)i);
+			float th = deg2rad((float)i);
 			vect2 v1 = vect2( r*cos(th)/aspect, r*sin(th) )+v;
 
 			//gl

@@ -1,6 +1,6 @@
 
 // 輪
-struct Ring
+struct Skin
 {
 	struct PrimTrigon
 	{
@@ -250,7 +250,7 @@ struct Skeleton
 
 
 	//
-	Ring ring;
+	Skin skin;
 
 //	void UtilUpdate( Pers& pers, SysGra& gra, SysMouse& mouse );
 

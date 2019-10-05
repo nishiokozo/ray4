@@ -80,7 +80,7 @@ struct Pers
 	//--------------------------------------------------------------------------
 	{
 		fovy=90/2;
-//		sz = 1/tan(rad(fovy)/2);				// 投影面までの距離
+//		sz = 1/tan(deg2rad(fovy)/2);				// 投影面までの距離
 		rate = 8.0f*8;
 
 	}
@@ -92,11 +92,11 @@ struct Pers
 	#if 0
 		//投影面サイズ基準
 		fy = 1;									// 投影面の高さ/2
-		sz = fy/tan(rad(fovy)/2);				// 投影面までの距離
+		sz = fy/tan(deg2rad(fovy)/2);				// 投影面までの距離
 	#else
 		//投影面までの距離基準	こちらの方がニアクリップがしやすく扱いやすい。
 		sz = 1.0;								// 投影面までの距離
-		fy = sz*tan(rad(fovy)/2);				// 投影面の高さ/2
+		fy = sz*tan(deg2rad(fovy)/2);				// 投影面の高さ/2
 	#endif
 		aspect	= screensize.x/screensize.y;	// 描画画面のアスペクト比
 

@@ -508,6 +508,8 @@ void cource_moveCutmull( Pers& pers, vector<Point3>& tbl, vect2& mmov )
 }
 struct Cource
 {
+	bool	bActive = false;	//	使用可能
+
 	int idxTbl = 0;
 	vector<Obj*> tblPoint =
 	{
@@ -528,7 +530,8 @@ struct Cource
 		}	
 	}
 	
-} infCource;
+};
+;
 
 vector<Obj*>	dummy_tblPoint = { new Obj };
 struct Bezier
@@ -1131,7 +1134,7 @@ struct Apr : public Sys
 				vect3 v0;
 				for ( int i = 0 ; i <= 360 ; i+=20 )
 				{
-					vect3 p = vect3( r*cos(rad((float)i)), 0, r*sin(rad((float)i)) ) + pos;
+					vect3 p = vect3( r*cos(deg2rad((float)i)), 0, r*sin(deg2rad((float)i)) ) + pos;
 					vect3 v1 = pers.calcWorldToScreen3( p );
 					if ( i > 0 ) gra.Line( v0,v1, col );
 					v0 = v1;
@@ -1181,7 +1184,7 @@ struct Apr : public Sys
 				vect3 a;
 				for ( int i = 0 ; i <= 360 ; i+=20 )
 				{
-					vect3 b = vect3( r*cos(rad((float)i)), 0, r*sin(rad((float)i)) ) + pos;
+					vect3 b = vect3( r*cos(deg2rad((float)i)), 0, r*sin(deg2rad((float)i)) ) + pos;
 					if ( i > 0 ) 
 					{
 						vect3 v0 = a * m;
@@ -1214,10 +1217,60 @@ struct Apr : public Sys
 	} grid;
 	
 	
+	// タイヤ
+	struct Tire
+	{
 
+		vector<vect3> vert;
+		vector<vect3> disp;
 
+		//------------------------------------------------------------------------------
+		Tire()
+		//------------------------------------------------------------------------------
+		{
+			float r = 1.0;
+			for ( float t = 0 ; t < 2*pi ; t+=deg2rad(5) )
+			{
+				float x = 0;
+				float y = r * sin(t);
+				float z = r * cos(t);
 
+				vert.emplace_back( x, y, z );
+			}
+		}
 
+		//------------------------------------------------------------------------------
+		void DrawRing( SysGra& gra, Pers& pers, vect3 pos, float head, float bank, float radius )
+		//------------------------------------------------------------------------------
+		{
+			mat33 m = mrotz(bank) * mroty(head);
+
+			rgb col(0,1,1);
+			int i = 0;
+			vect3 v0;
+			for ( vect3 v : vert )
+			{
+				vect3 v1 = v*radius * m + pos;
+
+				if ( i > 0 ) 
+				{
+					g_line3d( gra, pers, v0, v1, col, 2 );
+
+					// 影
+					vect3 a0= v0;
+					vect3 a1= v1;
+					a0.y=0;
+					a1.y=0;
+					g_line3d( gra, pers, a0, a1, col/4, 2 );
+				}
+
+				v0 = v1;
+				i++;
+			}
+
+		}
+		
+	} tire;
 
 
 	struct
@@ -1304,8 +1357,8 @@ struct Apr : public Sys
 					float w = 0.05;
 					for ( int i = 0 ; i < 360 ; i+= 30 )
 					{
-						float z = r*cos(rad((float)i));
-						float y = r*sin(rad((float)i));
+						float z = r*cos(deg2rad((float)i));
+						float y = r*sin(deg2rad((float)i));
 						vert.emplace_back(-w,y,z);
 						vert.emplace_back( w,y,z);
 						vert.emplace_back( w,y*0.5,z*0.5);
@@ -1390,7 +1443,6 @@ struct Apr : public Sys
 		void skeleton_update( SysKeys& keys, SysMouse& mouse, Pers& pers, Skeleton& skeleton )
 		//-------------------------------------------------------------------------
 		{
-	//			if ( skeleton.bActive )
 			if ( skeleton.bActive )
 			{
 
@@ -1556,8 +1608,8 @@ struct Apr : public Sys
 						nz.x,	nz.y,	nz.z
 					);
 
-					if ( keys.CTRL.on )		mkata.rotateByAxis( (p4-p2).normalize(), rad(0.5));
-					if ( keys.SHIFT.on )	mkata.rotateByAxis( (p4-p2).normalize(), rad(-0.5));
+					if ( keys.CTRL.on )		mkata.rotateByAxis( (p4-p2).normalize(), deg2rad(0.5));
+					if ( keys.SHIFT.on )	mkata.rotateByAxis( (p4-p2).normalize(), deg2rad(-0.5));
 					
 					box.DrawBox( gra, pers, p2, mkata );
 				}
@@ -1643,7 +1695,7 @@ struct Apr : public Sys
 					mx.setRotateX(-rx);
 					mat44 m = mx * my;
 
-					skeleton.ring.ring_DrawMat( gra, pers, vect3(  0,0,0), m );
+					skeleton.skin.skin( gra, pers, vect3(  0,0,0), m );
 				}
 			#endif
 
@@ -1703,7 +1755,7 @@ struct Apr : public Sys
 			rgb	col = vect3(0.2,0.2,0.2);
 
 			gra.Clr(rgb(0.3,0.3,0.3));
-			grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
+			grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
 //				grid.Draw2D( gra, pers, vect2(0,0), rgb(0.2,0.2,0.2) );
 
 
@@ -1782,6 +1834,14 @@ struct Apr : public Sys
 			pSkeleton = move(pNew);
 		}
 
+		//=================================
+		// cource 定義
+		//=================================
+		unique_ptr<Cource> pCource(new Cource);
+	//	(*pCource).bActive = true;	//	使用可能
+
+
+
 		cout<<fixed<<setprecision(24);
 
 	#if 1 // camera
@@ -1791,7 +1851,7 @@ struct Apr : public Sys
 		pers.cam.pos = vect3(  0.3, 1.7, -1.7 );
 		pers.cam.at = vect3( 0,  0.7, 0 );
 
-		pers.cam.pos = vect3(  0.0, 0.7, -10.0 );
+		pers.cam.pos = vect3(  0.5, 2.7, -5.0 );
 		pers.cam.at = vect3( 0,  0.7, 0 );
 	#endif
 
@@ -1806,8 +1866,8 @@ struct Apr : public Sys
 			//=================================
 			{
 				// パースペクティブ
-				if (keys.Y.rep) {pers.fovy-=2;cout << pers.fovy <<" "<<1/tan(rad(pers.fovy)) << endl; }
-				if (keys.H.rep) {pers.fovy+=2;cout << pers.fovy <<" "<<1/tan(rad(pers.fovy)) << endl; }
+				if (keys.Y.rep) {pers.fovy-=2;cout << pers.fovy <<" "<<1/tan(deg2rad(pers.fovy)) << endl; }
+				if (keys.H.rep) {pers.fovy+=2;cout << pers.fovy <<" "<<1/tan(deg2rad(pers.fovy)) << endl; }
 
 				// パース更新
 				pers.Update( vect2( gra.GetWidth(), gra.GetHeight() ) );
@@ -1906,14 +1966,19 @@ struct Apr : public Sys
 			//=================================
 			//	登録
 			//=================================
-			vector<vector<Obj*>> tbls = 
+			vector<vector<Obj*>> tbls = {dummy_tblPoint};	// 0 はダミー
+
+			if ( (*pCource).bActive )
 			{
-				dummy_tblPoint,	// 0 はダミー
-				infCource.tblPoint,
-				(*pSkeleton).tblPoint,
-			};
-			infCource.idxTbl = 1;
-			(*pSkeleton).idxTbl = 2;
+				(*pCource).idxTbl = (signed)tbls.size();
+				tbls.emplace_back( (*pCource).tblPoint );
+			}
+
+			if ( (*pSkeleton).bActive )
+			{
+				(*pSkeleton).idxTbl = (signed)tbls.size();
+				tbls.emplace_back( (*pSkeleton).tblPoint );
+			}
 
 			//=================================
 			//	GUI操作
@@ -1983,24 +2048,28 @@ struct Apr : public Sys
 			}
 
 			//=================================
-			//	表示
+			// skeleton 描画
 			//=================================
+			util.skeleton_draw( gra, keys, mouse, pers, (*pSkeleton), text_y );
+
+			//=================================
+			//	infCource 表示
+			//=================================
+			if ( (*pCource).bActive ) 
 			{
 				// マウスベクトル
 				vect3 P = pers.calcScreenToWorld3( vect3(mouse.pos,0) );
 				vect3 I = pers.calcRayvect( P );
 
-				// skeleton 描画
-				util.skeleton_draw( gra, keys, mouse, pers, (*pSkeleton), text_y );
-
 				// 表示 加工 ベジェ 三次曲線
-				bezier.cource_exec_drawBezier( gra, pers, infCource.tblPoint, infCource.idxPoint, infCource.idxTbl, P, I, keys.E.on, mouse.L.hi );
-
-				// 表示 矩形カーソル、制御点
-				gui.DrawController( pers, gra, tbls, mouse.pos );
-
+				bezier.cource_exec_drawBezier( gra, pers, (*pCource).tblPoint, (*pCource).idxPoint, (*pCource).idxTbl, P, I, keys.E.on, mouse.L.hi );
 
 			}
+
+			//=================================
+			// 表示 矩形カーソル、制御点
+			//=================================
+			gui.DrawController( pers, gra, tbls, mouse.pos );
 			
 			//=================================
 			// コース描画
@@ -2059,20 +2128,43 @@ struct Apr : public Sys
 			gra.Print(1,(float)text_y++,string("idxTbl=")+to_string(gui.one.idxTbl) ); 
 			gra.Print(1,(float)text_y++,string("idxObj=")+to_string(gui.one.idxObj) ); 
 
-//			gra.Print(1,(float)text_y++,string("tbl size=")+to_string(infCource.tblPoint.size()) ); 
-//			gra.Print(1,(float)text_y++,string("idx size=")+to_string(infCource.idxPoint.size()) ); 
-
-
 			//=================================
-			// マニュピレーター描画
+			// 描画	マニュピレーター
 			//=================================
 			axis.DrawAxis( mouse.pos, *this );
 
 			//=================================
-			// グラフ実験
+			// 描画	グラフ実験
 			//=================================
 
-//			test.graph( gra, pers, grid );
+		//	test.graph( gra, pers, grid );
+
+			//=================================
+			// 描画	タイヤ実験
+			//=================================
+			{
+				static vect3 pos = vect3(0,2.0,0);
+				static vect3 acc= vect3(0,0,0.0);
+				static float radius = 0.5;
+				static float rad = deg2rad(0);		//	角速度
+				static float head = deg2rad(35);	//	タイヤの方向
+				static float bank = deg2rad(0);	//	各速度
+				
+				if ( mouse.F.hi ) acc += vect3( sin(head), 0, cos(head) )*0.02;
+				if ( mouse.B.hi ) acc += vect3( sin(head), 0, cos(head) )*-0.01;
+				if ( mouse.R.hi ) bank += deg2rad(10);
+
+				acc.y += -0.01;
+
+				pos += acc ;
+
+				// 衝突
+				if ( radius > pos.y ) pos.y = radius;
+		
+
+				tire.DrawRing( gra, pers, pos, head, bank, radius );
+			}
+
 
 
 			//=================================

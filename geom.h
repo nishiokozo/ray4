@@ -167,9 +167,9 @@ public:
 class vect3
 {
 public:
-	union { float	x, r; };
-	union { float	y, g; }; 
-	union {	float	z, b; };
+	union { float	x, r, pitch; };
+	union { float	y, g, head,	yaw; }; 
+	union {	float	z, b, bank,	roll; };
 
 
 	vect3() :x(0),y(0),z(0){};
@@ -282,8 +282,8 @@ extern vect3	normalize( vect3 a );
 
 //#define	rad(n)	((n)*M_PI/180.0f)
 //#define	deg(n)	((n)*180.0f/M_PI)
-extern	float rad( float n );
-extern	float deg( float n );
+extern	float deg2rad( float n );
+extern	float rad2deg( float n );
 extern	float atan2_360( float y, float x );
 extern	float atan2_180( float y, float x );
 

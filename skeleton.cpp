@@ -724,7 +724,7 @@ void Skeleton::DrawSkeleton( Pers& pers, SysGra& gra )
 						my.setRotateY(-ry);
 						mx.setRotateX(-rx);
 						mat44 m = mx * my;
-						ring.ring_DrawMat( gra, pers, pos, m );
+						skin.ring_DrawMat( gra, pers, pos, m );
 					}
 
 				}
