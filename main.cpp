@@ -2144,7 +2144,65 @@ struct Apr : public Sys
 			//=================================
 			// 描画	振り子実験
 			//=================================
+#if 0
 			{
+				gra.Clr(rgb(0.3,0.3,0.3));
+				grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
+
+				const float G = 9.8;				// 重力加速度
+				const float T = 1.0/60.0;			// 時間/frame
+				const float grate = 9.8 *T*T;		// 重力加速度/frame
+
+				static float	radius = 1.0;
+				static vect3	v0 = vect3(0, 2,0);
+				static vect3	v1 = v0+vect3(radius,0,0);
+				static float	rsp = 0;
+				static vect3	vsp = 0;
+
+				g_line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
+
+				// 角度リセット
+				if ( keys.R.hi )	{v1 = v0+vect3((v1-v0).abs(),0,0);rsp=0;}
+
+				// 縮む
+				if ( mouse.F.hi )	v1 = (v1+v0)/2;
+
+				// 伸びる
+				if ( mouse.B.hi )	v1 = (v1-v0)*2+v0;
+
+				{
+					vect3 v = v1-v0;
+//					float bank = atan2(v.x,v.y);
+					float bank = acos(dot(vect3(0,1,0),v));
+//					if ( bank > pi ) bank-pi)
+					
+					// 角速度に変換
+					float tsp = -grate * sin(bank);	//	接線速度
+					float ty = tsp * cos(pi/2-bank);
+					float tx = tsp * sin(pi/2-bank);
+					
+					vect3 vr = vect3(0,ty,0);
+
+					vsp += vr;
+					
+//					float r = tsp/2/pi/v.abs();		//	角加速度
+//					rsp +=r;						//	角速度
+//			gra.Print(1,(float)text_y++,string("r=")+to_string(sin(bank))); 
+
+					// 回転
+//					float x = v.x *cos(rsp) - v.y*sin(rsp); 
+//					float y = v.x *sin(rsp) + v.y*cos(rsp); 
+//					v1 = v0+vect3(x,y,0);
+					v1 += vsp;
+				}
+
+				
+			}
+#else
+			{
+				gra.Clr(rgb(0.3,0.3,0.3));
+				grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
+
 				const float G = 9.8;				// 重力加速度
 				const float T = 1.0/60.0;			// 時間/frame
 				const float grate = 9.8 *T*T;		// 重力加速度/frame
@@ -2157,7 +2215,7 @@ struct Apr : public Sys
 				g_line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
 
 				// 角度リセット
-				if ( mouse.R.hi )	{v1 = v0+vect3((v1-v0).abs(),0,0);rsp=0;}
+				if ( keys.R.hi )	{v1 = v0+vect3((v1-v0).abs(),0,0);rsp=0;}
 
 				// 縮む
 				if ( mouse.F.hi )	v1 = (v1+v0)/2;
@@ -2170,7 +2228,7 @@ struct Apr : public Sys
 					float bank = atan2(v.x,v.y);
 
 					// 角速度に変換
-					float tsp = -grate * sin(bank);	//	接戦速度
+					float tsp = -grate * sin(bank);	//	接線速度
 					float r = tsp/2/pi/v.abs();		//	角加速度
 					rsp +=r;						//	角速度
 
@@ -2181,9 +2239,10 @@ struct Apr : public Sys
 
 				}
 
-			gra.Print(1,(float)text_y++,string("len=")+to_string((v1-v0).abs()) ); 
+			//gra.Print(1,(float)text_y++,string("len=")+to_string((v1-v0).abs()) ); 
 				
 			}
+#endif
 
 			//=================================
 			// 描画	タイヤ実験
