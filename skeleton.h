@@ -108,16 +108,14 @@ struct Obj
 
 	vect3	pos;
 
+	Obj(){};
+	Obj( vect3 _pos ) : pos(_pos){};
 	virtual ~Obj(){};
 };
 
 
 struct Joint : Obj
 {
-//	bool 	bSelected		= false;		//	選択
-//	bool 	bPreselect		= false;		//	仮選択
-
-//	vect3 pos;
 	vect3 tension;
 	vect3 disp;
 	float len;

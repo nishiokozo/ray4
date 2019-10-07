@@ -2139,9 +2139,56 @@ struct Apr : public Sys
 
 		//	test.graph( gra, pers, grid );
 
+
+
+			//=================================
+			// 描画	振り子実験
+			//=================================
+			{
+				const float G = 9.8;				// 重力加速度
+				const float T = 1.0/60.0;			// 時間/frame
+				const float grate = 9.8 *T*T;		// 重力加速度/frame
+
+				static float	radius = 1.0;
+				static vect3	v0 = vect3(0, 2,0);
+				static vect3	v1 = v0+vect3(radius,0,0);
+				static float	rsp = 0;
+
+				g_line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
+
+				// 角度リセット
+				if ( mouse.R.hi )	{v1 = v0+vect3((v1-v0).abs(),0,0);rsp=0;}
+
+				// 縮む
+				if ( mouse.F.hi )	v1 = (v1+v0)/2;
+
+				// 伸びる
+				if ( mouse.B.hi )	v1 = (v1-v0)*2+v0;
+
+				{
+					vect3 v = v1-v0;
+					float bank = atan2(v.x,v.y);
+
+					// 角速度に変換
+					float tsp = -grate * sin(bank);	//	接戦速度
+					float r = tsp/2/pi/v.abs();		//	角加速度
+					rsp +=r;						//	角速度
+
+					// 回転
+					float x = v.x *cos(rsp) - v.y*sin(rsp); 
+					float y = v.x *sin(rsp) + v.y*cos(rsp); 
+					v1 = v0+vect3(x,y,0);
+
+				}
+
+			gra.Print(1,(float)text_y++,string("len=")+to_string((v1-v0).abs()) ); 
+				
+			}
+
 			//=================================
 			// 描画	タイヤ実験
 			//=================================
+if(0)
 			{
 				const vect3 G_pos = vect3(0,2.0,0);
 				const vect3 G_acc= vect3(0,0,0.0);
@@ -2181,15 +2228,15 @@ struct Apr : public Sys
 							acc1 += vect3( sin(head), 0, cos(head) )*0.02;
 							acc2 += vect3( sin(head), 0, cos(head) )*0.02;
 						}
-						if ( mouse.B.hi ) bank += deg2rad(5);
-						if ( mouse.R.hi ) bank += deg2rad(-5);
+						if ( mouse.B.hi ) rspd += deg2rad(5);
+						if ( mouse.R.hi ) rspd += deg2rad(-5);
 					}
 
 					// 重力
 					{
 						acc1.y -= grate;
 						acc2.y -= grate;
-						pos += (acc1+acc2)/2 ;
+//						pos += (acc1+acc2)/2 ;
 					}
 
 					// 回転
@@ -2243,7 +2290,7 @@ struct Apr : public Sys
 
 				// 減衰	空気抵抗
 				{
-						rspd *= 0.99;
+//						rspd *= 0.99;
 				}
 
 				// 描画
