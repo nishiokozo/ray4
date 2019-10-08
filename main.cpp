@@ -2159,7 +2159,6 @@ struct Apr : public Sys
 				static vect3	v1 = v0+vect3(radius,0,0);
 				static vect3	v2 = v0+vect3(radius,0,0);
 				static float	rsp = 0;
-				static vect3	vg = vect3(0,-g,0);	//	重力加速度ベクトル
 				static vect3	vv = 0;
 
 
@@ -2174,27 +2173,42 @@ struct Apr : public Sys
 
 			#if 1
 				{
-					vect3 v = (v1-v0).normalize();
-					float b = atan2(v.x,v.y);
+					vect3 v = (v1-v0);
+
 					// 角速度に変換
-					float t = -g * sin(b);	//	接線速度
-					float r = t/2/pi/v.abs();		//	角加速度
-					rsp +=r;						//	角速度
+					{
+						float b = atan2(v.x,v.y);
+						float t = -g * sin(b);			//	接線速度
+						float r = t/2/pi/v.abs();		//	角加速度
+						rsp +=r;						//	角速度
+					}
 
 					// 回転
-					float x = v.x *cos(rsp) - v.y*sin(rsp); 
-					float y = v.x *sin(rsp) + v.y*cos(rsp); 
-					v1 = v0+vect3(x,y,0);
+					{
+						float x = v.x *cos(rsp) - v.y*sin(rsp); 
+						float y = v.x *sin(rsp) + v.y*cos(rsp); 
+						vect3 a = vect3(x,y,0);
+						v1 = v0 + a;
 
-					vect3 n0 = cross( v, vg );
-					vect3 vt = cross( n0, v );
+						g_line3d( gra, pers, v1, v1+(a-v)*10, rgb(1,0,0),2 );
+					}
 
-					g_line3d( gra, pers, v1, v1+vt*100, rgb(0,1,0) );
 					g_line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
+
+					// 加速ベクトルの実験
+					{
+						vect3 vg = vect3(0,-g,0);	//	重力加速度ベクトル
+						vect3 n0 = cross( v, vg );
+						vect3 vt = cross( n0, v );
+
+						g_line3d( gra, pers, v1, v1+vt*100, rgb(0,1,0) );
+					}
+
 				}
 			#endif
-			#if 1
+			#if 0
 				{
+					vect3 vg = vect3(0,-g,0);	//	重力加速度ベクトル
 					vect3 v = (v2-v0).normalize();
 					vect3 n0 = cross( v, vg );
 					vect3 vt = cross( n0, v );
@@ -2202,8 +2216,12 @@ struct Apr : public Sys
 					vv += vt;
 					v2 += vt*10;
 
+//					g_line3d( gra, pers,  0,  vv*10, rgb(0,1,1), 2 );
+					g_line3d( gra, pers,  vect3(1,0,0),  vect3(1,0,0)+vt*100, rgb(0,1,0), 1 );
+
 					g_line3d( gra, pers, v2, v2+vt*100, rgb(0,1,0) );
 					g_line3d( gra, pers, v0, v2, rgb(0,1,1), 2 );
+
 				}
 			#endif
 
