@@ -1851,8 +1851,9 @@ struct Apr : public Sys
 		pers.cam.pos = vect3(  0.3, 1.7, -1.7 );
 		pers.cam.at = vect3( 0,  0.7, 0 );
 
-		pers.cam.pos = vect3(  0.5, 2.7, -5.0 );
-		pers.cam.at = vect3( 0,  0.7, 0 );
+		//2D グラフ用
+		pers.cam.pos = vect3(  0.0, 0.0, -7.0 );
+		pers.cam.at = vect3( 0,  0.0, 0 );
 	#endif
 
 
@@ -2144,22 +2145,23 @@ struct Apr : public Sys
 			//=================================
 			// 描画	振り子実験
 			//=================================
-#if 0
+#if 1
 			{
 				gra.Clr(rgb(0.3,0.3,0.3));
 				grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
 
 				const float G = 9.8;				// 重力加速度
 				const float T = 1.0/60.0;			// 時間/frame
-				const float grate = 9.8 *T*T;		// 重力加速度/frame
+				const float g = 9.8 *T*T;		// 重力加速度/frame
 
 				static float	radius = 1.0;
 				static vect3	v0 = vect3(0, 2,0);
 				static vect3	v1 = v0+vect3(radius,0,0);
+				static vect3	v2 = v0+vect3(radius,0,0);
 				static float	rsp = 0;
-				static vect3	vsp = 0;
+				static vect3	vg = vect3(0,-g,0);	//	重力加速度ベクトル
+				static vect3	vv = 0;
 
-				g_line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
 
 				// 角度リセット
 				if ( keys.R.hi )	{v1 = v0+vect3((v1-v0).abs(),0,0);rsp=0;}
@@ -2170,32 +2172,42 @@ struct Apr : public Sys
 				// 伸びる
 				if ( mouse.B.hi )	v1 = (v1-v0)*2+v0;
 
+			#if 1
 				{
-					vect3 v = v1-v0;
-//					float bank = atan2(v.x,v.y);
-					float bank = acos(dot(vect3(0,1,0),v));
-//					if ( bank > pi ) bank-pi)
-					
+					vect3 v = (v1-v0).normalize();
+					float b = atan2(v.x,v.y);
 					// 角速度に変換
-					float tsp = -grate * sin(bank);	//	接線速度
-					float ty = tsp * cos(pi/2-bank);
-					float tx = tsp * sin(pi/2-bank);
-					
-					vect3 vr = vect3(0,ty,0);
-
-					vsp += vr;
-					
-//					float r = tsp/2/pi/v.abs();		//	角加速度
-//					rsp +=r;						//	角速度
-//			gra.Print(1,(float)text_y++,string("r=")+to_string(sin(bank))); 
+					float t = -g * sin(b);	//	接線速度
+					float r = t/2/pi/v.abs();		//	角加速度
+					rsp +=r;						//	角速度
 
 					// 回転
-//					float x = v.x *cos(rsp) - v.y*sin(rsp); 
-//					float y = v.x *sin(rsp) + v.y*cos(rsp); 
-//					v1 = v0+vect3(x,y,0);
-					v1 += vsp;
-				}
+					float x = v.x *cos(rsp) - v.y*sin(rsp); 
+					float y = v.x *sin(rsp) + v.y*cos(rsp); 
+					v1 = v0+vect3(x,y,0);
 
+					vect3 n0 = cross( v, vg );
+					vect3 vt = cross( n0, v );
+
+					g_line3d( gra, pers, v1, v1+vt*100, rgb(0,1,0) );
+					g_line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
+				}
+			#endif
+			#if 1
+				{
+					vect3 v = (v2-v0).normalize();
+					vect3 n0 = cross( v, vg );
+					vect3 vt = cross( n0, v );
+
+					vv += vt;
+					v2 += vt*10;
+
+					g_line3d( gra, pers, v2, v2+vt*100, rgb(0,1,0) );
+					g_line3d( gra, pers, v0, v2, rgb(0,1,1), 2 );
+				}
+			#endif
+
+			//gra.Print(1,(float)text_y++,string("len=")+to_string((v1-v0).abs()) ); 
 				
 			}
 #else
@@ -2225,10 +2237,10 @@ struct Apr : public Sys
 
 				{
 					vect3 v = v1-v0;
-					float bank = atan2(v.x,v.y);
+					float b = atan2(v.x,v.y);
 
 					// 角速度に変換
-					float tsp = -grate * sin(bank);	//	接線速度
+					float tsp = -grate * sin(b);	//	接線速度
 					float r = tsp/2/pi/v.abs();		//	角加速度
 					rsp +=r;						//	角速度
 
