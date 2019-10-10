@@ -72,6 +72,13 @@ struct One
 	
 };
 
+//unique
+static vector<Obj*> g_tblPoint =
+{
+	new Obj(vect3(0,0,0)),
+	new Obj(vect3(1,0,0)),
+};
+
 struct
 {
 	vect2 rect_st = vect2(0,0);			//	矩形選択開始位置
@@ -324,7 +331,7 @@ struct
 			int n2 = 0;
 			for ( vector<Obj*>& tblPoint : tbls )
 			{
-				if ( n2 > 0 ) 
+//				if ( n2 > 0 ) 
 				{
 					// ベジェ制御点
 					for ( Obj* po : tblPoint )
@@ -452,6 +459,19 @@ struct
 
 	}
 
+//	vector<Obj*>	dummy_tblPoint = { new Obj };
+//	vector<vector<Obj*>> tbls = {dummy_tblPoint};	// 0 はダミー
+	vector<vector<Obj*>> tbls;	// 0 はダミー
+
+	//------------------------------------------------------------------------------
+	int EntryTbl( vector<Obj*>tbl )
+	//------------------------------------------------------------------------------
+	{
+		int idx =  (signed)tbls.size();
+		tbls.emplace_back( tbl );
+		return idx;
+	}
+
 } gui;
 
 //------------------------------------------------------------------------------
@@ -533,7 +553,6 @@ struct Cource
 };
 ;
 
-vector<Obj*>	dummy_tblPoint = { new Obj };
 struct Bezier
 {
 	//------------------------------------------------------------------------------
@@ -1838,7 +1857,7 @@ struct Apr : public Sys
 		// cource 定義
 		//=================================
 		unique_ptr<Cource> pCource(new Cource);
-	//	(*pCource).bActive = true;	//	使用可能
+//		(*pCource).bActive = true;	//	使用可能
 
 
 
@@ -1848,11 +1867,12 @@ struct Apr : public Sys
 		pers.cam.pos = vect3(  0.3, 0.7, -1.2 );
 		pers.cam.at = vect3( 0,  0.7, 0 );
 
-		pers.cam.pos = vect3(  0.3, 1.7, -1.7 );
-		pers.cam.at = vect3( 0,  0.7, 0 );
 
 		//2D グラフ用
 		pers.cam.pos = vect3(  0.0, 0.0, -7.0 );
+		pers.cam.at = vect3( 0,  0.0, 0 );
+
+		pers.cam.pos = vect3(  0.5, 3.0, -3.0 );
 		pers.cam.at = vect3( 0,  0.0, 0 );
 	#endif
 
@@ -1964,22 +1984,15 @@ struct Apr : public Sys
 				g_line3d( gra, pers, P2, P3, vect3(1,1,1));
 			}
 
+
 			//=================================
 			//	登録
 			//=================================
-			vector<vector<Obj*>> tbls = {dummy_tblPoint};	// 0 はダミー
+			gui.tbls.clear();
+			if ( (*pCource).bActive ) (*pCource).idxTbl = gui.EntryTbl( (*pCource).tblPoint );
+			if ( (*pSkeleton).bActive ) (*pSkeleton).idxTbl = gui.EntryTbl( (*pSkeleton).tblPoint );
+			gui.EntryTbl( g_tblPoint );
 
-			if ( (*pCource).bActive )
-			{
-				(*pCource).idxTbl = (signed)tbls.size();
-				tbls.emplace_back( (*pCource).tblPoint );
-			}
-
-			if ( (*pSkeleton).bActive )
-			{
-				(*pSkeleton).idxTbl = (signed)tbls.size();
-				tbls.emplace_back( (*pSkeleton).tblPoint );
-			}
 
 			//=================================
 			//	GUI操作
@@ -1988,7 +2001,7 @@ struct Apr : public Sys
 
 				// 最近点検索
 				if ( !keys.ALT.on && mouse.L.hi ) 
-					gui.TouchFirst( pers, tbls, mouse.pos );
+					gui.TouchFirst( pers, gui.tbls, mouse.pos );
 
 				// 矩形カーソル開始 新規選択
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && gui.one.bEnable == false && gui.rect_mode == G_CALC::NONE ) 
@@ -2008,33 +2021,33 @@ struct Apr : public Sys
 
 				// 矩形カーソル終了（選択決定）
 				if ( !keys.ALT.on && !mouse.L.on && gui.rect_mode != G_CALC::NONE ) 
-					gui.SelectRectEnd( tbls );
+					gui.SelectRectEnd( gui.tbls );
 
 				// 矩形カーソル選択	
 				if ( !keys.ALT.on && mouse.L.on && gui.rect_mode != G_CALC::NONE ) 
-					gui.SelectRectBegin( pers, tbls , mouse.pos );
+					gui.SelectRectBegin( pers, gui.tbls , mouse.pos );
 
 				// 単独 新規選択
-				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && gui.one.bEnable && tbls[ gui.one.idxTbl ][ gui.one.idxObj ]->bSelected == false ) 
-					gui.SelectOneOnly( tbls );
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && gui.one.bEnable && gui.tbls[ gui.one.idxTbl ][ gui.one.idxObj ]->bSelected == false ) 
+					gui.SelectOneOnly( gui.tbls );
 
 				// 単独 追加選択
 				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && keys.SHIFT.on && gui.one.bEnable ) 
-					gui.SelectOneAdd( tbls );
+					gui.SelectOneAdd( gui.tbls );
 
 				// 単独 反転選択
 				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && !keys.SHIFT.on && gui.one.bEnable ) 
-					gui.SelectOneRev( tbls );
+					gui.SelectOneRev( gui.tbls );
 
 				// 単独 削除選択
 				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && keys.SHIFT.on && gui.one.bEnable ) 
-					gui.SelectOneSub( tbls );
+					gui.SelectOneSub( gui.tbls );
 
 				// 移動
 
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && gui.one.bEnable ) 
 				{
-					gui.MoveObj( gra, pers, tbls, mouse.mov, keys.T.on );
+					gui.MoveObj( gra, pers, gui.tbls, mouse.mov, keys.T.on );
 
 					if ( (*pSkeleton).bActive )
 					{
@@ -2070,7 +2083,7 @@ struct Apr : public Sys
 			//=================================
 			// 表示 矩形カーソル、制御点
 			//=================================
-			gui.DrawController( pers, gra, tbls, mouse.pos );
+			gui.DrawController( pers, gra, gui.tbls, mouse.pos );
 			
 			//=================================
 			// コース描画
@@ -2115,6 +2128,35 @@ struct Apr : public Sys
 			#endif
 				
 			}
+
+
+			//=================================
+			// 描画	重心回転 実験
+			//=================================
+			{
+
+				const float G = 9.8;			// 重力加速度
+				const float T = 1.0/60.0;		// 時間/frame
+				const float g = 9.8 *T*T;		// 重力加速度/frame
+
+				static vect3&	v0 = g_tblPoint[0]->pos;
+				static vect3&	v1 = g_tblPoint[1]->pos;
+				static float	radius = (v1-v0).abs();
+
+				// 角度リセット
+				if ( keys.R.hi )	{v1 = v0+vect3((v1-v0).abs(),0,0);}
+
+				// 縮む
+				if ( mouse.F.hi )	v1 = (v1+v0)/2;
+
+				// 伸びる
+				if ( mouse.B.hi )	v1 = (v1-v0)*2+v0;
+
+				{
+					g_line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
+				}
+
+			}
 			
 			//=================================
 			// 情報表示
@@ -2141,17 +2183,16 @@ struct Apr : public Sys
 		//	test.graph( gra, pers, grid );
 
 
-
+#if 0
 			//=================================
 			// 描画	振り子実験
 			//=================================
-#if 1
 			{
-				gra.Clr(rgb(0.3,0.3,0.3));
-				grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
+//				gra.Clr(rgb(0.3,0.3,0.3));
+//				grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
 
-				const float G = 9.8;				// 重力加速度
-				const float T = 1.0/60.0;			// 時間/frame
+				const float G = 9.8;			// 重力加速度
+				const float T = 1.0/60.0;		// 時間/frame
 				const float g = 9.8 *T*T;		// 重力加速度/frame
 
 				static float	radius = 1.0;
@@ -2161,7 +2202,6 @@ struct Apr : public Sys
 				static float	rsp = 0;
 				static vect3	vv = 0;
 
-
 				// 角度リセット
 				if ( keys.R.hi )	{v1 = v0+vect3((v1-v0).abs(),0,0);rsp=0;}
 
@@ -2170,6 +2210,13 @@ struct Apr : public Sys
 
 				// 伸びる
 				if ( mouse.B.hi )	v1 = (v1-v0)*2+v0;
+
+				{
+
+//					g_tblPoint.
+				}
+
+
 
 			#if 1
 				{
@@ -2228,7 +2275,8 @@ struct Apr : public Sys
 			//gra.Print(1,(float)text_y++,string("len=")+to_string((v1-v0).abs()) ); 
 				
 			}
-#else
+#endif
+#if 0
 			{
 				gra.Clr(rgb(0.3,0.3,0.3));
 				grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );

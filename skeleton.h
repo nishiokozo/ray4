@@ -101,17 +101,6 @@ struct Skin
 
 };
 
-struct Obj
-{
-	bool	bSelected	 = false;
-	bool 	bPreselect	= false;		//	仮選択
-
-	vect3	pos;
-
-	Obj(){};
-	Obj( vect3 _pos ) : pos(_pos){};
-	virtual ~Obj(){};
-};
 
 
 struct Joint : Obj
