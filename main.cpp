@@ -400,7 +400,7 @@ struct
 	}
 
 	//------------------------------------------------------------------------------
-	void MoveObj( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbls, vect2& mmov, bool bSame )
+	void MoveObj( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbls, vect2& mpos, vect2& mprev, vect2& mmov, bool bSame, bool bByCamera )
 	//------------------------------------------------------------------------------
 	{
 		bool bsel = false;
@@ -440,9 +440,27 @@ struct
 
 		if ( !bsel )
 		{
-			vect3 v = vect3(mmov.x*pers.aspect, mmov.y, 0)/one.w/pers.rate;
-			mat33 mrot = pers.cam.mat.GetRotate();
-			v = v* mrot;
+			vect3 v;
+
+
+			// 移動 カメラに並行
+			if ( bByCamera )
+			{
+				v = vect3(mmov.x*pers.aspect, mmov.y, 0)/one.w/pers.rate;
+				mat33 mrot = pers.cam.mat.GetRotate();
+				v = v* mrot;
+			}
+			else
+			// 床に平行
+			{
+				vect3 P0 = pers.calcScreenToWorld3( vect3(mprev,0) );
+				vect3 P1 = pers.calcScreenToWorld3( vect3(mpos,0) );
+				vect3 I0 = pers.calcRayvect( P0 );
+				vect3 I1 = pers.calcRayvect( P1 );
+				auto[b0,t0,Q0] = distanceIntersectPlate( vect3(0,0,0), vect3(0,1,0), P0, I0);
+				auto[b1,t1,Q1] = distanceIntersectPlate( vect3(0,0,0), vect3(0,1,0), P1, I1);
+				v = Q1-Q0;
+			}
 			for ( vector<Obj*>& tblPoint : tbls )
 			{
 				for ( Obj* p : tblPoint )
@@ -459,8 +477,6 @@ struct
 
 	}
 
-//	vector<Obj*>	dummy_tblPoint = { new Obj };
-//	vector<vector<Obj*>> tbls = {dummy_tblPoint};	// 0 はダミー
 	vector<vector<Obj*>> tbls;	// 0 はダミー
 
 	//------------------------------------------------------------------------------
@@ -1043,7 +1059,7 @@ struct Apr : public Sys
 	{
 
 		bool bAxisX = true;;
-		bool bAxisY = true;;
+		bool bAxisY = false;;
 		bool bAxisZ = true;;
 
 		//------------------------------------------------------------------------------
@@ -1872,10 +1888,9 @@ struct Apr : public Sys
 		pers.cam.pos = vect3(  0.0, 0.0, -7.0 );
 		pers.cam.at = vect3( 0,  0.0, 0 );
 
-		pers.cam.pos = vect3(  0.5, 3.0, -3.0 );
+		pers.cam.pos = vect3(  0.0, 3.0, -0.5 );
 		pers.cam.at = vect3( 0,  0.0, 0 );
 	#endif
-
 
 		//===========================================================================
 		while( Update() )
@@ -1907,17 +1922,31 @@ struct Apr : public Sys
 				if ( (keys.ALT.on && mouse.R.on) || ( mouse.R.on && mouse.L.on ) ) pers.cam.Zoom( -mouse.mov.y/pers.getW((pers.cam.pos-pers.cam.at).abs()) );
 				
 				// カメラマトリクス計算
-				pers.cam.mat.LookAt( pers.cam.pos, pers.cam.at, pers.cam.up );
+//				pers.cam.mat.LookAt( pers.cam.pos, pers.cam.at, pers.cam.up );
+				pers.cam.Update();
 			}
 
 			//=================================
 			// カーソルモード X/Y/Z軸選択モード切替
 			//=================================
-			if ( keys.Z.hi ) {axis.bAxisZ = true;	axis.bAxisX = false;	axis.bAxisY = false;}
-			if ( keys.X.hi ) {axis.bAxisZ = false;	axis.bAxisX = true;		axis.bAxisY = false;}
-			if ( keys.C.hi ) {axis.bAxisZ = false;	axis.bAxisX = false;	axis.bAxisY = true;}
-			if ( keys.V.hi ) {axis.bAxisZ = true;	axis.bAxisX = true;		axis.bAxisY = true;}
-			if ( keys.V.hi && keys.SHIFT.on ) {axis.bAxisZ = false;	axis.bAxisX = false;	axis.bAxisY = false;}
+
+			if ( keys.Z.hi + keys.X.hi + keys.C.hi > 0 && keys.Z.on + keys.X.on + keys.C.on == keys.Z.hi + keys.X.hi + keys.C.hi ) 
+			{
+				// 排他的選択
+				axis.bAxisZ = false;
+				axis.bAxisX = false;
+				axis.bAxisY = false;
+				if ( keys.Z.hi ) axis.bAxisZ = true;
+				if ( keys.X.hi ) axis.bAxisX = true;
+				if ( keys.C.hi ) axis.bAxisY = true;
+			}
+			else
+			{
+				// 追加選択
+				if ( keys.Z.on ) axis.bAxisZ = true;
+				if ( keys.X.on ) axis.bAxisX = true;
+				if ( keys.C.on ) axis.bAxisY = true;
+			}
 
 			//=================================
 			// skeleton 入力
@@ -2047,11 +2076,22 @@ struct Apr : public Sys
 
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && gui.one.bEnable ) 
 				{
-					gui.MoveObj( gra, pers, gui.tbls, mouse.mov, keys.T.on );
+					bool bByCamera = false;
+					if ( axis.bAxisX && axis.bAxisY && axis.bAxisZ )
+					{
+						bByCamera = true;
+					}
+					else
+					{
+						axis.bAxisX = true;
+						axis.bAxisY = false;
+						axis.bAxisZ = true;
+					}
+					gui.MoveObj( gra, pers, gui.tbls, mouse.pos, mouse.prev, mouse.mov, keys.T.on, bByCamera );
 
 					if ( (*pSkeleton).bActive )
 					{
-						if ( (*pSkeleton).idxTbl ==  gui.one.idxTbl )
+						if ( (*pSkeleton).idxTbl == gui.one.idxTbl )
 						{
 							// キーフレームへ反映
 							(*pSkeleton).RefrectKeyframe();
@@ -2077,6 +2117,35 @@ struct Apr : public Sys
 
 				// 表示 加工 ベジェ 三次曲線
 				bezier.cource_exec_drawBezier( gra, pers, (*pCource).tblPoint, (*pCource).idxPoint, (*pCource).idxTbl, P, I, keys.E.on, mouse.L.hi );
+
+			}
+
+			//=================================
+			// 描画	重心回転 実験
+			//=================================
+			{
+
+				const float G = 9.8;			// 重力加速度
+				const float T = 1.0/60.0;		// 時間/frame
+				const float g = 9.8 *T*T;		// 重力加速度/frame
+
+				static vect3&	v0 = g_tblPoint[0]->pos;
+				static vect3&	v1 = g_tblPoint[1]->pos;
+				static float	radius = (v1-v0).abs();
+
+				// 角度リセット
+				if ( keys.R.hi )	{v1 = v0+vect3((v1-v0).abs(),0,0);}
+
+				// 縮む
+				if ( mouse.F.hi )	v1 = (v1+v0)/2;
+
+				// 伸びる
+				if ( mouse.B.hi )	v1 = (v1-v0)*2+v0;
+
+				{
+					g_line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
+					
+				}
 
 			}
 
@@ -2130,33 +2199,6 @@ struct Apr : public Sys
 			}
 
 
-			//=================================
-			// 描画	重心回転 実験
-			//=================================
-			{
-
-				const float G = 9.8;			// 重力加速度
-				const float T = 1.0/60.0;		// 時間/frame
-				const float g = 9.8 *T*T;		// 重力加速度/frame
-
-				static vect3&	v0 = g_tblPoint[0]->pos;
-				static vect3&	v1 = g_tblPoint[1]->pos;
-				static float	radius = (v1-v0).abs();
-
-				// 角度リセット
-				if ( keys.R.hi )	{v1 = v0+vect3((v1-v0).abs(),0,0);}
-
-				// 縮む
-				if ( mouse.F.hi )	v1 = (v1+v0)/2;
-
-				// 伸びる
-				if ( mouse.B.hi )	v1 = (v1-v0)*2+v0;
-
-				{
-					g_line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
-				}
-
-			}
 			
 			//=================================
 			// 情報表示
@@ -2238,6 +2280,7 @@ struct Apr : public Sys
 						v1 = v0 + a;
 
 						g_line3d( gra, pers, v1, v1+(a-v)*10, rgb(1,0,0),2 );
+						
 					}
 
 					g_line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
@@ -2248,8 +2291,13 @@ struct Apr : public Sys
 						vect3 n0 = cross( v, vg );
 						vect3 vt = cross( n0, v );
 
-						g_line3d( gra, pers, v1, v1+vt*100, rgb(0,1,0) );
-					}
+//						g_line3d( gra, pers, v1, v1+vt*100, rgb(0,1,0) );
+						vect3 v2 = v*1.05+v0;
+//						g_line3d( gra, pers, v2, v2+vv, rgb(0,1,0) );
+
+//						g_line3d( gra, pers, v2, v2+vg*100, rgb(1,0,0) );
+						g_line3d( gra, pers, v2, v2+vt*100, rgb(0,1,0) );
+						g_line3d( gra, pers, v2, v2+n0*100, rgb(0,0,1) );					}
 
 				}
 			#endif
@@ -2483,6 +2531,9 @@ int main()
 	cout << "start" << endl;
 	Apr	apr("Ray4 " __DATE__, 300,300,768, 512 );
 //	Apr	apr("Ray4 " __DATE__, 300,300,320, 200 );
+
+	apr.SetWincursor( false );
+
 	return apr.main();
 }
 

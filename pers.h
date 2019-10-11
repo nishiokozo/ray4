@@ -18,13 +18,8 @@ struct Pers
 	// カメラ
 	struct
 	{
-	#if 1
 		vect3	pos = vect3(  0.5, 1.5, -3+0.1 );
 		vect3 	at = vect3( 0,  1, 0 );
-	#else
-		vect3	pos = vect3(  0.5, 1.5, -1+0.1 );
-		vect3 	at = vect3( 0,  1.5, 0 );
-	#endif
 		vect3	up = vect3( 0, 1, 0);
 	  	mat44	mat;		
 
@@ -37,26 +32,38 @@ struct Pers
 			l=max(l,0.00001f/8);
 			l=min(l,8);
 
-			// 回転
-			vect3	v = mov * l;
-			mat44 mrot = mat;
-			mrot.SetTranslate(vect3(0,0,0));
-			v = v* mrot;
-			pos += v;
-			
+			if ( dot( (pos-at).normalize(), up ) < 0.3 )
 			{
-				vect3 dir = (pos-at).normalize();
-				pos = at+dir*len;
+				// 回転
+				vect3	v = mov * l;
+				mat33 mrot = mat.GetRotate();
+				v = v* mrot;
+				pos += v;
+				
+				// 正規化
+				{
+					vect3 dir = (pos-at).normalize();
+					pos = at+dir*len;
+				}
 			}
+			else
+			{
+				// 回転
+				vect3	v = mov * l;
+				mat33 mrot = mat.GetRotate();
 
+				mrot.rotateByAxis( vect3(0,1,0), (mov).x );
+				v.x = 0;
+				v = v* mrot;
+				pos += v;
+			}
 		}
 
 		//------------------------------------------------------------------------------
 		void Move( vect3 v )
 		//------------------------------------------------------------------------------
 		{
-			mat44 mrot = mat;
-			mrot.SetTranslate(vect3(0,0,0));
+			mat33 mrot = mat.GetRotate();
 			v = v* mrot;
 
 			at += v;
@@ -68,13 +75,19 @@ struct Pers
 		//------------------------------------------------------------------------------
 		{
 			vect3	v= vect3(0,0,step);
-			mat44 mrot = mat;
-			mrot.SetTranslate(vect3(0,0,0));
+			mat33 mrot = mat.GetRotate();
 			v = v* mrot;
 
 			vect3 r = pos;
 			pos += v;
 			if( (pos-at).abs() <= v.abs() ) pos = (r-at).normalize()*0.00001+at;
+		}
+
+		//------------------------------------------------------------------------------
+		void Update()
+		//------------------------------------------------------------------------------
+		{
+			mat.LookAt( pos, at, up );
 		}
 
 	} cam ;
@@ -237,10 +250,10 @@ struct Pers
 
 
 
-extern void g_pset3d( SysGra& gra, Pers& pers, vect3 p0, rgb col, float wide = 1.0f );
-extern void g_line3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col, float wide = 1.0f );
-extern void g_line3d_scissor( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col, float wide = 1.0f );
+extern void g_pset3d( SysGra& gra, Pers& pers, vect3 p0, rgb col = rgb(1,1,1), float wide = 1.0f );
+extern void g_line3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col = rgb(1,1,1), float wide = 1.0f );
+extern void g_line3d_scissor( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col = rgb(1,1,1), float wide = 1.0f );
 extern void g_print3d( SysGra& gra, Pers& pers, vect3 p0, float x, float y, string str );
-extern void g_pset2d( SysGra& gra, Pers& pers, vect2 p0, rgb col, float wide = 1.0f );
+extern void g_pset2d( SysGra& gra, Pers& pers, vect2 p0, rgb col = rgb(1,1,1), float wide = 1.0f );
 extern void g_print2d( SysGra& gra, Pers& pers, vect2 p0, string str );
-extern void g_line2d( SysGra& gra, Pers& pers, vect2 p0, vect2 p1, rgb col, float wide=1.0f );
+extern void g_line2d( SysGra& gra, Pers& pers, vect2 p0, vect2 p1, rgb col = rgb(1,1,1), float wide=1.0f );

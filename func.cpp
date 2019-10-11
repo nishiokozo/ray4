@@ -99,22 +99,22 @@ tuple<bool,float,vect3,vect3>distanceLineLine_func( vect3 P0, vect3 I0, vect3 P1
 
 
 //------------------------------------------------------------------------------
-bool IsIntersectPlate( vect3 plate_P, vect3 plate_N, vect3 P, vect3 I, vect3& Q)
+tuple<bool,float,vect3> distanceIntersectPlate( vect3 plate_P, vect3 plate_N, vect3 P, vect3 I)
 //------------------------------------------------------------------------------
 {
 	// 球と変面殿衝突判定
 	float	f = dot(plate_N, P - plate_P);
-//	if ( f > 0 )
+	if ( f > 0 )
 	{
 		float	t = -f/dot( plate_N, I );
 
 		if ( t >= 0 )
 		{
-			Q = I * t + P;
-			return true;
+			vect3	Q = I * t + P;
+			return {true,t,Q};
 		}
 	}
-	return false;
+	return {false,0,vect3(0,0,0)};
 };
 
 //------------------------------------------------------------------------------

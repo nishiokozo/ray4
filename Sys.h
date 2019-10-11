@@ -12,6 +12,8 @@ public:
 	Sys( const char* name, int pos_x, int pos_y, int width, int height  );
 	bool	Update();
 
+	void  SetWincursor( bool flg );
+
 	SysGra gra;
 	SysKeys&	keys = SysKeys::GetInstance();
 	SysMouse&	mouse = SysMouse::GetInstance();
