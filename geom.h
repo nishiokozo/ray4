@@ -164,6 +164,24 @@ public:
 
 };
 
+extern	float deg2rad( float n );
+extern	float rad2deg( float n );
+extern	float atan2_360( float y, float x );
+extern	float atan2_180( float y, float x );
+
+class mat44;
+class mat33;
+class vect3;
+
+typedef vect3 rgb;
+
+extern mat33 midentity();
+extern mat33 mrotx( float f);
+extern mat33 mroty( float f);
+extern mat33 mrotz( float f);
+
+
+
 class vect3
 {
 public:
@@ -212,6 +230,8 @@ public:
 	friend	vect3 operator/( float f, vect3 v )  { return vect3( f / v.x, f / v.y, f / v.z ); }
 	friend	vect3 operator+( float f, vect3 v )  { return vect3( f + v.x, f + v.y, f + v.z ); }
 	friend	vect3 operator-( float f, vect3 v )  { return vect3( f - v.x, f - v.y, f - v.z ); }
+
+	void rotateByAxis( vect3 pos, vect3 axis, float th );
 
 
 	void dump() const
@@ -282,13 +302,6 @@ extern vect3	normalize( vect3 a );
 
 //#define	rad(n)	((n)*M_PI/180.0f)
 //#define	deg(n)	((n)*180.0f/M_PI)
-extern	float deg2rad( float n );
-extern	float rad2deg( float n );
-extern	float atan2_360( float y, float x );
-extern	float atan2_180( float y, float x );
-
-
-class mat44;
 
 class	mat33
 {
@@ -374,9 +387,9 @@ public:
 		
 		return *this;
 	}
-
+/*
 	//-----------------------------------------------------------------------------
-	mat33 mrotx( float f)
+	mat33 _mrotx( float f)
 	//-----------------------------------------------------------------------------
 	{
 		float	c = cos(f);
@@ -389,7 +402,7 @@ public:
 	}
 
 	//-----------------------------------------------------------------------------
-	mat33 mroty( float f)
+	mat33 _mroty( float f)
 	//-----------------------------------------------------------------------------
 	{
 		float	c = cos(f);
@@ -402,7 +415,7 @@ public:
 	}
 
 	//-----------------------------------------------------------------------------
-	mat33 mrotz( float f)
+	mat33 _mrotz( float f)
 	//-----------------------------------------------------------------------------
 	{
 		float	c = cos(f);
@@ -413,16 +426,19 @@ public:
 			0,  0,  1
 		);
 	}
-
+*/
 	//-----------------------------------------------------------------------------
 	void rotateByAxis( vect3 axis, float th )
 	//-----------------------------------------------------------------------------
 	{
-		float ry	= atan2(axis.z,axis.x);
-		float lxz	= sqrt( axis.z*axis.z + axis.x*axis.x );
-		float rz	= atan2(axis.y,lxz);
+		// x軸をaixsに合わせたマトリクスを作り
+		
+		float ry	= atan2( axis.z , axis.x );
+		float lxz	= sqrt( axis.z * axis.z + axis.x*axis.x );
+		float rz	= atan2( axis.y , lxz );
 		mat33 mr = mrotz( rz )  * mroty( ry );
 
+		// 作成した行列のaxis軸で回転
 		(*this) *= mr;
 		(*this) *= mrotx(th);
 		(*this) *= mr.invers();
@@ -1120,12 +1136,6 @@ public:
 
 };
 
-typedef vect3 rgb;
-
-mat33 midentity();
-mat33 mrotx( float f);
-mat33 mroty( float f);
-mat33 mrotz( float f);
 
 
 void	mat4_Frustum( mat44 m, float l, float r, float b, float t, float n, float f );

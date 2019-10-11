@@ -73,11 +73,7 @@ struct One
 };
 
 //unique
-static vector<Obj*> g_tblPoint =
-{
-	new Obj(vect3(0,0,0)),
-	new Obj(vect3(1,0,0)),
-};
+static vector<Obj*> g_tblPoint;
 
 struct
 {
@@ -1892,6 +1888,9 @@ struct Apr : public Sys
 		pers.cam.at = vect3( 0,  0.0, 0 );
 	#endif
 
+		g_tblPoint.emplace_back( new Obj(vect3(0,0,0)) );
+		g_tblPoint.emplace_back( new Obj(vect3(1,0,0)) );
+
 		//===========================================================================
 		while( Update() )
 		{
@@ -1996,8 +1995,9 @@ struct Apr : public Sys
 			// マウス座標（投影面座標）を３Ｄ空間座標に逆変換＆描画
 			//=================================
 
-			if(0)
+			if(1)
 			{
+			
 				vect3 P = pers.calcScreenToWorld3( vect3(mouse.pos,0) );
 				vect3 I = pers.calcRayvect( P );
 
@@ -2011,6 +2011,19 @@ struct Apr : public Sys
 
 				g_line3d( gra, pers, P, P+I,  vect3(1,0,0));
 				g_line3d( gra, pers, P2, P3, vect3(1,1,1));
+
+				{
+					vect3& a0 = g_tblPoint[0]->pos;
+					vect3& a1 = g_tblPoint[1]->pos;
+				
+					static vect3 p(0,1,0);
+					g_pset3d( gra, pers, p, rgb(1,1,1), 11 );
+					g_pset3d( gra, pers, a0, rgb(0,1,1), 7 );
+					g_pset3d( gra, pers, a1, rgb(1,1,0), 7 );
+				
+					p.rotateByAxis( a0, a1-a0, deg2rad(1) );
+				}
+
 			}
 
 
@@ -2517,6 +2530,12 @@ if(0)
 			}
 
 		}
+
+		for ( Obj* p : g_tblPoint )
+		{
+			delete p;
+		}
+
 		return 0;
 	}
 

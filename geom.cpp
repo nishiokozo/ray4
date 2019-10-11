@@ -6,6 +6,34 @@
 using namespace std;
 
 //-----------------------------------------------------------------------------
+void vect3::rotateByAxis( vect3 pos, vect3 axis, float th )
+//-----------------------------------------------------------------------------
+{
+
+	// x軸をaixsに合わせたマトリクスを作り
+	
+	float ry	= atan2( axis.z , axis.x );
+	float lxz	= sqrt( axis.z * axis.z + axis.x*axis.x );
+	float rz	= atan2( axis.y , lxz );
+	mat33 mr = mrotz( rz )  * mroty( ry );
+
+	// pos を中心に作ったaxis軸
+	{
+		mat33 m = midentity();
+		//m.rotateByAxis( axis, deg2rad(1) );
+		// 作成した行列のaxis軸で回転
+		m *= mr;
+		m *= mrotx(th);
+		m *= mr.invers();
+
+
+		(*this) -= pos;
+		(*this) = m * (*this);  
+		(*this) += pos;
+	}
+}
+
+//-----------------------------------------------------------------------------
 float	mod( float a, float b )
 //-----------------------------------------------------------------------------
 {
@@ -202,6 +230,11 @@ vect3	cross( vect3 a, vect3 b )
 #endif
 
 }
+
+
+
+
+
 //-----------------------------------------------------------------------------
 float	length( vect3 a )
 //-----------------------------------------------------------------------------

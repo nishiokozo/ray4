@@ -30,32 +30,50 @@ struct Pers
 			float len = (pos-at).abs();
 			float l = (pos-at).abs()/10;
 			l=max(l,0.00001f/8);
-			l=min(l,8);
+			l=min(l,1);
 
-			if ( dot( (pos-at).normalize(), up ) < 0.3 )
+//			sin(deg2rad(87)
+//			vect3
+
+/*
+			float eyeup = dot( (pos-at).normalize(), up ); // 視線ベクトルとupベクトルの織り成すcos th
+
+			if ( eyeup > sin(deg2rad(87)) )
 			{
-				// 回転
-				vect3	v = mov * l;
-				mat33 mrot = mat.GetRotate();
-				v = v* mrot;
-				pos += v;
-				
-				// 正規化
-				{
-					vect3 dir = (pos-at).normalize();
-					pos = at+dir*len;
-				}
+				if ( mov.y > 0 ) mov.y = 0;
 			}
-			else
+			{
+				mov.x *=  1-pow(eyeup,4);
+			}
+*/
+
 			{
 				// 回転
 				vect3	v = mov * l;
 				mat33 mrot = mat.GetRotate();
-
-				mrot.rotateByAxis( vect3(0,1,0), (mov).x );
-				v.x = 0;
 				v = v* mrot;
-				pos += v;
+//v = v / 2 / pi; // 回転ベクトルに変更
+
+//mat33	m = midentity();
+//m.rotateByAxis( cross(pos-at, v).normalize(), v.abs() );
+
+
+		//		float th = dot( (pos+v-at).normalize(), up ); // 視線ベクトルとupベクトルの織り成すcos th
+
+				{
+					pos += v;
+//pos = pos * m;
+//m.dump("M ");
+//pos.dump("a " );
+////pos = m*pos;
+//pos.dump("b " );
+					
+					// 正規化
+					{
+						vect3 dir = (pos-at).normalize();
+						pos = at+dir*len;
+					}
+				}
 			}
 		}
 
