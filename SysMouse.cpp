@@ -32,16 +32,6 @@ SysMouse::SysMouse()
 
 	SysWin& win = SysWin::GetInstance();
 
-#if 0
-	this->pos.x = point.x - win.GetPosX();
-	this->pos.y = point.y - win.GetPosY();
-
-	this->mov.x = 0;
-	this->mov.y = 0;
-
-	this->prev = this->pos;
-#endif
-
 	this->wheel = 0;
 
 	// GL座標系
@@ -72,9 +62,9 @@ void SysMouse::Update()
 		point.y -= win.GetPosY();
 	}
 
-	int	l = GetAsyncKeyState(VK_LBUTTON);
-	int r = GetAsyncKeyState(VK_RBUTTON);
-	int m = GetAsyncKeyState(VK_MBUTTON);
+	int	l = GetAsyncKeyState( VK_LBUTTON );
+	int r = GetAsyncKeyState( VK_RBUTTON );
+	int m = GetAsyncKeyState( VK_MBUTTON );
  	int	b = GetAsyncKeyState( VK_XBUTTON1 );
  	int	f = GetAsyncKeyState( VK_XBUTTON2 );
 
@@ -104,20 +94,6 @@ void SysMouse::Update()
 	this->B.lo =  this->B.on && !on_b;
 	this->B.on = on_b;
 
-//	this->mx = point.x - this->sx;
-//	this->my = point.y - this->sy;
-//
-//	this->sx = point.x;
-//	this->sy = point.y;
-
-#if 0
-	this->prev = this->pos;
-	this->mov.x = point.x - this->pos.x;
-	this->mov.y = point.y - this->pos.y;
-	this->pos.x = point.x;
-	this->pos.y = point.y;
-#endif
-	
 	// GL座標系
 	{
 		SysWin& win = SysWin::GetInstance();
@@ -129,10 +105,6 @@ void SysMouse::Update()
 		this->mov = gp - this->pos;
 		this->pos = gp;
 
-		if ( win.GetHeight() > 0 )
-		{
-//			this->gmov.x *= 1.0/(win.GetWidth()/win.GetHeight());
-		}
 	}
 
 	this->wheel = (float)win.GetWheel();

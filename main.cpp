@@ -1995,7 +1995,7 @@ struct Apr : public Sys
 			// マウス座標（投影面座標）を３Ｄ空間座標に逆変換＆描画
 			//=================================
 
-			if(1)
+			if(0)
 			{
 			
 				vect3 P = pers.calcScreenToWorld3( vect3(mouse.pos,0) );
@@ -2013,8 +2013,8 @@ struct Apr : public Sys
 				g_line3d( gra, pers, P2, P3, vect3(1,1,1));
 
 				{
-					vect3& a0 = g_tblPoint[0]->pos;
-					vect3& a1 = g_tblPoint[1]->pos;
+					vect3 a0 = g_tblPoint[0]->pos;
+					vect3 a1 = g_tblPoint[1]->pos;
 				
 					static vect3 p(0,1,0);
 					g_pset3d( gra, pers, p, rgb(1,1,1), 11 );
@@ -2023,6 +2023,7 @@ struct Apr : public Sys
 				
 					p.rotateByAxis( a0, a1-a0, deg2rad(1) );
 				}
+
 
 			}
 
@@ -2133,34 +2134,7 @@ struct Apr : public Sys
 
 			}
 
-			//=================================
-			// 描画	重心回転 実験
-			//=================================
-			{
 
-				const float G = 9.8;			// 重力加速度
-				const float T = 1.0/60.0;		// 時間/frame
-				const float g = 9.8 *T*T;		// 重力加速度/frame
-
-				static vect3&	v0 = g_tblPoint[0]->pos;
-				static vect3&	v1 = g_tblPoint[1]->pos;
-				static float	radius = (v1-v0).abs();
-
-				// 角度リセット
-				if ( keys.R.hi )	{v1 = v0+vect3((v1-v0).abs(),0,0);}
-
-				// 縮む
-				if ( mouse.F.hi )	v1 = (v1+v0)/2;
-
-				// 伸びる
-				if ( mouse.B.hi )	v1 = (v1-v0)*2+v0;
-
-				{
-					g_line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
-					
-				}
-
-			}
 
 			//=================================
 			// 表示 矩形カーソル、制御点
@@ -2238,6 +2212,61 @@ struct Apr : public Sys
 		//	test.graph( gra, pers, grid );
 
 
+			//=================================
+			// 描画	重心回転 実験
+			//=================================
+			{
+
+				const float G = 9.8;			// 重力加速度
+				const float T = 1.0/60.0;		// 時間/frame
+				const float g = 9.8 *T*T;		// 重力加速度/frame
+
+				static vect3&	v0 = g_tblPoint[0]->pos;
+				static vect3&	v1 = g_tblPoint[1]->pos;
+				static float	radius = (v1-v0).abs();
+
+				// 角度リセット
+				if ( keys.R.hi )	{v1 = v0+vect3((v1-v0).abs(),0,0);}
+
+				// 縮む
+//				if ( mouse.F.hi )	v1 = (v1+v0)/2;
+
+				// 伸びる
+//				if ( mouse.B.hi )	v1 = (v1-v0)*2+v0;
+
+				static vect3	vel_st;
+				static bool 	vel_b = false;
+
+				if ( mouse.B.hi )	
+				{
+					vel_st = pers.calcScreenToWorld2( mouse.pos );
+					vel_b = true;
+				}
+				if ( mouse.B.on && vel_b )	
+				{
+					vect3 vel_en = pers.calcScreenToWorld2( mouse.pos );
+					g_line3d( gra, pers, vel_st, vel_en, rgb(0,1,0) );
+				}
+
+				{
+					g_line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
+					
+				}
+if(0)
+				{
+					vect3 a0 = v0;
+					vect3 a1 = v1;
+				
+					static vect3 p(0,1,0);
+					g_pset3d( gra, pers, p, rgb(1,1,1), 11 );
+					g_pset3d( gra, pers, a0, rgb(0,1,1), 7 );
+					g_pset3d( gra, pers, a1, rgb(1,1,0), 7 );
+				
+					p.rotateByAxis( a0, a1-a0, deg2rad(1) );
+				}
+
+
+			}
 #if 0
 			//=================================
 			// 描画	振り子実験
