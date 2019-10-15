@@ -2278,15 +2278,56 @@ struct Apr : public Sys
 
 					float l = (v1-v0).abs();
 					float th = vmove.abs()/2/pi;
+th = deg2rad(5);
+					static vect3 vto = v1-v0;
+//					vto.rotateByAxis( vaxis, th );
+					//-----------------------------------------------------------------------------
+//					void vect3::rotateByAxis( vect3 axis, float th )
+					//-----------------------------------------------------------------------------
+					{
+						// これがないと壊れる
+//						if ( fabsf(vaxis.x) < 0.00001 ) vaxis.x = 0;
+//						if ( fabsf(vaxis.y) < 0.00001 ) vaxis.y = 0;
+//						if ( fabsf(vaxis.z) < 0.00001 ) vaxis.z = 0;
 
-					vect3 vto = v1-v0;
-					vto.rotateByAxis( vaxis, th );
-					g_line3d( gra, pers, v1, v0+vto, rgb(0,1,1), 1 );	// 回転先ベクトル
+						// x軸をaixsに合わせたマトリクスを作り
+						
+						float ry	= atan2( vaxis.z , vaxis.x );
+
+						float lxz	= sqrt( vaxis.z * vaxis.z + vaxis.x * vaxis.x );
+						float rz	= atan2( vaxis.y , lxz );
+//if ( fabsf(lxz) < 0.00001 ) 
+//{
+//	if ( vaxis.y > 0 ) rz = pi/2; else rz = -pi/2; 
+//	lxz = 0;
+//}
+//cout << rz << "  " << lxz  << "  rz:" << rz << endl;
+//vaxis.dump();
+						mat33 mr = mrotz( rz )  * mroty( ry );
+						{
+							mat33 m = midentity();
+							//m.rotateByAxis( axis, deg2rad(1) );
+							// 作成した行列のaxis軸で回転
+							m *= mr;
+							m *= mrotx(th);
+							m *= mr.invers();
+
+							vto = m * vto;  
+						}
+					};
+
+
+					{// 影
+						vect3	va = v0+vto;
+						va.y = 0;
+						g_pset3d( gra, pers, va  , rgb(1,1,1)/4,11 );
+						g_line3d( gra, pers, v0, va, rgb(1,1,1)/4, 2 );
+					}
+					g_line3d( gra, pers, v0, v0+vto, rgb(0,1,1), 1 );	// 回転先ベクトル
 
 					g_pset3d( gra, pers, v1+vmove, rgb(0,1,0),5 );g_print3d( gra, pers, v1+vmove, 0,0, "vmove" ); 
 					g_pset3d( gra, pers, v1+vaxis, rgb(1,0,0),5 );g_print3d( gra, pers, v1+vaxis, 0,0, "vaxis" ); 
 					g_pset3d( gra, pers, v0+vto  , rgb(0,1,1),5 );g_print3d( gra, pers, v0+vto  , 0,0, "vto" ); 
-
 					gra.Print(1,(float)text_y++,string("th=")+to_string(rad2deg(th)) ); 
 						
 				}
