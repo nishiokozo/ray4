@@ -22,8 +22,8 @@
 #include "SysGra.h"
 #include "Sys.h"
 
-#include "pers.h"
 #include "func.h"
+#include "pers.h"
 
 #include "raytrace.h"
 #include "skeleton.h"
@@ -1055,7 +1055,7 @@ struct Apr : public Sys
 	{
 
 		bool bAxisX = true;;
-		bool bAxisY = false;;
+		bool bAxisY = true;;
 		bool bAxisZ = true;;
 
 		//------------------------------------------------------------------------------
@@ -1884,12 +1884,18 @@ struct Apr : public Sys
 		pers.cam.pos = vect3(  0.0, 0.0, -7.0 );
 		pers.cam.at = vect3( 0,  0.0, 0 );
 
+		//上から
 		pers.cam.pos = vect3(  0.0, 3.0, -0.5 );
+		pers.cam.at = vect3( 0,  0.0, 0 );
+
+		//右から
+		pers.cam.pos = vect3(  2.0, 0.5, -0.5 );
 		pers.cam.at = vect3( 0,  0.0, 0 );
 	#endif
 
 		g_tblPoint.emplace_back( new Obj(vect3(0,0,0)) );
 		g_tblPoint.emplace_back( new Obj(vect3(1,0,0)) );
+		g_tblPoint.emplace_back( new Obj(vect3(1,0,0.4)) );
 
 		//===========================================================================
 		while( Update() )
@@ -2223,7 +2229,10 @@ struct Apr : public Sys
 
 				static vect3&	v0 = g_tblPoint[0]->pos;
 				static vect3&	v1 = g_tblPoint[1]->pos;
+				static vect3&	v2 = g_tblPoint[2]->pos;
 				static float	radius = (v1-v0).abs();
+
+				static vect3	v9 = v1;
 
 				// 角度リセット
 				if ( keys.R.hi )	{v1 = v0+vect3((v1-v0).abs(),0,0);}
@@ -2235,22 +2244,51 @@ struct Apr : public Sys
 //				if ( mouse.B.hi )	v1 = (v1-v0)*2+v0;
 
 				static vect3	vel_st;
+				static vect3	vel_en;
 				static bool 	vel_b = false;
 
 				if ( mouse.B.hi )	
 				{
-					vel_st = pers.calcScreenToWorld2( mouse.pos );
-					vel_b = true;
+					auto[b,Q] = pers.calcScreenToGround( mouse.pos );
+					vel_st = Q;
+					vel_b = b;
 				}
 				if ( mouse.B.on && vel_b )	
 				{
-					vect3 vel_en = pers.calcScreenToWorld2( mouse.pos );
-					g_line3d( gra, pers, vel_st, vel_en, rgb(0,1,0) );
+					auto[b,Q] = pers.calcScreenToGround( mouse.pos );
+					if ( b )
+					{
+						vect3 v = Q - vel_st;
+						g_line3d( gra, pers, v1, v1+v, rgb(0,1,0) );
+//						g_line3d( gra, pers, vel_st, Q, rgb(0,1,0) );
+					}
 				}
 
 				{
-					g_line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
+					g_line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );	//	棒
 					
+					g_line3d( gra, pers, v1, v2, rgb(1,1,0), 1 );	// 外的な力
+
+					
+					vect3 v = cross(v0-v1,(v2-v1)/1);
+					vect3 vmove = cross(v,v0-v1);
+					vect3 vaxis = v.normalize();
+					g_line3d( gra, pers, v1, v1+vaxis, rgb(1,0,0), 1 );	// 回転軸
+					g_line3d( gra, pers, v1, v1+vmove, rgb(0,1,0), 1 );	// 移動ベクトル
+
+					float l = (v1-v0).abs();
+					float th = vmove.abs()/2/pi;
+
+					vect3 vto = v1-v0;
+					vto.rotateByAxis( vaxis, th );
+					g_line3d( gra, pers, v1, v0+vto, rgb(0,1,1), 1 );	// 回転先ベクトル
+
+					g_pset3d( gra, pers, v1+vmove, rgb(0,1,0),5 );g_print3d( gra, pers, v1+vmove, 0,0, "vmove" ); 
+					g_pset3d( gra, pers, v1+vaxis, rgb(1,0,0),5 );g_print3d( gra, pers, v1+vaxis, 0,0, "vaxis" ); 
+					g_pset3d( gra, pers, v0+vto  , rgb(0,1,1),5 );g_print3d( gra, pers, v0+vto  , 0,0, "vto" ); 
+
+					gra.Print(1,(float)text_y++,string("th=")+to_string(rad2deg(th)) ); 
+						
 				}
 if(0)
 				{

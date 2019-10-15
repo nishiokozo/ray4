@@ -232,6 +232,7 @@ public:
 	friend	vect3 operator-( float f, vect3 v )  { return vect3( f - v.x, f - v.y, f - v.z ); }
 
 	void rotateByAxis( vect3 pos, vect3 axis, float th );
+	void rotateByAxis( vect3 axis, float th );
 
 
 	void dump() const

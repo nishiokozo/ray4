@@ -14,9 +14,9 @@
 
 #include "SysGra.h"
 
+#include "func.h"
 #include "pers.h"
 #include "skeleton.h"
-#include "func.h"
 
 using namespace std;
 

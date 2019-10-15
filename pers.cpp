@@ -6,9 +6,10 @@
 
 #include "SysGra.h"
 
+#include "func.h"
+
 #include "pers.h"
 
-#include "func.h"
 
 using namespace std;
 //------------------------------------------------------------------------------

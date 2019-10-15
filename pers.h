@@ -200,6 +200,15 @@ struct Pers
 		return v;
 	}
 
+	//--------------------------------------------------------------------------
+	tuple<bool,vect3> calcScreenToGround( vect2 q )	// 透視変換後の画面座標から『床』上の座標を求める。
+	//--------------------------------------------------------------------------
+	{
+		vect3 P = calcScreenToWorld2( q );
+		vect3 I = calcRayvect( P );
+		auto[b,t,Q] = distanceIntersectPlate( vect3(0,0,0), vect3(0,1,0), P, I );
+		return {b,Q};
+	}
 
 	//--------------------------------------------------------------------------
 	bool calcScissorLine3d( vect3 v0, vect3 v1, vect3& va, vect3& vb )	// 3D 空間座標のままシザリングを行う。
