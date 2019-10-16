@@ -73,7 +73,21 @@ struct One
 };
 
 //unique
-static vector<Obj*> g_tblPoint;
+struct Planet:Obj
+{
+	 vect3	spd;
+	 static const 	int MaxPlanet = 300;
+	 vect3	tblPlanet[MaxPlanet];
+	 int		cntPlanet=0;;
+
+	Planet( vect3 v, vect3 _spd ) 
+	{
+		pos = v;
+		spd = _spd;
+	}
+};
+static vector<Obj*> g_tblObj;
+
 
 struct
 {
@@ -1787,19 +1801,19 @@ struct Apr : public Sys
 			if ( !bInit )
 			{
 				bInit = true;
-				g_tblPoint.clear();
-				g_tblPoint.emplace_back( new Obj(vect3(0,0.1,0)) );
-				g_tblPoint.emplace_back( new Obj(vect3(1,0.1,0)) );
-				g_tblPoint.emplace_back( new Obj(vect3(1,0.1,0.4)) );
+				g_tblObj.clear();
+				g_tblObj.emplace_back( new Obj(vect3(0,0.1,0)) );
+				g_tblObj.emplace_back( new Obj(vect3(1,0.1,0)) );
+				g_tblObj.emplace_back( new Obj(vect3(1,0.1,0.4)) );
 			}
 
 			const float	G = 9.8;			// 重力加速度
 			const float	T = 1.0/60.0;		// 時間/frame
 			const float	g = 9.8 *T*T;		// 重力加速度/frame
 
-			vect3&	v0 = g_tblPoint[0]->pos;	//	barの根本
-			vect3&	v1 = g_tblPoint[1]->pos;	//	barの先端
-			vect3&	v2 = g_tblPoint[2]->pos;	// 速度指定
+			vect3&	v0 = g_tblObj[0]->pos;	//	barの根本
+			vect3&	v1 = g_tblObj[1]->pos;	//	barの先端
+			vect3&	v2 = g_tblObj[2]->pos;	// 速度指定
 
 			// 角度リセット
 			if ( keys.R.hi )	bInit = false ;
@@ -2082,8 +2096,8 @@ struct Apr : public Sys
 				g_line3d( gra, pers, P2, P3, vect3(1,1,1));
 
 				{
-					vect3 a0 = g_tblPoint[0]->pos;
-					vect3 a1 = g_tblPoint[1]->pos;
+					vect3 a0 = g_tblObj[0]->pos;
+					vect3 a1 = g_tblObj[1]->pos;
 				
 					static vect3 p(0,1,0);
 					g_pset3d( gra, pers, p, rgb(1,1,1), 11 );
@@ -2103,7 +2117,7 @@ struct Apr : public Sys
 			gui.tbls.clear();
 			if ( (*pCource).bActive ) (*pCource).idxTbl = gui.EntryTbl( (*pCource).tblPoint );
 			if ( (*pSkeleton).bActive ) (*pSkeleton).idxTbl = gui.EntryTbl( (*pSkeleton).tblPoint );
-			gui.EntryTbl( g_tblPoint );
+			gui.EntryTbl( g_tblObj );
 
 
 			//=================================
@@ -2290,51 +2304,45 @@ struct Apr : public Sys
 			// 描画	引力実験
 			//=================================
 			{
-				static vect3	spd;
-				static const 	int MaxPlanet = 300;
-				static vect3	tblPlanet[MaxPlanet];
-				static int		cntPlanet=0;;
 				static bool bInit = false;
 				if ( !bInit )
 				{
 					bInit = true;
-					g_tblPoint.clear();
-					g_tblPoint.emplace_back( new Obj(vect3(0,0.1,0)) );
-					//g_tblPoint.emplace_back( new Obj(vect3(1,0.1,0)) );
-					g_tblPoint.emplace_back( new Obj(vect3(1,0.1,-0.4)) );
-
 					//上から
 					pers.cam.pos = vect3(  0.0, 0.5, -2.0 );
 					pers.cam.at = vect3( 0,  0.0, 0 );
 
-					spd = vect3(0, 0.01, 0.02);
+					g_tblObj.clear();
+					g_tblObj.emplace_back( new Planet(vect3(0,0.1,0), vect3(0,0,0)) );
+					//g_tblObj.emplace_back( new Planet(vect3(1,0.1,0)) );
+					g_tblObj.emplace_back( new Planet(vect3(1,0.1,-0.4),vect3(0, 0.01, 0.02)) );
+
 				}
 
 				const float	G = 9.8;			// 重力加速度
 				const float	T = 1.0/60.0;		// 時間/frame
 				const float	g = 9.8 *T*T;		// 重力加速度/frame
 
-				vect3&	v0 = g_tblPoint[0]->pos;	//	太陽
-				vect3&	v1 = g_tblPoint[1]->pos;	//	地球
+				Planet& pl0 = *dynamic_cast<Planet*>(g_tblObj[0]);	//	太陽
+				Planet& pl1 = *dynamic_cast<Planet*>(g_tblObj[1]);	//	地球
 
 
-
-				float 	dis = (v0-v1).abs();	// 距離
-				vect3 	dir = (v0-v1).normalize();		// 方向
+				float 	dis = (pl0.pos-pl1.pos).abs();				// 距離
+				vect3 	dir = (pl0.pos-pl1.pos).normalize();		// 方向
 
 				if ( dis < 0.01 ) dis = 0.01;
 				
-				spd = (spd + dir/dis/1000);
+				pl1.spd = (pl1.spd + dir/dis/1000);
 
-				v1 += spd; 
+				pl1.pos += pl1.spd; 
 			
 			
-				tblPlanet[ cntPlanet++ ] = v1;	
-				if ( cntPlanet >= MaxPlanet ) cntPlanet = 0;
+				pl1.tblPlanet[ pl1.cntPlanet++ ] = pl1.pos;	
+				if ( pl1.cntPlanet >= pl1.MaxPlanet ) pl1.cntPlanet = 0;
 
-				for ( int i = 0 ; i < MaxPlanet ; i++ )
+				for ( int i = 0 ; i < pl1.MaxPlanet ; i++ )
 				{
-					g_pset3d( gra, pers, tblPlanet[i], rgb(0,1,1),3 );
+					g_pset3d( gra, pers, pl1.tblPlanet[i], rgb(0,1,1),2 );
 				}
 
 				// 角度リセット
@@ -2412,9 +2420,9 @@ struct Apr : public Sys
 					pers.cam.at = vect3( 0,  0.0, 0 );
 
 					bInit = true;
-					g_tblPoint.clear();
-					g_tblPoint.emplace_back( new Obj(vect3(0, 2.0, 0)) );
-					g_tblPoint.emplace_back( new Obj(vect3(1, 2.0, 0)) );
+					g_tblObj.clear();
+					g_tblObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
+					g_tblObj.emplace_back( new Obj(vect3(1, 2.0, 0)) );
 				}
 
 				gra.Clr(rgb(0.3,0.3,0.3));
@@ -2424,8 +2432,8 @@ struct Apr : public Sys
 				const float T = 1.0/60.0;		// 時間/frame
 				const float g = 9.8 *T*T;		// 重力加速度/frame
 
-				vect3&	v0 = g_tblPoint[0]->pos;	//	barの根本
-				vect3&	v1 = g_tblPoint[1]->pos;	//	barの先端
+				vect3&	v0 = g_tblObj[0]->pos;	//	barの根本
+				vect3&	v1 = g_tblObj[1]->pos;	//	barの先端
 
 
 				// 角度リセット
@@ -2716,7 +2724,7 @@ if(0)
 
 		}
 
-		for ( Obj* p : g_tblPoint )
+		for ( Obj* p : g_tblObj )
 		{
 			delete p;
 		}
