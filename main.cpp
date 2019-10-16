@@ -2314,8 +2314,11 @@ struct Apr : public Sys
 
 					g_tblObj.clear();
 					g_tblObj.emplace_back( new Planet(vect3(0,0.1,0), vect3(0,0,0)) );
-					//g_tblObj.emplace_back( new Planet(vect3(1,0.1,0)) );
 					g_tblObj.emplace_back( new Planet(vect3(1,0.1,-0.4),vect3(0, 0.01, 0.02)) );
+					g_tblObj.emplace_back( new Planet(vect3(0.3,1.5,0.4),vect3(0, 0.01, 0.02)) );
+					g_tblObj.emplace_back( new Planet(vect3(0.2,1.3,0.2),vect3(0, 0.01, 0.02)) );
+					g_tblObj.emplace_back( new Planet(vect3(0.1,1.1,0.1),vect3(0, 0.01, 0.02)) );
+					g_tblObj.emplace_back( new Planet(vect3(0.1,1.2,0.0),vect3(0, 0.01, 0.02)) );
 
 				}
 
@@ -2323,27 +2326,39 @@ struct Apr : public Sys
 				const float	T = 1.0/60.0;		// 時間/frame
 				const float	g = 9.8 *T*T;		// 重力加速度/frame
 
-				Planet& pl0 = *dynamic_cast<Planet*>(g_tblObj[0]);	//	太陽
-				Planet& pl1 = *dynamic_cast<Planet*>(g_tblObj[1]);	//	地球
-
-
-				float 	dis = (pl0.pos-pl1.pos).abs();				// 距離
-				vect3 	dir = (pl0.pos-pl1.pos).normalize();		// 方向
-
-				if ( dis < 0.01 ) dis = 0.01;
-				
-				pl1.spd = (pl1.spd + dir/dis/1000);
-
-				pl1.pos += pl1.spd; 
-			
-			
-				pl1.tblPlanet[ pl1.cntPlanet++ ] = pl1.pos;	
-				if ( pl1.cntPlanet >= pl1.MaxPlanet ) pl1.cntPlanet = 0;
-
-				for ( int i = 0 ; i < pl1.MaxPlanet ; i++ )
+				function<void(Planet&, Planet&)> func = [&]( Planet& pl0, Planet& pl1 )
 				{
-					g_pset3d( gra, pers, pl1.tblPlanet[i], rgb(0,1,1),2 );
+					float 	dis = (pl0.pos-pl1.pos).abs();				// 距離
+					vect3 	dir = (pl0.pos-pl1.pos).normalize();		// 方向
+
+					if ( dis < 0.01 ) dis = 0.01;
+					
+					pl1.spd = (pl1.spd + dir/dis/1000);
+
+					pl1.pos += pl1.spd; 
+				
+					pl1.tblPlanet[ pl1.cntPlanet++ ] = pl1.pos;	
+					if ( pl1.cntPlanet >= pl1.MaxPlanet ) pl1.cntPlanet = 0;
+
+					for ( int i = 0 ; i < pl1.MaxPlanet ; i++ )
+					{
+						g_pset3d( gra, pers, pl1.tblPlanet[i], rgb(0,1,1),2 );
+					}
+				};
+				
+				Planet& pl0 = *dynamic_cast<Planet*>(g_tblObj[0]);	//	太陽
+//				Planet& pl1 = *dynamic_cast<Planet*>(g_tblObj[1]);	//	地球
+//				Planet& pl2 = *dynamic_cast<Planet*>(g_tblObj[2]);	//	地球
+
+//				func( pl0, pl1 );
+//				func( pl0, pl2 );
+				for ( int i = 1 ; i < 6 ; i++ )
+				{
+					Planet& pl1 = *dynamic_cast<Planet*>(g_tblObj[i]);
+					func( pl0, pl1 );
 				}
+
+//				g_line3d( gra, pers, pl1.pos, pl2.pos, rgb(0,1,1),1 );
 
 				// 角度リセット
 				if ( keys.R.hi )	bInit = false ;
