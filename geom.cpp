@@ -11,6 +11,7 @@ using namespace std;
 void vect3::rotateByAxis( vect3 axis, float th )
 //-----------------------------------------------------------------------------
 {
+/*
 	// axis軸回りにth°回転する
 
 	// z軸をaixsに合わせたマトリクスを作り
@@ -30,6 +31,32 @@ void vect3::rotateByAxis( vect3 axis, float th )
 
 		(*this) = m * (*this);  
 	}
+*/
+		(*this) = mrotateByAxis( axis, th ) * (*this);  
+};
+
+//-----------------------------------------------------------------------------
+mat33 mrotateByAxis( vect3 axis, float th )
+//-----------------------------------------------------------------------------
+{
+	// axis軸回りにth°回転する行列を返す。
+
+	// z軸をaixsに合わせたマトリクスを作り
+	float ry	= atan2( axis.x , axis.z);
+	float lxz	= sqrt( axis.z * axis.z + axis.x * axis.x );
+	float rz	= atan2( axis.y, lxz );
+	mat33 mr = midentity();
+	mr *= mrotx(-rz);
+	mr *= mroty(ry);
+
+		mat33 m = midentity();
+		// 作成した行列のz軸で回転
+		m *= mr.invers();
+		m *= mrotz(th);
+		m *= mr;
+
+	return m;
+	
 };
 
 /*

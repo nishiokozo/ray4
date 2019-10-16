@@ -248,6 +248,7 @@ public:
 };
 
 
+mat33 mrotateByAxis( vect3 axis, float th );
 
 extern float	vect3_dotproduct( float a[3], float b[3] );
 extern void		vect3_crossproduct( float v[3], float a[3], float b[3] );

@@ -1893,9 +1893,6 @@ struct Apr : public Sys
 		pers.cam.at = vect3( 0,  0.0, 0 );
 	#endif
 
-		g_tblPoint.emplace_back( new Obj(vect3(0,0,0)) );
-		g_tblPoint.emplace_back( new Obj(vect3(1,0,0)) );
-		g_tblPoint.emplace_back( new Obj(vect3(1,0,0.4)) );
 
 		//===========================================================================
 		while( Update() )
@@ -2218,100 +2215,54 @@ struct Apr : public Sys
 		//	test.graph( gra, pers, grid );
 
 
+#if 1
 			//=================================
 			// 描画	重心回転 実験
 			//=================================
 			{
+				static bool bInit = false;
+				if ( !bInit )
+				{
+					bInit = true;
+					g_tblPoint.clear();
+					g_tblPoint.emplace_back( new Obj(vect3(0,0,0)) );
+					g_tblPoint.emplace_back( new Obj(vect3(1,0,0)) );
+					g_tblPoint.emplace_back( new Obj(vect3(1,0,0.4)) );
+				}
 
-				const float G = 9.8;			// 重力加速度
-				const float T = 1.0/60.0;		// 時間/frame
-				const float g = 9.8 *T*T;		// 重力加速度/frame
+				const float	G = 9.8;			// 重力加速度
+				const float	T = 1.0/60.0;		// 時間/frame
+				const float	g = 9.8 *T*T;		// 重力加速度/frame
 
-				static vect3&	v0 = g_tblPoint[0]->pos;
-				static vect3&	v1 = g_tblPoint[1]->pos;
-				static vect3&	v2 = g_tblPoint[2]->pos;
-				static float	radius = (v1-v0).abs();
-
-				static vect3	v9 = v1;
+				vect3&	v0 = g_tblPoint[0]->pos;
+				vect3&	v1 = g_tblPoint[1]->pos;
+				vect3&	v2 = g_tblPoint[2]->pos;
 
 				// 角度リセット
-				if ( keys.R.hi )	{v1 = v0+vect3((v1-v0).abs(),0,0);}
-
-				static vect3	vel_st;
-				static vect3	vel_en;
-				static bool 	vel_b = false;
-
-				if ( mouse.B.hi )	
-				{
-					auto[b,Q] = pers.calcScreenToGround( mouse.pos );
-					vel_st = Q;
-					vel_b = b;
-				}
-				if ( mouse.B.on && vel_b )	
-				{
-					auto[b,Q] = pers.calcScreenToGround( mouse.pos );
-					if ( b )
-					{
-						vect3 v = Q - vel_st;
-						g_line3d( gra, pers, v1, v1+v, rgb(0,1,0) );
-//						g_line3d( gra, pers, vel_st, Q, rgb(0,1,0) );
-					}
-				}
+				if ( keys.R.hi )	bInit = false ;
 
 				{
+					float	radius = (v1-v0).abs();
+					vect3	moment = cross(v0-v1,v2-v1);	//	回転モーメント
+					vect3	velocity = cross(moment/radius,(v0-v1)/radius);		//	ベロシティ
+					vect3	axis = moment.normalize();
 
-					
-					vect3 v = cross(v0-v1,(v2-v1)/1);
-					vect3 vmove = cross(v,v0-v1);
-					vect3 vaxis = v.normalize();
+				 	float	th = velocity.abs()/radius;
 
-					float l = (v1-v0).abs();
-				 	float th = vmove.abs();
-//th += deg2rad(1);
+					vect3	to = v1-v0;
 
-					 vect3 vto = v1;
-#if 1
-					vto.rotateByAxis( vaxis, th );
-#else
-					//-----------------------------------------------------------------------------
-//					void vect3::rotateByAxis( vect3 axis, float th )
-					//-----------------------------------------------------------------------------
-					{
-						vect3 axis = vaxis;
-						// z軸をaixsに合わせたマトリクスを作り
-						
-						float ry	= atan2( axis.x , axis.z);
-						float lxz	= sqrt( axis.z * axis.z + axis.x * axis.x );
-						float rz	= atan2( axis.y, lxz );
-						mat33 mr = midentity();
-						mr *= mrotx(-rz);
-						mr *= mroty(ry);
+					to = mrotateByAxis( axis, th ) * to;
 
-						//gra.Print(1,(float)text_y++,string("rz=")+to_string(rad2deg(rz)) ); 
-						//gra.Print(1,(float)text_y++,string("ry=")+to_string(rad2deg(ry)) ); 
-						//g_showMat33( gra, pers, v0, mr );
-
-						{
-							mat33 m = midentity();
-							// 作成した行列のz軸で回転
-							m *= mr.invers();
-							m *= mrotz(th);
-							m *= mr;
-
-							vto = m * vto;  
-						}
-					};
-#endif
 
 					{// 影
 						vect3	va = v0;;va.y = 0;
-						vect3	vb = v0+vto;vb.y = 0;
+						vect3	vb = v0+to;vb.y = 0;
 						g_line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
 						va = v0;va.y = 0;
-						vb = v0+vaxis;vb.y = 0;
+						vb = v0+axis;vb.y = 0;
 						g_line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
 						va = v1;va.y = 0;
-						vb = v1+vmove;vb.y = 0;
+						vb = v1+velocity;vb.y = 0;
 						g_line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
 						va = v0;va.y = 0;
 						vb = v1;vb.y = 0;
@@ -2319,31 +2270,20 @@ struct Apr : public Sys
 					}
 					g_line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );	//	棒
 					g_line3d( gra, pers, v1, v2, rgb(1,1,0), 1 );	// 外的な力
-					g_line3d( gra, pers, v0, v0+vto, rgb(0,1,1), 1 );	// 回転先ベクトル
-					g_line3d( gra, pers, v0, v0+vaxis, rgb(1,0,1), 1 );	// 回転軸
-					g_line3d( gra, pers, v1, v1+vmove, rgb(0,1,0), 1 );	// 移動ベクトル
+					g_line3d( gra, pers, v0, v0+to, rgb(0,1,1), 1 );	// 回転先ベクトル
+					g_line3d( gra, pers, v0, v0+moment, rgb(1,0,1), 1 );	// モーメント/回転軸
+					g_line3d( gra, pers, v1, v1+velocity, rgb(0,1,0), 1 );	// 移動ベクトル
 
-					g_pset3d( gra, pers, v1+vmove, rgb(0,1,0),5 );g_print3d( gra, pers, v1+vmove, 0,0, "vmove" ); 
-					g_pset3d( gra, pers, v0+vaxis, rgb(1,0,1),5 );g_print3d( gra, pers, v0+vaxis, 0,0, "vaxis" ); 
-					g_pset3d( gra, pers, v0+vto  , rgb(0,1,1),5 );g_print3d( gra, pers, v0+vto  , 0,0, "vto" ); 
+					g_pset3d( gra, pers, v1+velocity, rgb(0,1,0),5 );g_print3d( gra, pers, v1+velocity, 0,0, "velocity" ); 
+					g_pset3d( gra, pers, v0+moment, rgb(1,0,1),5 );g_print3d( gra, pers, v0+moment, 0,0, "moment" ); 
+					g_pset3d( gra, pers, v0+to  , rgb(0,1,1),5 );g_print3d( gra, pers, v0+to  , 0,0, "to" ); 
 					gra.Print(1,(float)text_y++,string("th=")+to_string(rad2deg(th)) ); 
 						
 				}
-if(0)
-				{
-					vect3 a0 = v0;
-					vect3 a1 = v1;
-				
-					static vect3 p(0,1,0);
-					g_pset3d( gra, pers, p, rgb(1,1,1), 11 );
-					g_pset3d( gra, pers, a0, rgb(0,1,1), 7 );
-					g_pset3d( gra, pers, a1, rgb(1,1,0), 7 );
-				
-					p.rotateByAxis( a0, a1-a0, deg2rad(1) );
-				}
-
 
 			}
+#endif
+
 #if 0
 			//=================================
 			// 描画	振り子実験
