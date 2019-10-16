@@ -1,45 +1,18 @@
 #include <iostream>
-//#include <stdio.h>
-//#include <stdlib.h>
 #include <cmath>
 
 #include "geom.h"
 
 using namespace std;
 
-//-----------------------------------------------------------------------------
-void vect3::rotateByAxis( vect3 axis, float th )
-//-----------------------------------------------------------------------------
-{
-/*
-	// axis軸回りにth°回転する
-
-	// z軸をaixsに合わせたマトリクスを作り
-	float ry	= atan2( axis.x , axis.z);
-	float lxz	= sqrt( axis.z * axis.z + axis.x * axis.x );
-	float rz	= atan2( axis.y, lxz );
-	mat33 mr = midentity();
-	mr *= mrotx(-rz);
-	mr *= mroty(ry);
-
-	{
-		mat33 m = midentity();
-		// 作成した行列のz軸で回転
-		m *= mr.invers();
-		m *= mrotz(th);
-		m *= mr;
-
-		(*this) = m * (*this);  
-	}
-*/
-		(*this) = mrotateByAxis( axis, th ) * (*this);  
-};
 
 //-----------------------------------------------------------------------------
 mat33 mrotateByAxis( vect3 axis, float th )
 //-----------------------------------------------------------------------------
 {
 	// axis軸回りにth°回転する行列を返す。
+	//
+	// axisは正規化されてなくても良い。
 
 	// z軸をaixsに合わせたマトリクスを作り
 	float ry	= atan2( axis.x , axis.z);
@@ -49,106 +22,22 @@ mat33 mrotateByAxis( vect3 axis, float th )
 	mr *= mrotx(-rz);
 	mr *= mroty(ry);
 
-		mat33 m = midentity();
-		// 作成した行列のz軸で回転
-		m *= mr.invers();
-		m *= mrotz(th);
-		m *= mr;
+	mat33 m = midentity();
+	// 作成した行列のz軸で回転
+	m *= mr.invers();
+	m *= mrotz(th);
+	m *= mr;
 
 	return m;
-	
 };
-
-/*
-//-----------------------------------------------------------------------------
-void vect3::rotateByAxis( vect3 pos, vect3 axis, float th )
-//-----------------------------------------------------------------------------
-{
-	// これがないと壊れる
-	if ( fabsf(axis.x) < 0.00001 ) axis.x = 0;
-	if ( fabsf(axis.y) < 0.00001 ) axis.y = 0;
-	if ( fabsf(axis.z) < 0.00001 ) axis.z = 0;
-
-	// x軸をaixsに合わせたマトリクスを作り
-	
-	float ry	= atan2( axis.z , axis.x );
-	float lxz	= sqrt( axis.z * axis.z + axis.x*axis.x );
-	float rz	= atan2( axis.y , lxz );
-	mat33 mr = mrotz( rz )  * mroty( ry );
-
-	// pos を中心に作ったaxis軸
-	{
-		mat33 m = midentity();
-		//m.rotateByAxis( axis, deg2rad(1) );
-		// 作成した行列のaxis軸で回転
-		m *= mr;
-		m *= mrotx(th);
-		m *= mr.invers();
-
-
-		(*this) -= pos;
-		(*this) = m * (*this);  
-		(*this) += pos;
-	}
-}
 
 //-----------------------------------------------------------------------------
 void vect3::rotateByAxis( vect3 axis, float th )
 //-----------------------------------------------------------------------------
 {
-	// これがないと壊れる
-	if ( fabsf(axis.x) < 0.00001 ) axis.x = 0;
-	if ( fabsf(axis.y) < 0.00001 ) axis.y = 0;
-	if ( fabsf(axis.z) < 0.00001 ) axis.z = 0;
+	(*this) = mrotateByAxis( axis, th ) * (*this);  
+};
 
-	// x軸をaixsに合わせたマトリクスを作り
-	
-	float ry	= atan2( axis.z , axis.x );
-	float lxz	= sqrt( axis.z * axis.z + axis.x*axis.x );
-	float rz	= atan2( axis.y , lxz );
-	mat33 mr = mrotz( rz )  * mroty( ry );
-	{
-		mat33 m = midentity();
-		//m.rotateByAxis( axis, deg2rad(1) );
-		// 作成した行列のaxis軸で回転
-		m *= mr;
-		m *= mrotx(th);
-		m *= mr.invers();
-
-		(*this) = m * (*this);  
-	}
-}
-*/
-/*
-//-----------------------------------------------------------------------------
-vect3 vect3::rotateByAxis( vect3 pos, vect3 axis, float th )
-//-----------------------------------------------------------------------------
-{
-	// x軸をaixsに合わせたマトリクスを作り
-	
-	float ry	= atan2( axis.z , axis.x );
-	float lxz	= sqrt( axis.z * axis.z + axis.x*axis.x );
-	float rz	= atan2( axis.y , lxz );
-	mat33 mr = mrotz( rz )  * mroty( ry );
-
-	// pos を中心に作ったaxis軸
-	mat33 m = midentity();
-	//m.rotateByAxis( axis, deg2rad(1) );
-	// 作成した行列のaxis軸で回転
-	m *= mr;
-	m *= mrotx(th);
-	m *= mr.invers();
-
-	vect3 ret = (*this);
-
-	ret -= pos;
-	ret = m * ret;  
-	ret += pos;
-
-	return ret;
-		
-}
-*/
 //-----------------------------------------------------------------------------
 float	mod( float a, float b )
 //-----------------------------------------------------------------------------

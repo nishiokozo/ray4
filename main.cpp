@@ -1778,6 +1778,70 @@ struct Apr : public Sys
 
 	struct
 	{
+		//=================================
+		// 描画	角速度 実験
+		//=================================
+		void kakusokudo( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, Grid& grid )
+		{
+			static bool bInit = false;
+			if ( !bInit )
+			{
+				bInit = true;
+				g_tblPoint.clear();
+				g_tblPoint.emplace_back( new Obj(vect3(0,0.1,0)) );
+				g_tblPoint.emplace_back( new Obj(vect3(1,0.1,0)) );
+				g_tblPoint.emplace_back( new Obj(vect3(1,0.1,0.4)) );
+			}
+
+			const float	G = 9.8;			// 重力加速度
+			const float	T = 1.0/60.0;		// 時間/frame
+			const float	g = 9.8 *T*T;		// 重力加速度/frame
+
+			vect3&	v0 = g_tblPoint[0]->pos;	//	barの根本
+			vect3&	v1 = g_tblPoint[1]->pos;	//	barの先端
+			vect3&	v2 = g_tblPoint[2]->pos;	// 速度指定
+
+			// 角度リセット
+			if ( keys.R.hi )	bInit = false ;
+
+			{
+				vect3	bar = (v1-v0);									//	棒
+				float	radius = bar.abs();
+				vect3	moment = cross(-bar,v2-v1);						//	回転モーメント
+				vect3	velocity = cross(bar/radius, moment/radius );	//	ベロシティ
+
+			 	float	th = velocity.abs()/radius;						//	角速度
+				vect3	to = mrotateByAxis( moment, th ) * bar;			//	移動計算
+
+				{// 影 描画
+					vect3	va = v0;;va.y = 0;
+					vect3	vb = v0+to;vb.y = 0;
+					g_line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
+					va = v0;va.y = 0;
+					vb = v0+moment;vb.y = 0;
+					g_line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
+					va = v1;va.y = 0;
+					vb = v1+velocity;vb.y = 0;
+					g_line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
+					va = v0;va.y = 0;
+					vb = v1;vb.y = 0;
+					g_line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
+				}
+				g_line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );	//	棒
+				g_line3d( gra, pers, v1, v2, rgb(1,1,0), 1 );	// 外的な力
+				g_line3d( gra, pers, v0, v0+to, rgb(0,1,1), 1 );	// 回転先ベクトル
+				g_line3d( gra, pers, v0, v0+moment, rgb(1,0,1), 1 );	// モーメント/回転軸
+				g_line3d( gra, pers, v1, v1+velocity, rgb(0,1,0), 1 );	// 移動ベクトル
+
+				g_pset3d( gra, pers, v1+velocity, rgb(0,1,0),5 );g_print3d( gra, pers, v1+velocity, 0,0, "velocity" ); 
+				g_pset3d( gra, pers, v0+moment, rgb(1,0,1),5 );g_print3d( gra, pers, v0+moment, 0,0, "moment" ); 
+				g_pset3d( gra, pers, v0+to  , rgb(0,1,1),5 );g_print3d( gra, pers, v0+to  , 0,0, "to" ); 
+//				gra.Print(1,(float)text_y++,string("th=")+to_string(rad2deg(th)) ); 
+					
+			}
+
+		}
+	
 		void graph( SysGra& gra, Pers& pers, Grid& grid )
 		{
 	//		pers.cam.at = pers.cam.pos;
@@ -1880,16 +1944,18 @@ struct Apr : public Sys
 		pers.cam.at = vect3( 0,  0.7, 0 );
 
 
+
+		//右から
+		pers.cam.pos = vect3(  2.0, 0.5, -0.5 );
+		pers.cam.at = vect3( 0,  0.0, 0 );
+
+
 		//2D グラフ用
 		pers.cam.pos = vect3(  0.0, 0.0, -7.0 );
 		pers.cam.at = vect3( 0,  0.0, 0 );
 
 		//上から
 		pers.cam.pos = vect3(  0.0, 3.0, -0.5 );
-		pers.cam.at = vect3( 0,  0.0, 0 );
-
-		//右から
-		pers.cam.pos = vect3(  2.0, 0.5, -0.5 );
 		pers.cam.at = vect3( 0,  0.0, 0 );
 	#endif
 
@@ -2214,52 +2280,100 @@ struct Apr : public Sys
 
 		//	test.graph( gra, pers, grid );
 
+			//=================================
+			// 描画	角速度 実験
+			//=================================
+	//		test.kakusokudo( keys, mouse, gra, pers, grid );
 
 #if 1
 			//=================================
-			// 描画	重心回転 実験
+			// 描画	引力実験
 			//=================================
 			{
+				static vect3	spd;
+				static const 	int MaxPlanet = 300;
+				static vect3	tblPlanet[MaxPlanet];
+				static int		cntPlanet=0;;
 				static bool bInit = false;
 				if ( !bInit )
 				{
 					bInit = true;
 					g_tblPoint.clear();
-					g_tblPoint.emplace_back( new Obj(vect3(0,0,0)) );
-					g_tblPoint.emplace_back( new Obj(vect3(1,0,0)) );
-					g_tblPoint.emplace_back( new Obj(vect3(1,0,0.4)) );
+					g_tblPoint.emplace_back( new Obj(vect3(0,0.1,0)) );
+					//g_tblPoint.emplace_back( new Obj(vect3(1,0.1,0)) );
+					g_tblPoint.emplace_back( new Obj(vect3(1,0.1,-0.4)) );
+
+					//上から
+					pers.cam.pos = vect3(  0.0, 0.5, -2.0 );
+					pers.cam.at = vect3( 0,  0.0, 0 );
+
+					spd = vect3(0, 0.01, 0.02);
 				}
 
 				const float	G = 9.8;			// 重力加速度
 				const float	T = 1.0/60.0;		// 時間/frame
 				const float	g = 9.8 *T*T;		// 重力加速度/frame
 
-				vect3&	v0 = g_tblPoint[0]->pos;
-				vect3&	v1 = g_tblPoint[1]->pos;
-				vect3&	v2 = g_tblPoint[2]->pos;
+				vect3&	v0 = g_tblPoint[0]->pos;	//	太陽
+				vect3&	v1 = g_tblPoint[1]->pos;	//	地球
+
+
+
+				float 	dis = (v0-v1).abs();	// 距離
+				vect3 	dir = (v0-v1).normalize();		// 方向
+
+				if ( dis < 0.01 ) dis = 0.01;
+				
+				spd = (spd + dir/dis/1000);
+
+				v1 += spd; 
+			
+			
+				tblPlanet[ cntPlanet++ ] = v1;	
+				if ( cntPlanet >= MaxPlanet ) cntPlanet = 0;
+
+				for ( int i = 0 ; i < MaxPlanet ; i++ )
+				{
+					g_pset3d( gra, pers, tblPlanet[i], rgb(0,1,1),3 );
+				}
 
 				// 角度リセット
 				if ( keys.R.hi )	bInit = false ;
+				
+				
+
+				
+
+/*
+				static bool bShot = false; 
+
+				// 角度リセット
+				if ( keys.R.hi )	{bInit = false ;bShot = false;}
+
+				if ( mouse.B.hi )	bShot= !bShot ;
 
 				{
-					float	radius = (v1-v0).abs();
-					vect3	moment = cross(v0-v1,v2-v1);	//	回転モーメント
-					vect3	velocity = cross(moment/radius,(v0-v1)/radius);		//	ベロシティ
-					vect3	axis = moment.normalize();
+					vect3	bar = (v1-v0);									//	棒
+					float	radius = bar.abs();
+					vect3	moment = cross(-bar,v2-v1);						//	回転モーメント
+					vect3	velocity = cross(bar/radius, moment/radius );	//	ベロシティ
 
-				 	float	th = velocity.abs()/radius;
-
-					vect3	to = v1-v0;
-
-					to = mrotateByAxis( axis, th ) * to;
+				 	static float	th = velocity.abs()/radius;						//	角速度
 
 
-					{// 影
+					if ( bShot )
+					{
+						  th += velocity.abs()/radius;						//	角速度
+					}
+
+					vect3	to = mrotateByAxis( moment, th ) * bar;			//	移動計算
+
+					{// 影 描画
 						vect3	va = v0;;va.y = 0;
 						vect3	vb = v0+to;vb.y = 0;
 						g_line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
 						va = v0;va.y = 0;
-						vb = v0+axis;vb.y = 0;
+						vb = v0+moment;vb.y = 0;
 						g_line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
 						va = v1;va.y = 0;
 						vb = v1+velocity;vb.y = 0;
@@ -2280,6 +2394,7 @@ struct Apr : public Sys
 					gra.Print(1,(float)text_y++,string("th=")+to_string(rad2deg(th)) ); 
 						
 				}
+*/
 
 			}
 #endif
@@ -2289,22 +2404,32 @@ struct Apr : public Sys
 			// 描画	振り子実験
 			//=================================
 			{
-//				gra.Clr(rgb(0.3,0.3,0.3));
-//				grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
+
+				static bool bInit = false;
+				if ( !bInit )
+				{
+					pers.cam.pos = vect3(  0.0, 0.0, -7.0 );
+					pers.cam.at = vect3( 0,  0.0, 0 );
+
+					bInit = true;
+					g_tblPoint.clear();
+					g_tblPoint.emplace_back( new Obj(vect3(0, 2.0, 0)) );
+					g_tblPoint.emplace_back( new Obj(vect3(1, 2.0, 0)) );
+				}
+
+				gra.Clr(rgb(0.3,0.3,0.3));
+				grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
 
 				const float G = 9.8;			// 重力加速度
 				const float T = 1.0/60.0;		// 時間/frame
 				const float g = 9.8 *T*T;		// 重力加速度/frame
 
-				static float	radius = 1.0;
-				static vect3	v0 = vect3(0, 2,0);
-				static vect3	v1 = v0+vect3(radius,0,0);
-				static vect3	v2 = v0+vect3(radius,0,0);
-				static float	rsp = 0;
-				static vect3	vv = 0;
+				vect3&	v0 = g_tblPoint[0]->pos;	//	barの根本
+				vect3&	v1 = g_tblPoint[1]->pos;	//	barの先端
+
 
 				// 角度リセット
-				if ( keys.R.hi )	{v1 = v0+vect3((v1-v0).abs(),0,0);rsp=0;}
+				if ( keys.R.hi )	bInit = false ;
 
 				// 縮む
 				if ( mouse.F.hi )	v1 = (v1+v0)/2;
@@ -2312,15 +2437,29 @@ struct Apr : public Sys
 				// 伸びる
 				if ( mouse.B.hi )	v1 = (v1-v0)*2+v0;
 
-				{
-
-//					g_tblPoint.
-				}
-
-
 
 			#if 1
+					vect3	bar = (v1-v0);									//	棒
+					float	radius = bar.abs();								//	棒長さ
+					vect3	moment = cross(-bar,-g);						//	回転モーメント
+					vect3	velocity = cross(bar/radius, moment/radius );	//	ベロシティ
+
+				 	float	th = velocity.abs()/radius;						//	角速度
+					static vect3	to = bar;
+					to += mrotateByAxis( moment, th ) * bar-bar;			//	移動計算
+
+
+
+					g_line3d( gra, pers, v0, v0+to, rgb(1,1,1), 2 );
+
+			#endif
+
+
+			#if 0
 				{
+					static float	rsp = 0;
+					static vect3	vv = 0;
+
 					vect3 v = (v1-v0);
 
 					// 角速度に変換
