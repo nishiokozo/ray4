@@ -2237,12 +2237,6 @@ struct Apr : public Sys
 				// 角度リセット
 				if ( keys.R.hi )	{v1 = v0+vect3((v1-v0).abs(),0,0);}
 
-				// 縮む
-//				if ( mouse.F.hi )	v1 = (v1+v0)/2;
-
-				// 伸びる
-//				if ( mouse.B.hi )	v1 = (v1-v0)*2+v0;
-
 				static vect3	vel_st;
 				static vect3	vel_en;
 				static bool 	vel_b = false;
@@ -2265,68 +2259,72 @@ struct Apr : public Sys
 				}
 
 				{
-					g_line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );	//	棒
-					
-					g_line3d( gra, pers, v1, v2, rgb(1,1,0), 1 );	// 外的な力
 
 					
 					vect3 v = cross(v0-v1,(v2-v1)/1);
 					vect3 vmove = cross(v,v0-v1);
 					vect3 vaxis = v.normalize();
-					g_line3d( gra, pers, v1, v1+vaxis, rgb(1,0,0), 1 );	// 回転軸
-					g_line3d( gra, pers, v1, v1+vmove, rgb(0,1,0), 1 );	// 移動ベクトル
 
 					float l = (v1-v0).abs();
-					float th = vmove.abs()/2/pi;
-th = deg2rad(5);
-					static vect3 vto = v1-v0;
-//					vto.rotateByAxis( vaxis, th );
+				 	float th = vmove.abs();
+//th += deg2rad(1);
+
+					 vect3 vto = v1;
+#if 1
+					vto.rotateByAxis( vaxis, th );
+#else
 					//-----------------------------------------------------------------------------
 //					void vect3::rotateByAxis( vect3 axis, float th )
 					//-----------------------------------------------------------------------------
 					{
-						// これがないと壊れる
-//						if ( fabsf(vaxis.x) < 0.00001 ) vaxis.x = 0;
-//						if ( fabsf(vaxis.y) < 0.00001 ) vaxis.y = 0;
-//						if ( fabsf(vaxis.z) < 0.00001 ) vaxis.z = 0;
-
-						// x軸をaixsに合わせたマトリクスを作り
+						vect3 axis = vaxis;
+						// z軸をaixsに合わせたマトリクスを作り
 						
-						float ry	= atan2( vaxis.z , vaxis.x );
+						float ry	= atan2( axis.x , axis.z);
+						float lxz	= sqrt( axis.z * axis.z + axis.x * axis.x );
+						float rz	= atan2( axis.y, lxz );
+						mat33 mr = midentity();
+						mr *= mrotx(-rz);
+						mr *= mroty(ry);
 
-						float lxz	= sqrt( vaxis.z * vaxis.z + vaxis.x * vaxis.x );
-						float rz	= atan2( vaxis.y , lxz );
-//if ( fabsf(lxz) < 0.00001 ) 
-//{
-//	if ( vaxis.y > 0 ) rz = pi/2; else rz = -pi/2; 
-//	lxz = 0;
-//}
-//cout << rz << "  " << lxz  << "  rz:" << rz << endl;
-//vaxis.dump();
-						mat33 mr = mrotz( rz )  * mroty( ry );
+						//gra.Print(1,(float)text_y++,string("rz=")+to_string(rad2deg(rz)) ); 
+						//gra.Print(1,(float)text_y++,string("ry=")+to_string(rad2deg(ry)) ); 
+						//g_showMat33( gra, pers, v0, mr );
+
 						{
 							mat33 m = midentity();
-							//m.rotateByAxis( axis, deg2rad(1) );
-							// 作成した行列のaxis軸で回転
-							m *= mr;
-							m *= mrotx(th);
+							// 作成した行列のz軸で回転
 							m *= mr.invers();
+							m *= mrotz(th);
+							m *= mr;
 
 							vto = m * vto;  
 						}
 					};
-
+#endif
 
 					{// 影
-						vect3	va = v0+vto;
-						va.y = 0;
-						g_pset3d( gra, pers, va  , rgb(1,1,1)/4,11 );
-						g_line3d( gra, pers, v0, va, rgb(1,1,1)/4, 2 );
+						vect3	va = v0;;va.y = 0;
+						vect3	vb = v0+vto;vb.y = 0;
+						g_line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
+						va = v0;va.y = 0;
+						vb = v0+vaxis;vb.y = 0;
+						g_line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
+						va = v1;va.y = 0;
+						vb = v1+vmove;vb.y = 0;
+						g_line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
+						va = v0;va.y = 0;
+						vb = v1;vb.y = 0;
+						g_line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
 					}
+					g_line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );	//	棒
+					g_line3d( gra, pers, v1, v2, rgb(1,1,0), 1 );	// 外的な力
 					g_line3d( gra, pers, v0, v0+vto, rgb(0,1,1), 1 );	// 回転先ベクトル
+					g_line3d( gra, pers, v0, v0+vaxis, rgb(1,0,1), 1 );	// 回転軸
+					g_line3d( gra, pers, v1, v1+vmove, rgb(0,1,0), 1 );	// 移動ベクトル
 
 					g_pset3d( gra, pers, v1+vmove, rgb(0,1,0),5 );g_print3d( gra, pers, v1+vmove, 0,0, "vmove" ); 
-					g_pset3d( gra, pers, v1+vaxis, rgb(1,0,0),5 );g_print3d( gra, pers, v1+vaxis, 0,0, "vaxis" ); 
+					g_pset3d( gra, pers, v0+vaxis, rgb(1,0,1),5 );g_print3d( gra, pers, v0+vaxis, 0,0, "vaxis" ); 
 					g_pset3d( gra, pers, v0+vto  , rgb(0,1,1),5 );g_print3d( gra, pers, v0+vto  , 0,0, "vto" ); 
 					gra.Print(1,(float)text_y++,string("th=")+to_string(rad2deg(th)) ); 
 						

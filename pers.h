@@ -263,3 +263,4 @@ extern void g_print3d( SysGra& gra, Pers& pers, vect3 p0, float x, float y, stri
 extern void g_pset2d( SysGra& gra, Pers& pers, vect2 p0, rgb col = rgb(1,1,1), float wide = 1.0f );
 extern void g_print2d( SysGra& gra, Pers& pers, vect2 p0, string str );
 extern void g_line2d( SysGra& gra, Pers& pers, vect2 p0, vect2 p1, rgb col = rgb(1,1,1), float wide=1.0f );
+extern void g_showMat33(  SysGra& gra, Pers& pers, vect3 v0, mat33 m );

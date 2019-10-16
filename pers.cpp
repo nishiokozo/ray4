@@ -70,3 +70,22 @@ void g_line2d( SysGra& gra, Pers& pers, vect2 p0, vect2 p1, rgb col, float wide 
 	g_line3d( gra, pers, vect3(p0,0), vect3(p1,0), col, wide );
 
 }
+
+
+//------------------------------------------------------------------------------
+void g_showMat33(  SysGra& gra, Pers& pers, vect3 v0, mat33 m )
+//------------------------------------------------------------------------------
+{
+	vect3 a = {m.m[0][0],m.m[0][1],m.m[0][2]};
+	vect3 b = {m.m[1][0],m.m[1][1],m.m[1][2]};
+	vect3 c = {m.m[2][0],m.m[2][1],m.m[2][2]};
+
+	g_line3d( gra, pers, v0		, v0+a/2, rgb(1,0,0), 1 );
+	g_line3d( gra, pers, v0		, v0+b/2, rgb(0,1,0), 1 );
+	g_line3d( gra, pers, v0		, v0+c/2, rgb(0,0,1), 1 );
+	g_line3d( gra, pers, v0+a/2	, v0+c/2, rgb(0.5,0.5,0.5), 1 );
+	g_line3d( gra, pers, v0+b/2	, v0+c/2, rgb(0.5,0.5,0.5), 1 );
+	g_line3d( gra, pers, v0+b/2	, v0+a/2, rgb(0.5,0.5,0.5), 1 );
+
+}
+
