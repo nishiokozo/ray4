@@ -853,7 +853,7 @@ void Skeleton::DrawSkeleton( Pers& pers, SysGra& gra )
 						vect3 b = catmull3_func(t, P0,P1,P2,P3 );
 
 						rgb col = rgb(0,1,0);
-						g_line3d( gra, pers, a, b, col);
+						pers.line3d( gra, pers, a, b, col);
 
 						a=b;
 						t+=dt;

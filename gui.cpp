@@ -24,8 +24,8 @@
 #include "func.h"
 #include "pers.h"
 
-#include "raytrace.h"
-#include "skeleton.h"
+//#include "raytrace.h"
+//#include "skeleton.h"
 #include "gui.h"
 //------------------------------------------------------------------------------
 void Gui::TouchFirst( Pers& pers, vector<vector<Obj*>>& tbls, vect2 mpos )
@@ -296,10 +296,10 @@ void Gui::DrawController( Pers& pers, SysGra& gra, vector<vector<Obj*>>& tbls, v
 
 						if ( bSelected )
 						{
-							g_line3d( gra, pers, p->pos, p->pos +p->a, col2 );
-							g_line3d( gra, pers, p->pos, p->pos +p->b, col2 );
-							g_pset3d( gra, pers, p->pos+p->a, col2a, wide2 ); 
-							g_pset3d( gra, pers, p->pos+p->b, col2b, wide2 ); 
+							pers.line3d( gra, pers, p->pos, p->pos +p->a, col2 );
+							pers.line3d( gra, pers, p->pos, p->pos +p->b, col2 );
+							pers.pset3d( gra, pers, p->pos+p->a, col2a, wide2 ); 
+							pers.pset3d( gra, pers, p->pos+p->b, col2b, wide2 ); 
 						}
 					}
 				}
@@ -316,18 +316,18 @@ void Gui::DrawController( Pers& pers, SysGra& gra, vector<vector<Obj*>>& tbls, v
 					if ( bSelected )
 					{
 //							gra.Pset( pers.calcWorldToScreen3( p->pos ), rgb(1,0,0), 11 );
-						g_pset3d( gra, pers, p->pos, rgb(1,0,0), 11 );
+						pers.pset3d( gra, pers, p->pos, rgb(1,0,0), 11 );
 					}
 					else
 					{
 //							gra.Pset( pers.calcWorldToScreen3( p->pos ), rgb(0,0,1), 11 );
-						g_pset3d( gra, pers, p->pos, rgb(0,0,1), 11 );
+						pers.pset3d( gra, pers, p->pos, rgb(0,0,1), 11 );
 					}
 
 					{
 //							vect2 pos = pers.calcWorldToScreen2( p->pos );
 //							gra.Print( pos+gra.Dot(14,0), to_string(n++) );
-						g_print3d( gra, pers, p->pos, -14, 0, to_string(n++) ); 
+						pers.print3d( gra, pers, p->pos, -14, 0, to_string(n++) ); 
 					}
 				}
 			}
@@ -422,7 +422,6 @@ void Gui::MoveObj( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbls, vect2& m
 
 }
 
-vector<vector<Obj*>> tbls;	// 0 はダミー
 
 //------------------------------------------------------------------------------
 int Gui::EntryTbl( vector<Obj*>tbl )

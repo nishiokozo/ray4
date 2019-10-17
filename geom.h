@@ -200,7 +200,6 @@ public:
 
 	vect2 xy() {return vect2(x,y);}
 	
-//	vect3 abs() { return vect3( std::abs(x) , std::abs(y) ); }
 	vect3 normalize() { return (*this)/abs(); }
 	float abs() { return sqrt( x*x + y*y + z*z ); }
 
@@ -217,16 +216,11 @@ public:
 	vect3 operator-( vect3 v ) const { vect3	ret; ret.x = x - v.x; ret.y = y - v.y; ret.z = z - v.z; return ret; }
 	vect3 operator+( vect3 v ) const { vect3	ret; ret.x = x + v.x; ret.y = y + v.y; ret.z = z + v.z; return ret; }
 
-//	vect3 operator-() const { vect3	ret; ret.x = -x; ret.y = -y; ret.z = -z; return ret; }
-//	vect3 operator+() const { vect3	ret; ret.x =  x; ret.y =  y; ret.z =  z; return ret; }
 	vect3 operator-() const { return vect3( -x, -y, -z ); } 
 	vect3 operator+() const { return vect3(  x,  y,  z ); } 
 
 	vect3 operator*( float f ) const { vect3	ret; ret.x = x * f; ret.y = y * f; ret.z = z * f; return ret; }
 	vect3 operator/( float f ) const { float a = 1.0f / f; vect3	ret; ret.x = x * a; ret.y = y * a; ret.z = z * a; return ret; }
-
-//	friend	vect3 operator*( float f, vect3 v )  { vect3	ret; ret.x = f * v.x; ret.y = f * v.y; ret.z = f * v.z;  return ret; }
-//	friend	vect3 operator+( float f, vect3 v )  { vect3	ret; ret.x = f + v.x; ret.y = f + v.y; ret.z = f + v.z;  return ret; }
 
 	friend	vect3 operator*( float f, vect3 v )  { return vect3( f * v.x, f * v.y, f * v.z ); }
 	friend	vect3 operator/( float f, vect3 v )  { return vect3( f / v.x, f / v.y, f / v.z ); }

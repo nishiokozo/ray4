@@ -9,39 +9,43 @@ struct Point3 : Obj
 	Point3( vect3 _pos, vect3 _a, vect3 _b ) { pos=_pos; a=_a; b=_b;}
 };
 
-struct One
-{
-	bool	bEnable;
-	float	w;		// wバッファ値
-	int		idxTbl;	// オブジェクト番号
-	int		idxObj;	// オブジェクト番号
-	//--
-	bool	bSelected_a = false;
-	bool	bSelected_b = false;
-
-	One(){clear();}
-	void clear()
-	{
-		bEnable = false;
-		w = 0.0;
-		idxTbl = 0;
-		idxObj = 0;
-		bSelected_a = false;
-		bSelected_b = false;
-	}
-	
-};
-enum class G_CALC
-{
-	NONE,
-	ADD,
-	SUB,
-	COPY,
-	REV,
-};
 
 struct Gui
 {
+	vector<vector<Obj*>> tbls;
+
+	struct One
+	{
+		bool	bEnable;
+		float	w;		// wバッファ値
+		int		idxTbl;	// オブジェクト番号
+		int		idxObj;	// オブジェクト番号
+		//--
+		bool	bSelected_a = false;
+		bool	bSelected_b = false;
+
+		One(){clear();}
+		void clear()
+		{
+			bEnable = false;
+			w = 0.0;
+			idxTbl = 0;
+			idxObj = 0;
+			bSelected_a = false;
+			bSelected_b = false;
+		}
+		
+	};
+
+	enum class G_CALC
+	{
+		NONE,
+		ADD,
+		SUB,
+		COPY,
+		REV,
+	};
+
 	vect2 rect_st = vect2(0,0);			//	矩形選択開始位置
 	G_CALC rect_mode = G_CALC::NONE;	//	矩形選択中フラグ
 	One one;
@@ -112,8 +116,6 @@ struct Gui
 	//------------------------------------------------------------------------------
 	void MoveObj( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbls, vect2& mpos, vect2& mprev, vect2& mmov, bool bSame, bool bByCamera );
 	//------------------------------------------------------------------------------
-
-	vector<vector<Obj*>> tbls;	// 0 はダミー
 
 	//------------------------------------------------------------------------------
 	int EntryTbl( vector<Obj*>tbl );
