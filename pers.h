@@ -295,5 +295,212 @@ struct Pers
 	void print2d( SysGra& gra, Pers& pers, vect2 p0, float x, float y, string str );
 
 	void showMat33(  SysGra& gra, Pers& pers, vect3 v0, mat33 m );
+	void DrawBox( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAxis = true, bool bTri = true );
+	void DrawDrum( SysGra& gra, Pers& pers,  vect3 pos, mat33 m  );
+
+
+
+	// タイヤ
+	struct Tire
+	{
+
+		vector<vect3> vert;
+		vector<vect3> disp;
+
+		//------------------------------------------------------------------------------
+		Tire()
+		//------------------------------------------------------------------------------
+		{
+			float r = 1.0;
+			for ( float t = 0 ; t < 2*pi ; t+=deg2rad(5) )
+			{
+				float x = 0;
+				float y = r * sin(t);
+				float z = r * cos(t);
+
+				vert.emplace_back( x, y, z );
+			}
+		}
+
+		//------------------------------------------------------------------------------
+		void DrawTire( SysGra& gra, Pers& pers, vect3 pos, float head, float bank, float radius )
+		//------------------------------------------------------------------------------
+		{
+			mat33 m = mrotz(bank) * mroty(head);
+
+			rgb col(0,1,1);
+			int i = 0;
+			vect3 v0;
+			for ( vect3 v : vert )
+			{
+				vect3 v1 = v*radius * m + pos;
+
+				if ( i > 0 ) 
+				{
+					pers.line3d( gra, pers, v0, v1, col, 2 );
+
+					// 影
+					vect3 a0= v0;
+					vect3 a1= v1;
+					a0.y=0;
+					a1.y=0;
+					pers.line3d( gra, pers, a0, a1, col/4, 2 );
+				}
+
+				v0 = v1;
+				i++;
+			}
+
+		}
+		
+	} tire;
+
+	struct Square
+	{
+
+		const float s = 0.04f;
+		vector<vect3> vert=
+		{
+			{	-s,		 s,		0	},//0
+			{	 s,		 s,		0	},//1
+			{	-s,		-s,		0	},//2
+			{	 s,		-s,		0	},//3
+
+		};
+		vector<vect3> disp;
+
+		vector<ivect2>	edge
+		{
+			{	0,	1	},
+			{	1,	3	},
+			{	3,	2	},
+			{	2,	0	},
+		};
+
+		//------------------------------------------------------------------------------
+		void DrawSquare( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAxis = true, bool bTri = true )
+		//------------------------------------------------------------------------------
+		{
+			disp.clear();
+
+			for ( vect3 v : vert )
+			{
+
+				//	右手系座標系
+				//	右手ねじ周り
+				//	roll	:z	奥+
+				//	pitch	:x	右+
+				//	yaw		:y	下+
+				v= v * m + pos;
+
+				disp.emplace_back( v );
+
+			}
+
+
+			// 軸
+			if( bAxis )
+			{
+				vect3	nx = vect3( m.m[0][0], m.m[0][1], m.m[0][2] );
+				vect3	ny = vect3( m.m[1][0], m.m[1][1], m.m[1][2] );
+				vect3	nz = vect3( m.m[2][0], m.m[2][1], m.m[2][2] );
+				pers.line3d( gra, pers, pos, pos+nx*0.2, rgb(1,0,0) );
+				pers.line3d( gra, pers, pos, pos+ny*0.2, rgb(0,1,0) );
+				pers.line3d( gra, pers, pos, pos+nz*0.2, rgb(0,0,1) );
+			}
+			
+			int cnt = 0;
+			for ( ivect2 e : edge )
+			{
+				const vect3& a = disp[e.p];
+				const vect3& b = disp[e.n];
+				rgb col = rgb(0,1,1);
+				if ( cnt == 0 ) col = rgb(1,0,0);
+				//if ( cnt == 1 ) col = rgb(0,1,0);
+				cnt++;
+				pers.line3d( gra, pers, a, b, col, false );
+
+			}
+		}
+		
+	} square;
+
+
+	struct Grid
+	{
+		//------------------------------------------------------------------------------
+		void DrawGrid3d( SysGra& gra, Pers& pers,  vect3 pos, mat33 m, int NUM_U, int NUM_V, float dt, rgb col  )
+		//------------------------------------------------------------------------------
+		{	// ミニグリッド
+			vect3 vt = vect3(0,0,0);
+			float du = (float)NUM_U*dt;
+			float dv = (float)NUM_V*dt;
+			vect3 a;
+			vect3 b;
+			{
+				a = pos+vect3(-du, 0,-du);
+				b = pos+vect3( du, 0,-du);
+				vt = vect3(0,0,dt);
+				for ( int i = 0 ; i < NUM_V*2+1 ; i++ )
+				{
+					vect3 v0 = a * m;
+					vect3 v1 = b * m;
+					pers.line3d_scissor( gra, pers, v0, v1, col );
+					a+=vt;
+					b+=vt;
+				}
+			}			
+			{
+
+				a = pos+vect3(-dv, 0, dv);
+				b = pos+vect3(-dv, 0,-dv);
+				vt = vect3(dt,0,0);
+				for ( int i = 0 ; i < NUM_U*2+1 ; i++ )
+				{
+					vect3 v0 = a * m;
+					vect3 v1 = b * m;
+					pers.line3d_scissor( gra, pers, v0, v1, col );
+					a+=vt;
+					b+=vt;
+				}
+			}			
+
+			{//原点表示
+				float r = 0.1;
+				vect3 a;
+				for ( int i = 0 ; i <= 360 ; i+=20 )
+				{
+					vect3 b = vect3( r*cos(deg2rad((float)i)), 0, r*sin(deg2rad((float)i)) ) + pos;
+					if ( i > 0 ) 
+					{
+						vect3 v0 = a * m;
+						vect3 v1 = b * m;
+						pers.line3d( gra, pers, v0,v1, col );
+					}
+					a = b;
+				}
+			}
+		}
+		//------------------------------------------------------------------------------
+		void Draw2D( SysGra& gra, Pers& pers, vect2 pos, rgb col )
+		//------------------------------------------------------------------------------
+		{
+			gra.Line( vect2(-1,pos.y), vect2(1,pos.y), col*0);
+			gra.Line( vect2(pos.x,-1), vect2(pos.x,1), col*0);
+			for ( float x = -10 ; x < 10 ; x += 1 )
+			{
+				gra.Line( vect2(pos.x+x/pers.aspect,-1), vect2(pos.x+x/pers.aspect,1), col );
+			}
+			for ( float y = -10 ; y < 10 ; y += 1 )
+			{
+				gra.Line( vect2(-1,pos.y+y), vect2(1,pos.y+y), col );
+			}
+
+			gra.Circle( pos, 0.05, col );
+		
+		}
+
+	} grid;
 
 };
+

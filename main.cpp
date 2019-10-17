@@ -29,32 +29,21 @@
 #include "skeleton.h"
 #include "gui.h"
 
+#include "lab.h"
+
 using namespace std;
-
-struct Planet:Obj
-{
-	 vect3	spd;
-	 static const 	int MaxPlanet = 300;
-	 vect3	tblPlanet[MaxPlanet];
-	 int		cntPlanet=0;;
-
-	Planet( vect3 v, vect3 _spd ) 
-	{
-		pos = v;
-		spd = _spd;
-	}
-};
 
 
 Gui gui;
+Lab lab;
 
-struct Cutmull
+struct CutmullRing
 {
 	bool	bActive = false;	//	使用可能
 
 	int idxTbl = 0;
 
-	~Cutmull()
+	~CutmullRing()
 	{
 		for ( Obj* p : tblPoint )
 		{
@@ -213,13 +202,13 @@ struct Cutmull
 
 };
 
-struct Bezier
+struct BezierRing
 {
 	bool	bActive = false;	//	使用可能
 
 	int idxTbl = 0;
 
-	~Bezier()
+	~BezierRing()
 	{
 		for ( Obj* p : tblPoint )
 		{
@@ -374,514 +363,8 @@ struct Bezier
 	
 };
 
-
-
-struct Square
-{
-
-	const float s = 0.04f;
-	vector<vect3> vert=
-	{
-		{	-s,		 s,		0	},//0
-		{	 s,		 s,		0	},//1
-		{	-s,		-s,		0	},//2
-		{	 s,		-s,		0	},//3
-
-	};
-	vector<vect3> disp;
-
-	vector<ivect2>	edge
-	{
-		{	0,	1	},
-		{	1,	3	},
-		{	3,	2	},
-		{	2,	0	},
-	};
-
-	//------------------------------------------------------------------------------
-	void DrawSquare( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAxis = true, bool bTri = true )
-	//------------------------------------------------------------------------------
-	{
-		disp.clear();
-
-		for ( vect3 v : vert )
-		{
-
-			//	右手系座標系
-			//	右手ねじ周り
-			//	roll	:z	奥+
-			//	pitch	:x	右+
-			//	yaw		:y	下+
-			v= v * m + pos;
-
-			disp.emplace_back( v );
-
-		}
-
-
-		// 軸
-		if( bAxis )
-		{
-			vect3	nx = vect3( m.m[0][0], m.m[0][1], m.m[0][2] );
-			vect3	ny = vect3( m.m[1][0], m.m[1][1], m.m[1][2] );
-			vect3	nz = vect3( m.m[2][0], m.m[2][1], m.m[2][2] );
-			pers.line3d( gra, pers, pos, pos+nx*0.2, rgb(1,0,0) );
-			pers.line3d( gra, pers, pos, pos+ny*0.2, rgb(0,1,0) );
-			pers.line3d( gra, pers, pos, pos+nz*0.2, rgb(0,0,1) );
-		}
-		
-		int cnt = 0;
-		for ( ivect2 e : edge )
-		{
-			const vect3& a = disp[e.p];
-			const vect3& b = disp[e.n];
-			rgb col = rgb(0,1,1);
-			if ( cnt == 0 ) col = rgb(1,0,0);
-			//if ( cnt == 1 ) col = rgb(0,1,0);
-			cnt++;
-			pers.line3d( gra, pers, a, b, col, false );
-
-		}
-	}
-	
-} square;
-
-
-struct Box
-{
-
-	const float s = 0.04f;
-	const float l = 0.03f;
-	const float m = 0.02f;
-	const float n = 0.02f;
-	vector<vect3> vert=
-	{
-		{	-s,		 s,		-s	},//0
-		{	 s,		 s,		-s	},//1
-		{	-s,		-s,		-s	},//2
-		{	 s,		-s,		-s	},//3
-		{	-s,		 s,		 s	},//4
-		{	 s,		 s,		 s	},//5
-		{	-s,		-s,		 s	},//6
-		{	 s,		-s,		 s	},//7
-
-		{	-l,		-s-l, 	-l	},//8	//yマーク
-		{	 l,		-s-l, 	-l	},//9
-		{	-l,		-s-l, 	 l	},//10
-		{	 l,		-s-l, 	 l	},//11
-
-		{	s+m,	+m, 	-m	},//	//xマーク
-		{	s+m,	+m, 	+m	},//
-		{	s+m,	-m, 	 0	},//
-
-		{	-n,		 -n, 	s+n	},//	//zマーク
-		{	+n,		 -n, 	s+n	},//
-		{	-n,		 +n, 	s+n	},//
-		{	+n,		 +n, 	s+n	},//
-	};
-	vector<vect3> disp;
-
-	vector<ivect2>	edge
-	{
-		{	0,	1	},
-		{	1,	3	},
-		{	3,	2	},
-		{	2,	0	},
-		{	4,	5	},
-		{	5,	7	},
-		{	7,	6	},
-		{	6,	4	},
-		{	0,	4	},
-		{	1,	5	},
-		{	2,	6	},
-		{	3,	7	},
-		
-		{	8,	9	},	//yマーク
-		{	9,	11	},
-		{	11,	10	},
-		{	10,	8	},
-#if 0
-
-		{	12,	13	},	//xマーク
-		{	13,	14	},
-		{	14,	12	},
-
-
-		{	15,	18	},	//zマーク
-		{	17,	16	},
-#endif
-		
-	};
-	vector<ivect3>	tri
-	{
-		{	8,10,9	},{	9,10,11	},	// yマーク
-		{	14,	13, 12	},	// xマーク
-	};
-
-	Box()
-	{
-	}
-
-
-	//------------------------------------------------------------------------------
-	void DrawBox( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAxis = true, bool bTri = true )
-	//------------------------------------------------------------------------------
-	{
-		disp.clear();
-
-		for ( vect3 v : vert )
-		{
-
-			//	右手系座標系
-			//	右手ねじ周り
-			//	roll	:z	奥+
-			//	pitch	:x	右+
-			//	yaw		:y	下+
-			v= v * m + pos;
-
-			disp.emplace_back( v );
-
-		}
-
-
-		// 軸
-		if( bAxis )
-		{
-			vect3	nx = vect3( m.m[0][0], m.m[0][1], m.m[0][2] );
-			vect3	ny = vect3( m.m[1][0], m.m[1][1], m.m[1][2] );
-			vect3	nz = vect3( m.m[2][0], m.m[2][1], m.m[2][2] );
-			pers.line3d( gra, pers, pos, pos+nx*0.2, rgb(1,0,0) );
-			pers.line3d( gra, pers, pos, pos+ny*0.2, rgb(0,1,0) );
-			pers.line3d( gra, pers, pos, pos+nz*0.2, rgb(0,0,1) );
-		}
-		
-		// Tri
-		if ( bTri )
-		{
-			for ( ivect3 t : tri )
-			{
-				vect3 v0 = pers.calcWorldToScreen3( disp[t.n0] );
-				vect3 v1 = pers.calcWorldToScreen3( disp[t.n1] );
-				vect3 v2 = pers.calcWorldToScreen3( disp[t.n2] );
-//					if ( v0.z>0 )
-				{
-					gra.Tri( v0,v1,v2, rgb(1,0,1));
-					gra.Tri( v2,v1,v0, rgb(1,0,1)/2);
-				}
-
-			}
-		}
-		for ( ivect2 e : edge )
-		{
-			const vect3& a = disp[e.p];
-			const vect3& b = disp[e.n];
-			const rgb col = rgb(0,1,1);
-
-			pers.line3d( gra, pers, a, b, col, false );
-
-		}
-	}
-	
-};
-Box box;
-
-struct Grid
-{
-	//------------------------------------------------------------------------------
-	void DrawGrid3d( SysGra& gra, Pers& pers,  vect3 pos, mat33 m, int NUM_U, int NUM_V, float dt, rgb col  )
-	//------------------------------------------------------------------------------
-	{	// ミニグリッド
-		vect3 vt = vect3(0,0,0);
-		float du = (float)NUM_U*dt;
-		float dv = (float)NUM_V*dt;
-		vect3 a;
-		vect3 b;
-		{
-			a = pos+vect3(-du, 0,-du);
-			b = pos+vect3( du, 0,-du);
-			vt = vect3(0,0,dt);
-			for ( int i = 0 ; i < NUM_V*2+1 ; i++ )
-			{
-				vect3 v0 = a * m;
-				vect3 v1 = b * m;
-				pers.line3d_scissor( gra, pers, v0, v1, col );
-				a+=vt;
-				b+=vt;
-			}
-		}			
-		{
-
-			a = pos+vect3(-dv, 0, dv);
-			b = pos+vect3(-dv, 0,-dv);
-			vt = vect3(dt,0,0);
-			for ( int i = 0 ; i < NUM_U*2+1 ; i++ )
-			{
-				vect3 v0 = a * m;
-				vect3 v1 = b * m;
-				pers.line3d_scissor( gra, pers, v0, v1, col );
-				a+=vt;
-				b+=vt;
-			}
-		}			
-
-		{//原点表示
-			float r = 0.1;
-			vect3 a;
-			for ( int i = 0 ; i <= 360 ; i+=20 )
-			{
-				vect3 b = vect3( r*cos(deg2rad((float)i)), 0, r*sin(deg2rad((float)i)) ) + pos;
-				if ( i > 0 ) 
-				{
-					vect3 v0 = a * m;
-					vect3 v1 = b * m;
-					pers.line3d( gra, pers, v0,v1, col );
-				}
-				a = b;
-			}
-		}
-	}
-	//------------------------------------------------------------------------------
-	void Draw2D( SysGra& gra, Pers& pers, vect2 pos, rgb col )
-	//------------------------------------------------------------------------------
-	{
-		gra.Line( vect2(-1,pos.y), vect2(1,pos.y), col*0);
-		gra.Line( vect2(pos.x,-1), vect2(pos.x,1), col*0);
-		for ( float x = -10 ; x < 10 ; x += 1 )
-		{
-			gra.Line( vect2(pos.x+x/pers.aspect,-1), vect2(pos.x+x/pers.aspect,1), col );
-		}
-		for ( float y = -10 ; y < 10 ; y += 1 )
-		{
-			gra.Line( vect2(-1,pos.y+y), vect2(1,pos.y+y), col );
-		}
-
-		gra.Circle( pos, 0.05, col );
-	
-	}
-
-} grid;
-
-	
-// タイヤ
-struct Tire
-{
-
-	vector<vect3> vert;
-	vector<vect3> disp;
-
-	//------------------------------------------------------------------------------
-	Tire()
-	//------------------------------------------------------------------------------
-	{
-		float r = 1.0;
-		for ( float t = 0 ; t < 2*pi ; t+=deg2rad(5) )
-		{
-			float x = 0;
-			float y = r * sin(t);
-			float z = r * cos(t);
-
-			vert.emplace_back( x, y, z );
-		}
-	}
-
-	//------------------------------------------------------------------------------
-	void DrawRing( SysGra& gra, Pers& pers, vect3 pos, float head, float bank, float radius )
-	//------------------------------------------------------------------------------
-	{
-		mat33 m = mrotz(bank) * mroty(head);
-
-		rgb col(0,1,1);
-		int i = 0;
-		vect3 v0;
-		for ( vect3 v : vert )
-		{
-			vect3 v1 = v*radius * m + pos;
-
-			if ( i > 0 ) 
-			{
-				pers.line3d( gra, pers, v0, v1, col, 2 );
-
-				// 影
-				vect3 a0= v0;
-				vect3 a1= v1;
-				a0.y=0;
-				a1.y=0;
-				pers.line3d( gra, pers, a0, a1, col/4, 2 );
-			}
-
-			v0 = v1;
-			i++;
-		}
-
-	}
-	
-} tire;
-
-
 struct
 {
-	// ドラム
-	struct Drum
-	{
-
-		const float s = 0.05f;
-		const float l = 0.03f;
-		const float m = 0.02f;
-		const float n = 0.02f;
-		vector<vect3> vert=
-		{
-			{	-s,		 s,		-s	},
-			{	 s,		 s,		-s	},
-			{	-s,		-s,		-s	},
-			{	 s,		-s,		-s	},
-			{	-s,		 s,		 s	},
-			{	 s,		 s,		 s	},
-			{	-s,		-s,		 s	},
-			{	 s,		-s,		 s	},
-
-			{	-l,		-s-l, 	-l	},	//yマーク
-			{	 l,		-s-l, 	-l	},
-			{	-l,		-s-l, 	 l	},
-			{	 l,		-s-l, 	 l	},
-
-			{	s+m,	+m, 	-m	},	//xマーク
-			{	s+m,	+m, 	+m	},
-			{	s+m,	-m, 	 0	},
-
-			{	-n,	 -n, 	s+n	},	//zマーク
-			{	+n,	 -n, 	s+n	},
-			{	-n,	 +n, 	s+n	},
-			{	+n,	 +n, 	s+n	},
-		};
-		vector<vect3> disp;
-
-		vector<ivect2>	edge
-		{
-/*				{	0,	1	},
-			{	1,	3	},
-			{	3,	2	},
-			{	2,	0	},
-			{	4,	5	},
-			{	5,	7	},
-			{	7,	6	},
-			{	6,	4	},
-			{	0,	4	},
-			{	1,	5	},
-			{	2,	6	},
-			{	3,	7	},
-*/				
-#if 0
-			{	8,	9	},	//yマーク
-			{	9,	11	},
-			{	11,	10	},
-			{	10,	8	},
-
-//				{	12,	13	},	//xマーク
-//				{	13,	14	},
-//				{	14,	12	},
-
-			{	15,	18	},	//zマーク
-			{	17,	16	},
-#endif
-			
-		};
-		vector<ivect3>	tri
-		{
-//				{	14,	13, 12	},	// xマーク
-		};
-
-		//------------------------------------------------------------------------------
-		Drum()
-		//------------------------------------------------------------------------------
-		{
-			{
-				int	ofs = (signed)vert.size();
-				int cnt = 0;
-				float r = 0.05;
-				float w = 0.05;
-				for ( int i = 0 ; i < 360 ; i+= 30 )
-				{
-					float z = r*cos(deg2rad((float)i));
-					float y = r*sin(deg2rad((float)i));
-					vert.emplace_back(-w,y,z);
-					vert.emplace_back( w,y,z);
-					vert.emplace_back( w,y*0.5,z*0.5);
-					cnt++;
-				}
-				
-				for ( int i = 0 ; i < cnt ; i++ )
-				{
-					
-					int st = i;
-					int en = i+1;
-					if ( i+1 == cnt ) en = 0;
-					
-					const int n = 3;
-
-					edge.emplace_back(ofs+st*n  ,ofs+en*n);
-					edge.emplace_back(ofs+st*n+1,ofs+en*n+1);
-					edge.emplace_back(ofs+st*n+2,ofs+en*n+2);
-					if ( i%3 == 0 ) edge.emplace_back(ofs+st*n  ,ofs+st*n+1);
-				}
-			}
-		}
-
-		//------------------------------------------------------------------------------
-		void DrawDrum( SysGra& gra, Pers& pers,  vect3 pos, mat33 m  )
-		//------------------------------------------------------------------------------
-		{
-			disp.clear();
-
-			for ( vect3 v : vert )
-			{
-
-				//	右手系座標系
-				//	右手ねじ周り
-				//	roll	:z	奥+
-				//	pitch	:x	右+
-				//	yaw		:y	下+
-				v= v * m + pos;
-
-				disp.emplace_back( v );
-
-			}
-
-
-			// 軸
-			if(0)
-			{
-				vect3	nx = vect3( m.m[0][0], m.m[0][1], m.m[0][2] );
-				vect3	ny = vect3( m.m[1][0], m.m[1][1], m.m[1][2] );
-				vect3	nz = vect3( m.m[2][0], m.m[2][1], m.m[2][2] );
-				pers.line3d( gra, pers, pos, pos+nx*0.2, rgb(1,0,0) );
-				pers.line3d( gra, pers, pos, pos+ny*0.2, rgb(0,1,0) );
-				pers.line3d( gra, pers, pos, pos+nz*0.2, rgb(0,0,1) );
-			}
-			
-			// Tri
-			for ( ivect3 t : tri )
-			{
-				vect3 v0 = pers.calcWorldToScreen3( disp[t.n0] );
-				vect3 v1 = pers.calcWorldToScreen3( disp[t.n1] );
-				vect3 v2 = pers.calcWorldToScreen3( disp[t.n2] );
-				if ( v0.z>0 )
-				{
-					gra.Tri( v0,v1,v2, rgb(1,0,1));
-					gra.Tri( v2,v1,v0, rgb(1,0,1)/2);
-				}
-
-			}
-			for ( ivect2 e : edge )
-			{
-				const vect3& a = disp[e.p];
-				const vect3& b = disp[e.n];
-				const rgb col = rgb(0,1,1);
-
-				pers.line3d( gra, pers, a, b, col, false );
-			}
-		}
-		
-	} drum;
 
 	//-------------------------------------------------------------------------
 	void skeleton_update( SysKeys& keys, SysMouse& mouse, Pers& pers, Skeleton& skeleton )
@@ -997,7 +480,7 @@ struct
 		// スケルトン 描画
 		skeleton.DrawSkeleton( pers, gra );
 
-		if(0)
+		if(1)
 		{
 			mat33	mmune = midentity();
 			static mat33	mkata = midentity();
@@ -1024,7 +507,8 @@ struct
 					nz.x,	nz.y,	nz.z
 				);
 
-				box.DrawBox( gra, pers, pos0, mmune, false, false );
+//				box.DrawBox( gra, pers, pos0, mmune, false, false );
+				pers.DrawBox( gra, pers, pos0, mmune, false, false );
 			}
 			// 箱 肩
 			if(1)
@@ -1045,7 +529,8 @@ struct
 				if ( keys.CTRL.on )		mkata.rotateByAxis( (p4-p2).normalize(), deg2rad(0.5));
 				if ( keys.SHIFT.on )	mkata.rotateByAxis( (p4-p2).normalize(), deg2rad(-0.5));
 				
-				box.DrawBox( gra, pers, p2, mkata );
+//				box.DrawBox( gra, pers, p2, mkata );
+				pers.DrawBox( gra, pers, p2, mkata, false, false );
 			}
 			// 箱 肘
 			{
@@ -1061,7 +546,7 @@ struct
 				);	
 				mhiji = m;
 //					mhiji = skeleton.tblPoint[4].mat;
-				drum.DrawDrum( gra, pers, p4, mhiji );
+				pers.DrawDrum( gra, pers, p4, mhiji );
 			}
 			// 箱 手
 			if(0)
@@ -1079,7 +564,7 @@ struct
 					nz.x,	nz.y,	nz.z
 				);	
 				mte = m;
-				drum.DrawDrum( gra, pers, p5, mte );
+				pers.DrawDrum( gra, pers, p5, mte );
 			}
 		}
 
@@ -1162,498 +647,62 @@ struct
 } util;
 
 
-struct Lab
+
+struct
 {
-	vector<Obj*> tblObj;
 
-	~Lab()
-	{
-		for ( Obj* p : (*this).tblObj )
-		{
-			delete p;
-		}
-	}
-	
+	bool bAxisX = true;;
+	bool bAxisY = true;;
+	bool bAxisZ = true;;
+
 	//------------------------------------------------------------------------------
-	void tire3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers )
+	void DrawAxis( SysGra& gra, Pers& pers, vect2 mpos )
 	//------------------------------------------------------------------------------
 	{
-		const vect3 G_pos = vect3(0,2.0,0);
-		const vect3 G_acc= vect3(0,0,0.0);
-		const float G_radius = 0.5;
-		const float G_head = deg2rad(35);	//	タイヤの方向
-		const float G_bank = deg2rad(40);	//	回転角
-		const float G_rspd = deg2rad(0);	//	角速度
-		const float G = 9.8;				// 重力加速度
-		const float grate = 9.8 / 60/60;	// 重力加速度
+		gra.SetZTest( false );
 
-		static vect3 pos = G_pos;
-		static vect3 acc1 = G_acc;
-		static vect3 acc2 = G_acc;
-		static float radius = G_radius;
-		static float head = G_head;
-		static float bank = G_bank;
-		static float rspd = G_rspd;
+		vect3 pos = pers.calcScreenToWorld3( vect3(mpos,0) );
 
-		
-		// 動き
+		vect3 v0 = pers.calcWorldToScreen3( pos );
+
+		// 軸表示
+		float l = 0.1;
+		if ( bAxisX  )
 		{
-			// 強制
-			{
-				// リセット
-				if ( keys.R.hi ) 
-				{
-					pos = G_pos;
-					acc1 = G_acc;
-					acc2 = G_acc;
-					radius = G_radius;
-					head = G_head;
-					bank = G_bank;
-					rspd = G_rspd;
-				}
-				if ( mouse.F.hi ) 
-				{
-					acc1 += vect3( sin(head), 0, cos(head) )*0.02;
-					acc2 += vect3( sin(head), 0, cos(head) )*0.02;
-				}
-				if ( mouse.B.hi ) rspd += deg2rad(5);
-				if ( mouse.R.hi ) rspd += deg2rad(-5);
-			}
-
-			// 重力
-			{
-				acc1.y -= grate;
-				acc2.y -= grate;
-//						pos += (acc1+acc2)/2 ;
-			}
-
-			// 回転
-			{
-				bank += rspd;
-			}
+			vect3 v1 = v0 + vect3(
+				pers.cam.mat.m[0][0] / pers.aspect,
+				pers.cam.mat.m[1][0],
+				pers.cam.mat.m[2][0]
+			) * l;
+			gra.Line( v0, v1, rgb(0.8,0.2,0.2), 2.0 );
 		}
-
-		float high = abs(radius*cos(bank));
-		
-		// 衝突	地面
-		if ( high > pos.y ) 
+		if ( bAxisY  )
 		{
-
-			pos.y = high;
-
-			// バウンド
-			if ( bank > 0 )
-			{
-			}
-			else
-			{
-			}
-//						acc.y = -acc.y * 0.5; 
-//					acc.y = 0;
-#if 0
-			// 回転
-			{
-				float a = atan( acc.y * sin(bank) / radius );
-				rspd = a;
-			}
-			// 衝突 bank
-			if ( bank > deg2rad(90) ) bank -= deg2rad(180);
-			if ( bank < deg2rad(-90) ) bank += deg2rad(180);
-#endif
+			vect3 v1 = v0 + vect3(
+				pers.cam.mat.m[0][1] / pers.aspect,
+				pers.cam.mat.m[1][1],
+				pers.cam.mat.m[2][1]
+			) * l;
+			gra.Line( v0, v1, rgb(0.2,0.8,0.2), 2.0 );
 		}
-		
-		// 設置地面
-		if ( high == pos.y ) 
+		if ( bAxisZ )
 		{
-			// 衝突 bank
-			if ( bank > deg2rad(90) ) bank -= deg2rad(180);
-			if ( bank < deg2rad(-90) ) bank += deg2rad(180);
-
-			// 回転
-			{
-				float a = atan( grate * sin(bank) / radius );
-				rspd += a;
-			}
-		}
-
-		// 減衰	空気抵抗
-		{
-//						rspd *= 0.99;
-		}
-
-		// 描画
-		tire.DrawRing( gra, pers, pos, head, bank, radius );
-	}
-	//------------------------------------------------------------------------------
-	void furiko2d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers )
-	//------------------------------------------------------------------------------
-	{
-		const float G = 9.8;				// 重力加速度
-		const float T = 1.0/60.0;			// 時間/frame
-		const float grate = 9.8 *T*T;		// 重力加速度/frame
-
-		static float	rsp = 0;
-
-		static bool bInit = false;
-		if ( !bInit )
-		{
-			pers.cam.pos = vect3(  0.0, 2.0, -5.0 );
-			pers.cam.at = vect3( 0,  2.0, 0 );
-
-			bInit = true;
-			tblObj.clear();
-			tblObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
-			tblObj.emplace_back( new Obj(vect3(1, 2.0, 0)) );
-
-			rsp=0;
-		}
-		if ( keys.R.hi )	bInit = false;
-
-		vect3&	v0 = tblObj[0]->pos;	//	barの根本
-		vect3&	v1 = tblObj[1]->pos;	//	barの先端
-
-
-		pers.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
-
-		// 縮む
-		if ( mouse.F.hi )	v1 = (v1+v0)/2;
-
-		// 伸びる
-		if ( mouse.B.hi )	v1 = (v1-v0)*2+v0;
-
-		{
-			vect3 v = v1-v0;
-			float b = atan2(v.x,v.y);
-
-			// 角速度に変換
-			float tsp = -grate * sin(b);	//	接線速度
-			float r = tsp/2/pi/v.abs();		//	角加速度
-			rsp +=r;						//	角速度
-
-			// 回転
-			float x = v.x *cos(rsp) - v.y*sin(rsp); 
-			float y = v.x *sin(rsp) + v.y*cos(rsp); 
-			v1 = v0+vect3(x,y,0);
+			vect3 v1 = v0 + vect3(
+				pers.cam.mat.m[0][2] / pers.aspect,
+				pers.cam.mat.m[1][2],
+				pers.cam.mat.m[2][2]
+			) * l;
+			gra.Line( v0, v1, rgb(0.1,0.3,1), 2.0 );
 
 		}
 
-	//gra.Print(1,(float)text_y++,string("len=")+to_string((v1-v0).abs()) ); 
-		
-	}
-	//------------------------------------------------------------------------------
-	void furiko3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers )
-	//------------------------------------------------------------------------------
-	{
-		static bool bInit = false;
-		if ( !bInit )
-		{
-			pers.cam.pos = vect3(  0.0, 0.0, -7.0 );
-			pers.cam.at = vect3( 0,  0.0, 0 );
+		// 軸名表示
+		gra.Print( mpos+gra.Dot(16,-12),string("")+(bAxisX?"X":"")+(bAxisY?"Y":"")+(bAxisZ?"Z":"") ); 
 
-			bInit = true;
-			tblObj.clear();
-			tblObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
-			tblObj.emplace_back( new Obj(vect3(1, 2.0, 0)) );
-		}
-
-		gra.Clr(rgb(0.3,0.3,0.3));
-		grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
-
-		const float G = 9.8;			// 重力加速度
-		const float T = 1.0/60.0;		// 時間/frame
-		const float g = 9.8 *T*T;		// 重力加速度/frame
-
-		vect3&	v0 = tblObj[0]->pos;	//	barの根本
-		vect3&	v1 = tblObj[1]->pos;	//	barの先端
-
-
-		// 角度リセット
-		if ( keys.R.hi )	bInit = false ;
-
-		// 縮む
-		if ( mouse.F.hi )	v1 = (v1+v0)/2;
-
-		// 伸びる
-		if ( mouse.B.hi )	v1 = (v1-v0)*2+v0;
-
-
-	#if 1
-			vect3	bar = (v1-v0);									//	棒
-			float	radius = bar.abs();								//	棒長さ
-			vect3	moment = cross(-bar,-g);						//	回転モーメント
-			vect3	velocity = cross(bar/radius, moment/radius );	//	ベロシティ
-
-		 	float	th = velocity.abs()/radius;						//	角速度
-			static vect3	to = bar;
-			to += mrotateByAxis( moment, th ) * bar-bar;			//	移動計算
-
-
-
-			pers.line3d( gra, pers, v0, v0+to, rgb(1,1,1), 2 );
-
-	#endif
-
-
-	#if 0
-		{
-			static float	rsp = 0;
-			static vect3	vv = 0;
-
-			vect3 v = (v1-v0);
-
-			// 角速度に変換
-			{
-				float b = atan2(v.x,v.y);
-				float t = -g * sin(b);			//	接線速度
-				float r = t/2/pi/v.abs();		//	角加速度
-				rsp +=r;						//	角速度
-			}
-
-			// 回転
-			{
-				float x = v.x *cos(rsp) - v.y*sin(rsp); 
-				float y = v.x *sin(rsp) + v.y*cos(rsp); 
-				vect3 a = vect3(x,y,0);
-				v1 = v0 + a;
-
-				pers.line3d( gra, pers, v1, v1+(a-v)*10, rgb(1,0,0),2 );
-				
-			}
-
-			pers.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
-
-			// 加速ベクトルの実験
-			{
-				vect3 vg = vect3(0,-g,0);	//	重力加速度ベクトル
-				vect3 n0 = cross( v, vg );
-				vect3 vt = cross( n0, v );
-
-//						pers.line3d( gra, pers, v1, v1+vt*100, rgb(0,1,0) );
-				vect3 v2 = v*1.05+v0;
-//						pers.line3d( gra, pers, v2, v2+vv, rgb(0,1,0) );
-
-//						pers.line3d( gra, pers, v2, v2+vg*100, rgb(1,0,0) );
-				pers.line3d( gra, pers, v2, v2+vt*100, rgb(0,1,0) );
-				pers.line3d( gra, pers, v2, v2+n0*100, rgb(0,0,1) );					}
-
-		}
-	#endif
-	#if 0
-		{
-			vect3 vg = vect3(0,-g,0);	//	重力加速度ベクトル
-			vect3 v = (v2-v0).normalize();
-			vect3 n0 = cross( v, vg );
-			vect3 vt = cross( n0, v );
-
-			vv += vt;
-			v2 += vt*10;
-
-//					pers.line3d( gra, pers,  0,  vv*10, rgb(0,1,1), 2 );
-			pers.line3d( gra, pers,  vect3(1,0,0),  vect3(1,0,0)+vt*100, rgb(0,1,0), 1 );
-
-			pers.line3d( gra, pers, v2, v2+vt*100, rgb(0,1,0) );
-			pers.line3d( gra, pers, v0, v2, rgb(0,1,1), 2 );
-
-		}
-	#endif
-
-	//gra.Print(1,(float)text_y++,string("len=")+to_string((v1-v0).abs()) ); 
-		
-	}
-
-	//=================================
-	// 描画	引力実験
-	//=================================
-	//------------------------------------------------------------------------------
-	void gravity( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers )
-	//------------------------------------------------------------------------------
-	{
-		static bool bInit = false;
-		if ( !bInit )
-		{
-			bInit = true;
-			//上から
-			pers.cam.pos = vect3(  0.0, 0.5, -2.0 );
-			pers.cam.at = vect3( 0,  0.0, 0 );
-
-			tblObj.clear();
-			tblObj.emplace_back( new Planet(vect3(-0.5,0.1,0),vect3(0, 0, -0.02)) );
-			tblObj.emplace_back( new Planet(vect3( 0.5,0.1,0),vect3(0, 0, 0.02)) );
-
-		}
-
-		const float	G = 9.8;			// 重力加速度
-		const float	T = 1.0/60.0;		// 時間/frame
-		const float	g = 9.8 *T*T;		// 重力加速度/frame
-
-		function<void(Planet&, Planet&)> func = [&]( Planet& pl0, Planet& pl1 )
-		{
-			float 	dis = (pl0.pos-pl1.pos).abs();				// 距離
-			vect3 	dir = (pl0.pos-pl1.pos).normalize();		// 方向
-
-			if ( dis < 0.01 ) dis = 0.01;
-			
-			pl1.spd = (pl1.spd + dir/dis/1000);
-
-			pl1.pos += pl1.spd; 
-		
-			pl1.tblPlanet[ pl1.cntPlanet++ ] = pl1.pos;	
-			if ( pl1.cntPlanet >= pl1.MaxPlanet ) pl1.cntPlanet = 0;
-
-			for ( int i = 0 ; i < pl1.MaxPlanet ; i++ )
-			{
-				pers.pset3d( gra, pers, pl1.tblPlanet[i], rgb(0,1,1),2 );
-			}
-		};
-		
-		Planet& pl0 = *dynamic_cast<Planet*>((*this).tblObj[0]);	//	太陽
-		Planet& pl1 = *dynamic_cast<Planet*>((*this).tblObj[1]);	//	地球
-
-		func( pl0, pl1 );
-		func( pl1, pl0 );
-
-		for ( int i = 1 ; i < (signed)tblObj.size() ; i++ )
-		{
-			Planet& pl1 = *dynamic_cast<Planet*>((*this).tblObj[i]);
-//					func( pl0, pl1 );
-		}
-
-//				pers.line3d( gra, pers, pl1.pos, pl2.pos, rgb(0,1,1),1 );
-
-		// 角度リセット
-		if ( keys.R.hi )	bInit = false ;
-
-
-		if ( keys.SPACE.hi )
-		{
-			vect3 P = pers.calcScreenToWorld3( vect3(mouse.pos,0) );
-			vect3 I = pers.calcRayvect( P );
-			tblObj.emplace_back( new Planet( P, I/100.0 ) );
-		}
+		gra.SetZTest( true );
 
 	}
-			
-	//=================================
-	// 描画	角速度 実験
-	//=================================
-	//------------------------------------------------------------------------------
-	void kakusokudo( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, Grid& grid )
-	//------------------------------------------------------------------------------
-	{
-		static bool bInit = false;
-		if ( !bInit )
-		{
-			bInit = true;
-			tblObj.clear();
-			tblObj.emplace_back( new Obj(vect3(0,0.1,0)) );
-			tblObj.emplace_back( new Obj(vect3(1,0.1,0)) );
-			tblObj.emplace_back( new Obj(vect3(1,0.1,0.4)) );
-		}
-
-		const float	G = 9.8;			// 重力加速度
-		const float	T = 1.0/60.0;		// 時間/frame
-		const float	g = 9.8 *T*T;		// 重力加速度/frame
-
-		vect3&	v0 = (*this).tblObj[0]->pos;	//	barの根本
-		vect3&	v1 = (*this).tblObj[1]->pos;	//	barの先端
-		vect3&	v2 = (*this).tblObj[2]->pos;	// 速度指定
-
-		// 角度リセット
-		if ( keys.R.hi )	bInit = false ;
-
-		{
-			vect3	bar = (v1-v0);									//	棒
-			float	radius = bar.abs();
-			vect3	moment = cross(-bar,v2-v1);						//	回転モーメント
-			vect3	velocity = cross(bar/radius, moment/radius );	//	ベロシティ
-
-		 	float	th = velocity.abs()/radius;						//	角速度
-			vect3	to = mrotateByAxis( moment, th ) * bar;			//	移動計算
-
-			{// 影 描画
-				vect3	va = v0;;va.y = 0;
-				vect3	vb = v0+to;vb.y = 0;
-				pers.line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
-				va = v0;va.y = 0;
-				vb = v0+moment;vb.y = 0;
-				pers.line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
-				va = v1;va.y = 0;
-				vb = v1+velocity;vb.y = 0;
-				pers.line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
-				va = v0;va.y = 0;
-				vb = v1;vb.y = 0;
-				pers.line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
-			}
-			pers.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );	//	棒
-			pers.line3d( gra, pers, v1, v2, rgb(1,1,0), 1 );	// 外的な力
-			pers.line3d( gra, pers, v0, v0+to, rgb(0,1,1), 1 );	// 回転先ベクトル
-			pers.line3d( gra, pers, v0, v0+moment, rgb(1,0,1), 1 );	// モーメント/回転軸
-			pers.line3d( gra, pers, v1, v1+velocity, rgb(0,1,0), 1 );	// 移動ベクトル
-
-			pers.pset3d( gra, pers, v1+velocity, rgb(0,1,0),5 );pers.print3d( gra, pers, v1+velocity, 0,0, "velocity" ); 
-			pers.pset3d( gra, pers, v0+moment, rgb(1,0,1),5 );pers.print3d( gra, pers, v0+moment, 0,0, "moment" ); 
-			pers.pset3d( gra, pers, v0+to  , rgb(0,1,1),5 );pers.print3d( gra, pers, v0+to  , 0,0, "to" ); 
-				
-		}
-
-	}
-
-	//------------------------------------------------------------------------------
-	void graph( SysGra& gra, Pers& pers, Grid& grid )
-	//------------------------------------------------------------------------------
-	{
-
-		rgb	col = vect3(0.2,0.2,0.2);
-
-		gra.Clr(rgb(0.3,0.3,0.3));
-		grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
-
-
-		float n = 10;
-		{
-			float dt = 0.2;
-			float a = 1*dt*dt;
-			float v = 0;
-			float s = 0;
-
-			for ( float t = 0 ; t < n ; t+=dt )
-			{
-				v += a;
-				s += v;
-			}
-		}
-
-		{
-			float a = 0.5;
-			float v = 0;
-			float s = 0;
-
-			float t0 = 0;
-			float v0 = v;
-			float s0 = s;
-
-			for ( float t = 0 ; t < n ; t+=0.1 )
-			{
-				v = a * t;
-				s = v * t * 0.5f;
-
-				pers.line2d( gra, pers, vect2(t0,s0), vect2(t,s), rgb(0,0.5,1), 1 );
-				pers.line2d( gra, pers, vect2(t0,v0), vect2(t,v), rgb(0,1,0), 1 );
-
-				pers.pset2d( gra, pers, vect2(t,s), rgb(0,0.5,1), 3 );
-				pers.pset2d( gra, pers, vect2(t,v), rgb(0,1,0), 3 );
-				pers.print2d( gra, pers, vect2(t,s),0,0, to_string(s) );
-			
-				t0 = t;
-				v0 = v;
-				s0 = s;
-
-
-			}
-		}
-
-	}
-} lab;
+} axis;
 
 struct Apr : public Sys
 {
@@ -1670,61 +719,6 @@ struct Apr : public Sys
 	long long	time_peak = 0;
 
 
-	struct Manupirator
-	{
-
-		bool bAxisX = true;;
-		bool bAxisY = true;;
-		bool bAxisZ = true;;
-
-		//------------------------------------------------------------------------------
-		void DrawAxis( vect2 mpos, Apr& apr )
-		//------------------------------------------------------------------------------
-		{
-			apr.gra.SetZTest( false );
-
-			vect3 pos = apr.pers.calcScreenToWorld3( vect3(mpos,0) );
-
-			vect3 v0 = apr.pers.calcWorldToScreen3( pos );
-
-			// 軸表示
-			float l = 0.1;
-			if ( bAxisX  )
-			{
-				vect3 v1 = v0 + vect3(
-					apr.pers.cam.mat.m[0][0] / apr.pers.aspect,
-					apr.pers.cam.mat.m[1][0],
-					apr.pers.cam.mat.m[2][0]
-				) * l;
-				apr.gra.Line( v0, v1, rgb(0.8,0.2,0.2), 2.0 );
-			}
-			if ( bAxisY  )
-			{
-				vect3 v1 = v0 + vect3(
-					apr.pers.cam.mat.m[0][1] / apr.pers.aspect,
-					apr.pers.cam.mat.m[1][1],
-					apr.pers.cam.mat.m[2][1]
-				) * l;
-				apr.gra.Line( v0, v1, rgb(0.2,0.8,0.2), 2.0 );
-			}
-			if ( bAxisZ )
-			{
-				vect3 v1 = v0 + vect3(
-					apr.pers.cam.mat.m[0][2] / apr.pers.aspect,
-					apr.pers.cam.mat.m[1][2],
-					apr.pers.cam.mat.m[2][2]
-				) * l;
-				apr.gra.Line( v0, v1, rgb(0.1,0.3,1), 2.0 );
-
-			}
-
-			// 軸名表示
-			apr.gra.Print( mpos+apr.gra.Dot(16,-12),string("")+(bAxisX?"X":"")+(bAxisY?"Y":"")+(bAxisZ?"Z":"") ); 
-
-			apr.gra.SetZTest( true );
-
-		}
-	} axis;
 
 
 	Pers pers;
@@ -1739,8 +733,8 @@ struct Apr : public Sys
 		// 各種Obj 定義
 		//=================================
 		unique_ptr<Skeleton> pSkeleton(new Skeleton);
-		unique_ptr<Bezier> pBezier(new Bezier);
-		unique_ptr<Cutmull> pCutmull(new Cutmull);
+		unique_ptr<BezierRing> pBezier(new BezierRing);
+		unique_ptr<CutmullRing> pCutmull(new CutmullRing);
 
 		//===========================================================================
 		while( Update() )
@@ -1852,7 +846,7 @@ struct Apr : public Sys
 			//=================================
 			// 床グリッド描画
 			//=================================
-			grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
+			pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 
 
 
@@ -1987,7 +981,7 @@ struct Apr : public Sys
 			util.skeleton_draw( gra, keys, mouse, pers, (*pSkeleton), text_y );
 
 			//=================================
-			//	Bezier 表示
+			//	BezierRing 表示
 			//=================================
 			if ( (*pBezier).bActive ) 
 			{
@@ -2002,7 +996,7 @@ struct Apr : public Sys
 			}
 
 			//=================================
-			// コース描画 Cutmull
+			// コース描画 CutmullRing
 			//=================================
 			if ( (*pCutmull).bActive )
 			{
@@ -2035,20 +1029,20 @@ struct Apr : public Sys
 			//=================================
 			// 描画	マニュピレーター
 			//=================================
-			axis.DrawAxis( mouse.pos, *this );
+			axis.DrawAxis( gra, pers, mouse.pos );
 
 
 			//=================================
 			// 描画	Lab
 			//=================================
-			switch( 5 )
+			switch( 3 )
 			{
 				case 1:	// 描画	グラフ実験
-					lab.graph( gra, pers, grid );
+					lab.graph( keys, mouse, gra, pers );
 					break;
 
 				case 2:// 描画	角速度 実験
-					lab.kakusokudo( keys, mouse, gra, pers, grid );
+					lab.kakusokudo( keys, mouse, gra, pers );
 					break;
 
 				case 3:	// 描画	引力実験
