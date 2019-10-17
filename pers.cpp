@@ -57,7 +57,7 @@ void g_pset2d( SysGra& gra, Pers& pers, vect2 p0, rgb col, float wide )
 }
 
 //------------------------------------------------------------------------------
-void g_print2d( SysGra& gra, Pers& pers, vect2 p0, string str )
+void g_print2d( SysGra& gra, Pers& pers, vect2 p0, float x, float y, string str )
 //------------------------------------------------------------------------------
 {
 	g_print3d( gra, pers, vect3(p0,0), 0, 0, str );

@@ -383,16 +383,19 @@ struct
 
 						if ( bSelected )
 						{
-							gra.Pset( pers.calcWorldToScreen3( p->pos ), rgb(1,0,0), 11 );
+//							gra.Pset( pers.calcWorldToScreen3( p->pos ), rgb(1,0,0), 11 );
+							g_pset3d( gra, pers, p->pos, rgb(1,0,0), 11 );
 						}
 						else
 						{
-							gra.Pset( pers.calcWorldToScreen3( p->pos ), rgb(0,0,1), 11 );
+//							gra.Pset( pers.calcWorldToScreen3( p->pos ), rgb(0,0,1), 11 );
+							g_pset3d( gra, pers, p->pos, rgb(0,0,1), 11 );
 						}
 
 						{
-							vect2 pos = pers.calcWorldToScreen2( p->pos );
-							gra.Print( pos+gra.Dot(14,0), to_string(n++) );
+//							vect2 pos = pers.calcWorldToScreen2( p->pos );
+//							gra.Print( pos+gra.Dot(14,0), to_string(n++) );
+							g_print3d( gra, pers, p->pos, -14, 0, to_string(n++) ); 
 						}
 					}
 				}
@@ -1124,7 +1127,7 @@ struct Apr : public Sys
 
 	Pers pers;
 
-	//------------------------------------------------------------------------------
+/*	//------------------------------------------------------------------------------
 	void pset3d( vect3 pos0, rgb col, float wide )
 	//------------------------------------------------------------------------------
 	{
@@ -1135,7 +1138,7 @@ struct Apr : public Sys
 		}
 
 	}
-
+*/
 	
 
 	struct Grid
@@ -1904,7 +1907,7 @@ struct Apr : public Sys
 
 					g_pset2d( gra, pers, vect2(t,s), rgb(0,0.5,1), 3 );
 					g_pset2d( gra, pers, vect2(t,v), rgb(0,1,0), 3 );
-					g_print2d( gra, pers, vect2(t,s), to_string(s) );
+					g_print2d( gra, pers, vect2(t,s),0,0, to_string(s) );
 				
 					t0 = t;
 					v0 = v;
@@ -2002,9 +2005,11 @@ struct Apr : public Sys
 				
 				// カメラ移動
 				if ( (keys.ALT.on && mouse.R.on) || ( mouse.R.on && mouse.L.on ) ) pers.cam.Zoom( -mouse.mov.y/pers.getW((pers.cam.pos-pers.cam.at).abs()) );
+
+				// フォーカス
+				if ( keys.F.hi )	pers.Focus( gui.tbls );
 				
 				// カメラマトリクス計算
-//				pers.cam.mat.LookAt( pers.cam.pos, pers.cam.at, pers.cam.up );
 				pers.cam.Update();
 			}
 
@@ -2313,12 +2318,8 @@ struct Apr : public Sys
 					pers.cam.at = vect3( 0,  0.0, 0 );
 
 					g_tblObj.clear();
-					g_tblObj.emplace_back( new Planet(vect3(0,0.1,0), vect3(0,0,0)) );
-					g_tblObj.emplace_back( new Planet(vect3(1,0.1,-0.4),vect3(0, 0.01, 0.02)) );
-					g_tblObj.emplace_back( new Planet(vect3(0.3,1.5,0.4),vect3(0, 0.01, 0.02)) );
-					g_tblObj.emplace_back( new Planet(vect3(0.2,1.3,0.2),vect3(0, 0.01, 0.02)) );
-					g_tblObj.emplace_back( new Planet(vect3(0.1,1.1,0.1),vect3(0, 0.01, 0.02)) );
-					g_tblObj.emplace_back( new Planet(vect3(0.1,1.2,0.0),vect3(0, 0.01, 0.02)) );
+					g_tblObj.emplace_back( new Planet(vect3(-0.5,0.1,0),vect3(0, 0, -0.02)) );
+					g_tblObj.emplace_back( new Planet(vect3( 0.5,0.1,0),vect3(0, 0, 0.02)) );
 
 				}
 
@@ -2347,21 +2348,29 @@ struct Apr : public Sys
 				};
 				
 				Planet& pl0 = *dynamic_cast<Planet*>(g_tblObj[0]);	//	太陽
-//				Planet& pl1 = *dynamic_cast<Planet*>(g_tblObj[1]);	//	地球
-//				Planet& pl2 = *dynamic_cast<Planet*>(g_tblObj[2]);	//	地球
+				Planet& pl1 = *dynamic_cast<Planet*>(g_tblObj[1]);	//	地球
 
-//				func( pl0, pl1 );
-//				func( pl0, pl2 );
-				for ( int i = 1 ; i < 6 ; i++ )
+				func( pl0, pl1 );
+				func( pl1, pl0 );
+
+				for ( int i = 1 ; i < (signed)g_tblObj.size() ; i++ )
 				{
 					Planet& pl1 = *dynamic_cast<Planet*>(g_tblObj[i]);
-					func( pl0, pl1 );
+//					func( pl0, pl1 );
 				}
 
 //				g_line3d( gra, pers, pl1.pos, pl2.pos, rgb(0,1,1),1 );
 
 				// 角度リセット
 				if ( keys.R.hi )	bInit = false ;
+
+
+				if ( keys.SPACE.hi )
+				{
+					vect3 P = pers.calcScreenToWorld3( vect3(mouse.pos,0) );
+					vect3 I = pers.calcRayvect( P );
+					g_tblObj.emplace_back( new Planet( P, I/100.0 ) );
+				}
 				
 				
 

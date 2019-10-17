@@ -20,6 +20,8 @@ void	mat4_rotateZ( float* m, float th );
 //const static float pi = 3.141592654;
 const static float pi = 3.14159265f;//35897932384626433832795;
 const static float infinit =  FLT_MAX;//numeric_limits<float>::max();	//FLT_MAX
+const static float infinit_max =  FLT_MAX;//numeric_limits<float>::max();	//FLT_MAX
+const static float infinit_min =  FLT_MIN;
 
 
 struct	I2
@@ -265,8 +267,10 @@ extern vect3 reflect( vect3 I, vect3 N );
 
 extern vect2		min( vect2 a, vect2 b );
 extern vect2		max( vect2 a, vect2 b );
+extern vect2		ave( vect2 a, vect2 b );
 extern vect3		min( vect3 a, vect3 b );
 extern vect3		max( vect3 a, vect3 b );
+extern vect3		ave( vect3 a, vect3 b );
 
 extern float	max( float a, float b );
 extern vect3		max( const float a, vect3 b );
