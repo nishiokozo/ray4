@@ -193,14 +193,20 @@ void Lab::furiko2d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers )
 
 	}
 
-//gra.Print(1,(float)text_y++,string("len=")+to_string((v1-v0).abs()) ); 
-	
+
 }
 
 //------------------------------------------------------------------------------
 void Lab::furiko3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers )
 //------------------------------------------------------------------------------
 {
+	const float G = 9.8;			// 重力加速度
+	const float T = 1.0/60.0;		// 時間/frame
+	const float g = 9.8 *T*T;		// 重力加速度/frame
+	const vect3 vg = vect3(0,-g,0);		// 重力加速度/frame
+
+	static vect3	acc;
+
 	static bool bInit = false;
 	if ( !bInit )
 	{
@@ -211,18 +217,24 @@ void Lab::furiko3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers )
 		tblObj.clear();
 		tblObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
 		tblObj.emplace_back( new Obj(vect3(1, 2.0, 0)) );
+		
+		acc = 0;
 	}
 
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
 
-	const float G = 9.8;			// 重力加速度
-	const float T = 1.0/60.0;		// 時間/frame
-	const float g = 9.8 *T*T;		// 重力加速度/frame
 
 	vect3&	v0 = tblObj[0]->pos;	//	barの根本
 	vect3&	v1 = tblObj[1]->pos;	//	barの先端
 
+	auto drawVect = [&]( vect3 v0, vect3 v, rgb col, string str )
+	{
+		pers.line3d( gra, pers, v0, v0+v, col, 1 );
+		pers.pset3d( gra, pers,     v0+v, col, 5 );
+		pers.print3d( gra, pers, v0+v, 0,0, str ); 
+
+	};
 
 	// 角度リセット
 	if ( keys.R.hi )	bInit = false ;
@@ -237,16 +249,19 @@ void Lab::furiko3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers )
 #if 1
 		vect3	bar = (v1-v0);									//	棒
 		float	radius = bar.abs();								//	棒長さ
-		vect3	moment = cross(-bar,-g);						//	回転モーメント
+		vect3	moment = cross(-bar,vg);						//	回転モーメント
 		vect3	velocity = cross(bar/radius, moment/radius );	//	ベロシティ
 
 	 	float	th = velocity.abs()/radius;						//	角速度
-		static vect3	to = bar;
-		to += mrotateByAxis( moment, th ) * bar-bar;			//	移動計算
+//		v1 = mrotateByAxis( moment, th ) * v1;			//	移動計算
+v1 += velocity;
+		pers.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
 
 
+		drawVect( v0, moment*100, rgb(1,0,1), "moment" );
+		drawVect( v1, velocity*100, rgb(0,1,0), "velocity" );
+		drawVect( v1, vg*100, rgb(1,0,0), "g" );
 
-		pers.line3d( gra, pers, v0, v0+to, rgb(1,1,1), 2 );
 
 #endif
 
@@ -314,7 +329,6 @@ void Lab::furiko3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers )
 	}
 #endif
 
-//gra.Print(1,(float)text_y++,string("len=")+to_string((v1-v0).abs()) ); 
 	
 }
 
@@ -323,7 +337,7 @@ void Lab::furiko3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers )
 //=================================
 
 //------------------------------------------------------------------------------
-void Lab::gravity( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers )
+void Lab::gravityPlanet( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers )
 //------------------------------------------------------------------------------
 {
 	#define MAX_PLANET 300

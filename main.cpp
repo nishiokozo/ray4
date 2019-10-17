@@ -507,7 +507,6 @@ struct
 					nz.x,	nz.y,	nz.z
 				);
 
-//				box.DrawBox( gra, pers, pos0, mmune, false, false );
 				pers.DrawBox( gra, pers, pos0, mmune, false, false );
 			}
 			// 箱 肩
@@ -529,7 +528,6 @@ struct
 				if ( keys.CTRL.on )		mkata.rotateByAxis( (p4-p2).normalize(), deg2rad(0.5));
 				if ( keys.SHIFT.on )	mkata.rotateByAxis( (p4-p2).normalize(), deg2rad(-0.5));
 				
-//				box.DrawBox( gra, pers, p2, mkata );
 				pers.DrawBox( gra, pers, p2, mkata, false, false );
 			}
 			// 箱 肘
@@ -545,7 +543,6 @@ struct
 					nz.x,	nz.y,	nz.z
 				);	
 				mhiji = m;
-//					mhiji = skeleton.tblPoint[4].mat;
 				pers.DrawDrum( gra, pers, p4, mhiji );
 			}
 			// 箱 手
@@ -807,7 +804,6 @@ struct Apr : public Sys
 			{
 				//読み込み
 				unique_ptr<Skeleton> pNew(new Skeleton);
-				//pNew->LoadSkeleton( "human.mot" );
 				pNew->LoadSkeleton( "bone.mot" );
 				pNew->stat.bShowSkin = false;
 				pNew->stat.bShowLocus = false;
@@ -818,7 +814,6 @@ struct Apr : public Sys
 				//読み込み
 				unique_ptr<Skeleton> pNew(new Skeleton);
 				pNew->LoadSkeleton( "human.mot" );
-				//pNew->LoadSkeleton( "bone.mot" );
 				pNew->stat.bShowSkin = false;
 				pNew->stat.bShowLocus = false;
 				pSkeleton = move(pNew);
@@ -870,19 +865,6 @@ struct Apr : public Sys
 
 				pers.line3d( gra, pers, P, P+I,  vect3(1,0,0));
 				pers.line3d( gra, pers, P2, P3, vect3(1,1,1));
-
-				{
-					vect3 a0 = lab.tblObj[0]->pos;
-					vect3 a1 = lab.tblObj[1]->pos;
-				
-					static vect3 p(0,1,0);
-					pers.pset3d( gra, pers, p, rgb(1,1,1), 11 );
-					pers.pset3d( gra, pers, a0, rgb(0,1,1), 7 );
-					pers.pset3d( gra, pers, a1, rgb(1,1,0), 7 );
-				
-					p.rotateByAxis( a0, a1-a0, deg2rad(1) );
-				}
-
 
 			}
 
@@ -990,7 +972,6 @@ struct Apr : public Sys
 				vect3 I = pers.calcRayvect( P );
 
 				// 表示 加工 ベジェ 三次曲線
-	//				bezier.exec_drawBezier( gra, pers, (*pBezier).tblPoint, (*pBezier).idxPoint, (*pBezier).idxTbl, P, I, keys.E.on, mouse.L.hi );
 				(*pBezier).exec_drawBezier( gra, pers, (*pBezier).tblPoint, (*pBezier).idxPoint, (*pBezier).idxTbl, P, I, keys.E.on, mouse.L.hi );
 
 			}
@@ -1005,37 +986,10 @@ struct Apr : public Sys
 			}
 
 
-
-
-			//=================================
-			// 表示 矩形カーソル、制御点
-			//=================================
-			gui.DrawController( pers, gra, gui.tbls, mouse.pos );
-			
-			
-			//=================================
-			// 情報表示
-			//=================================
-			gra.Print(1,(float)text_y++,string("fovY:")+to_string(int(pers.fovy)));
-			gra.Print(1,(float)text_y++,string("sz:")+to_string(pers.sz) +string(" fy:")+to_string(pers.fy));
-			gra.Print(1,(float)text_y++,string("far:")+to_string((pers.cam.pos-pers.cam.at).abs())); 
-			gra.Print(1,(float)text_y++,string("at  x=")+to_string(pers.cam.at.x)+string(" y=")+to_string(pers.cam.at.y)+string(" z=")+to_string(pers.cam.at.z) ); 
-			gra.Print(1,(float)text_y++,string("pos x=")+to_string(pers.cam.pos.x)+string(" y=")+to_string(pers.cam.pos.y)+string(" z=")+to_string(pers.cam.pos.z) ); 
-			gra.Print(1,(float)text_y++,string("peak=")+to_string(time_peak/1000)+string("msec") ); 
-
-			gra.Print(1,(float)text_y++,string("idxTbl=")+to_string(gui.one.idxTbl) ); 
-			gra.Print(1,(float)text_y++,string("idxObj=")+to_string(gui.one.idxObj) ); 
-
-			//=================================
-			// 描画	マニュピレーター
-			//=================================
-			axis.DrawAxis( gra, pers, mouse.pos );
-
-
 			//=================================
 			// 描画	Lab
 			//=================================
-			switch( 3 )
+			switch( 4 )
 			{
 				case 1:	// 描画	グラフ実験
 					lab.graph( keys, mouse, gra, pers );
@@ -1046,7 +1000,7 @@ struct Apr : public Sys
 					break;
 
 				case 3:	// 描画	引力実験
-					lab.gravity( keys, mouse, gra, pers );
+					lab.gravityPlanet( keys, mouse, gra, pers );
 					break;
 
 				case 4:	// 描画	振り子3D実験
@@ -1062,6 +1016,30 @@ struct Apr : public Sys
 					break;
 				default:break;
 			}
+
+			//=================================
+			// 表示 矩形カーソル、制御点
+			//=================================
+			gui.DrawController( pers, gra, gui.tbls, mouse.pos );
+			
+
+			//=================================
+			// 描画	マニュピレーター
+			//=================================
+			axis.DrawAxis( gra, pers, mouse.pos );
+
+			//=================================
+			// 情報表示
+			//=================================
+			gra.Print(1,(float)text_y++,string("fovY:")+to_string(int(pers.fovy)));
+			gra.Print(1,(float)text_y++,string("sz:")+to_string(pers.sz) +string(" fy:")+to_string(pers.fy));
+			gra.Print(1,(float)text_y++,string("far:")+to_string((pers.cam.pos-pers.cam.at).abs())); 
+			gra.Print(1,(float)text_y++,string("at  x=")+to_string(pers.cam.at.x)+string(" y=")+to_string(pers.cam.at.y)+string(" z=")+to_string(pers.cam.at.z) ); 
+			gra.Print(1,(float)text_y++,string("pos x=")+to_string(pers.cam.pos.x)+string(" y=")+to_string(pers.cam.pos.y)+string(" z=")+to_string(pers.cam.pos.z) ); 
+			gra.Print(1,(float)text_y++,string("peak=")+to_string(time_peak/1000)+string("msec") ); 
+
+			gra.Print(1,(float)text_y++,string("idxTbl=")+to_string(gui.one.idxTbl) ); 
+			gra.Print(1,(float)text_y++,string("idxObj=")+to_string(gui.one.idxObj) ); 
 
 			//=================================
 			// 処理時間表示
