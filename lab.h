@@ -9,29 +9,33 @@ struct Lab
 			delete p;
 		}
 	}
+
+	int idx = 0;	
 	
+	Lab();
+
 	//------------------------------------------------------------------------------
-	void tire3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers );
+	void tire3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );
 	//------------------------------------------------------------------------------
 
 	//------------------------------------------------------------------------------
-	void furiko2d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers );
+	void furiko2d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );
 	//------------------------------------------------------------------------------
 
 	//------------------------------------------------------------------------------
-	void furiko3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers );
+	void furiko3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );
 	//------------------------------------------------------------------------------
 
 	//------------------------------------------------------------------------------
-	void gravityPlanet( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers );
+	void gravityPlanet( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );
 	//------------------------------------------------------------------------------
 
 	//------------------------------------------------------------------------------
-	void kakusokudo( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers );
+	void kakusokudo( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );
 	//------------------------------------------------------------------------------
 
 	//------------------------------------------------------------------------------
-	void graph( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers );
+	void graph( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );
 	//------------------------------------------------------------------------------
 
 };

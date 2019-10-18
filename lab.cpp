@@ -29,8 +29,16 @@
 #include "gui.h"
 
 #include "lab.h"
+
 //------------------------------------------------------------------------------
-void Lab::tire3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers )
+Lab::Lab()
+//------------------------------------------------------------------------------
+{
+	idx = 4;
+}
+
+//------------------------------------------------------------------------------
+void Lab::tire3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
 {
 	const vect3 G_pos = vect3(0,2.0,0);
@@ -141,7 +149,7 @@ void Lab::tire3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers )
 }
 
 //------------------------------------------------------------------------------
-void Lab::furiko2d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers )
+void Lab::furiko2d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
 {
 	const float G = 9.8;				// 重力加速度
@@ -197,74 +205,113 @@ void Lab::furiko2d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers )
 }
 
 //------------------------------------------------------------------------------
-void Lab::furiko3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers )
+void Lab::furiko3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
 {
+		// T=J dω/dt
+		// T：トルク J：慣性モーメント ω：回転角速度[rad]
+		//
+		// t=rF
+		// r:位置ベクトル t:力のモーメント F:力
+		//
+		// L=rp
+		// r:位置ベクトル L:角運動量(運動量のモーメント) p:運動量
+
 	const float G = 9.8;			// 重力加速度
 	const float T = 1.0/60.0;		// 時間/frame
 	const float g = 9.8 *T*T;		// 重力加速度/frame
-	const vect3 vg = vect3(0,-g,0);		// 重力加速度/frame
+	const vect3 vg = vect3(0,-g,0);	// 重力加速度ベクトル/frame
 
-	static vect3	acc;
-
+	static vect3	acc;			// 運動量
+	static vect3	mov;			// 運動量
+	static bool	bPause = false; 
+	static bool	bStep = false; 
 	static bool bInit = false;
-	if ( !bInit )
+
+	auto drawVect = [&]( vect3 v0, vect3 v, float sc, rgb col, string str )
 	{
-		pers.cam.pos = vect3(  0.0, 0.0, -7.0 );
-		pers.cam.at = vect3( 0,  0.0, 0 );
+		pers.line3d( gra, pers, v0, v0+v*sc, col, 1 );
+		pers.pset3d( gra, pers,     v0+v*sc, col, 5 );
+		pers.print3d( gra, pers, 	v0+v*sc, 0,0, str ); 
 
-		bInit = true;
-		tblObj.clear();
-		tblObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
-		tblObj.emplace_back( new Obj(vect3(1, 2.0, 0)) );
-		
-		acc = 0;
+		gra.Print(1,(float)text_y++, str+":"+to_string(v.x)+","+to_string(v.y)+","+to_string(v.z));
+	};
+
+	// 初期化
+	{
+		if ( !bInit )
+		{
+			static bool b = false;
+			if ( !b )
+			{
+				b = true;
+				pers.cam.pos = vect3(  0.0, 0.0, -7.0 );
+				pers.cam.at = vect3( 0,  0.0, 0 );
+			}
+
+			bInit = true;
+			tblObj.clear();
+			tblObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
+			tblObj.emplace_back( new Obj(vect3(-1, 2.0, 0)) );
+			
+			acc = 0;
+		}
 	}
-
-	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
-
 
 	vect3&	v0 = tblObj[0]->pos;	//	barの根本
 	vect3&	v1 = tblObj[1]->pos;	//	barの先端
 
-	auto drawVect = [&]( vect3 v0, vect3 v, rgb col, string str )
+	// 入力
 	{
-		pers.line3d( gra, pers, v0, v0+v, col, 1 );
-		pers.pset3d( gra, pers,     v0+v, col, 5 );
-		pers.print3d( gra, pers, v0+v, 0,0, str ); 
+		// ポーズ
+		if ( keys.SPACE.hi )	bPause = !bPause;
 
-	};
+		// ステップ再生
+		if ( keys.ENTER.rep )	bStep = true;
 
-	// 角度リセット
-	if ( keys.R.hi )	bInit = false ;
+		// 角度リセット
+		if ( keys.R.hi )	bInit = false ;
 
-	// 縮む
-	if ( mouse.F.hi )	v1 = (v1+v0)/2;
+		// 縮む
+		if ( mouse.F.hi )	v1 = (v1+v0)/2;
 
-	// 伸びる
-	if ( mouse.B.hi )	v1 = (v1-v0)*2+v0;
+		// 伸びる
+		if ( mouse.B.hi )	v1 = (v1-v0)*2+v0;
+	}
 
+	vect3	vr = (v1-v0);				//	位置ベクトル
+	float	r = vr.abs();				//	位置スカラー
+	vect3	moment = cross(-vr,vg);		//	モーメント
+	vect3	F = cross(vr/r, moment/r );	//	力
 
-#if 1
-		vect3	bar = (v1-v0);									//	棒
-		float	radius = bar.abs();								//	棒長さ
-		vect3	moment = cross(-bar,vg);						//	回転モーメント
-		vect3	velocity = cross(bar/radius, moment/radius );	//	ベロシティ
+	// 計算
+	if ( !bPause || bStep )
+	{
+		acc += F;
 
-	 	float	th = velocity.abs()/radius;						//	角速度
-//		v1 = mrotateByAxis( moment, th ) * v1;			//	移動計算
-v1 += velocity;
+	 	float	w = acc.abs()/r;					//	角速度
+
+mov =acc;
+		acc = mrotateByAxis( moment, w ) * acc;		//	回転
+
+		v1 += acc;
+	}
+
+	// 描画
+	{
+		gra.Clr(rgb(0.3,0.3,0.3));
+		pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
+
 		pers.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
 
+		drawVect( v1, vg	,100, rgb(1,0,0), "g" );
+		drawVect( v0, moment,100, rgb(1,0,1), "moment" );
+		drawVect( v1, F		,100, rgb(0,1,0), "F" );
+		drawVect( v1, acc	,2	, rgb(1,1,0), "acc" );
+		drawVect( v1, mov	,2	, rgb(0,0,1), "mov" );
+	}
 
-		drawVect( v0, moment*100, rgb(1,0,1), "moment" );
-		drawVect( v1, velocity*100, rgb(0,1,0), "velocity" );
-		drawVect( v1, vg*100, rgb(1,0,0), "g" );
-
-
-#endif
-
+	bStep = false;
 
 #if 0
 	{
@@ -337,15 +384,15 @@ v1 += velocity;
 //=================================
 
 //------------------------------------------------------------------------------
-void Lab::gravityPlanet( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers )
+void Lab::gravityPlanet( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
 {
-	#define MAX_PLANET 300
+	#define MAX_PREV 300
 	struct Planet:Obj
 	{
 		 vect3	spd;
-		 vect3	tblPlanet[MAX_PLANET];
-		 int	cntPlanet=0;;
+		 vect3	tblPrev[MAX_PREV];
+		 int	cntPrev=0;;
 
 		Planet( vect3 v, vect3 _spd ) 
 		{
@@ -383,12 +430,12 @@ void Lab::gravityPlanet( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers
 
 		pl1.pos += pl1.spd; 
 	
-		pl1.tblPlanet[ pl1.cntPlanet++ ] = pl1.pos;	
-		if ( pl1.cntPlanet >= MAX_PLANET ) pl1.cntPlanet = 0;
+		pl1.tblPrev[ pl1.cntPrev++ ] = pl1.pos;	
+		if ( pl1.cntPrev >= MAX_PREV ) pl1.cntPrev = 0;
 
-		for ( int i = 0 ; i < MAX_PLANET ; i++ )
+		for ( int i = 0 ; i < MAX_PREV ; i++ )
 		{
-			pers.pset3d( gra, pers, pl1.tblPlanet[i], rgb(0,1,1),2 );
+			pers.pset3d( gra, pers, pl1.tblPrev[i], rgb(0,1,1),2 );
 		}
 	};
 	
@@ -423,7 +470,7 @@ void Lab::gravityPlanet( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers
 // 描画	角速度 実験
 //=================================
 //------------------------------------------------------------------------------
-void Lab::kakusokudo( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers )
+void Lab::kakusokudo( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
 {
 	static bool bInit = false;
@@ -485,7 +532,7 @@ void Lab::kakusokudo( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers )
 }
 
 //------------------------------------------------------------------------------
-void Lab::graph( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers )
+void Lab::graph( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
 {
 

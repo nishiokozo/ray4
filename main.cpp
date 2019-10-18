@@ -989,30 +989,30 @@ struct Apr : public Sys
 			//=================================
 			// 描画	Lab
 			//=================================
-			switch( 4 )
+			switch( lab.idx )
 			{
 				case 1:	// 描画	グラフ実験
-					lab.graph( keys, mouse, gra, pers );
+					lab.graph( keys, mouse, gra, pers, text_y );
 					break;
 
 				case 2:// 描画	角速度 実験
-					lab.kakusokudo( keys, mouse, gra, pers );
+					lab.kakusokudo( keys, mouse, gra, pers, text_y );
 					break;
 
 				case 3:	// 描画	引力実験
-					lab.gravityPlanet( keys, mouse, gra, pers );
+					lab.gravityPlanet( keys, mouse, gra, pers, text_y );
 					break;
 
 				case 4:	// 描画	振り子3D実験
-					lab.furiko3d( keys, mouse, gra, pers );
+					lab.furiko3d( keys, mouse, gra, pers, text_y );
 					break;
 
 				case 5:	// 描画	振り子2D実験
-					lab.furiko2d( keys, mouse, gra, pers );
+					lab.furiko2d( keys, mouse, gra, pers, text_y );
 					break;
 
 				case 6:	// 描画	タイヤ実験実験
-					lab.tire3d( keys, mouse, gra, pers );
+					lab.tire3d( keys, mouse, gra, pers, text_y );
 					break;
 				default:break;
 			}
@@ -1032,14 +1032,13 @@ struct Apr : public Sys
 			// 情報表示
 			//=================================
 			gra.Print(1,(float)text_y++,string("fovY:")+to_string(int(pers.fovy)));
-			gra.Print(1,(float)text_y++,string("sz:")+to_string(pers.sz) +string(" fy:")+to_string(pers.fy));
-			gra.Print(1,(float)text_y++,string("far:")+to_string((pers.cam.pos-pers.cam.at).abs())); 
-			gra.Print(1,(float)text_y++,string("at  x=")+to_string(pers.cam.at.x)+string(" y=")+to_string(pers.cam.at.y)+string(" z=")+to_string(pers.cam.at.z) ); 
-			gra.Print(1,(float)text_y++,string("pos x=")+to_string(pers.cam.pos.x)+string(" y=")+to_string(pers.cam.pos.y)+string(" z=")+to_string(pers.cam.pos.z) ); 
+		//	gra.Print(1,(float)text_y++,string("sz:")+to_string(pers.sz) +string(" fy:")+to_string(pers.fy));
+		//	gra.Print(1,(float)text_y++,string("far:")+to_string((pers.cam.pos-pers.cam.at).abs())); 
+		//	gra.Print(1,(float)text_y++,string("at  x=")+to_string(pers.cam.at.x)+string(" y=")+to_string(pers.cam.at.y)+string(" z=")+to_string(pers.cam.at.z) ); 
+		//	gra.Print(1,(float)text_y++,string("pos x=")+to_string(pers.cam.pos.x)+string(" y=")+to_string(pers.cam.pos.y)+string(" z=")+to_string(pers.cam.pos.z) ); 
+			gra.Print(1,(float)text_y++,string("idxTbl=")+to_string(gui.one.idxTbl)+":"+to_string(gui.one.idxObj) ); 
 			gra.Print(1,(float)text_y++,string("peak=")+to_string(time_peak/1000)+string("msec") ); 
 
-			gra.Print(1,(float)text_y++,string("idxTbl=")+to_string(gui.one.idxTbl) ); 
-			gra.Print(1,(float)text_y++,string("idxObj=")+to_string(gui.one.idxObj) ); 
 
 			//=================================
 			// 処理時間表示
