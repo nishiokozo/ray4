@@ -158,13 +158,13 @@ void Lab::furiko2d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int
 
 	static float	rsp = 0;
 
-	static bool bInit = false;
 	if ( !bInit )
 	{
 		pers.cam.pos = vect3(  0.0, 2.0, -5.0 );
 		pers.cam.at = vect3( 0,  2.0, 0 );
 
 		bInit = true;
+		for ( Obj* p : (*this).tblObj ) delete p;
 		tblObj.clear();
 		tblObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
 		tblObj.emplace_back( new Obj(vect3(1, 2.0, 0)) );
@@ -226,7 +226,6 @@ void Lab::furiko3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int
 	static vect3	mov;			// 運動量
 	static bool	bPause = false; 
 	static bool	bStep = false; 
-	static bool bInit = false;
 
 	auto drawVect = [&]( vect3 v0, vect3 v, float sc, rgb col, string str )
 	{
@@ -250,6 +249,7 @@ void Lab::furiko3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int
 			}
 
 			bInit = true;
+			for ( Obj* p : (*this).tblObj ) delete p;
 			tblObj.clear();
 			tblObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
 			tblObj.emplace_back( new Obj(vect3(-1, 2.0, 0)) );
@@ -401,7 +401,6 @@ void Lab::gravityPlanet( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers
 		}
 	};
 
-	static bool bInit = false;
 	if ( !bInit )
 	{
 		bInit = true;
@@ -409,6 +408,7 @@ void Lab::gravityPlanet( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers
 		pers.cam.pos = vect3(  0.0, 0.5, -2.0 );
 		pers.cam.at = vect3( 0,  0.0, 0 );
 
+		for ( Obj* p : (*this).tblObj ) delete p;
 		tblObj.clear();
 		tblObj.emplace_back( new Planet(vect3(-0.5,0.1,0),vect3(0, 0, -0.02)) );
 		tblObj.emplace_back( new Planet(vect3( 0.5,0.1,0),vect3(0, 0, 0.02)) );
@@ -473,10 +473,10 @@ void Lab::gravityPlanet( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers
 void Lab::kakusokudo( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
 {
-	static bool bInit = false;
 	if ( !bInit )
 	{
 		bInit = true;
+		for ( Obj* p : (*this).tblObj ) delete p;
 		tblObj.clear();
 		tblObj.emplace_back( new Obj(vect3(0,0.1,0)) );
 		tblObj.emplace_back( new Obj(vect3(1,0.1,0)) );

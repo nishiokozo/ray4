@@ -870,6 +870,40 @@ struct Apr : public Sys
 
 
 			//=================================
+			// 描画	Lab
+			//=================================
+			if ( keys.N.rep ) {lab.idx++;lab.bInit=false;};
+			if ( keys.B.rep ) {lab.idx--;lab.bInit=false;};
+			switch( lab.idx )
+			{
+				case 1:	// 描画	グラフ実験
+					lab.graph( keys, mouse, gra, pers, text_y );
+					break;
+
+				case 2:// 描画	角速度 実験
+					lab.kakusokudo( keys, mouse, gra, pers, text_y );
+					break;
+
+				case 3:	// 描画	引力実験
+					lab.gravityPlanet( keys, mouse, gra, pers, text_y );
+					break;
+
+				case 4:	// 描画	振り子3D実験
+					lab.furiko3d( keys, mouse, gra, pers, text_y );
+					break;
+
+				case 5:	// 描画	振り子2D実験
+					lab.furiko2d( keys, mouse, gra, pers, text_y );
+					break;
+
+				case 6:	// 描画	タイヤ実験実験
+					lab.tire3d( keys, mouse, gra, pers, text_y );
+					break;
+				default:break;
+			}
+
+
+			//=================================
 			//	登録
 			//=================================
 			gui.tbls.clear();
@@ -986,36 +1020,6 @@ struct Apr : public Sys
 			}
 
 
-			//=================================
-			// 描画	Lab
-			//=================================
-			switch( lab.idx )
-			{
-				case 1:	// 描画	グラフ実験
-					lab.graph( keys, mouse, gra, pers, text_y );
-					break;
-
-				case 2:// 描画	角速度 実験
-					lab.kakusokudo( keys, mouse, gra, pers, text_y );
-					break;
-
-				case 3:	// 描画	引力実験
-					lab.gravityPlanet( keys, mouse, gra, pers, text_y );
-					break;
-
-				case 4:	// 描画	振り子3D実験
-					lab.furiko3d( keys, mouse, gra, pers, text_y );
-					break;
-
-				case 5:	// 描画	振り子2D実験
-					lab.furiko2d( keys, mouse, gra, pers, text_y );
-					break;
-
-				case 6:	// 描画	タイヤ実験実験
-					lab.tire3d( keys, mouse, gra, pers, text_y );
-					break;
-				default:break;
-			}
 
 			//=================================
 			// 表示 矩形カーソル、制御点
@@ -1038,6 +1042,7 @@ struct Apr : public Sys
 		//	gra.Print(1,(float)text_y++,string("pos x=")+to_string(pers.cam.pos.x)+string(" y=")+to_string(pers.cam.pos.y)+string(" z=")+to_string(pers.cam.pos.z) ); 
 			gra.Print(1,(float)text_y++,string("idxTbl=")+to_string(gui.one.idxTbl)+":"+to_string(gui.one.idxObj) ); 
 			gra.Print(1,(float)text_y++,string("peak=")+to_string(time_peak/1000)+string("msec") ); 
+			gra.Print(1,(float)text_y++,string("lab=")+to_string(lab.idx)); 
 
 
 			//=================================

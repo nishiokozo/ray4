@@ -2,6 +2,8 @@ struct Lab
 {
 	vector<Obj*> tblObj;
 
+	bool bInit = false;
+
 	~Lab()
 	{
 		for ( Obj* p : (*this).tblObj )
@@ -37,5 +39,6 @@ struct Lab
 	//------------------------------------------------------------------------------
 	void graph( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );
 	//------------------------------------------------------------------------------
+
 
 };
