@@ -24,7 +24,11 @@ struct Gui
 		bool	bSelected_a = false;
 		bool	bSelected_b = false;
 
-		One(){clear();}
+		One()
+		{
+			clear();
+		}
+		
 		void clear()
 		{
 			bEnable = false;

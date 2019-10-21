@@ -872,36 +872,9 @@ struct Apr : public Sys
 			//=================================
 			// 描画	Lab
 			//=================================
-			if ( keys.N.rep ) {lab.idx++;lab.bInit=false;};
-			if ( keys.B.rep ) {lab.idx--;lab.bInit=false;};
-			switch( lab.idx )
-			{
-				case 1:	// 描画	グラフ実験
-					lab.graph( keys, mouse, gra, pers, text_y );
-					break;
-
-				case 2:// 描画	角速度 実験
-					lab.kakusokudo( keys, mouse, gra, pers, text_y );
-					break;
-
-				case 3:	// 描画	引力実験
-					lab.gravityPlanet( keys, mouse, gra, pers, text_y );
-					break;
-
-				case 4:	// 描画	振り子3D実験
-					lab.furiko3d( keys, mouse, gra, pers, text_y );
-					break;
-
-				case 5:	// 描画	振り子2D実験
-					lab.furiko2d( keys, mouse, gra, pers, text_y );
-					break;
-
-				case 6:	// 描画	タイヤ実験実験
-					lab.tire3d( keys, mouse, gra, pers, text_y );
-					break;
-				default:break;
-			}
-
+			if ( keys.N.rep ) {lab.SetIdx(lab.idx+1);};
+			if ( keys.B.rep ) {lab.SetIdx(lab.idx-1);};
+			lab.Update( keys, mouse, gra, pers, text_y );
 
 			//=================================
 			//	登録
@@ -1005,8 +978,23 @@ struct Apr : public Sys
 				vect3 P = pers.calcScreenToWorld3( vect3(mouse.pos,0) );
 				vect3 I = pers.calcRayvect( P );
 
+				bool bCut = mouse.L.hi;
+				bool bSerch = keys.E.on;
 				// 表示 加工 ベジェ 三次曲線
-				(*pBezier).exec_drawBezier( gra, pers, (*pBezier).tblPoint, (*pBezier).idxPoint, (*pBezier).idxTbl, P, I, keys.E.on, mouse.L.hi );
+				(*pBezier).exec_drawBezier( gra, pers, (*pBezier).tblPoint, (*pBezier).idxPoint, (*pBezier).idxTbl, P, I, bSerch, bCut );
+
+				//=================================
+				//	登録 
+				//=================================
+				if ( bCut )
+				{
+					// テーブルの再作成しないとうまく中身が参照できない
+					gui.tbls.clear();
+					if ( (*pBezier).bActive ) (*pBezier).idxTbl = gui.EntryTbl( (*pBezier).tblPoint );
+					if ( (*pCutmull).bActive ) (*pCutmull).idxTbl = gui.EntryTbl( (*pCutmull).tblPoint );
+					if ( (*pSkeleton).bActive ) (*pSkeleton).idxTbl = gui.EntryTbl( (*pSkeleton).tblPoint );
+					gui.EntryTbl( lab.tblObj );
+				}
 
 			}
 
@@ -1036,13 +1024,13 @@ struct Apr : public Sys
 			// 情報表示
 			//=================================
 			gra.Print(1,(float)text_y++,string("fovY:")+to_string(int(pers.fovy)));
-		//	gra.Print(1,(float)text_y++,string("sz:")+to_string(pers.sz) +string(" fy:")+to_string(pers.fy));
-		//	gra.Print(1,(float)text_y++,string("far:")+to_string((pers.cam.pos-pers.cam.at).abs())); 
-		//	gra.Print(1,(float)text_y++,string("at  x=")+to_string(pers.cam.at.x)+string(" y=")+to_string(pers.cam.at.y)+string(" z=")+to_string(pers.cam.at.z) ); 
-		//	gra.Print(1,(float)text_y++,string("pos x=")+to_string(pers.cam.pos.x)+string(" y=")+to_string(pers.cam.pos.y)+string(" z=")+to_string(pers.cam.pos.z) ); 
-			gra.Print(1,(float)text_y++,string("idxTbl=")+to_string(gui.one.idxTbl)+":"+to_string(gui.one.idxObj) ); 
-			gra.Print(1,(float)text_y++,string("peak=")+to_string(time_peak/1000)+string("msec") ); 
-			gra.Print(1,(float)text_y++,string("lab=")+to_string(lab.idx)); 
+			gra.Print(1,(float)text_y++,string("peak: ")+to_string(time_peak/1000)+string("msec") ); 
+			if ( gui.one.bEnable )
+			{
+				gra.Print(1,(float)text_y++,string("idxTbl=")+to_string(gui.one.idxTbl)+":"+to_string(gui.one.idxObj) ); 
+				Obj* p =gui.tbls[ gui.one.idxTbl ][ gui.one.idxObj ];
+				if ( p ) gra.Print(1,(float)text_y++,string("one: ")+to_string(p->pos.x)+" , "+to_string(p->pos.y)+" , "+to_string(p->pos.z)); 
+			}
 
 
 			//=================================
