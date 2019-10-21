@@ -37,18 +37,15 @@ using namespace std;
 Gui gui;
 Lab lab;
 
-struct CutmullRing
+struct Cutmull
 {
 	bool	bActive = false;	//	使用可能
 
 	int idxTbl = 0;
 
-	~CutmullRing()
+	~Cutmull()
 	{
-		for ( Obj* p : tblPoint )
-		{
-			delete p;
-		}	
+		for ( Obj* p : tblPoint ) delete p;
 	}
 	
 	
@@ -67,6 +64,7 @@ struct CutmullRing
 		new Obj( vect3(	-0.9,	0.12,	 0.5)*1.2 ),
 	};
 	
+
 	vector<ivect2>	tblIdx =
 	{
 		{0,5},
@@ -76,14 +74,8 @@ struct CutmullRing
 		{4,9},
 	};
 
-	vector<Edge*> tblEdge =
-	{
-		new Edge(0,5),
-		new Edge(1,6),
-		new Edge(2,7),
-		new Edge(3,8),
-		new Edge(4,9),
-	};
+
+	vector<Edge*> tblDummy;		//	使ってはいけない
 
 	//------------------------------------------------------------------------------
 	void drawPoint( SysGra& gra, Pers& pers, vector<Obj*>& tblPoint )
@@ -206,23 +198,18 @@ struct CutmullRing
 			}
 		};
 		func();
-
 	}
-
 };
 
-struct BezierRing
+struct Bezier
 {
 	bool	bActive = false;	//	使用可能
 
 	int idxTbl = 0;
 
-	~BezierRing()
+	~Bezier()
 	{
-		for ( Obj* p : tblPoint )
-		{
-			delete p;
-		}	
+		for ( Obj* p : tblPoint ) delete p;
 	}
 
 	vector<Obj*> tblPoint =
@@ -237,10 +224,7 @@ struct BezierRing
 		0,1,0
 	};
 
-	vector<Edge*> tblEdge =
-	{
-		new Edge(0,1)
-	};
+	vector<Edge*> tblDummy;	//	使ってはいけない
 
 	//------------------------------------------------------------------------------
 	void exec_drawBezier( SysGra& gra, Pers& pers, vector<Obj*>& tblPoint, vector<int>& idxPoint, int idxTbl , vect3& P, vect3& I, bool bSerch, bool bCut )
@@ -745,8 +729,8 @@ struct Apr : public Sys
 		// 各種Obj 定義
 		//=================================
 		unique_ptr<Skeleton> pSkeleton(new Skeleton);
-		unique_ptr<BezierRing> pBezier(new BezierRing);
-		unique_ptr<CutmullRing> pCutmull(new CutmullRing);
+		unique_ptr<Bezier> pBezier(new Bezier);
+		unique_ptr<Cutmull> pCutmull(new Cutmull);
 
 		//===========================================================================
 		while( Update() )
@@ -817,6 +801,7 @@ struct Apr : public Sys
 			//=================================
 			if ( keys.CTRL.on && keys.L.hi ) 
 			{
+				gui.one.bEnable = false;
 				//読み込み
 				unique_ptr<Skeleton> pNew(new Skeleton);
 				pNew->LoadSkeleton( "bone.mot" );
@@ -826,6 +811,7 @@ struct Apr : public Sys
 			}
 			if ( keys.CTRL.on && keys.SEMICOLON.hi ) 
 			{
+				gui.one.bEnable = false;
 				//読み込み
 				unique_ptr<Skeleton> pNew(new Skeleton);
 				pNew->LoadSkeleton( "human.mot" );
@@ -839,10 +825,12 @@ struct Apr : public Sys
 			//=================================
 			if ( keys._1.hi ) 
 			{
+				gui.one.bEnable = false;
 				(*pBezier).bActive = !(*pBezier).bActive;	//	使用可能
 			}
 			if ( keys._2.hi ) 
 			{
+				gui.one.bEnable = false;
 				(*pCutmull).bActive = !(*pCutmull).bActive;	//	使用可能
 			}
 
@@ -887,8 +875,8 @@ struct Apr : public Sys
 			//=================================
 			// 描画	Lab
 			//=================================
-			if ( keys.N.rep ) {lab.SetIdx(lab.idx+1);};
-			if ( keys.B.rep ) {lab.SetIdx(lab.idx-1);};
+			if ( keys.N.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.idx+1);};
+			if ( keys.B.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.idx-1);};
 			lab.Update( keys, mouse, gra, pers, text_y );
 
 			//=================================
@@ -898,11 +886,11 @@ struct Apr : public Sys
 			gui.tbltblEdge.clear();
 			if ( (*pBezier).bActive ) 
 			{
-				(*pBezier).idxTbl = gui.EntryTbl( (*pBezier).tblPoint, (*pBezier).tblEdge );
+				(*pBezier).idxTbl = gui.EntryTbl( (*pBezier).tblPoint, (*pBezier).tblDummy );
 			}
 			if ( (*pCutmull).bActive ) 
 			{
-				(*pCutmull).idxTbl = gui.EntryTbl( (*pCutmull).tblPoint, (*pCutmull).tblEdge );
+				(*pCutmull).idxTbl = gui.EntryTbl( (*pCutmull).tblPoint, (*pCutmull).tblDummy );
 			}
 			if ( (*pSkeleton).bActive ) 
 			{
@@ -997,7 +985,7 @@ struct Apr : public Sys
 			util.skeleton_draw( gra, keys, mouse, pers, (*pSkeleton), text_y );
 
 			//=================================
-			//	BezierRing 表示
+			//	Bezier 表示
 			//=================================
 			if ( (*pBezier).bActive ) 
 			{
@@ -1022,7 +1010,7 @@ struct Apr : public Sys
 			}
 
 			//=================================
-			// コース描画 CutmullRing
+			// コース描画 Cutmull
 			//=================================
 			if ( (*pCutmull).bActive )
 			{

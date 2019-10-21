@@ -283,6 +283,13 @@ void Gui::DrawController( Pers& pers, SysGra& gra, vector<vector<Obj*>>& tbls, v
 				Obj*	p0 = tbls[ i ][ p->n0 ];
 				Obj*	p1 = tbls[ i ][ p->n1 ];
 
+
+				{	// 影
+					vect3 a = p0->pos;	a.y=0;
+					vect3 b = p1->pos;	b.y=0;
+					pers.line3d( gra, pers, a, b, rgb(1,1,1)/4, 2 );
+				}
+
 				if ( bSelected )
 				{
 					// 選択点
@@ -292,12 +299,6 @@ void Gui::DrawController( Pers& pers, SysGra& gra, vector<vector<Obj*>>& tbls, v
 				{
 					// 非選択点
 					pers.line3d( gra, pers, p0->pos, p1->pos, rgb(1,1,1), 2 );
-				}
-
-				{	// 影
-					vect3 a = p0->pos;	a.y=0;
-					vect3 b = p1->pos;	b.y=0;
-					pers.line3d( gra, pers, a, b, rgb(1,1,1)/4, 2 );
 				}
 
 			}
