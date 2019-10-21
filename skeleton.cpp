@@ -44,9 +44,13 @@ void Skeleton::SaveSkeleton()
 
 
 		fo << "bone" << endl;
-		for ( Bone& b : tblBone )	// 骨
+//		for ( Bone& b : tblBone )	// 骨
 		{
-			fo  << "\t"<< b.n0 << "\t" << b.n1 << endl;
+//			fo  << "\t"<< b.n0 << "\t" << b.n1 << endl;
+		}
+		for ( Edge* p : tblEdge )	// 骨
+		{
+			fo  << "\t"<< p->n0 << "\t" << p->n1 << endl;
 		}
 	}
 	{
@@ -129,21 +133,20 @@ void Skeleton::LoadSkeleton( const string fn )
 		}
 		if ( string(buf) == "end" )	
 		{	
-			for ( Bone& b : tblBone )	// 関節の距離を決定する。
+//			for ( Bone& b : tblBone )	// 関節の距離を決定する。
 			{
-				Joint&	j0 = tblJointForm[b.n0];
-				Joint&	j1 = tblJointForm[b.n1];
-				b.length = (j1.pos - j0.pos).abs();
+//				Joint&	j0 = tblJointForm[b.n0];
+//				Joint&	j1 = tblJointForm[b.n1];
+//				b.length = (j1.pos - j0.pos).abs();
 			}
-/*
-			for ( Bone& b : tblBone )	// ジョイントに関節の距離を決定する。
+			for ( Edge* p  : tblEdge )	// 関節の距離を決定する。
 			{
-				Joint&	j0 = tblJointForm[b.n0];
-				Joint&	j1 = tblJointForm[b.n1];
-				j1.relative.emplace_back( j0 ); 
-				j0.relative.emplace_back( j1 ); 
+				Bone* pb = dynamic_cast<Bone*>(p);
+
+				Joint&	j0 = tblJointForm[p->n0];
+				Joint&	j1 = tblJointForm[p->n1];
+				pb->length = (j1.pos - j0.pos).abs();
 			}
-*/
 			cur.pose = 0;
 			break;
 		}
@@ -167,7 +170,9 @@ void Skeleton::LoadSkeleton( const string fn )
 					int n0 = stoi(v[0]);
 					int n1 = stoi(v[1]);
 					bool bBold = (v.size() >2 && v[2]=="-" )?false:true;
-					tblBone.emplace_back( n0, n1, bBold );
+//					tblBone.emplace_back( n0, n1, bBold );
+					tblEdge.emplace_back( new Bone( n0, n1, bBold ) );
+			
 					//	cout << x << "," << y << "," << z << endl; 
 				}
 				break;
@@ -190,7 +195,6 @@ void Skeleton::LoadSkeleton( const string fn )
 	this->bActive = true;
 
 
-	//kozo	tblPoint = tblJointForm;
 	for ( Joint& j : tblJointForm )	// 関節の位置
 	{
 		tblPoint.emplace_back( new Joint( j.pos , j.weight, j.bCtrl ) );
@@ -297,7 +301,6 @@ void Skeleton::PrevKeyframe()
 	if ( animations[cur.act].pose[ 0 ].joint.size()==0 ) return;
 
 	cur.pose--;
-//		if ( cur.pose < 0 ) cur.pose = static_cast<signed>(animations[cur.act].pose.size())-1;
 	if ( cur.pose < 0 ) cur.pose = 0;
 
 	if ( cur.pose >= 0 )
@@ -433,9 +436,14 @@ void Skeleton::CopyKeyframe()
 			pNew->tblPoint.emplace_back( new Joint( p->pos, p->weight, p->bCtrl ) );
 		}
 
-		for ( Bone& b : tblBone )
+//		for ( Bone& b : tblBone )
 		{
-			pNew->tblBone.emplace_back( b.n0, b.n1, b.bBold );
+//			pNew->tblBone.emplace_back( b.n0, b.n1, b.bBold );
+		}
+		for ( Edge* p : tblEdge )
+		{
+			Bone* pb = dynamic_cast<Bone*>(p);
+			pNew->tblEdge.emplace_back( new Bone( pb->n0, pb->n1, pb->bBold ) );
 		}
 	}
 	{
@@ -596,7 +604,6 @@ void Skeleton::UpdateSkeleton()
 	for ( Obj* po : tblPoint )
 	{
 		Joint* p = dynamic_cast<Joint*>(po);
-//		p->prev = (p->prev+p->pos)/2.0;
 
 		if ( p->prev != p->pos )
 		{
@@ -615,12 +622,33 @@ void Skeleton::UpdateSkeleton()
 	for ( int i = 0 ; i < 111 ; i++ )	// 収束回数多いほど収束数る
 	{
 		// 骨コリジョン 張力計算
+/*
 		for ( Bone b : tblBone )
 		{
 			Joint*	p0 = dynamic_cast<Joint*>(tblPoint[b.n0]);
 			Joint*	p1 = dynamic_cast<Joint*>(tblPoint[b.n1]);
 			vect3 v = p1->pos - p0->pos;
 			float l = v.abs() - b.length;
+			vect3 va  =	v.normalize()*l;
+
+
+			float w0 = 0.33f;
+			float w1 = 0.33f;
+			w0 = p0->weight;
+			w1 = p1->weight;
+
+			p0->tension += va*w0;
+			p1->tension -= va*w1;
+		}
+*/
+		for ( Edge* p : tblEdge )
+		{
+			Bone* pb = dynamic_cast<Bone*>(p);
+			
+			Joint*	p0 = dynamic_cast<Joint*>(tblPoint[pb->n0]);
+			Joint*	p1 = dynamic_cast<Joint*>(tblPoint[pb->n1]);
+			vect3 v = p1->pos - p0->pos;
+			float l = v.abs() - pb->length;
 			vect3 va  =	v.normalize()*l;
 
 
@@ -650,37 +678,6 @@ void Skeleton::DrawSkeleton( Pers& pers, SysGra& gra )
 //------------------------------------------------------------------------------
 {
 
-	// 影 描画
-	if ( stat.bShowBone )
-	{
-		gra.SetZTest( false );
-
-		rgb col = rgb(0.2,0.2,0.2);
-		for ( Bone b : tblBone )
-		{
-			Joint*	p0 = dynamic_cast<Joint*>(tblPoint[b.n0]);
-			Joint*	p1 = dynamic_cast<Joint*>(tblPoint[b.n1]);
-	
-			vect3 v0= p0->pos;
-			v0.y = 0;
-			v0 = pers.calcWorldToScreen3(v0);
-
-			vect3 v1= p1->pos;
-			v1.y = 0;
-			v1 = pers.calcWorldToScreen3(v1);
-
-	
-			if ( v1.z > 0 && v1.z > 0 )
-			{
-				gra.Line( v0,v1, col,2);
-
-			}
-		}
-		gra.SetZTest( true );
-	}	
-	
-//	rgb col = rgb(0,1,0);
-
 
 	// 透視投影変換
 	for ( Obj* po : tblPoint )
@@ -695,14 +692,16 @@ void Skeleton::DrawSkeleton( Pers& pers, SysGra& gra )
 	}
 
 	// 肉 描画
+
 	if ( stat.bShowSkin )
 	{
-		for ( Bone b : tblBone )
+//		for ( Bone b : tblBone )
+		for ( Edge* p : tblEdge )
 		{
-//			Joint*	p0 = tblPoint[b.n0];
-//			Joint*	p1 = tblPoint[b.n1];
-			Joint*	p0 = dynamic_cast<Joint*>(tblPoint[b.n0]);
-			Joint*	p1 = dynamic_cast<Joint*>(tblPoint[b.n1]);
+			Bone* pb = dynamic_cast<Bone*>(p);
+
+			Joint*	p0 = dynamic_cast<Joint*>(tblPoint[pb->n0]);
+			Joint*	p1 = dynamic_cast<Joint*>(tblPoint[pb->n1]);
 
 			if ( p0->disp.z > 0 && p0->disp.z > 0 )
 			{
@@ -735,36 +734,6 @@ void Skeleton::DrawSkeleton( Pers& pers, SysGra& gra )
 
 
 
-	// 骨 描画
-	if ( stat.bShowBone )
-	{
-		rgb col = rgb(0,0,1);
-		
-		gra.SetZTest( false );
-		for ( Bone b : tblBone )
-		{
-//			Joint*	p0 = tblPoint[b.n0];
-//			Joint*	p1 = tblPoint[b.n1];
-			Joint*	p0 = dynamic_cast<Joint*>(tblPoint[b.n0]);
-			Joint*	p1 = dynamic_cast<Joint*>(tblPoint[b.n1]);
-			if ( p0->disp.z > 0 && p0->disp.z > 0 )
-			{
-				if ( b.bBold )
-				gra.Line( p0->disp,p1->disp, col, b.bBold?3:1);
-
-			}
-		}
-
-//		// ジョイント表示
-//		for ( Obj* po : tblPoint )
-//		{
-//			Joint* p = dynamic_cast<Joint*>(po);
-//
-//			vect3 v0 = pers.calcWorldToScreen3( p->pos );
-//			if ( p->bCtrl ) gra.Pset( v0, col, 11 );
-//		}
-//		gra.SetZTest( true );
-	}
 	
 	// 剛体実験
 

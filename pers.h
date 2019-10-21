@@ -5,12 +5,21 @@ struct Obj
 
 	vect3	pos;
 
-	Obj(){};
+//	Obj(){};							// 定義したくないが継承すると強制的にデフォルトコンストラクタが要求される
 	Obj( vect3 _pos ) : pos(_pos){};
 	virtual ~Obj(){};
 };
 
+struct Edge
+{
+	bool	bSelected	 = false;
+	bool	bPreselect	= false;		//	仮選択
+	int		n0;
+	int		n1;
 
+	Edge( int _n0, int _n1 ) : n0(_n0),n1(_n1){};
+	virtual ~Edge(){};
+};
 
 struct Pers
 {

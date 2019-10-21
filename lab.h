@@ -1,9 +1,12 @@
 struct Lab
 {
 	vector<Obj*> tblObj;
+	vector<Edge*> tblEdge;
 	bool bInit = false;
 	bool bInitCam = false;
 	int idx = 0;	
+
+	int idxTbl;
 	
 	Lab();
 
@@ -13,6 +16,7 @@ struct Lab
 	//------------------------------------------------------------------------------
 	{
 		for ( Obj* p : (*this).tblObj ) delete p;
+		for ( Edge* p : (*this).tblEdge ) delete p;
 	}
 
 
@@ -26,6 +30,9 @@ struct Lab
 
 		for ( Obj* p : (*this).tblObj ) delete p;
 		tblObj.clear();
+
+		for ( Edge* p : (*this).tblEdge ) delete p;
+		tblEdge.clear();
 	}
 
 	void tire3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );

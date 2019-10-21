@@ -126,7 +126,7 @@ struct Joint : Obj
 	
 //	vector<reference_wrapper<Joint>>	relative;
 	virtual ~Joint(){}
-	Joint( vect3 v, float _weight, bool _bCtrl )
+	Joint( vect3 v, float _weight, bool _bCtrl ) :Obj(v)
 	{
 		pos = v;
 		weight = _weight;
@@ -142,13 +142,13 @@ struct Joint : Obj
 
 };
 
-struct Bone
+struct Bone : Edge
 {
-	int		n0;	//	コピーするときに必要
-	int		n1;	//	コピーするときに必要
+//	int		n0;	//	コピーするときに必要
+//	int		n1;	//	コピーするときに必要
 	float	length;
 	bool	bBold;
-	Bone( int _n0, int _n1, bool _bBold ) :n0(_n0), n1(_n1), bBold(_bBold){}
+	Bone( int _n0, int _n1, bool _bBold ) : Edge(_n0, _n1), bBold(_bBold){}
 };
 
 
@@ -161,8 +161,9 @@ struct Skeleton
 	string	filename;
 
 	vector<Joint>			tblJointForm;	// 基本フォーム
-	vector<Obj*>			tblPoint;	//joint	継承クラスとして使うためポインタ型
-	vector<Bone>			tblBone;
+	vector<Obj*>			tblPoint;		//joint	継承クラスとして使うためポインタ型
+	vector<Edge*>			tblEdge;		// 継承クラスとして使うためポインタ型
+//	vector<Bone>			tblBone;
 
 	struct A
 	{
@@ -210,10 +211,8 @@ struct Skeleton
 	Skeleton(){};
 	~Skeleton()
 	{
-		for ( Obj* p : tblPoint )
-		{
-			delete p;
-		}
+		for ( Obj* p : tblPoint ) delete p;
+		for ( Edge* p : tblEdge ) delete p;
 	};
 
 	void LoadSkeleton( const string filename );

@@ -2,17 +2,18 @@
 
 struct Point3 : Obj
 {
-	Point3( vect3 _pos ) { pos = _pos;}
+	Point3( vect3 _pos ) :Obj(_pos) { pos = _pos;}
 	vect3	a;
 	vect3	b;
 
-	Point3( vect3 _pos, vect3 _a, vect3 _b ) { pos=_pos; a=_a; b=_b;}
+	Point3( vect3 _pos, vect3 _a, vect3 _b ) :Obj(_pos) { pos=_pos; a=_a; b=_b;}
 };
 
 
 struct Gui
 {
 	vector<vector<Obj*>> tbls;
+	vector<vector<Edge*>> tbltblEdge;
 
 	struct One
 	{
@@ -53,6 +54,17 @@ struct Gui
 	vect2 rect_st = vect2(0,0);			//	矩形選択開始位置
 	G_CALC rect_mode = G_CALC::NONE;	//	矩形選択中フラグ
 	One one;
+
+
+	//------------------------------------------------------------------------------
+	int EntryTbl( vector<Obj*>tbl, vector<Edge*>tblEdge )
+	//------------------------------------------------------------------------------
+	{
+		int idx =  (signed)tbls.size();
+		tbls.emplace_back( tbl );
+		tbltblEdge.emplace_back( tblEdge );
+		return idx;
+	}
 
 	//------------------------------------------------------------------------------
 	void TouchFirst( Pers& pers, vector<vector<Obj*>>& tbls, vect2 mpos );
@@ -114,15 +126,11 @@ struct Gui
 	//------------------------------------------------------------------------------
 	// 選択リスト表示
 	//------------------------------------------------------------------------------
-	void DrawController( Pers& pers, SysGra& gra, vector<vector<Obj*>>& tbls, vect2 mpos );
+	void DrawController( Pers& pers, SysGra& gra, vector<vector<Obj*>>& tbls, vector<vector<Edge*>>& tbltblEdge, vect2 mpos );
 	//------------------------------------------------------------------------------
 
 	//------------------------------------------------------------------------------
 	void MoveObj( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbls, vect2& mpos, vect2& mprev, vect2& mmov, bool bSame, bool bByCamera );
-	//------------------------------------------------------------------------------
-
-	//------------------------------------------------------------------------------
-	int EntryTbl( vector<Obj*>tbl );
 	//------------------------------------------------------------------------------
 
 };

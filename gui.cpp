@@ -263,50 +263,64 @@ void Gui::SelectOneSub( vector<vector<Obj*>>& tbls )
 
 // 選択リスト表示
 //------------------------------------------------------------------------------
-void Gui::DrawController( Pers& pers, SysGra& gra, vector<vector<Obj*>>& tbls, vect2 mpos )
+void Gui::DrawController( Pers& pers, SysGra& gra, vector<vector<Obj*>>& tbls, vector<vector<Edge*>>& tbltblEdge, vect2 mpos )
 //------------------------------------------------------------------------------
 {
 	gra.SetZTest( false );
 
 	{
-		int n = 0;
-		int n2 = 0;
-		for ( vector<Obj*>& tblPoint : tbls )
+		for ( int i = 0 ; i < (signed)tbltblEdge.size() ; i++ )
 		{
-//				if ( n2 > 0 ) 
+			// 汎用制御点
+			for ( Edge* p : tbltblEdge[i] )
 			{
-				// ベジェ制御点
-				for ( Obj* po : tblPoint )
+
+				bool bPreselect = p->bPreselect;
+				bool bSelected = p->bSelected;
+
+				calcRectMode( rect_mode, bPreselect, bSelected );
+
+				Obj*	p0 = tbls[ i ][ p->n0 ];
+				Obj*	p1 = tbls[ i ][ p->n1 ];
+
+				if ( bSelected )
 				{
-					Point3* p = dynamic_cast<Point3*>(po);
-					if ( p ) 
-					{
-
-						float wide = 11;
-						float wide2 = 7;
-						rgb	col = rgb(0,0,1);
-						rgb	col2 = rgb(0,1,0);
-						rgb	col2a = rgb(0,1,0);
-						rgb	col2b = rgb(0,1,0);
-
-						bool bPreselect = p->bPreselect;
-						bool bSelected = p->bSelected;
-						
-						calcRectMode( rect_mode, bPreselect, bSelected );
-
-						if ( bSelected )
-						{
-							pers.line3d( gra, pers, p->pos, p->pos +p->a, col2 );
-							pers.line3d( gra, pers, p->pos, p->pos +p->b, col2 );
-							pers.pset3d( gra, pers, p->pos+p->a, col2a, wide2 ); 
-							pers.pset3d( gra, pers, p->pos+p->b, col2b, wide2 ); 
-						}
-					}
+					// 選択点
+					pers.line3d( gra, pers, p0->pos, p1->pos, rgb(1,0,0), 2 );
+				}
+				else
+				{
+					// 非選択点
+					pers.line3d( gra, pers, p0->pos, p1->pos, rgb(1,1,1), 2 );
 				}
 
-				// 汎用制御点
-				for ( Obj* p : tblPoint )
+				{	// 影
+					vect3 a = p0->pos;	a.y=0;
+					vect3 b = p1->pos;	b.y=0;
+					pers.line3d( gra, pers, a, b, rgb(1,1,1)/4, 2 );
+				}
+
+			}
+		}
+	}
+	{
+		int n = 0;
+		for ( vector<Obj*>& tblPoint : tbls )
+		{
+
+			// ベジェ制御点
+			for ( Obj* po : tblPoint )
+			{
+				Point3* p = dynamic_cast<Point3*>(po);
+				if ( p ) 
 				{
+
+					float wide = 11;
+					float wide2 = 7;
+					rgb	col = rgb(0,0,1);
+					rgb	col2 = rgb(0,1,0);
+					rgb	col2a = rgb(0,1,0);
+					rgb	col2b = rgb(0,1,0);
 
 					bool bPreselect = p->bPreselect;
 					bool bSelected = p->bSelected;
@@ -315,23 +329,38 @@ void Gui::DrawController( Pers& pers, SysGra& gra, vector<vector<Obj*>>& tbls, v
 
 					if ( bSelected )
 					{
-//							gra.Pset( pers.calcWorldToScreen3( p->pos ), rgb(1,0,0), 11 );
-						pers.pset3d( gra, pers, p->pos, rgb(1,0,0), 11 );
-					}
-					else
-					{
-//							gra.Pset( pers.calcWorldToScreen3( p->pos ), rgb(0,0,1), 11 );
-						pers.pset3d( gra, pers, p->pos, rgb(0,0,1), 11 );
-					}
-
-					{
-//							vect2 pos = pers.calcWorldToScreen2( p->pos );
-//							gra.Print( pos+gra.Dot(14,0), to_string(n++) );
-						pers.print3d( gra, pers, p->pos, -14, 0, to_string(n++) ); 
+						pers.line3d( gra, pers, p->pos, p->pos +p->a, col2 );
+						pers.line3d( gra, pers, p->pos, p->pos +p->b, col2 );
+						pers.pset3d( gra, pers, p->pos+p->a, col2a, wide2 ); 
+						pers.pset3d( gra, pers, p->pos+p->b, col2b, wide2 ); 
 					}
 				}
 			}
-			n2++;
+
+			// 汎用制御点
+			for ( Obj* p : tblPoint )
+			{
+
+				bool bPreselect = p->bPreselect;
+				bool bSelected = p->bSelected;
+				
+				calcRectMode( rect_mode, bPreselect, bSelected );
+
+				if ( bSelected )
+				{
+					// 選択点
+					pers.pset3d( gra, pers, p->pos, rgb(1,0,0), 11 );
+				}
+				else
+				{
+					// 非選択点
+					pers.pset3d( gra, pers, p->pos, rgb(0,0,1), 11 );
+				}
+
+				{
+					pers.print3d( gra, pers, p->pos, -14, 0, to_string(n++) ); 
+				}
+			}
 		}
 	}
 
@@ -420,15 +449,5 @@ void Gui::MoveObj( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbls, vect2& m
 	}
 
 
-}
-
-
-//------------------------------------------------------------------------------
-int Gui::EntryTbl( vector<Obj*>tbl )
-//------------------------------------------------------------------------------
-{
-	int idx =  (signed)tbls.size();
-	tbls.emplace_back( tbl );
-	return idx;
 }
 

@@ -76,6 +76,15 @@ struct CutmullRing
 		{4,9},
 	};
 
+	vector<Edge*> tblEdge =
+	{
+		new Edge(0,5),
+		new Edge(1,6),
+		new Edge(2,7),
+		new Edge(3,8),
+		new Edge(4,9),
+	};
+
 	//------------------------------------------------------------------------------
 	void drawPoint( SysGra& gra, Pers& pers, vector<Obj*>& tblPoint )
 	//------------------------------------------------------------------------------
@@ -222,9 +231,15 @@ struct BezierRing
 		new Point3(vect3( 1.0, 0.0, 0.0 ),vect3( 0.0, 0.0,-1.0 ),vect3( 0.0, 0.0, 1.0 )),
 
 	};
+
 	vector<int>	idxPoint =
 	{
 		0,1,0
+	};
+
+	vector<Edge*> tblEdge =
+	{
+		new Edge(0,1)
 	};
 
 	//------------------------------------------------------------------------------
@@ -880,10 +895,22 @@ struct Apr : public Sys
 			//	登録
 			//=================================
 			gui.tbls.clear();
-			if ( (*pBezier).bActive ) (*pBezier).idxTbl = gui.EntryTbl( (*pBezier).tblPoint );
-			if ( (*pCutmull).bActive ) (*pCutmull).idxTbl = gui.EntryTbl( (*pCutmull).tblPoint );
-			if ( (*pSkeleton).bActive ) (*pSkeleton).idxTbl = gui.EntryTbl( (*pSkeleton).tblPoint );
-			gui.EntryTbl( lab.tblObj );
+			gui.tbltblEdge.clear();
+			if ( (*pBezier).bActive ) 
+			{
+				(*pBezier).idxTbl = gui.EntryTbl( (*pBezier).tblPoint, (*pBezier).tblEdge );
+			}
+			if ( (*pCutmull).bActive ) 
+			{
+				(*pCutmull).idxTbl = gui.EntryTbl( (*pCutmull).tblPoint, (*pCutmull).tblEdge );
+			}
+			if ( (*pSkeleton).bActive ) 
+			{
+				(*pSkeleton).idxTbl = gui.EntryTbl( (*pSkeleton).tblPoint, (*pSkeleton).tblEdge );
+			}
+			{
+				lab.idxTbl =  gui.EntryTbl( lab.tblObj, lab.tblEdge );
+			}
 
 
 			//=================================
@@ -989,11 +1016,7 @@ struct Apr : public Sys
 				if ( bCut )
 				{
 					// テーブルの再作成しないとうまく中身が参照できない
-					gui.tbls.clear();
-					if ( (*pBezier).bActive ) (*pBezier).idxTbl = gui.EntryTbl( (*pBezier).tblPoint );
-					if ( (*pCutmull).bActive ) (*pCutmull).idxTbl = gui.EntryTbl( (*pCutmull).tblPoint );
-					if ( (*pSkeleton).bActive ) (*pSkeleton).idxTbl = gui.EntryTbl( (*pSkeleton).tblPoint );
-					gui.EntryTbl( lab.tblObj );
+					continue;
 				}
 
 			}
@@ -1012,7 +1035,7 @@ struct Apr : public Sys
 			//=================================
 			// 表示 矩形カーソル、制御点
 			//=================================
-			gui.DrawController( pers, gra, gui.tbls, mouse.pos );
+			gui.DrawController( pers, gra, gui.tbls, gui.tbltblEdge, mouse.pos );
 			
 
 			//=================================

@@ -452,7 +452,7 @@ void Lab::gravityPlanet( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers
 		 vect3	tblPrev[MAX_PREV];
 		 int	cntPrev=0;;
 
-		Planet( vect3 v, vect3 _spd ) 
+		Planet( vect3 v, vect3 _spd ) : Obj(v)
 		{
 			pos = v;
 			spd = _spd;
@@ -686,10 +686,16 @@ void Lab::kakusokudo7( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, 
 			}
 			bInit = true;
 
+			// 点
 			for ( Obj* p : (*this).tblObj ) delete p;
 			tblObj.clear();
 			tblObj.emplace_back( new Obj(vect3(0  ,0.1,0)) );
 			tblObj.emplace_back( new Obj(vect3(-1 ,0.1,0)) );
+
+			// 線
+			for ( Edge* p : (*this).tblEdge ) delete p;
+			tblEdge.clear();
+			tblEdge.emplace_back( new Edge(0,1) );
 
 			bShot = false;
 		}
@@ -739,17 +745,9 @@ w=deg2rad(2);
 
 		}
 
-
-		{// 影 描画
-			vect3	va = v0;va.y = 0;
-			vect3	vb = v1;vb.y = 0;
-			pers.line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
-		}
-
-		pers.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );	//	棒
-
-		drawVect( gra, pers, text_y, v1, velocity	,1	, rgb(1,1,0), "velocity" );
-		drawVect( gra, pers, text_y, v0, moment		,1	, rgb(1,0,1), "moment" );
+		// 補助線
+//		drawVect( gra, pers, text_y, v1, velocity	,1	, rgb(1,1,0), "velocity" );
+//		drawVect( gra, pers, text_y, v0, moment		,1	, rgb(1,0,1), "moment" );
 		drawVect( gra, pers, text_y, v1, gv			,100	, rgb(1,0,0), "gv" );
 			
 	}
