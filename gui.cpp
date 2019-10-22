@@ -287,7 +287,7 @@ void Gui::DrawController( Pers& pers, SysGra& gra, vector<vector<Obj*>>& tbls, v
 				{	// 影
 					vect3 a = p0->pos;	a.y=0;
 					vect3 b = p1->pos;	b.y=0;
-					pers.line3d( gra, pers, a, b, rgb(1,1,1)/4, 2 );
+					pers.line3d( gra, pers, a, b, rgb(1,1,1)/4, 3 );
 				}
 
 				if ( bSelected )

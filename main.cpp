@@ -325,6 +325,7 @@ struct Bezier
 					idxPoint.insert( idxPoint.begin()+minn+1, (signed)tblPoint.size()-1);
 				}
 
+				//	接線計算
 				{
 					Point3* p0 = dynamic_cast<Point3*>(tblPoint[idxPoint[minn+0]]);
 					Point3* p2 = dynamic_cast<Point3*>(tblPoint[idxPoint[minn+2]]);
@@ -884,22 +885,10 @@ struct Apr : public Sys
 			//=================================
 			gui.tbls.clear();
 			gui.tbltblEdge.clear();
-			if ( (*pBezier).bActive ) 
-			{
-				(*pBezier).idxTbl = gui.EntryTbl( (*pBezier).tblPoint, (*pBezier).tblDummy );
-			}
-			if ( (*pCutmull).bActive ) 
-			{
-				(*pCutmull).idxTbl = gui.EntryTbl( (*pCutmull).tblPoint, (*pCutmull).tblDummy );
-			}
-			if ( (*pSkeleton).bActive ) 
-			{
-				(*pSkeleton).idxTbl = gui.EntryTbl( (*pSkeleton).tblPoint, (*pSkeleton).tblEdge );
-			}
-			{
-				lab.idxTbl =  gui.EntryTbl( lab.tblObj, lab.tblEdge );
-			}
-
+			if ( (*pBezier).bActive )	(*pBezier).idxTbl = gui.EntryTbl( (*pBezier).tblPoint, (*pBezier).tblDummy );
+			if ( (*pCutmull).bActive )	(*pCutmull).idxTbl = gui.EntryTbl( (*pCutmull).tblPoint, (*pCutmull).tblDummy );
+			if ( (*pSkeleton).bActive )	(*pSkeleton).idxTbl = gui.EntryTbl( (*pSkeleton).tblPoint, (*pSkeleton).tblEdge );
+			lab.idxTbl =  gui.EntryTbl( lab.tblObj, lab.tblEdge );
 
 			//=================================
 			//	GUI操作
