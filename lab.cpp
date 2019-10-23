@@ -130,6 +130,7 @@ void Lab::vector_six_lab8( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pe
 		tblObj.emplace_back( new Obj(vect3( 1    , 0.1, -0.3 )) );
 
 	}
+	if ( keys.R.hi ) bInit = false;
 
 	vect3	v0 = tblObj[0]->pos;
 	vect3	s0 = tblObj[1]->pos - v0;
