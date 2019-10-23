@@ -30,7 +30,7 @@ struct  wgl_Font
 	{
 		font_base = glGenLists(255);	
 
-	#if 0	
+	#if 1	
 	    int   nHeight			= 14;					// 文字セルまたは文字の高さ
 	    int   nWidth			= 0;					// 平均文字幅
 	    int   nEscapement		= 0;					// 文字送りの方向とX軸との角度
@@ -265,24 +265,7 @@ void  SysGra::OnSize( int width, int height )
 	}
 
 	// gl
-#if 1
 		glViewport(0,0,width, height);
-#else
-	{
-		HDC	hDc = GetDC( hWnd );	// GetDCに対してはReleaseDC
-		if( g.gl_bInitialized )
-		{
-			wgl_font.Delete();
-			wgl_Disable( g.hGlrc );
-		}
-		{
-			wgl_Enable( &hDc, &g.hGlrc );
-			wgl_font.Init( hDc );
-		}
-		ReleaseDC( hWnd, hDc );
-
-	}
-#endif
 }
 
 //------------------------------------------------------------------------------
@@ -522,6 +505,8 @@ void SysGra::Print( vect2 v0, string str )
 
 	glRasterPos2f(v0.x, v0.y);
 	wgl_font.DrawString( str );
+
+//	wgl_font.DrawStringW(10,120,L"こんにちは OpenGLの世界!!");
 
 	glDepthFunc(GL_GEQUAL);		// depth <= 書き込み値 
 }

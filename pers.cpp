@@ -181,16 +181,16 @@ void Pers::Focus( vector<vector<Obj*>>& tbls )
 			if ( p->bSelected )
 			{
 				vect3 v = calcWorldToScreen3( p->pos );
-				if ( b.x < v.x ) b2.x = p->pos.x;
-				if ( b.y < v.y ) b2.y = p->pos.y;
-				if ( b.z < v.z ) b2.z = p->pos.z;
-				if ( s.x > v.x ) s2.x = p->pos.x;
-				if ( s.y > v.y ) s2.y = p->pos.y;
-				if ( s.z > v.z ) s2.z = p->pos.z;
+				if ( b.x < v.x ) { b2.x = p->pos.x; b.x=v.x; }
+				if ( b.y < v.y ) { b2.y = p->pos.y; b.y=v.y; }
+				if ( b.z < v.z ) { b2.z = p->pos.z; b.z=v.z; }
+				if ( s.x > v.x ) { s2.x = p->pos.x; s.x=v.x; }
+				if ( s.y > v.y ) { s2.y = p->pos.y; s.y=v.y; }
+				if ( s.z > v.z ) { s2.z = p->pos.z; s.z=v.z; }
 			}
 		}
 	}
-	vect3 v2 = ave( b2, s2 );
+	vect3 v2 = ave(b2,s2);
 	cam.pos = cam.pos - cam.at + v2;
 	cam.at = v2;
 }

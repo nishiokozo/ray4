@@ -56,7 +56,7 @@ void drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc
 Lab::Lab()
 //------------------------------------------------------------------------------
 {
-	idx = 7;
+	idx = 8;
 }
 
 //------------------------------------------------------------------------------
@@ -65,6 +65,10 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& 
 {
 	switch( idx )
 	{
+		case 8:	// 描画	位相空間
+			vector_six_lab8( keys, mouse, gra, pers, text_y );
+			break;
+
 		case 1:	// 描画	グラフ実験
 			graph( keys, mouse, gra, pers, text_y );
 			break;
@@ -92,9 +96,56 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& 
 		case 6:	// 描画	タイヤ実験実験
 			tire3d( keys, mouse, gra, pers, text_y );
 			break;
+
 		default:break;
 	}
 	gra.Print(1,(float)text_y++,string("lab: ")+to_string(idx)); 
+}
+
+//------------------------------------------------------------------------------
+void Lab::vector_six_lab8( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+//------------------------------------------------------------------------------
+{
+	gra.Print(1,(float)text_y++,string("vector_six_lab8")+to_string(idx)); 
+
+	static bool bInitCam = false;
+
+//	gra.Clr(rgb(0.3,0.3,0.3));
+//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
+
+	if ( !bInit )
+	{
+		if ( !bInitCam )
+		{
+			bInitCam = true;
+			pers.cam.pos = vect3(  0.0, 5.0, -1.0 );
+			pers.cam.at = vect3( 0,  0.0, 0 );
+		}
+	
+		bInit = true;
+		for ( Obj* p : (*this).tblObj ) delete p;
+		tblObj.clear();
+		tblObj.emplace_back( new Obj(vect3( 0    , 0.1,    0 )) );
+		tblObj.emplace_back( new Obj(vect3( 0+1  , 0.1, +0.3 )) );
+		tblObj.emplace_back( new Obj(vect3( 1    , 0.1, -0.3 )) );
+
+	}
+
+	vect3	v0 = tblObj[0]->pos;
+	vect3	s0 = tblObj[1]->pos - v0;
+	vect3	s1 = tblObj[2]->pos - v0;
+
+	vect3 s2 = cross(s0,s1);
+	float d = dot( s0,s1);
+
+	gra.Print(1,(float)text_y++,string("dot      : ")+to_string(d)); 
+	gra.Print(1,(float)text_y++,string("s2.abs() : ")+to_string(s2.abs())); 
+
+
+	drawVect( gra, pers, text_y, v0, s0	,1	, rgb(0,1,0), "s0" );
+	drawVect( gra, pers, text_y, v0, s1	,1	, rgb(0,1,0), "s1" );
+	drawVect( gra, pers, text_y, v0, s2	,1	, rgb(1,1,0), "s2" );
+
 }
 
 //------------------------------------------------------------------------------
@@ -287,7 +338,7 @@ void Lab::kakusokudo7( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, 
 	static vect3	add;
 	
 	static float 	w;	//	角速度
-	static bool bPause = false;
+	static bool		bPause = false;
 	bool bStep = false;
 
 	// 初期化
@@ -351,6 +402,8 @@ void Lab::kakusokudo7( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, 
 			v1 = v0+bar/radius;
 			acc2 += v1-prev;
 		}
+		else
+		{
 
 			vect3	bar = (v1-v0);							//	棒
 
@@ -358,24 +411,25 @@ void Lab::kakusokudo7( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, 
 
 			vect3 vt = cross(bar, moment );	//	タンジェント
 
-		if ( !bPause || bStep )
-		{
+			if ( !bPause || bStep )
+			{
 
-			acc2+=vt;
+				acc2+=vt;
 
-			moment = cross(-bar,acc2);				//	回転モーメント
+				moment = cross(-bar,acc2);				//	回転モーメント
 
 
-			acc2 = mrotateByAxis( moment, acc2.abs() )*  acc2;
+				acc2 = mrotateByAxis( moment, acc2.abs() )*  acc2;
 
-			v1+=acc2;
-			vect3 prev = v1;
-			v1 = (v1-v0)/(v1-v0).abs()+v0;
-			acc2 += v1-prev;
+				v1+=acc2;
+				vect3 prev = v1;
+				v1 = (v1-v0)/(v1-v0).abs()+v0;
+				acc2 += v1-prev;
+			}
+			drawVect( gra, pers, text_y, v1, vt			,100	, rgb(1,0,0), "vt" );
+			gra.Print(1,(float)text_y++,string("radius ")+to_string(bar.abs())); 
 		}
-		drawVect( gra, pers, text_y, v1, vt			,100	, rgb(1,0,0), "vt" );
 
-	gra.Print(1,(float)text_y++,string("radius ")+to_string(bar.abs())); 
 				
 
 	}
