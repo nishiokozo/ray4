@@ -278,5 +278,64 @@ struct Pers
 
 	} grid;
 
+	struct Axis
+	{
+
+		bool bAxisX = true;;
+		bool bAxisY = true;;
+		bool bAxisZ = true;;
+
+		//------------------------------------------------------------------------------
+		void DrawAxis( SysGra& gra, Pers& pers, vect2 mpos )
+		//------------------------------------------------------------------------------
+		{
+			gra.SetZTest( false );
+
+			vect3 pos = pers.calcScreenToWorld3( vect3(mpos,0) );
+
+			vect3 v0 = pers.calcWorldToScreen3( pos );
+
+			// 軸表示
+			float l = 0.1;
+			if ( bAxisX  )
+			{
+				vect3 v1 = v0 + vect3(
+					pers.cam.mat.m[0][0] / pers.aspect,
+					pers.cam.mat.m[1][0],
+					pers.cam.mat.m[2][0]
+				) * l;
+				gra.Line( v0, v1, rgb(0.8,0.2,0.2), 2.0 );
+			}
+			if ( bAxisY  )
+			{
+				vect3 v1 = v0 + vect3(
+					pers.cam.mat.m[0][1] / pers.aspect,
+					pers.cam.mat.m[1][1],
+					pers.cam.mat.m[2][1]
+				) * l;
+				gra.Line( v0, v1, rgb(0.2,0.8,0.2), 2.0 );
+			}
+			if ( bAxisZ )
+			{
+				vect3 v1 = v0 + vect3(
+					pers.cam.mat.m[0][2] / pers.aspect,
+					pers.cam.mat.m[1][2],
+					pers.cam.mat.m[2][2]
+				) * l;
+				gra.Line( v0, v1, rgb(0.1,0.3,1), 2.0 );
+
+			}
+
+			// 軸名表示
+			gra.Print( mpos+gra.Dot(16,-12),string("")+(bAxisX?"X":"")+(bAxisY?"Y":"")+(bAxisZ?"Z":"") ); 
+
+
+			gra.Pset( v0, rgb(1,1,1),3 );
+
+			gra.SetZTest( true );
+
+		}
+	} axis;
+
 };
 

@@ -30,6 +30,73 @@
 
 #include "lab.h"
 
+struct Plot
+{
+	static const int MaxPlot = 100;
+	float tblPlot[MaxPlot];
+	int cntPlot = 0;
+	bool	bScroll = false;
+	rgb col;
+	float step;
+	
+	//------------------------------------------------------------------------------
+	Plot( float _step, rgb _col = rgb(1,1,1) )
+	//------------------------------------------------------------------------------
+	{
+		col = _col;
+		step = _step;
+		for ( int i = 0 ; i < MaxPlot ; i++ )
+		{
+			tblPlot[i] = 0;
+		}
+		Reset();
+	}
+
+	//------------------------------------------------------------------------------
+	void Reset()
+	//------------------------------------------------------------------------------
+	{
+		bScroll = false;
+		cntPlot = 0 ;
+	}
+	//------------------------------------------------------------------------------
+	void Update( float val )
+	//------------------------------------------------------------------------------
+	{
+		if ( cntPlot >= MaxPlot ) 
+		{
+			bScroll = true;
+			cntPlot = 0;
+		}
+
+		tblPlot[ cntPlot++ ] = val;
+	}
+	//------------------------------------------------------------------------------
+	void Draw( SysGra& gra, Pers& pers )
+	//------------------------------------------------------------------------------
+	{
+		gra.SetZTest( false );
+		
+		float x = 0;
+		
+		if ( bScroll )
+		for ( int i = cntPlot ; i < MaxPlot ; i++ )
+		{
+			pers.pset3d( gra, pers, vect3( x, 0, tblPlot[i] ),  col, 2 );
+			x += step;
+		}
+		for ( int i = 0 ; i < cntPlot-1 ; i++ )
+		{
+			pers.pset3d( gra, pers, vect3( x, 0, tblPlot[i] ),  col, 2 );
+			x += step;
+		}
+			pers.pset3d( gra, pers, vect3( x, 0, tblPlot[cntPlot-1] ),  rgb(1,1,1), 2 );
+
+		gra.SetZTest( true );
+	}
+
+};
+
 //------------------------------------------------------------------------------
 void drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str )
 //------------------------------------------------------------------------------
@@ -45,6 +112,7 @@ void drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc
 		pers.pset3d( gra, pers,    b, c, 5 );
 	}
 
+	// 線
 	pers.line3d( gra, pers, v0, v1, col, 1 );
 	pers.pset3d( gra, pers,     v1, col, 5 );
 	pers.print3d( gra, pers, 	v1, 0,0, str ); 
@@ -108,11 +176,17 @@ void Lab::vector_six_lab8( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pe
 {
 	gra.Print(1,(float)text_y++,string("vector_six_lab8")+to_string(idx)); 
 
-	static bool bInitCam = false;
+	const float	G = 9.8;			// 重力加速度
+	const float	T = 1.0/60.0;		// 時間/frame
+	const float	g = 9.8 *T*T;		// 重力加速度/frame
+	const vect3	gv = vect3(0,0, -g);		// 重力加速度/frame
 
-//	gra.Clr(rgb(0.3,0.3,0.3));
-//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
+	static	Plot plot_moment( 0.02, rgb(1,0,1) );
+	static vect3 acc;
+	static bool		bPause = false;
+	bool bStep = false;
 
+	// 初期化
 	if ( !bInit )
 	{
 		if ( !bInitCam )
@@ -123,29 +197,76 @@ void Lab::vector_six_lab8( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pe
 		}
 	
 		bInit = true;
+		//点
 		for ( Obj* p : (*this).tblObj ) delete p;
 		tblObj.clear();
-		tblObj.emplace_back( new Obj(vect3( 0    , 0.1,    0 )) );
-		tblObj.emplace_back( new Obj(vect3( 0+1  , 0.1, +0.3 )) );
-		tblObj.emplace_back( new Obj(vect3( 1    , 0.1, -0.3 )) );
+		tblObj.emplace_back( new Obj(vect3( 0  , 0.1, 0 )) );
+		tblObj.emplace_back( new Obj(vect3( 1  , 0.1, 0 )) );
+		// 線
+		for ( Edge* p : (*this).tblEdge ) delete p;
+		tblEdge.clear();
+		tblEdge.emplace_back( new Edge(0,1) );
 
+		pers.axis.bAxisX = true;
+		pers.axis.bAxisY = false;
+		pers.axis.bAxisZ = true;
+
+		acc=0;	// 加速度
+
+		plot_moment.Reset();
 	}
+
+	// 入力
 	if ( keys.R.hi ) bInit = false;
+	if ( keys.SPACE.hi )	bPause = !bPause ;
+	if ( keys.ENTER.rep )	{bStep = true; bPause = true; }
 
-	vect3	v0 = tblObj[0]->pos;
-	vect3	s0 = tblObj[1]->pos - v0;
-	vect3	s1 = tblObj[2]->pos - v0;
+	vect3&	v0 = tblObj[0]->pos;
+	vect3&	v1 = tblObj[1]->pos;
 
-	vect3 s2 = cross(s0,s1);
-	float d = dot( s0,s1);
-
-	gra.Print(1,(float)text_y++,string("dot      : ")+to_string(d)); 
-	gra.Print(1,(float)text_y++,string("s2.abs() : ")+to_string(s2.abs())); 
+	vect3	bar = (v1-v0);				//	棒
+	vect3	moment = cross(-bar, gv);		//	回転モーメント
+	vect3	vt = cross(bar, moment );		//	タンジェント
+	moment = cross(-bar,vt);			//	回転モーメント
 
 
-	drawVect( gra, pers, text_y, v0, s0	,1	, rgb(0,1,0), "s0" );
-	drawVect( gra, pers, text_y, v0, s1	,1	, rgb(0,1,0), "s1" );
-	drawVect( gra, pers, text_y, v0, s2	,1	, rgb(1,1,0), "s2" );
+
+ 
+	// 計算
+	if ( !bPause || bStep )
+	{
+		plot_moment.Update( moment.y*100 );
+
+//		acc+=gv;
+
+//		vect3 a = acc.abs()+vt.abs();
+
+		// 衝突
+		if ( ((v1+acc+vt)-v0).abs() > 1.0 )
+		{
+			v1 = mrotateByAxis( moment, acc.abs()+vt.abs() )* (v1-v0) + v0;
+
+//			vect3 v = mrotateByAxis( moment, acc.abs() )*  vt;
+
+			acc+=vt;
+
+		}
+		else
+		{
+			cout << "over" << endl;
+		}
+		
+	}
+
+	drawVect( gra, pers, text_y, v0, moment ,100	, rgb(1,0,1), "moment" );
+	drawVect( gra, pers, text_y, v1, gv ,100	, rgb(1,0,0), "gv" );
+	drawVect( gra, pers, text_y, v1, vt ,100	, rgb(0,1,0), "vt" );
+	drawVect( gra, pers, text_y, v1, acc ,10	, rgb(0,1,1), "acc" );
+	plot_moment.Draw( gra, pers );
+	gra.Print(1,(float)text_y++,string("<<radius>>")+to_string(bar.abs())); 
+
+	
+	
 
 }
 

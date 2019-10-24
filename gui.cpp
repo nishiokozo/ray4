@@ -266,7 +266,6 @@ void Gui::SelectOneSub( vector<vector<Obj*>>& tbls )
 void Gui::DrawController( Pers& pers, SysGra& gra, vector<vector<Obj*>>& tbls, vector<vector<Edge*>>& tbltblEdge, vect2 mpos )
 //------------------------------------------------------------------------------
 {
-	gra.SetZTest( false );
 
 	{
 		for ( int i = 0 ; i < (signed)tbltblEdge.size() ; i++ )
@@ -304,6 +303,8 @@ void Gui::DrawController( Pers& pers, SysGra& gra, vector<vector<Obj*>>& tbls, v
 			}
 		}
 	}
+
+	gra.SetZTest( false );
 	{
 		int n = 0;
 		for ( vector<Obj*>& tblPoint : tbls )

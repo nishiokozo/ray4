@@ -645,61 +645,6 @@ struct
 
 
 
-struct
-{
-
-	bool bAxisX = true;;
-	bool bAxisY = true;;
-	bool bAxisZ = true;;
-
-	//------------------------------------------------------------------------------
-	void DrawAxis( SysGra& gra, Pers& pers, vect2 mpos )
-	//------------------------------------------------------------------------------
-	{
-		gra.SetZTest( false );
-
-		vect3 pos = pers.calcScreenToWorld3( vect3(mpos,0) );
-
-		vect3 v0 = pers.calcWorldToScreen3( pos );
-
-		// 軸表示
-		float l = 0.1;
-		if ( bAxisX  )
-		{
-			vect3 v1 = v0 + vect3(
-				pers.cam.mat.m[0][0] / pers.aspect,
-				pers.cam.mat.m[1][0],
-				pers.cam.mat.m[2][0]
-			) * l;
-			gra.Line( v0, v1, rgb(0.8,0.2,0.2), 2.0 );
-		}
-		if ( bAxisY  )
-		{
-			vect3 v1 = v0 + vect3(
-				pers.cam.mat.m[0][1] / pers.aspect,
-				pers.cam.mat.m[1][1],
-				pers.cam.mat.m[2][1]
-			) * l;
-			gra.Line( v0, v1, rgb(0.2,0.8,0.2), 2.0 );
-		}
-		if ( bAxisZ )
-		{
-			vect3 v1 = v0 + vect3(
-				pers.cam.mat.m[0][2] / pers.aspect,
-				pers.cam.mat.m[1][2],
-				pers.cam.mat.m[2][2]
-			) * l;
-			gra.Line( v0, v1, rgb(0.1,0.3,1), 2.0 );
-
-		}
-
-		// 軸名表示
-		gra.Print( mpos+gra.Dot(16,-12),string("")+(bAxisX?"X":"")+(bAxisY?"Y":"")+(bAxisZ?"Z":"") ); 
-
-		gra.SetZTest( true );
-
-	}
-} axis;
 
 struct Apr : public Sys
 {
@@ -776,19 +721,19 @@ struct Apr : public Sys
 			if ( keys.Z.hi + keys.X.hi + keys.C.hi > 0 && keys.Z.on + keys.X.on + keys.C.on == keys.Z.hi + keys.X.hi + keys.C.hi ) 
 			{
 				// 排他的選択
-				axis.bAxisZ = false;
-				axis.bAxisX = false;
-				axis.bAxisY = false;
-				if ( keys.Z.hi ) axis.bAxisZ = true;
-				if ( keys.X.hi ) axis.bAxisX = true;
-				if ( keys.C.hi ) axis.bAxisY = true;
+				pers.axis.bAxisZ = false;
+				pers.axis.bAxisX = false;
+				pers.axis.bAxisY = false;
+				if ( keys.Z.hi ) pers.axis.bAxisZ = true;
+				if ( keys.X.hi ) pers.axis.bAxisX = true;
+				if ( keys.C.hi ) pers.axis.bAxisY = true;
 			}
 			else
 			{
 				// 追加選択
-				if ( keys.Z.on ) axis.bAxisZ = true;
-				if ( keys.X.on ) axis.bAxisX = true;
-				if ( keys.C.on ) axis.bAxisY = true;
+				if ( keys.Z.on ) pers.axis.bAxisZ = true;
+				if ( keys.X.on ) pers.axis.bAxisX = true;
+				if ( keys.C.on ) pers.axis.bAxisY = true;
 			}
 
 			//=================================
@@ -944,15 +889,15 @@ struct Apr : public Sys
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && gui.one.bEnable ) 
 				{
 					bool bByCamera = false;
-					if ( axis.bAxisX && axis.bAxisY && axis.bAxisZ )
+					if ( pers.axis.bAxisX && pers.axis.bAxisY && pers.axis.bAxisZ )
 					{
 						bByCamera = true;
 					}
 					else
 					{
-						axis.bAxisX = true;
-						axis.bAxisY = false;
-						axis.bAxisZ = true;
+						pers.axis.bAxisX = true;
+						pers.axis.bAxisY = false;
+						pers.axis.bAxisZ = true;
 					}
 					gui.MoveObj( gra, pers, gui.tbls, mouse.pos, mouse.prev, mouse.mov, keys.T.on, bByCamera );
 
@@ -1018,7 +963,7 @@ struct Apr : public Sys
 			//=================================
 			// 描画	マニュピレーター
 			//=================================
-			axis.DrawAxis( gra, pers, mouse.pos );
+			pers.axis.DrawAxis( gra, pers, mouse.pos );
 
 			//=================================
 			// 情報表示

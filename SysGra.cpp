@@ -30,7 +30,7 @@ struct  wgl_Font
 	{
 		font_base = glGenLists(255);	
 
-	#if 1	
+	#if 0	
 	    int   nHeight			= 14;					// 文字セルまたは文字の高さ
 	    int   nWidth			= 0;					// 平均文字幅
 	    int   nEscapement		= 0;					// 文字送りの方向とX軸との角度
