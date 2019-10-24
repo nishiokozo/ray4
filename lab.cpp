@@ -235,25 +235,14 @@ void Lab::vector_six_lab8( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pe
 	// 計算
 	if ( !bPause || bStep )
 	{
-		plot_moment.Update( moment.y*100 );
-
-//		acc+=gv;
-
-//		vect3 a = acc.abs()+vt.abs();
+		plot_moment.Update( moment.y*10 );
 
 		// 衝突
-		if ( ((v1+acc+vt)-v0).abs() > 1.0 )
 		{
 			v1 = mrotateByAxis( moment, acc.abs()+vt.abs() )* (v1-v0) + v0;
 
-//			vect3 v = mrotateByAxis( moment, acc.abs() )*  vt;
-
 			acc+=vt;
 
-		}
-		else
-		{
-			cout << "over" << endl;
 		}
 		
 	}
