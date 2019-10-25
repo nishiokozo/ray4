@@ -185,6 +185,7 @@ void Lab::vector_six_lab8( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pe
 	static vect3 acc;
 	static bool		bPause = false;
 	bool bStep = false;
+	static float w = 0;
 
 	// 初期化
 	if ( !bInit )
@@ -212,6 +213,7 @@ void Lab::vector_six_lab8( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pe
 		pers.axis.bAxisZ = true;
 
 		acc=0;	// 加速度
+		w = 0;
 
 		plot_moment.Reset();
 	}
@@ -225,34 +227,47 @@ void Lab::vector_six_lab8( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pe
 	vect3&	v1 = tblObj[1]->pos;
 
 	vect3	bar = (v1-v0);				//	棒
-	vect3	moment = cross(-bar, gv);		//	回転モーメント
-	vect3	vt = cross(bar, moment );		//	タンジェント
-	moment = cross(-bar,vt);			//	回転モーメント
+	vect3	moment = cross(-bar, gv);	//	回転モーメント
+	vect3	F = cross(bar, moment );	//	力
 
 
-
+if ( keys.G.hi )
+{
+			mat33 m = mrotateByAxis( vect3(-0.000000000121692836363430, -0.000158748924150131642818, -0.000000000000000000000000),  1 );
+			m.dump("m");
+}
  
 	// 計算
 	if ( !bPause || bStep )
 	{
-		plot_moment.Update( moment.y*10 );
+		plot_moment.Update( moment.y*100 );
 
+			
 		// 衝突
 		{
-			v1 = mrotateByAxis( moment, acc.abs()+vt.abs() )* (v1-v0) + v0;
-
-			acc+=vt;
-
-		}
+			cout << "----" << endl;
+			mat33 m = mrotateByAxis( moment, w );
 		
+			moment.dumpDetail("moment");
+			cout << "w  "<< w << endl;
+			m.dump("m");
+	//		v1.dump("v1");	
+
+			v1 = m * (v1-v0) + v0;
+			w += F.abs();
+		}
+ 		
 	}
 
 	drawVect( gra, pers, text_y, v0, moment ,100	, rgb(1,0,1), "moment" );
-	drawVect( gra, pers, text_y, v1, gv ,100	, rgb(1,0,0), "gv" );
-	drawVect( gra, pers, text_y, v1, vt ,100	, rgb(0,1,0), "vt" );
-	drawVect( gra, pers, text_y, v1, acc ,10	, rgb(0,1,1), "acc" );
+	drawVect( gra, pers, text_y, v1, gv		,100	, rgb(1,0,0), "gv" );
+	drawVect( gra, pers, text_y, v1, F		,100	, rgb(1,0,0), "F" );
 	plot_moment.Draw( gra, pers );
 	gra.Print(1,(float)text_y++,string("<<radius>>")+to_string(bar.abs())); 
+
+//	gra.Print(1,(float)text_y++, "bar: "+to_string(bar.x)+" , "+to_string(bar.y)+" , "+to_string(bar.z));
+//	gra.Print(1,(float)text_y++, "v0 : "+to_string(v0.x)+" , "+to_string(v0.y)+" , "+to_string(v0.z));
+//	gra.Print(1,(float)text_y++, "v1 : "+to_string(v1.x)+" , "+to_string(v1.y)+" , "+to_string(v1.z));
 
 	
 	

@@ -219,15 +219,21 @@ public:
 	void rotateByAxis( vect3 axis, float th );
 
 
-	void dump() const
+	void dumpDetail( const char* str ) const
 	{
-		printf("(vect3)%9.6f %9.6f %9.6f\n", x, y, z );
+		std::cout << str << "<" << x << " " << y << " " << z << ">" <<std::endl;
 	}
 
 	void dump( const char* str ) const
 	{
 		printf("%s<%9.6f %9.6f %9.6f>\n", str, x, y, z );
 	}
+
+	void dump() const
+	{
+		dump("");
+	}
+
 
 };
 
@@ -420,12 +426,12 @@ public:
 
 	}
 
-	void dump()
+	void dumpDetail( const char* str )
 	{
-		printf("mat33:\n");
-		printf("%9.6f %9.6f %9.6f \n", m[0][0], m[0][1], m[0][2] );
-		printf("%9.6f %9.6f %9.6f \n", m[1][0], m[1][1], m[1][2] );
-		printf("%9.6f %9.6f %9.6f \n", m[2][0], m[2][1], m[2][2] );
+		printf("mat33:%s\n", str);
+		printf("%f %f %f \n", m[0][0], m[0][1], m[0][2] );
+		printf("%f %f %f \n", m[1][0], m[1][1], m[1][2] );
+		printf("%f %f %f \n", m[2][0], m[2][1], m[2][2] );
 	}
 	void dump( const char* str )
 	{
@@ -433,6 +439,10 @@ public:
 		printf("%9.6f %9.6f %9.6f \n", m[0][0], m[0][1], m[0][2] );
 		printf("%9.6f %9.6f %9.6f \n", m[1][0], m[1][1], m[1][2] );
 		printf("%9.6f %9.6f %9.6f \n", m[2][0], m[2][1], m[2][2] );
+	}
+	void dump()
+	{
+		dump("");
 	}
 
 };
