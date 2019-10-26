@@ -230,13 +230,44 @@ void Lab::vector_six_lab8( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pe
 	vect3	moment = cross(-bar, gv);	//	回転モーメント
 	vect3	F = cross(bar, moment );	//	力
 
-
-if ( keys.G.hi )
+static bool bOnce = false;
+if ( keys.G.hi || bOnce )
 {
-			mat33 m = mrotateByAxis( vect3(-0.000000000121692836363430, -0.000158748924150131642818, -0.000000000000000000000000),  1 );
-			m.dump("m");
+	bOnce = false;
+//			mat33 m = mrotateByAxis( vect3(-0.000000000121692836363430, -0.000158748924150131642818, -0.000000000000000000000000),  1 );
+	{
+		vect3 axis = vect3( 0.000000000121692836363430, 0.000158748924150131642818, 0);
+		float th = 0;
+		// axis軸回りにth°回転する行列を返す。
+		//
+		// axisは正規化されてなくても良い。
+
+		// z軸をaixsに合わせたマトリクスを作り
+		float ry	= atan2( axis.x , axis.z);
+		float lxz	= sqrt( axis.z * axis.z + axis.x * axis.x );
+		float rz	= atan2( axis.y, lxz );
+		mat33 mr = midentity();
+		mr *= mrotx(-rz);
+		mr *= mroty(ry);
+
+//		mat33 m = midentity();
+		// 作成した行列のz軸で回転
+//		m *= mr.invers();
+//		m *= mrotz(th);
+//		m *= mr;
+mr = mat33(
+	 0,  0, -1,
+	-1,  0,  0,
+	 0,  1,  0
+ );
+
+			mr.dump("mr");
+			mr.invers().dump("mr.invers");
+//			m.dump("m");
+	};
+
+// exit(0);
 }
- 
 	// 計算
 	if ( !bPause || bStep )
 	{
@@ -245,12 +276,12 @@ if ( keys.G.hi )
 			
 		// 衝突
 		{
-			cout << "----" << endl;
+//			cout << "----" << endl;
 			mat33 m = mrotateByAxis( moment, w );
 		
-			moment.dumpDetail("moment");
-			cout << "w  "<< w << endl;
-			m.dump("m");
+//			moment.dumpDetail("moment");
+//			cout << "w  "<< w << endl;
+//			m.dump("m");
 	//		v1.dump("v1");	
 
 			v1 = m * (v1-v0) + v0;

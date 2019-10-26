@@ -215,8 +215,8 @@ public:
 	friend	vect3 operator+( float f, vect3 v )  { return vect3( f + v.x, f + v.y, f + v.z ); }
 	friend	vect3 operator-( float f, vect3 v )  { return vect3( f - v.x, f - v.y, f - v.z ); }
 
-	void rotateByAxis( vect3 pos, vect3 axis, float th );
-	void rotateByAxis( vect3 axis, float th );
+//	void rotateByAxis( vect3 pos, vect3 axis, float th );
+//	void rotateByAxis( vect3 axis, float th );
 
 
 	void dumpDetail( const char* str ) const
@@ -327,6 +327,27 @@ public:
 	}
 
 	//-----------------------------------------------------------------------------
+	mat33 operator*( float f ) const
+	//-----------------------------------------------------------------------------
+	{
+		return mat33(
+			m[0][0]*f , m[0][1]*f , m[0][2]*f ,
+			m[1][0]*f , m[1][1]*f , m[1][2]*f ,
+			m[2][0]*f , m[2][1]*f , m[2][2]*f 
+		);
+	}
+	//-----------------------------------------------------------------------------
+	mat33 operator/( float f ) const
+	//-----------------------------------------------------------------------------
+	{
+		return mat33(
+			m[0][0]/f , m[0][1]/f , m[0][2]/f ,
+			m[1][0]/f , m[1][1]/f , m[1][2]/f ,
+			m[2][0]/f , m[2][1]/f , m[2][2]/f 
+		);
+	}
+	
+	//-----------------------------------------------------------------------------
 	mat33 operator*( const mat33 m ) const
 	//-----------------------------------------------------------------------------
 	{
@@ -377,61 +398,21 @@ public:
 
 	}
 
-	//-----------------------------------------------------------------------------
-	mat33 invers()
-	//-----------------------------------------------------------------------------
-	{
-	#if 0
+	// 逆行列
+	mat33 invers();
 
-	/*		return mat33(
-			m[0][0],	m[0][1],	m[0][2],
-			m[1][0],	m[1][1],	m[1][2],
-			m[2][0],	m[2][1],	m[2][2]
-		);
-	*/
+	// 転置行列
+	mat33 transpose();
 
-	#else
-
-		mat33 A(*this);
-		mat33 I(1,0,0, 0,1,0, 0,0,1);
-		
-		int d = 3;  //配列の次数
-
-		//掃き出し法
-		for( int i = 0 ; i < d ; i++ )
-		{
-			float f = 1/A.m[i][i];
-			for( int j=0 ; j < d ; j++ )
-			{
-				A.m[i][j] *= f;
-				I.m[i][j] *= f;
-			}
-			for( int j=0 ; j < d ; j++ )
-			{
-				if(i!=j)
-				{
-					f = A.m[j][i];
-					for( int k=0 ; k < d ; k++ )
-					{
-						A.m[j][k] -= A.m[i][k] * f;
-						I.m[j][k] -= I.m[i][k] * f;
-					}
-				}
-			}
-		}
-
-
-		return I;
-	#endif
-
-	}
+	// 行列式の値
+	float det();
 
 	void dumpDetail( const char* str )
 	{
-		printf("mat33:%s\n", str);
-		printf("%f %f %f \n", m[0][0], m[0][1], m[0][2] );
-		printf("%f %f %f \n", m[1][0], m[1][1], m[1][2] );
-		printf("%f %f %f \n", m[2][0], m[2][1], m[2][2] );
+		printf("mat33(detail):%s\n", str);
+		std::cout << m[0][0] << " " << m[0][1] << " " << m[0][2] << std::endl;
+		std::cout << m[1][0] << " " << m[1][1] << " " << m[1][2] << std::endl;
+		std::cout << m[2][0] << " " << m[2][1] << " " << m[2][2] << std::endl;
 	}
 	void dump( const char* str )
 	{
