@@ -191,6 +191,8 @@ public:
 	vect3 normalize() { return (*this)/abs(); }
 	float abs() { return sqrt( x*x + y*y + z*z ); }
 
+	bool operator==( float f ) { return ( x == f &&  y == f &&  z == f ); }
+	bool operator!=( float f ) { return !( x == f &&  y == f &&  z == f ); }
 	bool operator==( vect3 v ) { return ( x == v.x &&  y == v.y &&  z == v.z); }
 	bool operator!=( vect3 v ) { return !( x == v.x &&  y == v.y &&  z == v.z); }
 
@@ -229,6 +231,10 @@ public:
 		printf("%s<%9.6f %9.6f %9.6f>\n", str, x, y, z );
 	}
 
+	void dumpDetail() const
+	{
+		dumpDetail("");
+	}
 	void dump() const
 	{
 		dump("");

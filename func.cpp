@@ -32,7 +32,6 @@ tuple<bool,float,vect3,vect3,float,float>distanceLineLine0( vect3 P0, vect3 I0, 
 //------------------------------------------------------------------------------
 {
 	// 直線/線分距離、共通ルーチン
-
 	if ( cross( I0, I1 ).abs() < 0.000001f ) 
 	{
 		vect3 Q0;
@@ -72,15 +71,84 @@ tuple<bool,float,vect3,vect3,float,float>distanceLineSegline_func( vect3 P0, vec
 
 	auto[b,d,Q0,Q1,t0,t1] = distanceLineLine0( P0, I0, P1, I1 );
 
-	// 線分処理
 	if ( b )
 	{
+		// 線分処理
 		if ( t1 < 0 ) b = false;
 		if ( t1 > (e1-s1).abs() ) b = false;
+
 	}
 
 	return {b,d,Q0,Q1,t0,t1};
 }
+
+//------------------------------------------------------------------------------
+tuple<bool,float,vect3,vect3,float,float>distance_Harfline_Segline_func( vect3 s0, vect3 I0, vect3 s1, vect3 e1 )
+//------------------------------------------------------------------------------
+{
+//	if ( e1 == s1 ) return {false,0,vect3(0,0,0),vect3(0,0,0),0,0};
+
+	// 半直線と線分の距離
+	// 半直線   : s0+I0
+	// 線分開始 : s1
+	// 線分終了 : e1
+	// 距離     : d = |Q1-Q0|
+	// 戻り値   : d距離 Q0,Q1	※false でもdだけは取得できる
+	
+	vect3	P0 = s0;
+	vect3	P1 = s1;
+	vect3	I1 = (e1-s1).normalize();
+
+	auto[b,d,Q0,Q1,t0,t1] = distanceLineLine0( P0, I0, P1, I1 );
+
+	if ( b )
+	{
+		// 線分処理
+		if ( t1 < 0 ) b = false;
+		if ( t1 > (e1-s1).abs() ) b = false;
+
+		// 半直線
+		if ( t0 < 0 ) b = false;
+	}
+
+	return {b,d,Q0,Q1,t0,t1};
+}
+
+//------------------------------------------------------------------------------
+tuple<bool,float,vect3,vect3,float,float>distance_Segline_Segline_func( vect3 s0, vect3 e0, vect3 s1, vect3 e1 )
+//------------------------------------------------------------------------------
+{
+//	if ( e0 == s0 || e1 == s1 ) return {false,0,vect3(0,0,0),vect3(0,0,0),0,0};
+
+	// 線分と線分の距離
+	// 線分0開始: s1
+	// 線分0終了: e1
+	// 線分1開始: s1
+	// 線分1終了: e1
+	// 距離     : d = |Q1-Q0|
+	// 戻り値   : d距離 Q0,Q1	※false でもdだけは取得できる
+	
+	vect3	P0 = s0;
+	vect3	I0 = (e0-s0).normalize();
+	vect3	P1 = s1;
+	vect3	I1 = (e1-s1).normalize();
+
+	auto[b,d,Q0,Q1,t0,t1] = distanceLineLine0( P0, I0, P1, I1 );
+
+	if ( b )
+	{
+		// 線分処理
+		if ( t1 < 0 ) b = false;
+		if ( t1 > (e1-s1).abs() ) b = false;
+
+		// 線分処理
+		if ( t0 < 0 ) b = false;
+		if ( t0 > (e0-s0).abs() ) b = false;
+	}
+
+	return {b,d,Q0,Q1,t0,t1};
+}
+
 
 //------------------------------------------------------------------------------
 tuple<bool,float,vect3,vect3>distanceLineLine_func( vect3 P0, vect3 I0, vect3 P1, vect3 I1 )

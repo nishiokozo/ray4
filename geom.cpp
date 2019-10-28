@@ -89,7 +89,7 @@ mat33 mat33::invers()
 	float c22 =  (	 m00 * m11
 					-m10 * m01	);
 
-	//随伴行列は四因子行列の転置
+	//随伴行列は余因子行列の転置
 	mat33 a(
 		c00, c01, c02,
 		c10, c11, c12,
@@ -99,7 +99,7 @@ mat33 mat33::invers()
 
 	// 随伴行列を行列会式で割ることで逆行列が求まる
 	
-	return adjM /a.det();
+	return adjM / a.det();
 
 #else
 	//掃き出し法

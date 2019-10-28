@@ -34,8 +34,6 @@
 using namespace std;
 
 
-Gui gui;
-Lab lab;
 
 struct Cutmull
 {
@@ -75,7 +73,7 @@ struct Cutmull
 	};
 
 
-	vector<Edge*> tblDummy;		//	使ってはいけない
+	vector<Edge*> tblDummy;		//	空のまま
 
 	//------------------------------------------------------------------------------
 	void drawPoint( SysGra& gra, Pers& pers, vector<Obj*>& tblPoint )
@@ -224,8 +222,7 @@ struct Bezier
 		0,1,0
 	};
 
-	vector<Edge*> tblDummy;	//	使ってはいけない
-
+	vector<Edge*> tblDummy;		//	空のまま
 	//------------------------------------------------------------------------------
 	void exec_drawBezier( SysGra& gra, Pers& pers, vector<Obj*>& tblPoint, vector<int>& idxPoint, int idxTbl , vect3& P, vect3& I, bool bSerch, bool bCut )
 	//------------------------------------------------------------------------------
@@ -332,6 +329,7 @@ struct Bezier
 					p0->b *= t0;
 					p2->a *= t1;
 				}
+/*
 				gui.rect_mode = Gui::G_CALC::NONE;
 
 
@@ -349,6 +347,7 @@ struct Bezier
 					gui.one.bSelected_a = false;
 					gui.one.bSelected_b = false;
 				}
+*/
 			}
 
 			{
@@ -363,7 +362,7 @@ struct Bezier
 	
 };
 
-struct
+struct SkeletonUtil
 {
 
 	//-------------------------------------------------------------------------
@@ -641,13 +640,19 @@ struct
 			}
 		}
 	}
-} util;
+};
 
 
 
 
 struct Apr : public Sys
 {
+	long long	time_peak = 0;
+	Gui gui;
+	Lab lab;
+	SkeletonUtil	util;
+	Pers pers;
+
 	//------------------------------------------------------------------------------
 	Apr( const char* name, int pos_x, int pos_y, int width, int height ) : Sys( name, pos_x, pos_y, width, height )
 	//------------------------------------------------------------------------------
@@ -657,13 +662,6 @@ struct Apr : public Sys
 	~Apr()
 	//------------------------------------------------------------------------------
 	{}
-
-	long long	time_peak = 0;
-
-
-
-
-	Pers pers;
 
 	//------------------------------------------------------------------------------
 	int main()

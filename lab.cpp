@@ -32,6 +32,8 @@
 
 struct Plot
 {
+	//	y = 0面に座標(0,0,0)を中心にグラフ（ドット）を打ってゆく
+
 	static const int MaxPlot = 100;
 	float tblPlot[MaxPlot];
 	int cntPlot = 0;
@@ -40,8 +42,11 @@ struct Plot
 	float step;
 	
 	//------------------------------------------------------------------------------
-	Plot( float _step, rgb _col = rgb(1,1,1) )
+	Plot( 
 	//------------------------------------------------------------------------------
+		float _step, 			// 送りステップ
+		rgb _col = rgb(1,1,1) 	// 色
+	)
 	{
 		col = _col;
 		step = _step;
@@ -124,7 +129,7 @@ void drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc
 Lab::Lab()
 //------------------------------------------------------------------------------
 {
-	idx = 8;
+	idx = 9;
 }
 
 //------------------------------------------------------------------------------
@@ -133,6 +138,10 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& 
 {
 	switch( idx )
 	{
+		case 9:	// 描画	2d剛体
+			lab9_2dRidge( keys, mouse, gra, pers, text_y );
+			break;
+
 		case 8:	// 描画	位相空間
 			vector_six_lab8( keys, mouse, gra, pers, text_y );
 			break;
@@ -171,15 +180,119 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& 
 }
 
 //------------------------------------------------------------------------------
+void Lab::lab9_2dRidge( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+//------------------------------------------------------------------------------
+{
+	gra.Print(1,(float)text_y++,string("vector_six_lab8")+to_string(idx)); 
+
+	const float	G = 9.8;				// 重力加速度
+	const float	T = 1.0/60.0;			// 時間/frame
+	const float	g = 9.8 *T*T;			// 重力加速度/frame
+	const vect3	gv = vect3(0,0, -g);	// 重力加速度/frame
+	static bool		bPause = false;
+	bool bStep = false;
+	struct Car:Obj
+	{
+		vect3	acc;
+		vect3	spd;
+
+		bool	bReq = false;
+		vect3	req_pos;
+		vect3	req_acc;
+
+		Car( vect3 v, vect3 _spd ) : Obj(v)
+		{
+			pos = v;
+			acc = 0;
+			spd = _spd;
+		}
+	};
+
+	// 初期化
+	if ( !bInit )
+	{
+		if ( !bInitCam )
+		{
+			bInitCam = true;
+			pers.cam.pos = vect3(  0.0, 5.0, -1.0 );
+			pers.cam.at = vect3( 0,  0.0, 0 );
+		}
+	
+		bInit = true;
+		//点
+		for ( Obj* p : (*this).tblObj ) delete p;
+		tblObj.clear();
+		tblObj.emplace_back( new Obj(vect3( -0.5  , 0.1, 0 )) );
+		tblObj.emplace_back( new Obj(vect3(  0.5  , 0.1, -0.6 )) );
+		tblObj.emplace_back( new Car(vect3(  0  , 0.1,  1 ), vect3(0,0,0)) );
+		// 線
+		for ( Edge* p : (*this).tblEdge ) delete p;
+		tblEdge.clear();
+		tblEdge.emplace_back( new Edge(0,1) );
+
+		pers.axis.bAxisX = true;
+		pers.axis.bAxisY = false;
+		pers.axis.bAxisZ = true;
+
+	}
+
+	// 入力
+	if ( keys.R.hi ) bInit = false;
+	if ( keys.SPACE.hi )	bPause = !bPause ;
+	if ( keys.ENTER.rep )	{bStep = true; bPause = true; }
+
+	vect3&	v0 = tblObj[0]->pos;
+	vect3&	v1 = tblObj[1]->pos;
+	Car&	car = *dynamic_cast<Car*>(tblObj[2]);
+
+	// 計算
+	if ( !bPause || bStep )
+	{
+		car.acc += gv;
+	}
+
+	// 衝突
+	if ( car.acc.abs() > 0.000001f )
+	{
+		auto[b,d,Q0,Q1,t0,t1] = distance_Segline_Segline_func( car.pos, car.pos+car.acc, v0, v1 );
+		
+
+		if ( b )
+		{
+			car.bReq = true;
+			car.req_pos = Q1;
+			car.req_acc = -car.acc*1.0;
+		}
+
+	}
+
+	// 移動
+	if ( !bPause || bStep )
+	{
+		if ( car.bReq )
+		{
+			car.bReq = false;
+			car.pos = car.req_pos;
+			car.acc = car.req_acc;
+		}
+
+		car.pos += car.acc;
+	}
+
+	drawVect( gra, pers, text_y, car.pos, car.acc	,10		, rgb(1,0,0), "acc" );
+
+}
+
+//------------------------------------------------------------------------------
 void Lab::vector_six_lab8( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
 {
 	gra.Print(1,(float)text_y++,string("vector_six_lab8")+to_string(idx)); 
 
-	const float	G = 9.8;			// 重力加速度
-	const float	T = 1.0/60.0;		// 時間/frame
-	const float	g = 9.8 *T*T;		// 重力加速度/frame
-	const vect3	gv = vect3(0,0, -g);		// 重力加速度/frame
+	const float	G = 9.8;				// 重力加速度
+	const float	T = 1.0/60.0;			// 時間/frame
+	const float	g = 9.8 *T*T;			// 重力加速度/frame
+	const vect3	gv = vect3(0,0, -g);	// 重力加速度/frame
 
 	static	Plot plot_moment( 0.02, rgb(1,0,1) );
 	static vect3 acc;
@@ -226,29 +339,34 @@ void Lab::vector_six_lab8( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pe
 	vect3&	v0 = tblObj[0]->pos;
 	vect3&	v1 = tblObj[1]->pos;
 
-	vect3	bar = (v1-v0);				//	棒
-	vect3	moment = cross(-bar, gv);	//	回転モーメント
-	vect3	F = cross(bar, moment );	//	力
+	vect3	bar = (v1-v0);					//	棒
+	vect3	moment = cross(-bar, acc+gv);	//	回転モーメント 仮
+	vect3	F = cross(bar, moment );		//	力
 
 	// 計算
 	if ( !bPause || bStep )
 	{
-		plot_moment.Update( moment.y*100 );
+		plot_moment.Update( moment.y*10 );
 
 			
 		// 衝突
 		{
-			mat33 m = mrotateByAxis( moment, w );
+			acc = mrotateByAxis( moment, (acc+gv).abs() )*acc+gv;
 
-			v1 = m * (v1-v0) + v0;
-			w += F.abs();
+			v1 += acc;
+
+//			mat33 m = mrotateByAxis( moment, w );
+
+//			v1 = m * (v1-v0) + v0;
+//			w += F.abs();
+//			acc += F;
 		}
  		
 	}
 
-	drawVect( gra, pers, text_y, v0, moment ,100	, rgb(1,0,1), "moment" );
+	drawVect( gra, pers, text_y, v0, moment ,10	, rgb(1,0,1), "moment" );
 	drawVect( gra, pers, text_y, v1, gv		,100	, rgb(1,0,0), "gv" );
-	drawVect( gra, pers, text_y, v1, F		,100	, rgb(1,0,0), "F" );
+	drawVect( gra, pers, text_y, v1, F		,1		, rgb(0,1,0), "F" );
 	plot_moment.Draw( gra, pers );
 	gra.Print(1,(float)text_y++,string("<<radius>>")+to_string(bar.abs())); 
 

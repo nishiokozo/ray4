@@ -37,6 +37,7 @@ struct Lab
 
 	void vector_six_lab8( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );
 
+	void lab9_2dRidge( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );
 	void tire3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );
 	void furiko2d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );
 	void furiko3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );

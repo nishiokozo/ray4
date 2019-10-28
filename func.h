@@ -1,4 +1,6 @@
 extern float distanceLinePoint( vect3 P0, vect3 I0, vect3 P1 );
+extern std::tuple<bool,float,vect3,vect3,float,float>distance_Harfline_Segline_func( vect3 s0, vect3 I0, vect3 s1, vect3 e1 );
+extern std::tuple<bool,float,vect3,vect3,float,float>distance_Segline_Segline_func( vect3 s0, vect3 e0, vect3 s1, vect3 e1 );
 extern std::tuple<bool,float,vect3,vect3,float,float>distanceLineLine0( vect3 P0, vect3 I0, vect3 P1, vect3 I1 );
 extern std::tuple<bool,float,vect3,vect3,float,float>distanceLineSegline_func( vect3 P0, vect3 I0, vect3 s1, vect3 e1 );
 extern std::tuple<bool,float,vect3,vect3>distanceLineLine_func( vect3 P0, vect3 I0, vect3 P1, vect3 I1 );
@@ -6,5 +8,4 @@ extern vect3 bezier3_func( float t, vect3 P0, vect3 P1, vect3 P2, vect3 P3 );
 extern vect3 bezier3_delta_func( float t, vect3 P0, vect3 P1, vect3 P2, vect3 P3 );
 extern vect3 catmull3_func( float t, const vect3 P0, const vect3 P1, const vect3 P2, const vect3 P3 );
 extern std::tuple<bool,float,vect3> distanceIntersectPlate( vect3 plate_P, vect3 plate_N, vect3 P, vect3 I);
-//extern bool IsIntersectPlate( vect3 plate_P, vect3 plate_N, vect3 P , vect3 I, vect3& Q);
 extern bool IsIntersectSphereLine( vect3 sphere_P, float sphere_r, vect3 line_P , vect3 line_I );
