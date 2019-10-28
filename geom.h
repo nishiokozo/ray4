@@ -191,8 +191,6 @@ public:
 	vect3 normalize() { return (*this)/abs(); }
 	float abs() { return sqrt( x*x + y*y + z*z ); }
 
-	bool operator==( float f ) { return ( x == f &&  y == f &&  z == f ); }
-	bool operator!=( float f ) { return !( x == f &&  y == f &&  z == f ); }
 	bool operator==( vect3 v ) { return ( x == v.x &&  y == v.y &&  z == v.z); }
 	bool operator!=( vect3 v ) { return !( x == v.x &&  y == v.y &&  z == v.z); }
 
@@ -217,8 +215,11 @@ public:
 	friend	vect3 operator+( float f, vect3 v )  { return vect3( f + v.x, f + v.y, f + v.z ); }
 	friend	vect3 operator-( float f, vect3 v )  { return vect3( f - v.x, f - v.y, f - v.z ); }
 
-//	void rotateByAxis( vect3 pos, vect3 axis, float th );
-//	void rotateByAxis( vect3 axis, float th );
+	bool isZero()
+	{
+		const float zero = 0.00000001f*100; // 小さすぎるとベクトルとして意味をなさないので100倍
+		return std::abs(x)<zero && std::abs(y)<zero && std::abs(z)<zero;
+	}
 
 
 	void dumpDetail( const char* str ) const
@@ -441,11 +442,11 @@ class	mat44
 {
 public:
 
-	union
-	{
-		float	m_array[16];
-		MAT4	m;
-	};
+//	union
+//	{
+	//	float	m_array[16];
+	MAT4	m;
+//	};
 	mat44()
 	{
 		//	m[行][列]
@@ -527,7 +528,7 @@ public:
 		return *this;
 	}
 
-	float* GetArray(){ return m_array; };
+//	float* GetArray(){ return m_array; };
 
 	void identity()
 	{

@@ -120,7 +120,7 @@ tuple<bool,vect3> Pers::calcScreenToGround( vect2 q )	// 透視変換後の画�
 {
 	vect3 P = calcScreenToWorld2( q );
 	vect3 I = calcRayvect( P );
-	auto[b,t,Q] = distanceIntersectPlate( vect3(0,0,0), vect3(0,1,0), P, I );
+	auto[b,t,Q] = func_distance_Plate_Line( vect3(0,0,0), vect3(0,1,0), P, I );
 	return {b,Q};
 }
 

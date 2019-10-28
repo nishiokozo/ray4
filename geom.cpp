@@ -541,7 +541,8 @@ void	mat4_frustum( float* m, float x1, float x2, float y1, float y2, float z1, f
 void	mat4_Frustum( mat44& m, float x1, float x2, float y1, float y2, float z1, float z2 )
 //-----------------------------------------------------------------------------
 {
-	float* a = m.m_array;
+//	float* a = m.m_array;
+	float* a = &m.m[0][0];
 
 
 	float sx =    2.0f / (x2-x1);
@@ -569,7 +570,7 @@ void	mat4_Frustum( mat44& m, float x1, float x2, float y1, float y2, float z1, f
 void	mat4_Ortho( mat44& m, float x1, float x2, float y1, float y2, float z1, float z2 )
 //-----------------------------------------------------------------------------
 {
-	float* a = m.m_array;
+	float* a = &m.m[0][0];
 
 	float sx =    2.0f / (x2-x1);
 	float sy =    2.0f / (y2-y1);

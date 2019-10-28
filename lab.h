@@ -35,16 +35,8 @@ struct Lab
 		tblEdge.clear();
 	}
 
-	void vector_six_lab8( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );
-
-	void lab9_2dRidge( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );
-	void tire3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );
-	void furiko2d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );
-	void furiko3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );
-	void gravityPlanet( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );
-	void kakusokudo( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );
-	void kakusokudo7( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );
-	void graph( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );
+	//------------------------------------------------------------------------------
 	void Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );
+	//------------------------------------------------------------------------------
 
 };

@@ -134,8 +134,8 @@ struct Cutmull
 				
 				for ( float t = 0.0 ; t < 1.0 ; t+=0.1 )
 				{
-					vect3 v1 = catmull3_func(t, P0,P1,P2,P3 );
-					vect3 w1 = catmull3_func(t, Q0,Q1,Q2,Q3 );
+					vect3 v1 = func_catmull3(t, P0,P1,P2,P3 );
+					vect3 w1 = func_catmull3(t, Q0,Q1,Q2,Q3 );
 					if ( (i==0 && t==0) ) 
 					{
 						v2=v1;
@@ -260,13 +260,13 @@ struct Bezier
 			vect3 pos0 = p0->pos;
 			for ( int i = 0 ; i < div ; i++ )
 			{
-				vect3 pos1 = bezier3_func( t, P0, P1, P2, P3 );
+				vect3 pos1 = func_bezier3( t, P0, P1, P2, P3 );
 				pers.line3d( gra, pers, pos0, pos1, rgb(1,1,1) );
 
 				// マウスベクトルとの最近点
 				if ( bSerch )
 				{
-					auto[b,d,Q0,Q1,t0,t1] = distanceLineSegline_func( P, I, pos0, pos1 );
+					auto[b,d,Q0,Q1,t0,t1] = func_distance_Line_Segline( P, I, pos0, pos1 );
 					if ( b ) 
 					{
 						if ( mind > d && 0.2 > d )
@@ -279,8 +279,8 @@ struct Bezier
 							minQ1 = Q1;
 
 							mint	= t-(1/(float)div) + (t1/(pos1-pos0).abs())/((float)div);
-							minQ	= bezier3_func( mint, P0, P1, P2, P3 );
-							mindt	= bezier3_delta_func( mint, P0, P1, P2, P3 );
+							minQ	= func_bezier3( mint, P0, P1, P2, P3 );
+							mindt	= func_bezier3_delta( mint, P0, P1, P2, P3 );
 
 							minv = (minQ-Q0).normalize();
 						}
@@ -805,7 +805,7 @@ struct Apr : public Sys
 				vect3 P2 = vect3( 0, 0.4, 0 );
 				vect3 P3 = vect3( 0.5, 0.6, 0.4 );
 
-				auto[b,d,Q0,Q1,t0,t1] = distanceLineSegline_func( P, I, P2, P3 );
+				auto[b,d,Q0,Q1,t0,t1] = func_distance_Line_Segline( P, I, P2, P3 );
 
 				if ( b ) pers.line3d( gra, pers, Q0, Q1,  vect3(0,1,0));
 				else pers.line3d( gra, pers, Q0, Q1,  vect3(1,0,0));

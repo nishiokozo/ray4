@@ -251,7 +251,7 @@ void Skeleton::PlayAnimation()
 		vect3 P1 = animations[cur.act].pose[ n1 ].joint[ j ].pos;
 		vect3 P2 = animations[cur.act].pose[ n2 ].joint[ j ].pos;
 		vect3 P3 = animations[cur.act].pose[ n3 ].joint[ j ].pos;
-		vect3 b = catmull3_func(anim.t, P0,P1,P2,P3 );
+		vect3 b = func_catmull3(anim.t, P0,P1,P2,P3 );
 
 		tblPoint[ j ]->pos = b;
 
@@ -816,10 +816,10 @@ void Skeleton::DrawSkeleton( Pers& pers, SysGra& gra )
 					vect3 P3 = animations[cur.act].pose[ n3 ].joint[ j ].pos;
 
 					float t = dt;
-					vect3 a = catmull3_func(0, P0,P1,P2,P3 );
+					vect3 a = func_catmull3(0, P0,P1,P2,P3 );
 					for ( int i = 0 ; i <div ; i++ )
 					{
-						vect3 b = catmull3_func(t, P0,P1,P2,P3 );
+						vect3 b = func_catmull3(t, P0,P1,P2,P3 );
 
 						rgb col = rgb(0,1,0);
 						pers.line3d( gra, pers, a, b, col);

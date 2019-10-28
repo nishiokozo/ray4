@@ -103,7 +103,7 @@ struct Plot
 };
 
 //------------------------------------------------------------------------------
-void drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str )
+static void drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str )
 //------------------------------------------------------------------------------
 {
 	vect3 v1 = v0+v*sc;
@@ -126,64 +126,10 @@ void drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc
 };
 
 //------------------------------------------------------------------------------
-Lab::Lab()
+static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
 {
-	idx = 9;
-}
-
-//------------------------------------------------------------------------------
-void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
-//------------------------------------------------------------------------------
-{
-	switch( idx )
-	{
-		case 9:	// 描画	2d剛体
-			lab9_2dRidge( keys, mouse, gra, pers, text_y );
-			break;
-
-		case 8:	// 描画	位相空間
-			vector_six_lab8( keys, mouse, gra, pers, text_y );
-			break;
-
-		case 1:	// 描画	グラフ実験
-			graph( keys, mouse, gra, pers, text_y );
-			break;
-
-		case 2:// 描画	角速度 実験
-			kakusokudo( keys, mouse, gra, pers, text_y );
-			break;
-
-		case 7:// 描画	角速度 実験
-			kakusokudo7( keys, mouse, gra, pers, text_y );
-			break;
-
-		case 3:	// 描画	引力実験
-			gravityPlanet( keys, mouse, gra, pers, text_y );
-			break;
-
-		case 4:	// 描画	振り子3D実験
-			furiko3d( keys, mouse, gra, pers, text_y );
-			break;
-
-		case 5:	// 描画	振り子2D実験
-			furiko2d( keys, mouse, gra, pers, text_y );
-			break;
-
-		case 6:	// 描画	タイヤ実験実験
-			tire3d( keys, mouse, gra, pers, text_y );
-			break;
-
-		default:break;
-	}
-	gra.Print(1,(float)text_y++,string("lab: ")+to_string(idx)); 
-}
-
-//------------------------------------------------------------------------------
-void Lab::lab9_2dRidge( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
-//------------------------------------------------------------------------------
-{
-	gra.Print(1,(float)text_y++,string("vector_six_lab8")+to_string(idx)); 
+	gra.Print(1,(float)text_y++,string("lab9_2dRidge")+to_string(lab.idx)); 
 
 	const float	G = 9.8;				// 重力加速度
 	const float	T = 1.0/60.0;			// 時間/frame
@@ -209,26 +155,26 @@ void Lab::lab9_2dRidge( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers,
 	};
 
 	// 初期化
-	if ( !bInit )
+	if ( !lab.bInit )
 	{
-		if ( !bInitCam )
+		if ( !lab.bInitCam )
 		{
-			bInitCam = true;
+			lab.bInitCam = true;
 			pers.cam.pos = vect3(  0.0, 5.0, -1.0 );
 			pers.cam.at = vect3( 0,  0.0, 0 );
 		}
 	
-		bInit = true;
+		lab.bInit = true;
 		//点
-		for ( Obj* p : (*this).tblObj ) delete p;
-		tblObj.clear();
-		tblObj.emplace_back( new Obj(vect3( -0.5  , 0.1, 0 )) );
-		tblObj.emplace_back( new Obj(vect3(  0.5  , 0.1, -0.6 )) );
-		tblObj.emplace_back( new Car(vect3(  0  , 0.1,  1 ), vect3(0,0,0)) );
+		for ( Obj* p : lab.tblObj ) delete p;
+		lab.tblObj.clear();
+		lab.tblObj.emplace_back( new Obj(vect3( -0.5  , 0.1, 0 )) );
+		lab.tblObj.emplace_back( new Obj(vect3(  0.5  , 0.1, -0.6 )) );
+		lab.tblObj.emplace_back( new Car(vect3(  0  , 0.1,  1 ), vect3(0,0,0)) );
 		// 線
-		for ( Edge* p : (*this).tblEdge ) delete p;
-		tblEdge.clear();
-		tblEdge.emplace_back( new Edge(0,1) );
+		for ( Edge* p : lab.tblEdge ) delete p;
+		lab.tblEdge.clear();
+		lab.tblEdge.emplace_back( new Edge(0,1) );
 
 		pers.axis.bAxisX = true;
 		pers.axis.bAxisY = false;
@@ -237,13 +183,13 @@ void Lab::lab9_2dRidge( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers,
 	}
 
 	// 入力
-	if ( keys.R.hi ) bInit = false;
+	if ( keys.R.hi ) lab.bInit = false;
 	if ( keys.SPACE.hi )	bPause = !bPause ;
 	if ( keys.ENTER.rep )	{bStep = true; bPause = true; }
 
-	vect3&	v0 = tblObj[0]->pos;
-	vect3&	v1 = tblObj[1]->pos;
-	Car&	car = *dynamic_cast<Car*>(tblObj[2]);
+	vect3&	v0 = lab.tblObj[0]->pos;
+	vect3&	v1 = lab.tblObj[1]->pos;
+	Car&	car = *dynamic_cast<Car*>(lab.tblObj[2]);
 
 	// 計算
 	if ( !bPause || bStep )
@@ -252,18 +198,15 @@ void Lab::lab9_2dRidge( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers,
 	}
 
 	// 衝突
-	if ( car.acc.abs() > 0.000001f )
 	{
-		auto[b,d,Q0,Q1,t0,t1] = distance_Segline_Segline_func( car.pos, car.pos+car.acc, v0, v1 );
-		
+		auto[b,d,Q0,Q1,t0,t1] = func_distance_Segline_Segline( car.pos, car.pos+car.acc, v0, v1 );
 
 		if ( b )
 		{
 			car.bReq = true;
-			car.req_pos = Q1;
-			car.req_acc = -car.acc*1.0;
+			car.req_pos = Q0-(car.acc - car.acc.normalize()*t0);
+			car.req_acc = -car.acc;
 		}
-
 	}
 
 	// 移動
@@ -275,19 +218,35 @@ void Lab::lab9_2dRidge( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers,
 			car.pos = car.req_pos;
 			car.acc = car.req_acc;
 		}
+		else
+		{
+			car.pos += car.acc;
+		}
 
-		car.pos += car.acc;
+{
+	static bool b = false;
+	static float prev = 0;
+
+	if ( car.pos.z < prev && b == false ) 
+	{
+		car.pos.dump();
+		b = true;
+	}
+	if ( car.pos.z > prev ) b = false;
+
+	prev = car.pos.z;
+}
 	}
 
-	drawVect( gra, pers, text_y, car.pos, car.acc	,10		, rgb(1,0,0), "acc" );
+	drawVect( gra, pers, text_y, car.pos, car.acc	,1		, rgb(1,0,0), "acc" );
 
 }
 
 //------------------------------------------------------------------------------
-void Lab::vector_six_lab8( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
 {
-	gra.Print(1,(float)text_y++,string("vector_six_lab8")+to_string(idx)); 
+	gra.Print(1,(float)text_y++,string("lab8_vector_six_lab8")+to_string(lab.idx)); 
 
 	const float	G = 9.8;				// 重力加速度
 	const float	T = 1.0/60.0;			// 時間/frame
@@ -301,25 +260,25 @@ void Lab::vector_six_lab8( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pe
 	static float w = 0;
 
 	// 初期化
-	if ( !bInit )
+	if ( !lab.bInit )
 	{
-		if ( !bInitCam )
+		if ( !lab.bInitCam )
 		{
-			bInitCam = true;
+			lab.bInitCam = true;
 			pers.cam.pos = vect3(  0.0, 5.0, -1.0 );
 			pers.cam.at = vect3( 0,  0.0, 0 );
 		}
 	
-		bInit = true;
+		lab.bInit = true;
 		//点
-		for ( Obj* p : (*this).tblObj ) delete p;
-		tblObj.clear();
-		tblObj.emplace_back( new Obj(vect3( 0  , 0.1, 0 )) );
-		tblObj.emplace_back( new Obj(vect3( 1  , 0.1, 0 )) );
+		for ( Obj* p : lab.tblObj ) delete p;
+		lab.tblObj.clear();
+		lab.tblObj.emplace_back( new Obj(vect3( 0  , 0.1, 0 )) );
+		lab.tblObj.emplace_back( new Obj(vect3( 1  , 0.1, 0 )) );
 		// 線
-		for ( Edge* p : (*this).tblEdge ) delete p;
-		tblEdge.clear();
-		tblEdge.emplace_back( new Edge(0,1) );
+		for ( Edge* p : lab.tblEdge ) delete p;
+		lab.tblEdge.clear();
+		lab.tblEdge.emplace_back( new Edge(0,1) );
 
 		pers.axis.bAxisX = true;
 		pers.axis.bAxisY = false;
@@ -332,12 +291,12 @@ void Lab::vector_six_lab8( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pe
 	}
 
 	// 入力
-	if ( keys.R.hi ) bInit = false;
+	if ( keys.R.hi ) lab.bInit = false;
 	if ( keys.SPACE.hi )	bPause = !bPause ;
 	if ( keys.ENTER.rep )	{bStep = true; bPause = true; }
 
-	vect3&	v0 = tblObj[0]->pos;
-	vect3&	v1 = tblObj[1]->pos;
+	vect3&	v0 = lab.tblObj[0]->pos;
+	vect3&	v1 = lab.tblObj[1]->pos;
 
 	vect3	bar = (v1-v0);					//	棒
 	vect3	moment = cross(-bar, acc+gv);	//	回転モーメント 仮
@@ -374,10 +333,10 @@ void Lab::vector_six_lab8( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pe
 }
 
 //------------------------------------------------------------------------------
-void Lab::tire3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab6_tire3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
 {
-	gra.Print(1,(float)text_y++,string("<<tire3d>>")+to_string(idx)); 
+	gra.Print(1,(float)text_y++,string("<<lab6_tire3d>>")+to_string(lab.idx)); 
 
 	const vect3 G_pos = vect3(0,2.0,0);
 	const vect3 G_acc= vect3(0,0,0.0);
@@ -487,10 +446,10 @@ void Lab::tire3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& 
 }
 
 //------------------------------------------------------------------------------
-void Lab::furiko2d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab5_furiko2d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
 {
-	gra.Print(1,(float)text_y++,string("<<furiko2d>>")+to_string(idx)); 
+	gra.Print(1,(float)text_y++,string("<<lab5_furiko2d>>")+to_string(lab.idx)); 
 
 	const float G = 9.8;				// 重力加速度
 	const float T = 1.0/60.0;			// 時間/frame
@@ -498,27 +457,27 @@ void Lab::furiko2d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int
 
 	static float	rsp = 0;
 
-	if ( !bInit )
+	if ( !lab.bInit )
 	{
-		if ( !bInitCam )
+		if ( !lab.bInitCam )
 		{
-			bInitCam = true;
+			lab.bInitCam = true;
 			pers.cam.pos = vect3(  0.0, 2.0, -5.0 );
 			pers.cam.at = vect3( 0,  2.0, 0 );
 		}
 	
-		bInit = true;
-		for ( Obj* p : (*this).tblObj ) delete p;
-		tblObj.clear();
-		tblObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
-		tblObj.emplace_back( new Obj(vect3(1, 2.0, 0)) );
+		lab.bInit = true;
+		for ( Obj* p : lab.tblObj ) delete p;
+		lab.tblObj.clear();
+		lab.tblObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
+		lab.tblObj.emplace_back( new Obj(vect3(1, 2.0, 0)) );
 
 		rsp=0;
 	}
-	if ( keys.R.hi )	bInit = false;
+	if ( keys.R.hi )	lab.bInit = false;
 
-	vect3&	v0 = tblObj[0]->pos;	//	barの根本
-	vect3&	v1 = tblObj[1]->pos;	//	barの先端
+	vect3&	v0 = lab.tblObj[0]->pos;	//	barの根本
+	vect3&	v1 = lab.tblObj[1]->pos;	//	barの先端
 
 
 	pers.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
@@ -546,10 +505,10 @@ void Lab::furiko2d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int
 	}
 }
 //------------------------------------------------------------------------------
-void Lab::kakusokudo7( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab7_kakusokudo7( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
 {
-	gra.Print(1,(float)text_y++,string("<<kakusokudo7>>")+to_string(idx)); 
+	gra.Print(1,(float)text_y++,string("<<lab7_kakusokudo7>>")+to_string(lab.idx)); 
 
 	const float	G = 9.8;			// 重力加速度
 	const float	T = 1.0/60.0;		// 時間/frame
@@ -567,39 +526,39 @@ void Lab::kakusokudo7( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, 
 	bool bStep = false;
 
 	// 初期化
-	if ( !bInit )
+	if ( !lab.bInit )
 	{
-		if ( !bInitCam )
+		if ( !lab.bInitCam )
 		{
-			bInitCam = true;
+			lab.bInitCam = true;
 			pers.cam.pos = vect3( 0, 5.0, -0.5 );
 			pers.cam.at = vect3( 0,  0, 0 );
 		}
-		bInit = true;
+		lab.bInit = true;
 
 		// 点
-		for ( Obj* p : (*this).tblObj ) delete p;
-		tblObj.clear();
-		tblObj.emplace_back( new Obj(vect3( 0 ,0.1, 0)) );
-		tblObj.emplace_back( new Obj(vect3(-1 ,0.1, 0)) );
+		for ( Obj* p : lab.tblObj ) delete p;
+		lab.tblObj.clear();
+		lab.tblObj.emplace_back( new Obj(vect3( 0 ,0.1, 0)) );
+		lab.tblObj.emplace_back( new Obj(vect3(-1 ,0.1, 0)) );
 
 		// 線
-		for ( Edge* p : (*this).tblEdge ) delete p;
-		tblEdge.clear();
-		tblEdge.emplace_back( new Edge(0,1) );
+		for ( Edge* p : lab.tblEdge ) delete p;
+		lab.tblEdge.clear();
+		lab.tblEdge.emplace_back( new Edge(0,1) );
 
 		bShot = false;
 	}
 
 
-	vect3&	v0 = (*this).tblObj[0]->pos;	//	barの根本
-	vect3&	v1 = (*this).tblObj[1]->pos;	//	barの先端
+	vect3&	v0 = lab.tblObj[0]->pos;	//	barの根本
+	vect3&	v1 = lab.tblObj[1]->pos;	//	barの先端
 
 
 	//入力
 	{
 		// リセット
-		if ( keys.R.hi )		bInit = false ;
+		if ( keys.R.hi )		lab.bInit = false ;
 
 		if ( keys.SPACE.hi )	bPause = !bPause ;
 
@@ -697,10 +656,10 @@ w=deg2rad(2);
 }
 
 //------------------------------------------------------------------------------
-void Lab::furiko3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab4_furiko3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
 {
-		gra.Print(1,(float)text_y++,string("<<furiko3d>>")+to_string(idx)); 
+		gra.Print(1,(float)text_y++,string("<<lab4_furiko3d>>")+to_string(lab.idx)); 
 		// T=J dω/dt
 		// T：トルク J：慣性モーメント ω：回転角速度[rad]
 		//
@@ -722,26 +681,26 @@ void Lab::furiko3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int
 
 
 	// 初期化
-	if ( !bInit )
+	if ( !lab.bInit )
 	{
-		if ( !bInitCam )
+		if ( !lab.bInitCam )
 		{
-			bInitCam = true;
+			lab.bInitCam = true;
 			pers.cam.pos = vect3(  0.0, 0.0, -7.0 );
 			pers.cam.at = vect3( 0,  0.0, 0 );
 		}
 
-		bInit = true;
-		for ( Obj* p : (*this).tblObj ) delete p;
-		tblObj.clear();
-		tblObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
-		tblObj.emplace_back( new Obj(vect3(-1, 2.0, 0)) );
+		lab.bInit = true;
+		for ( Obj* p : lab.tblObj ) delete p;
+		lab.tblObj.clear();
+		lab.tblObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
+		lab.tblObj.emplace_back( new Obj(vect3(-1, 2.0, 0)) );
 		
 		acc = 0;
 	}
 
-	vect3&	v0 = tblObj[0]->pos;	//	barの根本
-	vect3&	v1 = tblObj[1]->pos;	//	barの先端
+	vect3&	v0 = lab.tblObj[0]->pos;	//	barの根本
+	vect3&	v1 = lab.tblObj[1]->pos;	//	barの先端
 
 	// 入力
 	{
@@ -752,7 +711,7 @@ void Lab::furiko3d( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int
 		if ( keys.ENTER.rep )	bStep = true;
 
 		// リセット
-		if ( keys.R.hi )	bInit = false ;
+		if ( keys.R.hi )	lab.bInit = false ;
 
 		// 縮む
 		if ( mouse.F.hi )	v1 = (v1+v0)/2;
@@ -865,10 +824,10 @@ mov =acc;
 //=================================
 
 //------------------------------------------------------------------------------
-void Lab::gravityPlanet( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab3_gravityPlanet( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
 {
-	gra.Print(1,(float)text_y++,string("<<gravityPlanet>>")+to_string(idx)); 
+	gra.Print(1,(float)text_y++,string("<<lab3_gravityPlanet>>")+to_string(lab.idx)); 
 
 	static bool	bPause = false; 
 	bool	bStep = false; 
@@ -888,21 +847,21 @@ void Lab::gravityPlanet( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers
 	};
 
 	// 初期化
-	if ( !bInit )
+	if ( !lab.bInit )
 	{
-		bInit = true;
-		if ( !bInitCam )
+		lab.bInit = true;
+		if ( !lab.bInitCam )
 		{
-			bInitCam = true;
+			lab.bInitCam = true;
 			//上から
 			pers.cam.pos = vect3(  0.0, 0.5, -2.0 );
 			pers.cam.at = vect3( 0,  0.0, 0 );
 		}
 
-		for ( Obj* p : (*this).tblObj ) delete p;
-		tblObj.clear();
-		tblObj.emplace_back( new Planet(vect3(-0.5,0.1,0),vect3(0, 0, -0.02)) );
-		tblObj.emplace_back( new Planet(vect3( 0.5,0.1,0),vect3(0, 0, 0.02)) );
+		for ( Obj* p : lab.tblObj ) delete p;
+		lab.tblObj.clear();
+		lab.tblObj.emplace_back( new Planet(vect3(-0.5,0.1,0),vect3(0, 0, -0.02)) );
+		lab.tblObj.emplace_back( new Planet(vect3( 0.5,0.1,0),vect3(0, 0, 0.02)) );
 	}
 
 	const float	G = 9.8;			// 重力加速度
@@ -918,21 +877,21 @@ void Lab::gravityPlanet( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers
 		if ( keys.ENTER.rep )	bStep = true;
 
 		// リセット
-		if ( keys.R.hi )	bInit = false ;
+		if ( keys.R.hi )	lab.bInit = false ;
 
 		// 生成
 		if ( mouse.B.hi )
 		{
 			vect3 P = pers.calcScreenToWorld3( vect3(mouse.pos,0) );
 			vect3 I = pers.calcRayvect( P );
-			tblObj.emplace_back( new Planet( P, I/100.0 ) );
+			lab.tblObj.emplace_back( new Planet( P, I/100.0 ) );
 		}
 
 	}
 
 	
-	Planet& pl0 = *dynamic_cast<Planet*>((*this).tblObj[0]);	//	太陽
-	Planet& pl1 = *dynamic_cast<Planet*>((*this).tblObj[1]);	//	地球
+	Planet& pl0 = *dynamic_cast<Planet*>(lab.tblObj[0]);	//	太陽
+	Planet& pl1 = *dynamic_cast<Planet*>(lab.tblObj[1]);	//	地球
 
 	// 計算
 	if ( !bPause || bStep )
@@ -959,7 +918,7 @@ void Lab::gravityPlanet( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers
 
 	// 描画
 	{
-		for ( Obj* p : (*this).tblObj ) 
+		for ( Obj* p : lab.tblObj ) 
 		{
 			Planet& pl = *dynamic_cast<Planet*>(p);
 			for ( int i = 0 ; i < MAX_PREV ; i++ )
@@ -975,10 +934,10 @@ void Lab::gravityPlanet( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers
 // 描画	角速度 実験
 //=================================
 //------------------------------------------------------------------------------
-void Lab::kakusokudo( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab2_kakusokudo( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
 {
-	gra.Print(1,(float)text_y++,string("<<kakusokudo>>")+to_string(idx)); 
+	gra.Print(1,(float)text_y++,string("<<lab2_kakusokudo>>")+to_string(lab.idx)); 
 
 	const float	G = 9.8;			// 重力加速度
 	const float	T = 1.0/60.0;		// 時間/frame
@@ -993,35 +952,35 @@ void Lab::kakusokudo( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, i
 	static float 	w;	//	角速度
 
 	// 初期化
-	if ( !bInit )
+	if ( !lab.bInit )
 	{
-		if ( !bInitCam )
+		if ( !lab.bInitCam )
 		{
-			bInitCam = true;
+			lab.bInitCam = true;
 			pers.cam.pos = vect3( 2.0, 2.5, -2.0 );
 			pers.cam.at = vect3( 0,  0.0, 0 );
 		}
-		bInit = true;
+		lab.bInit = true;
 
-		for ( Obj* p : (*this).tblObj ) delete p;
-		tblObj.clear();
-		tblObj.emplace_back( new Obj(vect3(0  ,0.1,0)) );
-		tblObj.emplace_back( new Obj(vect3(1  ,0.1,0)) );
-		tblObj.emplace_back( new Obj(vect3(1.5,0.1,0.2)) );
+		for ( Obj* p : lab.tblObj ) delete p;
+		lab.tblObj.clear();
+		lab.tblObj.emplace_back( new Obj(vect3(0  ,0.1,0)) );
+		lab.tblObj.emplace_back( new Obj(vect3(1  ,0.1,0)) );
+		lab.tblObj.emplace_back( new Obj(vect3(1.5,0.1,0.2)) );
 
 		bShot = false;
 	}
 
 
-	vect3&	v0 = (*this).tblObj[0]->pos;	//	barの根本
-	vect3&	v1 = (*this).tblObj[1]->pos;	//	barの先端
-	vect3&	v2 = (*this).tblObj[2]->pos;	// 速度指定
+	vect3&	v0 = lab.tblObj[0]->pos;	//	barの根本
+	vect3&	v1 = lab.tblObj[1]->pos;	//	barの先端
+	vect3&	v2 = lab.tblObj[2]->pos;	// 速度指定
 
 
 	//入力
 	{
 		// リセット
-		if ( keys.R.hi )	bInit = false ;
+		if ( keys.R.hi )	lab.bInit = false ;
 
 		if ( mouse.B.hi )	bShot = !bShot ;
 	}
@@ -1079,10 +1038,10 @@ void Lab::kakusokudo( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, i
 }
 
 //------------------------------------------------------------------------------
-void Lab::graph( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab1_graph( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
 {
-	gra.Print(1,(float)text_y++,string("<<graph>>")+to_string(idx)); 
+	gra.Print(1,(float)text_y++,string("<<lab1_graph>>")+to_string(lab.idx)); 
 
 	rgb	col = vect3(0.2,0.2,0.2);
 
@@ -1134,3 +1093,58 @@ void Lab::graph( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& t
 	}
 
 }
+
+//------------------------------------------------------------------------------
+void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+//------------------------------------------------------------------------------
+{
+	switch( idx )
+	{
+		case 9:	// 描画	2d剛体
+			lab9_2dRidge( (*this), keys, mouse, gra, pers, text_y );
+			break;
+
+		case 8:	// 描画	位相空間
+			lab8_vector_six_lab8( (*this), keys, mouse, gra, pers, text_y );
+			break;
+
+		case 1:	// 描画	グラフ実験
+			lab1_graph( (*this), keys, mouse, gra, pers, text_y );
+			break;
+
+		case 2:// 描画	角速度 実験
+			lab2_kakusokudo( (*this), keys, mouse, gra, pers, text_y );
+			break;
+
+		case 7:// 描画	角速度 実験
+			lab7_kakusokudo7( (*this), keys, mouse, gra, pers, text_y );
+			break;
+
+		case 3:	// 描画	引力実験
+			lab3_gravityPlanet( (*this), keys, mouse, gra, pers, text_y );
+			break;
+
+		case 4:	// 描画	振り子3D実験
+			lab4_furiko3d( (*this), keys, mouse, gra, pers, text_y );
+			break;
+
+		case 5:	// 描画	振り子2D実験
+			lab5_furiko2d( (*this), keys, mouse, gra, pers, text_y );
+			break;
+
+		case 6:	// 描画	タイヤ実験実験
+			lab6_tire3d( (*this), keys, mouse, gra, pers, text_y );
+			break;
+
+		default:break;
+	}
+	gra.Print(1,(float)text_y++,string("lab: ")+to_string(idx)); 
+}
+
+//------------------------------------------------------------------------------
+Lab::Lab()
+//------------------------------------------------------------------------------
+{
+	idx = 9;
+}
+
