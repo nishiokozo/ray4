@@ -35,12 +35,12 @@ tuple<bool,float,vect3,vect3,float,float>func_distance_Line_Line( vect3 P0, vect
 
 	//    P0       P1
 	//    |        |
-	//    |}t0     |}t1
+	//    |}s0     |}s1(距離)
 	//    |        |
-	// Q0 +--------+ Q1
+	// Q0 +--------+ Q1(衝突位置)
 	//    |        |
 	//    v        v
-	//    I0       I1
+	//    I0       I1(単位ベクトル)
 	//
 	//	交点ができたときは、Q0=Q1 , d=0 になる
 
@@ -58,110 +58,110 @@ tuple<bool,float,vect3,vect3,float,float>func_distance_Line_Line( vect3 P0, vect
 	float d2 = dot( I0, I1 );
 
 
-	float t0 = ( d0 - d1 * d2 ) / ( 1.0f - d2 * d2 );
-	float t1 = ( d1 - d0 * d2 ) / ( d2 * d2 - 1.0f );
+	float s0 = ( d0 - d1 * d2 ) / ( 1.0f - d2 * d2 );
+	float s1 = ( d1 - d0 * d2 ) / ( d2 * d2 - 1.0f );
 
-	vect3	Q0 = P0 + t0 * I0;
-	vect3	Q1 = P1 + t1 * I1;
+	vect3	Q0 = P0 + s0 * I0;
+	vect3	Q1 = P1 + s1 * I1;
 	float	d =  (Q1 - Q0).abs();
 
-	return {true,d,Q0,Q1,t0,t1};
+	return {true,d,Q0,Q1,s0,s1};
 }
 
 //------------------------------------------------------------------------------
-tuple<bool,float,vect3,vect3,float,float>func_distance_Line_Segline( vect3 P0, vect3 I0, vect3 s1, vect3 e1 )
+tuple<bool,float,vect3,vect3,float,float>func_distance_Line_Segline( vect3 P0, vect3 I0, vect3 p1, vect3 q1 )
 //------------------------------------------------------------------------------
 {
-	if ( e1 == s1 ) return {false,0,vect3(0,0,0),vect3(0,0,0),0,0};
+	if ( q1 == p1 ) return {false,0,vect3(0,0,0),vect3(0,0,0),0,0};
 
 	// 直線と線分の距離
 	// 直線     : P0+I0
-	// 線分開始 : s1
-	// 線分終了 : e1
+	// 線分開始 : p1
+	// 線分終了 : q1
 	// 距離     : d = |Q1-Q0|
 	// 戻り値   : d距離 Q0,Q1	※false でもdだけは取得できる
 	
-	vect3	P1 = s1;
-	vect3	I1 = (e1-s1).normalize();
+	vect3	P1 = p1;
+	vect3	I1 = (q1-p1).normalize();
 
-	auto[b,d,Q0,Q1,t0,t1] = func_distance_Line_Line( P0, I0, P1, I1 );
+	auto[b,d,Q0,Q1,s0,s1] = func_distance_Line_Line( P0, I0, P1, I1 );
 
 	if ( b )
 	{
 		// 線分処理
-		if ( t1 < 0 ) b = false;
-		if ( t1 > (e1-s1).abs() ) b = false;
+		if ( s1 < 0 ) b = false;
+		if ( s1 > (q1-p1).abs() ) b = false;
 
 	}
 
-	return {b,d,Q0,Q1,t0,t1};
+	return {b,d,Q0,Q1,s0,s1};
 }
 
 //------------------------------------------------------------------------------
-tuple<bool,float,vect3,vect3,float,float>func_distance_Harfline_Segline( vect3 s0, vect3 I0, vect3 s1, vect3 e1 )
+tuple<bool,float,vect3,vect3,float,float>func_distance_Harfline_Segline( vect3 p0, vect3 I0, vect3 p1, vect3 q1 )
 //------------------------------------------------------------------------------
 {
-	if ( I0.isZero() || e1 == s1 ) return {false,0,vect3(0,0,0),vect3(0,0,0),0,0};
+	if ( I0.isZero() || q1 == p1 ) return {false,0,vect3(0,0,0),vect3(0,0,0),0,0};
 
 	// 半直線と線分の距離
-	// 半直線   : s0+I0
-	// 線分開始 : s1
-	// 線分終了 : e1
+	// 半直線   : p0+I0
+	// 線分開始 : p1
+	// 線分終了 : q1
 	// 距離     : d = |Q1-Q0|
 	// 戻り値   : d距離 Q0,Q1	※false でもdだけは取得できる
 	
-	vect3	P0 = s0;
-	vect3	P1 = s1;
-	vect3	I1 = (e1-s1).normalize();
+	vect3	P0 = p0;
+	vect3	P1 = p1;
+	vect3	I1 = (q1-p1).normalize();
 
-	auto[b,d,Q0,Q1,t0,t1] = func_distance_Line_Line( P0, I0, P1, I1 );
+	auto[b,d,Q0,Q1,s0,s1] = func_distance_Line_Line( P0, I0, P1, I1 );
 
 	if ( b )
 	{
 		// 線分処理
-		if ( t1 < 0 ) b = false;
-		if ( t1 > (e1-s1).abs() ) b = false;
+		if ( s1 < 0 ) b = false;
+		if ( s1 > (q1-p1).abs() ) b = false;
 
 		// 半直線
-		if ( t0 < 0 ) b = false;
+		if ( s0 < 0 ) b = false;
 	}
 
-	return {b,d,Q0,Q1,t0,t1};
+	return {b,d,Q0,Q1,s0,s1};
 }
 
 //------------------------------------------------------------------------------
-tuple<bool,float,vect3,vect3,float,float>func_distance_Segline_Segline( vect3 s0, vect3 e0, vect3 s1, vect3 e1 )
+tuple<bool,float,vect3,vect3,float,float>func_distance_Segline_Segline( vect3 p0, vect3 q0, vect3 p1, vect3 q1 )
 //------------------------------------------------------------------------------
 {
-	if ( e0 == s0 || e1 == s1 ) return {false,0,vect3(0,0,0),vect3(0,0,0),0,0};
+	if ( q0 == p0 || q1 == p1 ) return {false,0,vect3(0,0,0),vect3(0,0,0),0,0};
 
 	// 線分と線分の距離
-	// 線分0開始: s1
-	// 線分0終了: e1
-	// 線分1開始: s1
-	// 線分1終了: e1
+	// 線分0開始: p1
+	// 線分0終了: q1
+	// 線分1開始: p1
+	// 線分1終了: q1
 	// 距離     : d = |Q1-Q0|
 	// 戻り値   : d距離 Q0,Q1	※false でもdだけは取得できる
 	
-	vect3	P0 = s0;
-	vect3	I0 = (e0-s0).normalize();
-	vect3	P1 = s1;
-	vect3	I1 = (e1-s1).normalize();
+	vect3	P0 = p0;
+	vect3	I0 = (q0-p0).normalize();
+	vect3	P1 = p1;
+	vect3	I1 = (q1-p1).normalize();
 
-	auto[b,d,Q0,Q1,t0,t1] = func_distance_Line_Line( P0, I0, P1, I1 );
+	auto[b,d,Q0,Q1,s0,s1] = func_distance_Line_Line( P0, I0, P1, I1 );
 
 	if ( b )
 	{
 		// 線分処理
-		if ( t1 < 0 ) b = false;
-		if ( t1 > (e1-s1).abs() ) b = false;
+		if ( s1 < 0 ) b = false;
+		if ( s1 > (q1-p1).abs() ) b = false;
 
 		// 線分処理
-		if ( t0 < 0 ) b = false;
-		if ( t0 > (e0-s0).abs() ) b = false;
+		if ( s0 < 0 ) b = false;
+		if ( s0 > (q0-p0).abs() ) b = false;
 	}
 
-	return {b,d,Q0,Q1,t0,t1};
+	return {b,d,Q0,Q1,s0,s1};
 }
 
 //------------------------------------------------------------------------------

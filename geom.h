@@ -149,7 +149,7 @@ public:
 	}
 	void dump( const char* str ) const
 	{
-		printf("%s<%9.6f %9.6f>\n", str, x, y );
+		printf("%s%9.6f %9.6f\n", str, x, y );
 	}
 
 };
@@ -229,7 +229,7 @@ public:
 
 	void dump( const char* str ) const
 	{
-		printf("%s<%9.6f %9.6f %9.6f>\n", str, x, y, z );
+		printf("%s%9.6f %9.6f %9.6f\n", str, x, y, z );
 	}
 
 	void dumpDetail() const
