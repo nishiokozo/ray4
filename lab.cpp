@@ -112,7 +112,7 @@ static void drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, f
 	{
 		vect3	a = v0;	a.y=0;
 		vect3	b = v1;	b.y=0;
-		rgb		c = (col+rgb(1,1,1))/4;
+		rgb		c = (col+rgb(0.75))/4;
 		pers.line3d( gra, pers, a, b, c, 1 );
 		pers.pset3d( gra, pers,    b, c, 5 );
 	}
@@ -131,9 +131,9 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 {
 	gra.Print(1,(float)text_y++,string("lab9_2dRidge")+to_string(lab.idx)); 
 
-	const float	G = 9.8;				// 重力加速度
+	const float	G = 9.80665;				// 重力加速度
 	const float	T = 1.0/60.0;			// 時間/frame
-	const float	g = 9.8 *T*T;			// 重力加速度/frame
+	const float	g = G *T*T;			// 重力加速度/frame
 	const vect3	gv = vect3(0,0, -g);	// 重力加速度/frame
 	static bool		bPause = false;
 	bool bStep = false;
@@ -255,9 +255,9 @@ static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysG
 {
 	gra.Print(1,(float)text_y++,string("lab8_vector_six_lab8")+to_string(lab.idx)); 
 
-	const float	G = 9.8;				// 重力加速度
+	const float	G = 9.80665;				// 重力加速度
 	const float	T = 1.0/60.0;			// 時間/frame
-	const float	g = 9.8 *T*T;			// 重力加速度/frame
+	const float	g = G *T*T;			// 重力加速度/frame
 	const vect3	gv = vect3(0,0, -g);	// 重力加速度/frame
 
 	static	Plot plot_moment( 0.02, rgb(1,0,1) );
@@ -351,8 +351,8 @@ static void lab6_tire3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, 
 	const float G_head = deg2rad(35);	//	タイヤの方向
 	const float G_bank = deg2rad(40);	//	回転角
 	const float G_rspd = deg2rad(0);	//	角速度
-	const float G = 9.8;				// 重力加速度
-	const float grate = 9.8 / 60/60;	// 重力加速度
+	const float G = 9.80665;				// 重力加速度
+	const float grate = 9.80665 / 60/60;	// 重力加速度
 
 	static vect3 pos = G_pos;
 	static vect3 acc1 = G_acc;
@@ -458,9 +458,9 @@ static void lab5_furiko2d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra
 {
 	gra.Print(1,(float)text_y++,string("<<lab5_furiko2d>>")+to_string(lab.idx)); 
 
-	const float G = 9.8;				// 重力加速度
+	const float G = 9.80665;				// 重力加速度
 	const float T = 1.0/60.0;			// 時間/frame
-	const float grate = 9.8 *T*T;		// 重力加速度/frame
+	const float grate = 9.80665 *T*T;		// 重力加速度/frame
 
 	static float	rsp = 0;
 
@@ -478,6 +478,10 @@ static void lab5_furiko2d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra
 		lab.tblObj.clear();
 		lab.tblObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
 		lab.tblObj.emplace_back( new Obj(vect3(1, 2.0, 0)) );
+		// 線
+		for ( Edge* p : lab.tblEdge ) delete p;
+		lab.tblEdge.clear();
+		lab.tblEdge.emplace_back( new Edge(0,1) );
 
 		rsp=0;
 	}
@@ -487,7 +491,7 @@ static void lab5_furiko2d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra
 	vect3&	v1 = lab.tblObj[1]->pos;	//	barの先端
 
 
-	pers.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
+//	pers.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
 
 	// 縮む
 	if ( mouse.F.hi )	v1 = (v1+v0)/2;
@@ -517,9 +521,9 @@ static void lab7_kakusokudo7( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& 
 {
 	gra.Print(1,(float)text_y++,string("<<lab7_kakusokudo7>>")+to_string(lab.idx)); 
 
-	const float	G = 9.8;			// 重力加速度
+	const float	G = 9.80665;			// 重力加速度
 	const float	T = 1.0/60.0;		// 時間/frame
-	const float	g = 9.8 *T*T;		// 重力加速度/frame
+	const float	g = G *T*T;		// 重力加速度/frame
 	const vect3	gv = vect3(0,0, -g);		// 重力加速度/frame
 
 	static bool		bShot = false;
@@ -676,9 +680,9 @@ static void lab4_furiko3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra
 		// L=rp
 		// r:位置ベクトル L:角運動量(運動量のモーメント) p:運動量
 
-	const float G = 9.8;			// 重力加速度
+	const float G = 9.80665;			// 重力加速度
 	const float T = 1.0/60.0;		// 時間/frame
-	const float g = 9.8 *T*T;		// 重力加速度/frame
+	const float g = G *T*T;		// 重力加速度/frame
 	const vect3 vg = vect3(0,-g,0);	// 重力加速度ベクトル/frame
 
 	static vect3	vel;			// 運動量
@@ -871,9 +875,9 @@ static void lab3_gravityPlanet( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra
 		lab.tblObj.emplace_back( new Planet(vect3( 0.5,0.1,0),vect3(0, 0, 0.02)) );
 	}
 
-	const float	G = 9.8;			// 重力加速度
+	const float	G = 9.80665;			// 重力加速度
 	const float	T = 1.0/60.0;		// 時間/frame
-	const float	g = 9.8 *T*T;		// 重力加速度/frame
+	const float	g = G *T*T;		// 重力加速度/frame
 
 	// 入力
 	{
@@ -946,9 +950,9 @@ static void lab2_kakusokudo( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 {
 	gra.Print(1,(float)text_y++,string("<<lab2_kakusokudo>>")+to_string(lab.idx)); 
 
-	const float	G = 9.8;			// 重力加速度
+	const float	G = 9.80665;			// 重力加速度
 	const float	T = 1.0/60.0;		// 時間/frame
-	const float	g = 9.8 *T*T;		// 重力加速度/frame
+	const float	g = G *T*T;		// 重力加速度/frame
 
 	static bool bShot = false;
 	static vect3	velocity;
@@ -974,6 +978,11 @@ static void lab2_kakusokudo( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 		lab.tblObj.emplace_back( new Obj(vect3(0  ,0.1,0)) );
 		lab.tblObj.emplace_back( new Obj(vect3(1  ,0.1,0)) );
 		lab.tblObj.emplace_back( new Obj(vect3(1.5,0.1,0.2)) );
+		// 線
+		for ( Edge* p : lab.tblEdge ) delete p;
+		lab.tblEdge.clear();
+		lab.tblEdge.emplace_back( new Edge(0,1) );
+		lab.tblEdge.emplace_back( new Edge(1,2,rgb(0,1,0),1) );
 
 		bShot = false;
 	}
@@ -1020,7 +1029,7 @@ static void lab2_kakusokudo( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 			to = mrotateByAxis( moment, w ) * bar;			//	移動計算
 
 		}
-
+/*
 
 		{// 影 描画
 			vect3	va = v0;va.y = 0;
@@ -1035,7 +1044,7 @@ static void lab2_kakusokudo( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 
 		pers.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );	//	棒
 		pers.line3d( gra, pers, v1, v2, rgb(0,1,0), 1 );	// 外的な力
-
+*/
 		drawVect( gra, pers, text_y, v1, velocity	,1	, rgb(1,1,0), "velocity" );
 		drawVect( gra, pers, text_y, v0, moment		,1	, rgb(1,0,1), "moment" );
 		drawVect( gra, pers, text_y, v0, to			,1	, rgb(0,1,1), "to" );

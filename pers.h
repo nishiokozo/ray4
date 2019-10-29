@@ -16,8 +16,11 @@ struct Edge
 	bool	bPreselect	= false;		//	仮選択
 	int		n0;
 	int		n1;
+	rgb		col	= rgb(1,1,1);
+	float	wide = 2.0;
 
 	Edge( int _n0, int _n1 ) : n0(_n0),n1(_n1){};
+	Edge( int _n0, int _n1, rgb c, float w ) : n0(_n0),n1(_n1),col(c),wide(w){};
 	virtual ~Edge(){};
 };
 
