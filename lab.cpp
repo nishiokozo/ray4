@@ -126,6 +126,139 @@ static void drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, f
 };
 
 //------------------------------------------------------------------------------
+static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+//------------------------------------------------------------------------------
+{
+//		gra.Clr(rgb(0.0,0.0,0.0));
+
+	gra.Print(1,(float)text_y++,string("lab10_colors")+to_string(lab.idx)); 
+
+	// 初期化
+	if ( !lab.bInit )
+	{
+		lab.bInit = true;
+		pers.cam.pos = vect3( -2.0, 2.0, -5.0 );
+		pers.cam.at = vect3( 0,  0.0, 0 );
+	}
+
+	const float s = 0.1;
+	vect3 vert[4] =
+	{
+		vect3(-s,-s,0),
+		vect3( s,-s,0),
+		vect3( s, s,0),
+		vect3(-s, s,0),
+	};
+
+	// 入力
+
+	// 計算
+
+	// 衝突
+
+	// 移動
+
+	// 計算チェック
+
+	// 描画
+
+	auto func = [&]( float y, float th, float p, float q )
+	{
+		mat33 m = mrotateByAxis( vect3(0,1,0), th );
+		vect3 p0 = m * vect3(-s,-s+y, p) ;
+		vect3 p1 = m * vect3( s,-s+y, p) ;
+		vect3 p2 = m * vect3( s, s+y, p) ;
+		vect3 p3 = m * vect3(-s, s+y, p) ;
+
+		vect3 q0 = m * vect3(-s,-s+y, q) ;
+		vect3 q1 = m * vect3( s,-s+y, q) ;
+		vect3 q2 = m * vect3( s, s+y, q) ;
+		vect3 q3 = m * vect3(-s, s+y, q) ;
+
+
+		// 面
+		{
+			auto suf = [&]( 
+				vect3 v0, vect3 v1, vect3 v2, vect3 v3,
+				vect3 w0, vect3 w1, vect3 w2, vect3 w3,
+				 rgb col 
+			)
+			{
+				// 右面
+				pers.tri3d( gra, pers, v0, v1 ,v2 , col );
+				pers.tri3d( gra, pers, v0 ,v2, v3 , col );
+
+				// 右面
+				pers.tri3d( gra, pers, w0, w1 ,w2 , col );
+				pers.tri3d( gra, pers, w0 ,w2, w3 , col );
+
+				// 上面
+				pers.tri3d( gra, pers, v0, v3 ,w2 , col );
+				pers.tri3d( gra, pers, w2, w1 ,v0 , col );
+
+				// 先
+				pers.tri3d( gra, pers, v1, v0, w0, col );
+				pers.tri3d( gra, pers, w1, w0, v0, col );
+			};
+		
+			{
+				auto colfunc = [&]( float th )
+				{
+					th = fmodf( th, deg2rad(360) );
+
+					float f = 0; 
+					if ( th < deg2rad(60) ) f = th/deg2rad(60);
+					else
+					if ( th < deg2rad(180) ) f = 1.0;
+					else
+					if ( th < deg2rad(240) ) f = (deg2rad(240)-th)/deg2rad(60);
+					else
+					f = 0.0;
+					return f;
+				};
+
+				th += deg2rad(60);
+				float r = colfunc(th);
+				float g = colfunc(th + deg2rad(120));
+				float b = colfunc(th + deg2rad(240));
+
+				vect3 c2 = rgb(r,g,b);
+
+				suf(
+					q3, q0, p0, p3, 
+					q1, q2, p2, p1,
+					c2
+				);
+			}
+		}
+
+		// 線
+		{
+			rgb c1(1,1,1);
+			float wide = 2;
+			pers.line3d( gra, pers, p0, q0, c1, wide );
+			pers.line3d( gra, pers, p1, q1, c1, wide );
+			pers.line3d( gra, pers, p2, q2, c1, wide );
+			pers.line3d( gra, pers, p3, q3, c1, wide );
+
+			pers.line3d( gra, pers, q0, q1, c1, wide );
+			pers.line3d( gra, pers, q1, q2, c1, wide );
+			pers.line3d( gra, pers, q2, q3, c1, wide );
+			pers.line3d( gra, pers, q3, q0, c1, wide );
+		}
+
+	};
+
+//		func( 1, 0, 0.32, 1 );
+//		func( 1, pi, 0.32, 1 );
+	
+	for ( float th = 0 ; th < pi*2 ; th+=deg2rad(30) )
+	{
+		func( 1, th, 0.38, 1 );
+	}
+
+}
+//------------------------------------------------------------------------------
 static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
 {
@@ -218,7 +351,7 @@ cout << "s2 :" << s2 << endl;
 cout << "s3 :" << s3 << endl;
 cout << "vel:" << car.req_vel.abs() << endl;
 	
-			car.req_pos = q0 - car.req_vel.normalize()*s2;
+			car.req_pos = q0 - car.req_vel*s2;//.normalize()*s2;
 			car.req_vel = -car.req_vel;
 		}
 	}
@@ -1137,6 +1270,10 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& 
 {
 	switch( idx )
 	{
+		case 10:	// 描画	色見本
+			lab10_colors( (*this), keys, mouse, gra, pers, text_y );
+			break;
+
 		case 9:	// 描画	2d剛体
 			lab9_2dRidge( (*this), keys, mouse, gra, pers, text_y );
 			break;
@@ -1182,6 +1319,6 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& 
 Lab::Lab()
 //------------------------------------------------------------------------------
 {
-	idx = 9;
+	idx = 10;
 }
 

@@ -207,6 +207,7 @@ void Pers::line3d_scissor( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col,
 	bool flg = pers.calcScissorLine3d( a, b, v0, v1 );
 	if ( flg ) gra.Line( v0, v1, col, wide );
 }
+
 //------------------------------------------------------------------------------
 void Pers::line3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col, float wide )
 //------------------------------------------------------------------------------
@@ -214,6 +215,16 @@ void Pers::line3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col, float w
 	vect3 v0 = pers.calcWorldToScreen3( p0 );
 	vect3 v1 = pers.calcWorldToScreen3( p1 );
 	if ( v0.z > 0 && v1.z > 0 ) gra.Line( v0, v1, col, wide );
+}
+
+//------------------------------------------------------------------------------
+void Pers::tri3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, vect3 p2, rgb col )
+//------------------------------------------------------------------------------
+{
+	vect3 v0 = pers.calcWorldToScreen3( p0 );
+	vect3 v1 = pers.calcWorldToScreen3( p1 );
+	vect3 v2 = pers.calcWorldToScreen3( p2 );
+	if ( v0.z > 0 && v1.z > 0 && v2.z > 0 ) gra.Tri( v0, v1, v2, col );
 }
 
 //------------------------------------------------------------------------------

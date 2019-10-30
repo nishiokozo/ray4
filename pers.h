@@ -112,6 +112,8 @@ struct Pers
 	void Focus( vector<vector<Obj*>>& tbls );
 	//------------------------------------------------------------------------------
 
+	void tri3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, vect3 p2, rgb col );
+
 	void pset2d( SysGra& gra, Pers& pers, vect2 p0, rgb col = rgb(1,1,1), float wide = 1.0f );
 	void pset3d( SysGra& gra, Pers& pers, vect3 p0, rgb col = rgb(1,1,1), float wide = 1.0f );
 
