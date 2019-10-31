@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <tuple>
+#include <random>
 
 #include "geom.h"
 
@@ -129,7 +130,8 @@ static void drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, f
 static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
 {
-//		gra.Clr(rgb(0.0,0.0,0.0));
+	static bool bGrid = true;
+	if (bGrid==false)	gra.Clr(rgb(0.0,0.0,0.0));
 
 	gra.Print(1,(float)text_y++,string("lab10_colors")+to_string(lab.idx)); 
 
@@ -137,8 +139,9 @@ static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	if ( !lab.bInit )
 	{
 		lab.bInit = true;
-		pers.cam.pos = vect3( -2.0, 2.0, -5.0 );
-		pers.cam.at = vect3( 0,  0.0, 0 );
+		pers.cam.pos = vect3( -4.0, 4.0, -1.5 );
+		pers.cam.at = vect3( 0,  1.0, 0 );
+		bGrid = true;
 	}
 
 	const float s = 0.1;
@@ -151,6 +154,8 @@ static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	};
 
 	// 入力
+	if ( keys.R.hi ) lab.bInit = false;
+	if ( keys.G.hi ) bGrid = !bGrid;
 
 	// 計算
 
@@ -161,102 +166,158 @@ static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	// 計算チェック
 
 	// 描画
-
-	auto func = [&]( float y, float th, float p, float q )
 	{
-		mat33 m = mrotateByAxis( vect3(0,1,0), th );
-		vect3 p0 = m * vect3(-s,-s+y, p) ;
-		vect3 p1 = m * vect3( s,-s+y, p) ;
-		vect3 p2 = m * vect3( s, s+y, p) ;
-		vect3 p3 = m * vect3(-s, s+y, p) ;
-
-		vect3 q0 = m * vect3(-s,-s+y, q) ;
-		vect3 q1 = m * vect3( s,-s+y, q) ;
-		vect3 q2 = m * vect3( s, s+y, q) ;
-		vect3 q3 = m * vect3(-s, s+y, q) ;
-
-
-		// 面
+		// カラーバー
+		auto func = [&]( float n, float th, float p, float q )
 		{
-			auto suf = [&]( 
-				vect3 v0, vect3 v1, vect3 v2, vect3 v3,
-				vect3 w0, vect3 w1, vect3 w2, vect3 w3,
-				 rgb col 
-			)
+			float y = n * 0.23;
+
+			mat33 m = mrotateByAxis( vect3(0,1,0), th );
+			vect3 p0 = m * vect3(-s,-s+y, p) ;
+			vect3 p1 = m * vect3( s,-s+y, p) ;
+			vect3 p2 = m * vect3( s, s+y, p) ;
+			vect3 p3 = m * vect3(-s, s+y, p) ;
+
+			vect3 q0 = m * vect3(-s,-s+y, q) ;
+			vect3 q1 = m * vect3( s,-s+y, q) ;
+			vect3 q2 = m * vect3( s, s+y, q) ;
+			vect3 q3 = m * vect3(-s, s+y, q) ;
+
+
+			// 面
 			{
-				// 右面
-				pers.tri3d( gra, pers, v0, v1 ,v2 , col );
-				pers.tri3d( gra, pers, v0 ,v2, v3 , col );
-
-				// 右面
-				pers.tri3d( gra, pers, w0, w1 ,w2 , col );
-				pers.tri3d( gra, pers, w0 ,w2, w3 , col );
-
-				// 上面
-				pers.tri3d( gra, pers, v0, v3 ,w2 , col );
-				pers.tri3d( gra, pers, w2, w1 ,v0 , col );
-
-				// 先
-				pers.tri3d( gra, pers, v1, v0, w0, col );
-				pers.tri3d( gra, pers, w1, w0, v0, col );
-			};
-		
-			{
-				auto colfunc = [&]( float th )
+				auto suf = [&]( 
+					vect3 v0, vect3 v1, vect3 v2, vect3 v3,
+					vect3 w0, vect3 w1, vect3 w2, vect3 w3,
+					 rgb col 
+				)
 				{
-					th = fmodf( th, deg2rad(360) );
+					rgb top = col;
+					if ( n == 10 ) top = rgb(0.70);
+				
+					// 右面
+					pers.tri3d( gra, pers, v0, v1 ,v2 , col );
+					pers.tri3d( gra, pers, v0 ,v2, v3 , col );
 
-					float f = 0; 
-					if ( th < deg2rad(60) ) f = th/deg2rad(60);
-					else
-					if ( th < deg2rad(180) ) f = 1.0;
-					else
-					if ( th < deg2rad(240) ) f = (deg2rad(240)-th)/deg2rad(60);
-					else
-					f = 0.0;
-					return f;
+					// 右面
+					pers.tri3d( gra, pers, w0, w1 ,w2 , col );
+					pers.tri3d( gra, pers, w0 ,w2, w3 , col );
+
+					// 先
+					pers.tri3d( gra, pers, v1, v0, w0, col );
+					pers.tri3d( gra, pers, w1, w0, v0, col );
+
+					// 上面
+					pers.tri3d( gra, pers, v0, v3 ,w2 , top );
+					pers.tri3d( gra, pers, w2, w1 ,v0 , top );
+
+					// 蓋
+					pers.tri3d( gra, pers, w2, v3, vect3(0,y+s,0), top );
+					
 				};
+			
+				{
+					auto colfunc = [&]( float th )
+					{
+						th = fmodf( th, deg2rad(360) );
 
-				th += deg2rad(60);
-				float r = colfunc(th);
-				float g = colfunc(th + deg2rad(120));
-				float b = colfunc(th + deg2rad(240));
+						float f = 0; 
+						if ( th < deg2rad(60) ) f = th/deg2rad(60);
+						else
+						if ( th < deg2rad(180) ) f = 1.0;
+						else
+						if ( th < deg2rad(240) ) f = (deg2rad(240)-th)/deg2rad(60);
+						else
+						f = 0.0;
+						return f;
+					};
 
-				vect3 c2 = rgb(r,g,b);
+					th += deg2rad(60);
+					float r = colfunc(th);
+					float g = colfunc(th + deg2rad(120));
+					float b = colfunc(th + deg2rad(240));
 
-				suf(
-					q3, q0, p0, p3, 
-					q1, q2, p2, p1,
-					c2
-				);
+					float alu[11][2] =
+					{
+						{0.0,	0.0},
+						{0.1,	0.0},
+						{0.2,	0.0},
+						{0.4,	0.0},
+						{0.6,	0.0},
+						{0.8,	0.0},
+						{1.0,	0.0},
+						{1.0,	0.2},
+						{1.0,	0.4},
+						{1.0,	0.6},
+						{1.0,	0.8},
+					};
+					vect3 col = rgb(r,g,b) * alu[int(n)%11][0] + alu[int(n)%11][1];
+
+					suf(
+						q3, q0, p0, p3, 
+						q1, q2, p2, p1,
+						col
+					);
+				}
+			}
+
+			// 線
+			{
+				rgb c1(1,1,1);
+				float wide = 2;
+				pers.line3d( gra, pers, p0, q0, c1, wide );
+				pers.line3d( gra, pers, p1, q1, c1, wide );
+				pers.line3d( gra, pers, p2, q2, c1, wide );
+				pers.line3d( gra, pers, p3, q3, c1, wide );
+
+				pers.line3d( gra, pers, q0, q1, c1, wide );
+				pers.line3d( gra, pers, q1, q2, c1, wide );
+				pers.line3d( gra, pers, q2, q3, c1, wide );
+				pers.line3d( gra, pers, q3, q0, c1, wide );
+			}
+
+		};
+		{
+			mt19937    foo(0);
+			for ( float th = 0 ; th < pi*2 ; th+=deg2rad(30) )
+			{
+				float n = 0;
+				for ( float th2 = 0 ; th2 < pi ; th2+=deg2rad(18) )
+				{
+					float a = 1.75*sin(th2)-0.5;
+					float r = (float)(foo()%10)/10.0*a/5;
+					n++;
+					func( n, th, 0.37, 0.7+a+r );
+				}
 			}
 		}
-
-		// 線
-		{
-			rgb c1(1,1,1);
-			float wide = 2;
-			pers.line3d( gra, pers, p0, q0, c1, wide );
-			pers.line3d( gra, pers, p1, q1, c1, wide );
-			pers.line3d( gra, pers, p2, q2, c1, wide );
-			pers.line3d( gra, pers, p3, q3, c1, wide );
-
-			pers.line3d( gra, pers, q0, q1, c1, wide );
-			pers.line3d( gra, pers, q1, q2, c1, wide );
-			pers.line3d( gra, pers, q2, q3, c1, wide );
-			pers.line3d( gra, pers, q3, q0, c1, wide );
-		}
-
-	};
-
-//		func( 1, 0, 0.32, 1 );
-//		func( 1, pi, 0.32, 1 );
-	
-	for ( float th = 0 ; th < pi*2 ; th+=deg2rad(30) )
-	{
-		func( 1, th, 0.38, 1 );
+		
+		//円柱
+if(0)		{
+			int i = 0;
+			vect3 v1;
+			for ( float th = 0 ; th < pi*2 ; th+=deg2rad(30) )
+			{
+				float r = 0.5;
+				vect3 v0 =
+				{
+					r * cos( th ),
+					3,
+					r * sin( th )
+				};
+				
+				if ( i > 0 )
+				{
+					pers.tri3d( gra, pers, v1, v0, vect3(0,v0.y,0), rgb(1,1,1)/10 );
+				}
+				
+//				pers.pset3d( gra, pers, v0, rgb(1,1,1)/10, 10 );
+				v1 = v0;
+				i++;
+			}
+		}		
+		
 	}
-
 }
 //------------------------------------------------------------------------------
 static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
