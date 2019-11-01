@@ -31,77 +31,121 @@
 
 #include "lab.h"
 
-struct Plot
-{
-	//	y = 0面に座標(0,0,0)を中心にグラフ（ドット）を打ってゆく
 
-	static const int MaxPlot = 100;
-	float tblPlot[MaxPlot];
-	int cntPlot = 0;
-	bool	bScroll = false;
-	rgb col;
-	float step;
-	
+struct	Graphs
+{
+	struct Plot
+	{
+		//	y = 0面に座標(0,0,0)を中心にグラフ（ドット）を打ってゆく
+
+		static const int MaxPlot = 100;
+		float tblPlot[MaxPlot];
+		int cntPlot = 0;
+		bool	bScroll = false;
+		rgb col;
+		float step;
+		
+		//------------------------------------------------------------------------------
+		Plot( 
+		//------------------------------------------------------------------------------
+			float _step, 			// 送りステップ
+			rgb _col = rgb(1,1,1) 	// 色
+		)
+		{
+			col = _col;
+			step = _step;
+			for ( int i = 0 ; i < MaxPlot ; i++ )
+			{
+				tblPlot[i] = 0;
+			}
+			Reset();
+		}
+
+		//------------------------------------------------------------------------------
+		void Reset()
+		//------------------------------------------------------------------------------
+		{
+			bScroll = false;
+			cntPlot = 0 ;
+		}
+		//------------------------------------------------------------------------------
+		void Write( float val )
+		//------------------------------------------------------------------------------
+		{
+			if ( cntPlot >= MaxPlot ) 
+			{
+				bScroll = true;
+				cntPlot = 0;
+			}
+
+			tblPlot[ cntPlot++ ] = val;
+		}
+		//------------------------------------------------------------------------------
+		void Draw( SysGra& gra, Pers& pers )
+		//------------------------------------------------------------------------------
+		{
+			gra.SetZTest( false );
+			
+			float x = 0;
+			
+			if ( bScroll )
+			for ( int i = cntPlot ; i < MaxPlot ; i++ )
+			{
+				pers.pset3d( gra, pers, vect3( x, 0, tblPlot[i] ),  col, 2 );
+				x += step;
+			}
+			for ( int i = 0 ; i < cntPlot-1 ; i++ )
+			{
+				pers.pset3d( gra, pers, vect3( x, 0, tblPlot[i] ),  col, 2 );
+				x += step;
+			}
+			if ( cntPlot > 0 ) pers.pset3d( gra, pers, vect3( x, 0, tblPlot[cntPlot-1] ),  rgb(1,1,1), 2 );
+
+			gra.SetZTest( true );
+		}
+
+	};
+
+	vector<Plot>	plots;
+
 	//------------------------------------------------------------------------------
-	Plot( 
-	//------------------------------------------------------------------------------
+	int Add(
 		float _step, 			// 送りステップ
 		rgb _col = rgb(1,1,1) 	// 色
 	)
+	//------------------------------------------------------------------------------
 	{
-		col = _col;
-		step = _step;
-		for ( int i = 0 ; i < MaxPlot ; i++ )
-		{
-			tblPlot[i] = 0;
-		}
-		Reset();
+		int idx = (signed)plots.size(); 
+		plots.emplace_back( _step, _col );
+		return idx;
 	}
 
 	//------------------------------------------------------------------------------
-	void Reset()
+	void Clear()
 	//------------------------------------------------------------------------------
 	{
-		bScroll = false;
-		cntPlot = 0 ;
+		plots.clear();
 	}
+	
 	//------------------------------------------------------------------------------
-	void Update( float val )
+	void Request( int idx, float val )
 	//------------------------------------------------------------------------------
 	{
-		if ( cntPlot >= MaxPlot ) 
-		{
-			bScroll = true;
-			cntPlot = 0;
-		}
+		if ( idx >= (signed)plots.size() ) return;
+		plots[ idx ].Write( val );
+	}
 
-		tblPlot[ cntPlot++ ] = val;
-	}
 	//------------------------------------------------------------------------------
 	void Draw( SysGra& gra, Pers& pers )
 	//------------------------------------------------------------------------------
 	{
-		gra.SetZTest( false );
-		
-		float x = 0;
-		
-		if ( bScroll )
-		for ( int i = cntPlot ; i < MaxPlot ; i++ )
+		for ( Plot& p : plots )
 		{
-			pers.pset3d( gra, pers, vect3( x, 0, tblPlot[i] ),  col, 2 );
-			x += step;
+			p.Draw( gra, pers );
 		}
-		for ( int i = 0 ; i < cntPlot-1 ; i++ )
-		{
-			pers.pset3d( gra, pers, vect3( x, 0, tblPlot[i] ),  col, 2 );
-			x += step;
-		}
-			pers.pset3d( gra, pers, vect3( x, 0, tblPlot[cntPlot-1] ),  rgb(1,1,1), 2 );
-
-		gra.SetZTest( true );
 	}
-
 };
+
 
 //------------------------------------------------------------------------------
 static void drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str )
@@ -323,6 +367,8 @@ if(0)		{
 static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
 {
+	static	Graphs graphs;
+
 	gra.Print(1,(float)text_y++,string("lab9_2dRidge")+to_string(lab.idx)); 
 
 	const float	G = 9.80665;				// 重力加速度
@@ -360,9 +406,9 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 		//点
 		for ( Obj* p : lab.tblObj ) delete p;
 		lab.tblObj.clear();
-		lab.tblObj.emplace_back( new Obj(vect3( -0.5  , 0.1, 0 )) );
-		lab.tblObj.emplace_back( new Obj(vect3(  0.5  , 0.1, -0.6 )) );
-		lab.tblObj.emplace_back( new Car(vect3(  0  , 0.1,  1 ), vect3(0,0,0)) );
+		lab.tblObj.emplace_back( new Obj(vect3( -0.5	, 0.1, 0 )) );
+		lab.tblObj.emplace_back( new Obj(vect3(  0.5	, 0.1, -0.65 )) );
+		lab.tblObj.emplace_back( new Car(vect3(  0		, 0.1,  1 ), vect3(0,0,0)) );
 		// 線
 		for ( Edge* p : lab.tblEdge ) delete p;
 		lab.tblEdge.clear();
@@ -371,6 +417,11 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 		pers.axis.bAxisX = true;
 		pers.axis.bAxisY = false;
 		pers.axis.bAxisZ = true;
+
+		graphs.Clear();
+		graphs.Add( 0.02, rgb(0,0,1) );
+		graphs.Add( 0.02, rgb(0,1,1) );
+		graphs.Add( 0.02, rgb(1,1,0) );
 
 	}
 
@@ -393,6 +444,7 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	{
 		auto[b,d,q0,q1,s0,s1] = func_distance_Segline_Segline( car.pos, car.pos + car.req_vel, v0, v1 );
 
+if(1)
 		if ( b )
 		{
 			float a0 = car.req_vel.abs() * 2.0 / (T*T);	// 加速度
@@ -407,10 +459,12 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 			float s0 = 0.5*a0*t0*t0;	// s0と同じ
 			float s2 = 0.5*a2*t2*t2;
 			float s3 = 0.5*a0*T*T;
+#if 0
 cout << endl;
 cout << "s2 :" << s2 << endl;
 cout << "s3 :" << s3 << endl;
 cout << "vel:" << car.req_vel.abs() << endl;
+#endif
 	
 			car.req_pos = q0 - car.req_vel*s2;//.normalize()*s2;
 			car.req_vel = -car.req_vel;
@@ -420,8 +474,13 @@ cout << "vel:" << car.req_vel.abs() << endl;
 	// 移動
 	if ( !bPause || bStep )
 	{
+//		graphs.Request( 2, car.req_pos.z- car.pos.z  );
+//cout << car.req_pos.z- car.pos.z << endl;	
 		car.pos = car.req_pos;
 		car.vel = car.req_vel;
+
+		graphs.Request( 0, car.vel.z );
+		graphs.Request( 1, car.pos.z );
 	}
 
 	// 計算チェック
@@ -439,8 +498,12 @@ cout << "vel:" << car.req_vel.abs() << endl;
 		prev = car.pos.z;
 	}
 
-	drawVect( gra, pers, text_y, car.pos, car.vel	,1		, rgb(1,0,0), "vel" );
+	// 描画
+	{
+		graphs.Draw( gra, pers );
 
+		drawVect( gra, pers, text_y, car.pos, car.vel	,1		, rgb(1,0,0), "vel" );
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -454,7 +517,7 @@ static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysG
 	const float	g = G *T*T;			// 重力加速度/frame
 	const vect3	gv = vect3(0,0, -g);	// 重力加速度/frame
 
-	static	Plot plot_moment( 0.02, rgb(1,0,1) );
+	static	Graphs::Plot plot_moment( 0.02, rgb(1,0,1) );
 	static vect3 vel;
 	static bool		bPause = false;
 	bool bStep = false;
@@ -506,7 +569,7 @@ static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysG
 	// 計算
 	if ( !bPause || bStep )
 	{
-		plot_moment.Update( moment.y*10 );
+		plot_moment.Write( moment.y*10 );
 
 			
 		// 衝突
@@ -1380,6 +1443,6 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& 
 Lab::Lab()
 //------------------------------------------------------------------------------
 {
-	idx = 10;
+	idx = 9;
 }
 
