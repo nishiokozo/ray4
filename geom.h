@@ -191,32 +191,31 @@ public:
 	vect3 normalize() { return (*this)/abs(); }
 	float abs() { return sqrt( x*x + y*y + z*z ); }
 
-	bool operator==( vect3 v ) { return ( x == v.x &&  y == v.y &&  z == v.z); }
+	vect3 operator-() const { return vect3( -x, -y, -z ); } 
+	vect3 operator+() const { return vect3(  x,  y,  z ); } 
+
+	bool operator==( vect3 v ) { return  ( x == v.x &&  y == v.y &&  z == v.z); }
 	bool operator!=( vect3 v ) { return !( x == v.x &&  y == v.y &&  z == v.z); }
 
-	vect3 operator*=( vect3 v ) { x *= v.x; y *= v.y; z *= v.z;  return *this; }
-	vect3 operator/=( vect3 v ) { x /= v.x; y /= v.y; z /= v.z;  return *this; }
-	vect3 operator+=( vect3 v ) { x += v.x; y += v.y; z += v.z;  return *this; }
-	vect3 operator-=( vect3 v ) { x -= v.x; y -= v.y; z -= v.z;  return *this; }
+	void operator*=( vect3 v ) { x *= v.x; y *= v.y; z *= v.z;  }
+	void operator/=( vect3 v ) { x /= v.x; y /= v.y; z /= v.z;  }
+	void operator+=( vect3 v ) { x += v.x; y += v.y; z += v.z;  }
+	void operator-=( vect3 v ) { x -= v.x; y -= v.y; z -= v.z;  }
 
 	vect3 operator*( vect3 v ) const { vect3	ret; ret.x = x * v.x; ret.y = y * v.y; ret.z = z * v.z; return ret; }
 	vect3 operator/( vect3 v ) const { vect3	ret; ret.x = x / v.x; ret.y = y / v.y; ret.z = z / v.z; return ret; }
 	vect3 operator-( vect3 v ) const { vect3	ret; ret.x = x - v.x; ret.y = y - v.y; ret.z = z - v.z; return ret; }
 	vect3 operator+( vect3 v ) const { vect3	ret; ret.x = x + v.x; ret.y = y + v.y; ret.z = z + v.z; return ret; }
 
-	vect3 operator-() const { return vect3( -x, -y, -z ); } 
-	vect3 operator+() const { return vect3(  x,  y,  z ); } 
+	void operator*=( float f ) { x *= f; y *= f; z *= f;  }
+	void operator/=( float f ) { x /= f; y /= f; z /= f;  }
+	void operator+=( float f ) { x += f; y += f; z += f;  }
+	void operator-=( float f ) { x -= f; y -= f; z -= f;  }
 
 	vect3 operator*( float f ) const { return	vect3( x * f, y * f, z * f ); }
 	vect3 operator/( float f ) const { return	vect3( x / f, y / f, z / f ); }
 	vect3 operator+( float f ) const { return	vect3( x + f, y + f, z + f ); }
 	vect3 operator-( float f ) const { return	vect3( x - f, y - f, z - f ); }
-
-	vect3 operator*=( float f ) { x *= f; y *= f; z *= f;  return *this; }
-	vect3 operator/=( float f ) { x /= f; y /= f; z /= f;  return *this; }
-	vect3 operator+=( float f ) { x += f; y += f; z += f;  return *this; }
-	vect3 operator-=( float f ) { x -= f; y -= f; z -= f;  return *this; }
-
 
 	friend	vect3 operator*( float f, vect3 v )  { return vect3( f * v.x, f * v.y, f * v.z ); }
 	friend	vect3 operator/( float f, vect3 v )  { return vect3( f / v.x, f / v.y, f / v.z ); }
@@ -225,7 +224,7 @@ public:
 
 	bool isZero()
 	{
-		const float zero = 0.00000001f*100; // 小さすぎるとベクトルとして意味をなさないので100倍
+		const float zero = 0.00000001f*100; // 小さすぎるとベクトルとして意味をなさないので100倍を下限にする
 		return std::abs(x)<zero && std::abs(y)<zero && std::abs(z)<zero;
 	}
 
