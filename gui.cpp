@@ -286,7 +286,7 @@ void Gui::DrawController( Pers& pers, SysGra& gra, vector<vector<Obj*>>& tbls, v
 				{	// 影
 					vect3	a = p0->pos;	a.y=0;
 					vect3	b = p1->pos;	b.y=0;
-					rgb		c = (p->col+rgb(0.75))/4;
+					rgb		c = (p->col+rgb(0.75,0.75,0.75))/4;
 					pers.line3d( gra, pers, a, b, c, p->wide );
 				}
 

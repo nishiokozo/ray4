@@ -169,8 +169,8 @@ bool Pers::calcScissorLine3d( vect3 v0, vect3 v1, vect3& va, vect3& vb )	// 3D ç
 void Pers::Focus( vector<vector<Obj*>>& tbls )
 //------------------------------------------------------------------------------
 {
-	vect3 b(-infinit);
-	vect3 s(infinit);
+	vect3 b(-infinit,-infinit,-infinit);
+	vect3 s(infinit,infinit,infinit);
 	vect3 b2;
 	vect3 s2;
 

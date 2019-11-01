@@ -157,7 +157,7 @@ static void drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, f
 	{
 		vect3	a = v0;	a.y=0;
 		vect3	b = v1;	b.y=0;
-		rgb		c = (col+rgb(0.75))/4;
+		rgb		c = (col+rgb(0.75,0.75,0.75))/4;
 		pers.line3d( gra, pers, a, b, c, 1 );
 		pers.pset3d( gra, pers,    b, c, 5 );
 	}
@@ -237,7 +237,7 @@ static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 				)
 				{
 					rgb top = col;
-					if ( n == 10 ) top = rgb(0.70);
+					if ( n == 10 ) top = rgb(0.70,0.70,0.70);
 				
 					// 右面
 					pers.tri3d( gra, pers, v0, v1 ,v2 , col );
@@ -456,18 +456,25 @@ if(1)
 
 			float a2 = 1;							// 衝突後の時間
 
+			float v2 = 0.5*a0*t0*t0;
+
 			float s0 = 0.5*a0*t0*t0;	// s0と同じ
-			float s2 = 0.5*a2*t2*t2;
+
+			float s2 = -v2+0.5*a2*t2*t2;
+
 			float s3 = 0.5*a0*T*T;
-#if 0
+#if 1
 cout << endl;
+cout << "a0 :" << a0 << endl;
 cout << "s2 :" << s2 << endl;
 cout << "s3 :" << s3 << endl;
 cout << "vel:" << car.req_vel.abs() << endl;
 #endif
 	
-			car.req_pos = q0 - car.req_vel*s2;//.normalize()*s2;
-			car.req_vel = -car.req_vel;
+//			float v2 = 
+	
+			car.req_pos = q0 + car.req_vel*s2;//.normalize()*s2;
+			car.req_vel = car.req_vel.normalize()*v2;
 		}
 	}
 
@@ -548,7 +555,7 @@ static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysG
 		pers.axis.bAxisY = false;
 		pers.axis.bAxisZ = true;
 
-		vel=0;	// 加速度
+		vel=vect3(0,0,0);	// 加速度
 		w = 0;
 
 		plot_moment.Reset();
@@ -837,7 +844,7 @@ static void lab7_kakusokudo7( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& 
 	// 計算
 	{
 		static	vect3	acc2;
-		if ( keys.R.hi ) acc2 = 0;
+		if ( keys.R.hi ) acc2 = vect3(0,0,0);
 
 
 
@@ -964,7 +971,7 @@ static void lab4_furiko3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra
 		lab.tblObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
 		lab.tblObj.emplace_back( new Obj(vect3(-1, 2.0, 0)) );
 		
-		vel = 0;
+		vel = vect3(0,0,0);
 	}
 
 	vect3&	v0 = lab.tblObj[0]->pos;	//	barの根本

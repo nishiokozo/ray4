@@ -667,7 +667,7 @@ void Skeleton::UpdateSkeleton()
 			Joint* p = dynamic_cast<Joint*>(po);
 
 			p->pos += p->tension;
-			p->tension=0;
+			p->tension=vect3(0,0,0);
 		}
 	}
 	

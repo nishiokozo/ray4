@@ -131,7 +131,7 @@ struct Joint : Obj
 		pos = v;
 		weight = _weight;
 		bCtrl = _bCtrl;
-		tension = 0;
+		tension = vect3(0,0,0);
 		len = 0;
 		prev = pos;
 		prev2 = pos;

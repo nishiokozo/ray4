@@ -181,7 +181,7 @@ public:
 
 
 	vect3() :x(0),y(0),z(0){};
-	vect3( float f ) :x(f), y(f), z(f){};
+//	vect3( float f ) :x(f), y(f), z(f){};
 	vect3( float _x, float _y, float _z) :x(_x), y(_y), z(_z){};
 
 	vect3( vect2 v, float _z ) { x = v.x; y = v.y; z = _z;};
@@ -207,8 +207,16 @@ public:
 	vect3 operator-() const { return vect3( -x, -y, -z ); } 
 	vect3 operator+() const { return vect3(  x,  y,  z ); } 
 
-	vect3 operator*( float f ) const { vect3	ret; ret.x = x * f; ret.y = y * f; ret.z = z * f; return ret; }
-	vect3 operator/( float f ) const { float a = 1.0f / f; vect3	ret; ret.x = x * a; ret.y = y * a; ret.z = z * a; return ret; }
+	vect3 operator*( float f ) const { return	vect3( x * f, y * f, z * f ); }
+	vect3 operator/( float f ) const { return	vect3( x / f, y / f, z / f ); }
+	vect3 operator+( float f ) const { return	vect3( x + f, y + f, z + f ); }
+	vect3 operator-( float f ) const { return	vect3( x - f, y - f, z - f ); }
+
+	vect3 operator*=( float f ) { x *= f; y *= f; z *= f;  return *this; }
+	vect3 operator/=( float f ) { x /= f; y /= f; z /= f;  return *this; }
+	vect3 operator+=( float f ) { x += f; y += f; z += f;  return *this; }
+	vect3 operator-=( float f ) { x -= f; y -= f; z -= f;  return *this; }
+
 
 	friend	vect3 operator*( float f, vect3 v )  { return vect3( f * v.x, f * v.y, f * v.z ); }
 	friend	vect3 operator/( float f, vect3 v )  { return vect3( f / v.x, f / v.y, f / v.z ); }
