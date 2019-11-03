@@ -15,6 +15,8 @@ struct Gui
 	vector<vector<Obj*>> tbls;
 	vector<vector<Edge*>> tbltblEdge;
 
+	bool bShowPoint = true;
+
 	struct One
 	{
 		bool	bEnable;

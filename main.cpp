@@ -767,6 +767,11 @@ struct Apr : public Sys
 			//=================================
 			// 実験 on/off
 			//=================================
+			if ( keys._0.hi ) 
+			{
+				gui.bShowPoint = !gui.bShowPoint;
+			cout << gui.bShowPoint << endl;
+			}
 			if ( keys._1.hi ) 
 			{
 				gui.one.bEnable = false;

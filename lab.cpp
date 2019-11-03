@@ -371,19 +371,21 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 
 	gra.Print(1,(float)text_y++,string("lab9_2dRidge")+to_string(lab.idx)); 
 
-	const float	G = 9.80665;				// 重力加速度
-	const float	T = 1.0/60.0;			// 時間/frame
-	const float	g = G *T*T;			// 重力加速度/frame
-	const vect3	gv = vect3(0,0, -g);	// 重力加速度/frame
+	const float	G	= 9.80665;				// 重力加速度
+	const float	T	= 1.0/60.0;				// 時間/frame
+	const vect3	gv	= vect3(0,0, -G*T*T);	// 重力加速度/frame
 	static bool		bPause = false;
+	static float time = 0;
+//	static vect3 p0 = vect3(0,0,0);
+//	static vect3 v0 = vect3(0,0,0);
 	bool bStep = false;
 	struct Car:Obj
 	{
-		vect3	vel;	//	移動量
+		vect3	vel;	//	velocity 速度(m/frame)
 
 		bool	bReq = false;
-		vect3	req_pos;
-		vect3	req_vel;
+//		vect3	req_pos;
+//		vect3	req_vel;
 
 		Car( vect3 v, vect3 _vel ) : Obj(v)
 		{
@@ -398,8 +400,8 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 		if ( !lab.bInitCam )
 		{
 			lab.bInitCam = true;
-			pers.cam.pos = vect3(  0.0, 5.0, -1.0 );
-			pers.cam.at = vect3( 0,  0.0, 0 );
+			pers.cam.pos = vect3(  0.0, 5.0, 1.1 );
+			pers.cam.at = vect3( 0,  0.0, 1.2 );
 		}
 	
 		lab.bInit = true;
@@ -407,8 +409,8 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 		for ( Obj* p : lab.tblObj ) delete p;
 		lab.tblObj.clear();
 		lab.tblObj.emplace_back( new Obj(vect3( -0.5	, 0.1, 0 )) );
-		lab.tblObj.emplace_back( new Obj(vect3(  0.5	, 0.1, -0.65 )) );
-		lab.tblObj.emplace_back( new Car(vect3(  0		, 0.1,  1 ), vect3(0,0,0)) );
+		lab.tblObj.emplace_back( new Obj(vect3(  0.5	, 0.1, 0 )) );
+		lab.tblObj.emplace_back( new Car(vect3(  0		, 0.1,  2.5 ), vect3(0,0,0)) );
 		// 線
 		for ( Edge* p : lab.tblEdge ) delete p;
 		lab.tblEdge.clear();
@@ -423,6 +425,8 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 		graphs.Add( 0.02, rgb(0,1,1) );
 		graphs.Add( 0.02, rgb(1,1,0) );
 
+		time = 0;
+		cout << endl;
 	}
 
 	// 入力
@@ -430,10 +434,77 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	if ( keys.SPACE.hi )	bPause = !bPause ;
 	if ( keys.ENTER.rep )	{bStep = true; bPause = true; }
 
-	vect3&	v0 = lab.tblObj[0]->pos;
-	vect3&	v1 = lab.tblObj[1]->pos;
+	vect3&	st = lab.tblObj[0]->pos;
+	vect3&	en = lab.tblObj[1]->pos;
 	Car&	car = *dynamic_cast<Car*>(lab.tblObj[2]);
 
+	// 計算チェック
+	{
+		static bool b = false;
+		static float prev = 0;
+
+		if ( car.pos.z < prev && b == false ) 
+		{
+			cout << "top : " << prev << endl;
+			b = true;
+		}
+		if ( car.pos.z > prev ) b = false;
+
+//			cout << " : " << car.pos.z << " " << prev << endl;
+		prev = car.pos.z;
+	}
+
+	//-----
+
+	time += T;
+	vect3 p0 = car.pos;
+	vect3 v0 = car.vel;
+	vect3 p1;
+	vect3 v1;
+	vect3 p2;
+	vect3 v2;
+	{
+		// 計算
+		{
+			v1 = vect3( 0, 0, -G*T );	// 加速量/frame
+
+			p1 = v0*T +v1*T*0.5;		// 移動量/frame
+
+			p2 = p0 + p1;	// 仮想移動
+			v2 = v0 + v1;	// 仮想速度
+		}
+
+		// 衝突
+		{
+			auto[b,d,q0,q1,s0,s1] = func_distance_Segline_Segline( p0, p2, st, en );
+
+			if ( b )
+			{
+				p2 = p0;
+				v2 = -v0;
+				pers.pset3d( gra, pers, q0, rgb(1,0,0), 7 );
+				pers.pset3d( gra, pers, p2, rgb(1,1,0), 7 );
+			}
+		}
+
+		// 更新
+		if  ( !bPause || bStep )
+		{
+			p0 = p2;
+			v0 = v2;
+		}
+
+		// 描画
+		{
+			drawVect( gra, pers, text_y, p0, p1	,1		, rgb(1,0,0), "p1" );
+		}
+	}
+	car.pos = p0;
+	car.vel = v0;
+
+
+	
+#if 0
 	// 計算
 	{
 		car.req_vel = car.vel + gv;	//	落下
@@ -442,9 +513,9 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 
 	// 衝突
 	{
-		auto[b,d,q0,q1,s0,s1] = func_distance_Segline_Segline( car.pos, car.pos + car.req_vel, v0, v1 );
+		auto[b,d,q0,q1,s0,s1] = func_distance_Segline_Segline( car.pos, car.pos + car.req_vel, st, en );
 
-if(1)
+
 		if ( b )
 		{
 			float a0 = car.req_vel.abs() * 2.0 / (T*T);	// 加速度
@@ -465,16 +536,20 @@ if(1)
 			float s3 = 0.5*a0*T*T;
 #if 1
 cout << endl;
+cout << "s0 :" << s0    << endl;
+cout << "a0 :" << a0    << endl;
+cout << "t0 :" << t0    << endl;
+//cout << "at :" << t0*g  << endl;
+ #else
 cout << "a0 :" << a0 << endl;
 cout << "s2 :" << s2 << endl;
-cout << "s3 :" << s3 << endl;
 cout << "vel:" << car.req_vel.abs() << endl;
 #endif
 	
 //			float v2 = 
 	
-			car.req_pos = q0 + car.req_vel*s2;//.normalize()*s2;
-			car.req_vel = car.req_vel.normalize()*v2;
+			car.req_pos = q0 - car.req_vel;
+			car.req_vel = -car.req_vel;
 		}
 	}
 
@@ -490,27 +565,13 @@ cout << "vel:" << car.req_vel.abs() << endl;
 		graphs.Request( 1, car.pos.z );
 	}
 
-	// 計算チェック
-	{
-		static bool b = false;
-		static float prev = 0;
-
-		if ( car.pos.z < prev && b == false ) 
-		{
-			car.pos.dump("top:");
-			b = true;
-		}
-		if ( car.pos.z > prev ) b = false;
-
-		prev = car.pos.z;
-	}
-
 	// 描画
 	{
 		graphs.Draw( gra, pers );
 
 		drawVect( gra, pers, text_y, car.pos, car.vel	,1		, rgb(1,0,0), "vel" );
 	}
+#endif
 }
 
 //------------------------------------------------------------------------------

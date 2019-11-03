@@ -350,19 +350,22 @@ void Gui::DrawController( Pers& pers, SysGra& gra, vector<vector<Obj*>>& tbls, v
 				
 				calcRectMode( rect_mode, bPreselect, bSelected );
 
-				if ( bSelected )
+				if ( bShowPoint )
 				{
-					// 選択点
-					pers.pset3d( gra, pers, p->pos, rgb(1,0,0), 11 );
-				}
-				else
-				{
-					// 非選択点
-					pers.pset3d( gra, pers, p->pos, rgb(0,0,1), 11 );
-				}
+					if ( bSelected )
+					{
+						// 選択点
+						pers.pset3d( gra, pers, p->pos, rgb(1,0,0), 11 );
+					}
+					else
+					{
+						// 非選択点
+						pers.pset3d( gra, pers, p->pos, rgb(0,0,1), 11 );
+					}
 
-				{
-					pers.print3d( gra, pers, p->pos, -14, 0, to_string(n++) ); 
+					{
+						pers.print3d( gra, pers, p->pos, -14, 0, to_string(n++) ); 
+					}
 				}
 			}
 		}
