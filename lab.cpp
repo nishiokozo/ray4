@@ -371,7 +371,7 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 
 	gra.Print(1,(float)text_y++,string("lab9_2dRidge")+to_string(lab.idx)); 
 
-	const float	G	= 9.80665;				// 重力加速度
+	const float	G	= -9.80665;				// 重力加速度
 	const float	T	= 1.0/60.0;				// 時間/frame
 	const vect3	gv	= vect3(0,0, -G*T*T);	// 重力加速度/frame
 	static bool		bPause = false;
@@ -400,21 +400,21 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 		if ( !lab.bInitCam )
 		{
 			lab.bInitCam = true;
-			pers.cam.pos = vect3(  0.0, 5.0, 1.1 );
-			pers.cam.at = vect3( 0,  0.0, 1.2 );
+			pers.cam.pos = vect3(	0.0,	1.2, 0.1 );
+			pers.cam.at = vect3( 	0.0,	0.0, 0.2 );
 		}
 	
 		lab.bInit = true;
 		//点
 		for ( Obj* p : lab.tblObj ) delete p;
 		lab.tblObj.clear();
-		lab.tblObj.emplace_back( new Obj(vect3( -0.5	, 0.1, 0 )) );
-		lab.tblObj.emplace_back( new Obj(vect3(  0.5	, 0.1, 0 )) );
-		lab.tblObj.emplace_back( new Car(vect3(  0		, 0.1,  2.5 ), vect3(0,0,0)) );
+		lab.tblObj.emplace_back( new Car(vect3(  0		, 0.1,  1.1 ), vect3(0,0,0)) );
+//		lab.tblObj.emplace_back( new Obj(vect3( -0.5	, 0.1,	0.0 )) );
+//		lab.tblObj.emplace_back( new Obj(vect3(  0.5	, 0.1,	0.0 )) );
 		// 線
 		for ( Edge* p : lab.tblEdge ) delete p;
 		lab.tblEdge.clear();
-		lab.tblEdge.emplace_back( new Edge(0,1) );
+//		lab.tblEdge.emplace_back( new Edge(0,1) );
 
 		pers.axis.bAxisX = true;
 		pers.axis.bAxisY = false;
@@ -430,33 +430,97 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	}
 
 	// 入力
-	if ( keys.R.hi ) lab.bInit = false;
-	if ( keys.SPACE.hi )	bPause = !bPause ;
-	if ( keys.ENTER.rep )	{bStep = true; bPause = true; }
-
-	vect3&	st = lab.tblObj[0]->pos;
-	vect3&	en = lab.tblObj[1]->pos;
-	Car&	car = *dynamic_cast<Car*>(lab.tblObj[2]);
+	{
+		if ( keys.R.hi ) lab.bInit = false;
+		if ( keys.SPACE.hi )	bPause = !bPause ;
+		if ( keys.ENTER.rep )	{bStep = true; bPause = true; }
+	}
+	
+	Car&	car = *dynamic_cast<Car*>(lab.tblObj[0]);
+	vect3&	st = lab.tblObj[1]->pos;
+	vect3&	en = lab.tblObj[2]->pos;
 
 	// 計算チェック
 	{
 		static bool b = false;
 		static float prev = 0;
-
 		if ( car.pos.z < prev && b == false ) 
 		{
 			cout << "top : " << prev << endl;
 			b = true;
 		}
 		if ( car.pos.z > prev ) b = false;
-
-//			cout << " : " << car.pos.z << " " << prev << endl;
 		prev = car.pos.z;
 	}
 
 	//-----
 
 	time += T;
+#if 1
+	float p0 = car.pos.z;	//初期値
+	float v0 = car.vel.z;
+
+	float p1;	//増分
+	float v1;
+
+	float p2;	//結果
+	float v2;
+
+	float p3;	//衝突
+	float v3;
+
+	{
+		// 計算
+		{
+			v1 = G*T;				// 増分・速度/frame
+
+			p1 = v0*T +v1*T*0.5;	// 増分・移動/frame
+
+			p2 = p0 + p1;	// 仮想移動
+			v2 = v0 + v1;	// 仮想速度
+		}
+
+		// 衝突
+		{
+			if ( p2<=0 )
+			{
+				p3 = 0;				// 衝突位置
+				float p = p3-p0;	// 衝突増分	p=v0*t + 0.5*G*t^2	
+
+				// p = 0.5*G*t^2 + v0 * t
+				float a = sqrt(abs(G/2.0));	//	a=1/sqrt(2)*sqrt(G);と置く
+				// p = ( a*t + v0/(2*a) )^2 -(v0/(2*a))^2
+				// t = ( sqrt( p +(v0/(2*a))^2 ) - v0/(2*a) ) / a
+
+				float t = ( sqrt( p + pow((v0/(2*a)), 2) ) - v0/(2*a) ) / a;	// 衝突までの時間
+
+cout << t << endl;			
+
+
+
+				p2 = p0;
+				v2 = -v0;
+				pers.pset3d( gra, pers, vect3(0,0.1,p2), rgb(1,1,0), 7 );
+			}
+		}
+
+		// 更新
+		if  ( !bPause || bStep )
+		{
+			p0 = p2;
+			v0 = v2;
+		}
+
+		// 描画
+		{
+			drawVect( gra, pers, text_y, vect3(0,0.1,p0), vect3(0,0.1,p1)	,1		, rgb(1,0,0), "p1" );
+		}
+	}
+	car.pos.z = p0;
+	car.vel.z = v0;
+#endif
+
+#if 0
 	vect3 p0 = car.pos;
 	vect3 v0 = car.vel;
 	vect3 p1;
@@ -466,7 +530,7 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	{
 		// 計算
 		{
-			v1 = vect3( 0, 0, -G*T );	// 加速量/frame
+			v1 = vect3( 0, 0, G*T );	// 加速量/frame
 
 			p1 = v0*T +v1*T*0.5;		// 移動量/frame
 
@@ -501,7 +565,7 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	}
 	car.pos = p0;
 	car.vel = v0;
-
+#endif
 
 	
 #if 0
