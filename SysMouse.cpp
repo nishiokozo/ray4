@@ -1,11 +1,12 @@
 #include <iostream>
-using namespace std;
 
 #include "SysMouse.h"
 
 #include <windows.h>
 #include <functional>
 #include "SysWin.h"
+
+using namespace std;
 
 //-----------------------------------------------------------------------------
 SysMouse& SysMouse::GetInstance()
@@ -31,39 +32,22 @@ SysMouse::SysMouse()
 
 	SysWin& win = SysWin::GetInstance();
 
-//	this->sx = point.x - win.GetPosX();
-//	this->sy = point.y - win.GetPosY();
-	this->pos.x = point.x - win.GetPosX();
-	this->pos.y = point.y - win.GetPosY();
-
-//	this->mx = 0;
-//	this->my = 0;
-	this->mov.x = 0;
-	this->mov.y = 0;
-
-	this->prev = this->pos;
-
 	this->wheel = 0;
 
+	// GL座標系
+	{
+		SysWin& win = SysWin::GetInstance();
+
+		vect2	gp( (float)point.x, (float)point.y );
+		gp = gp/vect2((float)win.GetWidth()/2,-(float)win.GetHeight()/2)+vect2(-1,1);
+	
+		this->prev = this->pos;
+		this->mov = 0;
+		this->pos = gp;
+	}
+
 }
 
-/*
-//-----------------------------------------------------------------------------
-void SysMouse::OnSize( int width, int height )
-//-----------------------------------------------------------------------------
-{
-	m.width = width;
-	m.height = height;
-}
-
-//-----------------------------------------------------------------------------
-void SysMouse::OnMove( int pos_x, int pos_y )
-//-----------------------------------------------------------------------------
-{
-	m.pos_x = pos_x;
-	m.pos_y = pos_y;
-}
-*/
 
 //-----------------------------------------------------------------------------
 void SysMouse::Update()
@@ -78,9 +62,9 @@ void SysMouse::Update()
 		point.y -= win.GetPosY();
 	}
 
-	int	l = GetAsyncKeyState(VK_LBUTTON);
-	int r = GetAsyncKeyState(VK_RBUTTON);
-	int m = GetAsyncKeyState(VK_MBUTTON);
+	int	l = GetAsyncKeyState( VK_LBUTTON );
+	int r = GetAsyncKeyState( VK_RBUTTON );
+	int m = GetAsyncKeyState( VK_MBUTTON );
  	int	b = GetAsyncKeyState( VK_XBUTTON1 );
  	int	f = GetAsyncKeyState( VK_XBUTTON2 );
 
@@ -110,19 +94,20 @@ void SysMouse::Update()
 	this->B.lo =  this->B.on && !on_b;
 	this->B.on = on_b;
 
-//	this->mx = point.x - this->sx;
-//	this->my = point.y - this->sy;
-//
-//	this->sx = point.x;
-//	this->sy = point.y;
+	// GL座標系
+	{
+		SysWin& win = SysWin::GetInstance();
 
-	this->prev = this->pos;
-	this->mov.x = point.x - this->pos.x;
-	this->mov.y = point.y - this->pos.y;
-	this->pos.x = point.x;
-	this->pos.y = point.y;
+		vect2	gp( (float)point.x, (float)point.y );
+		gp = gp/vect2((float)win.GetWidth()/2,-(float)win.GetHeight()/2)+vect2(-1,1);
+	
+		this->prev = this->pos;
+		this->mov = gp - this->pos;
+		this->pos = gp;
 
-	this->wheel = win.GetWheel();
+	}
+
+	this->wheel = (float)win.GetWheel();
 
 //cout << wheel << endl;
 

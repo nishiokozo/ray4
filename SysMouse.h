@@ -18,6 +18,11 @@ class SysMouse
 
 	SysMouse();		//	間違って直接生成しないようにprivateで定義しておく
 	~SysMouse();	//	間違って直接生成しないようにprivateで定義しておく
+#if 0
+	vect2	prev;	//	マウスカーソル位置旧
+	vect2	pos;	//	マウスカーソル位置
+	vect2	mov;	//	マウスカーソル移動量
+#endif
 
 public:
 	static SysMouse& GetInstance();
@@ -28,9 +33,10 @@ public:
 	Keyobj	F;	//フォワードボタン
 	Keyobj	B;	//バックボタン
 
-	vect2	prev;	//	マウスカーソル位置旧
-	vect2	pos;	//	マウスカーソル位置
-	vect2	mov;	//	マウスカーソル移動量
+
+	vect2	prev;	//	マウスカーソル位置旧 GL座標
+	vect2	pos;	//	マウスカーソル位置 GL座標
+	vect2	mov;	//	マウスカーソル移動量 GL座標
 
 //	int	sx;	//	マウスカーソル位置
 //	int	sy;

@@ -4,15 +4,16 @@
 #include <chrono>
 #include <cmath>
 #include <functional>
-using namespace std;
 
 #include "geom.h"
 
 #include "SysGra.h"
 #include "raytrace.h"
 
+using namespace std;
 
-const	static	float INFINIT =  numeric_limits<float>::max();	//DBL_MAX
+
+//const	static	float infinit =  numeric_limits<float>::max();	//FLT_MAX
 
 struct  Material
 {
@@ -50,7 +51,7 @@ struct	Surface : Material
 
 	Surface()
 	{
-		t		= INFINIT;
+		t		= infinit;
 		flg		= false;
 		stat	= 0;
 		Q = vect3(0,0,0);
@@ -132,7 +133,7 @@ public:
 
 		sur.flg = false;
 
-		sur.t  = INFINIT;
+		sur.t  = infinit;
 		sur.stat  = Surface::STAT_NONE;
 		
 		//	球
@@ -397,8 +398,8 @@ public:
 		{
 			for( int px = 0 ; px < width ; px++ )
 			{
-				float x = ((float)px / width) *2.0-1.0;
-				float y = ((float)py / height) *2.0-1.0;
+				float x = ((float)px / (float)width) *2.0-1.0;
+				float y = ((float)py / (float)height) *2.0-1.0;
 				vect3	P = vect3( x, y, 0 ) + posScr;
 				vect3	I = normalize(P - posEye);
 
@@ -444,16 +445,16 @@ void	raytrace( SysGra& gra )
 		vect3	posEye = vect3(center_x,1.0,-17+8);
 
 		float r,s,p,e,t,rl,rr;
-		vect3	C;
+		rgb	C;
 
 		int	cntMax = 0;
 		int	cntRay = 0;
-//		for( int py = 0 ; py < height ; py++ )
+		for( int py = 0 ; py < height ; py++ )
 		{
-//			for( int px = 0 ; px < width ; px++ )
+			for( int px = 0 ; px < width ; px++ )
 			{
-				float x = ((float)px / width) *2.0*aspect-1.0;
-				float y = ((float)py / height) *2.0-1.0;
+				float x = ((float)px / (float)width) *2.0-1.0;
+				float y = ((float)py / (float)height) *2.0-1.0;
 				vect3	P = vect3( x, y, 0 ) + posScr;
 				vect3	I = normalize(P - posEye);
 
@@ -465,13 +466,22 @@ void	raytrace( SysGra& gra )
 				if ( ren.m_cntRay > cntMax ) cntMax = ren.m_cntRay;
 				cntRay+= ren.m_cntRay;
 
-				gra.Pset( cv(vect2(px,height-py)) ,vect3(C.r,C.g,C.b));
+//				gra.Pset( gra.Conv(vect2(px,height-py)) ,C);
+if (C.r<0 ) C.r = 0;
+if (C.r>1.0 ) C.r = 1.0;
+if (C.g<0 ) C.g = 0;
+if (C.g>1.0 ) C.g = 1.0;
+if (C.b<0 ) C.b = 0;
+if (C.b>1.0 ) C.b = 1.0;
+				gra.Pset( vect2(x,y) ,C);
+//cout << x << " " << y<<endl;
+//				gra.Pset( gra.Conv(vect2(px,height-py)) ,rgb(1,1,1));
 			}
 		}
 		
-		px++;
-		if ( px >= width ) {px = 0;py++;}
-		if ( py >= height ) py = 0;
+//		px++;
+//		if ( px >= width ) {px = 0;py++;}
+//		if ( py >= height ) py = 0;
 	}
 
 }

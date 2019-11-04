@@ -1,8 +1,9 @@
 #include <iostream>
-using namespace std;
 #include "SysKeys.h"
 
 #include <windows.h>
+
+using namespace std;
 
 // WinAPI由来の情報。表に出さないためにここで定義
 static struct Winapi_key
@@ -660,6 +661,11 @@ void SysKeys::Update()
 	this->_9.hi			= g.tbl_hi[ (int)'9' ];			// 
 	this->_9.lo			= g.tbl_lo[ (int)'9' ];			// 
 	this->_9.rep		= g.tbl_rep[ (int)'9' ];			// 
+
+	this->_0.on			= g.tbl_on[ (int)'0' ];			// 
+	this->_0.hi			= g.tbl_hi[ (int)'0' ];			// 
+	this->_0.lo			= g.tbl_lo[ (int)'0' ];			// 
+	this->_0.rep		= g.tbl_rep[ (int)'0' ];			// 
 
 	this->SEMICOLON.on	= g.tbl_on[ VK_OEM_1 ];			// BA
 	this->SEMICOLON.hi	= g.tbl_hi[ VK_OEM_1 ];			// BA

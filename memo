@@ -1,0 +1,29 @@
+{
+	float a = 1;	//加速度
+	float v = 0;	//速度
+	float s = 0;	//位置
+
+	for ( float t = 0 ; t < 10 ; t+=1 )
+	{
+		v += a;
+		s += v;
+
+		pset2d( t, s, rgb(0,1,0) );
+		print2d( t, s, to_string(s) );
+	}
+}
+
+{
+	float a = 1;	//加速度
+	float v = 0;	//速度
+	float s = 0;	//位置
+
+	for ( float t = 0 ; t < 10 ; t+=1 )
+	{
+		v = a * t;
+		s = v * t/2;
+
+		pset2d( t, s, rgb(0,1,0) );
+		print2d( t, s, to_string(s) );
+	};
+}

@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <map>
 #include <thread>
 #include <chrono>
 #include <cmath>
@@ -10,7 +11,8 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-using namespace std;
+#include <iomanip>
+#include <tuple>
 
 #include "geom.h"
 
@@ -20,1951 +22,1017 @@ using namespace std;
 #include "SysGra.h"
 #include "Sys.h"
 
-#include "raytrace.h"
-#include "obj.h"
+#include "func.h"
 #include "pers.h"
-#include "bone.h"
 
-		static vect3	g_dummy = vect3(0,0,0);
+#include "raytrace.h"
+#include "skeleton.h"
+#include "gui.h"
+
+#include "lab.h"
+
+using namespace std;
+
+
+
+struct Cutmull
+{
+	bool	bActive = false;	//	使用可能
+
+	int idxTbl = 0;
+
+	~Cutmull()
+	{
+		for ( Obj* p : tblPoint ) delete p;
+	}
+	
+	
+	vector<Obj*>	tblPoint =
+	{
+		new Obj( vect3(	-0.5,	0.12,	-0.5) ),
+		new Obj( vect3(	+0.5,	0.12,	-0.5) ),
+		new Obj( vect3(	+0.9,	0.12,	 0.5) ),
+		new Obj( vect3(	 0.0,	0.12,	 0.5) ),
+		new Obj( vect3(	-0.9,	0.12,	 0.5) ),
+
+		new Obj( vect3(	-0.5,	0.12,	-0.5)*1.2 ),
+		new Obj( vect3(	+0.5,	0.12,	-0.5)*1.2 ),
+		new Obj( vect3(	+0.9,	0.12,	 0.5)*1.2 ),
+		new Obj( vect3(	0.0,	0.12,	 0.5)*1.2 ),
+		new Obj( vect3(	-0.9,	0.12,	 0.5)*1.2 ),
+	};
+	
+
+	vector<ivect2>	tblIdx =
+	{
+		{0,5},
+		{1,6},
+		{2,7},
+		{3,8},
+		{4,9},
+	};
+
+
+	vector<Edge*> tblDummy;		//	空のまま
+
+	//------------------------------------------------------------------------------
+	void drawPoint( SysGra& gra, Pers& pers, vector<Obj*>& tblPoint )
+	//------------------------------------------------------------------------------
+	{
+		int cnt = 0 ;
+		gra.SetZTest(false);
+		for ( Obj* p : tblPoint )
+		{
+			vect3 v = pers.calcWorldToScreen3( p->pos );
+			if ( v.z > 0 )
+			{
+				if ( p->bSelected ) 
+						gra.Pset( v, rgb(1,0,0), 11 ); 
+				else	gra.Pset( v, rgb(0,0,1), 11 ); 
+
+				gra.Print( v.xy() + gra.Dot(16,-12), to_string(cnt) ); 
+			}
+			cnt++;
+		}
+		gra.SetZTest(true);
+	}
+
+	//------------------------------------------------------------------------------
+	void drawCutmull( SysGra& gra, Pers& pers, vector<Obj*> tbl, vector<ivect2>idx )
+	//------------------------------------------------------------------------------
+	{
+		// 描画 カーブ
+		function<void()> func = [&]()
+		{
+			rgb	col(1,1,1);
+			int size = (signed)idx.size();
+			vect3	v0;
+			vect3	v2;
+			vect3	w0;
+			vect3	w2;
+			for ( int i = 0 ; i < size ; i++ )
+			{
+				int n0 = idx[i].n0;
+				int n1 = idx[(i+1)%size].n0;
+				int n2 = idx[(i+2)%size].n0;
+				int n3 = idx[(i+3)%size].n0;
+
+				int m0 = idx[i].n1;
+				int m1 = idx[(i+1)%size].n1;
+				int m2 = idx[(i+2)%size].n1;
+				int m3 = idx[(i+3)%size].n1;
+			
+				vect3 P0 = tbl[n0]->pos;
+				vect3 P1 = tbl[n1]->pos;
+				vect3 P2 = tbl[n2]->pos;
+				vect3 P3 = tbl[n3]->pos;
+
+				vect3 Q0 = tbl[m0]->pos;
+				vect3 Q1 = tbl[m1]->pos;
+				vect3 Q2 = tbl[m2]->pos;
+				vect3 Q3 = tbl[m3]->pos;
+				
+				for ( float t = 0.0 ; t < 1.0 ; t+=0.1 )
+				{
+					vect3 v1 = func_catmull3(t, P0,P1,P2,P3 );
+					vect3 w1 = func_catmull3(t, Q0,Q1,Q2,Q3 );
+					if ( (i==0 && t==0) ) 
+					{
+						v2=v1;
+						w2=w1;
+					}
+					else 
+					{
+						pers.line3d( gra, pers, v0, v1, col);
+						pers.line3d( gra, pers, w0, w1, col);
+						pers.line3d( gra, pers, w1, v1, col);
+
+						{
+							vect3 a = v0;a.y=0;
+							vect3 b = v1;b.y=0;
+							pers.line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
+						}
+						{
+							vect3 a = w0;a.y=0;
+							vect3 b = w1;b.y=0;
+							pers.line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
+						}
+
+					}
+
+						{
+							vect3 nx,ny,nz;
+							nz = (v1-v0).normalize();
+							ny = vect3(0,1,0);
+							nx = cross(nz,ny).normalize();
+							ny = cross(nx,nz).normalize();
+
+							mat33	m(
+								nx.x,	nx.y,	nx.z,
+								ny.x,	ny.y,	ny.z,
+								nz.x,	nz.y,	nz.z
+							);
+
+							//square.DrawSquare( gra, pers, v1, m, false  );
+						}
+
+
+					v0 = v1;
+					w0 = w1;
+				}
+			}
+			pers.line3d( gra, pers, v0, v2, col);
+			pers.line3d( gra, pers, w0, w2, col);
+			pers.line3d( gra, pers, w2, v2, col );
+			{
+				vect3 a = v0;a.y=0;
+				vect3 b = v2;b.y=0;
+				pers.line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
+			}
+			{
+				vect3 a = w0;a.y=0;
+				vect3 b = w2;b.y=0;
+				pers.line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
+			}
+		};
+		func();
+	}
+};
+
+struct Bezier
+{
+	bool	bActive = false;	//	使用可能
+
+	int idxTbl = 0;
+
+	~Bezier()
+	{
+		for ( Obj* p : tblPoint ) delete p;
+	}
+
+	vector<Obj*> tblPoint =
+	{
+		new Point3(vect3(-1.0, 0.0, 0.0 ),vect3( 0.0, 0.0, 1.0 ),vect3( 0.0, 0.0,-1.0 )),
+		new Point3(vect3( 1.0, 0.0, 0.0 ),vect3( 0.0, 0.0,-1.0 ),vect3( 0.0, 0.0, 1.0 )),
+
+	};
+
+	vector<int>	idxPoint =
+	{
+		0,1,0
+	};
+
+	vector<Edge*> tblDummy;		//	空のまま
+	//------------------------------------------------------------------------------
+	void exec_drawBezier( SysGra& gra, Pers& pers, vector<Obj*>& tblPoint, vector<int>& idxPoint, int idxTbl , vect3& P, vect3& I, bool bSerch, bool bCut )
+	//------------------------------------------------------------------------------
+	{
+		//ベジェ計算＆描画
+		int div = 10;
+		float dt = 1/(float)div;
+
+		int size = static_cast<signed>(idxPoint.size());
+
+		float	mind = infinit;
+		vect3	minQ1;
+		vect3	minQ0;
+		vect3	minQ;
+		int		minn;
+		float	mint;
+		vect3	mindt;
+		bool	minb = false;
+		vect3	minv;
+
+		for ( int n = 0 ; n < size-1 ; n++ )
+		{
+			int n0 = idxPoint[n];
+			int n1 = idxPoint[n+1];
+
+			Point3* p0 = dynamic_cast<Point3*>(tblPoint[n0]);
+			Point3* p1 = dynamic_cast<Point3*>(tblPoint[n1]);
+
+			vect3 P0 =     p0->pos;
+			vect3 P1 = P0 +p0->b;
+			vect3 P3 =     p1->pos;
+			vect3 P2 = P3 +p1->a;
+
+			float t  = dt;
+			vect3 pos0 = p0->pos;
+			for ( int i = 0 ; i < div ; i++ )
+			{
+				vect3 pos1 = func_bezier3( t, P0, P1, P2, P3 );
+				pers.line3d( gra, pers, pos0, pos1, rgb(1,1,1) );
+
+				// マウスベクトルとの最近点
+				if ( bSerch )
+				{
+					auto[b,d,Q0,Q1,t0,t1] = func_distance_Line_Segline( P, I, pos0, pos1 );
+					if ( b ) 
+					{
+						if ( mind > d && 0.2 > d )
+						{
+							minb	= true;
+							mind	= d;
+							minn	= n;
+
+							minQ0 = Q0;
+							minQ1 = Q1;
+
+							mint	= t-(1/(float)div) + (t1/(pos1-pos0).abs())/((float)div);
+							minQ	= func_bezier3( mint, P0, P1, P2, P3 );
+							mindt	= func_bezier3_delta( mint, P0, P1, P2, P3 );
+
+							minv = (minQ-Q0).normalize();
+						}
+					}
+
+				}
+
+				pos0=pos1;
+				t+=dt;
+			}
+
+		}
+
+		// マウスベクトルとの最近点表示
+		gra.SetZTest( false );
+		if ( minb ) 
+		{
+			pers.pset3d( gra, pers, minQ, rgb(1,0,0), 5 );
+		}
+		gra.SetZTest( true );
+
+		//--------
+		// 切断
+		//--------
+		if ( minb )
+		{
+
+			if ( bCut )
+			{
+				vect3	q = minQ;
+				vect3	v = mindt/3;
+				float	t0 = mint;
+				float	t1 = 1.0-mint;
+
+				// 頂点生成
+				{
+					
+					tblPoint.emplace_back( new Point3( q, -v*t0, v*t1 ) );
+					idxPoint.insert( idxPoint.begin()+minn+1, (signed)tblPoint.size()-1);
+				}
+
+				//	接線計算
+				{
+					Point3* p0 = dynamic_cast<Point3*>(tblPoint[idxPoint[minn+0]]);
+					Point3* p2 = dynamic_cast<Point3*>(tblPoint[idxPoint[minn+2]]);
+					p0->b *= t0;
+					p2->a *= t1;
+				}
+/*
+				gui.rect_mode = Gui::G_CALC::NONE;
+
+
+				// 追加したポイントを選択状態にする
+				{
+					int idx = idxPoint[minn+1];
+					vect3 v = pers.calcWorldToScreen3( minQ );
+					//
+					gui.one.w = v.z;
+					gui.one.idxTbl = idxTbl;
+					gui.one.idxObj = idx;
+					gui.one.bEnable = true;
+					tblPoint[ idx ]->bSelected = true;
+					tblPoint[ idx ]->bPreselect = false;
+					gui.one.bSelected_a = false;
+					gui.one.bSelected_b = false;
+				}
+*/
+			}
+
+			{
+				gra.SetZTest( false );
+				pers.print3d( gra, pers, minQ, -26,-32-20, to_string(mint) ); 
+				gra.SetZTest( true );
+			}
+		}
+
+
+	};
+	
+};
+
+struct SkeletonUtil
+{
+
+	//-------------------------------------------------------------------------
+	void skeleton_update( SysKeys& keys, SysMouse& mouse, Pers& pers, Skeleton& skeleton )
+	//-------------------------------------------------------------------------
+	{
+		if ( skeleton.bActive )
+		{
+
+			if ( skeleton.cur.bSelecting ==false && keys.SHIFT.on && (keys.UP.hi || keys.DOWN.hi || keys.LEFT.hi ||keys.RIGHT.hi) )
+			{
+				skeleton.cur.bSelecting = true;
+				skeleton.cur.selecting_act = skeleton.cur.act;
+				skeleton.cur.selecting_pose = skeleton.cur.pose;
+			}
+			if ( !keys.SHIFT.on && (keys.UP.hi || keys.DOWN.hi || keys.LEFT.hi ||keys.RIGHT.hi) )
+			{
+				skeleton.cur.bSelecting = false;
+			}
+			
+			// キーフレームセーブ
+			if ( keys.CTRL.on && keys.S.hi ) skeleton.SaveSkeleton();
+
+			// キーフレームペースト
+			if ( keys.CTRL.on && keys.V.hi ) skeleton.PastKeyframe();
+
+			// キーフレームコピー
+			if ( keys.CTRL.on && keys.C.hi ) skeleton.CopyKeyframe();
+
+			// キーフレームカット
+			if ( keys.CTRL.on && keys.X.hi ) skeleton.CutKeyframe();
+
+			// キーフレーム追加
+			if ( keys.K.hi ) skeleton.InsertKeyframe();
+
+			// キーフレーム次
+			if ( keys.RIGHT.rep ) skeleton.NextKeyframe();
+
+			// キーフレーム最後
+			if ( keys.CTRL.on && keys.RIGHT.rep ) skeleton.LastKeyframe();
+
+			// キーフレーム前
+			if ( keys.LEFT.rep ) skeleton.PrevKeyframe();
+
+			// キーフレーム先頭
+			if ( keys.CTRL.on && keys.LEFT.rep ) skeleton.TopKeyframe();
+
+			// アニメーション記録
+			if ( keys.I.hi ) skeleton.AddAnimation();
+
+			// アニメーション前
+			if ( keys.UP.rep ) skeleton.PrevAnimation();
+
+			// アニメーション次
+			if ( keys.DOWN.rep ) skeleton.NextAnimation();
+
+			// アニメーションリクエスト
+			if ( keys.P.hi ) skeleton.ReqAnimation();
+
+			// アニメーション再生
+			if ( skeleton.anim.bPlaying )	skeleton.PlayAnimation();
+
+
+			if ( keys._1.hi ) skeleton.stat.bShowBone = !skeleton.stat.bShowBone;
+			if ( keys._2.hi ) skeleton.stat.bShowSkin = !skeleton.stat.bShowSkin;
+			if ( keys._3.hi ) skeleton.stat.bShowLocus = !skeleton.stat.bShowLocus;
+		}
+		
+
+	}
+
+	//-------------------------------------------------------------------------
+	void skeleton_draw( SysGra& gra, SysKeys& keys, SysMouse& mouse, Pers& pers, Skeleton& skeleton, int& text_y )
+	//-------------------------------------------------------------------------
+	{
+		if ( skeleton.bActive == false ) return;
+
+	#if 0 	//剛体実験
+		// 優先度つけ
+		{
+			int n = 0;
+			for ( Obj* po : skeleton.tblPoint )
+			{
+				Joint* p = dynamic_cast<Joint*>(po);
+
+				p->weight = 0.33;
+				if ( n == 2  ) p->weight = 0.000;
+				if ( n == 0  ) p->weight = 0.000;
+				if ( n == 1  ) p->weight = 0.000;
+				if ( n == 3  ) p->weight = 0.000;
+				if ( p->bSelected && mouse.L.on ) p->weight = 0.0;
+				n++;
+			}
+		}
+	#else
+		// 優先度つけ
+		{
+			int n = 0;
+			for ( Obj* po : skeleton.tblPoint )
+			{
+				Joint* p = dynamic_cast<Joint*>(po);
+
+				p->weight = 0.33;
+				if ( p->bSelected && mouse.L.on ) p->weight = 0.0;
+				n++;
+			}
+		}
+	#endif
+
+		//スケルトン更新
+		skeleton.UpdateSkeleton();
+
+
+		// スケルトン 描画
+		skeleton.DrawSkeleton( pers, gra );
+
+		if(1)
+		{
+			mat33	mmune = midentity();
+			static mat33	mkata = midentity();
+			mat33	mhiji = midentity();;
+			mat33	mte = midentity() ;
+			vect3	pos0 = skeleton.tblPoint[0]->pos;
+			vect3	pos1 = skeleton.tblPoint[1]->pos;
+			vect3	p2 = skeleton.tblPoint[2]->pos;
+			vect3	p3 = skeleton.tblPoint[3]->pos;
+			vect3	p4 = skeleton.tblPoint[4]->pos;
+			vect3	p5 = skeleton.tblPoint[5]->pos;
+			// 箱 胸
+			if(1)
+			{
+				vect3 nx,ny,nz;
+				ny = (pos0-p3).normalize();
+				nx = (pos1-p2).normalize();
+				nz = cross(ny,nx).normalize();
+				nx = cross(ny,nz).normalize();
+
+				mmune = mat33(
+					nx.x,	nx.y,	nx.z,
+					ny.x,	ny.y,	ny.z,
+					nz.x,	nz.y,	nz.z
+				);
+
+				pers.DrawBox( gra, pers, pos0, mmune, false, false );
+			}
+			// 箱 肩
+			if(1)
+			{
+				vect3 nx,ny,nz;
+				ny = (p2-p4).normalize();
+				nx = (p2-pos0).normalize();
+				nz = cross(nx,ny).normalize();
+				nx = cross(ny,nz).normalize();
+				nz = cross(nx,ny).normalize();
+
+				mat33	m(
+					nx.x,	nx.y,	nx.z,
+					ny.x,	ny.y,	ny.z,
+					nz.x,	nz.y,	nz.z
+				);
+
+				if ( keys.CTRL.on )		mkata.rotateByAxis( (p4-p2).normalize(), deg2rad(0.5));
+				if ( keys.SHIFT.on )	mkata.rotateByAxis( (p4-p2).normalize(), deg2rad(-0.5));
+				
+				pers.DrawBox( gra, pers, p2, mkata, false, false );
+			}
+			// 箱 肘
+			{
+				vect3 nx,ny,nz;
+				ny = (p2-p4).normalize();
+				nx = cross((p2-p4).normalize(),(p4-p5).normalize()).normalize();
+				nz = cross(nx,ny).normalize();
+
+				mat33	m(
+					nx.x,	nx.y,	nx.z,
+					ny.x,	ny.y,	ny.z,
+					nz.x,	nz.y,	nz.z
+				);	
+				mhiji = m;
+				pers.DrawDrum( gra, pers, p4, mhiji );
+			}
+			// 箱 手
+			if(0)
+			{
+				vect3 nx,ny,nz;
+				ny = (p4-p5).normalize();
+				nx = (p2-pos0).normalize();
+				nz = cross(nx,ny).normalize();
+				nx = cross(ny,nz).normalize();
+				nz = cross(nx,ny).normalize();
+
+				mat33	m(
+					nx.x,	nx.y,	nx.z,
+					ny.x,	ny.y,	ny.z,
+					nz.x,	nz.y,	nz.z
+				);	
+				mte = m;
+				pers.DrawDrum( gra, pers, p5, mte );
+			}
+		}
+
+		// animカーソルビュー cursor
+		{
+			gra.SetZTest( false );
+
+			bool flg = false;
+			for ( int y = 0 ; y < (signed)skeleton.animations.size() ; y++ )
+			{
+				for ( int x = 0 ; x < (signed)skeleton.animations[y].pose.size() ; x++ )
+				{
+					if ( skeleton.cur.bSelecting && ( y == skeleton.cur.selecting_act && x == skeleton.cur.selecting_pose ) ) flg=!flg;
+					if ( skeleton.cur.bSelecting && ( y == skeleton.cur.act && x == skeleton.cur.pose ) ) flg=!flg;
+
+					vect2 v = vect2( (float)x, (float)y )*vect2( 4, 8 ) + vect2(400,16);
+					{
+						gra.Fill( gra.Conv(v), gra.Conv(v+vect2(3,7)), rgb(1,1,1) );
+					}
+
+					if ( y == skeleton.cur.act && x == skeleton.cur.pose )
+					{
+						gra.Fill( gra.Conv(v+vect2(0,4)), gra.Conv(v+vect2(3,7)), rgb(1,0,0) );
+					}
+					
+					if ( flg )
+					{
+						gra.Fill( gra.Conv(v+vect2(0,4)), gra.Conv(v+vect2(3,7)), rgb(1,0,0) );
+					}
+				}
+			}
+
+			gra.SetZTest( true );
+		}
+
+
+		{
+			static bool flgInfo = true;
+			if( keys.F2.hi ) flgInfo = !flgInfo;
+			if ( flgInfo )
+			{
+
+				gra.Print(1,(float)text_y++,string("[ ")+skeleton.filename+" ]");
+				gra.Print(1,(float)text_y++,string("anim=")+to_string(skeleton.cur.act) + string(" cnt=")+to_string(skeleton.animations.size()) ); 
+				if ( skeleton.animations.size() > 0 ) 
+				{
+					gra.Print(1,(float)text_y++,string("pose=")+to_string(skeleton.cur.pose) + string(" cnt=")+to_string(skeleton.animations[skeleton.cur.act].pose.size()) ); 
+				}
+			}
+
+			if ( keys.F1.on )
+			{
+				gra.Print(1,(float)text_y++,string("[F1] help"));
+				gra.Print(1,(float)text_y++,string("[Y] pers -"));
+				gra.Print(1,(float)text_y++,string("[H] pers +"));
+				gra.Print(1,(float)text_y++,string("[L] Load"));
+				gra.Print(1,(float)text_y++,string("[S] Save"));
+				gra.Print(1,(float)text_y++,string("--Keyframe--"));
+				gra.Print(1,(float)text_y++,string("[K] Insert"));
+				gra.Print(1,(float)text_y++,string("[X] Cut"));
+				gra.Print(1,(float)text_y++,string("[C] Copy"));
+				gra.Print(1,(float)text_y++,string("[V] Past"));
+				gra.Print(1,(float)text_y++,string("[LEFT]  -"));
+				gra.Print(1,(float)text_y++,string("[RIGHT] +"));
+				gra.Print(1,(float)text_y++,string("--Animation--"));
+				gra.Print(1,(float)text_y++,string("[I] Add"));
+				gra.Print(1,(float)text_y++,string("[P] Play"));
+				gra.Print(1,(float)text_y++,string("[UP] -"));
+				gra.Print(1,(float)text_y++,string("[DOWN] +"));
+				gra.Print(1,(float)text_y++,string("--Other--"));
+				gra.Print(1,(float)text_y++,string("[1] select 3d"));
+				gra.Print(1,(float)text_y++,string("[2] select 2main"));
+			}
+			else
+			{
+				//gra.Print(vect2(10,16*y++),string("[F1] Help"));
+			}
+		}
+	}
+};
+
+
 
 
 struct Apr : public Sys
 {
+	long long	time_peak = 0;
+	Gui gui;
+	Lab lab;
+	SkeletonUtil	util;
+	Pers pers;
+
 	//------------------------------------------------------------------------------
 	Apr( const char* name, int pos_x, int pos_y, int width, int height ) : Sys( name, pos_x, pos_y, width, height )
 	//------------------------------------------------------------------------------
 	{}
+
 	//------------------------------------------------------------------------------
 	~Apr()
 	//------------------------------------------------------------------------------
 	{}
 
-	long long	time_peak = 0;
-
-	struct Figure
-	{
-		SysGra&	gra;
-		vector<vect2> vert;
-		vector<ivect2> edge;
-		rgb	col;
-		Figure( SysGra& _gra ) : gra(_gra) {}
-
-		void draw( vect2 ofs, float th, rgb col ) const 
-		{
-			for ( ivect2 e : edge )
-			{
-				const vect2& p = vert[e.p];
-				const vect2& n = vert[e.n];
-
-				float x0=p.x*cos(th) - p.y*sin(th) + ofs.x;
-				float y0=p.x*sin(th) + p.y*cos(th) + ofs.y;
-				float x1=n.x*cos(th) - n.y*sin(th) + ofs.x;
-				float y1=n.x*sin(th) + n.y*cos(th) + ofs.y;
-
-				gra.Line( cv(vect2(x0,y0)), cv(vect2(x1,y1)),col);
-			}
-		}
-
-	};
-
-	struct Marker
-	{
-		Obj&	obj;
-
-		Marker( Obj& _obj, int id ) : obj(_obj)
-		{
-			obj.id				= id;
-			obj.bSelected		= false;
-			obj.bRectIn			= false;
-			obj.bRectSelected	= false;
-			obj.bAffectable		= false;
-		}
-		Marker(const Marker& a) : obj(a.obj)
-		{
-			obj.id				= a.obj.id;
-			obj.bSelected		= a.obj.bSelected;
-			obj.bRectIn			= a.obj.bRectIn;
-			obj.bRectSelected	= a.obj.bRectSelected;
-			obj.bAffectable 	= a.obj.bAffectable;
-		}	
-		const Marker&	operator=(Marker&& a){return a;}	
-
-	};
-
-
-
-	struct Joint2 : Obj
-	{
-		vect2 pos;
-		vect2 tension;
-		float len;
-		Joint2( vect2 v )
-		{
-			pos = v;
-			tension = 0;
-			len = 0;
-		}
-		void Move2( vect2 v )
-		{
-			pos += v;
-		}
-		vect2 Pos2()
-		{
-			return pos;
-		}
-		bool IsVisuable()
-		{
-			return true;
-		}
-		virtual ~Joint2(){}
-	};
-	struct Bone2
-	{
-		Joint2& j0;
-		Joint2& j1;
-		float length;
-		Bone2( Joint2& _j0, Joint2& _j1 ) :j0(_j0), j1(_j1){}
-		Bone2( Joint2&& _j0, Joint2&& _j1 ) :j0(_j0), j1(_j1){}
-	};
-	struct Catmull : Obj
-	{
-		vect2	pos;
-		Catmull( const vect2& _pos ) : pos(_pos){}
-
-		void Move2( vect2 v )
-		{
-			pos += v;
-		}
-		vect2 Pos2()
-		{
-			return pos;
-		}
-		bool IsVisuable()
-		{
-			return true;
-		}
-
-	};
-	struct Bezier : Obj
-	{
-		vect2	pos;
-		Bezier( const vect2& _pos ) : pos(_pos){}
-		void Move2( vect2 v )
-		{
-			pos += v;
-		}
-		vect2 Pos2()
-		{
-			return pos;
-		}
-		bool IsVisuable()
-		{
-			return true;
-		}
-	};
-
-	struct PinAxis : Obj
-	{
-		
-		vect3 disp;
-		void Move2( vect2 v )
-		{
-		}
-		vect2 Pos2()
-		{
-			return vect2( disp.x, disp.y );
-		}
-		bool IsVisuable()
-		{
-			return true;
-		}
-	};
-	
-
-
-	struct Selector
-	{
-		enum MODE
-		{
-			MODE_NONE,
-			MODE_2D,
-			MODE_3D,
-		};
-
-		int mode = MODE_NONE;
-
-		vector<Marker>	tblMarker;
-		vect2 rect_pos = vect2(0,0);			//	矩形選択開始位置
-		bool rect_bSelect = false;	//	矩形選択中フラグ
-		struct
-		{
-			float	len;
-			Marker*	pm;
-			int		cnt;
-		} a = {99999,0,0};
-		rgb		colNormal = vect3(0.5,0.5,0);
-		rgb		colSelected = vect3(1,0,0);
-
-		//---------------------------------------------------------------------
-		void clear( vect2 mpos )
-		//---------------------------------------------------------------------
-		{
-			a.len = 9999;
-			a.pm = 0;
-			a.cnt = 0;
-
-			// 最近マーカーを検索
-			for ( Marker& m : tblMarker )
-			{
-				float len = (m.obj.Pos2()-mpos).length();
-				if ( len < 20.0 && a.len > len )
-				{
-					a.len = len;
-					a.pm = &m;
-					a.cnt++;
-				}
-			}
-
-		}
-
-		//---------------------------------------------------------------------
-		void beginRectcursor( vect2 mpos )
-		//---------------------------------------------------------------------
-		{
-			rect_bSelect = true;
-			rect_pos = mpos;
-		}
-
-		//---------------------------------------------------------------------
-		void allclear()
-		//---------------------------------------------------------------------
-		{
-			for ( Marker& m : tblMarker )
-			{
-				m.obj.bSelected = false;
-			}
-		}
-
-		//---------------------------------------------------------------------
-		void selectReverse()
-		//---------------------------------------------------------------------
-		{
-			a.pm->obj.bSelected = !a.pm->obj.bSelected;
-		}
-
-		//---------------------------------------------------------------------
-		void selectAdd()
-		//---------------------------------------------------------------------
-		{
-			a.pm->obj.bSelected = true;
-		}
-
-		//---------------------------------------------------------------------
-		void selectOne()
-		//---------------------------------------------------------------------
-		{
-			for ( Marker& m : tblMarker )
-			{
-				m.obj.bSelected = false;
-			}
-			a.pm->obj.bSelected = true;
-		}
-
-		//---------------------------------------------------------------------
-		void rect_selectReverse( vect2 mpos )
-		//---------------------------------------------------------------------
-		{
-			vect2 v0 = min( rect_pos, mpos );
-			vect2 v1 = max( rect_pos, mpos );
-
-			// 矩形カーソル選択解除
-			for ( Marker& m : tblMarker )
-			{
-				m.obj.bRectIn = false;
-			}
-
-			// 矩形カーソル内マーカーを検索
-			for ( Marker& m : tblMarker )
-			{
-				float len = (m.obj.Pos2()-mpos).length();
-				if ( m.obj.Pos2().x > v0.x && m.obj.Pos2().x < v1.x && m.obj.Pos2().y > v0.y && m.obj.Pos2().y < v1.y )
-				{
-					m.obj.bRectIn = true;
-					m.obj.bRectSelected = !m.obj.bSelected;
-				}
-			}
-		}
-
-		//---------------------------------------------------------------------
-		void rect_selectAdd( vect2 mpos )
-		//---------------------------------------------------------------------
-		{
-			vect2 v0 = min( rect_pos, mpos );
-			vect2 v1 = max( rect_pos, mpos );
-
-			// 矩形カーソル選択解除
-			for ( Marker& m : tblMarker )
-			{
-				m.obj.bRectIn = false;
-			}
-
-			// 矩形カーソル内マーカーを検索
-			for ( Marker& m : tblMarker )
-			{
-				float len = (m.obj.Pos2()-mpos).length();
-				if ( m.obj.Pos2().x > v0.x && m.obj.Pos2().x < v1.x && m.obj.Pos2().y > v0.y && m.obj.Pos2().y < v1.y )
-				{
-					m.obj.bRectIn = true;
-					m.obj.bRectSelected = true;
-				}
-			}
-
-		}
-
-		//---------------------------------------------------------------------
-		void endRect()
-		//---------------------------------------------------------------------
-		{
-			rect_bSelect = false;
-			for ( Marker& m : tblMarker )
-			{
-				if ( m.obj.bRectIn )
-				{
-					m.obj.bSelected = m.obj.bRectSelected;
-				}
-				m.obj.bRectIn = false;
-				m.obj.bRectSelected = false;
-			}
-		}
-		
-		//---------------------------------------------------------------------
-		void drawController2d( vect2 mpos, SysGra& gra )
-		//---------------------------------------------------------------------
-		{
-
-			// 矩形エリア表示
-			if ( rect_bSelect )
-			{
-				vect2 v0 = min( rect_pos, mpos );
-				vect2 v1 = max( rect_pos, mpos );
-				gra.Box( cv(v0), cv(v1), rgb(0,0.5,1));
-			}
-
-			// コントローラー表示
-			for ( Marker m : tblMarker )
-			{
-				if ( m.obj.IsVisuable() )
-				{
-					bool flg =  m.obj.bSelected;
-					
-					if ( m.obj.bRectIn )
-					{
-						flg = m.obj.bRectSelected;
-					}
-					
-					if ( flg )			
-					{
-						gra.Pset( cv(m.obj.Pos2()), colSelected, 9 );
-					}
-					else
-					{
-						gra.Pset( cv(m.obj.Pos2()), colNormal, 9 );
-					}
-				}
-			}
-		}
-	
-		//---------------------------------------------------------------------
-		void drawController3d( vect2 mpos, SysGra& gra )
-		//---------------------------------------------------------------------
-		{
-
-			// 矩形エリア表示
-			if ( rect_bSelect )
-			{
-				vect2 v0 = min( rect_pos, mpos );
-				vect2 v1 = max( rect_pos, mpos );
-				gra.Box( cv(v0) ,cv(v1), rgb(0,0.5,1));
-			}
-
-			// コントローラー表示
-			for ( Marker m : tblMarker )
-			{
-				if ( m.obj.IsVisuable() )
-				{
-					bool flg =  m.obj.bSelected;
-					
-					if ( m.obj.bRectIn )
-					{
-						flg = m.obj.bRectSelected;
-					}
-					
-					if ( flg )			
-					{
-						gra.Pset( cv(m.obj.Pos2()), colSelected, 9 );
-					}
-					else
-					{
-						gra.Pset( cv(m.obj.Pos2()), colNormal, 9 );
-					}
-				}
-			}
-		}
-	
-
-		
-	};
-
-	Selector selector;
-
-	struct Manupirator : Obj
-	{
-		vect3 disp;
-		void Move2( vect2 v )
-		{
-		}
-		vect2 Pos2()
-		{
-			return vect2( disp.x, disp.y );
-		}
-		bool IsVisuable()
-		{
-			return true;
-		}
-
-		bool bAxisX = true;;
-		bool bAxisY = true;;
-		bool bAxisZ = true;;
-
-		vect3	pos = vect3(0,-1,0);
-		bool bActive = true;
-		
-		PinAxis	pinAxisX;
-		PinAxis	pinAxisY;
-		PinAxis	pinAxisZ;
-
-		//------------------------------------------------------------------------------
-		void manupirator_setPos( vect3 _pos )
-		//------------------------------------------------------------------------------
-		{
-			pos = _pos;
-			bActive = true;
-		}
-		//------------------------------------------------------------------------------
-		void manupirator_drawAxis( Apr& apr )
-		//------------------------------------------------------------------------------
-		{
-			{
-					vect3 v0 = apr.pers.calcDisp( pos * apr.pers.cam.mat.invers() );
-					disp = v0;
-				float l = 30;
-				if ( bAxisX  )
-				{
-					vect3 v1 = v0 + vect3( l,0,0) * apr.pers.cam.mat.invers();
-					apr.gra.Line( cv(vect2(v0.x,v0.y)), cv(vect2(v1.x,v1.y)), rgb(1,0,0) );
-	
-					pinAxisX.disp = v1;
-	
-				}
-				if ( bAxisY  )
-				{
-					vect3 v1 = v0 + vect3( 0,l,0) * apr.pers.cam.mat.invers();
-					apr.gra.Line( cv(vect2(v0.x,v0.y)), cv(vect2(v1.x,v1.y)), rgb(0,1,0) );
-	
-					pinAxisY.disp = v1;
-				}
-				if ( bAxisZ )
-				{
-					vect3 v1 = v0 + vect3( 0,0,l) * apr.pers.cam.mat.invers();
-					apr.gra.Line( cv(vect2(v0.x,v0.y)), cv(vect2(v1.x,v1.y)), rgb(0,0,1) );
-	
-					pinAxisZ.disp = v1;
-				}
-			}
-
-
-		}
-	} manupirator;
-
-	
-	Figure figCircle=Figure(gra);
-
-
-
-
-
-
-	Pers pers;
-
-
-	//------------------------------------------------------------------------------
-	void line3d( vect3 p0, vect3 p1, rgb col )
-	//------------------------------------------------------------------------------
-	{
-		float l = 0.2;
-		vect3 a = p0* pers.cam.mat.invers();
-		vect3 b = p1* pers.cam.mat.invers();
-		vect3 v0;
-		vect3 v1;
-		bool flg = pers.calcScissorLine3d( a, b, v0, v1 );
-		if ( flg ) gra.Line( cv(vect2(v0.x,v0.y)), cv(vect2(v1.x,v1.y)), col );
-	}
-
-	//------------------------------------------------------------------------------
-	void circle3d_x( vect3 pos,  float r, rgb col )
-	//------------------------------------------------------------------------------
-	{
-		vect2 v0;
-		for ( int i = 0 ; i <= 360 ; i+=10 )
-		{
-			vect3 p = vect3( 0, r*cos(rad(i)), r*sin(rad(i)) ) + pos;
-			vect3 q = pers.calcDisp( p * pers.cam.mat.invers() );
-			vect2 v1 = vect2( q.x, q.y );
-			if ( i > 0 ) gra.Line( cv(v0), cv(v1), col );
-			v0 = v1;
-		}
-	}
-
-	//------------------------------------------------------------------------------
-	void circle3d_y( vect3 pos,  float r, rgb col )
-	//------------------------------------------------------------------------------
-	{
-		vect2 v0;
-		for ( int i = 0 ; i <= 360 ; i+=10 )
-		{
-			vect3 p = vect3( r*cos(rad(i)), 0, r*sin(rad(i)) ) + pos;
-			vect3 q = pers.calcDisp( p * pers.cam.mat.invers() );
-			vect2 v1 = vect2( q.x, q.y );
-			if ( i > 0 ) gra.Line( cv(v0), cv(v1), col );
-			v0 = v1;
-		}
-	}
-
-	//------------------------------------------------------------------------------
-	void circle3d_z( vect3 pos,  float r, rgb col )
-	//------------------------------------------------------------------------------
-	{
-		vect2 v0;
-		for ( int i = 0 ; i <= 360 ; i+=10 )
-		{
-			vect3 p = vect3( r*cos(rad(i)), r*sin(rad(i)), 0 ) + pos;
-			vect3 q = pers.calcDisp( p * pers.cam.mat.invers() );
-			vect2 v1 = vect2( q.x, q.y );
-			if ( i > 0 ) gra.Line( cv(v0), cv(v1), col );
-			v0 = v1;
-		}
-
-	}
-
-	//------------------------------------------------------------------------------
-	bool funcIntersectPlate( vect3 plate_P, vect3 plate_N, vect3 P , vect3 I, vect3& Q)
-	//------------------------------------------------------------------------------
-	{
-		float	f = dot(plate_N, P - plate_P);
-	//	if ( f > 0 )
-		{
-			float	t = -f/dot( plate_N, I );
-
-			if ( t >= 0 )
-			{
-				Q = I * t + P;
-				return true;
-			}
-		}
-		return false;
-	};
-
-	struct Grid
-	{
-		vect3	pos;
-		int		mode;
-		int		NUM_U;
-		int		NUM_V;
-		float	dt;
-		rgb		col;
-	
-		//------------------------------------------------------------------------------
-		void SetMesh( vect3 _pos, int _mode, int _NUM_U, int _NUM_V, float _dt, rgb _col )
-		//------------------------------------------------------------------------------
-		{	// ミニグリッド
-			pos 	= _pos;
-			mode	= _mode;
-			NUM_U	= _NUM_U;
-			NUM_V	= _NUM_V;
-			dt		= _dt;
-			col	 = _col;
-		}
-		//------------------------------------------------------------------------------
-		void DrawMesh( Apr& apr )
-		//------------------------------------------------------------------------------
-		{	// ミニグリッド
-	//			const int NUM_U = 5;
-	//		float dt = 0.05;
-			vect3 vt = vect3(0,0,0);
-			float du = NUM_U*dt;
-			float dv = NUM_V*dt;
-			vect3 a;
-			vect3 b;
-//			rgb col = vect3(0.2,0.2,0.2)*2;
-			{
-				if ( mode == 0 )
-				{
-					a = pos+vect3(-du, 0,-du);
-					b = pos+vect3( du, 0,-du);
-					vt = vect3(0,0,dt);
-				}
-				if ( mode == 1 )
-				{
-					a = pos+vect3(-du,-du,0);
-					b = pos+vect3( du,-du,0);
-					vt = vect3(0,dt,0);
-				}
-				if ( mode == 2 )
-				{
-					a = pos+vect3( 0,-du,-du);
-					b = pos+vect3( 0, du,-du);
-					vt = vect3(0,0,dt);
-				}
-				for ( int i = 0 ; i < NUM_V*2+1 ; i++ )
-				{
-					apr.line3d( a, b, col );
-					a+=vt;
-					b+=vt;
-				}
-			}			
-			{
-
-				if ( mode == 0 )
-				{
-					a = pos+vect3(-dv, 0, dv);
-					b = pos+vect3(-dv, 0,-dv);
-					vt = vect3(dt,0,0);
-				}
-				if ( mode == 1 )
-				{
-					a = pos+vect3(-dv, dv, 0);
-					b = pos+vect3(-dv,-dv, 0);
-					vt = vect3(dt,0,0);
-				}
-				if ( mode == 2 )
-				{
-					a = pos+vect3( 0,-dv, dv);
-					b = pos+vect3( 0,-dv,-dv);
-					vt = vect3(0,dt,0);
-				}
-				for ( int i = 0 ; i < NUM_U*2+1 ; i++ )
-				{
-					apr.line3d( a, b, col );
-					a+=vt;
-					b+=vt;
-				}
-			}			
-		}
-	};
-	Grid gridGround;
-	Grid gridMini;
-	
-	bool flgInfo = true;
-	
 	//------------------------------------------------------------------------------
 	int main()
 	//------------------------------------------------------------------------------
 	{
-		Figure figArrow=Figure(gra);
-		figArrow.vert.emplace_back( (vect2){   0,20*tan(rad(60))	-10*tan(rad(30)) } );
-		figArrow.vert.emplace_back( (vect2){-10,  0 	    	   	-10*tan(rad(30)) } );
-		figArrow.vert.emplace_back( (vect2){ 10,  0 				-10*tan(rad(30)) } );
-		figArrow.edge.emplace_back( (ivect2){ 0,1 } );
-		figArrow.edge.emplace_back( (ivect2){ 1,2 } );
-		figArrow.edge.emplace_back( (ivect2){ 2,0 } );
-		figArrow.col = vect3(0,0.5,1);
+		int text_y = 0;
 
-		Figure figTriangle=Figure(gra);
-		{
-			const float R=30;
-			figTriangle.vert.emplace_back( (vect2){   0,R*tan(rad(60))	-R*tan(rad(30)) } );
-			figTriangle.vert.emplace_back( (vect2){-R,  0 	    	   	-R*tan(rad(30)) } );
-			figTriangle.vert.emplace_back( (vect2){ R,  0 				-R*tan(rad(30)) } );
-			figTriangle.edge.emplace_back( (ivect2){ 0,1 } );
-			figTriangle.edge.emplace_back( (ivect2){ 1,2 } );
-			figTriangle.edge.emplace_back( (ivect2){ 2,0 } );
-			figTriangle.col = rgb(0,1,1);
-		}
-
-		{
-			int s=0;
-			for ( int i = 0 ; i < 360 ; i+=45 )
-			{
-				float th = i*pi/180.0;
-				float r = 7;
-				vect2 v( r*cos(th), r*sin(th) );
-				figCircle.vert.emplace_back( v );
-				s++;
-			}
-			for ( int i = 0 ; i < s-1 ; i++ )
-			{
-				figCircle.edge.emplace_back( (ivect2){ i,i+1 } );
-			}
-			figCircle.edge.emplace_back( (ivect2){ s-1,0 } );
-		}
-
-		// カトマル曲線2D
-		auto catmull_func = []( float t, const vect2 P0, const vect2 P1, const vect2 P2, const vect2 P3 )
-		{
-			//catmull-Rom 曲線
-			// P(t)=P1*(2t^3-3t^2+1)+m0*(t^3-2t^2+t)+P2*(-2t^3+3t^2)+m1*(t^3-t^2)
-			// m0=(P2-P0)/2
-			// m1=(P3-P1)/2
-
-			vect2 m0 = (P2-P0)/2.0;
-			vect2 m1 = (P3-P1)/2.0;
-			vect2 P =  P1*(  2*t*t*t - 3*t*t +1) + m0*( t*t*t -2*t*t +t )
-					 + P2*( -2*t*t*t + 3*t*t   ) + m1*( t*t*t - t*t );
-
-			return P;
-		};
-
-		vector<Catmull> catmull_tbl =
-		{
-			#define X 700
-			#define Y 50
-			Catmull( vect2(X-+ 0,Y +0) ),
-			Catmull( vect2(X+50,Y+ 60) ),
-			Catmull( vect2(X+ 0,Y+120) ),
-			Catmull( vect2(X+50,Y+180) ),
-			#undef X
-			#undef Y
-		};
-		
-		//3字曲線
-		auto bezier_func = [] ( float t, vect2 P0, vect2 P1, vect2 P2, vect2 P3 )
-		{
-		#if 1
-			vect2 L0=(P1-P0)*t+P0;
-			vect2 L1=(P2-P1)*t+P1;
-			vect2 L2=(P3-P2)*t+P2;
-
-			vect2 M0=(L1-L0)*t+L0;
-			vect2 M1=(L2-L1)*t+L1;
-
-			vect2 Q=(M1-M0)*t+M0;
-		#else
-			float tt = t*t;
-			float ttt = tt*t;
-			vect2 Q=
-				 P3*  ttt
-				+P2*(-ttt*3 +tt*3)
-				+P1*( ttt*3 -tt*6 +t*3)
-				+P0*(-ttt   +tt*3 -t*3 +1)
-				;
-		#endif
-
-			return Q;
-		};
-
-		vector<Bezier> bezier_tbl =
-		{
-			#define X 550
-			#define Y 400
-				Bezier( vect2(X+ 00,Y+90) ),
-				Bezier( vect2(X+ 00,Y+20) ),
-				Bezier( vect2(X+100,Y+90) ),
-				Bezier( vect2(X+100,Y+60) ),
-				Bezier( vect2(X+100,Y+20) ),
-				Bezier( vect2(X+200,Y+60) ),
-				Bezier( vect2(X+200,Y+90) ),
-			#undef X
-			#undef Y
-		};
-
-		//骨---------------------------------------
-		vector<Joint2> tblJoint_2d;
-		tblJoint_2d.reserve(1000);
-		vector<Bone2> tblBone_2d;
-		if(1)
-		{	//	対△
-			int cx=200,cy=300;
-
-			tblJoint_2d.emplace_back( vect2( cx,cy) );
-			tblJoint_2d.emplace_back( vect2( cx-20,cy+60) );
-			tblJoint_2d.emplace_back( vect2( cx+20,cy+60) );
-			tblJoint_2d.emplace_back( vect2( cx+0 ,cy+120) );
-
-			tblBone_2d.emplace_back( tblJoint_2d[0], tblJoint_2d[1] );
-			tblBone_2d.emplace_back( tblJoint_2d[0], tblJoint_2d[2] );
-			tblBone_2d.emplace_back( tblJoint_2d[1], tblJoint_2d[2] );
-			tblBone_2d.emplace_back( tblJoint_2d[1], tblJoint_2d[3] );
-			tblBone_2d.emplace_back( tblJoint_2d[2], tblJoint_2d[3] );
-		}
-		if(0)
-		{	//	四角格子メッシュ
-			int cx=200,cy=300;
-			const int  W=40;
-			const int  H=80;
-			const int  X=2;
-			const int  Y=3;
-			for ( int x = 0 ; x < X ; x++ )
-			{
-				for ( int y = 0 ; y < Y ; y++ )
-				{
-					tblJoint_2d.emplace_back( vect2( x*W+cx,y*H+cy) );
-				}
-			}
-			for ( int y=0 ; y < Y-1 ; y++ )
-			{
-				for ( int x=0 ; x < X ; x++ )
-				{
-					tblBone_2d.emplace_back( tblJoint_2d[x*Y+y], tblJoint_2d[x*Y+y+1] );
-				}
-			}
-			for ( int y=0 ; y < Y ; y++ )
-			{
-				for ( int x=0 ; x < X-1 ; x++ )
-				{
-					tblBone_2d.emplace_back( tblJoint_2d[x*Y+y], tblJoint_2d[(x+1)*Y+y] );
-				}
-			}
-		}
-		if(0)
-		{	//	三角形メッシュ
-			function<void(int,int,int,int)> func = [&]( int v0, int v1, int v2, int n )
-			{ 
-				if ( n > 0 )
-				{
-					int ix = static_cast<signed>(tblJoint_2d.size());
-					tblJoint_2d.emplace_back( vect2( (tblJoint_2d[v0].pos + tblJoint_2d[v1].pos )/2 ) );
-					tblJoint_2d.emplace_back( vect2( (tblJoint_2d[v1].pos + tblJoint_2d[v2].pos )/2 ) );
-					tblJoint_2d.emplace_back( vect2( (tblJoint_2d[v2].pos + tblJoint_2d[v0].pos )/2 ) );
-					
-					func( v0, ix+0, ix+2, n-1 );
-					func( v1, ix+1, ix+0, n-1 );
-					func( v2, ix+2, ix+1, n-1 );
-				}
-				else
-				{
-					tblBone_2d.emplace_back( tblJoint_2d[v0], tblJoint_2d[v1] );
-					tblBone_2d.emplace_back( tblJoint_2d[v1], tblJoint_2d[v2] );
-					tblBone_2d.emplace_back( tblJoint_2d[v2], tblJoint_2d[v0] );
-				}
-			};
-
-			float R=80;
-			tblJoint_2d.emplace_back( vect2(200+0, 500-R*tan(rad(60))	-R*tan(rad(30)) ));
-			tblJoint_2d.emplace_back( vect2(200-R, 500+  	    	   	-R*tan(rad(30))) );
-			tblJoint_2d.emplace_back( vect2(200+R, 500+  				-R*tan(rad(30))) );
-
-			func( 0, 1, 2, 3 );
-			cout << tblJoint_2d.size() << endl;
-		}
-		for ( Bone2& b : tblBone_2d )
-		{
-			b.length = (b.j1.pos - b.j0.pos).length();
-		}
-
-		//人
-
-#if 0 
-		Bone* pPreset = new Bone;
-		{	//	人
-			float cx=0,cy=-160,os=0.01;
-
-			pPreset->tblJoint.emplace_back( os*vect3( cx-10,	cy- 20,	0 )	);//0
-			pPreset->tblJoint.emplace_back( os*vect3( cx+10,	cy- 20,	0 )	);//1
-			pPreset->tblJoint.emplace_back( os*vect3( cx+ 0,	cy+  0,	0 )	);//2
-			pPreset->tblJoint.emplace_back( os*vect3( cx-20,	cy+  0,	0 )	);//3
-			pPreset->tblJoint.emplace_back( os*vect3( cx+20,	cy+  0,	0 )	);//4
-			pPreset->tblJoint.emplace_back( os*vect3( cx+ 0,	cy+ 40,	0 )	);//5
-			pPreset->tblJoint.emplace_back( os*vect3( cx-15,	cy+ 70,	0 )	);//6
-			pPreset->tblJoint.emplace_back( os*vect3( cx+15,	cy+ 70,	0 )	);//7
-			pPreset->tblJoint.emplace_back( os*vect3( cx-15,	cy+115,	0 )	);//8
-			pPreset->tblJoint.emplace_back( os*vect3( cx-15,	cy+160,	0 )	);//9
-			pPreset->tblJoint.emplace_back( os*vect3( cx+15,	cy+115,	0 )	);//10
-			pPreset->tblJoint.emplace_back( os*vect3( cx+15,	cy+160,	0 )	);//11
-			pPreset->tblJoint.emplace_back( os*vect3( cx-20,	cy+ 40,	0 )	);//12
-			pPreset->tblJoint.emplace_back( os*vect3( cx-20,	cy+ 80,	0 )	);//13
-			pPreset->tblJoint.emplace_back( os*vect3( cx+20,	cy+ 40,	0 )	);//14
-			pPreset->tblJoint.emplace_back( os*vect3( cx+20,	cy+ 80,	0 )	);//15
-
-		 	pPreset->tblBone.emplace_back( pPreset->tblJoint, 0, 1 );	//head
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 1, 2 );
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 2, 0 );
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 2, 5 ); //chest
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 5, 3 );
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 3, 2 );
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 2, 4 );
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 4, 5 );
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 5, 7 ); //hip
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 7, 6 );
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 6, 5 );
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 6, 8 ); //leg
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 8, 9 );
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 7,10 ); //leg
-			pPreset->tblBone.emplace_back( pPreset->tblJoint,10,11 );
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 3,12 ); //arm
-			pPreset->tblBone.emplace_back( pPreset->tblJoint,12,13 );
-			pPreset->tblBone.emplace_back( pPreset->tblJoint, 4,14 ); //arm
-			pPreset->tblBone.emplace_back( pPreset->tblJoint,14,15 );
-		}
-		for ( Bone3& b : pPreset->tblBone )	// 関節の距離を決定する。
-		{
-			b.length = (b.j1.pos - b.j0.pos).length();
-		}
-		{
-			int cnt = 0 ;
-			for ( Joint3& j : pPreset->tblJoint )
-			{
-				j.id = cnt++;				//id登録
-			}
-		}
-		for ( Bone3& b : pPreset->tblBone )	// ジョイントに関節の距離を決定する。
-		{
-			b.j1.relative.emplace_back( b.j0 ); 
-			b.j0.relative.emplace_back( b.j1 ); 
-		}
-
-
-		pPreset->animations.emplace_back();
-
-		Bone* pBone = pPreset;
-
-#else
-		unique_ptr<Bone> pBone(new Bone);
-#endif
-				{
-					//読み込み
-					unique_ptr<Bone> pNew(new Bone);
-					pNew->loadMotion( "human.mot" );
-
-					{
-						int id = 0;
-						selector.tblMarker.clear();
-						for ( Joint3& j : pNew->tblJoint )	//マーカー登録
-						{
-							selector.tblMarker.emplace_back( j, id++ );
-						}
-						selector.mode = Selector::MODE_3D;
-					}
-					pBone = move(pNew);
-				}
-
-
-		// 箱
-		struct
-		{
-			float	rx = rad(0);
-			float	ry = rad(0);
-			float	rz = rad(0);
-
-			vect3 pos = {4.5,-0.51,8.5};
-
-			vector<vect3> vert=
-			{
-				{	-0.5,	 0.5,	-0.5	},
-				{	 0.5,	 0.5,	-0.5	},
-				{	-0.5,	-0.5,	-0.5	},
-				{	 0.5,	-0.5,	-0.5	},
-				{	-0.5,	 0.5,	 0.5	},
-				{	 0.5,	 0.5,	 0.5	},
-				{	-0.5,	-0.5,	 0.5	},
-				{	 0.5,	-0.5,	 0.5	},
-			};
-			vector<vect3> disp;
-
-			vector<ivect2>	edge
-			{
-				{	0,	1	},
-				{	1,	3	},
-				{	3,	2	},
-				{	2,	0	},
-				{	4,	5	},
-				{	5,	7	},
-				{	7,	6	},
-				{	6,	4	},
-				{	0,	4	},
-				{	1,	5	},
-				{	2,	6	},
-				{	3,	7	},
-			};
-
-		} box;
-
-
-
-//		Ring	ring;
-
-
-	#if 0
-			// レイトレ
-		while( Update() )
-	 	{
-			raytrace( gra );
-		}
-		return 0;
-	#endif	
-
+		//=================================
+		// 各種Obj 定義
+		//=================================
+		unique_ptr<Skeleton> pSkeleton(new Skeleton);
+		unique_ptr<Bezier> pBezier(new Bezier);
+		unique_ptr<Cutmull> pCutmull(new Cutmull);
 
 		//===========================================================================
 		while( Update() )
 		{
-			// パースペクティブ
-			if (keys.Y.rep) {pers.fovy-=2;cout << pers.fovy <<" "<<1/tan(rad(pers.fovy)) << endl; }
-			if (keys.H.rep) {pers.fovy+=2;cout << pers.fovy <<" "<<1/tan(rad(pers.fovy)) << endl; }
+			text_y = 0;
 
-			// パース更新
-			pers.Update( vect2( m.width, m.height ) );
+			//=================================
+			// カメラ
+			//=================================
+			{
+				// パースペクティブ
+				if (keys.Y.rep) {pers.fovy-=2;cout << pers.fovy <<" "<<1/tan(deg2rad(pers.fovy)) << endl; }
+				if (keys.H.rep) {pers.fovy+=2;cout << pers.fovy <<" "<<1/tan(deg2rad(pers.fovy)) << endl; }
 
+				// パース更新
+				pers.Update( vect2( gra.GetWidth(), gra.GetHeight() ) );
+
+				
+				// カメラ回転
+				if ( (!keys.ALT.on && mouse.R.on && !mouse.L.on && !mouse.M.on) || (keys.ALT.on && !mouse.R.on && mouse.L.on && !mouse.M.on) ) pers.cam.Rotation( -vect3(mouse.mov,0)*18.0f );
+
+				// カメラ平行移動
+				if ( mouse.M.on ) pers.cam.Move( -vect3(mouse.mov,0)/pers.getW((pers.cam.pos-pers.cam.at).abs()));
+
+				// マウスホイールZOOM
+				if ( !keys.ALT.on  ) pers.cam.Zoom( -mouse.wheel*2/gra.GetHeight()/pers.getW((pers.cam.pos-pers.cam.at).abs()) );
+				
+				// カメラ移動
+				if ( (keys.ALT.on && mouse.R.on) || ( mouse.R.on && mouse.L.on ) ) pers.cam.Zoom( -mouse.mov.y/pers.getW((pers.cam.pos-pers.cam.at).abs()) );
+
+				// フォーカス
+				if ( keys.F.hi )	pers.Focus( gui.tbls );
+				
+				// カメラマトリクス計算
+				pers.cam.Update();
+			}
+
+			//=================================
+			// カーソルモード X/Y/Z軸選択モード切替
+			//=================================
+
+			if ( keys.Z.hi + keys.X.hi + keys.C.hi > 0 && keys.Z.on + keys.X.on + keys.C.on == keys.Z.hi + keys.X.hi + keys.C.hi ) 
+			{
+				// 排他的選択
+				pers.axis.bAxisZ = false;
+				pers.axis.bAxisX = false;
+				pers.axis.bAxisY = false;
+				if ( keys.Z.hi ) pers.axis.bAxisZ = true;
+				if ( keys.X.hi ) pers.axis.bAxisX = true;
+				if ( keys.C.hi ) pers.axis.bAxisY = true;
+			}
+			else
+			{
+				// 追加選択
+				if ( keys.Z.on ) pers.axis.bAxisZ = true;
+				if ( keys.X.on ) pers.axis.bAxisX = true;
+				if ( keys.C.on ) pers.axis.bAxisY = true;
+			}
+
+			//=================================
+			// skeleton 入力
+			//=================================
+			util.skeleton_update( keys, mouse, pers, (*pSkeleton) );
+
+
+			//=================================
+			// キーフレームロード
+			//=================================
+			if ( keys.CTRL.on && keys.L.hi ) 
+			{
+				gui.one.bEnable = false;
+				//読み込み
+				unique_ptr<Skeleton> pNew(new Skeleton);
+				pNew->LoadSkeleton( "bone.mot" );
+				pNew->stat.bShowSkin = false;
+				pNew->stat.bShowLocus = false;
+				pSkeleton = move(pNew);
+			}
+			if ( keys.CTRL.on && keys.SEMICOLON.hi ) 
+			{
+				gui.one.bEnable = false;
+				//読み込み
+				unique_ptr<Skeleton> pNew(new Skeleton);
+				pNew->LoadSkeleton( "human.mot" );
+				pNew->stat.bShowSkin = false;
+				pNew->stat.bShowLocus = false;
+				pSkeleton = move(pNew);
+			}
+
+			//=================================
+			// 実験 on/off
+			//=================================
+			if ( keys._0.hi ) 
+			{
+				gui.bShowPoint = !gui.bShowPoint;
+			cout << gui.bShowPoint << endl;
+			}
+			if ( keys._1.hi ) 
+			{
+				gui.one.bEnable = false;
+				(*pBezier).bActive = !(*pBezier).bActive;	//	使用可能
+			}
+			if ( keys._2.hi ) 
+			{
+				gui.one.bEnable = false;
+				(*pCutmull).bActive = !(*pCutmull).bActive;	//	使用可能
+			}
+
+
+
+			//=================================
 			// 画面クリア
+			//=================================
 			gra.Clr(rgb(0.3,0.3,0.3));
 
-			{
-				int y = 10;
-
-				if ( keys.F1.on )
-				{
-					gra.Print(cv(vect2(10,16*y++)),string("[F1] help"));
-					gra.Print(cv(vect2(10,16*y++)),string("[Y] pers -"));
-					gra.Print(cv(vect2(10,16*y++)),string("[H] pers +"));
-					gra.Print(cv(vect2(10,16*y++)),string("[L] Load"));
-					gra.Print(cv(vect2(10,16*y++)),string("[S] Save"));
-					gra.Print(cv(vect2(10,16*y++)),string("--Keyframe--"));
-					gra.Print(cv(vect2(10,16*y++)),string("[K] Insert"));
-					gra.Print(cv(vect2(10,16*y++)),string("[X] Cut"));
-					gra.Print(cv(vect2(10,16*y++)),string("[C] Copy"));
-					gra.Print(cv(vect2(10,16*y++)),string("[V] Past"));
-					gra.Print(cv(vect2(10,16*y++)),string("[LEFT]  -"));
-					gra.Print(cv(vect2(10,16*y++)),string("[RIGHT] +"));
-					gra.Print(cv(vect2(10,16*y++)),string("--Animation--"));
-					gra.Print(cv(vect2(10,16*y++)),string("[I] Add"));
-					gra.Print(cv(vect2(10,16*y++)),string("[P] Play"));
-					gra.Print(cv(vect2(10,16*y++)),string("[UP] -"));
-					gra.Print(cv(vect2(10,16*y++)),string("[DOWN] +"));
-					gra.Print(cv(vect2(10,16*y++)),string("--Other--"));
-					gra.Print(cv(vect2(10,16*y++)),string("[1] select 3d"));
-					gra.Print(cv(vect2(10,16*y++)),string("[2] select 2main"));
-				}
-				else
-				{
-				}
-
-
-				if ( pBone->cur.bSelecting ==false && keys.SHIFT.on && (keys.UP.hi || keys.DOWN.hi || keys.LEFT.hi ||keys.RIGHT.hi) )
-				{
-					pBone->cur.bSelecting = true;
-					pBone->cur.selecting_act = pBone->cur.act;
-					pBone->cur.selecting_pose = pBone->cur.pose;
-				}
-				if ( !keys.SHIFT.on && (keys.UP.hi || keys.DOWN.hi || keys.LEFT.hi ||keys.RIGHT.hi) )
-				{
-					pBone->cur.bSelecting = false;
-				}
-				
-				// キーフレームロード
-				if ( keys.CTRL.on && keys.L.hi ) 
-				{
-					//読み込み
-					unique_ptr<Bone> pNew(new Bone);
-					pNew->loadMotion( "human.mot" );
-
-					{
-						int id = 0;
-						selector.tblMarker.clear();
-						for ( Joint3& j : pNew->tblJoint )	//マーカー登録
-						{
-							selector.tblMarker.emplace_back( j, id++ );
-						}
-						selector.mode = Selector::MODE_3D;
-					}
-					pBone = move(pNew);
-				}
-
-				// キーフレームセーブ
-				if ( keys.CTRL.on && keys.S.hi ) pBone->saveMotion( "human.mot" );
-
-				// キーフレームペースト
-				if ( keys.CTRL.on && keys.V.hi ) pBone->PastKeyframe();
-
-				// キーフレームコピー
-				if ( keys.CTRL.on && keys.C.hi ) pBone->CopyKeyframe();
-
-				// キーフレームカット
-				if ( keys.CTRL.on && keys.X.hi ) pBone->CutKeyframe();
-
-				// キーフレーム追加
-				if ( keys.K.hi ) pBone->InsertKeyframe();
-
-				// キーフレーム次
-				if ( keys.RIGHT.rep ) pBone->NextKeyframe();
-
-				// キーフレーム最後
-				if ( keys.CTRL.on && keys.RIGHT.rep ) pBone->LastKeyframe();
-
-				// キーフレーム前
-				if ( keys.LEFT.rep ) pBone->PrevKeyframe();
-
-				// キーフレーム先頭
-				if ( keys.CTRL.on && keys.LEFT.rep ) pBone->TopKeyframe();
-
-				// アニメーション記録
-				if ( keys.I.hi ) pBone->AddAnimation();
-
-				// アニメーション前
-				if ( keys.UP.rep ) pBone->PrevAnimation();
-
-				// アニメーション次
-				if ( keys.DOWN.rep ) pBone->NextAnimation();
-
-				// アニメーションリクエスト
-				if ( keys.P.hi ) pBone->ReqAnimation();
-
-				// アニメーション再生
-				if ( pBone->anim.bPlaying )	pBone->PlayAnimation();
-
-				// X/Y/Z軸選択モード切替
-			#if 0
-				if ( keys.X.hi ) manupirator.bAxisX = !manupirator.bAxisX;
-				if ( keys.C.hi ) manupirator.bAxisY = !manupirator.bAxisY;
-				if ( keys.Z.hi ) manupirator.bAxisZ = !manupirator.bAxisZ;
-			#else
-				if ( keys.Z.hi ) {manupirator.bAxisZ = true;	manupirator.bAxisX = false;	manupirator.bAxisY = false;}
-				if ( keys.X.hi ) {manupirator.bAxisZ = false;	manupirator.bAxisX = true;	manupirator.bAxisY = false;}
-				if ( keys.C.hi ) {manupirator.bAxisZ = false;	manupirator.bAxisX = false;	manupirator.bAxisY = true;}
-				if ( keys.V.hi ) {manupirator.bAxisZ = true;	manupirator.bAxisX = true;	manupirator.bAxisY = true;}
-			#endif
-			}
-
-			{
-				if( keys.F2.hi ) flgInfo = !flgInfo;
-				if ( flgInfo )
-				{
-				int y = 1;
-					gra.Print( cv(vect2(10,16*y++)),string("fovY:")+to_string(int(pers.fovy)));
-					gra.Print( cv(vect2(10,16*y++)),string("sz:")+to_string(pers.sz) +string(" fy:")+to_string(pers.fy));
-					gra.Print( cv(vect2(10,16*y++)),string("far:")+to_string((pers.cam.pos-pers.cam.at).length())); 
-					gra.Print( cv(vect2(10,16*y++)),string("at  x=")+to_string(pers.cam.at.x)+string(" y=")+to_string(pers.cam.at.y)+string(" z=")+to_string(pers.cam.at.z) ); 
-					gra.Print( cv(vect2(10,16*y++)),string("pos x=")+to_string(pers.cam.pos.x)+string(" y=")+to_string(pers.cam.pos.y)+string(" z=")+to_string(pers.cam.pos.z) ); 
-					gra.Print( cv(vect2(10,16*y++)),string("anim=")+to_string(pBone->cur.act) + string(" cnt=")+to_string(pBone->animations.size()) ); 
-					if ( pBone->animations.size() > 0 ) 
-					{
-						gra.Print( cv(vect2(10,16*y++)),string("pose=")+to_string(pBone->cur.pose) + string(" cnt=")+to_string(pBone->animations[pBone->cur.act].pose.size()) ); 
-					}
-					gra.Print( cv(vect2(10,16*y++)),string("peak=")+to_string(time_peak/1000)+string("msec") ); 
-				}
-
-			}
-
-			// animカーソルビュー cursor
-			{
-				bool flg = false;
-				for ( int y = 0 ; y < (signed)pBone->animations.size() ; y++ )
-				{
-					for ( int x = 0 ; x < (signed)pBone->animations[y].pose.size() ; x++ )
-					{
-						if ( pBone->cur.bSelecting && ( y == pBone->cur.selecting_act && x == pBone->cur.selecting_pose ) ) flg=!flg;
-						if ( pBone->cur.bSelecting && ( y == pBone->cur.act && x == pBone->cur.pose ) ) flg=!flg;
-
-						vect2 v = vect2( x, y )*vect2( 4, 8 ) + vect2(400,16);
-						{
-							gra.Fill( cv(v), cv(v+vect2(3,7)), rgb(1,1,1) );
-						}
-
-						if ( y == pBone->cur.act && x == pBone->cur.pose )
-						{
-							gra.Fill( cv(v+vect2(0,4)), cv(v+vect2(3,7)), rgb(1,0,0) );
-						}
-						
-						if ( flg )
-						{
-							gra.Fill( cv(v+vect2(0,4)), cv(v+vect2(3,7)), rgb(1,0,0) );
-						}
-					}
-				}
-			}
-			
-
-
-
-
-			// カメラ回転
-			if ( (!keys.ALT.on && mouse.R.on) || (keys.ALT.on && mouse.L.on) ) pers.cam.Rotation( vect3(-mouse.mov.x/28,-mouse.mov.y/28,0) );
-
-			// カメラ平行移動
-			if ( mouse.M.on ) pers.cam.Move( vect3(-mouse.mov.x,-mouse.mov.y,0)/pers.height/pers.getW((pers.cam.pos-pers.cam.at).length()));
-
-			// マウスホイールZOOM
-			if ( !keys.ALT.on  ) pers.cam.Zoom( -mouse.wheel*1.5 /pers.height/pers.getW((pers.cam.pos-pers.cam.at).length()) );
-			
-			// カメラ移動
-			if ( keys.ALT.on && mouse.R.on ) pers.cam.Zoom( mouse.mov.y*3/pers.height/pers.getW((pers.cam.pos-pers.cam.at).length()) );
-			
-			// カメラマトリクス計算
-			{
-				pers.cam.mat.LookAt( pers.cam.pos, pers.cam.at, pers.cam.up );
-			}
-
-			// カメラ注視点表示
-			{
-				vect3 v = pers.calcDisp(pers.cam.at*pers.cam.mat.invers());
-				if ( v.z > 0 ) 
-				{
-				}
-			}
-
-			// グリッドgridMini
-			{
-				const int NUM = 10;
-
-				gridGround.SetMesh( vect3(0,0,0), 0, NUM, NUM, 1, vect3(0.2,0.2,0.2) );
-				gridGround.DrawMesh( *this );
-			}
-//===			
-			// 箱
-			//calcDisp rotate
-			box.disp.clear();
-			for ( vect3 v : box.vert )
-			{
-
-	#if 0
-				float	x,y,z;
-				//box.rz
-				x=v.x*cos(box.rz) - v.y*sin(box.rz) + v.z *0;
-				y=v.x*sin(box.rz) + v.y*cos(box.rz) + v.z *0;
-				z=v.x* 0      + v.y*0       + v.z *1;
-				v.x=x;
-				v.y=y;
-				v.z=z;
-
-				//box.rx
-				x=v.x;
-				y=v.y*cos(box.rx) - v.z*sin(box.rx);
-				z=v.y*sin(box.rx) + v.z*cos(box.rx);
-				v.x=x;
-				v.y=y;
-				v.z=z;
-
-				//box.ry
-				x=v.x*cos(box.ry) - v.z*sin(box.ry);
-				y=v.y;
-				z=v.x*sin(box.ry) + v.z*cos(box.ry);
-				v.x=x;
-				v.y=y;
-				v.z=z;
-	#else
-				//	右手系座標系
-				//	右手ねじ周り
-				//	roll	:z	奥+
-				//	pitch	:x	右+
-				//	yaw		:y	下+
-
-//				box.rx+=rad(0.03);
-//				box.ry+=rad(0.05);
-//				box.rz+=rad(0.1);
-	/*
-				mat44 rotx(
-					1.0			,	0.0			,	0.0			,	0.0	,
-					0.0			,	 cos(box.rx)	,	-sin(box.rx)	,	0.0	,
-					0.0			,	 sin(box.rx)	,	 cos(box.rx)	,	0.0	,
-					0.0			,	0.0			,	0.0			,	0.0	
-				);
-
-				mat44 roty(
-					 cos(box.ry)	,	0.0			,	 sin(box.ry)	,	0.0	,
-					 0.0		,	1.0			,	0.0			,	0.0	,
-					-sin(box.ry)	,	0.0			,	 cos(box.ry)	,	0.0	,
-					 0.0		,	0.0			,	0.0			,	0.0	
-				);
-
-				mat44 rotz(
-					 cos(box.rz)	,	-sin(box.rz)	,	0.0			,	0.0	,
-					 sin(box.rz)	,	 cos(box.rz)	,	0.0			,	0.0	,
-					0.0			,	0.0			,	1.0			,	0.0	,
-					0.0			,	0.0			,	0.0			,	0.0	
-				);
-	*/
-				mat44	rotx;
-				mat44	roty;
-				mat44	rotz;
-				rotx.setRotateX(box.rx);
-				roty.setRotateY(box.ry);
-				rotz.setRotateZ(box.rz);
-		
-
-	#if 0
-				v= rotx *v ;
-				v= roty *v ;
-				v= rotz *v ;
-	#else
-				v= rotx * roty * rotz *v + box.pos ;
-	#endif
-
-
-				
-	#endif
-
-				v = v * pers.cam.mat.invers();
-
-				box.disp.emplace_back( v );
-
-			}
-			
-			
-			// 箱
-			for ( ivect2 e : box.edge )
-			{
-				const vect3& a = box.disp[e.p];
-				const vect3& b = box.disp[e.n];
-
-
-				vect3 v0;
-				vect3 v1;
-				bool flg = pers.calcScissorLine3d( a, b, v0, v1 );
-				if ( flg )
-				{
-					gra.Line( cv(vect2(v0.x,v0.y)), cv(vect2(v1.x,v1.y)), rgb(0,1,1));
-				}
-
-			}
-
-
-			// カトマル
-			{
-				// マーカースプライン変換表示
-				{
-					float div = 10;
-					float dt = 1/div;
-
-					for ( int n = -1 ; n < static_cast<signed>(catmull_tbl.size())-3+1 ; n++ )
-					{
-						int n0 = n;
-						int n1 = n+1;
-						int n2 = n+2;
-						int n3 = n+3;
-						if ( n0 < 0 ) n0 = 0;
-						if ( n3 >= static_cast<signed>(catmull_tbl.size()) ) n3 = n2;
-					
-						float t = dt;
-						vect2 v0 = catmull_func(0, catmull_tbl[n0].pos, catmull_tbl[n1].pos, catmull_tbl[n2].pos, catmull_tbl[n3].pos );
-						for ( int i = 0 ; i <div ; i++ )
-						{
-							vect2 v1 = catmull_func(t, catmull_tbl[n0].pos, catmull_tbl[n1].pos, catmull_tbl[n2].pos, catmull_tbl[n3].pos );
-							gra.Line( cv(v1), cv(v0), rgb(1,1,1));
-							gra.Pset( cv(v1), rgb(1,1,1), 3);
-							v0=v1;
-							t+=dt;
-
-						}	
-							
-					}
-				}
-			}
-
-
-			
-
-			// ベジェ 三次曲線
-			{
-				{//ベジェ計算＆描画
-					float div = 20;
-					float dt = 1/div;
-
-					for ( int n = 0 ; n < static_cast<signed>(bezier_tbl.size())-3 ; n+=3 )
-					{
-						float t  = dt;
-						vect2 v0 = bezier_tbl[n+0].pos;
-						for ( int i = 0 ; i < div ; i++ )
-						{
-							vect2 v1 = bezier_func( t, bezier_tbl[n+0].pos, bezier_tbl[n+1].pos, bezier_tbl[n+2].pos, bezier_tbl[n+3].pos );
-							gra.Line( cv(v0), cv(v1), rgb(1,1,1));
-							gra.Pset( cv(v1), rgb(1,1,1), 3);
-							v0=v1;
-							t+=dt;
-						}
-					}
-
-				}
-
-				{// 補助ライン描画
-					int cnt = 0;
-					vect2 v0 = bezier_tbl[0].pos;
-					for ( int i = 1 ; i < static_cast<signed>(bezier_tbl.size()) ; i++ )
-					{ 
-						vect2 v1 = bezier_tbl[i].pos;
-						if ( cnt != 1 ) 
-						{
-							gra.Line( cv(v0), cv(v1), rgb(0,1,0));
-						}
-						v0 = v1;
-						cnt = (cnt+1)%3;
-					}
-				}
-
-			}
-
-			static vect2 gv1;
-			if(1)
-			{//ベジェアニメーション
-		
-				static	float t = 0;
-				static	bool	bForward = true;
-
-				static int n = 0;
-				gv1 = bezier_func( t, bezier_tbl[n+0].pos, bezier_tbl[n+1].pos, bezier_tbl[n+2].pos, bezier_tbl[n+3].pos );
-
-				gra.Pset( cv(gv1), rgb(1,1,1), 5);
-
-				if ( bForward ) t+=0.01; else t-=0.01;
-
-
-				if ( t >= 1.0 ) 
-				{
-					if ( n+3 < static_cast<signed>(bezier_tbl.size())-3 )
-					{
-						t = 0;
-						n+=3;
-					}
-					else
-					{
-						t = 1.0;
-						bForward = !bForward;
-					}
-				}
-				else
-				if ( t <= 0.0 ) 
-				{
-					if ( n >= 3 )
-					{
-						t = 1.0;
-						n-=3;
-					}
-					else
-					{
-						t = 0.0;
-						bForward = !bForward;
-					}
-				}
-			}
-
-			static vect2 gv2;
-			if(1)
-			{//カトマルアニメーション
-		
-				static	float t = 0;
-				static	bool	bForward = true;
-
-				static int n = 0;
-				int n0 = n-1;
-				int n1 = n;
-				int n2 = n+1;
-				int n3 = n+2;
-				if ( n0<0 ) n0 = 0;
-				if ( n3>=static_cast<signed>(catmull_tbl.size()) ) n3 =n2;
-
-				gv2 = catmull_func( t, catmull_tbl[n0].pos, catmull_tbl[n1].pos, catmull_tbl[n2].pos, catmull_tbl[n3].pos );
-
-				gra.Pset( cv(gv2), rgb(1,1,1), 5);
-
-				if ( bForward ) t+=0.01; else t-=0.01;
-
-
-				if ( t >= 1.0 ) 
-				{
-					if ( n+1 < static_cast<signed>(catmull_tbl.size())-1 )
-					{
-						t = 0;
-						n+=1;
-					}
-					else
-					{
-						t = 1.0;
-						bForward = !bForward;
-					}
-				}
-				else
-				if ( t <= 0.0 ) 
-				{
-					if ( n >= 1 )
-					{
-						t = 1.0;
-						n-=1;
-					}
-					else
-					{
-						t = 0.0;
-						bForward = !bForward;
-					}
-				}
-			}
-
-
-			
-
-			// マーカー登録
-			{
-				if ( keys._3.hi )	//マニュピレーター
-				{
-					selector.mode = Selector::MODE_3D;
-					int id = 0;
-					selector.tblMarker.clear();
-											// マニュピレーターのマーカー登録
-							selector.tblMarker.emplace_back( manupirator, id++ );
-							selector.tblMarker.emplace_back( manupirator.pinAxisX, id++ );
-							selector.tblMarker.emplace_back( manupirator.pinAxisY, id++ );
-							selector.tblMarker.emplace_back( manupirator.pinAxisZ, id++ );
-
-
-				}
-				if ( keys._2.hi )	//2D
-				{
-					int id = 0;
-					selector.tblMarker.clear();
-					for ( Catmull& c : catmull_tbl )	// マーカー対象に位置を登録
-					{
-						selector.tblMarker.emplace_back( c, id++ );
-					}
-					for ( Bezier& b : bezier_tbl )	// マーカー対象に位置を登録
-					{
-						selector.tblMarker.emplace_back( b, id++ );
-					}
-					for ( Joint2& j : tblJoint_2d )	//マーカー対象に位置を登録
-					{
-						selector.tblMarker.emplace_back( j, id++ );
-					}
-					selector.mode = Selector::MODE_2D;
-				}
-				if ( keys._1.hi )	//3D human
-				{
-					int id = 0;
-					selector.tblMarker.clear();
-					for ( Joint3& j : pBone->tblJoint )	//マーカー登録
-					{
-						selector.tblMarker.emplace_back( j, id++ );
-					}
-				}
-
-			}
-
-
-
-			// マーカー操作	
-			{
-				// 最近マーカー初期化
-				if ( !keys.ALT.on && mouse.L.hi ) selector.clear( mouse.pos );
-
-				// 矩形カーソル開始
-				if ( !keys.ALT.on && mouse.L.hi && selector.a.pm == 0 ) selector.beginRectcursor( mouse.pos );
-
-				// マーカー全解除
-				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && !selector.a.pm ) 
-				{
-					selector.allclear();
-					manupirator.bAxisZ = true;	manupirator.bAxisX = true;	manupirator.bAxisY = true;
-				}
-
-				// マーカー 反転選択
-				if ( !keys.ALT.on && mouse.L.hi &&  keys.CTRL.on && !keys.SHIFT.on &&  selector.a.pm ) selector.selectReverse();
-
-				//	マーカー 追加選択 
-				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on &&  keys.SHIFT.on &&  selector.a.pm ) selector.selectAdd();
-
-				//	マーカー 単独選択 
-				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on &&  selector.a.pm && selector.a.pm->obj.bSelected == false ) selector.selectOne();
-
-				// 矩形カーソル 反転 選択	
-				if ( !keys.ALT.on && mouse.L.on &&  keys.CTRL.on && !keys.SHIFT.on &&  selector.rect_bSelect ) selector.rect_selectReverse( mouse.pos );
-
-				// 矩形カーソル 追加選択	
-				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on &&  selector.rect_bSelect ) selector.rect_selectAdd( mouse.pos );
-
-				// 矩形カーソル解除	
-				if ( !keys.ALT.on && !mouse.L.on &&  selector.rect_bSelect ) selector.endRect();
-
-				// マーカー移動準備
-				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && !selector.rect_bSelect ) 
-				{
-					if ( selector.mode == Selector::MODE_3D )
-					{
-
-						#if 1
-						if ( selector.a.pm )
-						{
-							// 優先度つけ
-							for ( Joint3& j : pBone->tblJoint )
-							{
-								j.priority = 999;
-							}
-							function<void( Joint3&,int)> funcSetPriority = [&funcSetPriority] ( Joint3& j, int prio )
-							{
-								j.priority = prio;
-								for ( Joint3& r : j.relative )
-								{
-									if ( r.priority > prio+1 ) funcSetPriority( r, prio+1 );
-								}
-							};
-							
-							Joint3* pj = dynamic_cast<Joint3*>(&selector.a.pm->obj);
-							if ( pj ) funcSetPriority( *pj, 1 );
-						}
-						#endif
-
-
-						// 3Dマーカー移動
-						for ( Marker& m : selector.tblMarker )
-						{
-							Joint3* pj = dynamic_cast<Joint3*>(&m.obj);
-							if ( pj && pj->bSelected )
-							{
-								// 平行移動 カメラ面
-								if ( manupirator.bAxisX && manupirator.bAxisY && manupirator.bAxisZ )
-								{
-								}
-								else
-								{// 3D 平面上を触る
-									
-									if ( manupirator.bAxisX && manupirator.bAxisZ )
-									{
-										gridMini.SetMesh( pj->pos, 0, 5, 5, 0.05, vect3(0.2,0.2,0.2) );
-									}
-									else
-									if ( manupirator.bAxisX && manupirator.bAxisY )
-									{
-										gridMini.SetMesh( pj->pos, 1, 5, 5, 0.05, vect3(0.2,0.2,0.2) );
-									}
-									else
-									if ( manupirator.bAxisZ && manupirator.bAxisY )
-									{
-										gridMini.SetMesh( pj->pos, 2, 5, 5, 0.05, vect3(0.2,0.2,0.2) );
-									}
-									else
-									if ( manupirator.bAxisX )
-									{
-										gridMini.SetMesh( pj->pos, 0, 1, 5, 0.05, vect3(0.2,0.2,0.2) );
-									}
-									else
-									if ( manupirator.bAxisY )
-									{
-										gridMini.SetMesh( pj->pos, 1, 1, 5, 0.05, vect3(0.2,0.2,0.2) );
-									}
-									else
-									if ( manupirator.bAxisZ )
-									{
-										gridMini.SetMesh( pj->pos, 0, 1, 5, 0.05, vect3(0.2,0.2,0.2) );
-									}
-									
-									
-								}
-
-
-							}
-						}
-					}
-				
-				}
-						gra.Print( cv(vect2(mouse.pos.x+10,mouse.pos.y-0)),string("")+(manupirator.bAxisX?"X":"")+(manupirator.bAxisY?"Y":"")+(manupirator.bAxisZ?"Z":"") ); 
-				// マーカー移動
-				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && !selector.rect_bSelect ) 
-				{
-					if ( selector.mode == Selector::MODE_3D )
-					{
-
-						// 3Dマーカー移動
-						for ( Marker& m : selector.tblMarker )
-						{
-							Joint3* pj = dynamic_cast<Joint3*>(&m.obj);
-							if ( pj && pj->bSelected )
-							{
-								// 平行移動 カメラ面
-								if ( manupirator.bAxisX && manupirator.bAxisY && manupirator.bAxisZ )
-								{
-									vect3 v = vect3(mouse.mov.x, mouse.mov.y, 0)/pers.height/(pj->disp.z);
-									mat44 mrot = pers.cam.mat;
-									mrot.SetTranslate(vect3(0,0,0));
-									mrot.invers();
-									v = v* mrot;
-									pj->pos += v ;
-								}
-								else
-								{// 3D 平面上を触る
-									vect3	plate_P = pj->pos;
-									vect3	plate_N;
-									if ( manupirator.bAxisX && manupirator.bAxisZ )
-									{
-										// X-Z 平面 を仮定する。
-										 plate_N = vect3(0,-1,0);
-									}
-									else
-									if ( manupirator.bAxisX && manupirator.bAxisY )
-									{
-										// X-Y 平面 を仮定する。
-										 plate_N = vect3(0,0,-1);
-									}
-									else
-									if ( manupirator.bAxisZ && manupirator.bAxisY )
-									{
-										// Z-Y 平面 を仮定する。
-										 plate_N = vect3(-1,0,0);
-									}
-									else
-									if ( manupirator.bAxisX )
-									{
-										 plate_N = vect3(0,-1,0);
-									}
-									else
-									if ( manupirator.bAxisY )
-									{
-										 plate_N = vect3(0,0,-1);
-									}
-									else
-									if ( manupirator.bAxisZ )
-									{
-										 plate_N = vect3(-1,0,0);
-									}
-
-									vect3 P = pers.calcInvers( vect2( mouse.pos.x, mouse.pos.y ) );
-									vect3 I = pers.calcRayvect( P );
-									vect3 Q;
-									bool b = funcIntersectPlate( plate_P, plate_N,  P, I, Q );
-									if ( b )
-									{
-										vect3 P = pers.calcInvers( vect2( mouse.prev.x, mouse.prev.y ) );
-										vect3 I = pers.calcRayvect( P );
-										vect3 Q0;
-										bool b = funcIntersectPlate( plate_P, plate_N, P, I, Q0 );
-										if ( b )
-										{
-											if ( manupirator.bAxisY )
-											{
-												float y  = dot( (Q-Q0), vect3(0,1,0) );
-												pj->pos.y += y;
-											}
-											if ( manupirator.bAxisZ )
-											{
-												float z  = dot( (Q-Q0), vect3(0,0,1) );
-												pj->pos.z += z;
-											}
-											if ( manupirator.bAxisX )
-											{
-												float x  = dot( (Q-Q0), vect3(1,0,0) );
-												pj->pos.x += x;
-											}
-										}
-									}
-									
-									
-								}
-
-
-							}
-						}
-						pBone->RefrectKeyframe();
-					}
-					if ( selector.mode == Selector::MODE_2D )
-					{
-						// 2Dマーカー移動
-						for ( Marker& m : selector.tblMarker )
-						{
-							if ( m.obj.bSelected )
-							{
-								m.obj.Move2( mouse.mov );
-							}
-						}
-					}
-				}				
-			}			
-
-			
-
-
 			//=================================
-			// 2D joint
+			// 床グリッド描画
 			//=================================
-			{
-				Joint2& tar = tblJoint_2d[0];
-				tar.pos = gv1;
-
-
-				for ( int i = 0 ; i < 1 ; i++ )
-				{
-					// 骨コリジョン 張力計算
-					for ( Bone2 b : tblBone_2d )
-					{
-						vect2 v = b.j1.pos - b.j0.pos;
-						float l = v.length() - b.length;
-						float w = 0;
-
-						vect2 va  =	v.normalize()*l;
-						if ( &tar == &b.j0 )
-						{
-							b.j1.tension -= va/3;
-						}
-						else
-						if ( &tar == &b.j1 )
-						{
-							b.j0.tension -= va/3;
-						}
-						else
-						{
-							b.j0.tension += va/3;
-							b.j1.tension -= va/3;
-						}
-
-					}
-
-					// 張力解消
-					for ( Joint2& a : tblJoint_2d )
-					{
-						a.pos += a.tension;
-						//a.accell += a.tension;
-						a.tension=0;
-					}
-				}
-
-				// 骨描画
-				for ( Bone2 b : tblBone_2d )
-				{
-					vect2 v0 = b.j0.pos;
-					vect2 v1 = b.j1.pos;
-
-					gra.Line( cv(v0), cv(v1), rgb( 1,1,1 ) );
-				}
-			}
+			pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 
 
 
 			//=================================
-			// 3D joint
+			// マウス座標（投影面座標）を３Ｄ空間座標に逆変換＆描画
 			//=================================
 
-			// human 更新
-			pBone->update();
-
-			// human 描画
-			pBone->draw( pers, gra );
-
-
-			if ( !(pBone->anim.bPlaying && selector.mode == Selector::MODE_3D) )
-			{
-				// カトマル3D モーション軌跡表示
-				pBone->drawMotion( pers, gra );
-
-				// マーカー表示
-				if ( selector.mode == Selector::MODE_3D )
-				{
-					selector.drawController3d( mouse.pos, gra );
-				}
-				if ( selector.mode == Selector::MODE_2D )
-				{
-					selector.drawController2d( mouse.pos, gra );
-				}
-				
-
-			}
-			
-			
-			
-			// 原点
-			circle3d_y( vect3(0,0,0), 0.1, vect3(0.2,0.2,0.2) );
-
-
-			// マニュピレーター描画
-			if ( manupirator.bActive  ) 
-			{
-				vect3 p = pers.calcInvers( vect2( mouse.pos.x, mouse.pos.y ) );
-				manupirator.manupirator_setPos( p );
-				manupirator.manupirator_drawAxis( *this );
-
-			}
-
-
-			// マウス座標（投影面座標）を３Ｄ空間座標に逆変換
 			if(0)
 			{
-				vect3 v = pers.calcInvers( vect2( mouse.pos.x, mouse.pos.y ) );
-				vect3 p = pers.calcRay( v, 10 );
-
-
-				line3d( v, p, vect3(1,0,0));
-				line3d( vect3(0,0,0), v, vect3(1,1,0));
-				line3d( vect3(0,-1,0), p, vect3(1,0,1));
-
-
-
-				gra.Print( cv(vect2(10,16*20)),string("v x=")+to_string(v.x) + string(" y=")+to_string(v.y) +string(" z=")+to_string(v.z) );
-				gra.Print( cv(vect2(10,16*21)),string("p x=")+to_string(p.x) + string(" y=")+to_string(p.y) +string(" z=")+to_string(p.z) );
-//				gra.Print( vect2(10,16*21),string(" x=")+to_string(pers.cam.pos.x) + string(" y=")+to_string(pers.cam.pos.y) +string(" z=")+to_string(pers.cam.pos.z) );
-			}
-
-			// 点 
-			{
-				gra.Pset(cv(vect2(  1,  1)),rgb(1,1,1));
-				gra.Pset(cv(vect2(766,  1)),rgb(1,1,1));
-				gra.Pset(cv(vect2(   1,510)),rgb(1,1,1));
-				gra.Pset(cv(vect2(766,510)),rgb(1,1,1));
-			}
 			
-			// 塗りつぶし三角
-			{
-				vect2	ofs = vect2(10,432);
-				float	scale=0.5;
-				vect2	v0 = scale * vect2( 55,0) + ofs;
-				vect2	v1 = scale * vect2( 10,90) + ofs;
-				vect2	v2 = scale * vect2(100,90) + ofs;
-				gra.Tri( cv(v0), cv(v1), cv(v2), rgb(0.5,0.3,0.2));
+				vect3 P = pers.calcScreenToWorld3( vect3(mouse.pos,0) );
+				vect3 I = pers.calcRayvect( P );
+
+				vect3 P2 = vect3( 0, 0.4, 0 );
+				vect3 P3 = vect3( 0.5, 0.6, 0.4 );
+
+				auto[b,d,Q0,Q1,t0,t1] = func_distance_Line_Segline( P, I, P2, P3 );
+
+				if ( b ) pers.line3d( gra, pers, Q0, Q1,  vect3(0,1,0));
+				else pers.line3d( gra, pers, Q0, Q1,  vect3(1,0,0));
+
+				pers.line3d( gra, pers, P, P+I,  vect3(1,0,0));
+				pers.line3d( gra, pers, P2, P3, vect3(1,1,1));
+
 			}
 
-			// figTriangle
-			{
-				int cx=56,cy=464;
-				int sx =cx-128;
-				int sy =cy-128;
-				int ex =cx+128;
-				int ey =cy+128;
 
-				static int cnt = 0;
-				figTriangle.draw( vect2(cx,cy),rad(cnt), vect3(0,1,1) );
-				cnt++;
+			//=================================
+			// 描画	Lab
+			//=================================
+			if ( keys.N.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.idx+1);};
+			if ( keys.B.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.idx-1);};
+			lab.Update( keys, mouse, gra, pers, text_y );
+
+			//=================================
+			//	登録
+			//=================================
+			gui.tbls.clear();
+			gui.tbltblEdge.clear();
+			if ( (*pBezier).bActive )	(*pBezier).idxTbl = gui.EntryTbl( (*pBezier).tblPoint, (*pBezier).tblDummy );
+			if ( (*pCutmull).bActive )	(*pCutmull).idxTbl = gui.EntryTbl( (*pCutmull).tblPoint, (*pCutmull).tblDummy );
+			if ( (*pSkeleton).bActive )	(*pSkeleton).idxTbl = gui.EntryTbl( (*pSkeleton).tblPoint, (*pSkeleton).tblEdge );
+			lab.idxTbl =  gui.EntryTbl( lab.tblObj, lab.tblEdge );
+
+			//=================================
+			//	GUI操作
+			//=================================
+			{
+
+				// 最近点検索
+				if ( !keys.ALT.on && mouse.L.hi ) 
+					gui.TouchFirst( pers, gui.tbls, mouse.pos );
+
+				// 矩形カーソル開始 新規選択
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && gui.one.bEnable == false && gui.rect_mode == Gui::G_CALC::NONE ) 
+					gui.SelectRectOnly( mouse.pos );
+
+				// 矩形カーソル開始 追加選択
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && keys.SHIFT.on && gui.one.bEnable == false && gui.rect_mode == Gui::G_CALC::NONE ) 
+					gui.SelectRectAdd( mouse.pos );
+
+				// 矩形カーソル開始 反転選択
+				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && !keys.SHIFT.on && gui.one.bEnable == false && gui.rect_mode == Gui::G_CALC::NONE ) 
+					gui.SelectRectRev( mouse.pos );
+
+				// 矩形カーソル開始 削除選択
+				if ( !keys.ALT.on && mouse.L.on && keys.CTRL.on && keys.SHIFT.on && gui.one.bEnable == false && gui.rect_mode == Gui::G_CALC::NONE ) 
+					gui.SelectRectSub( mouse.pos );
+
+				// 矩形カーソル終了（選択決定）
+				if ( !keys.ALT.on && !mouse.L.on && gui.rect_mode != Gui::G_CALC::NONE ) 
+					gui.SelectRectEnd( gui.tbls );
+
+				// 矩形カーソル選択	
+				if ( !keys.ALT.on && mouse.L.on && gui.rect_mode != Gui::G_CALC::NONE ) 
+					gui.SelectRectBegin( pers, gui.tbls , mouse.pos );
+
+				// 単独 新規選択
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && gui.one.bEnable && gui.tbls[ gui.one.idxTbl ][ gui.one.idxObj ]->bSelected == false ) 
+					gui.SelectOneOnly( gui.tbls );
+
+				// 単独 追加選択
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && keys.SHIFT.on && gui.one.bEnable ) 
+					gui.SelectOneAdd( gui.tbls );
+
+				// 単独 反転選択
+				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && !keys.SHIFT.on && gui.one.bEnable ) 
+					gui.SelectOneRev( gui.tbls );
+
+				// 単独 削除選択
+				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && keys.SHIFT.on && gui.one.bEnable ) 
+					gui.SelectOneSub( gui.tbls );
+
+				// 移動
+
+				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && gui.one.bEnable ) 
+				{
+					bool bByCamera = false;
+					if ( pers.axis.bAxisX && pers.axis.bAxisY && pers.axis.bAxisZ )
+					{
+						bByCamera = true;
+					}
+					else
+					{
+						pers.axis.bAxisX = true;
+						pers.axis.bAxisY = false;
+						pers.axis.bAxisZ = true;
+					}
+					gui.MoveObj( gra, pers, gui.tbls, mouse.pos, mouse.prev, mouse.mov, keys.T.on, bByCamera );
+
+					if ( (*pSkeleton).bActive )
+					{
+						if ( (*pSkeleton).idxTbl == gui.one.idxTbl )
+						{
+							// キーフレームへ反映
+							(*pSkeleton).RefrectKeyframe();
+						}
+					}
+				}
+
 			}
+
+			//=================================
+			// skeleton 描画
+			//=================================
+			util.skeleton_draw( gra, keys, mouse, pers, (*pSkeleton), text_y );
+
+			//=================================
+			//	Bezier 表示
+			//=================================
+			if ( (*pBezier).bActive ) 
+			{
+				// マウスベクトル
+				vect3 P = pers.calcScreenToWorld3( vect3(mouse.pos,0) );
+				vect3 I = pers.calcRayvect( P );
+
+				bool bCut = mouse.L.hi;
+				bool bSerch = keys.E.on;
+				// 表示 加工 ベジェ 三次曲線
+				(*pBezier).exec_drawBezier( gra, pers, (*pBezier).tblPoint, (*pBezier).idxPoint, (*pBezier).idxTbl, P, I, bSerch, bCut );
+
+				//=================================
+				//	登録 
+				//=================================
+				if ( bCut )
+				{
+					// テーブルの再作成しないとうまく中身が参照できない
+					continue;
+				}
+
+			}
+
+			//=================================
+			// コース描画 Cutmull
+			//=================================
+			if ( (*pCutmull).bActive )
+			{
+				// 描画
+				(*pCutmull).drawCutmull( gra, pers, (*pCutmull).tblPoint, (*pCutmull).tblIdx );
+			}
+
+
+
+			//=================================
+			// 表示 矩形カーソル、制御点
+			//=================================
+			gui.DrawController( pers, gra, gui.tbls, gui.tbltblEdge, mouse.pos );
 			
+
+			//=================================
+			// 描画	マニュピレーター
+			//=================================
+			pers.axis.DrawAxis( gra, pers, mouse.pos );
+
+			//=================================
+			// 情報表示
+			//=================================
+			gra.Print(1,(float)text_y++,string("fovY:")+to_string(int(pers.fovy)));
+			gra.Print(1,(float)text_y++,string("peak: ")+to_string(time_peak/1000)+string("msec") ); 
+			if ( gui.one.bEnable )
+			{
+				gra.Print(1,(float)text_y++,string("idxTbl=")+to_string(gui.one.idxTbl)+":"+to_string(gui.one.idxObj) ); 
+				Obj* p =gui.tbls[ gui.one.idxTbl ][ gui.one.idxObj ];
+				if ( p ) gra.Print(1,(float)text_y++,string("one: ")+to_string(p->pos.x)+" , "+to_string(p->pos.y)+" , "+to_string(p->pos.z)); 
+			}
+
+
+			//=================================
 			// 処理時間表示
+			//=================================
 			{
-				static chrono::system_clock::duration dime_a;
-				static chrono::system_clock::duration dime_b;
-				static chrono::system_clock::duration dime_sec;
-				static chrono::system_clock::duration dime_now;
-				static chrono::system_clock::duration dime_max;
+				static chrono::system_clock::duration time_a;
+				static chrono::system_clock::duration time_b;
+				static chrono::system_clock::duration time_sec;
+				static chrono::system_clock::duration time_now;
+				static chrono::system_clock::duration time_max;
 
-				dime_b = chrono::system_clock::now().time_since_epoch(); 
-				if ( dime_max < dime_b-dime_a ) dime_max = dime_b-dime_a;
+				time_b = chrono::system_clock::now().time_since_epoch(); 
+				if ( time_max < time_b-time_a ) time_max = time_b-time_a;
 
 				// ウェイト(60fps)
-				while( chrono::system_clock::now().time_since_epoch()-dime_a < chrono::microseconds(16666) )
+				while( chrono::system_clock::now().time_since_epoch()-time_a < chrono::microseconds(16666) )
 				{
 	 				this_thread::sleep_for(chrono::microseconds(100));
 				}
 
 				// 表示
-			    dime_now = chrono::system_clock::now().time_since_epoch();
-				if ( dime_now-dime_sec > chrono::seconds(2) ) // n sec毎表示
+			    time_now = chrono::system_clock::now().time_since_epoch();
+				if ( time_now-time_sec > chrono::seconds(2) ) // n sec毎表示
 				{
-					dime_sec = chrono::system_clock::now().time_since_epoch();
+					time_sec = chrono::system_clock::now().time_since_epoch();
 
-					long long f2 = chrono::duration_cast<chrono::microseconds>(dime_max).count();
+					long long f2 = chrono::duration_cast<chrono::microseconds>(time_max).count();
 					time_peak = f2;
-					dime_max = chrono::seconds(0);
+					time_max = chrono::seconds(0);
 				}
-				dime_a = chrono::system_clock::now().time_since_epoch();  
+				time_a = chrono::system_clock::now().time_since_epoch();  
 			}
 
 		}
+
+
 		return 0;
 	}
-
-
-} ;
+};
 
 
 //------------------------------------------------------------------------------
 int main()
 //------------------------------------------------------------------------------
 {
+	cout<<fixed<<setprecision(24);	// 浮動小数出力桁数
+
+	cout << "start" << endl;
 	Apr	apr("Ray4 " __DATE__, 300,300,768, 512 );
+//	Apr	apr("Ray4 " __DATE__, 300,300,320, 200 );
+
+	apr.SetWincursor( false );
+
 	return apr.main();
 }
+

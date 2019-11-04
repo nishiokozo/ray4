@@ -1,24 +1,21 @@
 #include <iostream>
 #include <functional>
-using namespace std;
 
 #include "SysKeys.h"
 #include "SysMouse.h"
-#include "SysGra.h"
-#include "Sys.h"
 
 #include <windows.h>
+#include "SysGra.h"
+#include "Sys.h"
 #include "SysWin.h"
+
+using namespace std;
 
 
 //------------------------------------------------------------------------------
 Sys::Sys( const char* name, int pos_x, int pos_y, int width, int height  )
 //------------------------------------------------------------------------------
 {
-//	m.x		= pos_x;
-//	m.y		= pos_y;
-//	m.width		= width;
-//	m.height	= height;
 
 
 	SysWin&	win = SysWin::GetInstance();
@@ -38,23 +35,9 @@ Sys::Sys( const char* name, int pos_x, int pos_y, int width, int height  )
 	{
 		auto func = [&]( int width, int height )
 		{
-			m.width = width;
-			m.height = height;
 			gra.OnSize( width, height );
 		};
 		win.SetOnSize( func );
-	}
-
-	// ウィンドウ位置変更関数
-	{
-		auto func = [&]( int pos_x, int pos_y )
-		{
-			m.pos_x = pos_x;
-			m.pos_y = pos_y;
-			gra.OnMove( pos_x, pos_y );
-//			mouse.OnMove( pos_x, pos_y );
-		};
-		win.SetOnMove( func );
 	}
 
 	// ウィンドウペイント関数
@@ -78,6 +61,14 @@ Sys::Sys( const char* name, int pos_x, int pos_y, int width, int height  )
 	win.OpenWindow("Ray4 " __DATE__, pos_x,pos_y,width, height );
 
 }
+
+//------------------------------------------------------------------------------
+void  Sys::SetWincursor( bool flg ) 
+//------------------------------------------------------------------------------
+{	// カーソル非表示
+	ShowCursor( flg );
+}
+
 //------------------------------------------------------------------------------
 bool	Sys::Update()
 //------------------------------------------------------------------------------

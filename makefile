@@ -7,9 +7,13 @@ TAR = main.exe
 
 SRCS = \
 	main.cpp \
-	bone.cpp \
+	skeleton.cpp \
 	raytrace.cpp \
+	pers.cpp \
+	func.cpp \
 	geom.cpp \
+	gui.cpp \
+	lab.cpp \
 	Sys.cpp \
 	Syswin.cpp \
 	SysGra.cpp \
@@ -22,9 +26,11 @@ LIBS = \
 
 FLGS = \
 	-c -g \
-	-std=c++14 \
+	-std=c++17 \
 	-Werror \
-	-Wall -Wno-unused -Wconversion -Wno-sign-conversion -Wno-shorten-64-to-32 -Wno-implicit-float-conversion
+	-Wall -Wno-unused -Wconversion -Wno-sign-conversion -Wno-float-conversion -Wno-shorten-64-to-32 -Wno-implicit-float-conversion
+
+#	-Wall -Wno-unused -Wconversion -Wno-sign-conversion -Wno-shorten-64-to-32 -Wno-implicit-float-conversion -Wno-float-conversion
 
 FILE=main.o
 
@@ -40,7 +46,7 @@ FILE=main.o
 #	-Wno-unknown-pragmas \
 #	-Werror \
 
-CC	= clang++#
+CC	= clang++
 #CC	= g++
 
 $(TAR)	:	$(SRCS:.cpp=.o)

@@ -16,18 +16,19 @@ public:
 	int GetPosX();
 	int GetPosY();
 	int GetWidth();
-	int GetHeigit();
+	int GetHeight();
 	int GetWheel();
 
 	bool	Update();
 
 	void OpenWindow( const char* name, int pos_x, int pos_y, int width, int height  );
+	void SetTitle( std::string name );
 
-	void SetOnCreate( function<void()> func );
-	void SetOnSize( function<void( int width, int height )> func );
-	void SetOnMove( function<void( int pos_x, int pos_y )> func );
-	void SetOnPaint( function<void()> func );
-	void SetOnDestroy( function<void()> func );
+	void SetOnCreate( std::function<void()> func );
+	void SetOnSize( std::function<void( int width, int height )> func );
+//	void SetOnMove( function<void( int pos_x, int pos_y )> func );
+	void SetOnPaint( std::function<void()> func );
+	void SetOnDestroy( std::function<void()> func );
 
 
 };
