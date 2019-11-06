@@ -373,7 +373,7 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 
 	const float	G	= -9.80665;				// 重力加速度
 	const float	T	= 1.0/60.0;				// 時間/frame
-	const vect3	gv	= vect3(0,0, -G*T*T);	// 重力加速度/frame
+	const vect3	gv	= vect3(0,0, G*T*T);	// 重力加速度/frame
 	static bool		bPause = false;
 	static float time = 0;
 //	static vect3 p0 = vect3(0,0,0);
@@ -408,7 +408,7 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 		//点
 		for ( Obj* p : lab.tblObj ) delete p;
 		lab.tblObj.clear();
-		lab.tblObj.emplace_back( new Car(vect3(  0		, 0.1,  1.1 ), vect3(0,0,0)) );
+		lab.tblObj.emplace_back( new Car(vect3(  0		, 0.1,  1.0 ), vect3(0,0,0)) );
 //		lab.tblObj.emplace_back( new Obj(vect3( -0.5	, 0.1,	0.0 )) );
 //		lab.tblObj.emplace_back( new Obj(vect3(  0.5	, 0.1,	0.0 )) );
 		// 線
@@ -456,7 +456,112 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	//-----
 
 	time += T;
+
 #if 1
+	float p0 = car.pos.z;	//初期値
+	float v0 = car.vel.z;
+
+	float p1;	//増分
+	float v1;
+
+	float p2;	//結果
+	float v2;
+
+	float p3;	//衝突
+	float v3;
+
+	{
+		// 計算
+		{
+			v1 = G*T;				// 増分・速度/frame
+
+			p1 = v0*T +v1*T*0.5;	// 増分・移動/frame
+
+			p2 = p0 + p1;	// 仮想移動
+			v2 = v0 + v1;	// 仮想速度
+		}
+
+		// 衝突
+		{
+					// 移動量s,初速v0の時間を求める。
+					auto func_t =[]( float s, float v0 )
+					{
+						const float	G	= -9.80665;				// 重力加速度
+						float a = 0.5*G;
+						float c = v0/(2*a);
+						float t = sqrt( abs( s/a + c*c ) ) - c; 
+						return t;
+					};
+
+					// 時間t,初速v0の移動量sを求める。
+					auto func_s =[]( float t, float v0 )
+					{
+						const float	G	= -9.80665;				// 重力加速度
+						float a = 0.5*G;
+						float c = v0/(2*a);
+						float s = a * pow( t+c, 2 ) -a*c*c;
+						return s;
+					};
+
+					// 時間t,移動量sの、速度を求める。
+					auto func_v =[]( float t, float s )
+					{
+						const float	G	= -9.80665;				// 重力加速度
+						float a = 0.5*G;
+						float v = (s-a*t*t)/t;
+						return v;
+					};
+
+			if ( p2<=0 )
+			{
+	float new_p0 = p0;
+	float new_v0 = v0;
+				p3 = 0;				// 衝突点の位置
+				float p = p3-p0;	// 衝突点までの移動
+				{
+
+					float t = func_t( p, v0 );
+					float s = func_s( t, v0 );
+					float v = func_v( t, s );
+
+					float t0 = t; 
+					{
+						float t2 = T-t0;	// 衝突後残り時間
+						float v0 = -v;		// 衝突後速度
+						//--
+						float s = func_s( t2, v0 );
+						float v = func_v( t2, s );
+
+						cout << " t : " << t  << "t+t2 : " << +t+t2 << " v : " << v << endl ;
+new_p0 = s;
+new_v0 = v;
+						pers.pset3d( gra, pers, vect3(0,0.1,s), rgb(1,1,0), 7 );
+					}
+				}
+
+				p2 = new_p0;
+				v2 = new_v0;
+//				pers.pset3d( gra, pers, vect3(0,0.1,p2), rgb(1,1,0), 7 );
+			}
+		}
+
+		// 更新
+		if  ( !bPause || bStep )
+		{
+			p0 = p2;
+			v0 = v2;
+		}
+
+		// 描画
+		{
+			drawVect( gra, pers, text_y, vect3(0,0.1,p0), vect3(0,0.1,p1)	,1		, rgb(1,0,0), "p1" );
+		}
+	}
+	car.pos.z = p0;
+	car.vel.z = v0;
+#endif
+
+#if 0
 	float p0 = car.pos.z;	//初期値
 	float v0 = car.vel.z;
 
@@ -484,18 +589,56 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 		{
 			if ( p2<=0 )
 			{
-				p3 = 0;				// 衝突位置
-				float p = p3-p0;	// 衝突増分	p=v0*t + 0.5*G*t^2	
+				p3 = 0;				// 衝突点の位置
+				float p = p3-p0;	// 衝突点までの移動
 
 				// p = 0.5*G*t^2 + v0 * t
-				float a = sqrt(abs(G/2.0));	//	a=1/sqrt(2)*sqrt(G);と置く
-				// p = ( a*t + v0/(2*a) )^2 -(v0/(2*a))^2
-				// t = ( sqrt( p +(v0/(2*a))^2 ) - v0/(2*a) ) / a
 
-				float t = ( sqrt( p + pow((v0/(2*a)), 2) ) - v0/(2*a) ) / a;	// 衝突までの時間
+if(0)
+{
+	float t = 1.0;
+	float p = G/2*t*t;
 
-cout << t << endl;			
+	cout << endl;
+	cout << "p : "<< p << endl;
 
+	{
+		float t = sqrt( abs( 2 * p / G ) );
+		cout << "t : "<< t << endl;
+
+		float s = 0.5*G*t*t;
+		cout << "s : "<< s << endl;
+		
+	}
+
+	
+}
+
+if (1)
+{
+
+	p = -G/2;
+	float v = -G/8;
+
+		float a = 0.5*G;
+		float b = sqrt(abs(a));
+		float c = v/(2*b);
+
+
+					float t = ( sqrt( abs( p - c*c ) ) + c )/b; 
+
+	cout << endl;
+	cout << "v : " << v << endl;			
+	cout << "t : " << t << endl;			
+	{
+//		float s  = 0.5*G*t*t + v*t;
+		float s  = a*t*t + v*t;
+		float s2 = -pow( b*t - c, 2 ) + c*c;
+//		float s2 = pow( b*t + c, 2 ) - c*c;
+		cout << " s : " << s  << " p : " << p  << " s2 : "<< s2 << endl ;
+	}
+
+}
 
 
 				p2 = p0;
