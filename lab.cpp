@@ -483,46 +483,64 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 
 		// 衝突
 		{
+					// 移動量s,初速v0の時間を求める。
+					auto func_t =[]( float s, float v0 )
+					{
+						const float	G	= -9.80665;				// 重力加速度
+						float a = 0.5*G;
+						float c = v0/(2*a);
+						float t = sqrt( abs( s/a + c*c ) ) - c; 
+						return t;
+					};
+
+					// 時間t,初速v0の移動量sを求める。
+					auto func_s =[]( float t, float v0 )
+					{
+						const float	G	= -9.80665;				// 重力加速度
+						float a = 0.5*G;
+						float c = v0/(2*a);
+						float s = a * pow( t+c, 2 ) -a*c*c;
+						return s;
+					};
+
+					// 時間t,移動量sの、速度を求める。
+					auto func_v =[]( float t, float s )
+					{
+						const float	G	= -9.80665;				// 重力加速度
+						float a = 0.5*G;
+						float v = (s-a*t*t)/t;
+						return v;
+					};
+
 			if ( p2<=0 )
 			{
 	float new_p0 = p0;
-	float new_v0 = -v0;
+	float new_v0 = v0;
 				p3 = 0;				// 衝突点の位置
 				float p = p3-p0;	// 衝突点までの移動
 				{
-					float a = 0.5*G;
-					float b = sqrt(abs(a));
-					float c = v0/(2*b);
-					float t = ( sqrt( abs( p - c*c ) ) + c )/b; 
-					float s = -pow( b*t - c, 2 ) + c*c;
-					float v = (0.5*G*t*t - s )/(-t);
 
-//					cout << " t : " << t  << " s : " << s << " p : " << p << " v : " << v << endl ;
+					float t = func_t( p, v0 );
+					float s = func_s( t, v0 );
+					float v = func_v( t, s );
 
 					float t0 = t; 
 					{
 						float t2 = T-t0;	// 衝突後残り時間
 						float v0 = -v;		// 衝突後速度
 						//--
-						float a = 0.5*G;
-						float b = sqrt(abs(a));
-						float c = v0/(2*b);
-//						float t = ( sqrt( abs( p - c*c ) ) + c )/b; 
-						float s = -pow( b*t - c, 2 ) + c*c;
-						float v = (0.5*G*t*t - s )/(-t);
+						float s = func_s( t2, v0 );
+						float v = func_v( t2, s );
 
-//						cout << " t : " << t  << " s : " << s << " v : " << v << endl ;
+						cout << " t : " << t  << "t+t2 : " << +t+t2 << " v : " << v << endl ;
 new_p0 = s;
-new_v0 = -v;
+new_v0 = v;
 						pers.pset3d( gra, pers, vect3(0,0.1,s), rgb(1,1,0), 7 );
 					}
 				}
 
-
-//				p2 = p0;
-//				v2 = -v0;
 				p2 = new_p0;
-				v2 = -new_v0;
+				v2 = new_v0;
 //				pers.pset3d( gra, pers, vect3(0,0.1,p2), rgb(1,1,0), 7 );
 			}
 		}
