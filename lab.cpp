@@ -514,15 +514,30 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 				// 簡易実装
 				p1 = p0;
 				v1 = -v0;
-			#elif 1
+			#elif 0
 				// 簡易実装2
 				float s = 0-p0;					// 衝突までの距離(m)
 				float t = func_t( G, s, v0 );	// 衝突までの時間(s)
-				float v2 = (v0 + G*t);			// 衝突後の速度(m/s)
+				float v = (v0 + G*t);			// 衝突後の速度(m/s)
 
 				p1 = p0 + s;	
-				v1 = -v2;
-			#else
+				v1 = -v;
+			#elif 1
+				// １バウンド実装
+				float s = 0-p0;					// 衝突までの距離(m)
+				float t = func_t( G, s, v0 );	// 衝突までの時間(s)
+				float v = (v0 + G*t);			// 衝突後の速度(m/s)
+
+				{
+					float t2 = T-t;					// 衝突後の残り時間(s)
+					float s2 = func_s( G, t2, -v );	// 衝突後の移動距離(m)
+					float v2 = (-v + G*t2);			// 衝突後の速度(m/s)
+				
+					p1 = p0 + s + s2;	
+					v1 = v2;
+
+				}
+
 			#endif
 
 			}
