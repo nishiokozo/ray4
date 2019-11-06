@@ -1,7 +1,6 @@
 // version 20170527
 //	2019/06/25 to only vect3 & mat44
 #include <cmath>
-#include <cmath>
 #ifndef GEOM_H
 #define	GEOM_H
 #include <cfloat>

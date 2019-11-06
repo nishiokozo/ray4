@@ -435,11 +435,11 @@ void	raytrace( SysGra& gra )
 	static int py = 0;
 
 	{
-		int width	= gra.GetWidth(); 
-		int height	= gra.GetHeight(); 
+		float width		= gra.GetWidth(); 
+		float height	= gra.GetHeight(); 
 
-		float	aspect = (float)width / (float)height;
-		float	center_x = -((float)width / (float)height)/2;
+		float	aspect = width / height;
+		float	center_x = -(width / height)/2;
 	
 		vect3	posScr = vect3(center_x,1.0,-12+8);
 		vect3	posEye = vect3(center_x,1.0,-17+8);
@@ -453,8 +453,8 @@ void	raytrace( SysGra& gra )
 		{
 			for( int px = 0 ; px < width ; px++ )
 			{
-				float x = ((float)px / (float)width) *2.0-1.0;
-				float y = ((float)py / (float)height) *2.0-1.0;
+				float x = ((float)px / width) *2.0-1.0;
+				float y = ((float)py / height) *2.0-1.0;
 				vect3	P = vect3( x, y, 0 ) + posScr;
 				vect3	I = normalize(P - posEye);
 

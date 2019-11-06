@@ -28,8 +28,9 @@ FLGS = \
 	-c -g \
 	-std=c++17 \
 	-Werror \
-	-Wall -Wno-unused -Wconversion -Wno-sign-conversion -Wno-float-conversion -Wno-shorten-64-to-32 -Wno-implicit-float-conversion
+	-Wall -Wno-unused -Wconversion -Wno-sign-conversion -Wno-shorten-64-to-32 -Wno-implicit-float-conversion
 
+#	-Wall -Wno-unused -Wconversion -Wno-sign-conversion -Wno-float-conversion -Wno-shorten-64-to-32 -Wno-implicit-float-conversion
 #	-Wall -Wno-unused -Wconversion -Wno-sign-conversion -Wno-shorten-64-to-32 -Wno-implicit-float-conversion -Wno-float-conversion
 
 FILE=main.o

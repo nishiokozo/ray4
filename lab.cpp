@@ -376,8 +376,10 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	const vect3	gv	= vect3(0,0, G*T*T);	// 重力加速度/frame
 	static bool		bPause = false;
 	static float time = 0;
-//	static vect3 p0 = vect3(0,0,0);
-//	static vect3 v0 = vect3(0,0,0);
+
+	typedef float Float;
+	static Float p0;// = car.pos.z;
+	static Float v0;// = car.vel.z;
 	bool bStep = false;
 	struct Car:Obj
 	{
@@ -426,6 +428,10 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 		graphs.Add( 0.02, rgb(1,1,0) );
 
 		time = 0;
+
+		p0 = lab.tblObj[0]->pos.z;
+		v0 = 0;
+
 		cout << endl;
 	}
 
@@ -443,7 +449,8 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	// 計算チェック
 	{
 		static bool b = false;
-		static float prev = 0;
+		static Float prev = 0;
+/*
 		if ( car.pos.z < prev && b == false ) 
 		{
 			cout << "top : " << prev << endl;
@@ -451,51 +458,58 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 		}
 		if ( car.pos.z > prev ) b = false;
 		prev = car.pos.z;
+*/
+		if ( p0 < prev && b == false ) 
+		{
+			cout << "top : " << prev << endl;
+			b = true;
+		}
+		if ( p0 > prev ) b = false;
+		prev = p0;
 	}
 
 	//-----
 
 	time += T;
 
+
+#if 1
+
 	// 移動量s,初速v0の時間を求める。
-	auto func_t =[]( float g, float s, float v0 )
+	auto func_t =[]( Float g, Float s, Float v0 )
 	{
-		float a = 0.5*g;
-		float c = v0/(2*a);
-		float t = sqrt( abs( s/a + c*c ) ) - c; 
+		Float a = 0.5*g;
+		Float c = v0/(2*a);
+		Float t = std::sqrt( std::abs( s/a + c*c ) ) - c; 
 		return t;
 	};
 
 	// 時間t,初速v0の移動量sを求める。
-	auto func_s =[]( float g, float t, float v0 )
+	auto func_s =[]( Float g, Float t, Float v0 )
 	{
-		float a = 0.5*g;
-	//	float c = v0/(2*a);
-	//	float s = a * pow( t+c, 2 ) -a*c*c;
-		float s = a*t*t + v0*t;
+		Float a = 0.5*g;
+		Float s = a*t*t + v0*t;
 		return s;
 	};
 
 	// 時間t,移動量sの、速度を求める。
-	auto func_v =[]( float g, float t, float s )
+	auto func_v =[]( Float g, Float t, Float s )
 	{
-		float a = 0.5*g;
-		float v = (s-a*t*t)/t;
+		Float a = 0.5*g;
+		Float v = (s-a*t*t)/t;
 		return v;
 	};
 
-#if 1
-
 	//初期値
-	float p0 = car.pos.z;
-	float v0 = car.vel.z;
+//	Float p0 = car.pos.z;
+//	Float v0 = car.vel.z;
 
 	// 差分
-	float s1; 	// 移動量
+	Float s1; 	// 移動量
 
 	// 結果
-	float p1;
-	float v1;
+	Float p1;
+	Float v1;
 
 	{
 		// 計算
@@ -516,26 +530,25 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 				v1 = -v0;
 			#elif 0
 				// 簡易実装2
-				float s = 0-p0;					// 衝突までの距離(m)
-				float t = func_t( G, s, v0 );	// 衝突までの時間(s)
-				float v = (v0 + G*t);			// 衝突後の速度(m/s)
+				Float s = 0-p0;					// 衝突までの距離(m)
+				Float t = func_t( G, s, v0 );	// 衝突までの時間(s)
+				Float v = (v0 + G*t);			// 衝突後の速度(m/s)
 
 				p1 = p0 + s;	
 				v1 = -v;
 			#elif 1
 				// １バウンド実装
-				float s = 0-p0;					// 衝突までの距離(m)
-				float t = func_t( G, s, v0 );	// 衝突までの時間(s)
-				float v = (v0 + G*t);			// 衝突後の速度(m/s)
+				Float s = 0-p0;					// 衝突までの距離(m)
+				Float t = func_t( G, s, v0 );	// 衝突までの時間(s)
+				Float v = (v0 + G*t);			// 衝突後の速度(m/s)
 
 				{
-					float t2 = T-t;					// 衝突後の残り時間(s)
-					float s2 = func_s( G, t2, -v );	// 衝突後の移動距離(m)
-					float v2 = (-v + G*t2);			// 衝突後の速度(m/s)
+					Float t2 = T-t;					// 衝突後の残り時間(s)
+					Float s2 = func_s( G, t2, -v );	// 衝突後の移動距離(m)
+					Float v2 = (-v + G*t2);			// 衝突後の速度(m/s)
 				
 					p1 = p0 + s + s2;	
 					v1 = v2;
-
 				}
 
 			#endif
