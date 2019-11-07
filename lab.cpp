@@ -371,23 +371,23 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 
 	gra.Print(1,(float)text_y++,string("lab9_2dRidge")+to_string(lab.idx)); 
 
-	const float	G	= -9.80665;				// 重力加速度
-	const float	T	= 1.0/60.0;				// 時間/frame
+	typedef float Float;
+	const Float	G	= -9.80665;				// 重力加速度
+	const Float	T	= 1.0/60.0;				// 時間/frame
 	const vect3	gv	= vect3(0,0, G*T*T);	// 重力加速度/frame
 	static bool		bPause = false;
 	static float time = 0;
 
-	typedef float Float;
-	static Float p0;// = car.pos.z;
-	static Float v0;// = car.vel.z;
+//	static Float p0;// = car.pos.z;
+//	static Float v0;// = car.vel.z;
 	bool bStep = false;
 	struct Car:Obj
 	{
 		vect3	vel;	//	velocity 速度(m/frame)
 
 		bool	bReq = false;
-//		vect3	req_pos;
-//		vect3	req_vel;
+		vect3	req_pos;
+		vect3	req_vel;
 
 		Car( vect3 v, vect3 _vel ) : Obj(v)
 		{
@@ -411,12 +411,12 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 		for ( Obj* p : lab.tblObj ) delete p;
 		lab.tblObj.clear();
 		lab.tblObj.emplace_back( new Car(vect3(  0		, 0.0,  1.0 ), vect3(0,0,0)) );
-//		lab.tblObj.emplace_back( new Obj(vect3( -0.5	, 0.1,	0.0 )) );
-//		lab.tblObj.emplace_back( new Obj(vect3(  0.5	, 0.1,	0.0 )) );
+		lab.tblObj.emplace_back( new Obj(vect3( -0.5	, 0.1,	0.0 )) );
+		lab.tblObj.emplace_back( new Obj(vect3(  0.5	, 0.1,	0.0 )) );
 		// 線
 		for ( Edge* p : lab.tblEdge ) delete p;
 		lab.tblEdge.clear();
-//		lab.tblEdge.emplace_back( new Edge(0,1) );
+		lab.tblEdge.emplace_back( new Edge(1,2) );
 
 		pers.axis.bAxisX = true;
 		pers.axis.bAxisY = false;
@@ -429,8 +429,8 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 
 		time = 0;
 
-		p0 = lab.tblObj[0]->pos.z;
-		v0 = 0;
+	//	p0 = lab.tblObj[0]->pos.z;
+	//	v0 = 0;
 
 		cout << endl;
 	}
@@ -450,7 +450,7 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	{
 		static bool b = false;
 		static Float prev = 0;
-/*
+
 		if ( car.pos.z < prev && b == false ) 
 		{
 			cout << "top : " << prev << endl;
@@ -458,14 +458,7 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 		}
 		if ( car.pos.z > prev ) b = false;
 		prev = car.pos.z;
-*/
-		if ( p0 < prev && b == false ) 
-		{
-			cout << "top : " << prev << endl;
-			b = true;
-		}
-		if ( p0 > prev ) b = false;
-		prev = p0;
+
 	}
 
 	//-----
@@ -501,8 +494,8 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	};
 
 	//初期値
-//	Float p0 = car.pos.z;
-//	Float v0 = car.vel.z;
+	Float p0 = car.pos.z;
+	Float v0 = car.vel.z;
 
 	// 差分
 	Float s1; 	// 移動量
@@ -522,7 +515,10 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 
 		// 衝突
 		{
-			if ( p1 <= 0 )
+			auto[b,d,q0,q1,s0,s1] = func_distance_Segline_Segline( vect3(0,0,p0), vect3(0,0,p1), st, en );
+
+//			if ( p1 <= 0 )
+			if ( b )
 			{
 			#if 0
 				// 簡易実装
@@ -538,7 +534,7 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 				v1 = -v;
 			#elif 1
 				// １バウンド実装
-				Float s = 0-p0;					// 衝突までの距離(m)
+				Float s = q0.z-p0;					// 衝突までの距離(m)
 				Float t = func_t( G, s, v0 );	// 衝突までの時間(s)
 				Float v = (v0 + G*t);			// 衝突後の速度(m/s)
 
@@ -570,185 +566,6 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 		}
 	}
 
-	car.pos.z = p0;
-	car.vel.z = v0;
-#endif
-
-#if 0
-	float p0 = car.pos.z;	//初期値
-	float v0 = car.vel.z;
-
-	float p1;	//増分
-	float v1;
-
-	float p2;	//結果
-	float v2;
-
-	float p3;	//衝突
-	float v3;
-
-	{
-		// 計算
-		{
-			v1 = G*T;				// 増分・速度/frame
-
-			p1 = v0*T +v1*T*0.5;	// 増分・移動/frame
-
-			p2 = p0 + p1;	// 仮想移動
-			v2 = v0 + v1;	// 仮想速度
-		}
-
-		// 衝突
-		{
-
-
-			if ( p2<=0 )
-			{
-	float new_p0 = p0;
-	float new_v0 = v0;
-				p3 = 0;				// 衝突点の位置
-				float s = p3-p0;	// 衝突点までの移動
-				{
-
-					float t = func_t( G, s, v0 );
-//					float s = func_s( t, v0 );
-					float v = func_v( G, t, s );
-
-					float t0 = t; 
-					{
-						float t2 = T-t0;	// 衝突後残り時間
-						float v0 = -v;		// 衝突後速度
-						//--
-						float s = func_s( G, t2, v0 );
-						float v = func_v( G, t2, s );
-
-						cout << " t : " << t  << "t+t2 : " << +t+t2 << " v : " << v << endl ;
-new_p0 = s;
-new_v0 = v;
-						pers.pset3d( gra, pers, vect3(0,0.1,s), rgb(1,1,0), 7 );
-					}
-				}
-
-				p2 = new_p0;
-				v2 = new_v0;
-//				pers.pset3d( gra, pers, vect3(0,0.1,p2), rgb(1,1,0), 7 );
-			}
-		}
-
-		// 更新
-		if  ( !bPause || bStep )
-		{
-			p0 = p2;
-			v0 = v2;
-		}
-
-		// 描画
-		{
-			drawVect( gra, pers, text_y, vect3(0,0.1,p0), vect3(0,0.1,p1)	,1		, rgb(1,0,0), "p1" );
-		}
-	}
-	car.pos.z = p0;
-	car.vel.z = v0;
-#endif
-
-#if 0
-	float p0 = car.pos.z;	//初期値
-	float v0 = car.vel.z;
-
-	float p1;	//増分
-	float v1;
-
-	float p2;	//結果
-	float v2;
-
-	float p3;	//衝突
-	float v3;
-
-	{
-		// 計算
-		{
-			v1 = G*T;				// 増分・速度/frame
-
-			p1 = v0*T +v1*T*0.5;	// 増分・移動/frame
-
-			p2 = p0 + p1;	// 仮想移動
-			v2 = v0 + v1;	// 仮想速度
-		}
-
-		// 衝突
-		{
-			if ( p2<=0 )
-			{
-				p3 = 0;				// 衝突点の位置
-				float p = p3-p0;	// 衝突点までの移動
-
-				// p = 0.5*G*t^2 + v0 * t
-
-if(0)
-{
-	float t = 1.0;
-	float p = G/2*t*t;
-
-	cout << endl;
-	cout << "p : "<< p << endl;
-
-	{
-		float t = sqrt( abs( 2 * p / G ) );
-		cout << "t : "<< t << endl;
-
-		float s = 0.5*G*t*t;
-		cout << "s : "<< s << endl;
-		
-	}
-
-	
-}
-
-if (1)
-{
-
-	p = -G/2;
-	float v = -G/8;
-
-		float a = 0.5*G;
-		float b = sqrt(abs(a));
-		float c = v/(2*b);
-
-
-					float t = ( sqrt( abs( p - c*c ) ) + c )/b; 
-
-	cout << endl;
-	cout << "v : " << v << endl;			
-	cout << "t : " << t << endl;			
-	{
-//		float s  = 0.5*G*t*t + v*t;
-		float s  = a*t*t + v*t;
-		float s2 = -pow( b*t - c, 2 ) + c*c;
-//		float s2 = pow( b*t + c, 2 ) - c*c;
-		cout << " s : " << s  << " p : " << p  << " s2 : "<< s2 << endl ;
-	}
-
-}
-
-
-				p2 = p0;
-				v2 = -v0;
-				pers.pset3d( gra, pers, vect3(0,0.1,p2), rgb(1,1,0), 7 );
-			}
-		}
-
-		// 更新
-		if  ( !bPause || bStep )
-		{
-			p0 = p2;
-			v0 = v2;
-		}
-
-		// 描画
-		{
-			drawVect( gra, pers, text_y, vect3(0,0.1,p0), vect3(0,0.1,p1)	,1		, rgb(1,0,0), "p1" );
-		}
-	}
 	car.pos.z = p0;
 	car.vel.z = v0;
 #endif
