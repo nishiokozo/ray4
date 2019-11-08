@@ -151,6 +151,8 @@ struct	Graphs
 static void drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str )
 //------------------------------------------------------------------------------
 {
+	gra.SetZTest(false);
+
 	vect3 v1 = v0+v*sc;
 
 	// 影
@@ -168,6 +170,8 @@ static void drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, f
 	pers.print3d( gra, pers, 	v1, 0,0, str ); 
 
 	gra.Print(1,(float)text_y++, str+": "+to_string(v.x)+" , "+to_string(v.y)+" , "+to_string(v.z));
+
+	gra.SetZTest(true);
 };
 
 //------------------------------------------------------------------------------
@@ -504,8 +508,8 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 			#elif 0
 				// 簡易実装2
 				float s = q0.z-p0;					// 衝突までの距離(m)
-				float t = func_t( G, s, v0 );	// 衝突までの時間(s)
-				float v = (v0 + G*t);			// 衝突後の速度(m/s)
+				float t = func_t( G, s, v0 );		// 衝突までの時間(s)
+				float v = (v0 + G*t);				// 衝突後の速度(m/s)
 
 				p1 = p0 + s -v/10000;	
 				v1 = -v;
@@ -526,7 +530,7 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 					{ // デバッグ
 						if ( !bPause )
 						{
-							cout << " q1 : " <<q1.z << " p0 : " <<p0<< " v0 : " << v0 << endl;
+							cout << " q1 : " <<q1.z<< " p0 : " << p0 << " v0 : " << v0 << endl;
 							cout << " s  : " << s  << " t  : " << t  << " v : " << v  << endl;
 							cout << " s2 : " << s2 << " t2 : " << t2 << " v2 : " << v2 << endl;
 							cout << " p1 : " << p1 << " v1 : " << v1 << endl;
@@ -535,29 +539,28 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 						if ( t > T ) bPause = true;
 
 						drawVect( gra, pers, text_y, vect3(0,0.0,p0), vect3(0,0.0,v)		,1		, rgb(1,1,0), "v" );
-						drawVect( gra, pers, text_y, vect3(0,0.0,p0), vect3(0,0.0,s)		,1		, rgb(0,1,0), "s" );
+						drawVect( gra, pers, text_y, vect3(0,0.0,p0), vect3(0,0.0,s)		,1		, rgb(0,1,1), "s" );
 						drawVect( gra, pers, text_y, vect3(0,0.0,p0), vect3(0,0.0,p1-p0)	,1		, rgb(1,0,0), "p1-p0" );
-						if(1)
-						{
-//							float v0 = 3.855896472930908203125000;
-//							float s = 0.058378726243972778320312;
-//							const float	G	= -9.80665;				// 重力加速度
-//							float t = func_t( G, s, v0 );		// 衝突までの時間(s)
-
-							pers.pset3d( gra, pers, vect3(0,0,s), rgb(1,0,0), 2 );
-
-							for ( float tm = 0 ; tm < t ; tm += 0.01 )
-							{
-								float sx = func_s( G, tm, v0 )+p0;
-								pers.pset3d( gra, pers, vect3(tm,0,sx), rgb(0,1,0), 2 );
-							}
-						}
 					}
 
 				}
 			#endif
 
 			}
+						if(1)
+						{
+				float s = s0;					// 衝突までの距離(m)
+				float t = func_t( G, s, v0 );		// 衝突までの時間(s)
+
+			pers.print3d( gra, pers, 	vect3(0,0,p0), 20,12, "s="+to_string(s) ); 
+			pers.print3d( gra, pers, 	vect3(0,0,p0), 20,34, "t="+to_string(t) ); 
+
+							for ( float tm = 0 ; tm < t ; tm += 0.001 )
+							{
+								float sm = func_s( G, tm, v0 )+p0;
+								pers.pset3d( gra, pers, vect3(tm,0,sm), rgb(0,1,0), 2 );
+							}
+						}
 		}
 		// 更新
 //		if(time<1.0)
@@ -572,7 +575,9 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 
 		// 描画
 		{
-			pers.line3d( gra, pers, st, en, rgb(1,1,1), 2 );
+			gra.SetZTest(false);
+			pers.line3d_scissor( gra, pers, st, en, rgb(1,1,1), 2 );
+			gra.SetZTest(true);
 		}
 	}
 

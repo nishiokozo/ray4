@@ -17,7 +17,7 @@ Pers::Pers()
 //--------------------------------------------------------------------------
 {
 	fovy=90/2;
-	rate = 8.0f*8;
+	rate_w = 1.0f/64;	// wバッファに書き込むレート
 
 }
 
@@ -32,6 +32,7 @@ void Pers::Update( vect2 screensize )
 #else
 	//投影面までの距離基準	こちらの方がニアクリップがしやすく扱いやすい。
 	sz = 1.0;								// 投影面までの距離
+	sz = 1.0/8.0;								// 投影面までの距離
 	fy = sz*tan(deg2rad(fovy)/2);				// 投影面の高さ/2
 #endif
 	aspect	= screensize.x/screensize.y;	// 描画画面のアスペクト比
@@ -55,7 +56,7 @@ vect3 Pers::calcViewScreen3( vect3 v )	// 透視変換
 		float w = getW(v.z);
 		ret.x = v.x* w / aspect;
 		ret.y = v.y* w 	;
-		ret.z = w/rate;	// 三次元ベクトルで返す都合上、ZにW値を入れている。
+		ret.z = w*rate_w;	// 三次元ベクトルで返す都合上、ZにW値を入れている。
 	}
 
 	return ret;
@@ -132,30 +133,35 @@ bool Pers::calcScissorLine3d( vect3 v0, vect3 v1, vect3& va, vect3& vb )	// 3D �
 	vb = calcViewScreen3(v1);
 
 	{//シザリング ニアクリップ
-		function<vect3(vect3,vect3,int)>nearclip = [ this,&nearclip ]( vect3 a, vect3 b, int n )
+		const float NZ = 0;//getW(0)/rate_w;
+
+		const float FZ = 0;
+
+		function<vect3(vect3,vect3,int)>nearclip = [ this, &nearclip, NZ, FZ ]( vect3 a, vect3 b, int n )
 		{
 			if (n <=0 ) return b;
 
 			vect3 c =  (a+b)/2;
 	
-			if ( c.z <= -sz )
+			if ( c.z < NZ )
 			{
 				c = nearclip( a, c, n-1 );
 			}
-			if ( c.z > 0.0 )
+			if ( c.z > FZ )
 			{
 				c = nearclip( c, b, n-1 );
 			}
 			return c;
 		};
+
 		if ( va.z > 0|| vb.z > 0 )
 		{
-			if ( va.z < 0 )
+			if ( va.z < NZ )
 			{
 				vect3 c = nearclip(v1,v0,8);
 				va = calcViewScreen3(c);
 			}
-			if ( vb.z < 0 )
+			if ( vb.z < NZ )
 			{
 				vect3 c = nearclip(v0,v1,8);
 				vb = calcViewScreen3(c);
@@ -621,13 +627,40 @@ void Pers::Cam::Move( vect3 v )
 void Pers::Cam::Zoom( float step )
 //------------------------------------------------------------------------------
 {
+#if 1
 	vect3	v= vect3(0,0,step);
 	mat33 mrot = mat.GetRotate();
-	v = v* mrot;
+	v = v * mrot;
 
-	vect3 r = pos;
+	vect3 p = pos;
 	pos += v;
-	if( (pos-at).abs() <= v.abs() ) pos = (r-at).normalize()*0.00001+at;
+	if( (pos-at).abs() <= v.abs() ) pos = (p-at).normalize()*0.00001+at;
+#else
+	vect3	v= vect3(0,0,step);
+	mat33	mrot = mat.GetRotate();
+	v = v * mrot;
+
+//vect3 a = (pos-at).normalize() * step;
+
+	if( (pos-at).abs() <= v.abs() ) 
+	{
+//		vect3 p = pos;
+//		pos += v;
+//		pos += v;
+pos = (pos-at).normalize()*0.00001+at;
+cout << "a" << endl;
+pos.dump();
+at.dump();
+	}
+	else
+	{
+		vect3 p = pos;
+		pos += v;
+	}
+
+
+//	if( (pos-at).abs() <= v.abs() ) pos = (p-at).normalize()*0.00001+at;
+#endif
 }
 
 //------------------------------------------------------------------------------

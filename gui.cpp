@@ -266,6 +266,7 @@ void Gui::SelectOneSub( vector<vector<Obj*>>& tbls )
 void Gui::DrawController( Pers& pers, SysGra& gra, vector<vector<Obj*>>& tbls, vector<vector<Edge*>>& tbltblEdge, vect2 mpos )
 //------------------------------------------------------------------------------
 {
+	gra.SetZTest( false );
 
 	{
 		for ( int i = 0 ; i < (signed)tbltblEdge.size() ; i++ )
@@ -306,7 +307,6 @@ void Gui::DrawController( Pers& pers, SysGra& gra, vector<vector<Obj*>>& tbls, v
 		}
 	}
 
-	gra.SetZTest( false );
 	{
 		int n = 0;
 		for ( vector<Obj*>& tblPoint : tbls )
@@ -394,7 +394,7 @@ void Gui::MoveObj( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbls, vect2& m
 		if ( p )
 		{
 
-			vect2	scale = vect2(pers.aspect, 1)/one.w/pers.rate;
+			vect2	scale = vect2(pers.aspect, 1)/one.w*pers.rate_w;
 
 			if ( one.bSelected_a )
 			{
@@ -427,7 +427,7 @@ void Gui::MoveObj( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbls, vect2& m
 		// 移動 カメラに並行
 		if ( bByCamera )
 		{
-			v = vect3(mmov.x*pers.aspect, mmov.y, 0)/one.w/pers.rate;
+			v = vect3(mmov.x*pers.aspect, mmov.y, 0)/one.w*pers.rate_w;
 			mat33 mrot = pers.cam.mat.GetRotate();
 			v = v* mrot;
 		}
