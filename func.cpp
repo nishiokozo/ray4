@@ -35,7 +35,7 @@ tuple<bool,float,vect3,vect3,float,float>func_distance_Line_Line( vect3 P0, vect
 
 	//    P0       P1
 	//    |        |
-	//    |}s0     |}s1(距離)
+	//    |}s0     |}s1(距離ベクトル:Iベクトル方向、負の数ならP1より前)
 	//    |        |
 	// Q0 +--------+ Q1(衝突位置)
 	//    |        |

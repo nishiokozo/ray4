@@ -362,7 +362,7 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	bool bStep = false;
 	struct Car:Obj
 	{
-		vect3	vel;	//	velocity 速度(m/frame)
+		vect3	vel;	//	velocity 速度(m/s)
 
 		bool	bReq = false;
 		vect3	req_pos;
@@ -389,9 +389,9 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 		//点
 		for ( Obj* p : lab.tblObj ) delete p;
 		lab.tblObj.clear();
-		lab.tblObj.emplace_back( new Car(vect3(  0		, 0.0,  1.0 ), vect3(0,0,0)) );
-		lab.tblObj.emplace_back( new Obj(vect3( -0.5	, 0.0,	0.0/8 )) );
-		lab.tblObj.emplace_back( new Obj(vect3(  0.5	, 0.0,	0.0/8 )) );
+		lab.tblObj.emplace_back( new Car(vect3(  0		, 0.0,  0.1 ), vect3(0,0,3)) );
+		lab.tblObj.emplace_back( new Obj(vect3( -0.5	, 0.0,	0.0 )) );
+		lab.tblObj.emplace_back( new Obj(vect3(  0.5	, 0.0,	0.0 )) );
 		// 線
 		for ( Edge* p : lab.tblEdge ) delete p;
 		lab.tblEdge.clear();
@@ -447,28 +447,40 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 
 #if 1
 
-	// 移動量s,初速v0の時間を求める。
-	auto func_t =[]( float g, float s, float v0 )
+	// 移動量d,初速v0の時間を求める。
+	auto func_accelerationGetTime_DV =[]( float g, float d, float v0 )	// DV : Distance / Velocity
 	{
 		float a = 0.5*g;
 		float c = v0/(2*a);
-		float t = sqrt( abs( s/a + c*c ) ) - c; 
+		float t = 0;
+
+		if ( v0 < 0 )
+		{
+			// 落下している場合
+			t = sqrt( abs( d/a + c*c ) ) - c; 
+		}
+		else
+		{
+			// 上昇している場合
+			t = -sqrt( abs( d/a + c*c ) ) - c; 
+		}
+
 		return t;
 	};
 
-	// 時間t,初速v0の移動量sを求める。
-	auto func_s =[]( float g, float t, float v0 )
+	// 時間t,初速v0の移動量dを求める。
+	auto func_accelerationGetDistance_TV =[]( float g, float t, float v0 )	// TV : Time / Velocity
 	{
 		float a = 0.5*g;
-		float s = a*t*t + v0*t;
-		return s;
+		float d = a*t*t + v0*t;
+		return d;
 	};
 
-	// 時間t,移動量sの、速度を求める。
-	auto func_v =[]( float g, float t, float s )
+	// 時間t,移動量dの、速度を求める。
+	auto func_accelerationGetVelocity_TS =[]( float g, float t, float d )	// TD : Time / Distance
 	{
 		float a = 0.5*g;
-		float v = (s-a*t*t)/t;
+		float v = (d-a*t*t)/t;
 		return v;
 	};
 
@@ -484,14 +496,19 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	float v1;
 
 	{
+		rgb col1( 0, 1, 0 );
+		rgb col2( 0, 1.0, 1.0 );
+		rgb col3( 1.0, 1.0, 0.0 );
 		// 計算
 		{
-			float s = func_s( G, T, v0 );	// 移動距離 m
+			float d = func_accelerationGetDistance_TV( G, T, v0 );	// 移動距離 m
 
-			p1 = p0 + s;	// 仮想移動
+			p1 = p0 + d;	// 仮想移動
 			v1 = v0 + G*T;	// 仮想速度
 
-//			drawVect( gra, pers, text_y, vect3(0,0.0,p0), vect3(0,0.0,s)	,1		, rgb(1,0,0), "s" );
+			gra.SetZTest(false);
+			pers.line3d_scissor( gra, pers, vect3(0,0,p0), vect3(0,0,p1), col1, 1 );
+			gra.SetZTest(true);
 		}
 
 		// 衝突
@@ -507,61 +524,66 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 				v1 = -v0;
 			#elif 0
 				// 簡易実装2
-				float s = q0.z-p0;					// 衝突までの距離(m)
-				float t = func_t( G, s, v0 );		// 衝突までの時間(s)
-				float v = (v0 + G*t);				// 衝突後の速度(m/s)
+				float d = q0.z-p0;										// 衝突までの距離(m)
+				float t = func_accelerationGetTime_DV( G, d, v0 );		// 衝突までの時間(s)
+				float v = (v0 + G*t);									// 衝突後の速度(m/s)
 
-				p1 = p0 + s -v/10000;	
+				p1 = p0 + d -v/10000;	
 				v1 = -v;
 			#elif 1
 				// １バウンド実装
-				float s = q0.z-p0;					// 衝突までの距離(m)
-				float t = func_t( G, s, v0 );		// 衝突までの時間(s)
-				float v = (v0 + G*t);				// 衝突後の速度(m/s)
+				float d = q0.z-p0;										// 衝突までの距離(m)
+				float t = func_accelerationGetTime_DV( G, d, v0 );		// 衝突までの時間(s)
+				float v = (v0 + G*t);									// 衝突後の速度(m/s)
 
 				{
-					float t2 = T-t;					// 衝突後の残り時間(s)
-					float s2 = func_s( G, t2, -v );	// 衝突後の移動距離(m)
-					float v2 = (-v + G*t2);			// 衝突後の速度(m/s)
+					float t2 = T-t;												// 衝突後の残り時間(s)
+					float s2 = func_accelerationGetDistance_TV( G, t2, -v );	// 衝突後の移動距離(m)
+					float v2 = (-v + G*t2);										// 衝突後の速度(m/s)
 				
-					p1 = p0 + s + s2;	
+					p1 = p0 + d + s2;	
 					v1 = v2;
 
+					if(0)
 					{ // デバッグ
 						if ( !bPause )
 						{
 							cout << " q1 : " <<q1.z<< " p0 : " << p0 << " v0 : " << v0 << endl;
-							cout << " s  : " << s  << " t  : " << t  << " v : " << v  << endl;
+							cout << " d  : " << d  << " t  : " << t  << " v : " << v  << endl;
 							cout << " s2 : " << s2 << " t2 : " << t2 << " v2 : " << v2 << endl;
 							cout << " p1 : " << p1 << " v1 : " << v1 << endl;
 							cout << endl;
 						}
 						if ( t > T ) bPause = true;
-
-						drawVect( gra, pers, text_y, vect3(0,0.0,p0), vect3(0,0.0,v)		,1		, rgb(1,1,0), "v" );
-						drawVect( gra, pers, text_y, vect3(0,0.0,p0), vect3(0,0.0,s)		,1		, rgb(0,1,1), "s" );
-						drawVect( gra, pers, text_y, vect3(0,0.0,p0), vect3(0,0.0,p1-p0)	,1		, rgb(1,0,0), "p1-p0" );
 					}
-
+						pers.pset3d( gra, pers, vect3(0,0,p0+d), col1, 5 );	//	衝突点
+						pers.pset3d( gra, pers, vect3(0,0,p1), col1, 5 );	//	バウンド先
 				}
+
 			#endif
 
 			}
+						pers.pset3d( gra, pers, vect3(0,0,p0), col1, 5 );	//	位置
 						if(1)
 						{
-				float s = s0;					// 衝突までの距離(m)
-				float t = func_t( G, s, v0 );		// 衝突までの時間(s)
+							float s3 = q0.z-p0;											// 衝突までの距離(m)
+							float t3 = func_accelerationGetTime_DV( G, s3, v0 );		// 衝突までの時間(s)
+							float v3 = (v0 + G*t3);										// 衝突後の速度(m/s)
 
-			pers.print3d( gra, pers, 	vect3(0,0,p0), 20,12, "s="+to_string(s) ); 
-			pers.print3d( gra, pers, 	vect3(0,0,p0), 20,34, "t="+to_string(t) ); 
+							float line = 0;
+							pers.print3d( gra, pers, 	vect3(0,0,p0), 20,(line++)*22+12, "s3="+to_string(s3)+"m" ); 
+							pers.print3d( gra, pers, 	vect3(0,0,p0), 20,(line++)*22+12, "t3="+to_string(t3)+"ms" ); 
 
-							for ( float tm = 0 ; tm < t ; tm += 0.001 )
+							// グラフ化
+							for ( float tm = 0 ; tm < t3 ; tm += 0.001 )
 							{
-								float sm = func_s( G, tm, v0 )+p0;
-								pers.pset3d( gra, pers, vect3(tm,0,sm), rgb(0,1,0), 2 );
+								float sm = func_accelerationGetDistance_TV( G, tm, v0 );
+								pers.pset3d( gra, pers, vect3(tm/10,0,p0+sm), col3, 1 );
 							}
 						}
 		}
+		
+		
 		// 更新
 //		if(time<1.0)
 		if  ( !bPause || bStep )
@@ -576,7 +598,7 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 		// 描画
 		{
 			gra.SetZTest(false);
-			pers.line3d_scissor( gra, pers, st, en, rgb(1,1,1), 2 );
+			pers.line3d_scissor( gra, pers, st, en, rgb(1,1,1)*0.8, 1 );
 			gra.SetZTest(true);
 		}
 	}

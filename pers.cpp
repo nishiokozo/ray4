@@ -579,13 +579,14 @@ void Pers::DrawDrum( SysGra& gra, Pers& pers,  vect3 pos, mat33 m  )
 ////////////////
 // Camera
 ////////////////
+const static float g_nearist = 0.00000001f*100; 
 //------------------------------------------------------------------------------
 void Pers::Cam::Rotation( vect3 mov )
 //------------------------------------------------------------------------------
 {
 	float len = (pos-at).abs();
 	float l = (pos-at).abs()/10;
-	l=max(l,0.00001f/8);
+	l=max(l,0.0000001*2);
 	l=min(l,8);
 
 	float eyeup = dot( (pos-at).normalize(), up ); // 視線ベクトルとupベクトルの織り成すcos th
@@ -634,7 +635,7 @@ void Pers::Cam::Zoom( float step )
 
 	vect3 p = pos;
 	pos += v;
-	if( (pos-at).abs() <= v.abs() ) pos = (p-at).normalize()*0.00001+at;
+	if( (pos-at).abs() <= v.abs() ) pos = (p-at).normalize()*g_nearist+at;
 #else
 	vect3	v= vect3(0,0,step);
 	mat33	mrot = mat.GetRotate();
@@ -647,7 +648,7 @@ void Pers::Cam::Zoom( float step )
 //		vect3 p = pos;
 //		pos += v;
 //		pos += v;
-pos = (pos-at).normalize()*0.00001+at;
+pos = (pos-at).normalize()*g_nearist+at;
 cout << "a" << endl;
 pos.dump();
 at.dump();
@@ -659,7 +660,7 @@ at.dump();
 	}
 
 
-//	if( (pos-at).abs() <= v.abs() ) pos = (p-at).normalize()*0.00001+at;
+//	if( (pos-at).abs() <= v.abs() ) pos = (p-at).normalize()*g_nearist+at;
 #endif
 }
 
@@ -710,19 +711,38 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers,  vect3 pos, mat33 m, int N
 		}
 	}			
 
+	if(1)
 	{//原点表示
 		float r = 0.1;
 		vect3 a;
-		for ( int i = 0 ; i <= 360 ; i+=20 )
+		for ( float th = 0 ; th <= deg2rad(360) ; th+=deg2rad(20) )
 		{
-			vect3 b = vect3( r*cos(deg2rad((float)i)), 0, r*sin(deg2rad((float)i)) ) + pos;
-			if ( i > 0 ) 
+			vect3 b = vect3( r*cos(th), 0, r*sin(th) ) + pos;
+			if ( th > 0 ) 
 			{
 				vect3 v0 = a * m;
 				vect3 v1 = b * m;
 				pers.line3d( gra, pers, v0,v1, col );
 			}
 			a = b;
+		}
+	}
+	
+	{// 10cmメモリ
+		vect3 a;
+		for ( float f = -1.0 ; f <= 1.0 ; f+=0.1 )
+		{
+			if ( abs(f)<=0.11 ) continue;
+			{
+				vect3 v0 = vect3( f, 0, -0.025 ) * m;
+				vect3 v1 = vect3( f, 0,  0.025 ) * m;
+				pers.line3d( gra, pers, v0,v1, col );
+			}
+			{
+				vect3 v0 = vect3( -0.025, 0, f ) * m;
+				vect3 v1 = vect3(  0.025, 0, f ) * m;
+				pers.line3d( gra, pers, v0,v1, col );
+			}
 		}
 	}
 }
