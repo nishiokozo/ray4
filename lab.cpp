@@ -344,6 +344,294 @@ static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	}
 }
 //------------------------------------------------------------------------------
+static void lab11_2dRidge2( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+//------------------------------------------------------------------------------
+{
+
+	// 移動量d,初速v0の時間を求める。
+	auto func_accelerationGetTime_DV =[]( float g, float d, float v0 )	// DV : Distance / Velocity
+	{
+		float a = 0.5*g;
+		float c = v0/(2*a);
+		float t = 0;
+
+		if ( v0 < 0 )
+		{
+			// 落下している場合
+			t = sqrt( abs( d/a + c*c ) ) - c; 
+		}
+		else
+		{
+			// 上昇している場合
+			t = -sqrt( abs( d/a + c*c ) ) - c; 
+		}
+
+		return t;
+	};
+
+	// 時間t,初速v0の移動量dを求める。
+	auto func_accelerationGetDistance_TV =[]( float g, float t, float v0 )	// TV : Time / Velocity
+	{
+		float a = 0.5*g;
+		float d = a*t*t + v0*t;
+		return d;
+	};
+
+	// 時間t,移動量dの、速度を求める。
+	auto func_accelerationGetVelocity_TS =[]( float g, float t, float d )	// TD : Time / Distance
+	{
+		float a = 0.5*g;
+		float v = (d-a*t*t)/t;
+		return v;
+	};
+
+	// 頂点の高さyを求める。
+	auto func_getTopD = []( float G, float v0 )
+	{
+		float a = 0.5*G;
+		float c = v0/(2*a);
+//					float x = -c;
+		float y = -a*c*c;
+		return y;
+	};
+
+	// 頂点の時間tを求める。
+	auto func_getTopT = []( float G, float v0 )
+	{
+		float a = 0.5*G;
+		float c = v0/(2*a);
+		return -c;
+	};
+	
+	static	Graphs graphs;
+
+	gra.Print(1,(float)text_y++,string("lab11_2dRidge2")+to_string(lab.idx)); 
+
+	const float	G	= -9.80665;				// 重力加速度
+	const float	T	= 1.0/60.0;				// 時間/frame
+	const vect3	gv	= vect3(0,0, G*T*T);	// 重力加速度/frame
+	static bool		bPause = false;
+	static float time = 0;
+	rgb col0( 0, 0, 0 );
+	rgb col1( 0, 0, 1 );
+	rgb col2( 1, 0, 0 );
+	rgb col3( 1, 0, 1 );
+	rgb col4( 0, 1, 0 );
+	rgb col5( 0, 1, 1 );
+	rgb col6( 1, 1, 0 );
+	rgb col7( 1, 1, 1 );
+	bool bStep = false;
+	struct Car:Obj
+	{
+		vect3	vel;	//	velocity 速度(m/s)
+		Car( vect3 v, vect3 _vel ) : Obj(v)
+		{
+			pos = v;
+			vel = _vel;
+		}
+	};
+
+	// 初期化
+	if ( !lab.bInit )
+	{
+		if ( !lab.bInitCam )
+		{
+			lab.bInitCam = true;
+			pers.cam.pos = vect3(	0.0,	4.2, 0.1 );
+			pers.cam.at = vect3( 	0.0,	0.0, 0.2 );
+		}
+	
+		lab.bInit = true;
+		//点
+		for ( Obj* p : lab.tblObj ) delete p;
+		lab.tblObj.clear();
+		lab.tblObj.emplace_back( new Car(vect3(  0		, 0.0,  1.0 ), vect3(0,0,0)) );
+		lab.tblObj.emplace_back( new Obj(vect3( -0.5	, 0.0,	0.0 )) );
+		lab.tblObj.emplace_back( new Obj(vect3(  0.5	, 0.0,	-0.5 )) );
+		// 線
+		for ( Edge* p : lab.tblEdge ) delete p;
+		lab.tblEdge.clear();
+		lab.tblEdge.emplace_back( new Edge(1,2) );
+
+		pers.axis.bAxisX = true;
+		pers.axis.bAxisY = false;
+		pers.axis.bAxisZ = true;
+
+		graphs.Clear();
+		graphs.Add( 0.02, rgb(0,0,1) );
+		graphs.Add( 0.02, rgb(0,1,1) );
+		graphs.Add( 0.02, rgb(1,1,0) );
+
+		time = 0;
+
+		cout << endl;
+	}
+
+	// 入力
+	{
+		if ( keys.R.hi ) lab.bInit = false;
+		if ( keys.SPACE.hi )	bPause = !bPause ;
+		if ( keys.ENTER.rep )	{bStep = true; bPause = true; }
+	}
+	
+	Car&	car = *dynamic_cast<Car*>(lab.tblObj[0]);
+	vect3	st = lab.tblObj[1]->pos;
+	vect3	en = lab.tblObj[2]->pos;
+
+	// 頂点計算チェック
+	{
+		static bool flg = false;
+			   float p0 = car.pos.z;
+			   float v0 = car.vel.z;
+		static float p1 = 0;
+		static float p2 = 0;
+
+		if ( p0 < p1 && flg == false ) 
+		{
+			float a,b;
+			if ( p2 > p0 )
+			{
+				a = p2;
+				b = p1;
+			}
+			else
+			{
+				a = p1;
+				b = p0;
+			}
+
+			float top = func_getTopD(G,v0) + p0;
+		
+			cout << "top : " << top << endl;
+			flg = true;
+		}
+		if ( p0 > p1 ) flg = false;
+		p2 = p1;
+		p1 = p0;
+
+	}
+/*
+			{
+				float hi = -999;
+				float p0 = car.pos.z;
+				float v0 = car.vel.z;
+				for ( float t = 0 ; t < 1.0 ; t+=0.0001 )
+				{
+					float d = func_accelerationGetDistance_TV( G, t, v0 );	// 移動距離 m
+//hi = max(d+p0,hi);
+if ( hi < p0+d ) hi = p0+d;
+					pers.pset3d( gra, pers, vect3(t,0,p0+d), col4, 1 );	//	衝突点
+				}
+
+				{
+					float a = 0.5*G;
+					float c = v0/(2*a);
+					float x = func_getTopT(G,v0);
+					float y = func_getTopD(G,v0) +p0;
+
+					pers.pset3d( gra, pers, vect3(x,0,y), col2 , 5 );	//	衝突点
+					pers.line3d( gra, pers, vect3(x,0,y), vect3(0,0,0), col2 , 1 );	//	衝突点
+//cout << y << endl;
+				}
+			}
+*/
+	//-----
+
+	time += T;
+
+
+
+	//初期値
+	float p0 = car.pos.z;
+	float v0 = car.vel.z;
+
+
+	// 結果
+	float p1;
+	float v1;
+
+	{
+		// 計算
+		{
+			float d = func_accelerationGetDistance_TV( G, T, v0 );	// 移動距離 m
+
+			p1 = p0 + d;	// 仮想移動
+			v1 = v0 + G*T;	// 仮想速度
+
+			gra.SetZTest(false);
+			pers.line3d_scissor( gra, pers, vect3(0,0,p0), vect3(0,0,p1), col4, 1 );
+			gra.SetZTest(true);
+		}
+
+		// 衝突
+		{
+			auto[b,d,q0,q1,s0,s1] = func_distance_Segline_Segline( vect3(0,0,p0), vect3(0,0,p1), st, en );
+
+			if ( b )
+			{
+			#if 0
+				// 簡易実装
+				p1 = p0;
+				v1 = -v0;
+			#elif 0
+				// 簡易実装2
+				float d = q0.z-p0;										// 衝突までの距離(m)
+				float t = func_accelerationGetTime_DV( G, d, v0 );		// 衝突までの時間(s)
+				float v = (v0 + G*t);									// 衝突後の速度(m/s)
+
+				p1 = p0 + d -v/10000;	
+				v1 = -v;
+			#elif 1
+				// １バウンド実装
+				float d = q0.z-p0;										// 衝突までの距離(m)
+				float t = func_accelerationGetTime_DV( G, d, v0 );		// 衝突までの時間(s)
+				float v = (v0 + G*t);									// 衝突後の速度(m/s)
+
+				{
+					float t2 = T-t;												// 衝突後の残り時間(s)
+					float s2 = func_accelerationGetDistance_TV( G, t2, -v );	// 衝突後の移動距離(m)
+					float v2 = (-v + G*t2);										// 衝突後の速度(m/s)
+				
+					p1 = p0 + d + s2;	
+					v1 = v2;
+
+					pers.pset3d( gra, pers, vect3(0,0,p0+d), col4, 5 );	//	衝突点
+					pers.pset3d( gra, pers, vect3(0,0,p1), col4, 5 );	//	バウンド先
+				}
+
+			#endif
+
+			}
+		}
+
+		{
+			auto func = []( float t, float v )
+			{
+				return -t*t+v*t;
+			};
+
+			// グラフ化
+			for ( float t = 0 ; t < 1.0 ; t += 0.01 )
+			{
+				float y = func(t,0);
+				pers.pset3d( gra, pers, vect3(t,0,y), col6, 1 );
+			}
+		}		
+		
+		// 更新
+//		if(time<1.0)
+		if  ( !bPause || bStep )
+		{
+			p0 = p1;
+			v0 = v1;
+		}
+	}
+
+	car.pos.z = p0;
+	car.vel.z = v0;
+
+}
+//------------------------------------------------------------------------------
 static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
 {
@@ -382,7 +670,7 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 		if ( !lab.bInitCam )
 		{
 			lab.bInitCam = true;
-			pers.cam.pos = vect3(	0.0,	1.2, 0.1 );
+			pers.cam.pos = vect3(	0.0,	4.2, 0.1 );
 			pers.cam.at = vect3( 	0.0,	0.0, 0.2 );
 		}
 	
@@ -390,9 +678,9 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 		//点
 		for ( Obj* p : lab.tblObj ) delete p;
 		lab.tblObj.clear();
-		lab.tblObj.emplace_back( new Car(vect3(  0		, 0.0,  0.1 ), vect3(0,0,3)) );
+		lab.tblObj.emplace_back( new Car(vect3(  0		, 0.0,  1.0 ), vect3(0,0,0)) );
 		lab.tblObj.emplace_back( new Obj(vect3( -0.5	, 0.0,	0.0 )) );
-		lab.tblObj.emplace_back( new Obj(vect3(  0.5	, 0.0,	0.0 )) );
+		lab.tblObj.emplace_back( new Obj(vect3(  0.5	, 0.0,	-0.5 )) );
 		// 線
 		for ( Edge* p : lab.tblEdge ) delete p;
 		lab.tblEdge.clear();
@@ -433,7 +721,7 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 
 		if ( car.pos.z < prev && b == false ) 
 		{
-//			cout << "top : " << prev << endl;
+			cout << "top : " << prev << endl;
 			b = true;
 		}
 		if ( car.pos.z > prev ) b = false;
@@ -497,9 +785,9 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	float v1;
 
 	{
-		rgb col1( 0, 1, 0 );
-		rgb col2( 0, 1.0, 1.0 );
-		rgb col3( 1.0, 1.0, 0.0 );
+		rgb col4( 0, 1, 0 );
+		rgb col5( 0, 1.0, 1.0 );
+		rgb col6( 1.0, 1.0, 0.0 );
 		// 計算
 		{
 			float d = func_accelerationGetDistance_TV( G, T, v0 );	// 移動距離 m
@@ -508,7 +796,7 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 			v1 = v0 + G*T;	// 仮想速度
 
 			gra.SetZTest(false);
-			pers.line3d_scissor( gra, pers, vect3(0,0,p0), vect3(0,0,p1), col1, 1 );
+			pers.line3d_scissor( gra, pers, vect3(0,0,p0), vect3(0,0,p1), col4, 1 );
 			gra.SetZTest(true);
 		}
 
@@ -545,6 +833,7 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 					p1 = p0 + d + s2;	
 					v1 = v2;
 
+				/*	
 					if(0)
 					{ // デバッグ
 						if ( !bPause )
@@ -557,14 +846,16 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 						}
 						if ( t > T ) bPause = true;
 					}
-						pers.pset3d( gra, pers, vect3(0,0,p0+d), col1, 5 );	//	衝突点
-						pers.pset3d( gra, pers, vect3(0,0,p1), col1, 5 );	//	バウンド先
+				*/
+						pers.pset3d( gra, pers, vect3(0,0,p0+d), col4, 5 );	//	衝突点
+						pers.pset3d( gra, pers, vect3(0,0,p1), col4, 5 );	//	バウンド先
 				}
 
 			#endif
 
 			}
-						pers.pset3d( gra, pers, vect3(0,0,p0), col1, 5 );	//	位置
+			/*
+						pers.pset3d( gra, pers, vect3(0,0,p0), col4, 5 );	//	位置
 						if(1)
 						{
 							float s3 = q0.z-p0;											// 衝突までの距離(m)
@@ -579,9 +870,10 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 							for ( float tm = 0 ; tm < t3 ; tm += 0.001 )
 							{
 								float sm = func_accelerationGetDistance_TV( G, tm, v0 );
-								pers.pset3d( gra, pers, vect3(tm/10,0,p0+sm), col3, 1 );
+								pers.pset3d( gra, pers, vect3(tm/10,0,p0+sm), col6, 1 );
 							}
 						}
+			*/
 		}
 		
 		
@@ -1618,6 +1910,10 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& 
 			lab10_colors( (*this), keys, mouse, gra, pers, text_y );
 			break;
 
+		case 11:	// 描画	2d剛体
+			lab11_2dRidge2( (*this), keys, mouse, gra, pers, text_y );
+			break;
+
 		case 9:	// 描画	2d剛体
 			lab9_2dRidge( (*this), keys, mouse, gra, pers, text_y );
 			break;
@@ -1663,6 +1959,6 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& 
 Lab::Lab()
 //------------------------------------------------------------------------------
 {
-	idx = 9;
+	idx = 11;
 }
 
