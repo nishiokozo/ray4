@@ -995,9 +995,9 @@ struct Apr : public Sys
 				if ( time_max < time_b-time_a ) time_max = time_b-time_a;
 
 				// ウェイト(60fps)
-				while( chrono::system_clock::now().time_since_epoch()-time_a < chrono::microseconds(16666) )
+//				while( chrono::system_clock::now().time_since_epoch()-time_a < chrono::microseconds(16666) )
 				{
-	 				this_thread::sleep_for(chrono::microseconds(100));
+	 	//			this_thread::sleep_for(chrono::microseconds(100));
 				}
 
 				// 表示

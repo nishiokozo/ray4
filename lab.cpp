@@ -347,6 +347,7 @@ static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
 {
+
 	static	Graphs graphs;
 
 	gra.Print(1,(float)text_y++,string("lab9_2dRidge")+to_string(lab.idx)); 
