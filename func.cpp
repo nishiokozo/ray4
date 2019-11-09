@@ -84,17 +84,17 @@ tuple<bool,float,vect3,vect3,float,float>func_distance_Line_Segline( vect3 P0, v
 	vect3	P1 = p1;
 	vect3	I1 = (q1-p1).normalize();
 
-	auto[b,d,Q0,Q1,s0,s1] = func_distance_Line_Line( P0, I0, P1, I1 );
+	auto[flg,d,Q0,Q1,s0,s1] = func_distance_Line_Line( P0, I0, P1, I1 );
 
-	if ( b )
+	if ( flg )
 	{
 		// 線分処理
-		if ( s1 < 0 ) b = false;
-		if ( s1 > (q1-p1).abs() ) b = false;
+		if ( s1 < 0 ) flg = false;
+		if ( s1 > (q1-p1).abs() ) flg = false;
 
 	}
 
-	return {b,d,Q0,Q1,s0,s1};
+	return {flg,d,Q0,Q1,s0,s1};
 }
 
 //------------------------------------------------------------------------------
@@ -114,19 +114,19 @@ tuple<bool,float,vect3,vect3,float,float>func_distance_Harfline_Segline( vect3 p
 	vect3	P1 = p1;
 	vect3	I1 = (q1-p1).normalize();
 
-	auto[b,d,Q0,Q1,s0,s1] = func_distance_Line_Line( P0, I0, P1, I1 );
+	auto[flg,d,Q0,Q1,s0,s1] = func_distance_Line_Line( P0, I0, P1, I1 );
 
-	if ( b )
+	if ( flg )
 	{
 		// 線分処理
-		if ( s1 < 0 ) b = false;
-		if ( s1 > (q1-p1).abs() ) b = false;
+		if ( s1 < 0 ) flg = false;
+		if ( s1 > (q1-p1).abs() ) flg = false;
 
 		// 半直線
-		if ( s0 < 0 ) b = false;
+		if ( s0 < 0 ) flg = false;
 	}
 
-	return {b,d,Q0,Q1,s0,s1};
+	return {flg,d,Q0,Q1,s0,s1};
 }
 
 //------------------------------------------------------------------------------
@@ -148,20 +148,21 @@ tuple<bool,float,vect3,vect3,float,float>func_distance_Segline_Segline( vect3 p0
 	vect3	P1 = p1;
 	vect3	I1 = (q1-p1).normalize();
 
-	auto[b,d,Q0,Q1,s0,s1] = func_distance_Line_Line( P0, I0, P1, I1 );
+	auto[flg,d,Q0,Q1,s0,s1] = func_distance_Line_Line( P0, I0, P1, I1 );
 
-	if ( b )
+	if ( flg )
 	{
 		// 線分処理
-		if ( s1 < 0 ) b = false;
-		if ( s1 > (q1-p1).abs() ) b = false;
+		if ( s1 < 0 ) flg = false;
+		if ( s1 > (q1-p1).abs() ) flg = false;
 
 		// 線分処理
-		if ( s0 < 0 ) b = false;
-		if ( s0 > (q0-p0).abs() ) b = false;
+		if ( s0 < 0 ) flg = false;
+		if ( s0 > (q0-p0).abs() ) flg = false;
+
 	}
 
-	return {b,d,Q0,Q1,s0,s1};
+	return {flg,d,Q0,Q1,s0,s1};
 }
 
 //------------------------------------------------------------------------------

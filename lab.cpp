@@ -565,10 +565,27 @@ if ( hi < p0+d ) hi = p0+d;
 
 		// 衝突
 		{
-			auto[b,d,q0,q1,s0,s1] = func_distance_Segline_Segline( vect3(0,0,p0), vect3(0,0,p1), st, en );
+			auto[flg,d,q0,q1,s0,s1] = func_distance_Segline_Segline( vect3(0,0,p0), vect3(0,0,p1), st, en );
 
-			if ( b )
+			if ( flg )
 			{
+			
+				// 衝突方向の法線
+				{
+					vect3 a = (en-st).normalize();
+					vect3 b = vect3(0,0,(p1-p0)).normalize();
+					vect3 c = cross( a, b );
+					vect3 n = -cross( c, a ).normalize();
+					pers.line3d( gra, pers, vect3(0,0,p0), vect3(0,0,p0)+n , col6, 1 );
+
+					vect3 r = reflect( b, n );
+					pers.line3d( gra, pers, vect3(0,0,p0), vect3(0,0,p0)+r , col4, 1 );
+					pers.line3d( gra, pers, vect3(0,0,p0), vect3(0,0,p0)-b , col5, 1 );
+
+
+//					v0 = r;
+				}
+
 			#if 0
 				// 簡易実装
 				p1 = p0;
@@ -603,7 +620,7 @@ if ( hi < p0+d ) hi = p0+d;
 
 			}
 		}
-
+/*
 		{
 			auto func = []( float t, float v )
 			{
@@ -617,7 +634,7 @@ if ( hi < p0+d ) hi = p0+d;
 				pers.pset3d( gra, pers, vect3(t,0,y), col6, 1 );
 			}
 		}		
-		
+*/		
 		// 更新
 //		if(time<1.0)
 		if  ( !bPause || bStep )
