@@ -375,7 +375,7 @@ static void lab11_2dRidge2( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gr
 
 	const float	G	= -9.80665;				// 重力加速度
 	const float	T	= 1.0/60.0;				// 時間/frame
-	const vect3	gv	= vect3(0.1,0,G);		// 重力加速度ベクトル
+	static vect3	gv	= vect3(0.0,0,G);		// 重力加速度ベクトル
 	static bool		bPause = false;
 	static float time = 0;
 	rgb col0( 0, 0, 0 );
@@ -413,7 +413,7 @@ static void lab11_2dRidge2( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gr
 		lab.tblObj.clear();
 		lab.tblObj.emplace_back( new Car(vect3(  0		, 0.0,  1.0 ), vect3(0,0,0)) );
 		lab.tblObj.emplace_back( new Obj(vect3( -0.5	, 0.0,	0.0 )) );
-		lab.tblObj.emplace_back( new Obj(vect3(  0.5	, 0.0,	-0.5 )) );
+		lab.tblObj.emplace_back( new Obj(vect3(  0.5	, 0.0,	0.0 )) );
 
 		// 線
 		for ( Edge* p : lab.tblEdge ) delete p;
@@ -439,6 +439,10 @@ static void lab11_2dRidge2( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gr
 		if ( keys.R.hi ) lab.bInit = false;
 		if ( keys.SPACE.hi )	bPause = !bPause ;
 		if ( keys.ENTER.rep )	{bStep = true; bPause = true; }
+
+		if ( keys.G.hi )	{if ( gv.z==G ) gv=vect3(0,0,0); else gv=vect3(0,0,G);}
+//		gv.dump();
+	
 	}
 	
 	Car&	car = *dynamic_cast<Car*>(lab.tblObj[0]);
