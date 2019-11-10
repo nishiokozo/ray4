@@ -347,69 +347,35 @@ static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 static void lab11_2dRidge2( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
 {
+	gra.Print(1,(float)text_y++,string("lab11_2dRidge2")+to_string(lab.idx)); 
 
-	// 移動量d,初速v0の時間を求める。
-	auto func_accelerationGetTime_DV =[]( float g, float d, float v0 )	// DV : Distance / Velocity
+	// 移動量d,初速v0の時の時間tを求める。
+	auto func_accelerationGetTime_DVv =[]( vect3 gv, float d, vect3 v0 )	// DV : Distance / Velocity
 	{
-		float a = 0.5*g;
-		float c = v0/(2*a);
-		float t = 0;
 
-		if ( v0 < 0 )
-		{
-			// 落下している場合
-			t = sqrt( abs( d/a + c*c ) ) - c; 
-		}
-		else
-		{
-			// 上昇している場合
-			t = -sqrt( abs( d/a + c*c ) ) - c; 
-		}
+		float	a = 0.5*gv.abs();
+		float	c = v0.abs()/gv.abs();
+		float	t = 0;
+
+		t =  sqrt( abs( d/a + c*c ) ) - c; 
 
 		return t;
 	};
 
-	// 時間t,初速v0の移動量dを求める。
-	auto func_accelerationGetDistance_TV =[]( float g, float t, float v0 )	// TV : Time / Velocity
+	// 時間t,初速v0の時の移動量dを求める。
+	auto func_accelerationGetDistance_TVv =[]( vect3 gv, float t, vect3 v0 )	// TV : Time / Velocity
 	{
-		float a = 0.5*g;
-		float d = a*t*t + v0*t;
+		vect3 a = 0.5*gv;
+		vect3 d = a*t*t + v0*t;
 		return d;
 	};
 
-	// 時間t,移動量dの、速度を求める。
-	auto func_accelerationGetVelocity_TS =[]( float g, float t, float d )	// TD : Time / Distance
-	{
-		float a = 0.5*g;
-		float v = (d-a*t*t)/t;
-		return v;
-	};
-
-	// 頂点の高さyを求める。
-	auto func_getTopD = []( float G, float v0 )
-	{
-		float a = 0.5*G;
-		float c = v0/(2*a);
-//					float x = -c;
-		float y = -a*c*c;
-		return y;
-	};
-
-	// 頂点の時間tを求める。
-	auto func_getTopT = []( float G, float v0 )
-	{
-		float a = 0.5*G;
-		float c = v0/(2*a);
-		return -c;
-	};
-	
 	static	Graphs graphs;
 
-	gra.Print(1,(float)text_y++,string("lab11_2dRidge2")+to_string(lab.idx)); 
 
 	const float	G	= -9.80665;				// 重力加速度
 	const float	T	= 1.0/60.0;				// 時間/frame
-	const vect3	gv	= vect3(0,0, G*T*T);	// 重力加速度/frame
+	const vect3	gv	= vect3(0.1,0,G);		// 重力加速度ベクトル
 	static bool		bPause = false;
 	static float time = 0;
 	rgb col0( 0, 0, 0 );
@@ -448,6 +414,7 @@ static void lab11_2dRidge2( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gr
 		lab.tblObj.emplace_back( new Car(vect3(  0		, 0.0,  1.0 ), vect3(0,0,0)) );
 		lab.tblObj.emplace_back( new Obj(vect3( -0.5	, 0.0,	0.0 )) );
 		lab.tblObj.emplace_back( new Obj(vect3(  0.5	, 0.0,	-0.5 )) );
+
 		// 線
 		for ( Edge* p : lab.tblEdge ) delete p;
 		lab.tblEdge.clear();
@@ -478,63 +445,6 @@ static void lab11_2dRidge2( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gr
 	vect3	st = lab.tblObj[1]->pos;
 	vect3	en = lab.tblObj[2]->pos;
 
-	// 頂点計算チェック
-	{
-		static bool flg = false;
-			   float p0 = car.pos.z;
-			   float v0 = car.vel.z;
-		static float p1 = 0;
-		static float p2 = 0;
-
-		if ( p0 < p1 && flg == false ) 
-		{
-			float a,b;
-			if ( p2 > p0 )
-			{
-				a = p2;
-				b = p1;
-			}
-			else
-			{
-				a = p1;
-				b = p0;
-			}
-
-			float top = func_getTopD(G,v0) + p0;
-		
-			cout << "top : " << top << endl;
-			flg = true;
-		}
-		if ( p0 > p1 ) flg = false;
-		p2 = p1;
-		p1 = p0;
-
-	}
-/*
-			{
-				float hi = -999;
-				float p0 = car.pos.z;
-				float v0 = car.vel.z;
-				for ( float t = 0 ; t < 1.0 ; t+=0.0001 )
-				{
-					float d = func_accelerationGetDistance_TV( G, t, v0 );	// 移動距離 m
-//hi = max(d+p0,hi);
-if ( hi < p0+d ) hi = p0+d;
-					pers.pset3d( gra, pers, vect3(t,0,p0+d), col4, 1 );	//	衝突点
-				}
-
-				{
-					float a = 0.5*G;
-					float c = v0/(2*a);
-					float x = func_getTopT(G,v0);
-					float y = func_getTopD(G,v0) +p0;
-
-					pers.pset3d( gra, pers, vect3(x,0,y), col2 , 5 );	//	衝突点
-					pers.line3d( gra, pers, vect3(x,0,y), vect3(0,0,0), col2 , 1 );	//	衝突点
-//cout << y << endl;
-				}
-			}
-*/
 	//-----
 
 	time += T;
@@ -542,101 +452,72 @@ if ( hi < p0+d ) hi = p0+d;
 
 
 	//初期値
-	float p0 = car.pos.z;
-	float v0 = car.vel.z;
+	vect3 p0 = car.pos;
+	vect3 v0 = car.vel;
 
 
 	// 結果
-	float p1;
-	float v1;
+	vect3 p1;
+	vect3 v1;
 
 	{
 		// 計算
 		{
-			float d = func_accelerationGetDistance_TV( G, T, v0 );	// 移動距離 m
+			vect3 d = func_accelerationGetDistance_TVv( gv, T, v0 );	// 移動距離 m
 
 			p1 = p0 + d;	// 仮想移動
-			v1 = v0 + G*T;	// 仮想速度
+			v1 = v0 + gv*T;	// 仮想速度
 
 			gra.SetZTest(false);
-			pers.line3d_scissor( gra, pers, vect3(0,0,p0), vect3(0,0,p1), col4, 1 );
+			pers.line3d_scissor( gra, pers, p0, p1, col4, 1 );
 			gra.SetZTest(true);
 		}
 
 		// 衝突
 		{
-			auto[flg,d,q0,q1,s0,s1] = func_distance_Segline_Segline( vect3(0,0,p0), vect3(0,0,p1), st, en );
+			auto[flg,dis,q0,q1,s0,s1] = func_distance_Segline_Segline( p0, p1, st, en );
 
 			if ( flg )
 			{
 			
-				// 衝突方向の法線
+
+			#if 1
+				// 衝突点での速度を求める
+				vect3 d = q0-p0;												// 衝突までの距離(m)
+				float t = func_accelerationGetTime_DVv( gv, d.abs(), v0 );		// 衝突までの時間(s)
+				vect3 v = v0 + gv*t;											// 衝突後の速度(m/s)
+
+				// 速度の反射
 				{
 					vect3 a = (en-st).normalize();
-					vect3 b = vect3(0,0,(p1-p0)).normalize();
+					vect3 b = (v).normalize();
 					vect3 c = cross( a, b );
 					vect3 n = -cross( c, a ).normalize();
-					pers.line3d( gra, pers, vect3(0,0,p0), vect3(0,0,p0)+n , col6, 1 );
-
 					vect3 r = reflect( b, n );
-					pers.line3d( gra, pers, vect3(0,0,p0), vect3(0,0,p0)+r , col4, 1 );
-					pers.line3d( gra, pers, vect3(0,0,p0), vect3(0,0,p0)-b , col5, 1 );
+					v = r * v.abs();
 
-
-//					v0 = r;
+				///	pers.line3d( gra, pers, p0, p0+n , col6, 1 );
+				//	pers.line3d( gra, pers, p0, p0+r , col4, 1 );
+				//	pers.line3d( gra, pers, p0, p0-b , col5, 1 );
 				}
-
-			#if 0
-				// 簡易実装
-				p1 = p0;
-				v1 = -v0;
-			#elif 0
-				// 簡易実装2
-				float d = q0.z-p0;										// 衝突までの距離(m)
-				float t = func_accelerationGetTime_DV( G, d, v0 );		// 衝突までの時間(s)
-				float v = (v0 + G*t);									// 衝突後の速度(m/s)
-
-				p1 = p0 + d -v/10000;	
-				v1 = -v;
-			#elif 1
-				// １バウンド実装
-				float d = q0.z-p0;										// 衝突までの距離(m)
-				float t = func_accelerationGetTime_DV( G, d, v0 );		// 衝突までの時間(s)
-				float v = (v0 + G*t);									// 衝突後の速度(m/s)
 
 				{
 					float t2 = T-t;												// 衝突後の残り時間(s)
-					float s2 = func_accelerationGetDistance_TV( G, t2, -v );	// 衝突後の移動距離(m)
-					float v2 = (-v + G*t2);										// 衝突後の速度(m/s)
+					vect3 d2 = func_accelerationGetDistance_TVv( gv, t2, v );	// 衝突後の移動距離(m)
+					vect3 v2 = v + gv*t2;										// 衝突後の速度(m/s)
 				
-					p1 = p0 + d + s2;	
+					p1 = p0 + d + d2;	
 					v1 = v2;
 
-					pers.pset3d( gra, pers, vect3(0,0,p0+d), col4, 5 );	//	衝突点
-					pers.pset3d( gra, pers, vect3(0,0,p1), col4, 5 );	//	バウンド先
+					pers.pset3d( gra, pers, p0+d, col4, 5 );	//	衝突点
+					pers.pset3d( gra, pers, p1, col4, 5 );		//	バウンド先
 				}
 
 			#endif
 
 			}
 		}
-/*
-		{
-			auto func = []( float t, float v )
-			{
-				return -t*t+v*t;
-			};
 
-			// グラフ化
-			for ( float t = 0 ; t < 1.0 ; t += 0.01 )
-			{
-				float y = func(t,0);
-				pers.pset3d( gra, pers, vect3(t,0,y), col6, 1 );
-			}
-		}		
-*/		
-		// 更新
-//		if(time<1.0)
 		if  ( !bPause || bStep )
 		{
 			p0 = p1;
@@ -644,8 +525,8 @@ if ( hi < p0+d ) hi = p0+d;
 		}
 	}
 
-	car.pos.z = p0;
-	car.vel.z = v0;
+	car.pos = p0;
+	car.vel = v0;
 
 }
 //------------------------------------------------------------------------------

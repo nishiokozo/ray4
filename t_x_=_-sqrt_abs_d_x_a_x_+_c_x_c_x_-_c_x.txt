@@ -1,0 +1,26 @@
+
+			t.x = -sqrt( abs( d.x/a.x + c.x*c.x ) ) - c.x; 
+			t.y = -sqrt( abs( d.y/a.y + c.y*c.y ) ) - c.y; 
+			t.z = -sqrt( abs( d.z/a.z + c.z*c.z ) ) - c.z; 
+			t.x =  sqrt( abs( d.x/a.x + c.x*c.x ) ) - c.x; 
+			t.y =  sqrt( abs( d.y/a.y + c.y*c.y ) ) - c.y; 
+			t.z =  sqrt( abs( d.z/a.z + c.z*c.z ) ) - c.z; 
+		}
+
+		if ( v0.y < 0 )
+		{
+			// 落下している場合
+		}
+		else
+		{
+			// 上昇している場合
+		}
+
+		if ( v0.z < 0 )
+		{
+			// 落下している場合
+		}
+		else
+		{
+			// 上昇している場合
+		}
