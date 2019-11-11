@@ -354,10 +354,17 @@ static void lab11_2dRidge2( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gr
 	{
 
 		float	a = 0.5*gv.abs();
-		float	c = v0.abs()/gv.abs();
 		float	t = 0;
 
-		t =  sqrt( abs( d/a + c*c ) ) - c; 
+		if ( a == 0 )
+		{
+			t = d/v0.abs();
+		}
+		else
+		{
+			float	c = v0.abs()/gv.abs();
+			t =  sqrt( d/a + c*c ) - c; 
+		}
 
 		return t;
 	};
@@ -481,11 +488,12 @@ static void lab11_2dRidge2( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gr
 		{
 			auto[flg,dis,q0,q1,s0,s1] = func_distance_Segline_Segline( p0, p1, st, en );
 
+			static vect3 p0x,nx,rx,bx;
+
 			if ( flg )
 			{
 			
 
-			#if 1
 				// 衝突点での速度を求める
 				vect3 d = q0-p0;												// 衝突までの距離(m)
 				float t = func_accelerationGetTime_DVv( gv, d.abs(), v0 );		// 衝突までの時間(s)
@@ -499,10 +507,7 @@ static void lab11_2dRidge2( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gr
 					vect3 n = -cross( c, a ).normalize();
 					vect3 r = reflect( b, n );
 					v = r * v.abs();
-
-				///	pers.line3d( gra, pers, p0, p0+n , col6, 1 );
-				//	pers.line3d( gra, pers, p0, p0+r , col4, 1 );
-				//	pers.line3d( gra, pers, p0, p0-b , col5, 1 );
+					nx=n;rx=r;bx=b;
 				}
 
 				{
@@ -510,16 +515,19 @@ static void lab11_2dRidge2( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gr
 					vect3 d2 = func_accelerationGetDistance_TVv( gv, t2, v );	// 衝突後の移動距離(m)
 					vect3 v2 = v + gv*t2;										// 衝突後の速度(m/s)
 				
-					p1 = p0 + d + d2;	
-					v1 = v2;
+					p1 = p0 + d + d2;
+					v1 = v2 *0.8;
 
 					pers.pset3d( gra, pers, p0+d, col4, 5 );	//	衝突点
 					pers.pset3d( gra, pers, p1, col4, 5 );		//	バウンド先
+					p0x=p0+d;
 				}
-
-			#endif
-
 			}
+
+					pers.line3d( gra, pers, p0x, p0x+nx , col6, 1 );
+					pers.line3d( gra, pers, p0x, p0x+rx , col4, 1 );
+					pers.line3d( gra, pers, p0x, p0x-bx , col5, 1 );
+
 		}
 
 		if  ( !bPause || bStep )
