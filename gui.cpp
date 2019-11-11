@@ -28,11 +28,13 @@
 //#include "skeleton.h"
 #include "gui.h"
 //------------------------------------------------------------------------------
-void Gui::TouchFirst( Pers& pers, vector<vector<Obj*>>& tbls, vect2 mpos )
+void Gui::TouchFirst( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbls, vect2 mpos )
 //------------------------------------------------------------------------------
 {
 	one.clear();
 	int n2 = 0;
+	float len = infinit_max;
+	
 	for ( vector<Obj*>& tblPoint : tbls )
 	{
 		int n = 0;
@@ -45,7 +47,8 @@ void Gui::TouchFirst( Pers& pers, vector<vector<Obj*>>& tbls, vect2 mpos )
 				if (p2)
 				{
 					vect3 v = pers.calcWorldToScreen3( p2->pos +p2->a );
-					if ( (v.xy()-mpos).abs() < 0.04f )
+//					if ( (v.xy()-mpos).abs() < 0.04f )
+					if ( (v.xy()-mpos).abs() < gra.Dot(11,11).abs() )
 					{
 						if ( one.w < v.z ) // 近い場合はより手前が優先
 						{
@@ -62,7 +65,8 @@ void Gui::TouchFirst( Pers& pers, vector<vector<Obj*>>& tbls, vect2 mpos )
 				if (p2)
 				{
 					vect3 v = pers.calcWorldToScreen3( p2->pos +p2->b );
-					if ( (v.xy()-mpos).abs() < 0.04f )
+//					if ( (v.xy()-mpos).abs() < 0.04f )
+					if ( (v.xy()-mpos).abs() < gra.Dot(11,11).abs() )
 					{
 						if ( one.w < v.z ) // 近い場合はより手前が優先
 						{
@@ -82,7 +86,7 @@ void Gui::TouchFirst( Pers& pers, vector<vector<Obj*>>& tbls, vect2 mpos )
 			if ( one.bEnable == false )
 			{
 					vect3 v = pers.calcWorldToScreen3( p->pos );
-					if ( (v.xy()-mpos).abs() < 0.04f )
+					if ( (v.xy()-mpos).abs() < gra.Dot(11,11).abs() )
 					{
 						if ( one.w < v.z ) // 近い場合はより手前が優先
 						{

@@ -69,7 +69,7 @@ struct Gui
 	}
 
 	//------------------------------------------------------------------------------
-	void TouchFirst( Pers& pers, vector<vector<Obj*>>& tbls, vect2 mpos );
+	void TouchFirst( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbls, vect2 mpos );
 	//------------------------------------------------------------------------------
 
 	// 矩形カーソル開始 新規選択

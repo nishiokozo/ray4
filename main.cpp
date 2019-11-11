@@ -845,7 +845,7 @@ struct Apr : public Sys
 
 				// 最近点検索
 				if ( !keys.ALT.on && mouse.L.hi ) 
-					gui.TouchFirst( pers, gui.tbls, mouse.pos );
+					gui.TouchFirst( gra, pers, gui.tbls, mouse.pos );
 
 				// 矩形カーソル開始 新規選択
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && gui.one.bEnable == false && gui.rect_mode == Gui::G_CALC::NONE ) 

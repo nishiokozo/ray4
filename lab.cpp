@@ -356,8 +356,21 @@ static void lab11_2dRidge2( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gr
 		float	a = 0.5*gv.abs();
 		float	t = 0;
 
+		if ( a == 0 && v0.abs() == 0 )
+		{
+			// 加速度＆速度がない
+			t = 0;
+		}
+		else
+		if ( v0.abs() == 0 )
+		{
+			// 加速のみ
+			t =  sqrt( d/a ); 
+		}
+		else
 		if ( a == 0 )
 		{
+			// 速度のみ
 			t = d/v0.abs();
 		}
 		else
@@ -411,7 +424,7 @@ static void lab11_2dRidge2( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gr
 		{
 			lab.bInitCam = true;
 			pers.cam.pos = vect3(	0.0,	4.2, 0.1 );
-			pers.cam.at = vect3( 	0.0,	0.0, 0.2 );
+			pers.cam.at  = vect3( 	0.0,	0.0, 0.2 );
 		}
 	
 		lab.bInit = true;
@@ -420,7 +433,7 @@ static void lab11_2dRidge2( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gr
 		lab.tblObj.clear();
 		lab.tblObj.emplace_back( new Car(vect3(  0		, 0.0,  1.0 ), vect3(0,0,0)) );
 		lab.tblObj.emplace_back( new Obj(vect3( -0.5	, 0.0,	0.0 )) );
-		lab.tblObj.emplace_back( new Obj(vect3(  0.5	, 0.0,	0.0 )) );
+		lab.tblObj.emplace_back( new Obj(vect3(  1.5	, 0.0,  0.0 )) );
 
 		// 線
 		for ( Edge* p : lab.tblEdge ) delete p;
@@ -448,6 +461,8 @@ static void lab11_2dRidge2( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gr
 		if ( keys.ENTER.rep )	{bStep = true; bPause = true; }
 
 		if ( keys.G.hi )	{if ( gv.z==G ) gv=vect3(0,0,0); else gv=vect3(0,0,G);}
+		if ( keys.A.hi )	{lab.tblObj[2]->pos.z=-1.0;}
+
 //		gv.dump();
 	
 	}
@@ -460,80 +475,102 @@ static void lab11_2dRidge2( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gr
 
 	time += T;
 
-
-
 	//初期値
 	vect3 p0 = car.pos;
 	vect3 v0 = car.vel;
 
 
 	// 結果
-	vect3 p1;
-	vect3 v1;
+	vect3 pn;
+	vect3 vn;
 
 	{
 		// 計算
-		{
 			vect3 d = func_accelerationGetDistance_TVv( gv, T, v0 );	// 移動距離 m
+		{
 
-			p1 = p0 + d;	// 仮想移動
-			v1 = v0 + gv*T;	// 仮想速度
+			pn = p0 + d;	// 仮想移動
+			vn = v0 + gv*T;	// 仮想速度
 
 			gra.SetZTest(false);
-			pers.line3d_scissor( gra, pers, p0, p1, col4, 1 );
+			pers.line3d_scissor( gra, pers, p0, pn, col4, 1 );
 			gra.SetZTest(true);
 		}
 
 		// 衝突
 		{
-			auto[flg,dis,q0,q1,s0,s1] = func_distance_Segline_Segline( p0, p1, st, en );
-
 			static vect3 p0x,nx,rx,bx;
+			//vect3 a = (en-st).normalize();			//接線
+			//vect3 b = vect3(0,1,0);					//従法線
+			//vect3 n = -cross( b, a ).normalize();				//法線
+			//pers.line3d( gra, pers, (en+st)/2, (en+st)/2+n, col2, 1 );
 
-			if ( flg )
+//			if ( dot(n,p0-pn) > 0 )
 			{
-			
-
-				// 衝突点での速度を求める
-				vect3 d = q0-p0;												// 衝突までの距離(m)
-				float t = func_accelerationGetTime_DVv( gv, d.abs(), v0 );		// 衝突までの時間(s)
-				vect3 v = v0 + gv*t;											// 衝突後の速度(m/s)
-
-				// 速度の反射
-				{
-					vect3 a = (en-st).normalize();
-					vect3 b = (v).normalize();
-					vect3 c = cross( a, b );
-					vect3 n = -cross( c, a ).normalize();
-					vect3 r = reflect( b, n );
-					v = r * v.abs();
-					nx=n;rx=r;bx=b;
-				}
-
-				{
-					float t2 = T-t;												// 衝突後の残り時間(s)
-					vect3 d2 = func_accelerationGetDistance_TVv( gv, t2, v );	// 衝突後の移動距離(m)
-					vect3 v2 = v + gv*t2;										// 衝突後の速度(m/s)
 				
-					p1 = p0 + d + d2;
-					v1 = v2 *0.8;
+				auto[flg,dis,q0,q1,s0,s1] = func_distance_Segline_Segline( p0-d/65536, pn, st, en ); // 線上にある時の為にわずかに引く
 
-					pers.pset3d( gra, pers, p0+d, col4, 5 );	//	衝突点
-					pers.pset3d( gra, pers, p1, col4, 5 );		//	バウンド先
-					p0x=p0+d;
+
+
+
+
+//	cout <<"flg"<<flg << " " << p0.z << " " << q0.z<<endl;
+
+				if ( flg )
+				{
+
+					// 衝突点までの時間と、衝突点での速度を求める
+					vect3 d1 = q0-p0;												// 衝突までの距離(m)
+					float t1 = func_accelerationGetTime_DVv( gv, d1.abs(), v0 );		// 衝突までの時間(s)
+					vect3 v1 = v0 + gv*t1;											// 衝突後の速度(m/s)
+
+					{
+						// 速度の反射
+						if ( v1.abs() > 0 )
+						{
+							vect3 a = (en-st).normalize();			//接線
+							vect3 b = (v1).normalize();				//仮法線
+							vect3 c = cross( a, b );				//従法線
+							vect3 n = -cross( c, a ).normalize();	//法線
+							vect3 r = reflect( b, n );				//反射ベクトル
+							v1 = r * v1.abs();
+							nx=n;rx=r;bx=b;
+						}
+
+						{
+							float t2 = T-t1;											// 衝突後の残り時間(s)
+							vect3 d2 = func_accelerationGetDistance_TVv( gv, t2, v1 );	// 衝突後の移動距離(m)
+							vect3 v2 = v1 + gv*t2;										// 衝突後の速度(m/s)
+
+							if ( v2.z <= 0 )
+							{
+								d2 = vect3(0,0,0);
+								v2 = vect3(0,0,0);
+//	cout <<endl;
+	cout <<"ground "<< q0.z<<endl;
+							}
+							pn = p0 + t1 + d2;
+							vn = v2 *0.2;
+
+							pers.pset3d( gra, pers, p0+d1, col4, 5 );	//	衝突点
+							pers.pset3d( gra, pers, pn, col4, 5 );		//	バウンド先
+							p0x=p0+d1;
+						}
+					}
+
 				}
+//	cout <<"z"<<pn.z << " " << vn.z<<endl;
 			}
-
-					pers.line3d( gra, pers, p0x, p0x+nx , col6, 1 );
-					pers.line3d( gra, pers, p0x, p0x+rx , col4, 1 );
-					pers.line3d( gra, pers, p0x, p0x-bx , col5, 1 );
+			pers.line3d( gra, pers, p0x, p0x+nx , col6, 1 );
+			pers.line3d( gra, pers, p0x, p0x+rx , col4, 1 );
+			pers.line3d( gra, pers, p0x, p0x-bx , col5, 1 );
 
 		}
 
 		if  ( !bPause || bStep )
 		{
-			p0 = p1;
-			v0 = v1;
+			p0 = pn;
+			v0 = vn;
 		}
 	}
 
