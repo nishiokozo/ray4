@@ -461,7 +461,7 @@ static void lab11_2dRidge2( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gr
 		if ( keys.ENTER.rep )	{bStep = true; bPause = true; }
 
 		if ( keys.G.hi )	{if ( gv.z==G ) gv=vect3(0,0,0); else gv=vect3(0,0,G);}
-		if ( keys.A.hi )	{lab.tblObj[2]->pos.z=-1.0;}
+		if ( keys.A.hi )	{lab.tblObj[2]->pos.z+=-1.0;}
 	
 	}
 	
@@ -499,9 +499,7 @@ static void lab11_2dRidge2( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gr
 
 		// 衝突
 		{
-			vect3 a = (en-st).normalize();			//接線
-			vect3 b = vect3(0,1,0);					//従法線
-			vect3 n = -cross( b, a ).normalize();				//法線
+			vect3 n = cross( (en-st).normalize(), vect3(0,1,0) );
 			pers.line3d( gra, pers, (en+st)/2, (en+st)/2+n, col2, 1 );
 
 
@@ -515,37 +513,36 @@ static void lab11_2dRidge2( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gr
 
 				// 衝突点での速度を求める
 				vect3 d1 = q0-p0;												// 衝突までの距離(m)
-				float t1 = func_accelerationGetTime_DVv( gv, d1.abs(), v0 );		// 衝突までの時間(s)
+				float t1 = func_accelerationGetTime_DVv( gv, d1.abs(), v0 );	// 衝突までの時間(s)
 				vect3 v1 = v0 + gv*t1;											// 衝突後の速度(m/s)
 
 				// 速度の反射
 				if ( v1.abs() > 0 )
 				{
-					vect3 a = (en-st).normalize();
+					vect3 n = cross( (en-st).normalize(), vect3(0,1,0) );
 					vect3 b = (v1).normalize();
-					vect3 c = cross( a, b );
-					vect3 n = -cross( c, a ).normalize();
 					vect3 r = reflect( b, n );
 					v1 = r * v1.abs();
 					nx=n;rx=r;bx=b;
 				}
 
 				{
-					float t2 = T-t1;												// 衝突後の残り時間(s)
+					float t2 = T-t1;											// 衝突後の残り時間(s)
 					vect3 d2 = func_accelerationGetDistance_TVv( gv, t2, v1 );	// 衝突後の移動距離(m)
 					vect3 v2 = v1 + gv*t2;										// 衝突後の速度(m/s)
 				
-//					if ( v2.z <= 0 )
+					// 設置
 					if ( dot(n,v2) < 0 )
 					{
 						d2 = vect3(0,0,0);
 						v2 = vect3(0,0,0);
-//						cout << "ground" << time <<endl;
-						
 					}
-				
+					
+					// 減衰
+					v2 *= 0.2;
+
 					pn = q0 + d2;
-					vn = v2 *0.2;
+					vn = v2 ;
 
 					pers.pset3d( gra, pers, p0+d1, col4, 5 );	//	衝突点
 					pers.pset3d( gra, pers, pn, col4, 5 );		//	バウンド先
