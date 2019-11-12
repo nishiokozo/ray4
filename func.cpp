@@ -184,6 +184,72 @@ tuple<bool,float,vect3> func_distance_Plate_Line( vect3 plate_P, vect3 plate_N, 
 	return {false,0,vect3(0,0,0)};
 };
 
+#if 0
+//------------------------------------------------------------------------------
+tuple<bool,float,vect3> func_distance_Sphere_Line( vect3 sphere_P, float sphere_r, vect3 line_P, vect3 line_I )
+//------------------------------------------------------------------------------
+{
+	//	球と直線の衝突判定
+
+
+	vect3	O = sphere_P;
+	float	r = sphere_r;
+
+	vect3	OP = line_P-O;
+	float	b = dot( line_I, OP );
+	float	aa = r*r - dot(OP,OP)+ b*b;
+
+	int	stat = 0;
+
+	if ( aa >= 0 )
+	{
+		float t = - sqrt( aa ) - b;
+
+		if ( t < 0 )
+		{
+			t = + sqrt( aa ) - b;
+			stat++;
+		}
+
+		if ( sur.t >= t && t >= 0 )
+		{
+			stat += 2;
+
+			sur.stat = stat;
+
+			sur.t = t; 
+
+			sur.Q = line_I * t + line_P;
+
+			if ( stat == Surface::STAT_BACK )
+			{
+				sur.N = -normalize(sur.Q - O);
+			}
+			else
+			{
+				sur.N = normalize(sur.Q - O);
+			}
+
+			sur.C = sphere_C;
+
+			sur.R = reflect( line_I, sur.N );
+
+			sur.valReflectance = sphere_valReflectance;
+
+			sur.valRefractive   = sphere_valRefractive;
+
+			sur.valPower = sphere_valPower;
+
+			sur.valEmissive = sphere_valEmissive;
+
+			sur.valTransmittance = sphere_valTransmittance;
+
+			sur.flg = true;
+		}
+	}
+	
+}
+#endif
 //------------------------------------------------------------------------------
 bool func_IsIntersectSphereLine( vect3 sphere_P, float sphere_r, vect3 line_P , vect3 line_I )
 //------------------------------------------------------------------------------

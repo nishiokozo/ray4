@@ -129,8 +129,9 @@ public:
 	{
 		Surface sur;
 
-		P += I*2e-10;
-
+	//	P += I*2e-10;	// double
+		P += I*2e-5;	// float 
+		
 		sur.flg = false;
 
 		sur.t  = infinit;
@@ -148,21 +149,21 @@ public:
 			float	b = dot( I, OP );
 			float	aa = r*r - dot(OP,OP)+ b*b;
 
-			int	stat = 0;
+			int	stat = Surface::STAT_NONE;
 
 			if ( aa >= 0 )
 			{
+#if 1
 				float t = - sqrt( aa ) - b;
-
 				if ( t < 0 )
 				{
 					t = + sqrt( aa ) - b;
-					stat++;
+					stat++;	//STAT_OUT
 				}
 
 				if ( sur.t >= t && t >= 0 )
 				{
-					stat += 2;
+					stat += 2;	// t<0 ? STAT_BACK : STAT_FRONT
 
 					sur.stat = stat;
 
@@ -178,6 +179,33 @@ public:
 					{
 						sur.N = normalize(sur.Q - O);
 					}
+#else
+				float t = - sqrt( aa ) - b;
+				if ( t < 0 )
+				{
+					t = + sqrt( aa ) - b;
+					stat++;	//STAT_OUT
+				}
+
+				if ( sur.t >= t && t >= 0 )
+				{
+					stat += 2;	// t<0 ? STAT_BACK : STAT_FRONT
+
+					sur.stat = stat;
+
+					sur.t = t; 
+
+					sur.Q = I * t + P;
+
+					if ( stat == Surface::STAT_BACK )
+					{
+						sur.N = -normalize(sur.Q - O);
+					}
+					else
+					{
+						sur.N = normalize(sur.Q - O);
+					}
+#endif
 
 					sur.C = obj.C;
 
@@ -269,7 +297,7 @@ public:
 		float r,s,pw,e,tm,rl,rr;
 		vect3	P,C,N;
 
-	#define	SCENE 3
+	#define	SCENE 1
 	#if SCENE==1
 		m_tblPlate.push_back( PrimPlate( P=vect3( 0  ,  0 ,0.0),N=vect3(0,1,0),C=vect3(0.8,0.8,0.8),rl=0.5,rr=1.0 ,pw=20,e= 0.0,tm=0.0 ) );
 		m_tblSphere.push_back( PrimSphere(vect3( 0.0 , 1.25, -2       ),   0.5 , vect3(1  , 0.2, 0.2), 0.5, 1.0, 20, 0.0, 0.0 ) );
@@ -431,57 +459,46 @@ void	raytrace( SysGra& gra )
 {
 	Renderer ren;
 
-	static int px = 0;
-	static int py = 0;
-
 	{
 		float width		= gra.GetWidth(); 
 		float height	= gra.GetHeight(); 
 
 		float	aspect = width / height;
-		float	center_x = -(width / height)/2;
 	
-		vect3	posScr = vect3(center_x,1.0,-12+8);
-		vect3	posEye = vect3(center_x,1.0,-17+8);
+		vect3	posScr = vect3(0,1.0,-12+8);
+		vect3	posEye = vect3(0,1.0,-17+8);
 
-		float r,s,p,e,t,rl,rr;
-		rgb	C;
+
+//		float r,s,p,e,t,rl,rr;
+///		rgb	C;
 
 		int	cntMax = 0;
 		int	cntRay = 0;
-		for( int py = 0 ; py < height ; py++ )
+		for( float py = 0 ; py < height ; py += 1.0 )
 		{
-			for( int px = 0 ; px < width ; px++ )
+			for( float px = 0 ; px < width ; px += 1.0 )
 			{
-				float x = ((float)px / width) *2.0-1.0;
-				float y = ((float)py / height) *2.0-1.0;
-				vect3	P = vect3( x, y, 0 ) + posScr;
+				float	x = (px /  width) *2.0-1.0;
+				float	y = (py / height) *2.0-1.0;
+				vect3	P = vect3( x*aspect, y, 0 ) + posScr;
 				vect3	I = normalize(P - posEye);
 
-				float	valRefractive = 1.0;
-
 				ren.m_cntRay = 0;
-				int	cntNext = 0;
-		 		C = ren.Raycast( P, I );
+		 		rgb C = ren.Raycast( P, I );
 				if ( ren.m_cntRay > cntMax ) cntMax = ren.m_cntRay;
 				cntRay+= ren.m_cntRay;
-
-//				gra.Pset( gra.Conv(vect2(px,height-py)) ,C);
-if (C.r<0 ) C.r = 0;
-if (C.r>1.0 ) C.r = 1.0;
-if (C.g<0 ) C.g = 0;
-if (C.g>1.0 ) C.g = 1.0;
-if (C.b<0 ) C.b = 0;
-if (C.b>1.0 ) C.b = 1.0;
+			/*
+				if (C.r<0 ) C.r = 0;
+				if (C.r>1.0 ) C.r = 1.0;
+				if (C.g<0 ) C.g = 0;
+				if (C.g>1.0 ) C.g = 1.0;
+				if (C.b<0 ) C.b = 0;
+				if (C.b>1.0 ) C.b = 1.0;
+			*/
 				gra.Pset( vect2(x,y) ,C);
-//cout << x << " " << y<<endl;
-//				gra.Pset( gra.Conv(vect2(px,height-py)) ,rgb(1,1,1));
 			}
 		}
 		
-//		px++;
-//		if ( px >= width ) {px = 0;py++;}
-//		if ( py >= height ) py = 0;
 	}
 
 }
