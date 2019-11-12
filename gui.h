@@ -132,7 +132,7 @@ struct Gui
 	//------------------------------------------------------------------------------
 
 	//------------------------------------------------------------------------------
-	void MoveObj( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbls, vect2& mpos, vect2& mprev, vect2& mmov, bool bSame, bool bByCamera );
+	void MoveObj( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbls, vect2& mpos, vect2& mprev, vect2& mmov, bool bSame, bool bByCamera, bool bByFloor, bool bByXY );
 	//------------------------------------------------------------------------------
 
 };

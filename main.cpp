@@ -894,17 +894,30 @@ struct Apr : public Sys
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && gui.one.bEnable ) 
 				{
 					bool bByCamera = false;
+					bool bByFloor = false;
+					bool bByXY = false;
 					if ( pers.axis.bAxisX && pers.axis.bAxisY && pers.axis.bAxisZ )
 					{
+						// カメラに並行
 						bByCamera = true;
 					}
 					else
+					if ( pers.axis.bAxisX && pers.axis.bAxisY )
 					{
-						pers.axis.bAxisX = true;
-						pers.axis.bAxisY = false;
-						pers.axis.bAxisZ = true;
+						// XYに平行
+						bByXY = true;
 					}
-					gui.MoveObj( gra, pers, gui.tbls, mouse.pos, mouse.prev, mouse.mov, keys.T.on, bByCamera );
+					else
+					if ( pers.axis.bAxisX && pers.axis.bAxisZ )
+					{
+						// 床に平行
+						bByFloor = true;
+					}
+					else
+					{
+						bByCamera = true;
+					}
+					gui.MoveObj( gra, pers, gui.tbls, mouse.pos, mouse.prev, mouse.mov, keys.T.on, bByCamera, bByFloor, bByXY );
 
 					if ( (*pSkeleton).bActive )
 					{

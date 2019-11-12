@@ -395,7 +395,7 @@ static void lab11_RidgeBall( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 
 	const float	G	= -9.80665;				// 重力加速度
 	const float	T	= 1.0/60.0;				// 時間/frame
-	static vect3	gv	= vect3(0.0,0,G);		// 重力加速度ベクトル
+	static vect3	gv	= vect3(0,G,0);		// 重力加速度ベクトル
 	static bool		bPause = false;
 	static float time = 0;
 	rgb col0( 0, 0, 0 );
@@ -424,17 +424,17 @@ static void lab11_RidgeBall( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 		if ( !lab.bInitCam )
 		{
 			lab.bInitCam = true;
-			pers.cam.pos = vect3(	0.0,	4.2, 0.1 );
-			pers.cam.at = vect3( 	0.0,	0.0, 0.2 );
+			pers.cam.pos = vect3(	0.0,	1.0, -3.0 );
+			pers.cam.at = vect3( 	0.0,	1.0, 0.0 );
 		}
 	
 		lab.bInit = true;
 		//点
 		for ( Obj* p : lab.tblObj ) delete p;
 		lab.tblObj.clear();
-		lab.tblObj.emplace_back( new Ball(vect3(  0		, 0.0,  1.0 ), vect3(0,0,0)) );
-		lab.tblObj.emplace_back( new Obj(vect3( -0.5	, 0.0,	0.0 )) );
-		lab.tblObj.emplace_back( new Obj(vect3(  0.5	, 0.0, 0.0 )) );
+		lab.tblObj.emplace_back( new Ball(vect3(  0		, 1.0,  0.0 ), vect3(0,0,0)) );
+		lab.tblObj.emplace_back( new Obj(vect3( -0.5	, 0.5,	0.0 )) );
+		lab.tblObj.emplace_back( new Obj(vect3(  0.5	, 0.5,  0.0 )) );
 
 		// 線
 		for ( Edge* p : lab.tblEdge ) delete p;
@@ -442,14 +442,10 @@ static void lab11_RidgeBall( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 		lab.tblEdge.emplace_back( new Edge(1,2) );
 
 		pers.axis.bAxisX = true;
-		pers.axis.bAxisY = false;
-		pers.axis.bAxisZ = true;
+		pers.axis.bAxisY = true;
+		pers.axis.bAxisZ = false;
 
 		graphs.Clear();
-		graphs.Add( 0.02, rgb(0,0,1) );
-		graphs.Add( 0.02, rgb(0,1,1) );
-		graphs.Add( 0.02, rgb(1,1,0) );
-
 		time = 0;
 
 		cout << endl;
@@ -461,7 +457,7 @@ static void lab11_RidgeBall( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 		if ( keys.SPACE.hi )	bPause = !bPause ;
 		if ( keys.ENTER.rep )	{bStep = true; bPause = true; }
 
-		if ( keys.G.hi )	{if ( gv.z==G ) gv=vect3(0,0,0); else gv=vect3(0,0,G);}
+		if ( keys.G.hi )	{if ( gv.z==G ) gv=vect3(0,0,0); else gv=vect3(0,G,0);}
 		if ( keys.A.hi )	{lab.tblObj[2]->pos.z+=-1.0;}
 	
 	}
@@ -500,7 +496,7 @@ static void lab11_RidgeBall( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 
 		// 衝突
 		{
-			vect3 n = cross( (en-st).normalize(), vect3(0,1,0) );
+			vect3 n = cross( (en-st).normalize(), vect3(0,0,-1) );
 			pers.line3d( gra, pers, (en+st)/2, (en+st)/2+n, col2, 1 );
 
 
@@ -521,7 +517,7 @@ static void lab11_RidgeBall( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 				// 速度の反射
 				if ( v1.abs() > 0 )
 				{
-					vect3 n = cross( (en-st).normalize(), vect3(0,1,0) );
+					vect3 n = cross( (en-st).normalize(), vect3(0,0,-1) );
 					vect3 b = (v1).normalize();
 					vect3 r = reflect( b, n );
 					v1 = r * v1.abs();

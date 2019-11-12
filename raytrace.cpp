@@ -13,8 +13,6 @@
 using namespace std;
 
 
-//const	static	float infinit =  numeric_limits<float>::max();	//FLT_MAX
-
 struct  Material
 {
 	vect3	C;					//	ベースカラー
@@ -145,41 +143,83 @@ public:
 			vect3	O = obj.P;
 			float	r = obj.r;
 
-			vect3	OP = P-O;
-			float	b = dot( I, OP );
-			float	aa = r*r - dot(OP,OP)+ b*b;
+			////////////////////////////////////////////////////////////////////////////////////
+			//                                                                                //
+			//                                                                                //
+			//           O              O球の中心                                             //
+			//          /|                                                                    //
+			//        l/ |}r            r:球の半径                                            //
+			//        /  |                                                                    //
+			//       /   :}a            a:線と球表面までの距離                                //
+			//      /    :                                                                    //
+			//     P-----+--->I         P:Rayの照射元,I:Rayの単位ベクトル                     //
+			//        b                 b:衝突位置                                            //
+			//                                                                                //
+			//                                                                                //
+			//                                                                                //
+			//  l = P-O                                                                       //
+			//  b = I･l                                                                       //
+			//  aa = r^2 - l･l + b^2   ※(r+a)^2 + b^2 - l^2 からの変形。aaが負の数なら衝突   //
+			//  a = ±sqrt( aa )                                                              //
+			//  t = a - b                                                                     //
+			//                                                                                //
+			//                                                                                //
+			////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+			vect3	l = P-O;
+			float	b = dot( I, l );
+#if 1
+			// 屈折をに非対応
+			float	aa = r*r - dot(l,l)+ b*b;
 
 			int	stat = Surface::STAT_NONE;
 
 			if ( aa >= 0 )
 			{
-#if 1
 				float t = - sqrt( aa ) - b;
-				if ( t < 0 )
+				if ( t >= 0 )
 				{
-					t = + sqrt( aa ) - b;
-					stat++;	//STAT_OUT
-				}
-
-				if ( sur.t >= t && t >= 0 )
-				{
-					stat += 2;	// t<0 ? STAT_BACK : STAT_FRONT
-
-					sur.stat = stat;
-
-					sur.t = t; 
-
-					sur.Q = I * t + P;
-
-					if ( stat == Surface::STAT_BACK )
+					if ( sur.t >= t )
 					{
-						sur.N = -normalize(sur.Q - O);
-					}
-					else
-					{
+						int	stat = Surface::STAT_FRONT;
+	
+						sur.stat = stat;
+
+						sur.t = t; 
+
+						sur.Q = I * t + P;
+
 						sur.N = normalize(sur.Q - O);
+
+						sur.C = obj.C;
+
+						sur.R = reflect( I, sur.N );
+
+						sur.valReflectance = obj.valReflectance;
+
+						sur.valRefractive   = obj.valRefractive;
+
+						sur.valPower = obj.valPower;
+
+						sur.valEmissive = obj.valEmissive;
+
+						sur.valTransmittance = obj.valTransmittance;
+
+						sur.flg = true;
 					}
+				}
+			}
 #else
+			// 屈折を一部対応した記憶があるが、内容が読めない
+			float	aa = r*r - dot(l,l)+ b*b;
+
+			int	stat = Surface::STAT_NONE;
+
+			if ( aa >= 0 )
+			{
 				float t = - sqrt( aa ) - b;
 				if ( t < 0 )
 				{
@@ -205,7 +245,6 @@ public:
 					{
 						sur.N = normalize(sur.Q - O);
 					}
-#endif
 
 					sur.C = obj.C;
 
@@ -224,6 +263,7 @@ public:
 					sur.flg = true;
 				}
 			}
+#endif
 		}
 
 		//	床

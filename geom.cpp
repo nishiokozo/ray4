@@ -361,6 +361,87 @@ vect3 refract( vect3 I, vect3 N, float nm )
 float	dot( vect3 a, vect3 b )
 //-----------------------------------------------------------------------------
 {
+	/*
+		※よく使う内積のTips
+
+		①２つのベクトルの織りなす角を求める
+
+			int main()
+			{
+				vect3 a,b;
+
+				float	ao = deg2rad(10+32);
+				float	ar = 1.0;
+
+				float	bo = deg2rad(10+0);
+				float	br = 1.0;
+
+				a.x = ar * cos(ao);
+				a.y = ar * sin(ao);
+				b.x = br * cos(bo);
+				b.y = br * sin(bo);
+
+				cout << rad2deg( acos( dot(a,b) ) ) << endl;
+
+			}
+			--
+			32
+			
+			条件）両方のベクトルが単位ベクトルであること
+
+
+
+
+		②投影長さを求める
+
+			int main()
+			{
+				vect3 a,b;
+
+				float	ao = deg2rad(10+45);
+				float	ar = 2.0;
+
+				float	bo = deg2rad(10+0);
+				float	br = 1.0;
+
+				a.x = ar * cos(ao);
+				a.y = ar * sin(ao);
+				b.x = br * cos(bo);
+				b.y = br * sin(bo);
+
+				cout << dot(a,b) << endl;
+
+			}
+			---
+			1.14142
+
+			条件）少なくとも一方が単位ベクトルであること
+
+
+
+
+		③ベクトルの長さを求める
+
+			int main()
+			{
+				vect3 a,b;
+
+				float	ao = deg2rad(10+32);
+				float	ar = 123.45;
+
+				a.x = ar * cos(ao);
+				a.y = ar * sin(ao);
+
+				cout << sqrt( dot(a,a) ) << endl;
+
+			}
+			---
+			123.45
+
+			条件）最後に要平方根
+
+	*/
+
 	return a.x * b.x + a.y * b.y +a.z * b.z ;
 }
 //-----------------------------------------------------------------------------
@@ -607,6 +688,7 @@ float atan2_360( float y, float x )
 //	return	((n)*pi/180.0f);
 	return 0;
 }
+
 //-----------------------------------------------------------------------------
 float deg2rad( float n )
 //-----------------------------------------------------------------------------

@@ -385,7 +385,7 @@ void Gui::DrawController( Pers& pers, SysGra& gra, vector<vector<Obj*>>& tbls, v
 }
 
 //------------------------------------------------------------------------------
-void Gui::MoveObj( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbls, vect2& mpos, vect2& mprev, vect2& mmov, bool bSame, bool bByCamera )
+void Gui::MoveObj( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbls, vect2& mpos, vect2& mprev, vect2& mmov, bool bSame, bool bByCamera, bool bByFloor, bool bByXY )
 //------------------------------------------------------------------------------
 {
 	bool bsel = false;
@@ -436,6 +436,19 @@ void Gui::MoveObj( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbls, vect2& m
 			v = v* mrot;
 		}
 		else
+		if ( bByXY )
+		// XYに平行
+		{
+			vect3 P0 = pers.calcScreenToWorld3( vect3(mprev,0) );
+			vect3 P1 = pers.calcScreenToWorld3( vect3(mpos,0) );
+			vect3 I0 = pers.calcRayvect( P0 );
+			vect3 I1 = pers.calcRayvect( P1 );
+			auto[b0,t0,Q0] = func_distance_Plate_Line( vect3(0,0,0), vect3(0,0,-1), P0, I0);
+			auto[b1,t1,Q1] = func_distance_Plate_Line( vect3(0,0,0), vect3(0,0,-1), P1, I1);
+			v = Q1-Q0;
+		}
+		else
+		if ( bByFloor )
 		// 床に平行
 		{
 			vect3 P0 = pers.calcScreenToWorld3( vect3(mprev,0) );
