@@ -242,8 +242,6 @@ void  SysGra::OnDestroy()
 void  SysGra::OnSize( int width, int height ) 
 //------------------------------------------------------------------------------
 {
-
-
 	HWND hWnd = SysWin::GetInstance().win.hWnd;
 	{
 		HDC	hDc = GetDC( hWnd );	// GetDCに対してはReleaseDC
@@ -254,7 +252,6 @@ void  SysGra::OnSize( int width, int height )
 				DeleteObject(g.hBitmap);
 			}
 
-
 			g.hBitmap = CreateCompatibleBitmap( hDc, width, height );
 
 		    g.hdcBackbuffer = CreateCompatibleDC( NULL );	// Create...DCに対してはDeleteDC
@@ -264,16 +261,13 @@ void  SysGra::OnSize( int width, int height )
 		ReleaseDC( hWnd, hDc );
 	}
 
-	// gl
-		glViewport(0,0,width, height);
+	glViewport(0,0,width, height);
 }
 
 //------------------------------------------------------------------------------
 void  SysGra::OnMove( int pos_x, int pos_y ) 
 //------------------------------------------------------------------------------
 {
-
-
 	{
 		SysWin& win = SysWin::GetInstance();
 		int w = win.GetWidth();
@@ -284,8 +278,6 @@ void  SysGra::OnMove( int pos_x, int pos_y )
 		SetRect(&rect, 0, 0, w, h );
 		AdjustWindowRectEx(&rect, WS_OVERLAPPEDWINDOW, FALSE, 0);
 	}
-
-
 }
 
 ///------------------------------------------------------------------------------

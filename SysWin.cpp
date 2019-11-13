@@ -20,7 +20,6 @@ static struct
 {
 	function<void()> funcOnCreate;
 	function<void( int width, int height)> funcOnSize;
-//	function<void( int width, int height)> funcOnMove;
 	function<void()> funcOnPaint;
 	function<void()> funcOnDestroy;
 
@@ -110,23 +109,29 @@ static LRESULT CALLBACK WinProc
 	//cout << hex << "-- 0x" << uMsg << endl;
 	switch( uMsg ) 
 	{
-		case WM_CREATE:	// CreateWindowと同時に発行される
-		//	g.funcOnCreate();//ここだとinstance経由でhWndが取得できない
+		// CreateWindowと同時に発行される
+		case WM_CREATE:
 
-			RegisterTouchWindow( hWnd, TWF_WANTPALM );//WM_TOUCH有効、迅速反応、1回タッチで1マウスクリック相当に是正される。必須。
+			//WM_TOUCH有効、迅速反応、1回タッチで1マウスクリック相当に是正される。必須。
+			RegisterTouchWindow( hWnd, TWF_WANTPALM );
+
 			return 0;
 
-		case WM_ERASEBKGND:	//	WM_PAINTイベントの途中、及びWM_SHOWWINDOWのあとに発行される。 DefWindowProc()に任せると白いフラッシュが入ってしまうので、0を返す
+		// WM_PAINTイベントの途中、及びWM_SHOWWINDOWのあとに発行される。 
+		// DefWindowProc()に任せると白いフラッシュが入ってしまうので、0を返す
+		case WM_ERASEBKGND:
 			return 0;
 			
-		case WM_SIZE:	// 画面サイズが決定された時に発行される（初期表示含む）
+		// 画面サイズが決定された時に発行される（初期表示含む）
+		case WM_SIZE:
 			GetClientRect( hWnd, &g.rect );
 			g.width		= g.rect.right;
 			g.height	= g.rect.bottom;
 			g.funcOnSize( g.rect.right, g.rect.bottom );
 			return 0;
 
-		case WM_MOVE:	// 画面位置が決定された時に発行される（初期表示含む）
+		// 画面位置が決定された時に発行される（初期表示含む）
+		case WM_MOVE:
 			{
 				RECT	r;
 				SetRect(&r, 0, 0, 0, 0 );
@@ -136,7 +141,6 @@ static LRESULT CALLBACK WinProc
 				int y = g.rect.top - r.top;		//	描画区域の左上原点座標
 				g.pos_x = x;
 				g.pos_y = y;
-//				g.funcOnMove( x, y );
 			}
 			return 0;
 		
@@ -144,18 +148,13 @@ static LRESULT CALLBACK WinProc
 			{
 				int fwKeys = GET_KEYSTATE_WPARAM(wParam);
 				int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
-//				if ( fwKeys & MK_SHIFT ) cout << "shift" ;
-//				if ( fwKeys & MK_CONTROL ) cout << "ctrl" ;
-				//fwkeys:4 = shift
-				//fwkeys:8 = ctrl
-//				cout <<" zDelta" <<  zDelta << endl;
 				g.wheelAccum += zDelta;
 
 			}
 			return 0;
 
-		case WM_PAINT:	// OSからの描画要求。再描画区域情報（ウィンドウが重なっている際などの）が得られるタイミング。
-			//cout << "WM_PAINT " << endl;
+		// OSからの描画要求。再描画区域情報（ウィンドウが重なっている際などの）が得られるタイミング。
+		case WM_PAINT:
 			g.funcOnPaint();
 
 			return 0;
@@ -187,13 +186,6 @@ void SysWin::SetOnSize( function<void( int width, int height )> func )
 {
 	g.funcOnSize = func;
 }
-
-////------------------------------------------------------------------------------
-//void SysWin::SetOnMove( function<void( int pos_x, int pos_y )> func )
-////------------------------------------------------------------------------------
-//{
-//	g.funcOnMove = func;
-//}
 
 //------------------------------------------------------------------------------
 void SysWin::SetOnDestroy( function<void()> func )
@@ -340,7 +332,6 @@ void SysWin::OpenWindow( const char* windowname, int pos_x, int pos_y, int width
 
 		SetWindowPos(
 			  win.hWnd 
-//			, HWND_TOPMOST	// 常に最前面
 			, HWND_TOP	// 最前面に持ってくる
 			, pos_x //+ rect.left	
 			, pos_y //+ rect.top	
@@ -350,9 +341,7 @@ void SysWin::OpenWindow( const char* windowname, int pos_x, int pos_y, int width
 		);
 	}
 		g.funcOnCreate();//WM_CREATEからだと、instance経由でhWndが取得できないのでここから呼び出す。
-//cout<<"	funcOnCreate"<<endl;
 
-//ShowCursor( FALSE );
 	// ウィンドウを表示する
 	ShowWindow( win.hWnd, SW_SHOW );
 
@@ -376,8 +365,6 @@ bool SysWin::Update()
 
 		g.wheelResult = g.wheelAccum;
 		g.wheelAccum = 0;
-
-
 
 		return true;
 	}

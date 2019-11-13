@@ -652,16 +652,51 @@ struct Apr : public Sys
 	Lab lab;
 	SkeletonUtil	util;
 	Pers pers;
+	SysKeys&	keys = SysKeys::GetInstance();
+	SysMouse&	mouse = SysMouse::GetInstance();
+	SysGra gra;
+
 
 	//------------------------------------------------------------------------------
-	Apr( const char* name, int pos_x, int pos_y, int width, int height ) : Sys( name, pos_x, pos_y, width, height )
+	int mainx()
 	//------------------------------------------------------------------------------
-	{}
+	{
+		while( Update() )
+		{
 
-	//------------------------------------------------------------------------------
-	~Apr()
-	//------------------------------------------------------------------------------
-	{}
+			//=================================
+			// 処理時間計算
+			//=================================
+			{
+				static chrono::system_clock::duration time_st;
+				static chrono::system_clock::duration time_en;
+				static chrono::system_clock::duration time_sec;
+				static chrono::system_clock::duration time_now;
+				static chrono::system_clock::duration time_max;
+
+				time_en = chrono::system_clock::now().time_since_epoch(); 
+				if ( time_max < time_en-time_st ) time_max = time_en-time_st;
+
+				// 同期(60fps)
+				while( chrono::system_clock::now().time_since_epoch()-time_st < chrono::microseconds(16666) )
+				{
+	 				this_thread::sleep_for(chrono::microseconds(100));
+				}
+				time_st = chrono::system_clock::now().time_since_epoch();  
+
+				// 表示
+			    time_now = chrono::system_clock::now().time_since_epoch();
+				if ( time_now-time_sec > chrono::seconds(1) )	// 一秒更新
+				{
+					time_sec = chrono::system_clock::now().time_since_epoch();
+					time_peak = chrono::duration_cast<chrono::microseconds>(time_max).count();
+					time_max = chrono::seconds(0);
+cout<<time_peak<<endl;
+				}
+			}
+		}
+		return 0;
+	}
 
 	//------------------------------------------------------------------------------
 	int main()
@@ -679,6 +714,9 @@ struct Apr : public Sys
 		//===========================================================================
 		while( Update() )
 		{
+			keys.Update();
+			mouse.Update();
+			gra.Update();
 //raytrace( gra );continue;
 
 			text_y = 0;
@@ -1043,8 +1081,44 @@ int main()
 	cout<<fixed<<setprecision(24);	// 浮動小数出力桁数
 
 	cout << "start" << endl;
-	Apr	apr("Ray4 " __DATE__, 300,300,768, 512 );
-//	Apr	apr("Ray4 " __DATE__, 300,300,320, 200 );
+	Apr	apr;
+
+	//	ウィンドウ生成関数
+	{
+		auto func = [&]()
+		{
+			apr.gra.OnCreate();
+		};
+		apr.SetOnCreate( func );
+	}
+
+	// ウィンドウサイズ変更関数
+	{
+		auto func = [&]( int width, int height )
+		{
+			apr.gra.OnSize( width, height );
+		};
+		apr.SetOnSize( func );
+	}
+
+	// ウィンドウペイント関数
+	{
+		auto func = [&]()
+		{
+			apr.gra.OnPaint();
+		};
+		apr.SetOnPaint( func );
+	}
+
+	// ウィンドウ破棄関数
+	{
+		auto func = [&]()
+		{
+			apr.gra.OnDestroy();
+		};
+		apr.SetOnDestroy( func );
+	}
+	apr.OpenWindow( "Ray4 " __DATE__, 300,300,768, 512 );
 
 	apr.SetWincursor( false );
 
