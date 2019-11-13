@@ -21,6 +21,7 @@ public:
 
 	bool	Update();
 
+	void InitWinapi();
 	void OpenWindow( const char* name, int pos_x, int pos_y, int width, int height  );
 	void SetTitle( std::string name );
 

@@ -11,47 +11,24 @@
 
 using namespace std;
 
-
 //------------------------------------------------------------------------------
-void Sys::SetOnPaint( function<void()> func )
+void Sys::InitWinapi(
 //------------------------------------------------------------------------------
+	function<void()> funcOnCreate,
+	function<void( int width, int height )> funcOnSize,
+	function<void()> funcOnPaint,
+	function<void()> funcDestroy
+)
 {
 	SysWin&	win = SysWin::GetInstance();
 
-	// ウィンドウペイント関数
-	win.SetOnPaint( func );
+	win.SetOnCreate( funcOnCreate );
+	win.SetOnSize( funcOnSize );
+	win.SetOnPaint( funcOnPaint );
+	win.SetOnDestroy( funcDestroy );
 
+	win.InitWinapi();
 }
-
-//------------------------------------------------------------------------------
-void Sys::SetOnSize( function<void( int width, int height )> func )
-//------------------------------------------------------------------------------
-{
-	SysWin&	win = SysWin::GetInstance();
-
-	// ウィンドウサイズ変更関数
-	win.SetOnSize( func );
-
-}
-
-//------------------------------------------------------------------------------
-void Sys::SetOnDestroy( function<void()> func )
-//------------------------------------------------------------------------------
-{
-	SysWin&	win = SysWin::GetInstance();
-
-	// ウィンドウ破棄関数
-	win.SetOnDestroy( func );
-}
-
-//------------------------------------------------------------------------------
-void Sys::SetOnCreate( function<void()> func )
-//------------------------------------------------------------------------------
-{
-	SysWin&	win = SysWin::GetInstance();
-	win.SetOnCreate( func );
-}
-
 //------------------------------------------------------------------------------
 void Sys::OpenWindow( const char* name, int pos_x, int pos_y, int width, int height  )
 //------------------------------------------------------------------------------

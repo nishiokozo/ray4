@@ -127,7 +127,7 @@ static LRESULT CALLBACK WinProc
 			GetClientRect( hWnd, &g.rect );
 			g.width		= g.rect.right;
 			g.height	= g.rect.bottom;
-			g.funcOnSize( g.rect.right, g.rect.bottom );
+			if ( g.funcOnSize ) g.funcOnSize( g.rect.right, g.rect.bottom );
 			return 0;
 
 		// 画面位置が決定された時に発行される（初期表示含む）
@@ -155,7 +155,7 @@ static LRESULT CALLBACK WinProc
 
 		// OSからの描画要求。再描画区域情報（ウィンドウが重なっている際などの）が得られるタイミング。
 		case WM_PAINT:
-			g.funcOnPaint();
+			if ( g.funcOnPaint ) g.funcOnPaint();
 
 			return 0;
 
@@ -164,7 +164,7 @@ static LRESULT CALLBACK WinProc
 			return 0;
 
 		case WM_DESTROY:	//[x]を押すなどしたとき
-			g.funcOnDestroy();
+			if ( g.funcOnDestroy ) g.funcOnDestroy();
 			cout << "WM_DESTROY " << endl;
 			return 0;
 	}
@@ -260,7 +260,7 @@ void SysWin::SetTitle( string name   )
 }
 
 //------------------------------------------------------------------------------
-void SysWin::OpenWindow( const char* windowname, int pos_x, int pos_y, int width, int height  )
+void SysWin::InitWinapi()
 //------------------------------------------------------------------------------
 {
 	const char* name = "kozo:SysWin";
@@ -314,18 +314,26 @@ void SysWin::OpenWindow( const char* windowname, int pos_x, int pos_y, int width
 
 
 	}
+}
 
+//------------------------------------------------------------------------------
+void SysWin::OpenWindow( const char* windowname, int pos_x, int pos_y, int width, int height  )
+//------------------------------------------------------------------------------
+{
 	g.pos_x		= pos_x;
 	g.pos_y		= pos_y;
 	g.width		= width;
 	g.height	= height;
 
+
 	// ウィンドウ名を変える
 	SetWindowText(win.hWnd , windowname );
 
 
+
 	// ウィンドウ位置サイズを変える
 	{
+		int valWin = WS_OVERLAPPEDWINDOW;
 		RECT rect;
 		SetRect(&rect, 0, 0, width, height );
 		AdjustWindowRectEx(&rect, valWin, FALSE, 0);
@@ -340,7 +348,8 @@ void SysWin::OpenWindow( const char* windowname, int pos_x, int pos_y, int width
 			,0
 		);
 	}
-		g.funcOnCreate();//WM_CREATEからだと、instance経由でhWndが取得できないのでここから呼び出す。
+
+	if ( g.funcOnCreate ) g.funcOnCreate();//WM_CREATEからだと、instance経由でhWndが取得できないのでここから呼び出す。
 
 	// ウィンドウを表示する
 	ShowWindow( win.hWnd, SW_SHOW );

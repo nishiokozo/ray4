@@ -656,44 +656,83 @@ struct Apr : public Sys
 	SysMouse&	mouse = SysMouse::GetInstance();
 	SysGra gra;
 
+	//------------------------------------------------------------------------------
+	void chrono_update()
+	//------------------------------------------------------------------------------
+	{
+		//=================================
+		// 処理時間計算
+		//=================================
+		{
+			static chrono::system_clock::duration time_st;
+			static chrono::system_clock::duration time_en;
+			static chrono::system_clock::duration time_sec;
+			static chrono::system_clock::duration time_now;
+			static chrono::system_clock::duration time_max;
+
+			time_en = chrono::system_clock::now().time_since_epoch(); 
+			if ( time_max < time_en-time_st ) time_max = time_en-time_st;
+			// 同期(60fps)
+			{
+				int t=100;	
+				while( chrono::system_clock::now().time_since_epoch()-time_st < chrono::microseconds(16666)/2 )	// windowsの仕組みがよくわからない。
+				{
+	 				this_thread::sleep_for(chrono::microseconds(t));
+				}
+			}
+			time_st = chrono::system_clock::now().time_since_epoch();  
+
+			// 表示
+		    time_now = chrono::system_clock::now().time_since_epoch();
+			if ( time_now-time_sec > chrono::milliseconds(500) )	// 一秒更新
+			{
+				time_sec = chrono::system_clock::now().time_since_epoch();
+				time_peak = chrono::duration_cast<chrono::microseconds>(time_max).count();
+				time_max = chrono::seconds(0);
+	//			cout<<time_peak<<endl;
+			}
+		}
+	}
 
 	//------------------------------------------------------------------------------
 	int mainx()
 	//------------------------------------------------------------------------------
 	{
+		//	ウィンドウ生成関数
+		auto funcOnCreate = [&]()
+		{
+			gra.OnCreate();
+		};
+		// ウィンドウサイズ変更関数
+		auto funcOnSize = [&]( int width, int height )
+		{
+			gra.OnSize( width, height );
+		};
+		// ウィンドウペイント関数
+		auto funcOnPaint = [&]()
+		{
+			gra.OnPaint();
+		};
+		// ウィンドウ破棄関数
+		auto funcOnDestroy = [&]()
+		{
+			gra.OnDestroy();
+		};
+		SetWincursor( false );
+	
+		InitWinapi(
+			funcOnCreate,
+			funcOnSize,
+			funcOnPaint,
+			funcOnDestroy
+		);
+		OpenWindow( "Ray4 " __DATE__, 300,300,768, 512 );
+
 		while( Update() )
 		{
 
-			//=================================
-			// 処理時間計算
-			//=================================
-			{
-				static chrono::system_clock::duration time_st;
-				static chrono::system_clock::duration time_en;
-				static chrono::system_clock::duration time_sec;
-				static chrono::system_clock::duration time_now;
-				static chrono::system_clock::duration time_max;
+			chrono_update();
 
-				time_en = chrono::system_clock::now().time_since_epoch(); 
-				if ( time_max < time_en-time_st ) time_max = time_en-time_st;
-
-				// 同期(60fps)
-				while( chrono::system_clock::now().time_since_epoch()-time_st < chrono::microseconds(16666) )
-				{
-	 				this_thread::sleep_for(chrono::microseconds(100));
-				}
-				time_st = chrono::system_clock::now().time_since_epoch();  
-
-				// 表示
-			    time_now = chrono::system_clock::now().time_since_epoch();
-				if ( time_now-time_sec > chrono::seconds(1) )	// 一秒更新
-				{
-					time_sec = chrono::system_clock::now().time_since_epoch();
-					time_peak = chrono::duration_cast<chrono::microseconds>(time_max).count();
-					time_max = chrono::seconds(0);
-cout<<time_peak<<endl;
-				}
-			}
 		}
 		return 0;
 	}
@@ -702,6 +741,37 @@ cout<<time_peak<<endl;
 	int main()
 	//------------------------------------------------------------------------------
 	{
+
+		//	ウィンドウ生成関数
+		auto funcOnCreate = [&]()
+		{
+			gra.OnCreate();
+		};
+		// ウィンドウサイズ変更関数
+		auto funcOnSize = [&]( int width, int height )
+		{
+			gra.OnSize( width, height );
+		};
+		// ウィンドウペイント関数
+		auto funcOnPaint = [&]()
+		{
+			gra.OnPaint();
+		};
+		// ウィンドウ破棄関数
+		auto funcOnDestroy = [&]()
+		{
+			gra.OnDestroy();
+		};
+		SetWincursor( false );
+	
+		InitWinapi(
+			funcOnCreate,
+			funcOnSize,
+			funcOnPaint,
+			funcOnDestroy
+		);
+		OpenWindow( "Ray4 " __DATE__, 300,300,768, 512 );
+
 		int text_y = 0;
 
 		//=================================
@@ -1037,34 +1107,7 @@ cout<<time_peak<<endl;
 			//=================================
 			// 処理時間表示
 			//=================================
-			{
-				static chrono::system_clock::duration time_a;
-				static chrono::system_clock::duration time_b;
-				static chrono::system_clock::duration time_sec;
-				static chrono::system_clock::duration time_now;
-				static chrono::system_clock::duration time_max;
-
-				time_b = chrono::system_clock::now().time_since_epoch(); 
-				if ( time_max < time_b-time_a ) time_max = time_b-time_a;
-
-				// ウェイト(60fps)
-//				while( chrono::system_clock::now().time_since_epoch()-time_a < chrono::microseconds(16666) )
-				{
-	 	//			this_thread::sleep_for(chrono::microseconds(100));
-				}
-
-				// 表示
-			    time_now = chrono::system_clock::now().time_since_epoch();
-				if ( time_now-time_sec > chrono::seconds(2) ) // n sec毎表示
-				{
-					time_sec = chrono::system_clock::now().time_since_epoch();
-
-					long long f2 = chrono::duration_cast<chrono::microseconds>(time_max).count();
-					time_peak = f2;
-					time_max = chrono::seconds(0);
-				}
-				time_a = chrono::system_clock::now().time_since_epoch();  
-			}
+			chrono_update();
 
 		}
 
@@ -1083,44 +1126,7 @@ int main()
 	cout << "start" << endl;
 	Apr	apr;
 
-	//	ウィンドウ生成関数
-	{
-		auto func = [&]()
-		{
-			apr.gra.OnCreate();
-		};
-		apr.SetOnCreate( func );
-	}
 
-	// ウィンドウサイズ変更関数
-	{
-		auto func = [&]( int width, int height )
-		{
-			apr.gra.OnSize( width, height );
-		};
-		apr.SetOnSize( func );
-	}
-
-	// ウィンドウペイント関数
-	{
-		auto func = [&]()
-		{
-			apr.gra.OnPaint();
-		};
-		apr.SetOnPaint( func );
-	}
-
-	// ウィンドウ破棄関数
-	{
-		auto func = [&]()
-		{
-			apr.gra.OnDestroy();
-		};
-		apr.SetOnDestroy( func );
-	}
-	apr.OpenWindow( "Ray4 " __DATE__, 300,300,768, 512 );
-
-	apr.SetWincursor( false );
 
 	return apr.main();
 }
