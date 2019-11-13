@@ -358,7 +358,7 @@ void SysGra::Circle( vect3 v, float r, rgb col, float wide )
     glColor3f( col.r, col.g, col.b );
     glBegin(GL_LINE_LOOP);
 
-	float step = 12.0;
+	float step = 24.0;
 	vect3 v0 = v + vect3(r/aspect,0);
 	for ( float th = 0 ; th < 2*pi ; th+=2.0*pi/step )
 	{

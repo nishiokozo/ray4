@@ -433,13 +433,13 @@ static void lab11_RidgeBall( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 		for ( Obj* p : lab.tblObj ) delete p;
 		lab.tblObj.clear();
 		lab.tblObj.emplace_back( new Ball(vect3(  0		, 1.0,  0.0 ), vect3(0,0,0)) );
-		lab.tblObj.emplace_back( new Obj(vect3( -0.5	, 0.5,	0.0 )) );
-		lab.tblObj.emplace_back( new Obj(vect3(  0.5	, 0.5,  0.0 )) );
+		lab.tblObj.emplace_back( new Obj(vect3( -0.4	, 0.5,	0.0 )) );	// 平面原点
+		lab.tblObj.emplace_back( new Obj(vect3( -0.3	, 0.7,  0.0 )) );	// 平面法線
 
 		// 線
 		for ( Edge* p : lab.tblEdge ) delete p;
 		lab.tblEdge.clear();
-		lab.tblEdge.emplace_back( new Edge(1,2) );
+		lab.tblEdge.emplace_back( new Edge(1,2, col7,1) );
 
 		pers.axis.bAxisX = true;
 		pers.axis.bAxisY = true;
@@ -463,8 +463,8 @@ static void lab11_RidgeBall( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 	}
 	
 	Ball&	ball = *dynamic_cast<Ball*>(lab.tblObj[0]);
-	vect3	st = lab.tblObj[1]->pos;
-	vect3	en = lab.tblObj[2]->pos;
+	vect3	plate_p = lab.tblObj[1]->pos;
+	vect3	plate_n = (lab.tblObj[2]->pos-plate_p).normalize();
 
 	//-----
 
@@ -482,7 +482,8 @@ static void lab11_RidgeBall( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 	vect3 vn;
 
 	{
-			vect3 d = func_accelerationGetDistance_TVv( gv, T, v0 );	// 移動距離 m
+		
+		vect3 d = func_accelerationGetDistance_TVv( gv, T, v0 );	// 移動距離 m
 		// 計算
 		{
 
@@ -495,12 +496,69 @@ static void lab11_RidgeBall( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 		}
 
 		// 衝突
+		if(1)
 		{
-			vect3 n = cross( (en-st).normalize(), vect3(0,0,-1) );
-			pers.line3d( gra, pers, (en+st)/2, (en+st)/2+n, col2, 1 );
+			vect3 n = cross( plate_n, vect3(0,0,-1) );
+
+			auto[flg,t,q0] = func_distance_Plate_Line( plate_p, plate_n, p0-d/1024, pn );
+
+			static vect3 p0x,nx,rx,bx;
+cout << flg << " " << t << "" << endl;
+
+			if ( flg )
+			{
+			
+
+				// 衝突点での速度を求める
+				vect3 d1 = q0-p0;												// 衝突までの距離(m)
+				float t1 = func_accelerationGetTime_DVv( gv, d1.abs(), v0 );	// 衝突までの時間(s)
+				vect3 v1 = v0 + gv*t1;											// 衝突後の速度(m/s)
+
+				// 速度の反射
+				if ( v1.abs() > 0 )
+				{
+					vect3 n = cross( plate_n, vect3(0,0,-1) );
+					vect3 b = (v1).normalize();
+					vect3 r = reflect( b, n );
+					v1 = r * v1.abs();
+					nx=n;rx=r;bx=b;
+				}
+
+				{
+					float t2 = T-t1;											// 衝突後の残り時間(s)
+					vect3 d2 = func_accelerationGetDistance_TVv( gv, t2, v1 );	// 衝突後の移動距離(m)
+					vect3 v2 = v1 + gv*t2;										// 衝突後の速度(m/s)
+				
+					// 設置
+					if ( dot(n,v2) < 0 )
+					{
+						d2 = vect3(0,0,0);
+						v2 = vect3(0,0,0);
+					}
+					
+					// 減衰
+					v2 *= 0.2;
+
+					pn = q0 + d2;
+					vn = v2 ;
+
+					pers.pset3d( gra, pers, p0+d1, col4, 5 );	//	衝突点
+					pers.pset3d( gra, pers, pn, col4, 5 );		//	バウンド先
+					p0x=p0+d1;
+				}
+			}
+
+					pers.line3d( gra, pers, p0x, p0x+nx , col6, 1 );
+					pers.line3d( gra, pers, p0x, p0x+rx , col4, 1 );
+					pers.line3d( gra, pers, p0x, p0x-bx , col5, 1 );
+			
+		}
+		else
+		{
+			vect3 n = cross( plate_n, vect3(0,0,-1) );
 
 
-			auto[flg,dis,q0,q1,s0,s1] = func_distance_Segline_Segline( p0-d/1024.0, pn, st, en );
+			auto[flg,dis,q0,q1,s0,s1] = func_distance_Segline_Segline( p0-d/1024.0, pn, plate_p, plate_n );
 
 			static vect3 p0x,nx,rx,bx;
 
@@ -517,7 +575,7 @@ static void lab11_RidgeBall( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 				// 速度の反射
 				if ( v1.abs() > 0 )
 				{
-					vect3 n = cross( (en-st).normalize(), vect3(0,0,-1) );
+					vect3 n = cross( plate_n, vect3(0,0,-1) );
 					vect3 b = (v1).normalize();
 					vect3 r = reflect( b, n );
 					v1 = r * v1.abs();
@@ -559,18 +617,15 @@ static void lab11_RidgeBall( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 			p0 = pn;
 			v0 = vn;
 		}
-	}
 
-/*
+	}
+	
+	// 平面表示
 	{
-		vect3 v0 = pers.calcWorldToScreen3( p0 );
-		float r = ball.radius*v0.z;
-
-
-		gra.Circle( v0, r, col4 );
+		pers.showPlate( gra, pers, plate_p, plate_n, rgb(0.5,1,1)*0.55 );
 	}
-	*/
 
+	// ボール表示
 	pers.circle3d( gra, pers, p0, ball.radius, col4 );
 	
 	ball.pos = p0;

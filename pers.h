@@ -126,7 +126,9 @@ struct Pers
 	void print3d( SysGra& gra, Pers& pers, vect3 p0, float x, float y, string str );
 	void print2d( SysGra& gra, Pers& pers, vect2 p0, float x, float y, string str );
 
+	void showPlate( SysGra& gra, Pers& pers, vect3 p, vect3 n, rgb col=rgb(0,1,0) );
 	void showMat33(  SysGra& gra, Pers& pers, vect3 v0, mat33 m );
+
 	void DrawBox( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAxis = true, bool bTri = true );
 	void DrawDrum( SysGra& gra, Pers& pers,  vect3 pos, mat33 m  );
 

@@ -284,6 +284,38 @@ void Pers::line2d( SysGra& gra, Pers& pers, vect2 p0, vect2 p1, rgb col, float w
 }
 
 
+
+/////////////////////
+// 支援ツール
+/////////////////////
+//------------------------------------------------------------------------------
+void Pers::showPlate( SysGra& gra, Pers& pers, vect3 pos, vect3 n1, rgb col )
+//------------------------------------------------------------------------------
+{
+	mat33 m = mslerp( n1, 1.0 );
+
+	//	仮想平面表示
+	float r = 0.25;
+	for ( int i = 0 ; i < 4 ; i++  )
+	{
+		r = (float)(1+i)*0.25;
+	
+		vect3 a;
+		for ( float th = 0 ; th <= deg2rad(360) ; th+=deg2rad(20) )
+		{
+			vect3 b = vect3( r*cos(th), r*sin(th), 0 ) ;
+			if ( th > 0 ) 
+			{
+				vect3 v0 = a * m;
+				vect3 v1 = b * m;
+				pers.line3d( gra, pers, v0+ pos, v1+ pos, col );
+			}
+			a = b;
+		}
+//		r *= 1.5f;
+	}
+}
+
 //------------------------------------------------------------------------------
 void Pers::showMat33(  SysGra& gra, Pers& pers, vect3 v0, mat33 m )
 //------------------------------------------------------------------------------
@@ -722,8 +754,7 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers,  vect3 pos, mat33 m, int N
 		}
 	}			
 
-	if(1)
-	{//原点表示
+	{//原点円表示
 		float r = 0.1;
 		vect3 a;
 		for ( float th = 0 ; th <= deg2rad(360) ; th+=deg2rad(20) )

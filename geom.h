@@ -251,6 +251,7 @@ public:
 };
 
 
+extern mat33 mslerp( vect3 n1, float range );
 extern mat33 mrotateByAxis( vect3 axis, float th );
 
 extern float	vect3_dotproduct( float a[3], float b[3] );
