@@ -121,6 +121,8 @@ struct Pers
 	void line3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col = rgb(1,1,1), float wide = 1.0f );
 	void line3d_scissor( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col = rgb(1,1,1), float wide = 1.0f );
 
+	void circle3d( SysGra& gra, Pers& pers, vect3 p0, float radius, rgb col, float wide=1.0f );
+
 	void print3d( SysGra& gra, Pers& pers, vect3 p0, float x, float y, string str );
 	void print2d( SysGra& gra, Pers& pers, vect2 p0, float x, float y, string str );
 

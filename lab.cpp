@@ -561,16 +561,21 @@ static void lab11_RidgeBall( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 		}
 	}
 
+/*
 	{
 		vect3 v0 = pers.calcWorldToScreen3( p0 );
 		float r = ball.radius*v0.z;
 
 
-		gra.Circle( v0.xy(), r, col4 );
+		gra.Circle( v0, r, col4 );
 	}
+	*/
+
+	pers.circle3d( gra, pers, p0, ball.radius, col4 );
 	
 	ball.pos = p0;
 	ball.vel = v0;
+
 
 
 }

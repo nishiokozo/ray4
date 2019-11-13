@@ -75,8 +75,8 @@ struct SysGra
 	void	Line( vect3 v0, vect3 v1, rgb col, float wide=1.0f);
 	void	Pset( vect2 v0, rgb col, float wide=1.0f);
 	void	Pset( vect3 v0, rgb col, float wide=1.0f);
-
-	void	Circle( vect2 v, float r, rgb col );
+	void	Circle( vect2 v, float r, rgb col, float wide=1.0f );
+	void	Circle( vect3 v, float r, rgb col, float wide=1.0f );
 	void	Clr( rgb col );
 
 	void	SetZTest( bool flg );

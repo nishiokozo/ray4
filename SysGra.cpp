@@ -338,39 +338,49 @@ void SysGra::Clr( rgb col )
 
 }
 //------------------------------------------------------------------------------
-void SysGra::Circle( vect2 v, float r, rgb col )
+void SysGra::Circle( vect2 v, float r, rgb col, float wide )
 //------------------------------------------------------------------------------
 {
-//	glDisable(GL_DEPTH_TEST);
-
 	float aspect = GetAspect();
+
+    glColor3f( col.r, col.g, col.b );
+    glBegin(GL_LINE_LOOP);
+
+	float step = 12.0;
+	vect2 v0 = v + vect2(r/aspect,0);
+	for ( float th = 0 ; th < 2*pi ; th+=2.0*pi/step )
 	{
-	    glColor3f( col.r, col.g, col.b );
-	    glBegin(GL_LINE_LOOP);
+		vect2 v1 = vect2( r*cos(th)/aspect, r*sin(th) )+v;
 
-		int s=0;
-		vect2 v0 = v + vect2(r/aspect,0);
-//		v0 = v0/ aspect;
-		for ( int i = 0 ; i < 360 ; i+=30 )
-		{
-			float th = deg2rad((float)i);
-			vect2 v1 = vect2( r*cos(th)/aspect, r*sin(th) )+v;
-
-			//gl
-//			v1 = v1 / aspect;
-		    glVertex2f(v1.x, v1.y);
-			s++;
-		}
-	    glEnd();
+	    glVertex2f(v1.x, v1.y);
 	}
-
+    glEnd();
 }
+
+//------------------------------------------------------------------------------
+void SysGra::Circle( vect3 v, float r, rgb col, float wide )
+//------------------------------------------------------------------------------
+{
+	float aspect = GetAspect();
+
+    glColor3f( col.r, col.g, col.b );
+    glBegin(GL_LINE_LOOP);
+
+	float step = 12.0;
+	vect3 v0 = v + vect3(r/aspect,0);
+	for ( float th = 0 ; th < 2*pi ; th+=2.0*pi/step )
+	{
+		vect3 v1 = vect3( r*cos(th)/aspect, r*sin(th), 0 )+v;
+
+	    glVertex3f(v1.x, v1.y, v1.z);
+	}
+    glEnd();
+}
+
 //------------------------------------------------------------------------------
 void SysGra::Pset( vect2 v0, rgb col, float wide )
 //------------------------------------------------------------------------------
 {
-//	glDisable(GL_DEPTH_TEST);
-
 	glPointSize(wide );
     glBegin(GL_POINTS);
     glColor3f( col.r, col.g, col.b );
@@ -381,8 +391,6 @@ void SysGra::Pset( vect2 v0, rgb col, float wide )
 void SysGra::Pset( vect3 v0, rgb col, float wide )
 //------------------------------------------------------------------------------
 {
-//	glEnable(GL_DEPTH_TEST);	// (デフォルト:GL_LESS）
-
 	glPointSize(wide );
     glBegin(GL_POINTS);
     glColor3f( col.r, col.g, col.b );
@@ -393,8 +401,6 @@ void SysGra::Pset( vect3 v0, rgb col, float wide )
 void SysGra::Box( vect2 v0, vect2 v1,rgb col, float wide )
 //------------------------------------------------------------------------------
 {
-//	glDisable(GL_DEPTH_TEST);
-
   	glLineWidth(wide );
 
     glBegin(GL_LINE_LOOP);
@@ -410,8 +416,6 @@ void SysGra::Box( vect2 v0, vect2 v1,rgb col, float wide )
 void SysGra::Box( vect3 v0, vect3 v1,rgb col, float wide )
 //------------------------------------------------------------------------------
 {
-//	glDisable(GL_DEPTH_TEST);
-
   	glLineWidth(wide );
 
     glBegin(GL_LINE_LOOP);
@@ -427,8 +431,6 @@ void SysGra::Box( vect3 v0, vect3 v1,rgb col, float wide )
 void SysGra::Fill( vect2 v0, vect2 v1,rgb col )
 //------------------------------------------------------------------------------
 {
-//	glDisable(GL_DEPTH_TEST);
-
     glBegin(GL_QUADS);
     glColor3f( col.r, col.g, col.b );
     glVertex2f(v1.x, v1.y);
@@ -442,8 +444,6 @@ void SysGra::Fill( vect2 v0, vect2 v1,rgb col )
 void SysGra::Line( vect2 v0, vect2 v1,rgb col, float wide )
 //------------------------------------------------------------------------------
 {
-//	glDisable(GL_DEPTH_TEST);
-
   	glLineWidth(wide );
   
     glBegin(GL_LINES);
@@ -456,8 +456,6 @@ void SysGra::Line( vect2 v0, vect2 v1,rgb col, float wide )
 void SysGra::Line( vect3 v0, vect3 v1,rgb col, float wide )
 //------------------------------------------------------------------------------
 {
-//	glEnable(GL_DEPTH_TEST);	// (デフォルト:GL_LESS）
-
   	glLineWidth(wide );
   
     glBegin(GL_LINES);
@@ -470,8 +468,6 @@ void SysGra::Line( vect3 v0, vect3 v1,rgb col, float wide )
 void SysGra::Tri( vect2 v0, vect2 v1, vect2 v2, rgb col )
 //------------------------------------------------------------------------------
 {
-//	glDisable(GL_DEPTH_TEST);
-
     glBegin( GL_TRIANGLES );
     glColor3f( col.r, col.g, col.b );
     glVertex2f(v0.x, v0.y);
