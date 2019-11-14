@@ -344,10 +344,10 @@ static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	}
 }
 //------------------------------------------------------------------------------
-static void lab11_RidgeBall( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
 {
-	gra.Print(1,(float)text_y++,string("lab11_RidgeBall")+to_string(lab.idx)); 
+	gra.Print(1,(float)text_y++,string("lab11_RidgePlateDot")+to_string(lab.idx)); 
 
 	// 移動量d,初速v0の時の時間tを求める。
 	auto func_accelerationGetTime_DVv =[]( vect3 gv, float d, vect3 v0 )	// DV : Distance / Velocity
@@ -432,11 +432,6 @@ static void lab11_RidgeBall( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 			lab.tblObj.emplace_back( new Ball(vect3(  0		, 1.0,  0.0 ), vect3(0,0,0)) );
 			lab.tblObj.emplace_back( new Obj(vect3( -0.4	, 0.5,	0.0 )) );	// 平面原点
 			lab.tblObj.emplace_back( new Obj(vect3( -0.3	, 0.7,  0.0 )) );	// 平面法線
-//			lab.tblObj.emplace_back( new Obj(vect3(  0.0	, 0.0,	0.0 )) );	// 平面原点
-//			lab.tblObj.emplace_back( new Obj(vect3(  0.0	, 1.0,  0.0 )) );	// 平面法線
-
-//			lab.tblObj.emplace_back( new Obj(vect3(  0.3	, 1.5,	0.0 )) );	// 平面原点
-//			lab.tblObj.emplace_back( new Obj(vect3(  0.5	, 0.5,  0.0 )) );	// 平面法線
 
 			// 線
 			for ( Edge* p : lab.tblEdge ) delete p;
@@ -1701,7 +1696,7 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& 
 			break;
 
 		case 11:	// 描画	2d剛体
-			lab11_RidgeBall( (*this), keys, mouse, gra, pers, text_y );
+			lab11_RidgePlateDot( (*this), keys, mouse, gra, pers, text_y );
 			break;
 
 		case 9:	// 描画	2d剛体
