@@ -9,3 +9,13 @@ extern vect3 func_catmull3( float t, const vect3 P0, const vect3 P1, const vect3
 extern std::tuple<bool,vect3,float> func_distance_Plate_Segline( vect3 plate_P, vect3 plate_N, vect3 line_P, vect3 line_Q );
 extern std::tuple<bool,vect3,float> func_distance_Plate_Harfline( vect3 plate_P, vect3 plate_N, vect3 P, vect3 I);
 extern bool func_IsIntersectSphereLine( vect3 sphere_P, float sphere_r, vect3 line_P , vect3 line_I );
+
+extern	const rgb col0;
+extern	const rgb col1;
+extern	const rgb col2;
+extern	const rgb col3;
+extern	const rgb col4;
+extern	const rgb col5;
+extern	const rgb col6;
+extern	const rgb col7;
+extern const float	G;

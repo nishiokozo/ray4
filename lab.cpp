@@ -393,7 +393,6 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 	static	Graphs graphs;
 
 
-	const float	G	= -9.80665;				// 重力加速度
 	const float	T	= 1.0/60.0;				// 時間/frame
 	static vect3	gv	= vect3(0,G,0);		// 重力加速度ベクトル
 	static bool		bPause = false;
@@ -630,7 +629,6 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	static	Graphs graphs;
 
 
-	const float	G	= -9.80665;				// 重力加速度
 	const float	T	= 1.0/60.0;				// 時間/frame
 	static vect3	gv	= vect3(0.0,0,G);		// 重力加速度ベクトル
 	static bool		bPause = false;
@@ -811,7 +809,6 @@ static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysG
 {
 	gra.Print(1,(float)text_y++,string("lab8_vector_six_lab8")+to_string(lab.idx)); 
 
-	const float	G = 9.80665;				// 重力加速度
 	const float	T = 1.0/60.0;			// 時間/frame
 	const float	g = G *T*T;			// 重力加速度/frame
 	const vect3	gv = vect3(0,0, -g);	// 重力加速度/frame
@@ -1077,7 +1074,6 @@ static void lab7_kakusokudo7( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& 
 {
 	gra.Print(1,(float)text_y++,string("<<lab7_kakusokudo7>>")+to_string(lab.idx)); 
 
-	const float	G = 9.80665;			// 重力加速度
 	const float	T = 1.0/60.0;		// 時間/frame
 	const float	g = G *T*T;		// 重力加速度/frame
 	const vect3	gv = vect3(0,0, -g);		// 重力加速度/frame
@@ -1431,7 +1427,6 @@ static void lab3_gravityPlanet( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra
 		lab.tblObj.emplace_back( new Planet(vect3( 0.5,0.1,0),vect3(0, 0, 0.02)) );
 	}
 
-	const float	G = 9.80665;			// 重力加速度
 	const float	T = 1.0/60.0;		// 時間/frame
 	const float	g = G *T*T;		// 重力加速度/frame
 
@@ -1506,7 +1501,6 @@ static void lab2_kakusokudo( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 {
 	gra.Print(1,(float)text_y++,string("<<lab2_kakusokudo>>")+to_string(lab.idx)); 
 
-	const float	G = 9.80665;			// 重力加速度
 	const float	T = 1.0/60.0;		// 時間/frame
 	const float	g = G *T*T;		// 重力加速度/frame
 
