@@ -121,7 +121,7 @@ tuple<bool,vect3> Pers::calcScreenToGround( vect2 q )	// 透視変換後の画�
 {
 	vect3 P = calcScreenToWorld2( q );
 	vect3 I = calcRayvect( P );
-	auto[b,t,Q] = func_distance_Plate_Line( vect3(0,0,0), vect3(0,1,0), P, I );
+	auto[b,Q,s] = func_distance_Plate_Harfline( vect3(0,0,0), vect3(0,1,0), P, I );
 	return {b,Q};
 }
 
@@ -301,7 +301,7 @@ void Pers::showPlate( SysGra& gra, Pers& pers, vect3 pos, vect3 n1, rgb col )
 		r = (float)(1+i)*0.25;
 	
 		vect3 a;
-		for ( float th = 0 ; th <= deg2rad(360) ; th+=deg2rad(20) )
+		for ( float th = 0 ; th <= deg2rad(360) ; th+=deg2rad(10) )
 		{
 			vect3 b = vect3( r*cos(th), r*sin(th), 0 ) ;
 			if ( th > 0 ) 
@@ -312,8 +312,11 @@ void Pers::showPlate( SysGra& gra, Pers& pers, vect3 pos, vect3 n1, rgb col )
 			}
 			a = b;
 		}
-//		r *= 1.5f;
 	}
+
+		pers.line3d( gra, pers, pos, pos+ n1*0.2, col, 3 );
+		pers.pset3d( gra, pers, pos+ n1*0.2, col, 5 );
+
 }
 
 //------------------------------------------------------------------------------

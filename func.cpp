@@ -166,31 +166,73 @@ tuple<bool,float,vect3,vect3,float,float>func_distance_Segline_Segline( vect3 p0
 }
 
 //------------------------------------------------------------------------------
-tuple<bool,float,vect3> func_distance_Plate_Line( vect3 plate_P, vect3 plate_N, vect3 P, vect3 I)
+tuple<bool,vect3,float> func_distance_Plate_Line( vect3 plate_P, vect3 plate_N, vect3 line_P, vect3 line_I )
 //------------------------------------------------------------------------------
 {
 	// 平面と直線の距離
-	float	f = dot(plate_N, P - plate_P);
-	if ( f > 0 )
+	float	f = dot(plate_N, line_P - plate_P);
+	if ( f > 0 )	// 平面の表面のみ
 	{
-		float	t = -f/dot( plate_N, I );
+		float	s = -f/dot( plate_N, line_I );
 
-		if ( t >= 0 )
-		{
-			vect3	Q = I * t + P;
-			return {true,t,Q};
-		}
+		vect3	Q = line_I * s + line_P;
+		return {true,Q,s};
 	}
-	return {false,0,vect3(0,0,0)};
+	return {false,vect3(0,0,0),0};
 };
 
 //------------------------------------------------------------------------------
-bool func_IsIntersectSphereLine( vect3 sphere_P, float sphere_r, vect3 line_P , vect3 line_I )
+tuple<bool,vect3,float> func_distance_Plate_Harfline( vect3 plate_P, vect3 plate_N, vect3 p0, vect3 i0 )
+//------------------------------------------------------------------------------
+{
+	// 平面と直線の距離
+	// p0 : line start
+	// i0 : line vector
+
+	auto[flg,Q,s] = func_distance_Plate_Line( plate_P, plate_N, p0, i0 );
+
+	if ( flg )
+	{
+		if ( s < 0 ) flg = false;
+	}
+
+
+	return {flg,Q,s};
+
+};
+
+//------------------------------------------------------------------------------
+tuple<bool,vect3,float> func_distance_Plate_Segline( vect3 plate_P, vect3 plate_N, vect3 p0, vect3 q0 )
+//------------------------------------------------------------------------------
+{
+	// 平面と線分の距離
+	// p0 : line start
+	// q0 : line end
+
+	vect3 i0 = (q0 - p0).normalize();
+
+	auto[flg,Q,s] = func_distance_Plate_Line( plate_P, plate_N, p0, i0 );
+
+	if ( flg )
+	{
+		if ( s < 0 ) flg = false;
+		if ( s > (q0-p0).abs() ) flg = false;
+	}
+
+
+	return {flg,Q,s};
+}
+
+//------------------------------------------------------------------------------
+bool func_IsIntersectSphereLine( vect3 sphere_P, float sphere_r, vect3 p0 , vect3 i0 )
 //------------------------------------------------------------------------------
 {
 	//	球と直線の衝突判定
-	vect3	OP = line_P - sphere_P;
-	float	b = dot( line_I, OP );
+	// p0 : line start
+	// i0 : line vector
+
+	vect3	OP = p0 - sphere_P;
+	float	b = dot( i0, OP );
 	float	aa = sphere_r*sphere_r - dot(OP,OP)+ b*b;
 	return ( aa>=0 ) ;
 };

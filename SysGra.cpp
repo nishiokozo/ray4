@@ -356,6 +356,8 @@ void SysGra::Circle( vect3 v, float r, rgb col, float wide )
 	float aspect = GetAspect();
 
     glColor3f( col.r, col.g, col.b );
+  	glLineWidth( wide );
+
     glBegin(GL_LINE_LOOP);
 
 	float step = 24.0;
@@ -373,7 +375,7 @@ void SysGra::Circle( vect3 v, float r, rgb col, float wide )
 void SysGra::Pset( vect2 v0, rgb col, float wide )
 //------------------------------------------------------------------------------
 {
-	glPointSize(wide );
+	glPointSize( wide );
     glBegin(GL_POINTS);
     glColor3f( col.r, col.g, col.b );
     glVertex2f(v0.x, v0.y);
@@ -383,7 +385,7 @@ void SysGra::Pset( vect2 v0, rgb col, float wide )
 void SysGra::Pset( vect3 v0, rgb col, float wide )
 //------------------------------------------------------------------------------
 {
-	glPointSize(wide );
+	glPointSize( wide );
     glBegin(GL_POINTS);
     glColor3f( col.r, col.g, col.b );
     glVertex3f(v0.x, v0.y, v0.z);
@@ -393,7 +395,7 @@ void SysGra::Pset( vect3 v0, rgb col, float wide )
 void SysGra::Box( vect2 v0, vect2 v1,rgb col, float wide )
 //------------------------------------------------------------------------------
 {
-  	glLineWidth(wide );
+  	glLineWidth( wide );
 
     glBegin(GL_LINE_LOOP);
     glColor3f( col.r, col.g, col.b );
@@ -408,7 +410,7 @@ void SysGra::Box( vect2 v0, vect2 v1,rgb col, float wide )
 void SysGra::Box( vect3 v0, vect3 v1,rgb col, float wide )
 //------------------------------------------------------------------------------
 {
-  	glLineWidth(wide );
+  	glLineWidth( wide );
 
     glBegin(GL_LINE_LOOP);
     glColor3f( col.r, col.g, col.b );
@@ -436,7 +438,7 @@ void SysGra::Fill( vect2 v0, vect2 v1,rgb col )
 void SysGra::Line( vect2 v0, vect2 v1,rgb col, float wide )
 //------------------------------------------------------------------------------
 {
-  	glLineWidth(wide );
+  	glLineWidth( wide );
   
     glBegin(GL_LINES);
     glColor3f( col.r, col.g, col.b );
@@ -448,7 +450,7 @@ void SysGra::Line( vect2 v0, vect2 v1,rgb col, float wide )
 void SysGra::Line( vect3 v0, vect3 v1,rgb col, float wide )
 //------------------------------------------------------------------------------
 {
-  	glLineWidth(wide );
+  	glLineWidth( wide );
   
     glBegin(GL_LINES);
     glColor3f( col.r, col.g, col.b );
