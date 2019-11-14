@@ -289,7 +289,7 @@ void Pers::line2d( SysGra& gra, Pers& pers, vect2 p0, vect2 p1, rgb col, float w
 // 支援ツール
 /////////////////////
 //------------------------------------------------------------------------------
-void Pers::showPlate( SysGra& gra, Pers& pers, vect3 pos, vect3 n1, rgb col )
+void Pers::DrawPlate( SysGra& gra, Pers& pers, vect3 pos, vect3 n1, rgb col )
 //------------------------------------------------------------------------------
 {
 	mat33 m = mslerp( n1, 1.0 );
@@ -320,7 +320,7 @@ void Pers::showPlate( SysGra& gra, Pers& pers, vect3 pos, vect3 n1, rgb col )
 }
 
 //------------------------------------------------------------------------------
-void Pers::showMat33(  SysGra& gra, Pers& pers, vect3 v0, mat33 m )
+void Pers::DrawMat33(  SysGra& gra, Pers& pers, vect3 v0, mat33 m )
 //------------------------------------------------------------------------------
 {
 	vect3 a = {m.m[0][0],m.m[0][1],m.m[0][2]};
@@ -621,6 +621,39 @@ void Pers::DrawDrum( SysGra& gra, Pers& pers,  vect3 pos, mat33 m  )
 		pers.line3d( gra, pers, a, b, col, false );
 	}
 }
+
+// 球
+//------------------------------------------------------------------------------
+void Pers::DrawShpere( SysGra& gra, Pers& pers, float r, vect3 pos, mat33 m  )
+//------------------------------------------------------------------------------
+{
+	float step = 2*pi/24.0;
+	rgb col = rgb(0,1,1);
+	vect3	vx0;
+	vect3	vy0;
+	vect3	vz0;
+	for ( float th = 0 ; th < 2*pi ; th += step )
+	{
+		float u = r*cos(th);
+		float v = r*sin(th);
+	
+		vect3	vx1= m*vect3(0,u,v)+pos;
+		vect3	vy1= m*vect3(u,0,v)+pos;
+		vect3	vz1= m*vect3(u,v,0)+pos;
+		
+		if ( th > 0 )
+		{
+			pers.line3d( gra, pers, vx0, vx1, col );
+			pers.line3d( gra, pers, vy0, vy1, col );
+			pers.line3d( gra, pers, vz0, vz1, col );
+		}
+		vx0 = vx1;
+		vy0 = vy1;
+		vz0 = vz1;
+	}
+	
+}
+
 
 ////////////////
 // Camera

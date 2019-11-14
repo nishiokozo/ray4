@@ -410,7 +410,8 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 	struct Ball:Obj
 	{
 		vect3	vel;	//	velocity 速度(m/s)
-		float radius = 8;
+		float	radius = 0.1;
+		mat33	mat = midentity();
 		Ball( vect3 v, vect3 _vel ) : Obj(v)
 		{
 			pos = v;
@@ -565,14 +566,15 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 	
 	// 平面表示
 	{
-		pers.showPlate( gra, pers, plate_p, plate_n, rgb(0.5,1,1)*0.55 );
+		pers.DrawPlate( gra, pers, plate_p, plate_n, rgb(0.5,1,1)*0.55 );
 	}
 
-	// ボール表示
-	pers.circle3d( gra, pers, p0, ball.radius, col4 );
-	
+
 	ball.pos = p0;
 	ball.vel = v0;
+
+	// ボール表示
+	pers.DrawShpere( gra, pers, ball.radius, ball.pos, ball.mat );
 
 
 
