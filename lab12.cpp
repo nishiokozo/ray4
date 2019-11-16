@@ -68,9 +68,9 @@ void lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 		lab.tblEdge.emplace_back( new Edge(1,2, col7,1) );
 
 		// カーソル
-		pers.axis.bAxisX = true;
-		pers.axis.bAxisY = true;
-		pers.axis.bAxisZ = false;
+		gui.axis.bAxisX = true;
+		gui.axis.bAxisY = true;
+		gui.axis.bAxisZ = false;
 	}
 
 	// リセット

@@ -232,7 +232,7 @@ struct Skeleton
 	void PlayAnimation();
 	void ReqAnimation();
 	void UpdateSkeleton();
-	void DrawSkeleton( Pers& pers, SysGra& gra );
+	void DrawSkeleton( SysGra& gra, Pers& pers, Gui& gui );
 
 
 	//

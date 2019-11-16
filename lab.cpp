@@ -29,6 +29,7 @@
 extern void lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, Gui& gui, int& text_y );
 
 
+
 struct	Graphs
 {
 	struct Plot
@@ -55,18 +56,18 @@ struct	Graphs
 			{
 				tblPlot[i] = 0;
 			}
-			Reset();
+			ResetPlot();
 		}
 
 		//------------------------------------------------------------------------------
-		void Reset()
+		void ResetPlot()
 		//------------------------------------------------------------------------------
 		{
 			bScroll = false;
 			cntPlot = 0 ;
 		}
 		//------------------------------------------------------------------------------
-		void Write( float val )
+		void WritePlot( float val )
 		//------------------------------------------------------------------------------
 		{
 			if ( cntPlot >= MaxPlot ) 
@@ -78,7 +79,7 @@ struct	Graphs
 			tblPlot[ cntPlot++ ] = val;
 		}
 		//------------------------------------------------------------------------------
-		void Draw( SysGra& gra, Pers& pers )
+		void DrawPlot( SysGra& gra, Pers& pers, Gui& gui )
 		//------------------------------------------------------------------------------
 		{
 			gra.SetZTest( false );
@@ -88,15 +89,15 @@ struct	Graphs
 			if ( bScroll )
 			for ( int i = cntPlot ; i < MaxPlot ; i++ )
 			{
-				pers.pset3d( gra, pers, vect3( x, 0, tblPlot[i] ),  col, 2 );
+				gui.pen.pset3d( gra, pers, vect3( x, 0, tblPlot[i] ),  col, 2 );
 				x += step;
 			}
 			for ( int i = 0 ; i < cntPlot-1 ; i++ )
 			{
-				pers.pset3d( gra, pers, vect3( x, 0, tblPlot[i] ),  col, 2 );
+				gui.pen.pset3d( gra, pers, vect3( x, 0, tblPlot[i] ),  col, 2 );
 				x += step;
 			}
-			if ( cntPlot > 0 ) pers.pset3d( gra, pers, vect3( x, 0, tblPlot[cntPlot-1] ),  rgb(1,1,1), 2 );
+			if ( cntPlot > 0 ) gui.pen.pset3d( gra, pers, vect3( x, 0, tblPlot[cntPlot-1] ),  rgb(1,1,1), 2 );
 
 			gra.SetZTest( true );
 		}
@@ -129,23 +130,23 @@ struct	Graphs
 	//------------------------------------------------------------------------------
 	{
 		if ( idx >= (signed)plots.size() ) return;
-		plots[ idx ].Write( val );
+		plots[ idx ].WritePlot( val );
 	}
 
 	//------------------------------------------------------------------------------
-	void Draw( SysGra& gra, Pers& pers )
+	void Pen( SysGra& gra, Pers& pers, Gui& gui )
 	//------------------------------------------------------------------------------
 	{
 		for ( Plot& p : plots )
 		{
-			p.Draw( gra, pers );
+			p.DrawPlot( gra, pers, gui );
 		}
 	}
 };
 
 
 //------------------------------------------------------------------------------
-static void drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str )
+static void drawVect( SysGra& gra, Pers& pers, Gui& gui, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str )
 //------------------------------------------------------------------------------
 {
 	gra.SetZTest(false);
@@ -157,14 +158,14 @@ static void drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, f
 		vect3	a = v0;	a.y=0;
 		vect3	b = v1;	b.y=0;
 		rgb		c = (col+rgb(0.75,0.75,0.75))/4;
-		pers.line3d( gra, pers, a, b, c, 1 );
-		pers.pset3d( gra, pers,    b, c, 5 );
+		gui.pen.line3d( gra, pers, a, b, c, 1 );
+		gui.pen.pset3d( gra, pers,    b, c, 5 );
 	}
 
 	// 線
-	pers.line3d( gra, pers, v0, v1, col, 1 );
-	pers.pset3d( gra, pers,     v1, col, 5 );
-	pers.print3d( gra, pers, 	v1, 0,0, str ); 
+	gui.pen.line3d( gra, pers, v0, v1, col, 1 );
+	gui.pen.pset3d( gra, pers,     v1, col, 5 );
+	gui.pen.print3d( gra, pers, 	v1, 0,0, str ); 
 
 	gra.Print(1,(float)text_y++, str+": "+to_string(v.x)+" , "+to_string(v.y)+" , "+to_string(v.z));
 
@@ -172,7 +173,7 @@ static void drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, f
 };
 
 //------------------------------------------------------------------------------
-static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, Gui& gui, int& text_y )
 //------------------------------------------------------------------------------
 {
 	static bool bGrid = true;
@@ -241,23 +242,23 @@ static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 					if ( n == 10 ) top = rgb(0.70,0.70,0.70);
 				
 					// 右面
-					pers.tri3d( gra, pers, v0, v1 ,v2 , col );
-					pers.tri3d( gra, pers, v0 ,v2, v3 , col );
+					gui.pen.tri3d( gra, pers, v0, v1 ,v2 , col );
+					gui.pen.tri3d( gra, pers, v0 ,v2, v3 , col );
 
 					// 右面
-					pers.tri3d( gra, pers, w0, w1 ,w2 , col );
-					pers.tri3d( gra, pers, w0 ,w2, w3 , col );
+					gui.pen.tri3d( gra, pers, w0, w1 ,w2 , col );
+					gui.pen.tri3d( gra, pers, w0 ,w2, w3 , col );
 
 					// 先
-					pers.tri3d( gra, pers, v1, v0, w0, col );
-					pers.tri3d( gra, pers, w1, w0, v0, col );
+					gui.pen.tri3d( gra, pers, v1, v0, w0, col );
+					gui.pen.tri3d( gra, pers, w1, w0, v0, col );
 
 					// 上面
-					pers.tri3d( gra, pers, v0, v3 ,w2 , top );
-					pers.tri3d( gra, pers, w2, w1 ,v0 , top );
+					gui.pen.tri3d( gra, pers, v0, v3 ,w2 , top );
+					gui.pen.tri3d( gra, pers, w2, w1 ,v0 , top );
 
 					// 蓋
-					pers.tri3d( gra, pers, w2, v3, vect3(0,y+s,0), top );
+					gui.pen.tri3d( gra, pers, w2, v3, vect3(0,y+s,0), top );
 					
 				};
 			
@@ -310,15 +311,15 @@ static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 			{
 				rgb c1(1,1,1);
 				float wide = 2;
-				pers.line3d( gra, pers, p0, q0, c1, wide );
-				pers.line3d( gra, pers, p1, q1, c1, wide );
-				pers.line3d( gra, pers, p2, q2, c1, wide );
-				pers.line3d( gra, pers, p3, q3, c1, wide );
+				gui.pen.line3d( gra, pers, p0, q0, c1, wide );
+				gui.pen.line3d( gra, pers, p1, q1, c1, wide );
+				gui.pen.line3d( gra, pers, p2, q2, c1, wide );
+				gui.pen.line3d( gra, pers, p3, q3, c1, wide );
 
-				pers.line3d( gra, pers, q0, q1, c1, wide );
-				pers.line3d( gra, pers, q1, q2, c1, wide );
-				pers.line3d( gra, pers, q2, q3, c1, wide );
-				pers.line3d( gra, pers, q3, q0, c1, wide );
+				gui.pen.line3d( gra, pers, q0, q1, c1, wide );
+				gui.pen.line3d( gra, pers, q1, q2, c1, wide );
+				gui.pen.line3d( gra, pers, q2, q3, c1, wide );
+				gui.pen.line3d( gra, pers, q3, q0, c1, wide );
 			}
 
 		};
@@ -342,7 +343,7 @@ static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 }
 
 //------------------------------------------------------------------------------
-static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, Gui& gui, int& text_y )
 //------------------------------------------------------------------------------
 {
 	gra.Print(1,(float)text_y++,string("lab11_RidgePlateDot")+to_string(lab.idx)); 
@@ -428,9 +429,9 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 			lab.tblEdge.clear();
 			lab.tblEdge.emplace_back( new Edge(1,2, col7,1) );
 
-			pers.axis.bAxisX = true;
-			pers.axis.bAxisY = true;
-			pers.axis.bAxisZ = false;
+			gui.axis.bAxisX = true;
+			gui.axis.bAxisY = true;
+			gui.axis.bAxisZ = false;
 		}
 
 		Ball&	ball = *dynamic_cast<Ball*>(lab.tblObj[0]);
@@ -485,7 +486,7 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 			vn = v0 + gv*T;	// 仮想速度
 
 			gra.SetZTest(false);
-			pers.line3d_scissor( gra, pers, p0, pn, col4, 1 );
+			gui.pen.line3d_scissor( gra, pers, p0, pn, col4, 1 );
 			gra.SetZTest(true);
 		}
 
@@ -534,15 +535,15 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 					pn = q0 + d2;
 					vn = v2 ;
 
-					pers.pset3d( gra, pers, p0+d1, col4, 5 );	//	衝突点
-					pers.pset3d( gra, pers, pn, col4, 5 );		//	バウンド先
+					gui.pen.pset3d( gra, pers, p0+d1, col4, 5 );	//	衝突点
+					gui.pen.pset3d( gra, pers, pn, col4, 5 );		//	バウンド先
 					p0x=p0+d1;
 				}
 			}
 
-					pers.line3d( gra, pers, p0x, p0x+nx , col6, 1 );
-					pers.line3d( gra, pers, p0x, p0x+rx , col4, 1 );
-					pers.line3d( gra, pers, p0x, p0x-bx , col5, 1 );
+					gui.pen.line3d( gra, pers, p0x, p0x+nx , col6, 1 );
+					gui.pen.line3d( gra, pers, p0x, p0x+rx , col4, 1 );
+					gui.pen.line3d( gra, pers, p0x, p0x-bx , col5, 1 );
 		}
 
 		if  ( !bPause || bStep )
@@ -555,7 +556,7 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 	
 	// 平面表示
 	{
-		pers.DrawPlate( gra, pers, plate_p, plate_n, rgb(0.5,1,1)*0.55 );
+		gui.prim.DrawPlate( gra, pers, gui, plate_p, plate_n, rgb(0.5,1,1)*0.55 );
 	}
 
 
@@ -563,14 +564,14 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 	ball.vel = v0;
 
 	// ボール表示
-	pers.DrawShpere( gra, pers, ball.radius, ball.pos, ball.mat );
+	gui.prim.DrawShpere( gra, pers, gui, ball.radius, ball.pos, ball.mat );
 
 
 
 }
 
 //------------------------------------------------------------------------------
-static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, Gui& gui, int& text_y )
 //------------------------------------------------------------------------------
 {
 	gra.Print(1,(float)text_y++,string("lab9_2dRidge")+to_string(lab.idx)); 
@@ -665,9 +666,9 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 		lab.tblEdge.clear();
 		lab.tblEdge.emplace_back( new Edge(1,2) );
 
-		pers.axis.bAxisX = true;
-		pers.axis.bAxisY = false;
-		pers.axis.bAxisZ = true;
+		gui.axis.bAxisX = true;
+		gui.axis.bAxisY = false;
+		gui.axis.bAxisZ = true;
 
 		graphs.Clear();
 		graphs.Add( 0.02, rgb(0,0,1) );
@@ -718,14 +719,14 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 			vn = v0 + gv*T;	// 仮想速度
 
 			gra.SetZTest(false);
-			pers.line3d_scissor( gra, pers, p0, pn, col4, 1 );
+			gui.pen.line3d_scissor( gra, pers, p0, pn, col4, 1 );
 			gra.SetZTest(true);
 		}
 
 		// 衝突
 		{
 			vect3 n = cross( (en-st).normalize(), vect3(0,1,0) );
-			pers.line3d( gra, pers, (en+st)/2, (en+st)/2+n, col2, 1 );
+			gui.pen.line3d( gra, pers, (en+st)/2, (en+st)/2+n, col2, 1 );
 
 
 			auto[flg,dis,q0,q1,s0,s1] = func_distance_Segline_Segline( p0-d/1024.0, pn, st, en );
@@ -769,15 +770,15 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 					pn = q0 + d2;
 					vn = v2 ;
 
-					pers.pset3d( gra, pers, p0+d1, col4, 5 );	//	衝突点
-					pers.pset3d( gra, pers, pn, col4, 5 );		//	バウンド先
+					gui.pen.pset3d( gra, pers, p0+d1, col4, 5 );	//	衝突点
+					gui.pen.pset3d( gra, pers, pn, col4, 5 );		//	バウンド先
 					p0x=p0+d1;
 				}
 			}
 
-					pers.line3d( gra, pers, p0x, p0x+nx , col6, 1 );
-					pers.line3d( gra, pers, p0x, p0x+rx , col4, 1 );
-					pers.line3d( gra, pers, p0x, p0x-bx , col5, 1 );
+					gui.pen.line3d( gra, pers, p0x, p0x+nx , col6, 1 );
+					gui.pen.line3d( gra, pers, p0x, p0x+rx , col4, 1 );
+					gui.pen.line3d( gra, pers, p0x, p0x-bx , col5, 1 );
 
 		}
 
@@ -794,7 +795,7 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 }
 
 //------------------------------------------------------------------------------
-static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, Gui& gui, int& text_y )
 //------------------------------------------------------------------------------
 {
 	gra.Print(1,(float)text_y++,string("lab8_vector_six_lab8")+to_string(lab.idx)); 
@@ -830,14 +831,14 @@ static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysG
 		lab.tblEdge.clear();
 		lab.tblEdge.emplace_back( new Edge(0,1) );
 
-		pers.axis.bAxisX = true;
-		pers.axis.bAxisY = false;
-		pers.axis.bAxisZ = true;
+		gui.axis.bAxisX = true;
+		gui.axis.bAxisY = false;
+		gui.axis.bAxisZ = true;
 
 		vel=vect3(0,0,0);	// 加速度
 		w = 0;
 
-		plot_moment.Reset();
+		plot_moment.ResetPlot();
 	}
 
 	// 入力
@@ -855,7 +856,7 @@ static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysG
 	// 計算
 	if ( !bPause || bStep )
 	{
-		plot_moment.Write( moment.y*10 );
+		plot_moment.WritePlot( moment.y*10 );
 
 			
 		// 衝突
@@ -873,17 +874,17 @@ static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysG
  		
 	}
 
-	drawVect( gra, pers, text_y, v0, moment ,10	, rgb(1,0,1), "moment" );
-	drawVect( gra, pers, text_y, v1, gv		,100	, rgb(1,0,0), "gv" );
-	drawVect( gra, pers, text_y, v1, F		,1		, rgb(0,1,0), "F" );
-	plot_moment.Draw( gra, pers );
+	drawVect( gra, pers, gui, text_y, v0, moment ,10	, rgb(1,0,1), "moment" );
+	drawVect( gra, pers, gui, text_y, v1, gv		,100	, rgb(1,0,0), "gv" );
+	drawVect( gra, pers, gui, text_y, v1, F		,1		, rgb(0,1,0), "F" );
+	plot_moment.DrawPlot( gra, pers, gui );
 	gra.Print(1,(float)text_y++,string("<<radius>>")+to_string(bar.abs())); 
 
 
 }
 
 //------------------------------------------------------------------------------
-static void lab6_tire3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab6_tire3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, Gui& gui, int& text_y )
 //------------------------------------------------------------------------------
 {
 	gra.Print(1,(float)text_y++,string("<<lab6_tire3d>>")+to_string(lab.idx)); 
@@ -992,11 +993,11 @@ static void lab6_tire3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, 
 	}
 
 	// 描画
-	pers.tire.DrawTire( gra, pers, pos, head, bank, radius );
+	gui.prim.DrawTire( gra, pers, gui, pos, head, bank, radius );
 }
 
 //------------------------------------------------------------------------------
-static void lab5_furiko2d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab5_furiko2d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, Gui& gui, int& text_y )
 //------------------------------------------------------------------------------
 {
 	gra.Print(1,(float)text_y++,string("<<lab5_furiko2d>>")+to_string(lab.idx)); 
@@ -1034,7 +1035,7 @@ static void lab5_furiko2d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra
 	vect3&	v1 = lab.tblObj[1]->pos;	//	barの先端
 
 
-//	pers.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
+//	gui.pen.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
 
 	// 縮む
 	if ( mouse.F.hi )	v1 = (v1+v0)/2;
@@ -1059,7 +1060,7 @@ static void lab5_furiko2d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra
 	}
 }
 //------------------------------------------------------------------------------
-static void lab7_kakusokudo7( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab7_kakusokudo7( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, Gui& gui, int& text_y )
 //------------------------------------------------------------------------------
 {
 	gra.Print(1,(float)text_y++,string("<<lab7_kakusokudo7>>")+to_string(lab.idx)); 
@@ -1163,7 +1164,7 @@ static void lab7_kakusokudo7( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& 
 				v1 = (v1-v0)/(v1-v0).abs()+v0;
 				acc2 += v1-prev;
 			}
-			drawVect( gra, pers, text_y, v1, vt			,100	, rgb(1,0,0), "vt" );
+			drawVect( gra, pers, gui, text_y, v1, vt			,100	, rgb(1,0,0), "vt" );
 			gra.Print(1,(float)text_y++,string("radius ")+to_string(bar.abs())); 
 		}
 
@@ -1202,14 +1203,14 @@ w=deg2rad(2);
 		}
 
 		// 補助線
-		drawVect( gra, pers, text_y, v1, gv			,100	, rgb(1,0,0), "gv" );
+		drawVect( gra, pers, gui, text_y, v1, gv			,100	, rgb(1,0,0), "gv" );
 			
 	}
 
 }
 
 //------------------------------------------------------------------------------
-static void lab4_furiko3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab4_furiko3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, Gui& gui, int& text_y )
 //------------------------------------------------------------------------------
 {
 		gra.Print(1,(float)text_y++,string("<<lab4_furiko3d>>")+to_string(lab.idx)); 
@@ -1294,15 +1295,15 @@ mov =vel;
 	// 描画
 	{
 		gra.Clr(rgb(0.3,0.3,0.3));
-		pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
+		gui.grid.DrawGrid3d( gra, pers, gui, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
 
-		pers.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
+		gui.pen.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
 
-		drawVect( gra, pers, text_y, v1, vg	,100, rgb(1,0,0), "g" );
-		drawVect( gra, pers, text_y, v0, moment,100, rgb(1,0,1), "moment" );
-		drawVect( gra, pers, text_y, v1, F		,100, rgb(0,1,0), "F" );
-		drawVect( gra, pers, text_y, v1, vel	,2	, rgb(1,1,0), "vel" );
-		drawVect( gra, pers, text_y, v1, mov	,2	, rgb(0,0,1), "mov" );
+		drawVect( gra, pers, gui, text_y, v1, vg	,100, rgb(1,0,0), "g" );
+		drawVect( gra, pers, gui, text_y, v0, moment,100, rgb(1,0,1), "moment" );
+		drawVect( gra, pers, gui, text_y, v1, F		,100, rgb(0,1,0), "F" );
+		drawVect( gra, pers, gui, text_y, v1, vel	,2	, rgb(1,1,0), "vel" );
+		drawVect( gra, pers, gui, text_y, v1, mov	,2	, rgb(0,0,1), "mov" );
 	}
 
 
@@ -1328,11 +1329,11 @@ mov =vel;
 			vect3 a = vect3(x,y,0);
 			v1 = v0 + a;
 
-			pers.line3d( gra, pers, v1, v1+(a-v)*10, rgb(1,0,0),2 );
+			gui.pen.line3d( gra, pers, v1, v1+(a-v)*10, rgb(1,0,0),2 );
 			
 		}
 
-		pers.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
+		gui.pen.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
 
 		// 加速ベクトルの実験
 		{
@@ -1340,13 +1341,13 @@ mov =vel;
 			vect3 n0 = cross( v, vg );
 			vect3 vt = cross( n0, v );
 
-//						pers.line3d( gra, pers, v1, v1+vt*100, rgb(0,1,0) );
+//						gui.pen.line3d( gra, pers, v1, v1+vt*100, rgb(0,1,0) );
 			vect3 v2 = v*1.05+v0;
-//						pers.line3d( gra, pers, v2, v2+vv, rgb(0,1,0) );
+//						gui.pen.line3d( gra, pers, v2, v2+vv, rgb(0,1,0) );
 
-//						pers.line3d( gra, pers, v2, v2+vg*100, rgb(1,0,0) );
-			pers.line3d( gra, pers, v2, v2+vt*100, rgb(0,1,0) );
-			pers.line3d( gra, pers, v2, v2+n0*100, rgb(0,0,1) );					}
+//						gui.pen.line3d( gra, pers, v2, v2+vg*100, rgb(1,0,0) );
+			gui.pen.line3d( gra, pers, v2, v2+vt*100, rgb(0,1,0) );
+			gui.pen.line3d( gra, pers, v2, v2+n0*100, rgb(0,0,1) );					}
 
 	}
 #endif
@@ -1360,11 +1361,11 @@ mov =vel;
 		vv += vt;
 		v2 += vt*10;
 
-//					pers.line3d( gra, pers,  0,  vv*10, rgb(0,1,1), 2 );
-		pers.line3d( gra, pers,  vect3(1,0,0),  vect3(1,0,0)+vt*100, rgb(0,1,0), 1 );
+//					gui.pen.line3d( gra, pers,  0,  vv*10, rgb(0,1,1), 2 );
+		gui.pen.line3d( gra, pers,  vect3(1,0,0),  vect3(1,0,0)+vt*100, rgb(0,1,0), 1 );
 
-		pers.line3d( gra, pers, v2, v2+vt*100, rgb(0,1,0) );
-		pers.line3d( gra, pers, v0, v2, rgb(0,1,1), 2 );
+		gui.pen.line3d( gra, pers, v2, v2+vt*100, rgb(0,1,0) );
+		gui.pen.line3d( gra, pers, v0, v2, rgb(0,1,1), 2 );
 
 	}
 #endif
@@ -1377,7 +1378,7 @@ mov =vel;
 //=================================
 
 //------------------------------------------------------------------------------
-static void lab3_gravityPlanet( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab3_gravityPlanet( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, Gui& gui, int& text_y )
 //------------------------------------------------------------------------------
 {
 	gra.Print(1,(float)text_y++,string("<<lab3_gravityPlanet>>")+to_string(lab.idx)); 
@@ -1475,7 +1476,7 @@ static void lab3_gravityPlanet( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra
 			Planet& pl = *dynamic_cast<Planet*>(p);
 			for ( int i = 0 ; i < MAX_PREV ; i++ )
 			{
-				pers.pset3d( gra, pers, pl.tblPrev[i], rgb(0,1,1),2 );
+				gui.pen.pset3d( gra, pers, pl.tblPrev[i], rgb(0,1,1),2 );
 			}
 		}
 	}
@@ -1486,7 +1487,7 @@ static void lab3_gravityPlanet( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra
 // 描画	角速度 実験
 //=================================
 //------------------------------------------------------------------------------
-static void lab2_kakusokudo( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab2_kakusokudo( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, Gui& gui, int& text_y )
 //------------------------------------------------------------------------------
 {
 	gra.Print(1,(float)text_y++,string("<<lab2_kakusokudo>>")+to_string(lab.idx)); 
@@ -1574,31 +1575,31 @@ static void lab2_kakusokudo( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 		{// 影 描画
 			vect3	va = v0;va.y = 0;
 			vect3	vb = v1;vb.y = 0;
-			pers.line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
+			gui.pen.line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
 		}
 		{// 影 描画
 			vect3	va = v1;va.y = 0;
 			vect3	vb = v2;vb.y = 0;
-			pers.line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
+			gui.pen.line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
 		}
 
-		pers.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );	//	棒
-		pers.line3d( gra, pers, v1, v2, rgb(0,1,0), 1 );	// 外的な力
+		gui.pen.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );	//	棒
+		gui.pen.line3d( gra, pers, v1, v2, rgb(0,1,0), 1 );	// 外的な力
 */
-		drawVect( gra, pers, text_y, v1, velocity	,1	, rgb(1,1,0), "velocity" );
-		drawVect( gra, pers, text_y, v0, moment		,1	, rgb(1,0,1), "moment" );
-		drawVect( gra, pers, text_y, v0, to			,1	, rgb(0,1,1), "to" );
+		drawVect( gra, pers, gui, text_y, v1, velocity	,1	, rgb(1,1,0), "velocity" );
+		drawVect( gra, pers, gui, text_y, v0, moment		,1	, rgb(1,0,1), "moment" );
+		drawVect( gra, pers, gui, text_y, v0, to			,1	, rgb(0,1,1), "to" );
 			
 	}
 
 }
 
 //------------------------------------------------------------------------------
-static void lab1_graph( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab1_graph( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, Gui& gui, int& text_y )
 //------------------------------------------------------------------------------
 {
 	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
+	gui.grid.DrawGrid3d( gra, pers, gui, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
 
 	gra.Print(1,(float)text_y++,string("<<lab1_graph>>")+to_string(lab.idx)); 
 
@@ -1636,7 +1637,7 @@ static void lab1_graph( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, P
 			v += a;
 			s += v;
 
-			pers.pset2d( gra, pers, vect2(t,s), rgb(1,0,0), 3 );
+			gui.pen.pset2d( gra, pers, vect2(t,s), rgb(1,0,0), 3 );
 		}
 	}
 
@@ -1654,12 +1655,12 @@ static void lab1_graph( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, P
 			v = a * t;
 			s = v * t * 0.5f;
 
-			pers.line2d( gra, pers, vect2(t0,s0), vect2(t,s), rgb(0,0.5,1), 1 );
-			pers.line2d( gra, pers, vect2(t0,v0), vect2(t,v), rgb(0,1,0), 1 );
+			gui.pen.line2d( gra, pers, vect2(t0,s0), vect2(t,s), rgb(0,0.5,1), 1 );
+			gui.pen.line2d( gra, pers, vect2(t0,v0), vect2(t,v), rgb(0,1,0), 1 );
 
-			pers.pset2d( gra, pers, vect2(t,s), rgb(0,0.5,1), 3 );
-			pers.pset2d( gra, pers, vect2(t,v), rgb(0,1,0), 3 );
-			pers.print2d( gra, pers, vect2(t,s),0,0, to_string(s) );
+			gui.pen.pset2d( gra, pers, vect2(t,s), rgb(0,0.5,1), 3 );
+			gui.pen.pset2d( gra, pers, vect2(t,v), rgb(0,1,0), 3 );
+			gui.pen.print2d( gra, pers, vect2(t,s),0,0, to_string(s) );
 		
 			t0 = t;
 			v0 = v;
@@ -1678,7 +1679,7 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, Gui& 
 	switch( idx )
 	{
 		case 10:	// 描画	色見本
-			lab10_colors( (*this), keys, mouse, gra, pers, text_y );
+			lab10_colors( (*this), keys, mouse, gra, pers, gui, text_y );
 			break;
 
 		case 12:	// 描画	2d剛体
@@ -1686,43 +1687,43 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, Gui& 
 			break;
 
 		case 11:	// 描画	2d剛体
-			lab11_RidgePlateDot( (*this), keys, mouse, gra, pers, text_y );
+			lab11_RidgePlateDot( (*this), keys, mouse, gra, pers, gui, text_y );
 			break;
 
 		case 9:	// 描画	2d剛体
-			lab9_2dRidge( (*this), keys, mouse, gra, pers, text_y );
+			lab9_2dRidge( (*this), keys, mouse, gra, pers, gui, text_y );
 			break;
 
 		case 8:	// 描画	位相空間
-			lab8_vector_six_lab8( (*this), keys, mouse, gra, pers, text_y );
+			lab8_vector_six_lab8( (*this), keys, mouse, gra, pers, gui, text_y );
 			break;
 
 		case 1:	// 描画	グラフ実験
-			lab1_graph( (*this), keys, mouse, gra, pers, text_y );
+			lab1_graph( (*this), keys, mouse, gra, pers, gui, text_y );
 			break;
 
 		case 2:// 描画	角速度 実験
-			lab2_kakusokudo( (*this), keys, mouse, gra, pers, text_y );
+			lab2_kakusokudo( (*this), keys, mouse, gra, pers, gui, text_y );
 			break;
 
 		case 7:// 描画	角速度 実験
-			lab7_kakusokudo7( (*this), keys, mouse, gra, pers, text_y );
+			lab7_kakusokudo7( (*this), keys, mouse, gra, pers, gui, text_y );
 			break;
 
 		case 3:	// 描画	引力実験
-			lab3_gravityPlanet( (*this), keys, mouse, gra, pers, text_y );
+			lab3_gravityPlanet( (*this), keys, mouse, gra, pers, gui, text_y );
 			break;
 
 		case 4:	// 描画	振り子3D実験
-			lab4_furiko3d( (*this), keys, mouse, gra, pers, text_y );
+			lab4_furiko3d( (*this), keys, mouse, gra, pers, gui, text_y );
 			break;
 
 		case 5:	// 描画	振り子2D実験
-			lab5_furiko2d( (*this), keys, mouse, gra, pers, text_y );
+			lab5_furiko2d( (*this), keys, mouse, gra, pers, gui, text_y );
 			break;
 
 		case 6:	// 描画	タイヤ実験実験
-			lab6_tire3d( (*this), keys, mouse, gra, pers, text_y );
+			lab6_tire3d( (*this), keys, mouse, gra, pers, gui, text_y );
 			break;
 
 		default:break;

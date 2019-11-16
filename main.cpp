@@ -24,10 +24,10 @@
 
 #include "func.h"
 #include "pers.h"
+#include "gui.h"
 
 #include "raytrace.h"
 #include "skeleton.h"
-#include "gui.h"
 
 #include "lab.h"
 
@@ -98,7 +98,7 @@ struct Cutmull
 	}
 
 	//------------------------------------------------------------------------------
-	void drawCutmull( SysGra& gra, Pers& pers, vector<Obj*> tbl, vector<ivect2>idx )
+	void drawCutmull( SysGra& gra, Pers& pers, Gui& gui, vector<Obj*> tbl, vector<ivect2>idx )
 	//------------------------------------------------------------------------------
 	{
 		// 描画 カーブ
@@ -143,19 +143,19 @@ struct Cutmull
 					}
 					else 
 					{
-						pers.line3d( gra, pers, v0, v1, col);
-						pers.line3d( gra, pers, w0, w1, col);
-						pers.line3d( gra, pers, w1, v1, col);
+						gui.pen.line3d( gra, pers, v0, v1, col);
+						gui.pen.line3d( gra, pers, w0, w1, col);
+						gui.pen.line3d( gra, pers, w1, v1, col);
 
 						{
 							vect3 a = v0;a.y=0;
 							vect3 b = v1;b.y=0;
-							pers.line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
+							gui.pen.line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
 						}
 						{
 							vect3 a = w0;a.y=0;
 							vect3 b = w1;b.y=0;
-							pers.line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
+							gui.pen.line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
 						}
 
 					}
@@ -181,18 +181,18 @@ struct Cutmull
 					w0 = w1;
 				}
 			}
-			pers.line3d( gra, pers, v0, v2, col);
-			pers.line3d( gra, pers, w0, w2, col);
-			pers.line3d( gra, pers, w2, v2, col );
+			gui.pen.line3d( gra, pers, v0, v2, col);
+			gui.pen.line3d( gra, pers, w0, w2, col);
+			gui.pen.line3d( gra, pers, w2, v2, col );
 			{
 				vect3 a = v0;a.y=0;
 				vect3 b = v2;b.y=0;
-				pers.line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
+				gui.pen.line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
 			}
 			{
 				vect3 a = w0;a.y=0;
 				vect3 b = w2;b.y=0;
-				pers.line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
+				gui.pen.line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
 			}
 		};
 		func();
@@ -224,7 +224,7 @@ struct Bezier
 
 	vector<Edge*> tblDummy;		//	空のまま
 	//------------------------------------------------------------------------------
-	void exec_drawBezier( SysGra& gra, Pers& pers, vector<Obj*>& tblPoint, vector<int>& idxPoint, int idxTbl , vect3& P, vect3& I, bool bSerch, bool bCut )
+	void exec_drawBezier( SysGra& gra, Pers& pers, Gui& gui, vector<Obj*>& tblPoint, vector<int>& idxPoint, int idxTbl , vect3& P, vect3& I, bool bSerch, bool bCut )
 	//------------------------------------------------------------------------------
 	{
 		//ベジェ計算＆描画
@@ -261,7 +261,7 @@ struct Bezier
 			for ( int i = 0 ; i < div ; i++ )
 			{
 				vect3 pos1 = func_bezier3( t, P0, P1, P2, P3 );
-				pers.line3d( gra, pers, pos0, pos1, rgb(1,1,1) );
+				gui.pen.line3d( gra, pers, pos0, pos1, rgb(1,1,1) );
 
 				// マウスベクトルとの最近点
 				if ( bSerch )
@@ -298,7 +298,7 @@ struct Bezier
 		gra.SetZTest( false );
 		if ( minb ) 
 		{
-			pers.pset3d( gra, pers, minQ, rgb(1,0,0), 5 );
+			gui.pen.pset3d( gra, pers, minQ, rgb(1,0,0), 5 );
 		}
 		gra.SetZTest( true );
 
@@ -352,7 +352,7 @@ struct Bezier
 
 			{
 				gra.SetZTest( false );
-				pers.print3d( gra, pers, minQ, -26,-32-20, to_string(mint) ); 
+				gui.pen.print3d( gra, pers, minQ, -26,-32-20, to_string(mint) ); 
 				gra.SetZTest( true );
 			}
 		}
@@ -435,7 +435,7 @@ struct SkeletonUtil
 	}
 
 	//-------------------------------------------------------------------------
-	void skeleton_draw( SysGra& gra, SysKeys& keys, SysMouse& mouse, Pers& pers, Skeleton& skeleton, int& text_y )
+	void skeleton_draw( SysGra& gra, SysKeys& keys, SysMouse& mouse, Pers& pers, Gui& gui, Skeleton& skeleton, int& text_y )
 	//-------------------------------------------------------------------------
 	{
 		if ( skeleton.bActive == false ) return;
@@ -477,7 +477,7 @@ struct SkeletonUtil
 
 
 		// スケルトン 描画
-		skeleton.DrawSkeleton( pers, gra );
+		skeleton.DrawSkeleton( gra, pers, gui );
 
 		if(1)
 		{
@@ -506,7 +506,7 @@ struct SkeletonUtil
 					nz.x,	nz.y,	nz.z
 				);
 
-				pers.DrawBox( gra, pers, pos0, mmune, false, false );
+				gui.prim.DrawBox( gra, pers, gui, pos0, mmune, false, false );
 			}
 			// 箱 肩
 			if(1)
@@ -527,7 +527,7 @@ struct SkeletonUtil
 				if ( keys.CTRL.on )		mkata.rotateByAxis( (p4-p2).normalize(), deg2rad(0.5));
 				if ( keys.SHIFT.on )	mkata.rotateByAxis( (p4-p2).normalize(), deg2rad(-0.5));
 				
-				pers.DrawBox( gra, pers, p2, mkata, false, false );
+				gui.prim.DrawBox( gra, pers, gui, p2, mkata, false, false );
 			}
 			// 箱 肘
 			{
@@ -542,7 +542,7 @@ struct SkeletonUtil
 					nz.x,	nz.y,	nz.z
 				);	
 				mhiji = m;
-				pers.DrawDrum( gra, pers, p4, mhiji );
+				gui.prim.DrawDrum( gra, pers, gui, p4, mhiji );
 			}
 			// 箱 手
 			if(0)
@@ -560,7 +560,7 @@ struct SkeletonUtil
 					nz.x,	nz.y,	nz.z
 				);	
 				mte = m;
-				pers.DrawDrum( gra, pers, p5, mte );
+				gui.prim.DrawDrum( gra, pers, gui, p5, mte );
 			}
 		}
 
@@ -829,19 +829,19 @@ struct Apr : public Sys
 			if ( keys.Z.hi + keys.X.hi + keys.C.hi > 0 && keys.Z.on + keys.X.on + keys.C.on == keys.Z.hi + keys.X.hi + keys.C.hi ) 
 			{
 				// 排他的選択
-				pers.axis.bAxisZ = false;
-				pers.axis.bAxisX = false;
-				pers.axis.bAxisY = false;
-				if ( keys.Z.hi ) pers.axis.bAxisZ = true;
-				if ( keys.X.hi ) pers.axis.bAxisX = true;
-				if ( keys.C.hi ) pers.axis.bAxisY = true;
+				gui.axis.bAxisZ = false;
+				gui.axis.bAxisX = false;
+				gui.axis.bAxisY = false;
+				if ( keys.Z.hi ) gui.axis.bAxisZ = true;
+				if ( keys.X.hi ) gui.axis.bAxisX = true;
+				if ( keys.C.hi ) gui.axis.bAxisY = true;
 			}
 			else
 			{
 				// 追加選択
-				if ( keys.Z.on ) pers.axis.bAxisZ = true;
-				if ( keys.X.on ) pers.axis.bAxisX = true;
-				if ( keys.C.on ) pers.axis.bAxisY = true;
+				if ( keys.Z.on ) gui.axis.bAxisZ = true;
+				if ( keys.X.on ) gui.axis.bAxisX = true;
+				if ( keys.C.on ) gui.axis.bAxisY = true;
 			}
 
 			//=================================
@@ -903,7 +903,7 @@ struct Apr : public Sys
 			//=================================
 			// 床グリッド描画
 			//=================================
-			pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
+			gui.grid.DrawGrid3d( gra, pers, gui, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 
 
 
@@ -922,11 +922,11 @@ struct Apr : public Sys
 
 				auto[b,d,Q0,Q1,t0,t1] = func_distance_Line_Segline( P, I, P2, P3 );
 
-				if ( b ) pers.line3d( gra, pers, Q0, Q1,  vect3(0,1,0));
-				else pers.line3d( gra, pers, Q0, Q1,  vect3(1,0,0));
+				if ( b ) gui.pen.line3d( gra, pers, Q0, Q1,  vect3(0,1,0));
+				else gui.pen.line3d( gra, pers, Q0, Q1,  vect3(1,0,0));
 
-				pers.line3d( gra, pers, P, P+I,  vect3(1,0,0));
-				pers.line3d( gra, pers, P2, P3, vect3(1,1,1));
+				gui.pen.line3d( gra, pers, P, P+I,  vect3(1,0,0));
+				gui.pen.line3d( gra, pers, P2, P3, vect3(1,1,1));
 
 			}
 
@@ -1004,19 +1004,19 @@ struct Apr : public Sys
 					bool bByCamera = false;
 					bool bByFloor = false;
 					bool bByXY = false;
-					if ( pers.axis.bAxisX && pers.axis.bAxisY && pers.axis.bAxisZ )
+					if ( gui.axis.bAxisX && gui.axis.bAxisY && gui.axis.bAxisZ )
 					{
 						// カメラに並行
 						bByCamera = true;
 					}
 					else
-					if ( pers.axis.bAxisX && pers.axis.bAxisY )
+					if ( gui.axis.bAxisX && gui.axis.bAxisY )
 					{
 						// XYに平行
 						bByXY = true;
 					}
 					else
-					if ( pers.axis.bAxisX && pers.axis.bAxisZ )
+					if ( gui.axis.bAxisX && gui.axis.bAxisZ )
 					{
 						// 床に平行
 						bByFloor = true;
@@ -1025,7 +1025,7 @@ struct Apr : public Sys
 					{
 						bByCamera = true;
 					}
-					gui.MoveObj( gra, pers, gui.tbls, mouse.pos, mouse.prev, mouse.mov, keys.T.on, bByCamera, bByFloor, bByXY );
+					gui.MoveObj( gra, pers, gui, gui.tbls, mouse.pos, mouse.prev, mouse.mov, keys.T.on, bByCamera, bByFloor, bByXY );
 
 					if ( (*pSkeleton).bActive )
 					{
@@ -1042,7 +1042,7 @@ struct Apr : public Sys
 			//=================================
 			// skeleton 描画
 			//=================================
-			util.skeleton_draw( gra, keys, mouse, pers, (*pSkeleton), text_y );
+			util.skeleton_draw( gra, keys, mouse, pers, gui, (*pSkeleton), text_y );
 
 			//=================================
 			//	Bezier 表示
@@ -1056,7 +1056,7 @@ struct Apr : public Sys
 				bool bCut = mouse.L.hi;
 				bool bSerch = keys.E.on;
 				// 表示 加工 ベジェ 三次曲線
-				(*pBezier).exec_drawBezier( gra, pers, (*pBezier).tblPoint, (*pBezier).idxPoint, (*pBezier).idxTbl, P, I, bSerch, bCut );
+				(*pBezier).exec_drawBezier( gra, pers, gui, (*pBezier).tblPoint, (*pBezier).idxPoint, (*pBezier).idxTbl, P, I, bSerch, bCut );
 
 				//=================================
 				//	登録 
@@ -1075,7 +1075,7 @@ struct Apr : public Sys
 			if ( (*pCutmull).bActive )
 			{
 				// 描画
-				(*pCutmull).drawCutmull( gra, pers, (*pCutmull).tblPoint, (*pCutmull).tblIdx );
+				(*pCutmull).drawCutmull( gra, pers, gui, (*pCutmull).tblPoint, (*pCutmull).tblIdx );
 			}
 
 
@@ -1083,13 +1083,13 @@ struct Apr : public Sys
 			//=================================
 			// 表示 矩形カーソル、制御点
 			//=================================
-			gui.DrawController( pers, gra, gui.tbls, gui.tbltblEdge, mouse.pos );
+			gui.DrawController( gra, pers, gui, gui.tbls, gui.tbltblEdge, mouse.pos );
 			
 
 			//=================================
 			// 描画	マニュピレーター
 			//=================================
-			pers.axis.DrawAxis( gra, pers, mouse.pos );
+			gui.axis.DrawAxis( gra, pers, gui, mouse.pos );
 
 			//=================================
 			// 情報表示

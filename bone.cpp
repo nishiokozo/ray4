@@ -487,7 +487,7 @@ static	vect3 catmull3d_func( float t, const vect3 P0, const vect3 P1, const vect
 	}
 
 	//------------------------------------------------------------------------------
-	void Bone::draw( Pers& pers, SysGra& gra )
+	void Bone::Pen( Pers& pers, SysGra& gra )
 	//------------------------------------------------------------------------------
 	{
 		// わっか描画
