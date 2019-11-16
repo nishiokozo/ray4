@@ -125,30 +125,6 @@ struct Gui
 	//------------------------------------------------------------------------------
 	void SelectOneSub( vector<vector<Obj*>>& tbls );
 
-	struct Pen
-	{
-		void tri3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, vect3 p2, rgb col );
-		void pset2d( SysGra& gra, Pers& pers, vect2 p0, rgb col = rgb(1,1,1), float wide = 1.0f );
-		void pset3d( SysGra& gra, Pers& pers, vect3 p0, rgb col = rgb(1,1,1), float wide = 1.0f );
-		void line2d( SysGra& gra, Pers& pers, vect2 p0, vect2 p1, rgb col = rgb(1,1,1), float wide=1.0f );
-		void line3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col = rgb(1,1,1), float wide = 1.0f );
-		void line3d_scissor( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col = rgb(1,1,1), float wide = 1.0f );
-		void circle3d( SysGra& gra, Pers& pers, vect3 p0, float radius, rgb col, float wide=1.0f );
-		void print3d( SysGra& gra, Pers& pers, vect3 p0, float x, float y, string str );
-		void print2d( SysGra& gra, Pers& pers, vect2 p0, float x, float y, string str );
-	} pen;
-
-	struct Prim
-	{
-		void DrawPlate( SysGra& gra, Pers& pers, Gui& gui, vect3 p, vect3 n, rgb col=rgb(0,1,0) );
-		void DrawMat33(  SysGra& gra, Pers& pers, Gui& gui, vect3 v0, mat33 m );
-		void DrawBox( SysGra& gra, Pers& pers, Gui& gui, vect3 pos, mat33 m , bool bAxis = true, bool bTri = true );
-		void DrawDrum( SysGra& gra, Pers& pers, Gui& gui,  vect3 pos, mat33 m  );
-		void DrawShpere( SysGra& gra, Pers& pers, Gui& gui, float radius, vect3 pos, mat33 m  );
-		void DrawTire( SysGra& gra, Pers& pers, Gui& gui, vect3 pos, float head, float bank, float radius );
-		void DrawSquare( SysGra& gra, Pers& pers, Gui& gui, vect3 pos, mat33 m , bool bAxis = true, bool bTri = true );
-	} prim;
-
 	//------------------------------------------------------------------------------
 	// 選択リスト表示
 	//------------------------------------------------------------------------------
@@ -159,24 +135,6 @@ struct Gui
 	void MoveObj( SysGra& gra, Pers& pers, Gui& gui, vector<vector<Obj*>>& tbls, vect2& mpos, vect2& mprev, vect2& mmov, bool bSame, bool bByCamera, bool bByFloor, bool bByXY );
 	//------------------------------------------------------------------------------
 
-	struct Axis
-	{
-
-		bool bAxisX = true;;
-		bool bAxisY = true;;
-		bool bAxisZ = true;;
-
-		//------------------------------------------------------------------------------
-		void DrawAxis( SysGra& gra, Pers& pers, Gui& gui, vect2 mpos );
-		//------------------------------------------------------------------------------
-	} axis;
-
-	struct Grid
-	{
-		//------------------------------------------------------------------------------
-		void DrawGrid3d( SysGra& gra, Pers& pers, Gui& gui, vect3 pos, mat33 m, int NUM_U, int NUM_V, float dt, rgb col  );
-		//------------------------------------------------------------------------------
-	} grid;
 
 
 };

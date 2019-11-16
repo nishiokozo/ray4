@@ -16,7 +16,6 @@
 
 #include "func.h"
 #include "pers.h"
-#include "gui.h"
 #include "skeleton.h"
 
 using namespace std;
@@ -675,7 +674,7 @@ void Skeleton::UpdateSkeleton()
 }
 
 //------------------------------------------------------------------------------
-void Skeleton::DrawSkeleton( SysGra& gra, Pers& pers, Gui& gui )
+void Skeleton::DrawSkeleton( SysGra& gra, Pers& pers )
 //------------------------------------------------------------------------------
 {
 
@@ -823,7 +822,7 @@ void Skeleton::DrawSkeleton( SysGra& gra, Pers& pers, Gui& gui )
 						vect3 b = func_catmull3(t, P0,P1,P2,P3 );
 
 						rgb col = rgb(0,1,0);
-						gui.pen.line3d( gra, pers, a, b, col);
+						pers.pen.line3d( gra, pers, a, b, col);
 
 						a=b;
 						t+=dt;

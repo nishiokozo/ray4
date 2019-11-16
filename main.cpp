@@ -24,7 +24,9 @@
 
 #include "func.h"
 #include "pers.h"
+#include "prim.h"
 #include "gui.h"
+
 
 #include "raytrace.h"
 #include "skeleton.h"
@@ -143,19 +145,19 @@ struct Cutmull
 					}
 					else 
 					{
-						gui.pen.line3d( gra, pers, v0, v1, col);
-						gui.pen.line3d( gra, pers, w0, w1, col);
-						gui.pen.line3d( gra, pers, w1, v1, col);
+						pers.pen.line3d( gra, pers, v0, v1, col);
+						pers.pen.line3d( gra, pers, w0, w1, col);
+						pers.pen.line3d( gra, pers, w1, v1, col);
 
 						{
 							vect3 a = v0;a.y=0;
 							vect3 b = v1;b.y=0;
-							gui.pen.line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
+							pers.pen.line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
 						}
 						{
 							vect3 a = w0;a.y=0;
 							vect3 b = w1;b.y=0;
-							gui.pen.line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
+							pers.pen.line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
 						}
 
 					}
@@ -181,18 +183,18 @@ struct Cutmull
 					w0 = w1;
 				}
 			}
-			gui.pen.line3d( gra, pers, v0, v2, col);
-			gui.pen.line3d( gra, pers, w0, w2, col);
-			gui.pen.line3d( gra, pers, w2, v2, col );
+			pers.pen.line3d( gra, pers, v0, v2, col);
+			pers.pen.line3d( gra, pers, w0, w2, col);
+			pers.pen.line3d( gra, pers, w2, v2, col );
 			{
 				vect3 a = v0;a.y=0;
 				vect3 b = v2;b.y=0;
-				gui.pen.line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
+				pers.pen.line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
 			}
 			{
 				vect3 a = w0;a.y=0;
 				vect3 b = w2;b.y=0;
-				gui.pen.line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
+				pers.pen.line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
 			}
 		};
 		func();
@@ -261,7 +263,7 @@ struct Bezier
 			for ( int i = 0 ; i < div ; i++ )
 			{
 				vect3 pos1 = func_bezier3( t, P0, P1, P2, P3 );
-				gui.pen.line3d( gra, pers, pos0, pos1, rgb(1,1,1) );
+				pers.pen.line3d( gra, pers, pos0, pos1, rgb(1,1,1) );
 
 				// マウスベクトルとの最近点
 				if ( bSerch )
@@ -298,7 +300,7 @@ struct Bezier
 		gra.SetZTest( false );
 		if ( minb ) 
 		{
-			gui.pen.pset3d( gra, pers, minQ, rgb(1,0,0), 5 );
+			pers.pen.pset3d( gra, pers, minQ, rgb(1,0,0), 5 );
 		}
 		gra.SetZTest( true );
 
@@ -352,7 +354,7 @@ struct Bezier
 
 			{
 				gra.SetZTest( false );
-				gui.pen.print3d( gra, pers, minQ, -26,-32-20, to_string(mint) ); 
+				pers.pen.print3d( gra, pers, minQ, -26,-32-20, to_string(mint) ); 
 				gra.SetZTest( true );
 			}
 		}
@@ -477,7 +479,7 @@ struct SkeletonUtil
 
 
 		// スケルトン 描画
-		skeleton.DrawSkeleton( gra, pers, gui );
+		skeleton.DrawSkeleton( gra, pers );
 
 		if(1)
 		{
@@ -506,7 +508,7 @@ struct SkeletonUtil
 					nz.x,	nz.y,	nz.z
 				);
 
-				gui.prim.DrawBox( gra, pers, gui, pos0, mmune, false, false );
+				pers.prim.DrawBox( gra, pers, pos0, mmune, false, false );
 			}
 			// 箱 肩
 			if(1)
@@ -527,7 +529,7 @@ struct SkeletonUtil
 				if ( keys.CTRL.on )		mkata.rotateByAxis( (p4-p2).normalize(), deg2rad(0.5));
 				if ( keys.SHIFT.on )	mkata.rotateByAxis( (p4-p2).normalize(), deg2rad(-0.5));
 				
-				gui.prim.DrawBox( gra, pers, gui, p2, mkata, false, false );
+				pers.prim.DrawBox( gra, pers, p2, mkata, false, false );
 			}
 			// 箱 肘
 			{
@@ -542,7 +544,7 @@ struct SkeletonUtil
 					nz.x,	nz.y,	nz.z
 				);	
 				mhiji = m;
-				gui.prim.DrawDrum( gra, pers, gui, p4, mhiji );
+				pers.prim.DrawDrum( gra, pers, p4, mhiji );
 			}
 			// 箱 手
 			if(0)
@@ -560,7 +562,7 @@ struct SkeletonUtil
 					nz.x,	nz.y,	nz.z
 				);	
 				mte = m;
-				gui.prim.DrawDrum( gra, pers, gui, p5, mte );
+				pers.prim.DrawDrum( gra, pers, p5, mte );
 			}
 		}
 
@@ -829,19 +831,19 @@ struct Apr : public Sys
 			if ( keys.Z.hi + keys.X.hi + keys.C.hi > 0 && keys.Z.on + keys.X.on + keys.C.on == keys.Z.hi + keys.X.hi + keys.C.hi ) 
 			{
 				// 排他的選択
-				gui.axis.bAxisZ = false;
-				gui.axis.bAxisX = false;
-				gui.axis.bAxisY = false;
-				if ( keys.Z.hi ) gui.axis.bAxisZ = true;
-				if ( keys.X.hi ) gui.axis.bAxisX = true;
-				if ( keys.C.hi ) gui.axis.bAxisY = true;
+				pers.axis.bAxisZ = false;
+				pers.axis.bAxisX = false;
+				pers.axis.bAxisY = false;
+				if ( keys.Z.hi ) pers.axis.bAxisZ = true;
+				if ( keys.X.hi ) pers.axis.bAxisX = true;
+				if ( keys.C.hi ) pers.axis.bAxisY = true;
 			}
 			else
 			{
 				// 追加選択
-				if ( keys.Z.on ) gui.axis.bAxisZ = true;
-				if ( keys.X.on ) gui.axis.bAxisX = true;
-				if ( keys.C.on ) gui.axis.bAxisY = true;
+				if ( keys.Z.on ) pers.axis.bAxisZ = true;
+				if ( keys.X.on ) pers.axis.bAxisX = true;
+				if ( keys.C.on ) pers.axis.bAxisY = true;
 			}
 
 			//=================================
@@ -903,7 +905,7 @@ struct Apr : public Sys
 			//=================================
 			// 床グリッド描画
 			//=================================
-			gui.grid.DrawGrid3d( gra, pers, gui, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
+			pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 
 
 
@@ -922,11 +924,11 @@ struct Apr : public Sys
 
 				auto[b,d,Q0,Q1,t0,t1] = func_distance_Line_Segline( P, I, P2, P3 );
 
-				if ( b ) gui.pen.line3d( gra, pers, Q0, Q1,  vect3(0,1,0));
-				else gui.pen.line3d( gra, pers, Q0, Q1,  vect3(1,0,0));
+				if ( b ) pers.pen.line3d( gra, pers, Q0, Q1,  vect3(0,1,0));
+				else pers.pen.line3d( gra, pers, Q0, Q1,  vect3(1,0,0));
 
-				gui.pen.line3d( gra, pers, P, P+I,  vect3(1,0,0));
-				gui.pen.line3d( gra, pers, P2, P3, vect3(1,1,1));
+				pers.pen.line3d( gra, pers, P, P+I,  vect3(1,0,0));
+				pers.pen.line3d( gra, pers, P2, P3, vect3(1,1,1));
 
 			}
 
@@ -936,7 +938,7 @@ struct Apr : public Sys
 			//=================================
 			if ( keys.N.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.idx+1);};
 			if ( keys.B.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.idx-1);};
-			lab.Update( keys, mouse, gra, pers, gui, text_y );
+			lab.Update( keys, mouse, gra, pers, text_y );
 
 			//=================================
 			//	登録
@@ -1004,19 +1006,19 @@ struct Apr : public Sys
 					bool bByCamera = false;
 					bool bByFloor = false;
 					bool bByXY = false;
-					if ( gui.axis.bAxisX && gui.axis.bAxisY && gui.axis.bAxisZ )
+					if ( pers.axis.bAxisX && pers.axis.bAxisY && pers.axis.bAxisZ )
 					{
 						// カメラに並行
 						bByCamera = true;
 					}
 					else
-					if ( gui.axis.bAxisX && gui.axis.bAxisY )
+					if ( pers.axis.bAxisX && pers.axis.bAxisY )
 					{
 						// XYに平行
 						bByXY = true;
 					}
 					else
-					if ( gui.axis.bAxisX && gui.axis.bAxisZ )
+					if ( pers.axis.bAxisX && pers.axis.bAxisZ )
 					{
 						// 床に平行
 						bByFloor = true;
@@ -1089,7 +1091,7 @@ struct Apr : public Sys
 			//=================================
 			// 描画	マニュピレーター
 			//=================================
-			gui.axis.DrawAxis( gra, pers, gui, mouse.pos );
+			pers.axis.DrawAxis( gra, pers, mouse.pos );
 
 			//=================================
 			// 情報表示
