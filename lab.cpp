@@ -16,20 +16,17 @@
 
 #include "geom.h"
 
-
 #include "SysKeys.h"
 #include "SysMouse.h"
 #include "SysGra.h"
-#include "Sys.h"
 
 #include "func.h"
 #include "pers.h"
-
-#include "raytrace.h"
-#include "skeleton.h"
 #include "gui.h"
 
 #include "lab.h"
+
+extern void lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, Gui& gui, int& text_y );
 
 
 struct	Graphs
@@ -343,6 +340,7 @@ static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 		
 	}
 }
+
 //------------------------------------------------------------------------------
 static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
 //------------------------------------------------------------------------------
@@ -397,14 +395,6 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 	static vect3	gv	= vect3(0,G,0);		// 重力加速度ベクトル
 	static bool		bPause = false;
 	static float time = 0;
-	rgb col0( 0, 0, 0 );
-	rgb col1( 0, 0, 1 );
-	rgb col2( 1, 0, 0 );
-	rgb col3( 1, 0, 1 );
-	rgb col4( 0, 1, 0 );
-	rgb col5( 0, 1, 1 );
-	rgb col6( 1, 1, 0 );
-	rgb col7( 1, 1, 1 );
 	bool bStep = false;
 	struct Ball:Obj
 	{
@@ -1682,13 +1672,17 @@ static void lab1_graph( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, P
 }
 
 //------------------------------------------------------------------------------
-void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, Gui& gui, int& text_y )
 //------------------------------------------------------------------------------
 {
 	switch( idx )
 	{
 		case 10:	// 描画	色見本
 			lab10_colors( (*this), keys, mouse, gra, pers, text_y );
+			break;
+
+		case 12:	// 描画	2d剛体
+			lab12_RidgePlateDot( (*this), keys, mouse, gra, pers, gui, text_y );
 			break;
 
 		case 11:	// 描画	2d剛体
@@ -1740,6 +1734,6 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& 
 Lab::Lab()
 //------------------------------------------------------------------------------
 {
-	idx = 11;
+	idx = 12;
 }
 

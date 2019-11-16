@@ -936,7 +936,7 @@ struct Apr : public Sys
 			//=================================
 			if ( keys.N.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.idx+1);};
 			if ( keys.B.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.idx-1);};
-			lab.Update( keys, mouse, gra, pers, text_y );
+			lab.Update( keys, mouse, gra, pers, gui, text_y );
 
 			//=================================
 			//	登録
