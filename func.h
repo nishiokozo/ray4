@@ -10,12 +10,5 @@ extern std::tuple<bool,vect3,float> func_distance_Plate_Segline( vect3 plate_P, 
 extern std::tuple<bool,vect3,float> func_distance_Plate_Harfline( vect3 plate_P, vect3 plate_N, vect3 P, vect3 I);
 extern bool func_IsIntersectSphereLine( vect3 sphere_P, float sphere_r, vect3 line_P , vect3 line_I );
 
-extern	const rgb col0;
-extern	const rgb col1;
-extern	const rgb col2;
-extern	const rgb col3;
-extern	const rgb col4;
-extern	const rgb col5;
-extern	const rgb col6;
-extern	const rgb col7;
-extern const float	G;
+extern float func_accelerationGetTime_DVv( vect3 gv, float d, vect3 v0 );
+extern vect3 func_accelerationGetDistance_TVv( vect3 gv, float t, vect3 v0 );

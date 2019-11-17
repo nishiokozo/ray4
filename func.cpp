@@ -15,6 +15,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 //	定数
 //------------------------------------------------------------------------------
+/*
 const float	G	= -9.80665;				// 重力加速度
 const rgb col0( 0, 0, 0 );
 const rgb col1( 0, 0, 1 );
@@ -24,6 +25,7 @@ const rgb col4( 0, 1, 0 );
 const rgb col5( 0, 1, 1 );
 const rgb col6( 1, 1, 0 );
 const rgb col7( 1, 1, 1 );
+*/
 
 
 //------------------------------------------------------------------------------
@@ -315,3 +317,50 @@ vect3 func_catmull3( float t, const vect3 P0, const vect3 P1, const vect3 P2, co
 
 	return P;
 };
+
+
+// 移動量d,初速v0の時の時間tを求める。
+//------------------------------------------------------------------------------
+float func_accelerationGetTime_DVv( vect3 gv, float d, vect3 v0 )	// DV : Distance / Velocity
+//------------------------------------------------------------------------------
+{
+
+	float	a = 0.5*gv.abs();
+	float	t = 0;
+
+	if ( a == 0 && v0.abs() == 0 )
+	{
+		// 加速度＆速度がない
+		t = 0;
+	}
+	else
+	if ( v0.abs() == 0 )
+	{
+		// 加速のみ
+		t =  sqrt( d/a ); 
+	}
+	else
+	if ( a == 0 )
+	{
+		// 速度のみ
+		t = d/v0.abs();
+	}
+	else
+	{
+		float	c = v0.abs()/gv.abs();
+		t =  sqrt( d/a + c*c ) - c; 
+	}
+
+	return t;
+};
+
+// 時間t,初速v0の時の移動量dを求める。
+//------------------------------------------------------------------------------
+vect3 func_accelerationGetDistance_TVv( vect3 gv, float t, vect3 v0 )	// TV : Time / Velocity
+//------------------------------------------------------------------------------
+{
+	vect3 a = 0.5*gv;
+	vect3 d = a*t*t + v0*t;
+	return d;
+};
+

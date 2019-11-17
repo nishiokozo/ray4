@@ -25,69 +25,7 @@
 
 #include "lab.h"
 
-extern void lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );
 
-//------------------------------------------------------------------------------
-void lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
-//------------------------------------------------------------------------------
-{
-	gra.Print(1,(float)text_y++,to_string(lab.idx)+" : " + string(__func__ )); 
-
-	static bool		bPause = false;
-	bool bStep = false;
-
-	struct Ball:Obj
-	{
-		vect3	vel;	//	velocity 速度(m/s)
-		float	radius = 0.1;
-		mat33	mat = midentity();
-		Ball( vect3 v, vect3 _vel ) : Obj(v)
-		{
-			pos = v;
-			vel = _vel;
-		}
-	};
-
-	// 初期化
-	if ( !lab.bInitCam )
-	{
-		lab.bInitCam = true;
-		//カメラ
-		pers.cam.pos = vect3(	0.0,	1.0, -3.0 );
-		pers.cam.at = vect3( 	0.0,	1.0, 0.0 );
-
-		//点
-		for ( Obj* p : lab.tblObj ) delete p;
-		lab.tblObj.clear();
-		lab.tblObj.emplace_back( new Ball(vect3(  0		, 1.0,  0.0 ), vect3(0,0,0)) );
-		lab.tblObj.emplace_back( new Obj(vect3( -0.4	, 0.5,	0.0 )) );	// 平面原点
-		lab.tblObj.emplace_back( new Obj(vect3( -0.3	, 0.7,  0.0 )) );	// 平面法線
-
-		// 線
-		for ( Edge* p : lab.tblEdge ) delete p;
-		lab.tblEdge.clear();
-		lab.tblEdge.emplace_back( new Edge(1,2, col7,1) );
-
-		// カーソル
-		pers.axis.bAxisX = true;
-		pers.axis.bAxisY = true;
-		pers.axis.bAxisZ = false;
-	}
-
-	// リセット
-	if ( !lab.bInit )
-	{
-		Ball&	ball = *dynamic_cast<Ball*>(lab.tblObj[0]);
-		ball.pos = vect3(  0		, 1.0,  0.0 );
-		ball.vel = vect3(  0		, 0.0,  0.0 );
-
-		lab.bInit = true;
-
-
-	}
-
-
-}
 
 struct	Graphs
 {
@@ -205,7 +143,7 @@ struct	Graphs
 
 
 //------------------------------------------------------------------------------
-static void drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str )
+static void drawVect( SysGra& gra, Pers& pers, float delta, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str )
 //------------------------------------------------------------------------------
 {
 	gra.SetZTest(false);
@@ -232,7 +170,7 @@ static void drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, f
 };
 
 //------------------------------------------------------------------------------
-static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
 //------------------------------------------------------------------------------
 {
 	static bool bGrid = true;
@@ -402,9 +340,19 @@ static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 }
 
 //------------------------------------------------------------------------------
-static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
 //------------------------------------------------------------------------------
 {
+	const float	G	= -9.80665;				// 重力加速度
+	const rgb col0 = rgb( 0, 0, 0 );
+	const rgb col1 = rgb( 0, 0, 1 );
+	const rgb col2 = rgb( 1, 0, 0 );
+	const rgb col3 = rgb( 1, 0, 1 );
+	const rgb col4 = rgb( 0, 1, 0 );
+	const rgb col5 = rgb( 0, 1, 1 );
+	const rgb col6 = rgb( 1, 1, 0 );
+	const rgb col7 = rgb( 1, 1, 1 );
+	
 	gra.Print(1,(float)text_y++,string("lab11_RidgePlateDot")+to_string(lab.idx)); 
 
 	// 移動量d,初速v0の時の時間tを求める。
@@ -451,7 +399,6 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 	static	Graphs graphs;
 
 
-	const float	T	= 1.0/60.0;				// 時間/frame
 	static vect3	gv	= vect3(0,G,0);		// 重力加速度ベクトル
 	static bool		bPause = false;
 	static float time = 0;
@@ -522,7 +469,7 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 
 	//-----
 
-	time += T;
+	time += delta;
 
 
 
@@ -537,12 +484,12 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 
 	{
 		
-		vect3 d = func_accelerationGetDistance_TVv( gv, T, v0 );	// 移動距離 m
+		vect3 d = func_accelerationGetDistance_TVv( gv, delta, v0 );	// 移動距離 m
 		// 計算
 		{
 
 			pn = p0 + d;	// 仮想移動
-			vn = v0 + gv*T;	// 仮想速度
+			vn = v0 + gv*delta;	// 仮想速度
 
 			gra.SetZTest(false);
 			pers.pen.line3d_scissor( gra, pers, p0, pn, col4, 1 );
@@ -577,7 +524,7 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 				}
 
 				{
-					float t2 = T-t1;											// 衝突後の残り時間(s)
+					float t2 = delta-t1;											// 衝突後の残り時間(s)
 					vect3 d2 = func_accelerationGetDistance_TVv( gv, t2, v1 );	// 衝突後の移動距離(m)
 					vect3 v2 = v1 + gv*t2;										// 衝突後の速度(m/s)
 				
@@ -630,67 +577,26 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 }
 
 //------------------------------------------------------------------------------
-static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
 //------------------------------------------------------------------------------
 {
+	const float	G	= -9.80665;				// 重力加速度
+	const rgb col0 = rgb( 0, 0, 0 );
+	const rgb col1 = rgb( 0, 0, 1 );
+	const rgb col2 = rgb( 1, 0, 0 );
+	const rgb col3 = rgb( 1, 0, 1 );
+	const rgb col4 = rgb( 0, 1, 0 );
+	const rgb col5 = rgb( 0, 1, 1 );
+	const rgb col6 = rgb( 1, 1, 0 );
+	const rgb col7 = rgb( 1, 1, 1 );
+	
 	gra.Print(1,(float)text_y++,string("lab9_2dRidge")+to_string(lab.idx)); 
-
-	// 移動量d,初速v0の時の時間tを求める。
-	auto func_accelerationGetTime_DVv =[]( vect3 gv, float d, vect3 v0 )	// DV : Distance / Velocity
-	{
-
-		float	a = 0.5*gv.abs();
-		float	t = 0;
-
-		if ( a == 0 && v0.abs() == 0 )
-		{
-			// 加速度＆速度がない
-			t = 0;
-		}
-		else
-		if ( v0.abs() == 0 )
-		{
-			// 加速のみ
-			t =  sqrt( d/a ); 
-		}
-		else
-		if ( a == 0 )
-		{
-			// 速度のみ
-			t = d/v0.abs();
-		}
-		else
-		{
-			float	c = v0.abs()/gv.abs();
-			t =  sqrt( d/a + c*c ) - c; 
-		}
-
-		return t;
-	};
-
-	// 時間t,初速v0の時の移動量dを求める。
-	auto func_accelerationGetDistance_TVv =[]( vect3 gv, float t, vect3 v0 )	// TV : Time / Velocity
-	{
-		vect3 a = 0.5*gv;
-		vect3 d = a*t*t + v0*t;
-		return d;
-	};
 
 	static	Graphs graphs;
 
-
-	const float	T	= 1.0/60.0;				// 時間/frame
 	static vect3	gv	= vect3(0.0,0,G);		// 重力加速度ベクトル
 	static bool		bPause = false;
 	static float time = 0;
-	rgb col0( 0, 0, 0 );
-	rgb col1( 0, 0, 1 );
-	rgb col2( 1, 0, 0 );
-	rgb col3( 1, 0, 1 );
-	rgb col4( 0, 1, 0 );
-	rgb col5( 0, 1, 1 );
-	rgb col6( 1, 1, 0 );
-	rgb col7( 1, 1, 1 );
 	bool bStep = false;
 	struct Car:Obj
 	{
@@ -756,7 +662,7 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 
 	//-----
 
-	time += T;
+	time += delta;
 
 
 
@@ -770,12 +676,12 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	vect3 vn;
 
 	{
-			vect3 d = func_accelerationGetDistance_TVv( gv, T, v0 );	// 移動距離 m
+			vect3 d = func_accelerationGetDistance_TVv( gv, delta, v0 );	// 移動距離 m
 		// 計算
 		{
 
 			pn = p0 + d;	// 仮想移動
-			vn = v0 + gv*T;	// 仮想速度
+			vn = v0 + gv*delta;	// 仮想速度
 
 			gra.SetZTest(false);
 			pers.pen.line3d_scissor( gra, pers, p0, pn, col4, 1 );
@@ -812,7 +718,7 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 				}
 
 				{
-					float t2 = T-t1;											// 衝突後の残り時間(s)
+					float t2 = delta-t1;											// 衝突後の残り時間(s)
 					vect3 d2 = func_accelerationGetDistance_TVv( gv, t2, v1 );	// 衝突後の移動距離(m)
 					vect3 v2 = v1 + gv*t2;										// 衝突後の速度(m/s)
 				
@@ -854,13 +760,22 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 }
 
 //------------------------------------------------------------------------------
-static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
 //------------------------------------------------------------------------------
 {
+	const float	G	= -9.80665;				// 重力加速度
+	const rgb col0 = rgb( 0, 0, 0 );
+	const rgb col1 = rgb( 0, 0, 1 );
+	const rgb col2 = rgb( 1, 0, 0 );
+	const rgb col3 = rgb( 1, 0, 1 );
+	const rgb col4 = rgb( 0, 1, 0 );
+	const rgb col5 = rgb( 0, 1, 1 );
+	const rgb col6 = rgb( 1, 1, 0 );
+	const rgb col7 = rgb( 1, 1, 1 );
+
 	gra.Print(1,(float)text_y++,string("lab8_vector_six_lab8")+to_string(lab.idx)); 
 
-	const float	T = 1.0/60.0;			// 時間/frame
-	const float	g = G *T*T;			// 重力加速度/frame
+	const float	g = G *delta*delta;			// 重力加速度/frame
 	const vect3	gv = vect3(0,0, -g);	// 重力加速度/frame
 
 	static	Graphs::Plot plot_moment( 0.02, rgb(1,0,1) );
@@ -933,9 +848,9 @@ static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysG
  		
 	}
 
-	drawVect( gra, pers, text_y, v0, moment ,10	, rgb(1,0,1), "moment" );
-	drawVect( gra, pers, text_y, v1, gv		,100	, rgb(1,0,0), "gv" );
-	drawVect( gra, pers, text_y, v1, F		,1		, rgb(0,1,0), "F" );
+	drawVect( gra, pers, delta, text_y, v0, moment ,10	, rgb(1,0,1), "moment" );
+	drawVect( gra, pers, delta, text_y, v1, gv		,100	, rgb(1,0,0), "gv" );
+	drawVect( gra, pers, delta, text_y, v1, F		,1		, rgb(0,1,0), "F" );
 	plot_moment.DrawPlot( gra, pers );
 	gra.Print(1,(float)text_y++,string("<<radius>>")+to_string(bar.abs())); 
 
@@ -943,7 +858,7 @@ static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysG
 }
 
 //------------------------------------------------------------------------------
-static void lab6_tire3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab6_tire3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
 //------------------------------------------------------------------------------
 {
 	gra.Print(1,(float)text_y++,string("<<lab6_tire3d>>")+to_string(lab.idx)); 
@@ -1056,14 +971,22 @@ static void lab6_tire3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, 
 }
 
 //------------------------------------------------------------------------------
-static void lab5_furiko2d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab5_furiko2d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
 //------------------------------------------------------------------------------
 {
+	const float	G	= -9.80665;				// 重力加速度
+	const rgb col0 = rgb( 0, 0, 0 );
+	const rgb col1 = rgb( 0, 0, 1 );
+	const rgb col2 = rgb( 1, 0, 0 );
+	const rgb col3 = rgb( 1, 0, 1 );
+	const rgb col4 = rgb( 0, 1, 0 );
+	const rgb col5 = rgb( 0, 1, 1 );
+	const rgb col6 = rgb( 1, 1, 0 );
+	const rgb col7 = rgb( 1, 1, 1 );
+	
 	gra.Print(1,(float)text_y++,string("<<lab5_furiko2d>>")+to_string(lab.idx)); 
 
-	const float G = 9.80665;				// 重力加速度
-	const float T = 1.0/60.0;			// 時間/frame
-	const float grate = 9.80665 *T*T;		// 重力加速度/frame
+	const float grate = 9.80665 *delta*delta;		// 重力加速度/frame
 
 	static float	rsp = 0;
 
@@ -1119,13 +1042,22 @@ static void lab5_furiko2d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra
 	}
 }
 //------------------------------------------------------------------------------
-static void lab7_kakusokudo7( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab7_kakusokudo7( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
 //------------------------------------------------------------------------------
 {
+	const float	G	= -9.80665;				// 重力加速度
+	const rgb col0 = rgb( 0, 0, 0 );
+	const rgb col1 = rgb( 0, 0, 1 );
+	const rgb col2 = rgb( 1, 0, 0 );
+	const rgb col3 = rgb( 1, 0, 1 );
+	const rgb col4 = rgb( 0, 1, 0 );
+	const rgb col5 = rgb( 0, 1, 1 );
+	const rgb col6 = rgb( 1, 1, 0 );
+	const rgb col7 = rgb( 1, 1, 1 );
+	
 	gra.Print(1,(float)text_y++,string("<<lab7_kakusokudo7>>")+to_string(lab.idx)); 
 
-	const float	T = 1.0/60.0;		// 時間/frame
-	const float	g = G *T*T;		// 重力加速度/frame
+	const float	g = G *delta*delta;		// 重力加速度/frame
 	const vect3	gv = vect3(0,0, -g);		// 重力加速度/frame
 
 	static bool		bShot = false;
@@ -1223,7 +1155,7 @@ static void lab7_kakusokudo7( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& 
 				v1 = (v1-v0)/(v1-v0).abs()+v0;
 				acc2 += v1-prev;
 			}
-			drawVect( gra, pers, text_y, v1, vt			,100	, rgb(1,0,0), "vt" );
+			drawVect( gra, pers, delta, text_y, v1, vt			,100	, rgb(1,0,0), "vt" );
 			gra.Print(1,(float)text_y++,string("radius ")+to_string(bar.abs())); 
 		}
 
@@ -1262,19 +1194,19 @@ w=deg2rad(2);
 		}
 
 		// 補助線
-		drawVect( gra, pers, text_y, v1, gv			,100	, rgb(1,0,0), "gv" );
+		drawVect( gra, pers, delta, text_y, v1, gv			,100	, rgb(1,0,0), "gv" );
 			
 	}
 
 }
 
 //------------------------------------------------------------------------------
-static void lab4_furiko3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab4_furiko3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
 //------------------------------------------------------------------------------
 {
 		gra.Print(1,(float)text_y++,string("<<lab4_furiko3d>>")+to_string(lab.idx)); 
-		// T=J dω/dt
-		// T：トルク J：慣性モーメント ω：回転角速度[rad]
+		// delta=J dω/dt
+		// delta：トルク J：慣性モーメント ω：回転角速度[rad]
 		//
 		// t=rF
 		// r:位置ベクトル t:力のモーメント F:力
@@ -1283,8 +1215,7 @@ static void lab4_furiko3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra
 		// r:位置ベクトル L:角運動量(運動量のモーメント) p:運動量
 
 	const float G = 9.80665;			// 重力加速度
-	const float T = 1.0/60.0;		// 時間/frame
-	const float g = G *T*T;		// 重力加速度/frame
+	const float g = G *delta*delta;		// 重力加速度/frame
 	const vect3 vg = vect3(0,-g,0);	// 重力加速度ベクトル/frame
 
 	static vect3	vel;			// 運動量
@@ -1358,11 +1289,11 @@ mov =vel;
 
 		pers.pen.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
 
-		drawVect( gra, pers, text_y, v1, vg	,100, rgb(1,0,0), "g" );
-		drawVect( gra, pers, text_y, v0, moment,100, rgb(1,0,1), "moment" );
-		drawVect( gra, pers, text_y, v1, F		,100, rgb(0,1,0), "F" );
-		drawVect( gra, pers, text_y, v1, vel	,2	, rgb(1,1,0), "vel" );
-		drawVect( gra, pers, text_y, v1, mov	,2	, rgb(0,0,1), "mov" );
+		drawVect( gra, pers, delta, text_y, v1, vg	,100, rgb(1,0,0), "g" );
+		drawVect( gra, pers, delta, text_y, v0, moment,100, rgb(1,0,1), "moment" );
+		drawVect( gra, pers, delta, text_y, v1, F		,100, rgb(0,1,0), "F" );
+		drawVect( gra, pers, delta, text_y, v1, vel	,2	, rgb(1,1,0), "vel" );
+		drawVect( gra, pers, delta, text_y, v1, mov	,2	, rgb(0,0,1), "mov" );
 	}
 
 
@@ -1437,9 +1368,19 @@ mov =vel;
 //=================================
 
 //------------------------------------------------------------------------------
-static void lab3_gravityPlanet( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab3_gravityPlanet( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
 //------------------------------------------------------------------------------
 {
+	const float	G	= -9.80665;				// 重力加速度
+	const rgb col0 = rgb( 0, 0, 0 );
+	const rgb col1 = rgb( 0, 0, 1 );
+	const rgb col2 = rgb( 1, 0, 0 );
+	const rgb col3 = rgb( 1, 0, 1 );
+	const rgb col4 = rgb( 0, 1, 0 );
+	const rgb col5 = rgb( 0, 1, 1 );
+	const rgb col6 = rgb( 1, 1, 0 );
+	const rgb col7 = rgb( 1, 1, 1 );
+
 	gra.Print(1,(float)text_y++,string("<<lab3_gravityPlanet>>")+to_string(lab.idx)); 
 
 	static bool	bPause = false; 
@@ -1477,8 +1418,7 @@ static void lab3_gravityPlanet( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra
 		lab.tblObj.emplace_back( new Planet(vect3( 0.5,0.1,0),vect3(0, 0, 0.02)) );
 	}
 
-	const float	T = 1.0/60.0;		// 時間/frame
-	const float	g = G *T*T;		// 重力加速度/frame
+	const float	g = G *delta*delta;		// 重力加速度/frame
 
 	// 入力
 	{
@@ -1546,13 +1486,22 @@ static void lab3_gravityPlanet( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra
 // 描画	角速度 実験
 //=================================
 //------------------------------------------------------------------------------
-static void lab2_kakusokudo( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab2_kakusokudo( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
 //------------------------------------------------------------------------------
 {
+	const float	G	= -9.80665;				// 重力加速度
+	const rgb col0 = rgb( 0, 0, 0 );
+	const rgb col1 = rgb( 0, 0, 1 );
+	const rgb col2 = rgb( 1, 0, 0 );
+	const rgb col3 = rgb( 1, 0, 1 );
+	const rgb col4 = rgb( 0, 1, 0 );
+	const rgb col5 = rgb( 0, 1, 1 );
+	const rgb col6 = rgb( 1, 1, 0 );
+	const rgb col7 = rgb( 1, 1, 1 );
+	
 	gra.Print(1,(float)text_y++,string("<<lab2_kakusokudo>>")+to_string(lab.idx)); 
 
-	const float	T = 1.0/60.0;		// 時間/frame
-	const float	g = G *T*T;		// 重力加速度/frame
+	const float	g = G *delta*delta;		// 重力加速度/frame
 
 	static bool bShot = false;
 	static vect3	velocity;
@@ -1645,16 +1594,16 @@ static void lab2_kakusokudo( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 		pers.pen.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );	//	棒
 		pers.pen.line3d( gra, pers, v1, v2, rgb(0,1,0), 1 );	// 外的な力
 */
-		drawVect( gra, pers, text_y, v1, velocity	,1	, rgb(1,1,0), "velocity" );
-		drawVect( gra, pers, text_y, v0, moment		,1	, rgb(1,0,1), "moment" );
-		drawVect( gra, pers, text_y, v0, to			,1	, rgb(0,1,1), "to" );
+		drawVect( gra, pers, delta, text_y, v1, velocity	,1	, rgb(1,1,0), "velocity" );
+		drawVect( gra, pers, delta, text_y, v0, moment		,1	, rgb(1,0,1), "moment" );
+		drawVect( gra, pers, delta, text_y, v0, to			,1	, rgb(0,1,1), "to" );
 			
 	}
 
 }
 
 //------------------------------------------------------------------------------
-static void lab1_graph( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+static void lab1_graph( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
 //------------------------------------------------------------------------------
 {
 	gra.Clr(rgb(0.3,0.3,0.3));
@@ -1732,57 +1681,57 @@ static void lab1_graph( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, P
 }
 
 //------------------------------------------------------------------------------
-void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y )
+void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
 //------------------------------------------------------------------------------
 {
 	switch( idx )
 	{
 		case 10:	// 描画	色見本
-			lab10_colors( (*this), keys, mouse, gra, pers, text_y );
+			lab10_colors( (*this), keys, mouse, gra, pers, delta, text_y );
 			break;
 
 		case 12:	// 描画	2d剛体
-			lab12_RidgePlateDot( (*this), keys, mouse, gra, pers, text_y );
+			lab12_RidgePlateDot( (*this), keys, mouse, gra, pers, delta, text_y );
 			break;
 
 		case 11:	// 描画	2d剛体
-			lab11_RidgePlateDot( (*this), keys, mouse, gra, pers, text_y );
+			lab11_RidgePlateDot( (*this), keys, mouse, gra, pers, delta, text_y );
 			break;
 
 		case 9:	// 描画	2d剛体
-			lab9_2dRidge( (*this), keys, mouse, gra, pers, text_y );
+			lab9_2dRidge( (*this), keys, mouse, gra, pers, delta, text_y );
 			break;
 
 		case 8:	// 描画	位相空間
-			lab8_vector_six_lab8( (*this), keys, mouse, gra, pers, text_y );
+			lab8_vector_six_lab8( (*this), keys, mouse, gra, pers, delta, text_y );
 			break;
 
 		case 1:	// 描画	グラフ実験
-			lab1_graph( (*this), keys, mouse, gra, pers, text_y );
+			lab1_graph( (*this), keys, mouse, gra, pers, delta, text_y );
 			break;
 
 		case 2:// 描画	角速度 実験
-			lab2_kakusokudo( (*this), keys, mouse, gra, pers, text_y );
+			lab2_kakusokudo( (*this), keys, mouse, gra, pers, delta, text_y );
 			break;
 
 		case 7:// 描画	角速度 実験
-			lab7_kakusokudo7( (*this), keys, mouse, gra, pers, text_y );
+			lab7_kakusokudo7( (*this), keys, mouse, gra, pers, delta, text_y );
 			break;
 
 		case 3:	// 描画	引力実験
-			lab3_gravityPlanet( (*this), keys, mouse, gra, pers, text_y );
+			lab3_gravityPlanet( (*this), keys, mouse, gra, pers, delta, text_y );
 			break;
 
 		case 4:	// 描画	振り子3D実験
-			lab4_furiko3d( (*this), keys, mouse, gra, pers, text_y );
+			lab4_furiko3d( (*this), keys, mouse, gra, pers, delta, text_y );
 			break;
 
 		case 5:	// 描画	振り子2D実験
-			lab5_furiko2d( (*this), keys, mouse, gra, pers, text_y );
+			lab5_furiko2d( (*this), keys, mouse, gra, pers, delta, text_y );
 			break;
 
 		case 6:	// 描画	タイヤ実験実験
-			lab6_tire3d( (*this), keys, mouse, gra, pers, text_y );
+			lab6_tire3d( (*this), keys, mouse, gra, pers, delta, text_y );
 			break;
 
 		default:break;

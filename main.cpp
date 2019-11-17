@@ -24,7 +24,6 @@
 
 #include "func.h"
 #include "pers.h"
-#include "prim.h"
 #include "gui.h"
 
 
@@ -936,10 +935,13 @@ struct Apr : public Sys
 			//=================================
 			// 描画	Lab
 			//=================================
-			if ( keys.N.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.idx+1);};
-			if ( keys.B.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.idx-1);};
-			lab.Update( keys, mouse, gra, pers, text_y );
-
+			{
+				const float	T	= 1.0/60.0;				// 時間/frame
+				if ( keys.N.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.idx+1);};
+				if ( keys.B.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.idx-1);};
+				lab.Update( keys, mouse, gra, pers, T, text_y );
+			}
+			
 			//=================================
 			//	登録
 			//=================================

@@ -36,7 +36,9 @@ struct Lab
 	}
 
 	//------------------------------------------------------------------------------
-	void Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, int& text_y );
+	void Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y );
 	//------------------------------------------------------------------------------
+
+	void lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y );
 
 };

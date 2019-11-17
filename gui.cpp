@@ -24,8 +24,6 @@
 #include "func.h"
 #include "pers.h"
 
-#include "prim.h"
-
 #include "gui.h"
 //------------------------------------------------------------------------------
 void Gui::TouchFirst( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbls, vect2 mpos )
