@@ -36,37 +36,39 @@ static const rgb col6 = rgb( 1, 1, 0 );
 static const rgb col7 = rgb( 1, 1, 1 );
 
 
+static	bool	bPause = false;
+
+// 定義
+struct Ball:Obj
+{
+	vect3	vel;	//	velocity 速度(m/s)
+	float	radius = 0.1;
+	mat33	mat = midentity();
+	bool	flgOn = false;	// 接地フラグ
+
+	Ball( vect3 v, vect3 _vel ) : Obj(v)
+	{
+		pos = v;
+		vel = _vel;
+	}
+};
+
 //------------------------------------------------------------------------------
 void Lab::lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
 //------------------------------------------------------------------------------
 {
+	bool bStep=false;
 	gra.Print(1,(float)text_y++,to_string(lab.idx)+" : " + string(__func__ )); 
 
 	//----
 	// 変数
-	static bool		bPause = false;
-	bool	bStep = false;
 	vect3	gv	= vect3(0,G,0);		// 重力加速度ベクトル
 
-	// 定義
-	struct Ball:Obj
-	{
-		vect3	vel;	//	velocity 速度(m/s)
-		float	radius = 0.1;
-		mat33	mat = midentity();
-		bool	flgOn = false;	// 接地フラグ
-
-		Ball( vect3 v, vect3 _vel ) : Obj(v)
-		{
-			pos = v;
-			vel = _vel;
-		}
-	};
 
 	// 初期化：オール
-	if ( !lab.bInitCam )
+	if ( !lab.bInitAll )
 	{
-		lab.bInitCam = true;
+		lab.bInitAll = true;
 		//カメラ
 		pers.cam.pos = vect3(	0.0,	1.0, -3.0 );
 		pers.cam.at = vect3( 	0.0,	1.0, 0.0 );
@@ -90,20 +92,19 @@ void Lab::lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra&
 	}
 
 	// 初期化：パラメータ
-	if ( !lab.bInit )
+	if ( !lab.bInitParam )
 	{
+		lab.bInitParam = true;
+
 		Ball&	ball = *dynamic_cast<Ball*>(lab.tblObj[0]);
 		ball.pos = vect3(  0		, 1.0,  0.0 );
 		ball.vel = vect3(  0		, 0.0,  0.0 );
-		ball. flgOn = false;
-
-		lab.bInit = true;
-
+		ball.flgOn = false;
 	}
 
 	// 入力
 	{
-		if ( keys.R.hi ) lab.bInit = false;
+		if ( keys.R.hi ) lab.bInitParam = false;
 		if ( keys.SPACE.hi )	bPause = !bPause ;
 		if ( keys.ENTER.rep )	{bStep = true; bPause = true; }
 	}

@@ -2,9 +2,9 @@ struct Lab
 {
 	vector<Obj*> tblObj;
 	vector<Edge*> tblEdge;
-	bool bInit = false;
-	bool bInitCam = false;
-	int idx = 0;	
+	bool	bInitParam = false;
+	bool	bInitAll = false;
+	int		idx = 0;	
 
 	int idxTbl;
 	
@@ -25,8 +25,8 @@ struct Lab
 	//------------------------------------------------------------------------------
 	{
 		idx = max( n, 0 ); 
-		bInit=false;
-		bInitCam=false;
+		bInitParam=false;
+		bInitAll=false;
 
 		for ( Obj* p : (*this).tblObj ) delete p;
 		tblObj.clear();

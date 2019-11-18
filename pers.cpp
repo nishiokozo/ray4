@@ -631,8 +631,8 @@ void Pers::Prim::DrawDrum( SysGra& gra, Pers& pers,  vect3 pos, mat33 m  )
 //				{	14,	13, 12	},	// xマーク
 	};
 
-	static bool bInit = false;
-	if ( !bInit )
+	static bool bInitParam = false;
+	if ( !bInitParam )
 	{
 		{
 			int	ofs = (signed)vert.size();
@@ -664,7 +664,7 @@ void Pers::Prim::DrawDrum( SysGra& gra, Pers& pers,  vect3 pos, mat33 m  )
 				if ( i%3 == 0 ) edge.emplace_back(ofs+st*n  ,ofs+st*n+1);
 			}
 		}
-		bInit = true;
+		bInitParam = true;
 	}
 
 	disp.clear();
@@ -756,10 +756,10 @@ void Pers::Prim::DrawTire( SysGra& gra, Pers& pers, vect3 pos, float head, float
 {
 	static vector<vect3> vert;
 	static vector<vect3> disp;
-	static bool bInit = false;
-	if ( !bInit )
+	static bool bInitParam = false;
+	if ( !bInitParam )
 	{
-		bInit = true;
+		bInitParam = true;
 		float r = 1.0;
 		for ( float t = 0 ; t < 2*pi ; t+=deg2rad(5) )
 		{

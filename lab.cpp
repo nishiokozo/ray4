@@ -179,9 +179,9 @@ static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	gra.Print(1,(float)text_y++,string("lab10_colors")+to_string(lab.idx)); 
 
 	// 初期化
-	if ( !lab.bInit )
+	if ( !lab.bInitParam )
 	{
-		lab.bInit = true;
+		lab.bInitParam = true;
 		pers.cam.pos = vect3( -4.0, 4.0, -1.5 );
 		pers.cam.at = vect3( 0,  1.0, 0 );
 		bGrid = true;
@@ -197,7 +197,7 @@ static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	};
 
 	// 入力
-	if ( keys.R.hi ) lab.bInit = false;
+	if ( keys.R.hi ) lab.bInitParam = false;
 	if ( keys.G.hi ) bGrid = !bGrid;
 
 	// 計算
@@ -416,11 +416,11 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 	};
 
 	// 初期化
-	if ( !lab.bInit )
+	if ( !lab.bInitParam )
 	{
-		if ( !lab.bInitCam )
+		if ( !lab.bInitAll )
 		{
-			lab.bInitCam = true;
+			lab.bInitAll = true;
 			pers.cam.pos = vect3(	0.0,	1.0, -3.0 );
 			pers.cam.at = vect3( 	0.0,	1.0, 0.0 );
 			//点
@@ -444,7 +444,7 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 		ball.pos = vect3(  0		, 1.0,  0.0 );
 		ball.vel = vect3(  0		, 0.0,  0.0 );
 
-		lab.bInit = true;
+		lab.bInitParam = true;
 
 		graphs.Clear();
 		time = 0;
@@ -453,7 +453,7 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 
 	// 入力
 	{
-		if ( keys.R.hi ) lab.bInit = false;
+		if ( keys.R.hi ) lab.bInitParam = false;
 		if ( keys.SPACE.hi )	bPause = !bPause ;
 		if ( keys.ENTER.rep )	{bStep = true; bPause = true; }
 
@@ -612,16 +612,16 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	};
 
 	// 初期化
-	if ( !lab.bInit )
+	if ( !lab.bInitParam )
 	{
-		if ( !lab.bInitCam )
+		if ( !lab.bInitAll )
 		{
-			lab.bInitCam = true;
+			lab.bInitAll = true;
 			pers.cam.pos = vect3(	0.0,	4.2, 0.1 );
 			pers.cam.at = vect3( 	0.0,	0.0, 0.2 );
 		}
 	
-		lab.bInit = true;
+		lab.bInitParam = true;
 		//点
 		for ( Obj* p : lab.tblObj ) delete p;
 		lab.tblObj.clear();
@@ -650,7 +650,7 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 
 	// 入力
 	{
-		if ( keys.R.hi ) lab.bInit = false;
+		if ( keys.R.hi ) lab.bInitParam = false;
 		if ( keys.SPACE.hi )	bPause = !bPause ;
 		if ( keys.ENTER.rep )	{bStep = true; bPause = true; }
 
@@ -788,16 +788,16 @@ static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysG
 	static float w = 0;
 
 	// 初期化
-	if ( !lab.bInit )
+	if ( !lab.bInitParam )
 	{
-		if ( !lab.bInitCam )
+		if ( !lab.bInitAll )
 		{
-			lab.bInitCam = true;
+			lab.bInitAll = true;
 			pers.cam.pos = vect3(  0.0, 5.0, -1.0 );
 			pers.cam.at = vect3( 0,  0.0, 0 );
 		}
 	
-		lab.bInit = true;
+		lab.bInitParam = true;
 		//点
 		for ( Obj* p : lab.tblObj ) delete p;
 		lab.tblObj.clear();
@@ -819,7 +819,7 @@ static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysG
 	}
 
 	// 入力
-	if ( keys.R.hi ) lab.bInit = false;
+	if ( keys.R.hi ) lab.bInitParam = false;
 	if ( keys.SPACE.hi )	bPause = !bPause ;
 	if ( keys.ENTER.rep )	{bStep = true; bPause = true; }
 
@@ -993,16 +993,16 @@ static void lab5_furiko2d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra
 
 	static float	rsp = 0;
 
-	if ( !lab.bInit )
+	if ( !lab.bInitParam )
 	{
-		if ( !lab.bInitCam )
+		if ( !lab.bInitAll )
 		{
-			lab.bInitCam = true;
+			lab.bInitAll = true;
 			pers.cam.pos = vect3(  0.0, 2.0, -5.0 );
 			pers.cam.at = vect3( 0,  2.0, 0 );
 		}
 	
-		lab.bInit = true;
+		lab.bInitParam = true;
 		for ( Obj* p : lab.tblObj ) delete p;
 		lab.tblObj.clear();
 		lab.tblObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
@@ -1014,7 +1014,7 @@ static void lab5_furiko2d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra
 
 		rsp=0;
 	}
-	if ( keys.R.hi )	lab.bInit = false;
+	if ( keys.R.hi )	lab.bInitParam = false;
 
 	vect3&	v0 = lab.tblObj[0]->pos;	//	barの根本
 	vect3&	v1 = lab.tblObj[1]->pos;	//	barの先端
@@ -1074,15 +1074,15 @@ static void lab7_kakusokudo7( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& 
 	bool bStep = false;
 
 	// 初期化
-	if ( !lab.bInit )
+	if ( !lab.bInitParam )
 	{
-		if ( !lab.bInitCam )
+		if ( !lab.bInitAll )
 		{
-			lab.bInitCam = true;
+			lab.bInitAll = true;
 			pers.cam.pos = vect3( 0, 5.0, -0.5 );
 			pers.cam.at = vect3( 0,  0, 0 );
 		}
-		lab.bInit = true;
+		lab.bInitParam = true;
 
 		// 点
 		for ( Obj* p : lab.tblObj ) delete p;
@@ -1106,7 +1106,7 @@ static void lab7_kakusokudo7( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& 
 	//入力
 	{
 		// リセット
-		if ( keys.R.hi )		lab.bInit = false ;
+		if ( keys.R.hi )		lab.bInitParam = false ;
 
 		if ( keys.SPACE.hi )	bPause = !bPause ;
 
@@ -1228,16 +1228,16 @@ static void lab4_furiko3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra
 
 
 	// 初期化
-	if ( !lab.bInit )
+	if ( !lab.bInitParam )
 	{
-		if ( !lab.bInitCam )
+		if ( !lab.bInitAll )
 		{
-			lab.bInitCam = true;
+			lab.bInitAll = true;
 			pers.cam.pos = vect3(  0.0, 0.0, -7.0 );
 			pers.cam.at = vect3( 0,  0.0, 0 );
 		}
 
-		lab.bInit = true;
+		lab.bInitParam = true;
 		for ( Obj* p : lab.tblObj ) delete p;
 		lab.tblObj.clear();
 		lab.tblObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
@@ -1258,7 +1258,7 @@ static void lab4_furiko3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra
 		if ( keys.ENTER.rep )	bStep = true;
 
 		// リセット
-		if ( keys.R.hi )	lab.bInit = false ;
+		if ( keys.R.hi )	lab.bInitParam = false ;
 
 		// 縮む
 		if ( mouse.F.hi )	v1 = (v1+v0)/2;
@@ -1404,12 +1404,12 @@ static void lab3_gravityPlanet( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra
 	};
 
 	// 初期化
-	if ( !lab.bInit )
+	if ( !lab.bInitParam )
 	{
-		lab.bInit = true;
-		if ( !lab.bInitCam )
+		lab.bInitParam = true;
+		if ( !lab.bInitAll )
 		{
-			lab.bInitCam = true;
+			lab.bInitAll = true;
 			//上から
 			pers.cam.pos = vect3(  0.0, 0.5, -2.0 );
 			pers.cam.at = vect3( 0,  0.0, 0 );
@@ -1432,7 +1432,7 @@ static void lab3_gravityPlanet( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra
 		if ( keys.ENTER.rep )	bStep = true;
 
 		// リセット
-		if ( keys.R.hi )	lab.bInit = false ;
+		if ( keys.R.hi )	lab.bInitParam = false ;
 
 		// 生成
 		if ( mouse.B.hi )
@@ -1515,15 +1515,15 @@ static void lab2_kakusokudo( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 	static float 	w;	//	角速度
 
 	// 初期化
-	if ( !lab.bInit )
+	if ( !lab.bInitParam )
 	{
-		if ( !lab.bInitCam )
+		if ( !lab.bInitAll )
 		{
-			lab.bInitCam = true;
+			lab.bInitAll = true;
 			pers.cam.pos = vect3( 2.0, 2.5, -2.0 );
 			pers.cam.at = vect3( 0,  0.0, 0 );
 		}
-		lab.bInit = true;
+		lab.bInitParam = true;
 
 		for ( Obj* p : lab.tblObj ) delete p;
 		lab.tblObj.clear();
@@ -1548,7 +1548,7 @@ static void lab2_kakusokudo( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 	//入力
 	{
 		// リセット
-		if ( keys.R.hi )	lab.bInit = false ;
+		if ( keys.R.hi )	lab.bInitParam = false ;
 
 		if ( mouse.B.hi )	bShot = !bShot ;
 	}
@@ -1617,22 +1617,22 @@ static void lab1_graph( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, P
 	rgb	col = vect3(0.2,0.2,0.2);
 
 	// 初期化
-	if ( !lab.bInit )
+	if ( !lab.bInitParam )
 	{
-		if ( !lab.bInitCam )
+		if ( !lab.bInitAll )
 		{
-			lab.bInitCam = true;
+			lab.bInitAll = true;
 			pers.cam.pos = vect3( 0.0, 0.0, -5.0 );
 			pers.cam.at = vect3( 0,  0.0, 0 );
 		}
-		lab.bInit = true;
+		lab.bInitParam = true;
 	}
 
 
 	//入力
 	{
 		// リセット
-		if ( keys.R.hi )	lab.bInit = false ;
+		if ( keys.R.hi )	lab.bInitParam = false ;
 	}
 
 

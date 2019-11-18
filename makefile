@@ -26,27 +26,16 @@ LIBS = \
 	-lopengl32 \
 
 FLGS = \
-	-c -g \
+	-c \
+	-g \
 	-std=c++17 \
 	-Werror \
 	-Wall -Wno-unused -Wconversion -Wno-sign-conversion -Wno-shorten-64-to-32 -Wno-implicit-float-conversion
 
-#	-Wall -Wno-unused -Wconversion -Wno-sign-conversion -Wno-float-conversion -Wno-shorten-64-to-32 -Wno-implicit-float-conversion
-#	-Wall -Wno-unused -Wconversion -Wno-sign-conversion -Wno-shorten-64-to-32 -Wno-implicit-float-conversion -Wno-float-conversion
+#	-m64 \
+#	-O3 \
 
 FILE=main.o
-
-#	-Wno-unused-variable \
-#	-Wno-unused-function \
-#	-Wno-unused-value \
-#	-Wno-unused-but-set-variable \
-
-#	-g \
-#	-m64 \
-
-#	-O3 \
-#	-Wno-unknown-pragmas \
-#	-Werror \
 
 CC	= clang++
 #CC	= g++
