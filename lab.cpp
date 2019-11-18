@@ -516,11 +516,14 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 				// 速度の反射
 				if ( v1.abs() > 0 )
 				{
-					vect3 n = plate_n;
-					vect3 b = (v1).normalize();
-					vect3 r = reflect( b, n );
-					v1 = r * v1.abs();
-					nx=n;rx=r;bx=b;
+					bx=v1.normalize();
+//					vect3 n = plate_n;
+//					vect3 b = (v1).normalize();
+///					vect3 r = reflect( b, n );
+//					v1 = r * v1.abs();
+					v1 = plate_n.reflect( v1 );
+
+					nx=plate_n;rx=v1.normalize();
 				}
 
 				{

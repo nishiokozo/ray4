@@ -43,7 +43,6 @@ void Lab::lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra&
 	gra.Print(1,(float)text_y++,to_string(lab.idx)+" : " + string(__func__ )); 
 
 	//----
-
 	// 変数
 	static bool		bPause = false;
 	bool	bStep = false;
@@ -55,6 +54,8 @@ void Lab::lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra&
 		vect3	vel;	//	velocity 速度(m/s)
 		float	radius = 0.1;
 		mat33	mat = midentity();
+		bool	flgOn = false;	// 接地フラグ
+
 		Ball( vect3 v, vect3 _vel ) : Obj(v)
 		{
 			pos = v;
@@ -94,8 +95,10 @@ void Lab::lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra&
 		Ball&	ball = *dynamic_cast<Ball*>(lab.tblObj[0]);
 		ball.pos = vect3(  0		, 1.0,  0.0 );
 		ball.vel = vect3(  0		, 0.0,  0.0 );
+		ball. flgOn = false;
 
 		lab.bInit = true;
+
 	}
 
 	// 入力
@@ -111,44 +114,60 @@ void Lab::lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra&
 	vect3	plate_n = ( (*lab.tblObj[2]).pos - plate_p ).normalize();
 	Ball&	ball = *dynamic_cast<Ball*>(lab.tblObj[0]);
 
-	vect3&	p0 = ball.pos;
-	vect3&	v0 = ball.vel;
+	vect3	p0 = ball.pos;
+	vect3	v0 = ball.vel;
 	vect3	pn;
 	vect3	vn;
 
-	vect3	d = func_accelerationGetDistance_TVv( gv, delta, v0 );	// 移動距離(m)
-
-	// 計算：仮移動
+	if ( ball.flgOn )
 	{
-		pn = p0 + d;		// 仮想移動
-		vn = v0 + gv*delta;	// 仮想速度
+		// 接地状態
+
+		vect3	a = gv - dot( gv, plate_n )*plate_n;	// 床に並行なベクトル
+		vect3	d = func_accelerationGetDistance_TVv( a, delta, v0 );	// 移動距離(m)
+
+		pn = p0 + d;
+		vn = v0 + a*delta;
 	}
-	
-	// 衝突
+	else
 	{
-		auto[flg,q0,s] = func_distance_Plate_Segline( plate_p, plate_n, p0-d/1024.0, pn );
+		vect3	d = func_accelerationGetDistance_TVv( gv, delta, v0 );	// 移動距離(m)
 
-		if ( flg )
+		// 計算：仮移動
 		{
-			// 衝突点での速度を求める
-			vect3 d1 = q0-p0;												// 衝突までの距離(m)
-			float t1 = func_accelerationGetTime_DVv( gv, d1.abs(), v0 );	// 衝突までの時間(s)
-			vect3 v1 = v0 + gv*t1;											// 衝突後の速度(m/s)
-
-
-v1 = vect3(0,0,0);
-			pn = q0;
-			vn = -v1;
-		
+			pn = p0 + d;		// 仮移動
+			vn = v0 + gv*delta;	// 仮速度
 		}
+		
+		
+		// 衝突
+		{
+			auto[flg,q0,s] = func_distance_Plate_Segline( plate_p, plate_n, p0-d/1024.0, pn );
 
+			if ( flg )
+			{
+				float rate_r	= 0.3;		// 反射係数
+
+				v0  = v0 - (1.0+rate_r)*dot( v0, plate_n ) * plate_n;				// 反射ベクトル（ 反発レート付き）
+
+				if ( abs(dot(v0,plate_n)) < abs(dot((gv*delta),plate_n)) )
+				{
+					cout<<"ON"<<endl;
+					ball.flgOn =true;
+				}
+
+				pn = p0;
+				vn = v0;
+			}
+		}
 	}
 
 	// 反映
 	if  ( !bPause || bStep )
 	{
-		p0 = pn;
-		v0 = vn;
+		ball.pos = pn;
+		ball.vel = vn;
+
 	}
 
 

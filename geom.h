@@ -169,6 +169,8 @@ extern mat33 mrotx( float f);
 extern mat33 mroty( float f);
 extern mat33 mrotz( float f);
 
+extern float	dot( vect3 a, vect3 b );
+
 
 
 class vect3
@@ -188,6 +190,7 @@ public:
 	vect2 xy() {return vect2(x,y);}
 	
 	vect3 normalize() { return (*this)/abs(); }
+	vect3 reflect( vect3 I ) { return I - 2* dot(I,(*this))*(*this);}
 	float abs() { return sqrt( x*x + y*y + z*z ); }
 
 	vect3 operator-() const { return vect3( -x, -y, -z ); } 
@@ -261,7 +264,6 @@ extern void		vect3_normalize( float v[3] );
 extern void		vect3_normalize( vect3* v );
 extern float	vect3_length( float v[3] );
 extern void		vec4_multiplyMatrix( float v[4], float m[16], float a[4] );
-extern float	dot( vect3 a, vect3 b );
 
 extern vect3	refract( vect3 a, vect3 b, float n );
 extern vect3	reflect( vect3 I, vect3 N );

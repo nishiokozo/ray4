@@ -313,51 +313,76 @@ vect3	mix( float f, vect3 a, vect3 b )
 vect3 reflect( vect3 I, vect3 N )
 //-----------------------------------------------------------------------------
 {
-	vect3	ret;
+	// Iは自由ベクトル
+	// Nは単位ベクトル
 
- 	ret = I - 2* dot(I,N)*N;
-
-	return	ret;
+	return I - 2* dot(I,N)*N;
 }
 
 //-----------------------------------------------------------------------------
-vect3 refract( vect3 I, vect3 N, float nm )
+vect3 refract( vect3 I, vect3 N, float eta )
 //-----------------------------------------------------------------------------
 {
-	vect3	V;
-
+//https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/refract.xhtml
+//
+// I Specifies the incident vector.
+// 
+// N Specifies the normal vector.
+// 
+// eta Specifies the ratio of indices of refraction.
+// 
+//
+//    k = 1.0 - eta * eta * (1.0 - dot(N, I) * dot(N, I));
+//    if (k < 0.0)
+//        R = genType(0.0);
+//    else
+//        R = eta * I - (eta * dot(N, I) + sqrt(k)) * N;
+		vect3	R;
 #if 1
-	float	n1 = 1.0;
-	float	n2 = nm;
-	float	d = dot(-I,N);
-
-	V = (n1/n2)*(I-N*(sqrt((n2/n1)*(n2/n1)-1+d*d)-d));
+	float k = 1.0 - eta * eta * (1.0 - dot(N, I) * dot(N, I));
+	if ( k < 0.0 )
+	{
+		R = vect3(0,0,0);
+	}
+	else
+	{
+		R = eta * I - (eta * dot(N, I) + sqrt(k)) * N;
+	}
 #else
 
- #if 0
-//V = (n*I*cosθ + n*N - m*N)/(m*cosφ)
-	float	n = 1.0;
-	float	m = nm;
-	float	d = dot(I,-N); // cosθ
+	#if 1
+		float	n1 = 1.0;
+		float	n2 = eta;
+		float	d = dot(-I,N);
+
+		R = (n1/n2)*(I-N*(sqrt((n2/n1)*(n2/n1)-1+d*d)-d));
+	#else
+
+	 #if 0
+	//R = (n*I*cosθ + n*N - m*N)/(m*cosφ)
+		float	n = 1.0;
+		float	m = eta;
+		float	d = dot(I,-N); // cosθ
 
 
-	V = (n*I*d + n*N - m*N)/(m*d);
- #else
-//V = (n*N*cosθ + n*I - m*N*cosφ)/m
-	float	n = 1.0;
-	float	m = nm;
-	float	d = dot(I,-N); // cosθ
+		R = (n*I*d + n*N - m*N)/(m*d);
+	 #else
+	//R = (n*N*cosθ + n*I - m*N*cosφ)/m
+		float	n = 1.0;
+		float	m = eta;
+		float	d = dot(I,-N); // cosθ
 
-	V = (n*N*d + n*I - m*N*d)/m
-
-
- #endif
+		R = (n*N*d + n*I - m*N*d)/m
 
 
-	
+	 #endif
+
+
+		
+	#endif
 #endif
 
-	return V;
+	return R;
 }
 
 //-----------------------------------------------------------------------------
