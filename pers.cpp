@@ -385,16 +385,18 @@ void Pers::Pen::line2d( SysGra& gra, Pers& pers, vect2 p0, vect2 p1, rgb col, fl
 // Prim
 /////////////////////
 //------------------------------------------------------------------------------
-void Pers::Prim::DrawPlate( SysGra& gra, Pers& pers, vect3 pos, vect3 n1, rgb col )
+void Pers::Prim::DrawPlate( SysGra& gra, Pers& pers, vect3 pos, vect3 n1, int n, rgb col )
 //------------------------------------------------------------------------------
 {
 	mat33 m = mslerp( n1, 1.0 );
 
 	//	仮想平面表示
 	float r = 0.25;
-	for ( int i = 0 ; i < 4 ; i++  )
+	for ( int i = 0 ; i < n ; i++  )
 	{
-		r = (float)(1+i)*0.25;
+//		r = (float)(1+i)*0.25 + i*i/2.0;
+		if ( i == 0 ) r = 0.05;
+		else r = (float)(i)*0.5;
 	
 		vect3 a;
 		for ( float th = 0 ; th <= deg2rad(360) ; th+=deg2rad(10) )

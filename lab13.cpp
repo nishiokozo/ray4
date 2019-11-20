@@ -40,37 +40,16 @@ static const rgb col7 = rgb( 1, 1, 1 );
 
 static	bool	bPause = false;
 
-//------------------------------------------------------------------------------
-static void drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str )
-//------------------------------------------------------------------------------
-{
-	gra.SetZTest(false);
-
-	vect3 v1 = v0+v*sc;
-
-	// 影
-	{
-		vect3	a = v0;	a.y=0;
-		vect3	b = v1;	b.y=0;
-		rgb		c = (col+rgb(0.75,0.75,0.75))/4;
-		pers.pen.line3d( gra, pers, a, b, c, 1 );
-		pers.pen.pset3d( gra, pers,    b, c, 5 );
-	}
-
-	// 線
-	pers.pen.line3d( gra, pers, v0, v1, col, 1 );
-	pers.pen.pset3d( gra, pers,     v1, col, 5 );
-	pers.pen.print3d( gra, pers, 	v1, 0,0, str ); 
-
-	gra.Print(1,(float)text_y++, str+": "+to_string(v.x)+" , "+to_string(v.y)+" , "+to_string(v.z));
-
-	gra.SetZTest(true);
-};
 
 //------------------------------------------------------------------------------
 void Lab::lab13( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
 //------------------------------------------------------------------------------
 {
+	rgb col = rgb( 0.6, 1, 0.75 );
+	gra.Clr(col/5);
+	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, col/3 );
+
+
 	gra.Print(1,(float)text_y++,to_string(lab.idx)+" : " + string(__func__ )); 
 
 
@@ -103,14 +82,12 @@ void Lab::lab13( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pe
 	{
 		vect3 d = func_accelerationGetDistance_TVv( vg, t, v0 );	
 
-		pers.pen.pset3d( gra, pers, d, col7, 2 );
+		pers.pen.pset3d( gra, pers, d, col, 2 );
 	}
 	
 	
-	drawVect( gra, pers, text_y, vect3(0,0,0), v0	,1	, col4, "" );
-	pers.prim.DrawPlate( gra, pers, plate_p, plate_n, col5/2.0 );
-
-
+	lab.drawVect( gra, pers, text_y, vect3(0,0,0), v0	,1	, col, "HHH" );
+	pers.prim.DrawPlate( gra, pers, plate_p, plate_n, 15, col/2.0 );
 
 }
 

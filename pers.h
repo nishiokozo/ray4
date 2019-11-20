@@ -148,7 +148,7 @@ struct Pers
 
 	struct Prim
 	{
-		void DrawPlate( SysGra& gra, Pers& pers, vect3 p, vect3 n, rgb col=rgb(0,1,0) );
+		void DrawPlate( SysGra& gra, Pers& pers, vect3 p, vect3 q, int n, rgb col=rgb(0,1,0) );
 		void DrawMat33(  SysGra& gra, Pers& pers, vect3 v0, mat33 m );
 		void DrawBox( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAxis = true, bool bTri = true );
 		void DrawDrum( SysGra& gra, Pers& pers,  vect3 pos, mat33 m  );

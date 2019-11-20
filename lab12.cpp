@@ -62,6 +62,7 @@ void Lab::lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra&
 {
 delta = 1/60.0;
 	bool bStep=false;
+//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,to_string(lab.idx)+" : " + string(__func__ )); 
 
 	//----
@@ -177,7 +178,7 @@ delta = 1/60.0;
 
 
 	// 更新
-	pers.prim.DrawPlate( gra, pers, plate_p, plate_n, col5/2.0 );
+	pers.prim.DrawPlate( gra, pers, plate_p, plate_n, 4, col5/2.0 );
 }
 
 /*

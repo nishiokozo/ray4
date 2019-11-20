@@ -143,7 +143,7 @@ struct	Graphs
 
 
 //------------------------------------------------------------------------------
-static void drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str )
+void Lab::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str )
 //------------------------------------------------------------------------------
 {
 	gra.SetZTest(false);
@@ -162,7 +162,7 @@ static void drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, f
 	// 線
 	pers.pen.line3d( gra, pers, v0, v1, col, 1 );
 	pers.pen.pset3d( gra, pers,     v1, col, 5 );
-	pers.pen.print3d( gra, pers, 	v1, 0,0, str ); 
+	pers.pen.print3d( gra, pers, 	v1,12,0, str ); 
 
 	gra.Print(1,(float)text_y++, str+": "+to_string(v.x)+" , "+to_string(v.y)+" , "+to_string(v.z));
 
@@ -174,8 +174,8 @@ static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 //------------------------------------------------------------------------------
 {
 	static bool bGrid = true;
-	if (bGrid==false)	gra.Clr(rgb(0.0,0.0,0.0));
 
+	if (bGrid==false)	gra.Clr(rgb(0.0,0.0,0.0));
 	gra.Print(1,(float)text_y++,string("lab10_colors")+to_string(lab.idx)); 
 
 	// 初期化
@@ -353,6 +353,7 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 	const rgb col6 = rgb( 1, 1, 0 );
 	const rgb col7 = rgb( 1, 1, 1 );
 	
+//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,string("lab11_RidgePlateDot")+to_string(lab.idx)); 
 
 	// 移動量d,初速v0の時の時間tを求める。
@@ -565,7 +566,7 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 	
 	// 平面表示
 	{
-		pers.prim.DrawPlate( gra, pers, plate_p, plate_n, rgb(0.5,1,1)*0.55 );
+		pers.prim.DrawPlate( gra, pers, plate_p, plate_n, 4, rgb(0.5,1,1)*0.55 );
 	}
 
 
@@ -593,6 +594,7 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	const rgb col6 = rgb( 1, 1, 0 );
 	const rgb col7 = rgb( 1, 1, 1 );
 	
+//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,string("lab9_2dRidge")+to_string(lab.idx)); 
 
 	static	Graphs graphs;
@@ -776,6 +778,7 @@ static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysG
 	const rgb col6 = rgb( 1, 1, 0 );
 	const rgb col7 = rgb( 1, 1, 1 );
 
+//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,string("lab8_vector_six_lab8")+to_string(lab.idx)); 
 
 	const float	g = G *delta*delta;			// 重力加速度/frame
@@ -851,9 +854,9 @@ static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysG
  		
 	}
 
-	drawVect( gra, pers, text_y, v0, moment ,10	, rgb(1,0,1), "moment" );
-	drawVect( gra, pers, text_y, v1, vg		,100	, rgb(1,0,0), "vg" );
-	drawVect( gra, pers, text_y, v1, F		,1		, rgb(0,1,0), "F" );
+	lab.drawVect( gra, pers, text_y, v0, moment ,10	, rgb(1,0,1), "moment" );
+	lab.drawVect( gra, pers, text_y, v1, vg		,100	, rgb(1,0,0), "vg" );
+	lab.drawVect( gra, pers, text_y, v1, F		,1		, rgb(0,1,0), "F" );
 	plot_moment.DrawPlot( gra, pers );
 	gra.Print(1,(float)text_y++,string("<<radius>>")+to_string(bar.abs())); 
 
@@ -864,6 +867,7 @@ static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysG
 static void lab6_tire3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
 //------------------------------------------------------------------------------
 {
+//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,string("<<lab6_tire3d>>")+to_string(lab.idx)); 
 
 	const vect3 G_pos = vect3(0,2.0,0);
@@ -987,6 +991,8 @@ static void lab5_furiko2d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra
 	const rgb col6 = rgb( 1, 1, 0 );
 	const rgb col7 = rgb( 1, 1, 1 );
 	
+//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
+
 	gra.Print(1,(float)text_y++,string("<<lab5_furiko2d>>")+to_string(lab.idx)); 
 
 	const float grate = 9.80665 *delta*delta;		// 重力加速度/frame
@@ -1058,6 +1064,7 @@ static void lab7_kakusokudo7( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& 
 	const rgb col6 = rgb( 1, 1, 0 );
 	const rgb col7 = rgb( 1, 1, 1 );
 	
+//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,string("<<lab7_kakusokudo7>>")+to_string(lab.idx)); 
 
 	const float	g = G *delta*delta;		// 重力加速度/frame
@@ -1158,7 +1165,7 @@ static void lab7_kakusokudo7( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& 
 				v1 = (v1-v0)/(v1-v0).abs()+v0;
 				acc2 += v1-prev;
 			}
-			drawVect( gra, pers, text_y, v1, vt			,100	, rgb(1,0,0), "vt" );
+			lab.drawVect( gra, pers, text_y, v1, vt			,100	, rgb(1,0,0), "vt" );
 			gra.Print(1,(float)text_y++,string("radius ")+to_string(bar.abs())); 
 		}
 
@@ -1197,7 +1204,7 @@ w=deg2rad(2);
 		}
 
 		// 補助線
-		drawVect( gra, pers, text_y, v1, vg			,100	, rgb(1,0,0), "vg" );
+		lab.drawVect( gra, pers, text_y, v1, vg			,100	, rgb(1,0,0), "vg" );
 			
 	}
 
@@ -1207,6 +1214,7 @@ w=deg2rad(2);
 static void lab4_furiko3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
 //------------------------------------------------------------------------------
 {
+//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 		gra.Print(1,(float)text_y++,string("<<lab4_furiko3d>>")+to_string(lab.idx)); 
 		// delta=J dω/dt
 		// delta：トルク J：慣性モーメント ω：回転角速度[rad]
@@ -1287,16 +1295,15 @@ mov =vel;
 
 	// 描画
 	{
-		gra.Clr(rgb(0.3,0.3,0.3));
-		pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
+//		pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
 
 		pers.pen.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
 
-		drawVect( gra, pers, text_y, v1, vg	,100, rgb(1,0,0), "g" );
-		drawVect( gra, pers, text_y, v0, moment,100, rgb(1,0,1), "moment" );
-		drawVect( gra, pers, text_y, v1, F		,100, rgb(0,1,0), "F" );
-		drawVect( gra, pers, text_y, v1, vel	,2	, rgb(1,1,0), "vel" );
-		drawVect( gra, pers, text_y, v1, mov	,2	, rgb(0,0,1), "mov" );
+		lab.drawVect( gra, pers, text_y, v1, vg	,100, rgb(1,0,0), "g" );
+		lab.drawVect( gra, pers, text_y, v0, moment,100, rgb(1,0,1), "moment" );
+		lab.drawVect( gra, pers, text_y, v1, F		,100, rgb(0,1,0), "F" );
+		lab.drawVect( gra, pers, text_y, v1, vel	,2	, rgb(1,1,0), "vel" );
+		lab.drawVect( gra, pers, text_y, v1, mov	,2	, rgb(0,0,1), "mov" );
 	}
 
 
@@ -1384,6 +1391,7 @@ static void lab3_gravityPlanet( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra
 	const rgb col6 = rgb( 1, 1, 0 );
 	const rgb col7 = rgb( 1, 1, 1 );
 
+//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,string("<<lab3_gravityPlanet>>")+to_string(lab.idx)); 
 
 	static bool	bPause = false; 
@@ -1502,6 +1510,7 @@ static void lab2_kakusokudo( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 	const rgb col6 = rgb( 1, 1, 0 );
 	const rgb col7 = rgb( 1, 1, 1 );
 	
+//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,string("<<lab2_kakusokudo>>")+to_string(lab.idx)); 
 
 	const float	g = G *delta*delta;		// 重力加速度/frame
@@ -1597,9 +1606,9 @@ static void lab2_kakusokudo( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 		pers.pen.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );	//	棒
 		pers.pen.line3d( gra, pers, v1, v2, rgb(0,1,0), 1 );	// 外的な力
 */
-		drawVect( gra, pers, text_y, v1, velocity	,1	, rgb(1,1,0), "velocity" );
-		drawVect( gra, pers, text_y, v0, moment		,1	, rgb(1,0,1), "moment" );
-		drawVect( gra, pers, text_y, v0, to			,1	, rgb(0,1,1), "to" );
+		lab.drawVect( gra, pers, text_y, v1, velocity	,1	, rgb(1,1,0), "velocity" );
+		lab.drawVect( gra, pers, text_y, v0, moment		,1	, rgb(1,0,1), "moment" );
+		lab.drawVect( gra, pers, text_y, v0, to			,1	, rgb(0,1,1), "to" );
 			
 	}
 
@@ -1609,8 +1618,7 @@ static void lab2_kakusokudo( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 static void lab1_graph( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
 //------------------------------------------------------------------------------
 {
-	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
+//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
 
 	gra.Print(1,(float)text_y++,string("<<lab1_graph>>")+to_string(lab.idx)); 
 
