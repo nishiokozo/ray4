@@ -57,6 +57,7 @@ struct Ball:Obj
 void Lab::lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
 //------------------------------------------------------------------------------
 {
+delta = 1/60.0;
 	bool bStep=false;
 	gra.Print(1,(float)text_y++,to_string(lab.idx)+" : " + string(__func__ )); 
 
@@ -130,10 +131,9 @@ void Lab::lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra&
 			vn = v0 + gv*delta;	// 仮速度
 		}
 
-		auto[flg,q0,s] = func_distance_Plate_Segline( plate_p, plate_n, p0+plate_n/1024.0, p0 + d );
+		auto[flg,q0,s] = func_distance_Plate_Segline( plate_p, plate_n, p0+plate_n/1024.0, p0 + d ); // 『+plate_n/1024.0』は線上を突き抜け内容にする処置。
 
 
-cout << flg <<endl;
 		// 衝突
 		if ( flg )
 		{
@@ -142,7 +142,7 @@ cout << flg <<endl;
 			float t1 = func_accelerationGetTime_DVv( gv, d1.abs(), v0 );	// 衝突までの時間(s)
 			vect3 v1 = v0 + gv*t1;											// 衝突後の速度(m/s)
 
-			float rate_r	= 0.3;		// 反射係数
+			float rate_r	= 0.8;		// 反射係数
 			v1  = v1 - (1.0+rate_r)*dot( v1, plate_n ) * plate_n;
 
 			// 衝突後
@@ -150,16 +150,17 @@ cout << flg <<endl;
 			vect3 d2 = func_accelerationGetDistance_TVv( gv, t2, v1 );		// 衝突後の移動距離(m)
 			vect3 v2 = v1 + gv*t2;											// 衝突後の速度(m/s)
 
-			// 反発速度が重力による速度より小さければ、接地状態にする
-			if ( abs(dot(v2,plate_n)) < abs(dot((gv*delta),plate_n)) )
+			// 接地
+			if ( dot(d2,plate_n) < 0 )
 			{
-				d2 = vect3(0,0,0);
+				d2 -= dot(d2,plate_n) * plate_n;
 			}
 
-			pn = q0 + d2;
+			pn = p0 + d1 + d2;
 			vn = v2 ;
 			
 		}
+
 	}
 	
 

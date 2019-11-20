@@ -648,7 +648,6 @@ struct SkeletonUtil
 
 struct Apr : public Sys
 {
-//	uint64_t	time_peak = 0;
 	Gui gui;
 	Lab lab;
 	SkeletonUtil	util;
@@ -656,87 +655,6 @@ struct Apr : public Sys
 	SysKeys&	keys = SysKeys::GetInstance();
 	SysMouse&	mouse = SysMouse::GetInstance();
 	SysGra gra;
-/*
-	//------------------------------------------------------------------------------
-	void chrono_update()
-	//------------------------------------------------------------------------------
-	{
-		//=================================
-		// 処理時間計算
-		//=================================
-		{
-			static chrono::system_clock::duration time_st;
-			static chrono::system_clock::duration time_en;
-			static chrono::system_clock::duration time_sec;
-			static chrono::system_clock::duration time_now;
-			static chrono::system_clock::duration time_max;
-
-			time_en = chrono::system_clock::now().time_since_epoch(); 
-			if ( time_max < time_en-time_st ) time_max = time_en-time_st;
-			// 同期(60fps)
-			{
-				int t=100;	
-//				while( chrono::system_clock::now().time_since_epoch()-time_st < chrono::microseconds(16666)/2 )	// windowsの仕組みがよくわからない。
-				{
-//	 				this_thread::sleep_for(chrono::microseconds(t));
-				}
-			}
-			time_st = chrono::system_clock::now().time_since_epoch();  
-
-			// 表示
-		    time_now = chrono::system_clock::now().time_since_epoch();
-			if ( time_now-time_sec > chrono::milliseconds(500) )	// 一秒更新
-			{
-				time_sec = chrono::system_clock::now().time_since_epoch();
-				time_peak = chrono::duration_cast<chrono::microseconds>(time_max).count();
-				time_max = chrono::seconds(0);
-				cout<<time_peak/1000.0<<"ms"<<endl;
-			}
-		}
-	}
-*/
-	//------------------------------------------------------------------------------
-	int mainx()
-	//------------------------------------------------------------------------------
-	{
-		//	ウィンドウ生成関数
-		auto funcOnCreate = [&]()
-		{
-			gra.OnCreate();
-		};
-		// ウィンドウサイズ変更関数
-		auto funcOnSize = [&]( int width, int height )
-		{
-			gra.OnSize( width, height );
-		};
-		// ウィンドウペイント関数
-		auto funcOnPaint = [&]()
-		{
-			gra.OnPaint();
-		};
-		// ウィンドウ破棄関数
-		auto funcOnDestroy = [&]()
-		{
-			gra.OnDestroy();
-		};
-		SetWincursor( false );
-	
-		InitWinapi(
-			funcOnCreate,
-			funcOnSize,
-			funcOnPaint,
-			funcOnDestroy
-		);
-		OpenWindow( "Ray4 " __DATE__, 300,300,768, 512 );
-
-		while( Update() )
-		{
-
-//			chrono_update();
-
-		}
-		return 0;
-	}
 
 	//------------------------------------------------------------------------------
 	int main()
@@ -1106,12 +1024,6 @@ struct Apr : public Sys
 				Obj* p =gui.tbls[ gui.one.idxTbl ][ gui.one.idxObj ];
 				if ( p ) gra.Print(1,(float)text_y++,string("one: ")+to_string(p->pos.x)+" , "+to_string(p->pos.y)+" , "+to_string(p->pos.z)); 
 			}
-
-
-			//=================================
-			// 処理時間表示
-			//=================================
-//			chrono_update();
 
 		}
 
