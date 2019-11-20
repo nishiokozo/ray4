@@ -1,1 +1,1 @@
-start /affinity 1 main.exe
+start /affinity 1 main.exe 13

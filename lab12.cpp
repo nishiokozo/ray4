@@ -66,7 +66,7 @@ delta = 1/60.0;
 
 	//----
 	// 変数
-	vect3	gv	= vect3(0,G,0);		// 重力加速度ベクトル
+	vect3	vg	= vect3(0,G,0);		// 重力加速度ベクトル
 
 
 	// 初期化：オール
@@ -126,12 +126,12 @@ delta = 1/60.0;
 
 
 	{
-		vect3	d = func_accelerationGetDistance_TVv( gv, delta, v0 );	// 移動距離(m)
+		vect3	d = func_accelerationGetDistance_TVv( vg, delta, v0 );	// 移動距離(m)
 
 		// 通常
 		{
 			pn = p0 + d;		// 仮移動
-			vn = v0 + gv*delta;	// 仮速度
+			vn = v0 + vg*delta;	// 仮速度
 		}
 
 		// 二次曲線分との衝突だが、線分との衝突で近似している
@@ -142,16 +142,16 @@ delta = 1/60.0;
 		{
 			// 衝突まで
 			vect3 d1 = q0-p0;												// 衝突までの距離(m)
-			float t1 = func_accelerationGetTime_DVv( gv.abs(), dot(d1,gv.normalize()), dot(v0,gv.normalize()) );	// 衝突までの時間(s)
-			vect3 v1 = v0 + gv*t1;											// 衝突後の速度(m/s)
+			float t1 = func_accelerationGetTime_DVv( vg.abs(), dot(d1,vg.normalize()), dot(v0,vg.normalize()) );	// 衝突までの時間(s)
+			vect3 v1 = v0 + vg*t1;											// 衝突後の速度(m/s)
 
 			float rate_r	= 0.3;		// 反射係数
 			v1  = v1 - (1.0+rate_r)*dot( v1, plate_n ) * plate_n;
 
 			// 衝突後
 			float t2 = delta-t1;											// 衝突後の残り時間(s)
-			vect3 d2 = func_accelerationGetDistance_TVv( gv, t2, v1 );		// 衝突後の移動距離(m)
-			vect3 v2 = v1 + gv*t2;											// 衝突後の速度(m/s)
+			vect3 d2 = func_accelerationGetDistance_TVv( vg, t2, v1 );		// 衝突後の移動距離(m)
+			vect3 v2 = v1 + vg*t2;											// 衝突後の速度(m/s)
 
 			// 接地
 			if ( dot(d2,plate_n) < 0 )
@@ -181,5 +181,5 @@ delta = 1/60.0;
 }
 
 /*
-			if ( abs(dot(v0,plate_n)) < abs(dot((gv*delta),plate_n)) )
+			if ( abs(dot(v0,plate_n)) < abs(dot((vg*delta),plate_n)) )
 */

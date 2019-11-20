@@ -319,7 +319,7 @@ void SysGra::Update()
 		if ( time_max < time_en-time_st ) time_max = time_en-time_st;
 		// 同期(60fps)
 		{
-			int t=100;	
+			int t=300;	
 			while( chrono::system_clock::now().time_since_epoch()-time_st < chrono::microseconds(16666) )	// windowsの仕組みがよくわからない。
 			{
  				this_thread::sleep_for(chrono::microseconds(t));

@@ -657,9 +657,10 @@ struct Apr : public Sys
 	SysGra gra;
 
 	//------------------------------------------------------------------------------
-	int main()
+	int main( int num )
 	//------------------------------------------------------------------------------
 	{
+		lab.idx = num;
 
 		//	ウィンドウ生成関数
 		auto funcOnCreate = [&]()
@@ -1034,9 +1035,17 @@ struct Apr : public Sys
 
 
 //------------------------------------------------------------------------------
-int main()
+int main( int argc, char* argv[] )
 //------------------------------------------------------------------------------
 {
+	int num = 0; 
+	
+	if ( argc > 0 )
+	{
+		num = atoi(argv[1]);
+		cout << num << endl;
+	}
+
 	cout<<fixed<<setprecision(24);	// 浮動小数出力桁数
 
 	cout << "start" << endl;
@@ -1044,6 +1053,6 @@ int main()
 
 
 
-	return apr.main();
+	return apr.main( num );
 }
 
