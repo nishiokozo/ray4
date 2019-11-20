@@ -134,32 +134,27 @@ void Lab::lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra&
 	{
 		vect3	d = func_accelerationGetDistance_TVv( gv, delta, v0 );	// 移動距離(m)
 
-		// 計算：仮移動
+		auto[flg,q0,s] = func_distance_Plate_Segline( plate_p, plate_n, p0-d/1024.0, p0 + d );
+
+		// 衝突
+		if ( flg )
+		{
+			// 反射ベクトル（ 反発レート付き）
+//			float rate_r	= 0.0;		// 反射係数
+//			v0  = v0 - (1.0+rate_r)*dot( v0, plate_n ) * plate_n;
+			v0  = v0 - dot( v0, plate_n ) * plate_n;
+			vect3 a = gv - dot( gv, plate_n ) * plate_n;
+
+			v0 = v0 + a*delta;
+
+			pn = p0;
+			vn = v0;
+		}
+		// 通常
+		else
 		{
 			pn = p0 + d;		// 仮移動
 			vn = v0 + gv*delta;	// 仮速度
-		}
-		
-		
-		// 衝突
-		{
-			auto[flg,q0,s] = func_distance_Plate_Segline( plate_p, plate_n, p0-d/1024.0, pn );
-
-			if ( flg )
-			{
-				float rate_r	= 0.3;		// 反射係数
-
-				v0  = v0 - (1.0+rate_r)*dot( v0, plate_n ) * plate_n;				// 反射ベクトル（ 反発レート付き）
-
-				if ( abs(dot(v0,plate_n)) < abs(dot((gv*delta),plate_n)) )
-				{
-					cout<<"ON"<<endl;
-					ball.flgOn =true;
-				}
-
-				pn = p0;
-				vn = v0;
-			}
 		}
 	}
 
@@ -176,3 +171,13 @@ void Lab::lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra&
 	pers.prim.DrawPlate( gra, pers, plate_p, plate_n, col5/2.0 );
 }
 
+/*
+	cout <<"d " <<  dot( v0, plate_n ) ; 
+	v0.dump();
+
+			if ( abs(dot(v0,plate_n)) < abs(dot((gv*delta),plate_n)) )
+			{
+//					cout<<"ON"<<endl;
+//					ball.flgOn =true;
+			}
+*/
