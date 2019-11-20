@@ -132,6 +132,8 @@ void Lab::lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra&
 
 		auto[flg,q0,s] = func_distance_Plate_Segline( plate_p, plate_n, p0+plate_n/1024.0, p0 + d );
 
+
+cout << flg <<endl;
 		// 衝突
 		if ( flg )
 		{
@@ -140,7 +142,7 @@ void Lab::lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra&
 			float t1 = func_accelerationGetTime_DVv( gv, d1.abs(), v0 );	// 衝突までの時間(s)
 			vect3 v1 = v0 + gv*t1;											// 衝突後の速度(m/s)
 
-			float rate_r	= 0.7;		// 反射係数
+			float rate_r	= 0.3;		// 反射係数
 			v1  = v1 - (1.0+rate_r)*dot( v1, plate_n ) * plate_n;
 
 			// 衝突後
@@ -148,8 +150,15 @@ void Lab::lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra&
 			vect3 d2 = func_accelerationGetDistance_TVv( gv, t2, v1 );		// 衝突後の移動距離(m)
 			vect3 v2 = v1 + gv*t2;											// 衝突後の速度(m/s)
 
+			// 反発速度が重力による速度より小さければ、接地状態にする
+			if ( abs(dot(v2,plate_n)) < abs(dot((gv*delta),plate_n)) )
+			{
+				d2 = vect3(0,0,0);
+			}
+
 			pn = q0 + d2;
 			vn = v2 ;
+			
 		}
 	}
 	
@@ -168,12 +177,5 @@ void Lab::lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra&
 }
 
 /*
-	cout <<"d " <<  dot( v0, plate_n ) ; 
-	v0.dump();
-
 			if ( abs(dot(v0,plate_n)) < abs(dot((gv*delta),plate_n)) )
-			{
-//					cout<<"ON"<<endl;
-//					ball.flgOn =true;
-			}
 */

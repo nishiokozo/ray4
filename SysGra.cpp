@@ -334,7 +334,7 @@ void SysGra::Update()
 			time_sec = chrono::system_clock::now().time_since_epoch();
 			time_peak = chrono::duration_cast<chrono::microseconds>(time_max).count();
 			time_max = chrono::seconds(0);
-			cout<<time_peak/1000.0<<"ms"<<endl;
+//			cout<<time_peak/1000.0<<"ms"<<endl;
 		}
 	}
 
