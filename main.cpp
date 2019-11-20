@@ -648,7 +648,7 @@ struct SkeletonUtil
 
 struct Apr : public Sys
 {
-	long long	time_peak = 0;
+//	uint64_t	time_peak = 0;
 	Gui gui;
 	Lab lab;
 	SkeletonUtil	util;
@@ -656,7 +656,7 @@ struct Apr : public Sys
 	SysKeys&	keys = SysKeys::GetInstance();
 	SysMouse&	mouse = SysMouse::GetInstance();
 	SysGra gra;
-
+/*
 	//------------------------------------------------------------------------------
 	void chrono_update()
 	//------------------------------------------------------------------------------
@@ -676,9 +676,9 @@ struct Apr : public Sys
 			// 同期(60fps)
 			{
 				int t=100;	
-				while( chrono::system_clock::now().time_since_epoch()-time_st < chrono::microseconds(16666)/2 )	// windowsの仕組みがよくわからない。
+//				while( chrono::system_clock::now().time_since_epoch()-time_st < chrono::microseconds(16666)/2 )	// windowsの仕組みがよくわからない。
 				{
-	 				this_thread::sleep_for(chrono::microseconds(t));
+//	 				this_thread::sleep_for(chrono::microseconds(t));
 				}
 			}
 			time_st = chrono::system_clock::now().time_since_epoch();  
@@ -690,11 +690,11 @@ struct Apr : public Sys
 				time_sec = chrono::system_clock::now().time_since_epoch();
 				time_peak = chrono::duration_cast<chrono::microseconds>(time_max).count();
 				time_max = chrono::seconds(0);
-	//			cout<<time_peak<<endl;
+				cout<<time_peak/1000.0<<"ms"<<endl;
 			}
 		}
 	}
-
+*/
 	//------------------------------------------------------------------------------
 	int mainx()
 	//------------------------------------------------------------------------------
@@ -732,7 +732,7 @@ struct Apr : public Sys
 		while( Update() )
 		{
 
-			chrono_update();
+//			chrono_update();
 
 		}
 		return 0;
@@ -1099,7 +1099,7 @@ struct Apr : public Sys
 			// 情報表示
 			//=================================
 			gra.Print(1,(float)text_y++,string("fovY:")+to_string(int(pers.fovy)));
-			gra.Print(1,(float)text_y++,string("peak: ")+to_string(time_peak/1000)+string("msec") ); 
+			gra.Print(1,(float)text_y++,string("peak: ")+to_string(gra.time_peak/1000.0)+string("ms") ); 
 			if ( gui.one.bEnable )
 			{
 				gra.Print(1,(float)text_y++,string("idxTbl=")+to_string(gui.one.idxTbl)+":"+to_string(gui.one.idxObj) ); 
@@ -1111,7 +1111,7 @@ struct Apr : public Sys
 			//=================================
 			// 処理時間表示
 			//=================================
-			chrono_update();
+//			chrono_update();
 
 		}
 

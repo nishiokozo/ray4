@@ -70,14 +70,14 @@ void Lab::lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra&
 	{
 		lab.bInitAll = true;
 		//カメラ
-		pers.cam.pos = vect3(	0.0,	1.0, -3.0 );
-		pers.cam.at = vect3( 	0.0,	1.0, 0.0 );
+		pers.cam.pos = vect3(	0.0,	0.3, -3.0 );
+		pers.cam.at = vect3( 	0.0,	0.3, 0.0 );
 
 		//点
 		for ( Obj* p : lab.tblObj ) delete p;
 		lab.tblObj.clear();
 		lab.tblObj.emplace_back( new Ball(vect3(  0		, 1.0,  0.0 ), vect3(0,0,0)) );
-		lab.tblObj.emplace_back( new Obj(vect3( -0.4	, 0.5,	0.0 )) );	// 平面原点
+		lab.tblObj.emplace_back( new Obj(vect3( -0.3	, 0.5,	0.0 )) );	// 平面原点
 		lab.tblObj.emplace_back( new Obj(vect3( -0.3	, 0.7,  0.0 )) );	// 平面法線
 
 		// 線
@@ -120,43 +120,39 @@ void Lab::lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra&
 	vect3	pn;
 	vect3	vn;
 
-	if ( ball.flgOn )
-	{
-		// 接地状態
 
-		vect3	a = gv - dot( gv, plate_n )*plate_n;	// 床に並行なベクトル
-		vect3	d = func_accelerationGetDistance_TVv( a, delta, v0 );	// 移動距離(m)
-
-		pn = p0 + d;
-		vn = v0 + a*delta;
-	}
-	else
 	{
 		vect3	d = func_accelerationGetDistance_TVv( gv, delta, v0 );	// 移動距離(m)
 
-		auto[flg,q0,s] = func_distance_Plate_Segline( plate_p, plate_n, p0-d/1024.0, p0 + d );
-
-		// 衝突
-		if ( flg )
-		{
-			// 反射ベクトル（ 反発レート付き）
-//			float rate_r	= 0.0;		// 反射係数
-//			v0  = v0 - (1.0+rate_r)*dot( v0, plate_n ) * plate_n;
-			v0  = v0 - dot( v0, plate_n ) * plate_n;
-			vect3 a = gv - dot( gv, plate_n ) * plate_n;
-
-			v0 = v0 + a*delta;
-
-			pn = p0;
-			vn = v0;
-		}
 		// 通常
-		else
 		{
 			pn = p0 + d;		// 仮移動
 			vn = v0 + gv*delta;	// 仮速度
 		}
+
+		auto[flg,q0,s] = func_distance_Plate_Segline( plate_p, plate_n, p0+plate_n/1024.0, p0 + d );
+
+		// 衝突
+		if ( flg )
+		{
+			// 衝突まで
+			vect3 d1 = q0-p0;												// 衝突までの距離(m)
+			float t1 = func_accelerationGetTime_DVv( gv, d1.abs(), v0 );	// 衝突までの時間(s)
+			vect3 v1 = v0 + gv*t1;											// 衝突後の速度(m/s)
+
+			float rate_r	= 0.7;		// 反射係数
+			v1  = v1 - (1.0+rate_r)*dot( v1, plate_n ) * plate_n;
+
+			// 衝突後
+			float t2 = delta-t1;											// 衝突後の残り時間(s)
+			vect3 d2 = func_accelerationGetDistance_TVv( gv, t2, v1 );		// 衝突後の移動距離(m)
+			vect3 v2 = v1 + gv*t2;											// 衝突後の速度(m/s)
+
+			pn = q0 + d2;
+			vn = v2 ;
+		}
 	}
+	
 
 	// 反映
 	if  ( !bPause || bStep )

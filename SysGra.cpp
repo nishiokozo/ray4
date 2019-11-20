@@ -133,7 +133,7 @@ void wgl_Enable( HDC * hDc, HGLRC * hGlrc)
 	ZeroMemory( &pfd, sizeof( pfd ) );
 	pfd.nSize = sizeof( pfd );
 	pfd.nVersion = 1;
-	pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+	pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL;// | PFD_DOUBLEBUFFER;
 	pfd.iPixelType = PFD_TYPE_RGBA;
 	pfd.cColorBits = 24;
 	pfd.cDepthBits = 16;
@@ -294,7 +294,7 @@ void  SysGra::OnPaint()
 
 	{
 		HDC	hDc = GetDC( hWnd );	// GetDCに対してはReleaseDC
-		SwapBuffers( hDc );
+		//SwapBuffers( hDc );
 		ReleaseDC( hWnd, hDc );
 	}
 
@@ -305,7 +305,40 @@ void  SysGra::OnPaint()
 void SysGra::Update()
 //------------------------------------------------------------------------------
 {
+	//=================================
+	// 処理時間計算
+	//=================================
+	{
+		static chrono::system_clock::duration time_st;
+		static chrono::system_clock::duration time_en;
+		static chrono::system_clock::duration time_sec;
+		static chrono::system_clock::duration time_now;
+		static chrono::system_clock::duration time_max;
 
+		time_en = chrono::system_clock::now().time_since_epoch(); 
+		if ( time_max < time_en-time_st ) time_max = time_en-time_st;
+		// 同期(60fps)
+		{
+			int t=100;	
+			while( chrono::system_clock::now().time_since_epoch()-time_st < chrono::microseconds(16666) )	// windowsの仕組みがよくわからない。
+			{
+ 				this_thread::sleep_for(chrono::microseconds(t));
+			}
+		}
+		time_st = chrono::system_clock::now().time_since_epoch();  
+
+		// 表示
+	    time_now = chrono::system_clock::now().time_since_epoch();
+		if ( time_now-time_sec > chrono::milliseconds(500) )	// 一秒更新
+		{
+			time_sec = chrono::system_clock::now().time_since_epoch();
+			time_peak = chrono::duration_cast<chrono::microseconds>(time_max).count();
+			time_max = chrono::seconds(0);
+			cout<<time_peak/1000.0<<"ms"<<endl;
+		}
+	}
+
+	glFlush();
 }
 //------------------------------------------------------------------------------
 void SysGra::Clr( rgb col )

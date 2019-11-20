@@ -6,49 +6,9 @@ using namespace std;
 
 struct SysGra
 {
-
-//	enum EnumType
-//	{
-//		TypeClr,
-//		TypeCircle,
-//		TypePset,
-//		TypeLine,
-//		TypeFill,
-//		TypeBox,
-//		TypeTri,
-//	};
-//
-//	struct Message
-//	{
-//		string	str;
-//		vect2	pos;
-//		Message( string _str, vect2 _pos )
-//		{
-//			str = _str;
-//			pos = _pos;
-//		}
-//	} ;
-
-	struct 
-	{
-//		BITMAPINFO	bmpInfo;
-//		int			bpp;
-//		BYTE*		bPixelBits = nullptr;
-//		int			width;
-//		int			height;
-
-
-
-//		vector<vect2>		tblVect2;
-//		vector<Message>		tblMessage;
-
-
-
-	} m;
+	uint64_t	time_peak = 0;
 
 	bool bInitialized = false;
-
-//	 BITMAP bmBitmap;
 
 	float GetWidth();
 	float GetHeight();
@@ -60,8 +20,7 @@ struct SysGra
 	void OnCreate();
 	void OnPaint();
 
-	void Update() ;
-
+	void	Update();
 
 	void	Print( vect2 v, string str );
 	void	Print( float x, float y, string str );
