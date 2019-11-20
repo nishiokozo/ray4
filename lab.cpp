@@ -356,7 +356,7 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 	gra.Print(1,(float)text_y++,string("lab11_RidgePlateDot")+to_string(lab.idx)); 
 
 	// 移動量d,初速v0の時の時間tを求める。
-	auto func_accelerationGetTime_DVv =[]( vect3 gv, float d, vect3 v0 )	// DV : Distance / Velocity
+	auto func_accelerationGetTime_DVv_t =[]( vect3 gv, float d, vect3 v0 )	// DV : Distance / Velocity
 	{
 
 		float	a = 0.5*gv.abs();
@@ -389,7 +389,7 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 	};
 
 	// 時間t,初速v0の時の移動量dを求める。
-	auto func_accelerationGetDistance_TVv =[]( vect3 gv, float t, vect3 v0 )	// TV : Time / Velocity
+	auto func_accelerationGetDistance_TVv_t =[]( vect3 gv, float t, vect3 v0 )	// TV : Time / Velocity
 	{
 		vect3 a = 0.5*gv;
 		vect3 d = a*t*t + v0*t;
@@ -484,7 +484,7 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 
 	{
 		
-		vect3 d = func_accelerationGetDistance_TVv( gv, delta, v0 );	// 移動距離 m
+		vect3 d = func_accelerationGetDistance_TVv_t( gv, delta, v0 );	// 移動距離 m
 		// 計算
 		{
 
@@ -510,7 +510,7 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 
 				// 衝突点での速度を求める
 				vect3 d1 = q0-p0;												// 衝突までの距離(m)
-				float t1 = func_accelerationGetTime_DVv( gv, d1.abs(), v0 );	// 衝突までの時間(s)
+				float t1 = func_accelerationGetTime_DVv_t( gv, d1.abs(), v0 );	// 衝突までの時間(s)
 				vect3 v1 = v0 + gv*t1;											// 衝突後の速度(m/s)
 
 				// 速度の反射
@@ -528,7 +528,7 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 
 				{
 					float t2 = delta-t1;											// 衝突後の残り時間(s)
-					vect3 d2 = func_accelerationGetDistance_TVv( gv, t2, v1 );	// 衝突後の移動距離(m)
+					vect3 d2 = func_accelerationGetDistance_TVv_t( gv, t2, v1 );	// 衝突後の移動距離(m)
 					vect3 v2 = v1 + gv*t2;										// 衝突後の速度(m/s)
 				
 					// 設置
@@ -707,7 +707,7 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 
 				// 衝突点での速度を求める
 				vect3 d1 = q0-p0;												// 衝突までの距離(m)
-				float t1 = func_accelerationGetTime_DVv( gv, d1.abs(), v0 );	// 衝突までの時間(s)
+				float t1 = func_accelerationGetTime_DVv( gv.abs(), d1.abs(), v0.abs() );	// 衝突までの時間(s)
 				vect3 v1 = v0 + gv*t1;											// 衝突後の速度(m/s)
 
 				// 速度の反射
@@ -1691,6 +1691,10 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float
 	{
 		case 10:	// 描画	色見本
 			lab10_colors( (*this), keys, mouse, gra, pers, delta, text_y );
+			break;
+
+		case 13:	// 描画	2d剛体
+			lab13( (*this), keys, mouse, gra, pers, delta, text_y );
 			break;
 
 		case 12:	// 描画	2d剛体

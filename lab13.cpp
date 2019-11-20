@@ -1,7 +1,6 @@
-//2019/11/17
+//2019/11/20
 
-//	平面と点の衝突実験
-
+// 
 
 #include <iostream>
 #include <vector>
@@ -57,7 +56,7 @@ struct Ball:Obj
 };
 
 //------------------------------------------------------------------------------
-void Lab::lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
+void Lab::lab13( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
 //------------------------------------------------------------------------------
 {
 delta = 1/60.0;
@@ -142,7 +141,8 @@ delta = 1/60.0;
 		{
 			// 衝突まで
 			vect3 d1 = q0-p0;												// 衝突までの距離(m)
-			float t1 = func_accelerationGetTime_DVv( gv.abs(), dot(d1,gv.normalize()), dot(v0,gv.normalize()) );	// 衝突までの時間(s)
+			float t1 = func_accelerationGetTime_DVv( gv.abs(), d1.abs(), v0.abs() );	// 衝突までの時間(s)
+			vect3 d1x = func_accelerationGetDistance_TVv( gv, t1, v0 );		// 衝突後の移動距離(m)
 			vect3 v1 = v0 + gv*t1;											// 衝突後の速度(m/s)
 
 			float rate_r	= 0.3;		// 反射係数
