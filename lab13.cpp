@@ -66,19 +66,19 @@ void Lab::lab13( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pe
 		pers.cam.pos = vect3(	0.0,	4.3, -8.0 );
 		pers.cam.at = vect3( 	0.0,	2.3, 0.0 );
 
-//		pers.grid.SetCol( col/3 );
-
 		//点
 		lab.tblObj.emplace_back( new Obj( vect3(  2, 4.0,  2.0 ) ) );
+		lab.tblObj.emplace_back( new Obj( vect3(  0, G,  0 ) ) );
 		//平面
 		lab.tblObj.emplace_back( new Obj(vect3(  2.1	, 0.5,	2.0 )) );	// 平面原点
 		lab.tblObj.emplace_back( new Obj(vect3(  2.0	, 0.7,  2.0 )) );	// 平面法線
 	}
 
 	// 設定
-	vect3	plate_p = (*lab.tblObj[1]).pos;
-	vect3	plate_n = ( (*lab.tblObj[2]).pos - plate_p ).normalize();
+	vect3	plate_p = (*lab.tblObj[2]).pos;
+	vect3	plate_n = ( (*lab.tblObj[3]).pos - plate_p ).normalize();
 	v0 = lab.tblObj[0]->pos ;
+	vg = lab.tblObj[1]->pos ;
 
 	// 描画
 	for ( float t = 0 ; t < 1.0 ; t += 0.001 )
@@ -87,92 +87,25 @@ void Lab::lab13( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pe
 
 		float d = dot( p-plate_p, plate_n );
 
-if ( d >-0.01 && d < 0.01 ) 
-{
-//		pers.pen.pset3d( gra, pers, p, col2, 5 );
-}
-else
-if ( d >0 ) 
-{
-		pers.pen.pset3d( gra, pers, p, col, 2 );
-}
-else
-{
-		pers.pen.pset3d( gra, pers, p, col/2, 1 );
-}
-//		pers.pen.pset3d( gra, pers, vect3(t,0,d), col5, 1 );
+		if ( d >0 ) 
+		{
+			pers.pen.pset3d( gra, pers, p, col, 2 );
+		}
+		else
+		{
+			pers.pen.pset3d( gra, pers, p, col/2, 1 );
+		}
 
 	}
 
-	{
+	//  平面と二次曲線の交差判定
+	auto[flg,Q,s] = func_intersect_Plate_Curve( plate_n, plate_p, vg, v0 );
 
-        ////////////////////////////////////////////////////////////////////////
-        //                                                                    //
-        //  平面と二次曲線の交差判定                                          //
-        //                                                                    //
-        //  N:平面法線ベクトル                                                //
-        //  Q:平面原点ベクトル                                                //
-        //  P:交差点ベクトル                                                  //
-        //  A:加速度ベクトル                                                  //
-        //  V:初速度ベクトル                                                  //
-        //  t:時間                                                            //
-        //                                                                    //
-        //  N･(P - Q) = 0     ...①                                           //
-        //                                                                    //
-        //      w = 0.5t^2                                                    //
-        //                                                                    //
-        //  P = Aw + Vt       ...②                                           //
-        //                                                                    //
-        //  ①に②を代入                                                      //
-        //                                                                    //
-        //  N･(Aw + Vt - Q) = 0                                               //
-        //                                                                    //
-        //  N.x*((A.x*w + V.x*t)-Q.x) +                                       //
-        //  N.y*((A.y*w + V.y*t)-Q.y) +                                       //
-        //  N.z*((A.z*w + V.z*t)-Q.z) = 0                                     //
-        //                                                                    //
-        //  (N･A)0.5t^2 + (N･V)t - (N･Q) = 0                                  //
-        //                                                                    //
-        //      c=(N･A)0.5                                                    //
-        //      d=(N･V)                                                       //
-        //      e=-(N･Q)                                                      //
-        //                                                                    //
-        //  ct^2 + dt + e = 0                                                 //
-        //                                                                    //
-        //  c(t+(d/2c))^2 + e -c(d/(2c))^2 = 0                                //
-        //                                                                    //
-        //      f = (d/2c)                                                    //
-        //                                                                    //
-        //  c(t+f)^2 + e -cf^2 = 0                                            //
-        //                                                                    //
-        //  t = ±√( f^2 - e/c ) - f;                                        //
-        //                                                                    //
-        ////////////////////////////////////////////////////////////////////////
-
-
-		vect3 N = plate_n;	// 平面法線ベクトル
-		vect3 Q = plate_p;	// 平面位置ベクトル
-		vect3 A = vg;		// 加速度ベクトル
-		vect3 V = v0;		// 初速度ベクトル
-		//---
-		float c = dot(N,A)*0.5;
-		float d = dot(N,V);
-		float e = -dot(N,Q);
-		float f = d/(2*c);		
-		float t =sqrt( f*f - e/c ) - f;
-		float t2 = -sqrt( f*f - e/c ) - f;
-
-		// 交差点ベクトル
-		vect3 P = func_accelerationGetDistance_TVv( vg, t, v0 );	
-		vect3 P2 = func_accelerationGetDistance_TVv( vg, t2, v0 );	
-
-		pers.pen.pset3d( gra, pers, P, col2, 7 );
-		pers.pen.pset3d( gra, pers, P2, col3, 7 );
-
-	}
+	pers.pen.pset3d( gra, pers, Q, col2, 7 );
 	
 	
-	lab.drawVect( gra, pers, text_y, vect3(0,0,0), v0	,1	, col, "HHH" );
+	lab.drawVect( gra, pers, text_y, vect3(0,0,0), v0	,1	, col, "v" );
+	lab.drawVect( gra, pers, text_y, vect3(0,0,0), vg	,1	, col, "a" );
 	pers.prim.DrawPlate( gra, pers, plate_p, plate_n, 5, col/2.0 );
 
 }
