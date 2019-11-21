@@ -132,6 +132,7 @@ struct Pers
 		bool bAxisX = true;;
 		bool bAxisY = true;;
 		bool bAxisZ = true;;
+		
 
 		//------------------------------------------------------------------------------
 		void DrawAxis( SysGra& gra, Pers& pers, vect2 mpos );
@@ -140,9 +141,13 @@ struct Pers
 
 	struct Grid
 	{
-		//------------------------------------------------------------------------------
+		rgb		col = rgb(0.2,0.2,0.2);
+		mat33	mat =  midentity();
+
+		void SetCol( const rgb& _col ) { col = _col; }
+		void SetMat( const mat33& _mat ) { mat = _mat; }
 		void DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos, mat33 m, int NUM_U, int NUM_V, float dt, rgb col  );
-		//------------------------------------------------------------------------------
+		void DrawGrid( SysGra& gra, Pers& pers );
 	} grid;
 
 

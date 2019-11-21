@@ -823,7 +823,7 @@ struct Apr : public Sys
 			//=================================
 			// 床グリッド描画
 			//=================================
-			pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
+			pers.grid.DrawGrid( gra, pers );
 
 
 

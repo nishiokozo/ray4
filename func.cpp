@@ -319,12 +319,12 @@ vect3 func_catmull3( float t, const vect3 P0, const vect3 P1, const vect3 P2, co
 };
 
 
-// 加速度a,移動量d,初速vの時の時間tを求める。
+// 加速度a,位置p,初速vの時の時間tを求める。
 //------------------------------------------------------------------------------
-float func_accelerationGetTime_DVv( float a, float d, float v )	// DV : Distance / Velocity
+float func_accelerationGetTime_DVv( float a, float p, float v )	// DV : Distance / Velocity
 //------------------------------------------------------------------------------
 {
-	// d = 1/2*a*t^2 + v*t からの変形
+	// p = 1/2*a*t^2 + v*t からの変形
 	 
 	float	b = 0.5*a;
 	float	t = 0;
@@ -338,24 +338,24 @@ float func_accelerationGetTime_DVv( float a, float d, float v )	// DV : Distance
 	if ( v == 0 )
 	{
 		// 加速のみ
-		t =  sqrt( d/b ); 
+		t =  sqrt( p/b ); 
 	}
 	else
 	if ( b == 0 )
 	{
 		// 速度のみ
-		t = d/v;
+		t = p/v;
 	}
 	else
 	{
 		float	c = v/a;
-		t =  sqrt( d/b + c*c ) - c; 
+		t =  sqrt( p/b + c*c ) - c; 
 	}
 
 	return t;
 };
 
-// 加速度a,時間t,初速vの時の移動量dを求める。
+// 加速度a,時間t,初速vの時の位置pを求める。
 //------------------------------------------------------------------------------
 vect3 func_accelerationGetDistance_TVv( vect3 a, float t, vect3 v )	// TV : Time / Velocity
 //------------------------------------------------------------------------------

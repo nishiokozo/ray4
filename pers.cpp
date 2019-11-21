@@ -925,7 +925,7 @@ void Pers::Axis::DrawAxis( SysGra& gra, Pers& pers, vect2 mpos )
 ////////////////
 //------------------------------------------------------------------------------
 void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos, mat33 m, int NUM_U, int NUM_V, float dt, rgb col  )
-//------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 {	// ミニグリッド
 	vect3 vt = vect3(0,0,0);
 	float du = (float)NUM_U*dt;
@@ -993,4 +993,10 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos, mat33 m, int NU
 			}
 		}
 	}
+}
+//------------------------------------------------------------------------------
+void Pers::Grid::DrawGrid( SysGra& gra, Pers& pers )
+//----------------------------------------------------------------------------
+{
+	DrawGrid3d( gra, pers, vect3(0,0,0), mat, 10, 10, 1, col );
 }
