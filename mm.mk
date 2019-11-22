@@ -8,7 +8,12 @@ geom.o: geom.cpp geom.h
 gui.o: gui.cpp geom.h SysKeys.h SysMouse.h SysGra.h Sys.h func.h pers.h \
   gui.h
 lab.o: lab.cpp geom.h SysKeys.h SysMouse.h SysGra.h func.h pers.h lab.h
+lab0.o: lab0.cpp geom.h SysKeys.h SysMouse.h SysGra.h func.h pers.h lab.h
 lab12.o: lab12.cpp geom.h SysKeys.h SysMouse.h SysGra.h func.h pers.h \
+  lab.h
+lab13.o: lab13.cpp geom.h SysKeys.h SysMouse.h SysGra.h func.h pers.h \
+  lab.h
+lab14.o: lab14.cpp geom.h SysKeys.h SysMouse.h SysGra.h func.h pers.h \
   lab.h
 Sys.o: Sys.cpp SysKeys.h SysMouse.h geom.h SysGra.h Sys.h SysWin.h
 Syswin.o: Syswin.cpp SysWin.h

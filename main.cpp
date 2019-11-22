@@ -99,7 +99,7 @@ struct Cutmull
 	}
 
 	//------------------------------------------------------------------------------
-	void drawCutmull( SysGra& gra, Pers& pers, Gui& gui, vector<Obj*> tbl, vector<ivect2>idx )
+	void drawCutmull( SysGra& gra, Pers& pers, vector<Obj*> tbl, vector<ivect2>idx )
 	//------------------------------------------------------------------------------
 	{
 		// 描画 カーブ
@@ -225,7 +225,7 @@ struct Bezier
 
 	vector<Edge*> tblDummy;		//	空のまま
 	//------------------------------------------------------------------------------
-	void exec_drawBezier( SysGra& gra, Pers& pers, Gui& gui, vector<Obj*>& tblPoint, vector<int>& idxPoint, int idxTbl , vect3& P, vect3& I, bool bSerch, bool bCut )
+	void exec_drawBezier( SysGra& gra, Pers& pers, vector<Obj*>& tblPoint, vector<int>& idxPoint, int idxTbl , vect3& P, vect3& I, bool bSerch, bool bCut )
 	//------------------------------------------------------------------------------
 	{
 		//ベジェ計算＆描画
@@ -436,7 +436,7 @@ struct SkeletonUtil
 	}
 
 	//-------------------------------------------------------------------------
-	void skeleton_draw( SysGra& gra, SysKeys& keys, SysMouse& mouse, Pers& pers, Gui& gui, Skeleton& skeleton, int& text_y )
+	void skeleton_draw( SysGra& gra, SysKeys& keys, SysMouse& mouse, Pers& pers, Skeleton& skeleton, int& text_y )
 	//-------------------------------------------------------------------------
 	{
 		if ( skeleton.bActive == false ) return;
@@ -965,7 +965,7 @@ struct Apr : public Sys
 			//=================================
 			// skeleton 描画
 			//=================================
-			util.skeleton_draw( gra, keys, mouse, pers, gui, (*pSkeleton), text_y );
+			util.skeleton_draw( gra, keys, mouse, pers, (*pSkeleton), text_y );
 
 			//=================================
 			//	Bezier 表示
@@ -979,7 +979,7 @@ struct Apr : public Sys
 				bool bCut = mouse.L.hi;
 				bool bSerch = keys.E.on;
 				// 表示 加工 ベジェ 三次曲線
-				(*pBezier).exec_drawBezier( gra, pers, gui, (*pBezier).tblPoint, (*pBezier).idxPoint, (*pBezier).idxTbl, P, I, bSerch, bCut );
+				(*pBezier).exec_drawBezier( gra, pers, (*pBezier).tblPoint, (*pBezier).idxPoint, (*pBezier).idxTbl, P, I, bSerch, bCut );
 
 				//=================================
 				//	登録 
@@ -998,7 +998,7 @@ struct Apr : public Sys
 			if ( (*pCutmull).bActive )
 			{
 				// 描画
-				(*pCutmull).drawCutmull( gra, pers, gui, (*pCutmull).tblPoint, (*pCutmull).tblIdx );
+				(*pCutmull).drawCutmull( gra, pers, (*pCutmull).tblPoint, (*pCutmull).tblIdx );
 			}
 
 

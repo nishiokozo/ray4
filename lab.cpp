@@ -1732,6 +1732,10 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float
 			lab10_colors( (*this), keys, mouse, gra, pers, delta, text_y );
 			break;
 
+		case 14:	// 描画	2d剛体
+			lab14( (*this), keys, mouse, gra, pers, delta, text_y );
+			break;
+
 		case 13:	// 描画	2d剛体
 			lab13_intersect_plate_curve( (*this), keys, mouse, gra, pers, delta, text_y );
 			break;
