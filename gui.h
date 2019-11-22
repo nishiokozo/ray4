@@ -1,14 +1,5 @@
 
 
-struct Point3 : Obj
-{
-	Point3( vect3 _pos ) :Obj(_pos) { pos = _pos;}
-	vect3	a;
-	vect3	b;
-
-	Point3( vect3 _pos, vect3 _a, vect3 _b ) :Obj(_pos) { pos=_pos; a=_a; b=_b;}
-};
-
 
 struct Gui
 {

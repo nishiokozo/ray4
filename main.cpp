@@ -860,6 +860,8 @@ struct Apr : public Sys
 				if ( keys.N.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.idx+1);};
 				if ( keys.B.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.idx-1);};
 				lab.Update( keys, mouse, gra, pers, T, text_y );
+
+
 			}
 			
 			//=================================
@@ -988,10 +990,13 @@ struct Apr : public Sys
 				if ( bCut )
 				{
 					// テーブルの再作成しないとうまく中身が参照できない
-					continue;
+			//		continue;
 				}
 
 			}
+
+//extern bool g_bCut;
+//if ( g_bCut ) continue;
 
 			//=================================
 			// コース描画 Cutmull

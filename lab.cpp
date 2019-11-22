@@ -25,6 +25,7 @@
 
 #include "lab.h"
 #include "lab14.h"
+#include "lab15.h"
 
 
 
@@ -1746,6 +1747,7 @@ void Lab::SetIdx( int n )
 	switch( idx )
 	{
 		case 14:	pLab = new Lab14;	break;
+		case 15:	pLab = new Lab15;	break;
 	}
 	
 
@@ -1763,6 +1765,7 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float
 			lab10_colors( (*this), keys, mouse, gra, pers, delta, text_y );
 			break;
 
+		case 15:	// 描画	2d剛体
 		case 14:	// 描画	2d剛体
 //			lab14( (*this), keys, mouse, gra, pers, delta, text_y );
 			break;
@@ -1817,6 +1820,7 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float
 
 		default:
 			lab0_gridonly( (*this), keys, mouse, gra, pers, delta, text_y );
+
 			break;
 	}
 //	gra.Print(1,(float)text_y++,string("lab: ")+to_string(idx)); 
