@@ -42,7 +42,7 @@ static	bool	bPause = false;
 
 
 //------------------------------------------------------------------------------
-void Lab::lab13( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
+void Lab::lab13_intersect_plate_curve( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
 //------------------------------------------------------------------------------
 {
 	rgb col = rgb( 1, 1, 1 );

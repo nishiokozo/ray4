@@ -1654,14 +1654,15 @@ static void lab1_graph( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, P
 	rgb	col = vect3(0.2,0.2,0.2);
 
 	// 初期化
+	if ( !lab.bInitAll )
+	{
+		lab.bInitAll = true;
+		pers.cam.pos = vect3( 0.0, 0.0, -5.0 );
+		pers.cam.at = vect3( 0,  0.0, 0 );
+	}
+
 	if ( !lab.bInitParam )
 	{
-		if ( !lab.bInitAll )
-		{
-			lab.bInitAll = true;
-			pers.cam.pos = vect3( 0.0, 0.0, -5.0 );
-			pers.cam.at = vect3( 0,  0.0, 0 );
-		}
 		lab.bInitParam = true;
 	}
 
@@ -1720,15 +1721,6 @@ static void lab1_graph( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, P
 
 }
 
-//------------------------------------------------------------------------------
-void Lab::lab0_gridonly( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
-//------------------------------------------------------------------------------
-{
-	//画面クリア
-	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
-	gra.Print(1,(float)text_y++,to_string(lab.idx)+" : " + string(__func__ )); 
-}
 
 //------------------------------------------------------------------------------
 void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
@@ -1741,7 +1733,7 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float
 			break;
 
 		case 13:	// 描画	2d剛体
-			lab13( (*this), keys, mouse, gra, pers, delta, text_y );
+			lab13_intersect_plate_curve( (*this), keys, mouse, gra, pers, delta, text_y );
 			break;
 
 		case 12:	// 描画	2d剛体

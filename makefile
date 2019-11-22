@@ -14,6 +14,7 @@ SRCS = \
 	geom.cpp \
 	gui.cpp \
 	lab.cpp \
+	lab0.cpp \
 	lab12.cpp \
 	lab13.cpp \
 	Sys.cpp \
