@@ -24,6 +24,7 @@
 #include "pers.h"
 
 #include "lab.h"
+#include "lab0.h"
 #include "lab14.h"
 #include "lab15.h"
 
@@ -1746,8 +1747,23 @@ void Lab::SetIdx( int n )
 
 	switch( idx )
 	{
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+		case 5:
+		case 6:
+		case 7:
+		case 8:
+		case 9:
+		case 10:
+		case 11:
+		case 12:
+		case 13:
+			break;
 		case 14:	pLab = new Lab14;	break;
 		case 15:	pLab = new Lab15;	break;
+		default:	pLab = new Lab0;	break;
 	}
 	
 
@@ -1819,7 +1835,7 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float
 			break;
 
 		default:
-			lab0_gridonly( (*this), keys, mouse, gra, pers, delta, text_y );
+//			lab0_gridonly( (*this), keys, mouse, gra, pers, delta, text_y );
 
 			break;
 	}
