@@ -24,6 +24,7 @@
 #include "pers.h"
 
 #include "lab.h"
+#include "lab14.h"
 
 
 
@@ -1721,11 +1722,40 @@ static void lab1_graph( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, P
 
 }
 
+//------------------------------------------------------------------------------
+void Lab::SetIdx( int n )
+//------------------------------------------------------------------------------
+{
+	idx = max( n, 0 ); 
+	bInitParam=false;
+	bInitAll=false;
+
+	for ( Obj* p : (*this).tblObj ) delete p;
+	tblObj.clear();
+
+	for ( Edge* p : (*this).tblEdge ) delete p;
+	tblEdge.clear();
+
+
+	if ( pLab ) 
+	{
+		delete pLab;
+		pLab=0;
+	};
+
+	switch( idx )
+	{
+		case 14:	pLab = new Lab14;	break;
+	}
+	
+
+}
 
 //------------------------------------------------------------------------------
 void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
 //------------------------------------------------------------------------------
 {
+	if ( pLab ) pLab->Update( (*this), keys, mouse, gra, pers, delta, text_y );
 
 	switch( idx )
 	{
@@ -1735,7 +1765,6 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float
 
 		case 14:	// 描画	2d剛体
 //			lab14( (*this), keys, mouse, gra, pers, delta, text_y );
-			if ( pLab14 ) pLab14->Update( (*this), keys, mouse, gra, pers, delta, text_y );
 			break;
 
 		case 13:	// 描画	2d剛体

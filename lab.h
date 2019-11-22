@@ -1,9 +1,9 @@
 struct Lab;
-struct LabPart
+struct LabObj
 {
-	LabPart();
-	virtual ~LabPart();
-	void Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y );
+	LabObj(){};
+	virtual ~LabObj(){};
+	virtual void Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y ) = 0;
 };
 
 struct Lab
@@ -18,7 +18,7 @@ struct Lab
 	
 	Lab();
 
-	LabPart*	pLab14 = 0;
+	LabObj*	pLab = 0;
 
 	//------------------------------------------------------------------------------
 	~Lab()
@@ -29,37 +29,7 @@ struct Lab
 	}
 
 
-	//------------------------------------------------------------------------------
-	void SetIdx( int n )
-	//------------------------------------------------------------------------------
-	{
-		idx = max( n, 0 ); 
-		bInitParam=false;
-		bInitAll=false;
-
-		for ( Obj* p : (*this).tblObj ) delete p;
-		tblObj.clear();
-
-		for ( Edge* p : (*this).tblEdge ) delete p;
-		tblEdge.clear();
-
-
-		if ( idx == 14 )
-		{	
-			if ( !pLab14 )
-			{
-				pLab14 = new LabPart;
-			}
-		}
-		else
-		{
-			if ( pLab14 ) 
-			{
-				delete pLab14;
-				pLab14=0;
-			};
-		}
-	}
+	void SetIdx( int n );
 
 	//------------------------------------------------------------------------------
 	void Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y );
