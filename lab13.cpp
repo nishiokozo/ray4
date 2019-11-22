@@ -42,7 +42,7 @@ static	bool	bPause = false;
 
 
 //------------------------------------------------------------------------------
-void Lab::lab13_intersect_plate_curve( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
+void Lab::lab13_intersect_plate_curve( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	rgb col = rgb( 1, 1, 1 );
@@ -69,6 +69,11 @@ void Lab::lab13_intersect_plate_curve( Lab& lab, SysKeys& keys, SysMouse& mouse,
 		//平面
 		lab.tblObj.emplace_back( new Obj(vect3(  2.1	, 0.5,	2.0 )) );	// 平面原点
 		lab.tblObj.emplace_back( new Obj(vect3(  2.0	, 0.7,  2.0 )) );	// 平面法線
+
+		//GUI登録
+		cp.tbls.clear();
+		cp.tbltblEdge.clear();
+		cp.tbls.emplace_back( lab.tblObj );
 	}
 
 	// 設定

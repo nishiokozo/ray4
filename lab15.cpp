@@ -27,7 +27,7 @@
 #include "lab15.h"
 
 //------------------------------------------------------------------------------
-void Lab15::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
+void Lab15::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	// 画面クリア
@@ -44,6 +44,7 @@ void Lab15::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 		pers.cam.pos = vect3( 0.0, 2.0, -5.0 );
 		pers.cam.at = vect3( 0,  1.0, 0 );
 
+
 		// 点
 		lab.tblObj.emplace_back( 	new Point3(vect3(-1.0, 0.0, 0.0 ),vect3( 0.0, 0.0, 1.0 ),vect3( 0.0, 0.0,-1.0 )) );
 		lab.tblObj.emplace_back( 	new Point3(vect3( 1.0, 0.0, 0.0 ),vect3( 0.0, 0.0,-1.0 ),vect3( 0.0, 0.0, 1.0 )) );
@@ -51,6 +52,12 @@ void Lab15::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 		(*this).idxPoint.emplace_back( 0 );
 		(*this).idxPoint.emplace_back( 1 );
 		(*this).idxPoint.emplace_back( 0 );
+
+
+		//GUI登録
+		cp.tbls.clear();
+		cp.tbltblEdge.clear();
+		cp.tbls.emplace_back( lab.tblObj );
 
 
 
@@ -186,6 +193,7 @@ void Lab15::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 						gui.one.bSelected_b = false;
 					}
 	*/
+	
 				}
 
 				{
@@ -203,6 +211,11 @@ void Lab15::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 		//=================================
 		if ( bCut )
 		{
+			//GUI登録
+			cp.tbls.clear();
+			cp.tbltblEdge.clear();
+			cp.tbls.emplace_back( lab.tblObj );
+
 			// テーブルの再作成しないとうまく中身が参照できない
 ///			continue;
 		}

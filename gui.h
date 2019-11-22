@@ -3,8 +3,7 @@
 
 struct Gui
 {
-	vector<vector<Obj*>> tbls;
-	vector<vector<Edge*>> tbltblEdge;
+	struct Cp cp;	// Controll Point
 
 	bool bShowPoint = true;
 
@@ -53,9 +52,9 @@ struct Gui
 	int EntryTbl( vector<Obj*>tbl, vector<Edge*>tblEdge )
 	//------------------------------------------------------------------------------
 	{
-		int idx =  (signed)tbls.size();
-		tbls.emplace_back( tbl );
-		tbltblEdge.emplace_back( tblEdge );
+		int idx =  (signed)cp.tbls.size();
+		cp.tbls.emplace_back( tbl );
+		cp.tbltblEdge.emplace_back( tblEdge );
 		return idx;
 	}
 

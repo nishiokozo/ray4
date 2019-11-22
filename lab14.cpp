@@ -29,7 +29,7 @@
 
 
 //------------------------------------------------------------------------------
-void Lab14::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
+void Lab14::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	// 画面クリア
@@ -59,6 +59,11 @@ void Lab14::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 		lab.tblObj.emplace_back( new Obj( vect3(	0.0,	0.12,	 0.5)*1.2 ) );
 		lab.tblObj.emplace_back( new Obj( vect3(	-0.9,	0.12,	 0.5)*1.2 ) );
 
+
+		//GUI登録
+		cp.tbls.clear();
+		cp.tbltblEdge.clear();
+		cp.tbls.emplace_back( lab.tblObj );
 	}
 
 //				(*this).bActive = true;

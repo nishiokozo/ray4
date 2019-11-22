@@ -19,7 +19,6 @@ struct Point3 : Obj
 	Point3( vect3 _pos, vect3 _a, vect3 _b ) :Obj(_pos) { pos=_pos; a=_a; b=_b;}
 };
 
-
 struct Edge
 {
 	bool	bSelected	 = false;
@@ -33,6 +32,13 @@ struct Edge
 	Edge( int _n0, int _n1, rgb c, float w ) : n0(_n0),n1(_n1),col(c),wide(w){};
 	virtual ~Edge(){};
 };
+
+struct Cp
+{
+	vector<vector<Obj*>> tbls;
+	vector<vector<Edge*>> tbltblEdge;
+};
+
 
 struct Pers
 {

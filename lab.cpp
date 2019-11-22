@@ -27,6 +27,7 @@
 #include "lab0.h"
 #include "lab14.h"
 #include "lab15.h"
+#include "lab16.h"
 
 
 
@@ -173,7 +174,7 @@ void Lab::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, flo
 };
 
 //------------------------------------------------------------------------------
-static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
+static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	static bool bGrid = true;
@@ -344,7 +345,7 @@ static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 }
 
 //------------------------------------------------------------------------------
-static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
+static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	const float	G	= -9.80665;				// 重力加速度
@@ -446,6 +447,12 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 			pers.axis.bAxisX = true;
 			pers.axis.bAxisY = true;
 			pers.axis.bAxisZ = false;
+
+			//GUI登録
+			cp.tbls.clear();
+			cp.tbltblEdge.clear();
+			cp.tbls.emplace_back( lab.tblObj );
+			cp.tbltblEdge.emplace_back( lab.tblEdge );
 		}
 
 		Ball&	ball = *dynamic_cast<Ball*>(lab.tblObj[0]);
@@ -588,7 +595,7 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 }
 
 //------------------------------------------------------------------------------
-static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
+static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	const float	G	= -9.80665;				// 重力加速度
@@ -645,6 +652,12 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 		for ( Edge* p : lab.tblEdge ) delete p;
 		lab.tblEdge.clear();
 		lab.tblEdge.emplace_back( new Edge(1,2) );
+
+		//GUI登録
+		cp.tbls.clear();
+		cp.tbltblEdge.clear();
+		cp.tbls.emplace_back( lab.tblObj );
+		cp.tbltblEdge.emplace_back( lab.tblEdge );
 
 		pers.axis.bAxisX = true;
 		pers.axis.bAxisY = false;
@@ -775,7 +788,7 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 }
 
 //------------------------------------------------------------------------------
-static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
+static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	const float	G	= -9.80665;				// 重力加速度
@@ -823,6 +836,12 @@ static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysG
 		for ( Edge* p : lab.tblEdge ) delete p;
 		lab.tblEdge.clear();
 		lab.tblEdge.emplace_back( new Edge(0,1) );
+
+		//GUI登録
+		cp.tbls.clear();
+		cp.tbltblEdge.clear();
+		cp.tbls.emplace_back( lab.tblObj );
+		cp.tbltblEdge.emplace_back( lab.tblEdge );
 
 		pers.axis.bAxisX = true;
 		pers.axis.bAxisY = false;
@@ -877,7 +896,7 @@ static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysG
 }
 
 //------------------------------------------------------------------------------
-static void lab6_tire3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
+static void lab6_tire3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	//画面クリア
@@ -994,7 +1013,7 @@ static void lab6_tire3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, 
 }
 
 //------------------------------------------------------------------------------
-static void lab5_furiko2d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
+static void lab5_furiko2d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	const float	G	= -9.80665;				// 重力加速度
@@ -1036,6 +1055,12 @@ static void lab5_furiko2d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra
 		lab.tblEdge.clear();
 		lab.tblEdge.emplace_back( new Edge(0,1) );
 
+		//GUI登録
+		cp.tbls.clear();
+		cp.tbltblEdge.clear();
+		cp.tbls.emplace_back( lab.tblObj );
+		cp.tbltblEdge.emplace_back( lab.tblEdge );
+
 		rsp=0;
 	}
 	if ( keys.R.hi )	lab.bInitParam = false;
@@ -1069,7 +1094,7 @@ static void lab5_furiko2d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra
 	}
 }
 //------------------------------------------------------------------------------
-static void lab7_kakusokudo7( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
+static void lab7_kakusokudo7( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	const float	G	= -9.80665;				// 重力加速度
@@ -1122,6 +1147,12 @@ static void lab7_kakusokudo7( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& 
 		for ( Edge* p : lab.tblEdge ) delete p;
 		lab.tblEdge.clear();
 		lab.tblEdge.emplace_back( new Edge(0,1) );
+
+		//GUI登録
+		cp.tbls.clear();
+		cp.tbltblEdge.clear();
+		cp.tbls.emplace_back( lab.tblObj );
+		cp.tbltblEdge.emplace_back( lab.tblEdge );
 
 		bShot = false;
 	}
@@ -1232,7 +1263,7 @@ w=deg2rad(2);
 }
 
 //------------------------------------------------------------------------------
-static void lab4_furiko3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
+static void lab4_furiko3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	//画面クリア
@@ -1275,6 +1306,11 @@ static void lab4_furiko3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra
 		lab.tblObj.clear();
 		lab.tblObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
 		lab.tblObj.emplace_back( new Obj(vect3(-1, 2.0, 0)) );
+
+		//GUI登録
+		cp.tbls.clear();
+		cp.tbltblEdge.clear();
+		cp.tbls.emplace_back( lab.tblObj );
 		
 		vel = vect3(0,0,0);
 	}
@@ -1403,7 +1439,7 @@ mov =vel;
 //=================================
 
 //------------------------------------------------------------------------------
-static void lab3_gravityPlanet( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
+static void lab3_gravityPlanet( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	const float	G	= -9.80665;				// 重力加速度
@@ -1454,6 +1490,11 @@ static void lab3_gravityPlanet( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra
 		lab.tblObj.clear();
 		lab.tblObj.emplace_back( new Planet(vect3(-0.5,0.1,0),vect3(0, 0, -0.02)) );
 		lab.tblObj.emplace_back( new Planet(vect3( 0.5,0.1,0),vect3(0, 0, 0.02)) );
+
+		//GUI登録
+		cp.tbls.clear();
+		cp.tbltblEdge.clear();
+		cp.tbls.emplace_back( lab.tblObj );
 	}
 
 	const float	g = G *delta*delta;		// 重力加速度/frame
@@ -1524,7 +1565,7 @@ static void lab3_gravityPlanet( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra
 // 描画	角速度 実験
 //=================================
 //------------------------------------------------------------------------------
-static void lab2_kakusokudo( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
+static void lab2_kakusokudo( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	const float	G	= -9.80665;				// 重力加速度
@@ -1574,6 +1615,12 @@ static void lab2_kakusokudo( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 		lab.tblEdge.clear();
 		lab.tblEdge.emplace_back( new Edge(0,1) );
 		lab.tblEdge.emplace_back( new Edge(1,2,rgb(0,1,0),1) );
+
+		//GUI登録
+		cp.tbls.clear();
+		cp.tbltblEdge.clear();
+		cp.tbls.emplace_back( lab.tblObj );
+		cp.tbltblEdge.emplace_back( lab.tblEdge );
 
 		bShot = false;
 	}
@@ -1645,7 +1692,7 @@ static void lab2_kakusokudo( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 }
 
 //------------------------------------------------------------------------------
-static void lab1_graph( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
+static void lab1_graph( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	//画面クリア
@@ -1763,6 +1810,7 @@ void Lab::SetIdx( int n )
 			break;
 		case 14:	pLab = new Lab14;	break;
 		case 15:	pLab = new Lab15;	break;
+		case 16:	pLab = new Lab16;	break;
 		default:	pLab = new Lab0;	break;
 	}
 	
@@ -1770,72 +1818,72 @@ void Lab::SetIdx( int n )
 }
 
 //------------------------------------------------------------------------------
-void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
+void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
-	if ( pLab ) pLab->Update( (*this), keys, mouse, gra, pers, delta, text_y );
+	if ( pLab ) pLab->Update( (*this), keys, mouse, gra, pers, delta, text_y, cp );
 
 	switch( idx )
 	{
 		case 10:	// 描画	色見本
-			lab10_colors( (*this), keys, mouse, gra, pers, delta, text_y );
+			lab10_colors( (*this), keys, mouse, gra, pers, delta, text_y, cp );
 			break;
 
 		case 15:	// 描画	2d剛体
 		case 14:	// 描画	2d剛体
-//			lab14( (*this), keys, mouse, gra, pers, delta, text_y );
+//			lab14( (*this), keys, mouse, gra, pers, delta, text_y, cp );
 			break;
 
 		case 13:	// 描画	2d剛体
-			lab13_intersect_plate_curve( (*this), keys, mouse, gra, pers, delta, text_y );
+			lab13_intersect_plate_curve( (*this), keys, mouse, gra, pers, delta, text_y, cp );
 			break;
 
 		case 12:	// 描画	2d剛体
-			lab12_RidgePlateDot( (*this), keys, mouse, gra, pers, delta, text_y );
+			lab12_RidgePlateDot( (*this), keys, mouse, gra, pers, delta, text_y, cp );
 			break;
 
 		case 11:	// 描画	2d剛体
-			lab11_RidgePlateDot( (*this), keys, mouse, gra, pers, delta, text_y );
+			lab11_RidgePlateDot( (*this), keys, mouse, gra, pers, delta, text_y, cp );
 			break;
 
 		case 9:	// 描画	2d剛体
-			lab9_2dRidge( (*this), keys, mouse, gra, pers, delta, text_y );
+			lab9_2dRidge( (*this), keys, mouse, gra, pers, delta, text_y, cp );
 			break;
 
 		case 8:	// 描画	位相空間
-			lab8_vector_six_lab8( (*this), keys, mouse, gra, pers, delta, text_y );
+			lab8_vector_six_lab8( (*this), keys, mouse, gra, pers, delta, text_y, cp );
 			break;
 
 		case 1:	// 描画	グラフ実験
-			lab1_graph( (*this), keys, mouse, gra, pers, delta, text_y );
+			lab1_graph( (*this), keys, mouse, gra, pers, delta, text_y, cp );
 			break;
 
 		case 2:// 描画	角速度 実験
-			lab2_kakusokudo( (*this), keys, mouse, gra, pers, delta, text_y );
+			lab2_kakusokudo( (*this), keys, mouse, gra, pers, delta, text_y, cp );
 			break;
 
 		case 7:// 描画	角速度 実験
-			lab7_kakusokudo7( (*this), keys, mouse, gra, pers, delta, text_y );
+			lab7_kakusokudo7( (*this), keys, mouse, gra, pers, delta, text_y, cp );
 			break;
 
 		case 3:	// 描画	引力実験
-			lab3_gravityPlanet( (*this), keys, mouse, gra, pers, delta, text_y );
+			lab3_gravityPlanet( (*this), keys, mouse, gra, pers, delta, text_y, cp );
 			break;
 
 		case 4:	// 描画	振り子3D実験
-			lab4_furiko3d( (*this), keys, mouse, gra, pers, delta, text_y );
+			lab4_furiko3d( (*this), keys, mouse, gra, pers, delta, text_y, cp );
 			break;
 
 		case 5:	// 描画	振り子2D実験
-			lab5_furiko2d( (*this), keys, mouse, gra, pers, delta, text_y );
+			lab5_furiko2d( (*this), keys, mouse, gra, pers, delta, text_y, cp );
 			break;
 
 		case 6:	// 描画	タイヤ実験実験
-			lab6_tire3d( (*this), keys, mouse, gra, pers, delta, text_y );
+			lab6_tire3d( (*this), keys, mouse, gra, pers, delta, text_y, cp );
 			break;
 
 		default:
-//			lab0_gridonly( (*this), keys, mouse, gra, pers, delta, text_y );
+//			lab0_gridonly( (*this), keys, mouse, gra, pers, delta, text_y, cp );
 
 			break;
 	}

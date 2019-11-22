@@ -57,7 +57,7 @@ struct Ball:Obj
 };
 
 //------------------------------------------------------------------------------
-void Lab::lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
+void Lab::lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 delta = 1/60.0;
@@ -82,6 +82,11 @@ delta = 1/60.0;
 		pers.cam.pos = vect3(	0.0,	2.0, -5.0 );
 		pers.cam.at = vect3( 	0.0,	0.5, 0.0 );
 
+		// カーソル
+		pers.axis.bAxisX = true;
+		pers.axis.bAxisY = true;
+		pers.axis.bAxisZ = true;
+
 		//点
 		for ( Obj* p : lab.tblObj ) delete p;
 		lab.tblObj.clear();
@@ -94,10 +99,12 @@ delta = 1/60.0;
 		lab.tblEdge.clear();
 		lab.tblEdge.emplace_back( new Edge(1,2, col7,1) );
 
-		// カーソル
-		pers.axis.bAxisX = true;
-		pers.axis.bAxisY = true;
-		pers.axis.bAxisZ = true;
+		//GUI登録
+		cp.tbls.clear();
+		cp.tbltblEdge.clear();
+		cp.tbls.emplace_back( lab.tblObj );
+		cp.tbltblEdge.emplace_back( lab.tblEdge );
+
 	}
 
 	// 初期化：パラメータ
