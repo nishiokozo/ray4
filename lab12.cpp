@@ -62,7 +62,11 @@ void Lab::lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra&
 {
 delta = 1/60.0;
 	bool bStep=false;
-//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
+
+	//画面クリア
+	gra.Clr(rgb(0.3,0.3,0.3));
+	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
+
 	gra.Print(1,(float)text_y++,to_string(lab.idx)+" : " + string(__func__ )); 
 
 	//----
@@ -136,7 +140,8 @@ delta = 1/60.0;
 		}
 
 		// 二次曲線分との衝突だが、線分との衝突で近似している
-		auto[flg,q0,s] = func_distance_Plate_Segline( plate_p, plate_n, p0+plate_n/1024.0, p0 + d ); // 『+plate_n/1024.0』は線上を突き抜け内容にする処置。
+		auto[flg,q0,s] = func_intersect_Plate_SegLine( plate_p, plate_n, p0+plate_n/1024.0, p0 + d ); // 『+plate_n/1024.0』は線上を突き抜け内容にする処置。
+//		auto[flg,q0s] = func_intersect_Plate_Curve( plate_p, plate_n, p0, vg, v0 );
 
 		// 衝突
 		if ( flg )

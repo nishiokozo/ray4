@@ -267,7 +267,7 @@ struct Bezier
 				// マウスベクトルとの最近点
 				if ( bSerch )
 				{
-					auto[b,d,Q0,Q1,t0,t1] = func_distance_Line_Segline( P, I, pos0, pos1 );
+					auto[b,d,Q0,Q1,t0,t1] = func_intersect_Line_SegLine( P, I, pos0, pos1 );
 					if ( b ) 
 					{
 						if ( mind > d && 0.2 > d )
@@ -818,12 +818,12 @@ struct Apr : public Sys
 			//=================================
 			// 画面クリア
 			//=================================
-			gra.Clr(rgb(0.3,0.3,0.3));
+//			gra.Clr(rgb(0.3,0.3,0.3));
 
 			//=================================
 			// 床グリッド描画
 			//=================================
-			pers.grid.DrawGrid( gra, pers );
+//			pers.grid.DrawGrid( gra, pers );
 
 
 
@@ -840,7 +840,7 @@ struct Apr : public Sys
 				vect3 P2 = vect3( 0, 0.4, 0 );
 				vect3 P3 = vect3( 0.5, 0.6, 0.4 );
 
-				auto[b,d,Q0,Q1,t0,t1] = func_distance_Line_Segline( P, I, P2, P3 );
+				auto[b,d,Q0,Q1,t0,t1] = func_intersect_Line_SegLine( P, I, P2, P3 );
 
 				if ( b ) pers.pen.line3d( gra, pers, Q0, Q1,  vect3(0,1,0));
 				else pers.pen.line3d( gra, pers, Q0, Q1,  vect3(1,0,0));

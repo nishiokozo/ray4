@@ -121,7 +121,7 @@ tuple<bool,vect3> Pers::calcScreenToGround( vect2 q )	// 透視変換後の画�
 {
 	vect3 P = calcScreenToWorld2( q );
 	vect3 I = calcRayvect( P );
-	auto[b,Q,s] = func_distance_Plate_Harfline( vect3(0,0,0), vect3(0,1,0), P, I );
+	auto[b,Q,s] = func_intersect_Plate_HarfLine( vect3(0,0,0), vect3(0,1,0), P, I );
 	return {b,Q};
 }
 

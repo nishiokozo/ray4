@@ -45,17 +45,13 @@ static	bool	bPause = false;
 void Lab::lab13( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
 //------------------------------------------------------------------------------
 {
-//	rgb col = rgb( 0.6, 1, 0.75 );
 	rgb col = rgb( 1, 1, 1 );
+
+	//画面クリア
 	gra.Clr(col/5);
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, col/3 );
 
-
 	gra.Print(1,(float)text_y++,to_string(lab.idx)+" : " + string(__func__ )); 
-
-
-	vect3 vg = vect3(0,G,0);
-	vect3 v0 = vect3(1,1,0);
 
 	// 初期化：オール
 	if ( !lab.bInitAll )
@@ -67,6 +63,7 @@ void Lab::lab13( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pe
 		pers.cam.at = vect3( 	0.0,	2.3, 0.0 );
 
 		//点
+		lab.tblObj.emplace_back( new Obj( vect3(  0,	1,	0	 ) ) );
 		lab.tblObj.emplace_back( new Obj( vect3(  2, 4.0,  2.0 ) ) );
 		lab.tblObj.emplace_back( new Obj( vect3(  0, G,  0 ) ) );
 		//平面
@@ -75,15 +72,17 @@ void Lab::lab13( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pe
 	}
 
 	// 設定
-	vect3	plate_p = (*lab.tblObj[2]).pos;
-	vect3	plate_n = ( (*lab.tblObj[3]).pos - plate_p ).normalize();
-	v0 = lab.tblObj[0]->pos ;
-	vg = lab.tblObj[1]->pos ;
+	int n = 0;
+	vect3	p0 = lab.tblObj[n++]->pos ;
+	vect3	v0 = lab.tblObj[n++]->pos -p0;
+	vect3	vg = lab.tblObj[n++]->pos -p0;
+	vect3	plate_p = (*lab.tblObj[n++]).pos;
+	vect3	plate_n = ( (*lab.tblObj[n++]).pos - plate_p ).normalize();
 
 	// 描画
 	for ( float t = 0 ; t < 1.0 ; t += 0.001 )
 	{
-		vect3 p = func_accelerationGetDistance_TVv( vg, t, v0 );	
+		vect3 p = func_accelerationGetDistance_TVv( vg, t, v0 )+p0;	
 
 		float d = dot( p-plate_p, plate_n );
 
@@ -99,13 +98,23 @@ void Lab::lab13( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pe
 	}
 
 	//  平面と二次曲線の交差判定
-	auto[flg,Q,s] = func_intersect_Plate_Curve( plate_n, plate_p, vg, v0 );
+	auto[flg,Q,t] = func_intersect_Plate_SegCurve( plate_p, plate_n, p0, 1.0, vg, v0 );
 
-	pers.pen.pset3d( gra, pers, Q, col2, 7 );
+	gra.Print(1,(float)text_y++, " t " + to_string(t)); 
+
+	if ( flg )
+	{
+		pers.pen.pset3d( gra, pers, Q+p0, col2, 7 );
+	}
+	else
+	{
+		pers.pen.pset3d( gra, pers, Q+p0, col1, 7 );
+	}
 	
 	
-	lab.drawVect( gra, pers, text_y, vect3(0,0,0), v0	,1	, col, "v" );
-	lab.drawVect( gra, pers, text_y, vect3(0,0,0), vg	,1	, col, "a" );
+	
+	lab.drawVect( gra, pers, text_y, p0, v0	,1	, col, "v" );
+	lab.drawVect( gra, pers, text_y, p0, vg	,1	, col, "a" );
 	pers.prim.DrawPlate( gra, pers, plate_p, plate_n, 5, col/2.0 );
 
 }

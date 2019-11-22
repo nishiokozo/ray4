@@ -441,8 +441,8 @@ void Gui::MoveObj( SysGra& gra, Pers& pers, Gui& gui, vector<vector<Obj*>>& tbls
 			vect3 P1 = pers.calcScreenToWorld3( vect3(mpos,0) );
 			vect3 I0 = pers.calcRayvect( P0 );
 			vect3 I1 = pers.calcRayvect( P1 );
-			auto[b0,Q0,s0] = func_distance_Plate_Harfline( vect3(0,0,0), vect3(0,0,-1), P0, I0);
-			auto[b1,Q1,s1] = func_distance_Plate_Harfline( vect3(0,0,0), vect3(0,0,-1), P1, I1);
+			auto[b0,Q0,s0] = func_intersect_Plate_HarfLine( vect3(0,0,0), vect3(0,0,-1), P0, I0);
+			auto[b1,Q1,s1] = func_intersect_Plate_HarfLine( vect3(0,0,0), vect3(0,0,-1), P1, I1);
 			v = Q1-Q0;
 		}
 		else
@@ -453,8 +453,8 @@ void Gui::MoveObj( SysGra& gra, Pers& pers, Gui& gui, vector<vector<Obj*>>& tbls
 			vect3 P1 = pers.calcScreenToWorld3( vect3(mpos,0) );
 			vect3 I0 = pers.calcRayvect( P0 );
 			vect3 I1 = pers.calcRayvect( P1 );
-			auto[b0,Q0,s0] = func_distance_Plate_Harfline( vect3(0,0,0), vect3(0,1,0), P0, I0);
-			auto[b1,Q1,s1] = func_distance_Plate_Harfline( vect3(0,0,0), vect3(0,1,0), P1, I1);
+			auto[b0,Q0,s0] = func_intersect_Plate_HarfLine( vect3(0,0,0), vect3(0,1,0), P0, I0);
+			auto[b1,Q1,s1] = func_intersect_Plate_HarfLine( vect3(0,0,0), vect3(0,1,0), P1, I1);
 			v = Q1-Q0;
 		}
 		for ( vector<Obj*>& tblPoint : tbls )
