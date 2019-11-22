@@ -98,17 +98,17 @@ void Lab::lab13_intersect_plate_curve( Lab& lab, SysKeys& keys, SysMouse& mouse,
 	}
 
 	//  平面と二次曲線の交差判定
-	auto[flg,Q,t] = func_intersect_Plate_SegCurve( plate_p, plate_n, p0, 1.0, vg, v0 );
+	auto[flg,Q,t] = func_intersect_Plate_SegCurve( plate_p, plate_n, p0, 0, 1.0, vg, v0 );
 
 	gra.Print(1,(float)text_y++, " t " + to_string(t)); 
 
 	if ( flg )
 	{
-		pers.pen.pset3d( gra, pers, Q+p0, col2, 7 );
+		pers.pen.pset3d( gra, pers, Q, col2, 7 );
 	}
 	else
 	{
-		pers.pen.pset3d( gra, pers, Q+p0, col1, 7 );
+		pers.pen.pset3d( gra, pers, Q, col1, 7 );
 	}
 	
 	

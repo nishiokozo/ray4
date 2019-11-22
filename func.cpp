@@ -13,10 +13,10 @@
 using namespace std;
 
 //------------------------------------------------------------------------------
-static tuple<bool,float>func_intersect_Plate_Curve_t( vect3 plate_P, vect3 plate_N, vect3 curve_P0, vect3 curve_A, vect3 curve_V )
+static tuple<bool,float>func_intersect_Plate_Curve_t( vect3 plate_P, vect3 plate_N, vect3 curve_A, vect3 curve_V )
 //------------------------------------------------------------------------------
 {
-	vect3 P = plate_P - curve_P0;
+	vect3 P = plate_P;
 	vect3 N = plate_N;
 	vect3 A = curve_A;
 	vect3 V = curve_V;
@@ -128,35 +128,31 @@ static tuple<bool,float>func_intersect_Plate_Curve_t( vect3 plate_P, vect3 plate
 tuple<bool,vect3,float>func_intersect_Plate_Curve( vect3 plate_P, vect3 plate_N, vect3 curve_P0, vect3 curve_A, vect3 curve_V )
 //------------------------------------------------------------------------------
 {
-	auto[flg,t] = func_intersect_Plate_Curve_t( plate_P, plate_N, curve_P0, curve_A, curve_V );
+	// 平面と曲線の交差判定
+
+	auto[flg,t] = func_intersect_Plate_Curve_t( plate_P-curve_P0, plate_N, curve_A, curve_V );
 	if ( flg )
 	{
-		vect3 Q = func_accelerationGetDistance_TVv( curve_A, t, curve_V );
+		vect3 Q = func_accelerationGetDistance_TVv( curve_A, t, curve_V ) + curve_P0;
 		return {true,Q,t};
 	}
 	return {false,vect3(0,0,0),t};
 }
 
 //------------------------------------------------------------------------------
-tuple<bool,vect3,float>func_intersect_Plate_SegCurve( vect3 plate_P, vect3 plate_N, vect3 curve_P0, float curve_t, vect3 curve_A, vect3 curve_V )
+tuple<bool,vect3,float>func_intersect_Plate_SegCurve( vect3 plate_P, vect3 plate_N, vect3 curve_P0, float curve_t0, float curve_t1, vect3 curve_A, vect3 curve_V )
 //------------------------------------------------------------------------------
 {
-    //  P :平面原点ベクトル                                               //
-    //  N :平面法線ベクトル                                               //
-    //  P0:曲線原点                                                       //
-    //  A :曲線加速度ベクトル                                             //
-    //  V :曲線初速度ベクトル                                             //
-    //  Q :交差点ベクトル                                                 //
-    //  t :時間                                                           //
+	// 平面と曲線分の交差判定
 
-	auto[flg,t] = func_intersect_Plate_Curve_t( plate_P, plate_N, curve_P0, curve_A, curve_V );
+	auto[flg,t] = func_intersect_Plate_Curve_t( plate_P-curve_P0, plate_N, curve_A, curve_V );
 
 	if ( flg )
 	{
-		// 原点(t=0)以上、curve_t未満のみ
-		if ( t > 0 && t < curve_t )
+		// 原点(curve_t0)以上、curve_t1未満のみ
+		if ( t >= curve_t0 && t < curve_t1 )
 		{
-			vect3 Q = func_accelerationGetDistance_TVv( curve_A, t, curve_V );
+			vect3 Q = func_accelerationGetDistance_TVv( curve_A, t, curve_V ) + curve_P0;
 
 			return {flg,Q,t};
 		}

@@ -65,7 +65,7 @@ delta = 1/60.0;
 
 	//画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
+//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 
 	gra.Print(1,(float)text_y++,to_string(lab.idx)+" : " + string(__func__ )); 
 
@@ -79,15 +79,15 @@ delta = 1/60.0;
 	{
 		lab.bInitAll = true;
 		//カメラ
-		pers.cam.pos = vect3(	0.0,	0.3, -3.0 );
-		pers.cam.at = vect3( 	0.0,	0.3, 0.0 );
+		pers.cam.pos = vect3(	0.0,	2.0, -5.0 );
+		pers.cam.at = vect3( 	0.0,	0.5, 0.0 );
 
 		//点
 		for ( Obj* p : lab.tblObj ) delete p;
 		lab.tblObj.clear();
 		lab.tblObj.emplace_back( new Ball(vect3(  0		, 1.0,  0.0 ), vect3(0,0,0)) );
-		lab.tblObj.emplace_back( new Obj(vect3( -0.3	, 0.5,	0.0 )) );	// 平面原点
-		lab.tblObj.emplace_back( new Obj(vect3( -0.3	, 0.7,  0.0 )) );	// 平面法線
+		lab.tblObj.emplace_back( new Obj(vect3( -0.3	, 0.0,	0.0 )) );	// 平面原点
+		lab.tblObj.emplace_back( new Obj(vect3( -0.3	, 0.2,  0.0 )) );	// 平面法線
 
 		// 線
 		for ( Edge* p : lab.tblEdge ) delete p;
@@ -139,9 +139,7 @@ delta = 1/60.0;
 			vn = v0 + vg*delta;	// 仮速度
 		}
 
-		// 二次曲線分との衝突だが、線分との衝突で近似している
-		auto[flg,q0,s] = func_intersect_Plate_SegLine( plate_p, plate_n, p0+plate_n/1024.0, p0 + d ); // 『+plate_n/1024.0』は線上を突き抜け内容にする処置。
-//		auto[flg,q0s] = func_intersect_Plate_Curve( plate_p, plate_n, p0, vg, v0 );
+		auto[flg,q0,t] = func_intersect_Plate_SegCurve( plate_p, plate_n, p0, -0.0001, delta, vg, v0 );
 
 		// 衝突
 		if ( flg )
@@ -151,7 +149,7 @@ delta = 1/60.0;
 			float t1 = func_accelerationGetTime_DVv( vg.abs(), dot(d1,vg.normalize()), dot(v0,vg.normalize()) );	// 衝突までの時間(s)
 			vect3 v1 = v0 + vg*t1;											// 衝突後の速度(m/s)
 
-			float rate_r	= 0.3;		// 反射係数
+			float rate_r	= 0.6;		// 反射係数
 			v1  = v1 - (1.0+rate_r)*dot( v1, plate_n ) * plate_n;
 
 			// 衝突後
@@ -182,8 +180,27 @@ delta = 1/60.0;
 	}
 
 
-	// 更新
-	pers.prim.DrawPlate( gra, pers, plate_p, plate_n, 4, col5/2.0 );
+	// プレート表示
+	pers.prim.DrawPlate( gra, pers, plate_p, plate_n, 32, col5/2.0 );
+
+	// 軌跡表示
+	for ( float t = 0 ; t < 1.0 ; t += 0.001 )
+	{
+		vect3 p = func_accelerationGetDistance_TVv( vg, t, v0 )+p0;	
+
+		float d = dot( p-plate_p, plate_n );
+
+		if ( d >0 ) 
+		{
+			pers.pen.pset3d( gra, pers, p, col5, 2 );
+		}
+		else
+		{
+			pers.pen.pset3d( gra, pers, p, col5/4, 1 );
+		}
+
+	}
+
 }
 
 /*
