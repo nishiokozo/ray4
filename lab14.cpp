@@ -33,10 +33,10 @@ struct Cutmull14
 
 	~Cutmull14()
 	{
-		for ( Obj* p : tblPoint ) delete p;
+//		for ( Obj* p : tblPoint ) delete p;
 	}
 	
-	
+/*	
 	vector<Obj*>	tblPoint =
 	{
 		new Obj( vect3(	-0.5,	0.12,	-0.5) ),
@@ -51,7 +51,7 @@ struct Cutmull14
 		new Obj( vect3(	0.0,	0.12,	 0.5)*1.2 ),
 		new Obj( vect3(	-0.9,	0.12,	 0.5)*1.2 ),
 	};
-	
+*/	
 
 	vector<ivect2>	tblIdx =
 	{
@@ -189,10 +189,21 @@ struct Cutmull14
 	}
 };
 
-static	unique_ptr<Cutmull14> pCutmull(new Cutmull14);
+static	Cutmull14* pCutmull = 0;
+
+
+LabPart::LabPart()
+{
+	pCutmull = new Cutmull14;
+}
+
+LabPart::~LabPart()
+{
+	delete pCutmull;
+}
 
 //------------------------------------------------------------------------------
-void Lab::lab14( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
+void LabPart::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
 //------------------------------------------------------------------------------
 {
 	// 画面クリア
@@ -208,6 +219,20 @@ void Lab::lab14( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pe
 		// カメラ
 		pers.cam.pos = vect3( 0.0, 2.0, -5.0 );
 		pers.cam.at = vect3( 0,  1.0, 0 );
+
+		// 点
+		lab.tblObj.emplace_back( new Obj( vect3(	-0.5,	0.12,	-0.5) ) );
+		lab.tblObj.emplace_back( new Obj( vect3(	+0.5,	0.12,	-0.5) ) );
+		lab.tblObj.emplace_back( new Obj( vect3(	+0.9,	0.12,	 0.5) ) );
+		lab.tblObj.emplace_back( new Obj( vect3(	 0.0,	0.12,	 0.5) ) );
+		lab.tblObj.emplace_back( new Obj( vect3(	-0.9,	0.12,	 0.5) ) );
+
+		lab.tblObj.emplace_back( new Obj( vect3(	-0.5,	0.12,	-0.5)*1.2 ) );
+		lab.tblObj.emplace_back( new Obj( vect3(	+0.5,	0.12,	-0.5)*1.2 ) );
+		lab.tblObj.emplace_back( new Obj( vect3(	+0.9,	0.12,	 0.5)*1.2 ) );
+		lab.tblObj.emplace_back( new Obj( vect3(	0.0,	0.12,	 0.5)*1.2 ) );
+		lab.tblObj.emplace_back( new Obj( vect3(	-0.9,	0.12,	 0.5)*1.2 ) );
+
 	}
 
 				(*pCutmull).bActive = true;
@@ -219,7 +244,8 @@ void Lab::lab14( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pe
 			if ( (*pCutmull).bActive )
 			{
 				// 描画
-				(*pCutmull).drawCutmull( gra, pers, (*pCutmull).tblPoint, (*pCutmull).tblIdx );
+//				(*pCutmull).drawCutmull( gra, pers, (*pCutmull).tblPoint, (*pCutmull).tblIdx );
+				(*pCutmull).drawCutmull( gra, pers, lab.tblObj, (*pCutmull).tblIdx );
 			}
 
 }

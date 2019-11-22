@@ -1726,6 +1726,7 @@ static void lab1_graph( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, P
 void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y )
 //------------------------------------------------------------------------------
 {
+
 	switch( idx )
 	{
 		case 10:	// 描画	色見本
@@ -1733,7 +1734,8 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float
 			break;
 
 		case 14:	// 描画	2d剛体
-			lab14( (*this), keys, mouse, gra, pers, delta, text_y );
+//			lab14( (*this), keys, mouse, gra, pers, delta, text_y );
+			if ( pLab14 ) pLab14->Update( (*this), keys, mouse, gra, pers, delta, text_y );
 			break;
 
 		case 13:	// 描画	2d剛体

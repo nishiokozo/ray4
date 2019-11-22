@@ -1,3 +1,11 @@
+struct Lab;
+struct LabPart
+{
+	LabPart();
+	virtual ~LabPart();
+	void Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y );
+};
+
 struct Lab
 {
 	vector<Obj*> tblObj;
@@ -10,6 +18,7 @@ struct Lab
 	
 	Lab();
 
+	LabPart*	pLab14 = 0;
 
 	//------------------------------------------------------------------------------
 	~Lab()
@@ -33,6 +42,23 @@ struct Lab
 
 		for ( Edge* p : (*this).tblEdge ) delete p;
 		tblEdge.clear();
+
+
+		if ( idx == 14 )
+		{	
+			if ( !pLab14 )
+			{
+				pLab14 = new LabPart;
+			}
+		}
+		else
+		{
+			if ( pLab14 ) 
+			{
+				delete pLab14;
+				pLab14=0;
+			};
+		}
 	}
 
 	//------------------------------------------------------------------------------
@@ -45,6 +71,6 @@ struct Lab
 	void lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y );
 	void lab13_intersect_plate_curve( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y );
 
-	void lab14( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y );
+//	void lab14( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y );
 
 };

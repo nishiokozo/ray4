@@ -661,7 +661,8 @@ struct Apr : public Sys
 	//------------------------------------------------------------------------------
 	{
 		lab.idx = num;
-
+		lab.SetIdx(lab.idx);
+		
 		//	ウィンドウ生成関数
 		auto funcOnCreate = [&]()
 		{
