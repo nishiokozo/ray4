@@ -32,4 +32,6 @@ public:
 	void SetOnDestroy( std::function<void()> func );
 
 
+	struct Impl;
+
 };

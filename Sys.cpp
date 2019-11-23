@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include <functional>
 
 #include "SysKeys.h"

@@ -2,6 +2,7 @@
 // 2019/06/25 ray4
 
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <chrono>
 #include <thread>       // sleep_for
@@ -16,7 +17,7 @@ using namespace std;
 
 
 
-static struct
+struct SysWin::Impl
 {
 	function<void()> funcOnCreate;
 	function<void( int width, int height)> funcOnSize;
@@ -40,10 +41,30 @@ static struct
 	int	wheelAccum;	//	蓄積用
 	int	wheelResult;	//	結果出力用
 
-} g;
+	static LRESULT CALLBACK WinProc
+	(
+		  HWND		hWnd
+		, UINT		uMsg
+		, WPARAM	wParam	//メッセージの付加情報
+		, LPARAM	lParam	//メッセージの付加情報
+	);
+};
+static SysWin::Impl g;
+
+//------------------------------------------------------------------------------
+SysWin::~SysWin()
+//------------------------------------------------------------------------------
+{
+}
+
+//------------------------------------------------------------------------------
+SysWin::SysWin()
+//------------------------------------------------------------------------------
+{
+}
 
 ///------------------------------------------------------------------------------
-static LRESULT CALLBACK WinProc
+LRESULT CALLBACK SysWin::Impl::WinProc
 //------------------------------------------------------------------------------
 (
 	  HWND		hWnd
@@ -238,17 +259,6 @@ SysWin&	SysWin::GetInstance()
 	static SysWin	instance;
 	return instance;
 }
-//------------------------------------------------------------------------------
-SysWin::~SysWin()
-//------------------------------------------------------------------------------
-{
-}
-
-//------------------------------------------------------------------------------
-SysWin::SysWin()
-//------------------------------------------------------------------------------
-{
-}
 
 
 // ウィンドウ名を変える
@@ -281,7 +291,7 @@ void SysWin::InitWinapi()
 	// ウインドウクラスパラメータセット
 	g.wndclass.cbSize			= sizeof( WNDCLASSEX );
 	g.wndclass.style			= CS_HREDRAW | CS_VREDRAW;
-	g.wndclass.lpfnWndProc		= WinProc;
+	g.wndclass.lpfnWndProc		= SysWin::Impl::WinProc;
 	g.wndclass.cbClsExtra		= 0;	// GetClassLong で取得可能なメモリ
 	g.wndclass.cbWndExtra		= 0;	// GetWindowLong で取得可能なメモリ
 	g.wndclass.hInstance		= g.hInstance;
