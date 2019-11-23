@@ -4,7 +4,8 @@ struct Lab16 : LabObj
 
 	void Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
 
-    struct Lab16Impl;
-    std::unique_ptr<Lab16Impl> pImpl; 
+    struct Impl;
+    std::unique_ptr<Impl> pImpl;
+
 
 };

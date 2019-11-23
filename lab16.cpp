@@ -13,6 +13,7 @@
 #include <iomanip>
 #include <tuple>
 #include <random>
+#include <memory>
 
 #include "geom.h"
 
@@ -29,19 +30,13 @@
 
 
 
-
-struct Lab16Impl
+struct Lab16::Impl
 {
-public:
 	unique_ptr<Skeleton> pSkeleton;
-
-	Lab16Impl() : pSkeleton(new Skeleton)
-	{
-	}
 };
 
 //------------------------------------------------------------------------------
-Lab16::Lab16() : pImpl( new Lab16Impl )
+Lab16::Lab16() : pImpl( new Lab16::Impl )
 //------------------------------------------------------------------------------
 {
 }
