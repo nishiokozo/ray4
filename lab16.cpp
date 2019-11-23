@@ -26,13 +26,75 @@
 #include "lab.h"
 #include "lab16.h"
 #include "skeleton.h"
-struct SkeletonUtil
-{
 
-	//-------------------------------------------------------------------------
-	void skeleton_update( SysKeys& keys, SysMouse& mouse, Pers& pers, Skeleton& skeleton )
-	//-------------------------------------------------------------------------
+
+
+
+class Lab16Impl
+{
+public:
+	unique_ptr<Skeleton> pSkeleton;
+
+	Lab16Impl() : pSkeleton(new Skeleton)
 	{
+	}
+};
+
+//------------------------------------------------------------------------------
+Lab16::Lab16()
+//------------------------------------------------------------------------------
+{
+	pImpl = new Lab16Impl;
+}
+
+//------------------------------------------------------------------------------
+Lab16::~Lab16()
+//------------------------------------------------------------------------------
+{
+	delete pImpl; 
+}
+
+//------------------------------------------------------------------------------
+void Lab16::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+//------------------------------------------------------------------------------
+{
+	// 画面クリア
+	gra.Clr(rgb(0.3,0.3,0.3));
+	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
+	gra.Print(1,(float)text_y++,to_string(lab.idx)+" : Skeleton" ); 
+
+	//初期化
+	if ( !lab.bInitAll )
+	{
+		lab.bInitAll = true;
+
+		// カメラ
+		pers.cam.pos = vect3( 0.0, 2.0, -5.0 );
+		pers.cam.at = vect3( 0,  1.0, 0 );
+
+		{
+			//gui.one.bEnable = false;
+			//読み込み
+			unique_ptr<Skeleton> pNew(new Skeleton);
+			pNew->LoadSkeleton( "bone.mot" );
+			pNew->stat.bShowSkin = false;
+			pNew->stat.bShowLocus = false;
+			pImpl->pSkeleton = move(pNew);
+
+			cp.tbls.clear();
+			cp.tbltblEdge.clear();
+			cp.tbls.emplace_back( pImpl->pSkeleton->tblPoint );
+			cp.tbltblEdge.emplace_back( pImpl->pSkeleton->tblEdge );
+		}
+
+
+	}
+
+	//=================================
+	// update
+	//=================================
+	{
+		Skeleton& skeleton = (*pImpl->pSkeleton);
 		if ( skeleton.bActive )
 		
 		{
@@ -99,11 +161,46 @@ struct SkeletonUtil
 
 	}
 
-	//-------------------------------------------------------------------------
-	void skeleton_draw( SysGra& gra, SysKeys& keys, SysMouse& mouse, Pers& pers, Skeleton& skeleton, int& text_y,vector<Obj*> tblPoint )
-	//-------------------------------------------------------------------------
+	//=================================
+	// キーフレームロード
+	//=================================
+	if ( keys.CTRL.on && keys.L.hi ) 
 	{
-		if ( skeleton.bActive == false ) return;
+		//読み込み
+		unique_ptr<Skeleton> pNew(new Skeleton);
+		pNew->LoadSkeleton( "bone.mot" );
+		pNew->stat.bShowSkin = false;
+		pNew->stat.bShowLocus = false;
+		pImpl->pSkeleton = move(pNew);
+
+		cp.tbls.clear();
+		cp.tbltblEdge.clear();
+		cp.tbls.emplace_back( pImpl->pSkeleton->tblPoint );
+		cp.tbltblEdge.emplace_back( pImpl->pSkeleton->tblEdge );
+	}
+	if ( keys.CTRL.on && keys.SEMICOLON.hi ) 
+	{
+		//読み込み
+		unique_ptr<Skeleton> pNew(new Skeleton);
+		pNew->LoadSkeleton( "human.mot" );
+		pNew->stat.bShowSkin = false;
+		pNew->stat.bShowLocus = false;
+		pImpl->pSkeleton = move(pNew);
+
+		cp.tbls.clear();
+		cp.tbltblEdge.clear();
+		cp.tbls.emplace_back( pImpl->pSkeleton->tblPoint );
+		cp.tbltblEdge.emplace_back( pImpl->pSkeleton->tblEdge );
+	}
+
+	//=================================
+	// draw
+	//=================================
+	if ( (*pImpl->pSkeleton).bActive == false ) return;
+	{
+		Skeleton& skeleton = (*pImpl->pSkeleton);
+		vector<Obj*> tblPoint = (*pImpl->pSkeleton).tblPoint;
+
 
 	#if 0 	//剛体実験
 		// 優先度つけ
@@ -305,80 +402,5 @@ struct SkeletonUtil
 			}
 		}
 	}
-};
-
-static	SkeletonUtil	util;
-static	unique_ptr<Skeleton> pSkeleton(new Skeleton);
-
-//------------------------------------------------------------------------------
-void Lab16::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
-//------------------------------------------------------------------------------
-{
-	// 画面クリア
-	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
-	gra.Print(1,(float)text_y++,to_string(lab.idx)+" : Skeleton" ); 
-
-	//初期化
-	if ( !lab.bInitAll )
-	{
-		lab.bInitAll = true;
-
-		// カメラ
-		pers.cam.pos = vect3( 0.0, 2.0, -5.0 );
-		pers.cam.at = vect3( 0,  1.0, 0 );
-
-		{
-			//gui.one.bEnable = false;
-			//読み込み
-			unique_ptr<Skeleton> pNew(new Skeleton);
-			pNew->LoadSkeleton( "human.mot" );
-			pNew->stat.bShowSkin = false;
-			pNew->stat.bShowLocus = false;
-			pSkeleton = move(pNew);
-
-			cp.tbls.clear();
-			cp.tbltblEdge.clear();
-			cp.tbls.emplace_back( pSkeleton->tblPoint );
-			cp.tbltblEdge.emplace_back( pSkeleton->tblEdge );
-		}
-
-
-	}
-
-	util.skeleton_update( keys, mouse, pers, (*pSkeleton) );
-	//=================================
-	// キーフレームロード
-	//=================================
-	if ( keys.CTRL.on && keys.L.hi ) 
-	{
-		//読み込み
-		unique_ptr<Skeleton> pNew(new Skeleton);
-		pNew->LoadSkeleton( "bone.mot" );
-		pNew->stat.bShowSkin = false;
-		pNew->stat.bShowLocus = false;
-		pSkeleton = move(pNew);
-
-		cp.tbls.clear();
-		cp.tbltblEdge.clear();
-		cp.tbls.emplace_back( pSkeleton->tblPoint );
-		cp.tbltblEdge.emplace_back( pSkeleton->tblEdge );
-	}
-	if ( keys.CTRL.on && keys.SEMICOLON.hi ) 
-	{
-		//読み込み
-		unique_ptr<Skeleton> pNew(new Skeleton);
-		pNew->LoadSkeleton( "human.mot" );
-		pNew->stat.bShowSkin = false;
-		pNew->stat.bShowLocus = false;
-		pSkeleton = move(pNew);
-
-		cp.tbls.clear();
-		cp.tbltblEdge.clear();
-		cp.tbls.emplace_back( pSkeleton->tblPoint );
-		cp.tbltblEdge.emplace_back( pSkeleton->tblEdge );
-	}
-
-	util.skeleton_draw( gra, keys, mouse, pers, (*pSkeleton), text_y, (*pSkeleton).tblPoint );
 
 }
