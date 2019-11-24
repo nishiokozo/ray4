@@ -1788,8 +1788,9 @@ void Lab::SetIdx( int n, Cp& cp )
 	tblEdge.clear();
 
 
-		cp.tbls.clear();
-		cp.tbltblEdge.clear();
+	cp.tbls.clear();
+	cp.tbltblEdge.clear();
+
 	if ( pLab ) 
 	{
 		delete pLab;
