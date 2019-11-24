@@ -240,7 +240,7 @@ struct Apr : public Sys
 					{
 						bByCamera = true;
 					}
-					gui.MoveObj( gra, pers, gui, gui.cp.tbls, mouse.pos, mouse.prev, mouse.mov, keys.T.on, bByCamera, bByFloor, bByXY );
+					gui.MoveObj( gra, pers, gui.cp.tbls, mouse.pos, mouse.prev, mouse.mov, keys.T.on, bByCamera, bByFloor, bByXY );
 /*
 					if ( (*pSkeleton).bActive )
 					{
@@ -258,7 +258,7 @@ struct Apr : public Sys
 			//=================================
 			// 表示 矩形カーソル、制御点
 			//=================================
-			gui.DrawController( gra, pers, gui, gui.cp.tbls, gui.cp.tbltblEdge, mouse.pos );
+			gui.DrawController( gra, pers, gui.cp.tbls, gui.cp.tbltblEdge, mouse.pos );
 			
 
 			//=================================

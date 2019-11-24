@@ -118,11 +118,11 @@ struct Gui
 	//------------------------------------------------------------------------------
 	// 選択リスト表示
 	//------------------------------------------------------------------------------
-	void DrawController( SysGra& gra, Pers& pers, Gui& gui, vector<vector<Obj*>>& tbls, vector<vector<Edge*>>& tbltblEdge, vect2 mpos );
+	void DrawController( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbls, vector<vector<Edge*>>& tbltblEdge, vect2 mpos );
 	//------------------------------------------------------------------------------
 
 	//------------------------------------------------------------------------------
-	void MoveObj( SysGra& gra, Pers& pers, Gui& gui, vector<vector<Obj*>>& tbls, vect2& mpos, vect2& mprev, vect2& mmov, bool bSame, bool bByCamera, bool bByFloor, bool bByXY );
+	void MoveObj( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbls, vect2& mpos, vect2& mprev, vect2& mmov, bool bSame, bool bByCamera, bool bByFloor, bool bByXY );
 	//------------------------------------------------------------------------------
 
 
