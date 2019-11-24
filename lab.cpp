@@ -31,6 +31,47 @@
 #include "lab15.h"
 #include "lab16.h"
 
+struct Lab1 : LabObj
+{
+	void Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
+};
+struct Lab2 : LabObj
+{
+	void Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
+};
+struct Lab3 : LabObj
+{
+	void Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
+};
+struct Lab4 : LabObj
+{
+	void Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
+};
+struct Lab5 : LabObj
+{
+	void Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
+};
+struct Lab6 : LabObj
+{
+	void Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
+};
+struct Lab7 : LabObj
+{
+	void Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
+};
+struct Lab8 : LabObj
+{
+	void Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
+};
+struct Lab9 : LabObj
+{
+	void Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
+};
+struct Lab10 : LabObj
+{
+	void Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
+};
+
 
 
 struct	Graphs
@@ -176,7 +217,7 @@ void Lab::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, flo
 };
 
 //------------------------------------------------------------------------------
-static void lab10_colors( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab10::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	static bool bGrid = true;
@@ -597,7 +638,7 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 }
 
 //------------------------------------------------------------------------------
-static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab9::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	const float	G	= -9.80665;				// 重力加速度
@@ -790,7 +831,7 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 }
 
 //------------------------------------------------------------------------------
-static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab8::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	const float	G	= -9.80665;				// 重力加速度
@@ -898,7 +939,7 @@ static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysG
 }
 
 //------------------------------------------------------------------------------
-static void lab6_tire3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab6::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	//画面クリア
@@ -1015,7 +1056,7 @@ static void lab6_tire3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, 
 }
 
 //------------------------------------------------------------------------------
-static void lab5_furiko2d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab5::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	const float	G	= -9.80665;				// 重力加速度
@@ -1096,7 +1137,7 @@ static void lab5_furiko2d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra
 	}
 }
 //------------------------------------------------------------------------------
-static void lab7_kakusokudo7( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab7::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	const float	G	= -9.80665;				// 重力加速度
@@ -1265,7 +1306,7 @@ w=deg2rad(2);
 }
 
 //------------------------------------------------------------------------------
-static void lab4_furiko3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab4::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	//画面クリア
@@ -1441,7 +1482,7 @@ mov =vel;
 //=================================
 
 //------------------------------------------------------------------------------
-static void lab3_gravityPlanet( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab3::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	const float	G	= -9.80665;				// 重力加速度
@@ -1567,7 +1608,7 @@ static void lab3_gravityPlanet( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra
 // 描画	角速度 実験
 //=================================
 //------------------------------------------------------------------------------
-static void lab2_kakusokudo( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab2::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	const float	G	= -9.80665;				// 重力加速度
@@ -1694,7 +1735,7 @@ static void lab2_kakusokudo( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 }
 
 //------------------------------------------------------------------------------
-static void lab1_graph( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab1::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	//画面クリア
@@ -1799,24 +1840,23 @@ void Lab::SetIdx( int n, Cp& cp )
 
 	switch( idx )
 	{
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-		case 5:
-		case 6:
-		case 7:
-		case 8:
-		case 9:
-		case 10:
-		case 11:
-			break;
+		case 0:		pLab = new Lab0;	break;
+		case 1:		pLab = new Lab1;	break;
+		case 2:		pLab = new Lab2;	break;
+		case 3:		pLab = new Lab3;	break;
+		case 4:		pLab = new Lab4;	break;
+		case 5:		pLab = new Lab5;	break;
+		case 6:		pLab = new Lab6;	break;
+		case 7:		pLab = new Lab7;	break;
+		case 8:		pLab = new Lab8;	break;
+		case 9:		pLab = new Lab9;	break;
+		case 10:	pLab = new Lab10;	break;
 		case 12:	pLab = new Lab12;	break;
 		case 13:	pLab = new Lab13;	break;
 		case 14:	pLab = new Lab14;	break;
 		case 15:	pLab = new Lab15;	break;
 		case 16:	pLab = new Lab16;	break;
-		default:	pLab = new Lab0;	break;
+		default: break;
 	}
 	
 
@@ -1827,57 +1867,6 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float
 //------------------------------------------------------------------------------
 {
 	if ( pLab ) pLab->Update( (*this), keys, mouse, gra, pers, delta, text_y, cp );
-
-	switch( idx )
-	{
-		case 10:	// 描画	色見本
-			lab10_colors( (*this), keys, mouse, gra, pers, delta, text_y, cp );
-			break;
-
-		case 11:	// 描画	2d剛体
-			lab11_RidgePlateDot( (*this), keys, mouse, gra, pers, delta, text_y, cp );
-			break;
-
-		case 9:	// 描画	2d剛体
-			lab9_2dRidge( (*this), keys, mouse, gra, pers, delta, text_y, cp );
-			break;
-
-		case 8:	// 描画	位相空間
-			lab8_vector_six_lab8( (*this), keys, mouse, gra, pers, delta, text_y, cp );
-			break;
-
-		case 1:	// 描画	グラフ実験
-			lab1_graph( (*this), keys, mouse, gra, pers, delta, text_y, cp );
-			break;
-
-		case 2:// 描画	角速度 実験
-			lab2_kakusokudo( (*this), keys, mouse, gra, pers, delta, text_y, cp );
-			break;
-
-		case 7:// 描画	角速度 実験
-			lab7_kakusokudo7( (*this), keys, mouse, gra, pers, delta, text_y, cp );
-			break;
-
-		case 3:	// 描画	引力実験
-			lab3_gravityPlanet( (*this), keys, mouse, gra, pers, delta, text_y, cp );
-			break;
-
-		case 4:	// 描画	振り子3D実験
-			lab4_furiko3d( (*this), keys, mouse, gra, pers, delta, text_y, cp );
-			break;
-
-		case 5:	// 描画	振り子2D実験
-			lab5_furiko2d( (*this), keys, mouse, gra, pers, delta, text_y, cp );
-			break;
-
-		case 6:	// 描画	タイヤ実験実験
-			lab6_tire3d( (*this), keys, mouse, gra, pers, delta, text_y, cp );
-			break;
-
-		default:
-
-			break;
-	}
 }
 
 //------------------------------------------------------------------------------
