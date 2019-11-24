@@ -114,7 +114,7 @@ struct Apr : public Sys
 				if ( (keys.ALT.on && mouse.R.on) || ( mouse.R.on && mouse.L.on ) ) pers.cam.Zoom( -mouse.mov.y/pers.getW((pers.cam.pos-pers.cam.at).abs()) );
 
 				// フォーカス
-				if ( keys.F.hi )	pers.Focus( gui.cp.tbls );
+				if ( keys.F.hi )	pers.Focus( gui.cp.tbltbl_pObj );
 				
 				// カメラマトリクス計算
 				pers.cam.Update();
@@ -170,7 +170,7 @@ struct Apr : public Sys
 
 				// 最近点検索
 				if ( !keys.ALT.on && mouse.L.hi ) 
-					gui.TouchFirst( gra, pers, gui.cp.tbls, mouse.pos );
+					gui.TouchFirst( gra, pers, gui.cp.tbltbl_pObj, mouse.pos );
 
 				// 矩形カーソル開始 新規選択
 				if ( !keys.ALT.on && mouse.L.on && !keys.CTRL.on && !keys.SHIFT.on && gui.one.bEnable == false && gui.rect_mode == Gui::G_CALC::NONE ) 
@@ -190,27 +190,27 @@ struct Apr : public Sys
 
 				// 矩形カーソル終了（選択決定）
 				if ( !keys.ALT.on && !mouse.L.on && gui.rect_mode != Gui::G_CALC::NONE ) 
-					gui.SelectRectEnd( gui.cp.tbls );
+					gui.SelectRectEnd( gui.cp.tbltbl_pObj );
 
 				// 矩形カーソル選択	
 				if ( !keys.ALT.on && mouse.L.on && gui.rect_mode != Gui::G_CALC::NONE ) 
-					gui.SelectRectBegin( pers, gui.cp.tbls , mouse.pos );
+					gui.SelectRectBegin( pers, gui.cp.tbltbl_pObj , mouse.pos );
 
 				// 単独 新規選択
-				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && gui.one.bEnable && gui.cp.tbls[ gui.one.idxTbl ][ gui.one.idxObj ]->bSelected == false ) 
-					gui.SelectOneOnly( gui.cp.tbls );
+				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && !keys.SHIFT.on && gui.one.bEnable && gui.cp.tbltbl_pObj[ gui.one.idxTbl ][ gui.one.idxObj ]->bSelected == false ) 
+					gui.SelectOneOnly( gui.cp.tbltbl_pObj );
 
 				// 単独 追加選択
 				if ( !keys.ALT.on && mouse.L.hi && !keys.CTRL.on && keys.SHIFT.on && gui.one.bEnable ) 
-					gui.SelectOneAdd( gui.cp.tbls );
+					gui.SelectOneAdd( gui.cp.tbltbl_pObj );
 
 				// 単独 反転選択
 				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && !keys.SHIFT.on && gui.one.bEnable ) 
-					gui.SelectOneRev( gui.cp.tbls );
+					gui.SelectOneRev( gui.cp.tbltbl_pObj );
 
 				// 単独 削除選択
 				if ( !keys.ALT.on && mouse.L.hi && keys.CTRL.on && keys.SHIFT.on && gui.one.bEnable ) 
-					gui.SelectOneSub( gui.cp.tbls );
+					gui.SelectOneSub( gui.cp.tbltbl_pObj );
 
 				// 移動
 
@@ -240,7 +240,7 @@ struct Apr : public Sys
 					{
 						bByCamera = true;
 					}
-					gui.MoveObj( gra, pers, gui.cp.tbls, mouse.pos, mouse.prev, mouse.mov, keys.T.on, bByCamera, bByFloor, bByXY );
+					gui.MoveObj( gra, pers, gui.cp.tbltbl_pObj, mouse.pos, mouse.prev, mouse.mov, keys.T.on, bByCamera, bByFloor, bByXY );
 /*
 					if ( (*pSkeleton).bActive )
 					{
@@ -258,7 +258,7 @@ struct Apr : public Sys
 			//=================================
 			// 表示 矩形カーソル、制御点
 			//=================================
-			gui.DrawController( gra, pers, gui.cp.tbls, gui.cp.tbltblEdge, mouse.pos );
+			gui.DrawController( gra, pers, gui.cp.tbltbl_pObj, gui.cp.tbltbl_pEdge, mouse.pos );
 			
 
 			//=================================
@@ -274,7 +274,7 @@ struct Apr : public Sys
 			if ( gui.one.bEnable )
 			{
 				gra.Print(1,(float)text_y++,string("idxTbl=")+to_string(gui.one.idxTbl)+":"+to_string(gui.one.idxObj) ); 
-				Obj* p =gui.cp.tbls[ gui.one.idxTbl ][ gui.one.idxObj ];
+				Obj* p =gui.cp.tbltbl_pObj[ gui.one.idxTbl ][ gui.one.idxObj ];
 				if ( p ) gra.Print(1,(float)text_y++,string("one: ")+to_string(p->pos.x)+" , "+to_string(p->pos.y)+" , "+to_string(p->pos.z)); 
 			}
 

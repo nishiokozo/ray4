@@ -64,26 +64,26 @@ void Lab13::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 		pers.cam.at = vect3( 	0.0,	2.3, 0.0 );
 
 		//点
-		lab.tblObj.emplace_back( new Obj( vect3(  0,	1,	0	 ) ) );
-		lab.tblObj.emplace_back( new Obj( vect3(  2, 4.0,  2.0 ) ) );
-		lab.tblObj.emplace_back( new Obj( vect3(  0, G,  0 ) ) );
+		lab.tbl_pObj.emplace_back( new Obj( vect3(  0,	1,	0	 ) ) );
+		lab.tbl_pObj.emplace_back( new Obj( vect3(  2, 4.0,  2.0 ) ) );
+		lab.tbl_pObj.emplace_back( new Obj( vect3(  0, G,  0 ) ) );
 		//平面
-		lab.tblObj.emplace_back( new Obj(vect3(  2.1	, 0.5,	2.0 )) );	// 平面原点
-		lab.tblObj.emplace_back( new Obj(vect3(  2.0	, 0.7,  2.0 )) );	// 平面法線
+		lab.tbl_pObj.emplace_back( new Obj(vect3(  2.1	, 0.5,	2.0 )) );	// 平面原点
+		lab.tbl_pObj.emplace_back( new Obj(vect3(  2.0	, 0.7,  2.0 )) );	// 平面法線
 
 		//GUI登録
-		cp.tbls.clear();
-		cp.tbltblEdge.clear();
-		cp.tbls.emplace_back( lab.tblObj );
+		cp.tbltbl_pObj.clear();
+		cp.tbltbl_pEdge.clear();
+		cp.tbltbl_pObj.emplace_back( lab.tbl_pObj );
 	}
 
 	// 設定
 	int n = 0;
-	vect3	p0 = lab.tblObj[n++]->pos ;
-	vect3	v0 = lab.tblObj[n++]->pos -p0;
-	vect3	vg = lab.tblObj[n++]->pos -p0;
-	vect3	plate_p = (*lab.tblObj[n++]).pos;
-	vect3	plate_n = ( (*lab.tblObj[n++]).pos - plate_p ).normalize();
+	vect3	p0 = lab.tbl_pObj[n++]->pos ;
+	vect3	v0 = lab.tbl_pObj[n++]->pos -p0;
+	vect3	vg = lab.tbl_pObj[n++]->pos -p0;
+	vect3	plate_p = (*lab.tbl_pObj[n++]).pos;
+	vect3	plate_n = ( (*lab.tbl_pObj[n++]).pos - plate_p ).normalize();
 
 	// 描画
 	for ( float t = 0 ; t < 1.0 ; t += 0.001 )

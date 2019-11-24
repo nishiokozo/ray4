@@ -35,8 +35,8 @@ struct Edge
 
 struct Cp
 {
-	vector<vector<Obj*>> tbls;
-	vector<vector<Edge*>> tbltblEdge;
+	vector<vector<Obj*>> tbltbl_pObj;
+	vector<vector<Edge*>> tbltbl_pEdge;
 };
 
 
@@ -125,7 +125,7 @@ struct Pers
 	//--------------------------------------------------------------------------
 
 	//------------------------------------------------------------------------------
-	void Focus( vector<vector<Obj*>>& tbls );
+	void Focus( vector<vector<Obj*>>& tbltbl_pObj );
 	//------------------------------------------------------------------------------
 
 

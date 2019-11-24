@@ -47,23 +47,23 @@ void Lab14::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 		pers.cam.at = vect3( 0,  1.0, 0 );
 
 		// 点
-		lab.tblObj.emplace_back( new Obj( vect3(	-0.5,	0.12,	-0.5) ) );
-		lab.tblObj.emplace_back( new Obj( vect3(	+0.5,	0.12,	-0.5) ) );
-		lab.tblObj.emplace_back( new Obj( vect3(	+0.9,	0.12,	 0.5) ) );
-		lab.tblObj.emplace_back( new Obj( vect3(	 0.0,	0.12,	 0.5) ) );
-		lab.tblObj.emplace_back( new Obj( vect3(	-0.9,	0.12,	 0.5) ) );
+		lab.tbl_pObj.emplace_back( new Obj( vect3(	-0.5,	0.12,	-0.5) ) );
+		lab.tbl_pObj.emplace_back( new Obj( vect3(	+0.5,	0.12,	-0.5) ) );
+		lab.tbl_pObj.emplace_back( new Obj( vect3(	+0.9,	0.12,	 0.5) ) );
+		lab.tbl_pObj.emplace_back( new Obj( vect3(	 0.0,	0.12,	 0.5) ) );
+		lab.tbl_pObj.emplace_back( new Obj( vect3(	-0.9,	0.12,	 0.5) ) );
 
-		lab.tblObj.emplace_back( new Obj( vect3(	-0.5,	0.12,	-0.5)*1.2 ) );
-		lab.tblObj.emplace_back( new Obj( vect3(	+0.5,	0.12,	-0.5)*1.2 ) );
-		lab.tblObj.emplace_back( new Obj( vect3(	+0.9,	0.12,	 0.5)*1.2 ) );
-		lab.tblObj.emplace_back( new Obj( vect3(	0.0,	0.12,	 0.5)*1.2 ) );
-		lab.tblObj.emplace_back( new Obj( vect3(	-0.9,	0.12,	 0.5)*1.2 ) );
+		lab.tbl_pObj.emplace_back( new Obj( vect3(	-0.5,	0.12,	-0.5)*1.2 ) );
+		lab.tbl_pObj.emplace_back( new Obj( vect3(	+0.5,	0.12,	-0.5)*1.2 ) );
+		lab.tbl_pObj.emplace_back( new Obj( vect3(	+0.9,	0.12,	 0.5)*1.2 ) );
+		lab.tbl_pObj.emplace_back( new Obj( vect3(	0.0,	0.12,	 0.5)*1.2 ) );
+		lab.tbl_pObj.emplace_back( new Obj( vect3(	-0.9,	0.12,	 0.5)*1.2 ) );
 
 
 		//GUI登録
-		cp.tbls.clear();
-		cp.tbltblEdge.clear();
-		cp.tbls.emplace_back( lab.tblObj );
+		cp.tbltbl_pObj.clear();
+		cp.tbltbl_pEdge.clear();
+		cp.tbltbl_pObj.emplace_back( lab.tbl_pObj );
 	}
 
 //				(*this).bActive = true;
@@ -85,7 +85,7 @@ void Lab14::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 				};
 				//------------------------------------------------------------------------------
 				//void drawCutmull( SysGra& gra, Pers& pers, 
-				vector<Obj*> tbl = lab.tblObj; 
+				vector<Obj*> tbl = lab.tbl_pObj; 
 				vector<ivect2>idx = tblIdx;
 				//------------------------------------------------------------------------------
 				{

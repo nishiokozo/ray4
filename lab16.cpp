@@ -68,10 +68,10 @@ void Lab16::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 			pNew->stat.bShowLocus = false;
 			pImpl->pSkeleton = move(pNew);
 
-			cp.tbls.clear();
-			cp.tbltblEdge.clear();
-			cp.tbls.emplace_back( pImpl->pSkeleton->tblPoint );
-			cp.tbltblEdge.emplace_back( pImpl->pSkeleton->tblEdge );
+			cp.tbltbl_pObj.clear();
+			cp.tbltbl_pEdge.clear();
+			cp.tbltbl_pObj.emplace_back( pImpl->pSkeleton->tbl_pObj );
+			cp.tbltbl_pEdge.emplace_back( pImpl->pSkeleton->tbl_pEdge );
 		}
 
 
@@ -160,10 +160,10 @@ void Lab16::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 		pNew->stat.bShowLocus = false;
 		pImpl->pSkeleton = move(pNew);
 
-		cp.tbls.clear();
-		cp.tbltblEdge.clear();
-		cp.tbls.emplace_back( pImpl->pSkeleton->tblPoint );
-		cp.tbltblEdge.emplace_back( pImpl->pSkeleton->tblEdge );
+		cp.tbltbl_pObj.clear();
+		cp.tbltbl_pEdge.clear();
+		cp.tbltbl_pObj.emplace_back( pImpl->pSkeleton->tbl_pObj );
+		cp.tbltbl_pEdge.emplace_back( pImpl->pSkeleton->tbl_pEdge );
 	}
 	if ( keys.CTRL.on && keys.SEMICOLON.hi ) 
 	{
@@ -174,10 +174,10 @@ void Lab16::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 		pNew->stat.bShowLocus = false;
 		pImpl->pSkeleton = move(pNew);
 
-		cp.tbls.clear();
-		cp.tbltblEdge.clear();
-		cp.tbls.emplace_back( pImpl->pSkeleton->tblPoint );
-		cp.tbltblEdge.emplace_back( pImpl->pSkeleton->tblEdge );
+		cp.tbltbl_pObj.clear();
+		cp.tbltbl_pEdge.clear();
+		cp.tbltbl_pObj.emplace_back( pImpl->pSkeleton->tbl_pObj );
+		cp.tbltbl_pEdge.emplace_back( pImpl->pSkeleton->tbl_pEdge );
 	}
 
 	//=================================
@@ -186,14 +186,14 @@ void Lab16::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 	if ( (*pImpl->pSkeleton).bActive == false ) return;
 	{
 		Skeleton& skeleton = (*pImpl->pSkeleton);
-		vector<Obj*> tblPoint = (*pImpl->pSkeleton).tblPoint;
+		vector<Obj*> tbl_pObj = (*pImpl->pSkeleton).tbl_pObj;
 
 
 	#if 0 	//剛体実験
 		// 優先度つけ
 		{
 			int n = 0;
-			for ( Obj* po : tblPoint )
+			for ( Obj* po : tbl_pObj )
 			{
 				Joint* p = dynamic_cast<Joint*>(po);
 
@@ -210,7 +210,7 @@ void Lab16::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 		// 優先度つけ
 		{
 			int n = 0;
-			for ( Obj* po : tblPoint )
+			for ( Obj* po : tbl_pObj )
 			{
 				Joint* p = dynamic_cast<Joint*>(po);
 
@@ -234,12 +234,12 @@ void Lab16::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 			static mat33	mkata = midentity();
 			mat33	mhiji = midentity();;
 			mat33	mte = midentity() ;
-			vect3	pos0 = tblPoint[0]->pos;
-			vect3	pos1 = tblPoint[1]->pos;
-			vect3	p2 = tblPoint[2]->pos;
-			vect3	p3 = tblPoint[3]->pos;
-			vect3	p4 = tblPoint[4]->pos;
-			vect3	p5 = tblPoint[5]->pos;
+			vect3	pos0 = tbl_pObj[0]->pos;
+			vect3	pos1 = tbl_pObj[1]->pos;
+			vect3	p2 = tbl_pObj[2]->pos;
+			vect3	p3 = tbl_pObj[3]->pos;
+			vect3	p4 = tbl_pObj[4]->pos;
+			vect3	p5 = tbl_pObj[5]->pos;
 			// 箱 胸
 			if(1)
 			{

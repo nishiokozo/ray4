@@ -8,8 +8,8 @@ struct LabObj
 
 struct Lab
 {
-	vector<Obj*> tblObj;
-	vector<Edge*> tblEdge;
+	vector<Obj*> tbl_pObj;
+	vector<Edge*> tbl_pEdge;
 	bool	bInitParam = false;
 	bool	bInitAll = false;
 	int		idx = 0;	
@@ -24,8 +24,8 @@ struct Lab
 	~Lab()
 	//------------------------------------------------------------------------------
 	{
-		for ( Obj* p : (*this).tblObj ) delete p;
-		for ( Edge* p : (*this).tblEdge ) delete p;
+		for ( Obj* p : (*this).tbl_pObj ) delete p;
+		for ( Edge* p : (*this).tbl_pEdge ) delete p;
 	}
 
 

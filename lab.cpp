@@ -435,29 +435,29 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 			pers.cam.pos = vect3(	0.0,	1.0, -3.0 );
 			pers.cam.at = vect3( 	0.0,	1.0, 0.0 );
 			//点
-			for ( Obj* p : lab.tblObj ) delete p;
-			lab.tblObj.clear();
-			lab.tblObj.emplace_back( new Ball(vect3(  0		, 1.0,  0.0 ), vect3(0,0,0)) );
-			lab.tblObj.emplace_back( new Obj(vect3( -0.4	, 0.5,	0.0 )) );	// 平面原点
-			lab.tblObj.emplace_back( new Obj(vect3( -0.3	, 0.7,  0.0 )) );	// 平面法線
+			for ( Obj* p : lab.tbl_pObj ) delete p;
+			lab.tbl_pObj.clear();
+			lab.tbl_pObj.emplace_back( new Ball(vect3(  0		, 1.0,  0.0 ), vect3(0,0,0)) );
+			lab.tbl_pObj.emplace_back( new Obj(vect3( -0.4	, 0.5,	0.0 )) );	// 平面原点
+			lab.tbl_pObj.emplace_back( new Obj(vect3( -0.3	, 0.7,  0.0 )) );	// 平面法線
 
 			// 線
-			for ( Edge* p : lab.tblEdge ) delete p;
-			lab.tblEdge.clear();
-			lab.tblEdge.emplace_back( new Edge(1,2, col7,1) );
+			for ( Edge* p : lab.tbl_pEdge ) delete p;
+			lab.tbl_pEdge.clear();
+			lab.tbl_pEdge.emplace_back( new Edge(1,2, col7,1) );
 
 			pers.axis.bAxisX = true;
 			pers.axis.bAxisY = true;
 			pers.axis.bAxisZ = false;
 
 			//GUI登録
-			cp.tbls.clear();
-			cp.tbltblEdge.clear();
-			cp.tbls.emplace_back( lab.tblObj );
-			cp.tbltblEdge.emplace_back( lab.tblEdge );
+			cp.tbltbl_pObj.clear();
+			cp.tbltbl_pEdge.clear();
+			cp.tbltbl_pObj.emplace_back( lab.tbl_pObj );
+			cp.tbltbl_pEdge.emplace_back( lab.tbl_pEdge );
 		}
 
-		Ball&	ball = *dynamic_cast<Ball*>(lab.tblObj[0]);
+		Ball&	ball = *dynamic_cast<Ball*>(lab.tbl_pObj[0]);
 		ball.pos = vect3(  0		, 1.0,  0.0 );
 		ball.vel = vect3(  0		, 0.0,  0.0 );
 
@@ -475,13 +475,13 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 		if ( keys.ENTER.rep )	{bStep = true; bPause = true; }
 
 		if ( keys.G.hi )	{if ( vg.z==G ) vg=vect3(0,0,0); else vg=vect3(0,G,0);}
-		if ( keys.A.hi )	{lab.tblObj[2]->pos.z+=-1.0;}
+		if ( keys.A.hi )	{lab.tbl_pObj[2]->pos.z+=-1.0;}
 	
 	}
 	
-	Ball&	ball = *dynamic_cast<Ball*>(lab.tblObj[0]);
-	vect3	plate_p = lab.tblObj[1]->pos;
-	vect3	plate_n = (lab.tblObj[2]->pos-plate_p).normalize();
+	Ball&	ball = *dynamic_cast<Ball*>(lab.tbl_pObj[0]);
+	vect3	plate_p = lab.tbl_pObj[1]->pos;
+	vect3	plate_n = (lab.tbl_pObj[2]->pos-plate_p).normalize();
 
 
 	//-----
@@ -644,22 +644,22 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 	
 		lab.bInitParam = true;
 		//点
-		for ( Obj* p : lab.tblObj ) delete p;
-		lab.tblObj.clear();
-		lab.tblObj.emplace_back( new Car(vect3(  0		, 0.0,  1.0 ), vect3(0,0,0)) );
-		lab.tblObj.emplace_back( new Obj(vect3( -0.5	, 0.0,	0.0 )) );
-		lab.tblObj.emplace_back( new Obj(vect3(  0.5	, 0.0, 0.0 )) );
+		for ( Obj* p : lab.tbl_pObj ) delete p;
+		lab.tbl_pObj.clear();
+		lab.tbl_pObj.emplace_back( new Car(vect3(  0		, 0.0,  1.0 ), vect3(0,0,0)) );
+		lab.tbl_pObj.emplace_back( new Obj(vect3( -0.5	, 0.0,	0.0 )) );
+		lab.tbl_pObj.emplace_back( new Obj(vect3(  0.5	, 0.0, 0.0 )) );
 
 		// 線
-		for ( Edge* p : lab.tblEdge ) delete p;
-		lab.tblEdge.clear();
-		lab.tblEdge.emplace_back( new Edge(1,2) );
+		for ( Edge* p : lab.tbl_pEdge ) delete p;
+		lab.tbl_pEdge.clear();
+		lab.tbl_pEdge.emplace_back( new Edge(1,2) );
 
 		//GUI登録
-		cp.tbls.clear();
-		cp.tbltblEdge.clear();
-		cp.tbls.emplace_back( lab.tblObj );
-		cp.tbltblEdge.emplace_back( lab.tblEdge );
+		cp.tbltbl_pObj.clear();
+		cp.tbltbl_pEdge.clear();
+		cp.tbltbl_pObj.emplace_back( lab.tbl_pObj );
+		cp.tbltbl_pEdge.emplace_back( lab.tbl_pEdge );
 
 		pers.axis.bAxisX = true;
 		pers.axis.bAxisY = false;
@@ -682,13 +682,13 @@ static void lab9_2dRidge( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra,
 		if ( keys.ENTER.rep )	{bStep = true; bPause = true; }
 
 		if ( keys.G.hi )	{if ( vg.z==G ) vg=vect3(0,0,0); else vg=vect3(0,0,G);}
-		if ( keys.A.hi )	{lab.tblObj[2]->pos.z+=-1.0;}
+		if ( keys.A.hi )	{lab.tbl_pObj[2]->pos.z+=-1.0;}
 	
 	}
 	
-	Car&	car = *dynamic_cast<Car*>(lab.tblObj[0]);
-	vect3	st = lab.tblObj[1]->pos;
-	vect3	en = lab.tblObj[2]->pos;
+	Car&	car = *dynamic_cast<Car*>(lab.tbl_pObj[0]);
+	vect3	st = lab.tbl_pObj[1]->pos;
+	vect3	en = lab.tbl_pObj[2]->pos;
 
 	//-----
 
@@ -830,20 +830,20 @@ static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysG
 	
 		lab.bInitParam = true;
 		//点
-		for ( Obj* p : lab.tblObj ) delete p;
-		lab.tblObj.clear();
-		lab.tblObj.emplace_back( new Obj(vect3( 0  , 0.1, 0 )) );
-		lab.tblObj.emplace_back( new Obj(vect3( 1  , 0.1, 0 )) );
+		for ( Obj* p : lab.tbl_pObj ) delete p;
+		lab.tbl_pObj.clear();
+		lab.tbl_pObj.emplace_back( new Obj(vect3( 0  , 0.1, 0 )) );
+		lab.tbl_pObj.emplace_back( new Obj(vect3( 1  , 0.1, 0 )) );
 		// 線
-		for ( Edge* p : lab.tblEdge ) delete p;
-		lab.tblEdge.clear();
-		lab.tblEdge.emplace_back( new Edge(0,1) );
+		for ( Edge* p : lab.tbl_pEdge ) delete p;
+		lab.tbl_pEdge.clear();
+		lab.tbl_pEdge.emplace_back( new Edge(0,1) );
 
 		//GUI登録
-		cp.tbls.clear();
-		cp.tbltblEdge.clear();
-		cp.tbls.emplace_back( lab.tblObj );
-		cp.tbltblEdge.emplace_back( lab.tblEdge );
+		cp.tbltbl_pObj.clear();
+		cp.tbltbl_pEdge.clear();
+		cp.tbltbl_pObj.emplace_back( lab.tbl_pObj );
+		cp.tbltbl_pEdge.emplace_back( lab.tbl_pEdge );
 
 		pers.axis.bAxisX = true;
 		pers.axis.bAxisY = false;
@@ -860,8 +860,8 @@ static void lab8_vector_six_lab8( Lab& lab, SysKeys& keys, SysMouse& mouse, SysG
 	if ( keys.SPACE.hi )	bPause = !bPause ;
 	if ( keys.ENTER.rep )	{bStep = true; bPause = true; }
 
-	vect3&	v0 = lab.tblObj[0]->pos;
-	vect3&	v1 = lab.tblObj[1]->pos;
+	vect3&	v0 = lab.tbl_pObj[0]->pos;
+	vect3&	v1 = lab.tbl_pObj[1]->pos;
 
 	vect3	bar = (v1-v0);					//	棒
 	vect3	moment = cross(-bar, vel+vg);	//	回転モーメント 仮
@@ -1048,27 +1048,27 @@ static void lab5_furiko2d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra
 		}
 	
 		lab.bInitParam = true;
-		for ( Obj* p : lab.tblObj ) delete p;
-		lab.tblObj.clear();
-		lab.tblObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
-		lab.tblObj.emplace_back( new Obj(vect3(1, 2.0, 0)) );
+		for ( Obj* p : lab.tbl_pObj ) delete p;
+		lab.tbl_pObj.clear();
+		lab.tbl_pObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
+		lab.tbl_pObj.emplace_back( new Obj(vect3(1, 2.0, 0)) );
 		// 線
-		for ( Edge* p : lab.tblEdge ) delete p;
-		lab.tblEdge.clear();
-		lab.tblEdge.emplace_back( new Edge(0,1) );
+		for ( Edge* p : lab.tbl_pEdge ) delete p;
+		lab.tbl_pEdge.clear();
+		lab.tbl_pEdge.emplace_back( new Edge(0,1) );
 
 		//GUI登録
-		cp.tbls.clear();
-		cp.tbltblEdge.clear();
-		cp.tbls.emplace_back( lab.tblObj );
-		cp.tbltblEdge.emplace_back( lab.tblEdge );
+		cp.tbltbl_pObj.clear();
+		cp.tbltbl_pEdge.clear();
+		cp.tbltbl_pObj.emplace_back( lab.tbl_pObj );
+		cp.tbltbl_pEdge.emplace_back( lab.tbl_pEdge );
 
 		rsp=0;
 	}
 	if ( keys.R.hi )	lab.bInitParam = false;
 
-	vect3&	v0 = lab.tblObj[0]->pos;	//	barの根本
-	vect3&	v1 = lab.tblObj[1]->pos;	//	barの先端
+	vect3&	v0 = lab.tbl_pObj[0]->pos;	//	barの根本
+	vect3&	v1 = lab.tbl_pObj[1]->pos;	//	barの先端
 
 
 //	pers.pen.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
@@ -1140,28 +1140,28 @@ static void lab7_kakusokudo7( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& 
 		lab.bInitParam = true;
 
 		// 点
-		for ( Obj* p : lab.tblObj ) delete p;
-		lab.tblObj.clear();
-		lab.tblObj.emplace_back( new Obj(vect3( 0 ,0.1, 0)) );
-		lab.tblObj.emplace_back( new Obj(vect3(-1 ,0.1, 0)) );
+		for ( Obj* p : lab.tbl_pObj ) delete p;
+		lab.tbl_pObj.clear();
+		lab.tbl_pObj.emplace_back( new Obj(vect3( 0 ,0.1, 0)) );
+		lab.tbl_pObj.emplace_back( new Obj(vect3(-1 ,0.1, 0)) );
 
 		// 線
-		for ( Edge* p : lab.tblEdge ) delete p;
-		lab.tblEdge.clear();
-		lab.tblEdge.emplace_back( new Edge(0,1) );
+		for ( Edge* p : lab.tbl_pEdge ) delete p;
+		lab.tbl_pEdge.clear();
+		lab.tbl_pEdge.emplace_back( new Edge(0,1) );
 
 		//GUI登録
-		cp.tbls.clear();
-		cp.tbltblEdge.clear();
-		cp.tbls.emplace_back( lab.tblObj );
-		cp.tbltblEdge.emplace_back( lab.tblEdge );
+		cp.tbltbl_pObj.clear();
+		cp.tbltbl_pEdge.clear();
+		cp.tbltbl_pObj.emplace_back( lab.tbl_pObj );
+		cp.tbltbl_pEdge.emplace_back( lab.tbl_pEdge );
 
 		bShot = false;
 	}
 
 
-	vect3&	v0 = lab.tblObj[0]->pos;	//	barの根本
-	vect3&	v1 = lab.tblObj[1]->pos;	//	barの先端
+	vect3&	v0 = lab.tbl_pObj[0]->pos;	//	barの根本
+	vect3&	v1 = lab.tbl_pObj[1]->pos;	//	barの先端
 
 
 	//入力
@@ -1304,21 +1304,21 @@ static void lab4_furiko3d( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra
 		}
 
 		lab.bInitParam = true;
-		for ( Obj* p : lab.tblObj ) delete p;
-		lab.tblObj.clear();
-		lab.tblObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
-		lab.tblObj.emplace_back( new Obj(vect3(-1, 2.0, 0)) );
+		for ( Obj* p : lab.tbl_pObj ) delete p;
+		lab.tbl_pObj.clear();
+		lab.tbl_pObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
+		lab.tbl_pObj.emplace_back( new Obj(vect3(-1, 2.0, 0)) );
 
 		//GUI登録
-		cp.tbls.clear();
-		cp.tbltblEdge.clear();
-		cp.tbls.emplace_back( lab.tblObj );
+		cp.tbltbl_pObj.clear();
+		cp.tbltbl_pEdge.clear();
+		cp.tbltbl_pObj.emplace_back( lab.tbl_pObj );
 		
 		vel = vect3(0,0,0);
 	}
 
-	vect3&	v0 = lab.tblObj[0]->pos;	//	barの根本
-	vect3&	v1 = lab.tblObj[1]->pos;	//	barの先端
+	vect3&	v0 = lab.tbl_pObj[0]->pos;	//	barの根本
+	vect3&	v1 = lab.tbl_pObj[1]->pos;	//	barの先端
 
 	// 入力
 	{
@@ -1488,15 +1488,15 @@ static void lab3_gravityPlanet( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra
 			pers.cam.at = vect3( 0,  0.0, 0 );
 		}
 
-		for ( Obj* p : lab.tblObj ) delete p;
-		lab.tblObj.clear();
-		lab.tblObj.emplace_back( new Planet(vect3(-0.5,0.1,0),vect3(0, 0, -0.02)) );
-		lab.tblObj.emplace_back( new Planet(vect3( 0.5,0.1,0),vect3(0, 0, 0.02)) );
+		for ( Obj* p : lab.tbl_pObj ) delete p;
+		lab.tbl_pObj.clear();
+		lab.tbl_pObj.emplace_back( new Planet(vect3(-0.5,0.1,0),vect3(0, 0, -0.02)) );
+		lab.tbl_pObj.emplace_back( new Planet(vect3( 0.5,0.1,0),vect3(0, 0, 0.02)) );
 
 		//GUI登録
-		cp.tbls.clear();
-		cp.tbltblEdge.clear();
-		cp.tbls.emplace_back( lab.tblObj );
+		cp.tbltbl_pObj.clear();
+		cp.tbltbl_pEdge.clear();
+		cp.tbltbl_pObj.emplace_back( lab.tbl_pObj );
 	}
 
 	const float	g = G *delta*delta;		// 重力加速度/frame
@@ -1517,14 +1517,14 @@ static void lab3_gravityPlanet( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra
 		{
 			vect3 P = pers.calcScreenToWorld3( vect3(mouse.pos,0) );
 			vect3 I = pers.calcRayvect( P );
-			lab.tblObj.emplace_back( new Planet( P, I/100.0 ) );
+			lab.tbl_pObj.emplace_back( new Planet( P, I/100.0 ) );
 		}
 
 	}
 
 	
-	Planet& pl0 = *dynamic_cast<Planet*>(lab.tblObj[0]);	//	太陽
-	Planet& pl1 = *dynamic_cast<Planet*>(lab.tblObj[1]);	//	地球
+	Planet& pl0 = *dynamic_cast<Planet*>(lab.tbl_pObj[0]);	//	太陽
+	Planet& pl1 = *dynamic_cast<Planet*>(lab.tbl_pObj[1]);	//	地球
 
 	// 計算
 	if ( !bPause || bStep )
@@ -1551,7 +1551,7 @@ static void lab3_gravityPlanet( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra
 
 	// 描画
 	{
-		for ( Obj* p : lab.tblObj ) 
+		for ( Obj* p : lab.tbl_pObj ) 
 		{
 			Planet& pl = *dynamic_cast<Planet*>(p);
 			for ( int i = 0 ; i < MAX_PREV ; i++ )
@@ -1607,30 +1607,30 @@ static void lab2_kakusokudo( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& g
 		}
 		lab.bInitParam = true;
 
-		for ( Obj* p : lab.tblObj ) delete p;
-		lab.tblObj.clear();
-		lab.tblObj.emplace_back( new Obj(vect3(0  ,0.1,0)) );
-		lab.tblObj.emplace_back( new Obj(vect3(1  ,0.1,0)) );
-		lab.tblObj.emplace_back( new Obj(vect3(1.5,0.1,0.2)) );
+		for ( Obj* p : lab.tbl_pObj ) delete p;
+		lab.tbl_pObj.clear();
+		lab.tbl_pObj.emplace_back( new Obj(vect3(0  ,0.1,0)) );
+		lab.tbl_pObj.emplace_back( new Obj(vect3(1  ,0.1,0)) );
+		lab.tbl_pObj.emplace_back( new Obj(vect3(1.5,0.1,0.2)) );
 		// 線
-		for ( Edge* p : lab.tblEdge ) delete p;
-		lab.tblEdge.clear();
-		lab.tblEdge.emplace_back( new Edge(0,1) );
-		lab.tblEdge.emplace_back( new Edge(1,2,rgb(0,1,0),1) );
+		for ( Edge* p : lab.tbl_pEdge ) delete p;
+		lab.tbl_pEdge.clear();
+		lab.tbl_pEdge.emplace_back( new Edge(0,1) );
+		lab.tbl_pEdge.emplace_back( new Edge(1,2,rgb(0,1,0),1) );
 
 		//GUI登録
-		cp.tbls.clear();
-		cp.tbltblEdge.clear();
-		cp.tbls.emplace_back( lab.tblObj );
-		cp.tbltblEdge.emplace_back( lab.tblEdge );
+		cp.tbltbl_pObj.clear();
+		cp.tbltbl_pEdge.clear();
+		cp.tbltbl_pObj.emplace_back( lab.tbl_pObj );
+		cp.tbltbl_pEdge.emplace_back( lab.tbl_pEdge );
 
 		bShot = false;
 	}
 
 
-	vect3&	v0 = lab.tblObj[0]->pos;	//	barの根本
-	vect3&	v1 = lab.tblObj[1]->pos;	//	barの先端
-	vect3&	v2 = lab.tblObj[2]->pos;	// 速度指定
+	vect3&	v0 = lab.tbl_pObj[0]->pos;	//	barの根本
+	vect3&	v1 = lab.tbl_pObj[1]->pos;	//	barの先端
+	vect3&	v2 = lab.tbl_pObj[2]->pos;	// 速度指定
 
 
 	//入力
@@ -1781,15 +1781,15 @@ void Lab::SetIdx( int n, Cp& cp )
 	bInitParam=false;
 	bInitAll=false;
 
-	for ( Obj* p : (*this).tblObj ) delete p;
-	tblObj.clear();
+	for ( Obj* p : (*this).tbl_pObj ) delete p;
+	tbl_pObj.clear();
 
-	for ( Edge* p : (*this).tblEdge ) delete p;
-	tblEdge.clear();
+	for ( Edge* p : (*this).tbl_pEdge ) delete p;
+	tbl_pEdge.clear();
 
 
-	cp.tbls.clear();
-	cp.tbltblEdge.clear();
+	cp.tbltbl_pObj.clear();
+	cp.tbltbl_pEdge.clear();
 
 	if ( pLab ) 
 	{

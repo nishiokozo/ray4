@@ -172,7 +172,7 @@ bool Pers::calcScissorLine3d( vect3 v0, vect3 v1, vect3& va, vect3& vb )	// 3D ç
 }
 
 //------------------------------------------------------------------------------
-void Pers::Focus( vector<vector<Obj*>>& tbls )
+void Pers::Focus( vector<vector<Obj*>>& tbltbl_pObj )
 //------------------------------------------------------------------------------
 {
 	vect3 b(-infinit,-infinit,-infinit);
@@ -180,9 +180,9 @@ void Pers::Focus( vector<vector<Obj*>>& tbls )
 	vect3 b2;
 	vect3 s2;
 
-	for ( vector<Obj*>& tblObj : tbls )
+	for ( vector<Obj*>& tbl_pObj : tbltbl_pObj )
 	{
-		for ( Obj* p : tblObj )
+		for ( Obj* p : tbl_pObj )
 		{
 			if ( p->bSelected )
 			{

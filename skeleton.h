@@ -144,8 +144,6 @@ struct Joint : Obj
 
 struct Bone : Edge
 {
-//	int		n0;	//	コピーするときに必要
-//	int		n1;	//	コピーするときに必要
 	float	length;
 	bool	bBold;
 	Bone( int _n0, int _n1, bool _bBold ) : Edge(_n0, _n1), bBold(_bBold){}
@@ -161,9 +159,8 @@ struct Skeleton
 	string	filename;
 
 	vector<Joint>			tblJointForm;	// 基本フォーム
-	vector<Obj*>			tblPoint;		//joint	継承クラスとして使うためポインタ型
-	vector<Edge*>			tblEdge;		// 継承クラスとして使うためポインタ型
-//	vector<Bone>			tblBone;
+	vector<Obj*>			tbl_pObj;		//joint	継承クラスとして使うためポインタ型
+	vector<Edge*>			tbl_pEdge;		// 継承クラスとして使うためポインタ型
 
 	struct A
 	{
@@ -211,8 +208,8 @@ struct Skeleton
 	Skeleton(){};
 	~Skeleton()
 	{
-		for ( Obj* p : tblPoint ) delete p;
-		for ( Edge* p : tblEdge ) delete p;
+		for ( Obj* p : tbl_pObj ) delete p;
+		for ( Edge* p : tbl_pEdge ) delete p;
 	};
 
 	void LoadSkeleton( const string filename );
@@ -237,8 +234,6 @@ struct Skeleton
 
 	//
 	Skin skin;
-
-//	void UtilUpdate( Pers& pers, SysGra& gra, SysMouse& mouse );
 
 };
 

@@ -48,7 +48,7 @@ void Skeleton::SaveSkeleton()
 		{
 //			fo  << "\t"<< b.n0 << "\t" << b.n1 << endl;
 		}
-		for ( Edge* p : tblEdge )	// 骨
+		for ( Edge* p : tbl_pEdge )	// 骨
 		{
 			fo  << "\t"<< p->n0 << "\t" << p->n1 << endl;
 		}
@@ -139,7 +139,7 @@ void Skeleton::LoadSkeleton( const string fn )
 //				Joint&	j1 = tblJointForm[b.n1];
 //				b.length = (j1.pos - j0.pos).abs();
 			}
-			for ( Edge* p  : tblEdge )	// 関節の距離を決定する。
+			for ( Edge* p  : tbl_pEdge )	// 関節の距離を決定する。
 			{
 				Bone* pb = dynamic_cast<Bone*>(p);
 
@@ -171,7 +171,7 @@ void Skeleton::LoadSkeleton( const string fn )
 					int n1 = stoi(v[1]);
 					bool bBold = (v.size() >2 && v[2]=="-" )?false:true;
 //					tblBone.emplace_back( n0, n1, bBold );
-					tblEdge.emplace_back( new Bone( n0, n1, bBold ) );
+					tbl_pEdge.emplace_back( new Bone( n0, n1, bBold ) );
 			
 					//	cout << x << "," << y << "," << z << endl; 
 				}
@@ -197,7 +197,7 @@ void Skeleton::LoadSkeleton( const string fn )
 
 	for ( Joint& j : tblJointForm )	// 関節の位置
 	{
-		tblPoint.emplace_back( new Joint( j.pos , j.weight, j.bCtrl ) );
+		tbl_pObj.emplace_back( new Joint( j.pos , j.weight, j.bCtrl ) );
 	}
 
 	// 最初のアニメーションキーフレームを初期設定
@@ -206,7 +206,7 @@ void Skeleton::LoadSkeleton( const string fn )
 	{
 		// キーフレーム切り替え
 		int i = 0;
-		for ( Obj* p : tblPoint )
+		for ( Obj* p : tbl_pObj )
 		{
 			p->pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 			i++;
@@ -253,7 +253,7 @@ void Skeleton::PlayAnimation()
 		vect3 P3 = animations[cur.act].pose[ n3 ].joint[ j ].pos;
 		vect3 b = func_catmull3(anim.t, P0,P1,P2,P3 );
 
-		tblPoint[ j ]->pos = b;
+		tbl_pObj[ j ]->pos = b;
 
 	}
 
@@ -307,7 +307,7 @@ void Skeleton::PrevKeyframe()
 	{
 		// キーフレーム切り替え
 		int i = 0;
-		for ( Obj* p : tblPoint )
+		for ( Obj* p : tbl_pObj )
 		{
 			p->pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 			i++;
@@ -331,7 +331,7 @@ void Skeleton::TopKeyframe()
 	{
 		// キーフレーム切り替え
 		int i = 0;
-		for ( Obj* p : tblPoint )
+		for ( Obj* p : tbl_pObj )
 		{
 			p->pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 			i++;
@@ -356,7 +356,7 @@ void Skeleton::NextKeyframe()
 	{
 		// キーフレーム切り替え
 		int i = 0;
-		for ( Obj* p : tblPoint )
+		for ( Obj* p : tbl_pObj )
 		{
 			p->pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 			i++;
@@ -380,7 +380,7 @@ void Skeleton::LastKeyframe()
 	{
 		// キーフレーム切り替え
 		int i = 0;
-		for ( Obj* p : tblPoint )
+		for ( Obj* p : tbl_pObj )
 		{
 			p->pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 			i++;
@@ -398,9 +398,9 @@ void Skeleton::RefrectKeyframe()
 	if ( animations[cur.act].pose.size()==0) return;
 	if ( animations[cur.act].pose[ 0 ].joint.size()==0 ) return;
 
-	for ( int i = 0 ; i < static_cast<signed>(tblPoint.size()) ; i++ )
+	for ( int i = 0 ; i < static_cast<signed>(tbl_pObj.size()) ; i++ )
 	{ 
-		animations[cur.act].pose[ cur.pose ].joint[ i ].pos = tblPoint[ i ]->pos;
+		animations[cur.act].pose[ cur.pose ].joint[ i ].pos = tbl_pObj[ i ]->pos;
 	}
 }
 
@@ -416,7 +416,7 @@ void Skeleton::InsertKeyframe()
 	}
 	
 	animations[cur.act].pose.emplace( animations[cur.act].pose.begin() + cur.pose );
-	for ( const Obj* p : tblPoint )
+	for ( const Obj* p : tbl_pObj )
 	{
 		animations[cur.act].pose[ cur.pose ].joint.emplace_back( p->pos );
 	}
@@ -429,21 +429,21 @@ void Skeleton::CopyKeyframe()
 
 	unique_ptr<Skeleton> pNew(new Skeleton);
 	{
-		for ( Obj* po : tblPoint )
+		for ( Obj* po : tbl_pObj )
 		{
 			Joint* p = dynamic_cast<Joint*>(po);
 			
-			pNew->tblPoint.emplace_back( new Joint( p->pos, p->weight, p->bCtrl ) );
+			pNew->tbl_pObj.emplace_back( new Joint( p->pos, p->weight, p->bCtrl ) );
 		}
 
 //		for ( Bone& b : tblBone )
 		{
 //			pNew->tblBone.emplace_back( b.n0, b.n1, b.bBold );
 		}
-		for ( Edge* p : tblEdge )
+		for ( Edge* p : tbl_pEdge )
 		{
 			Bone* pb = dynamic_cast<Bone*>(p);
-			pNew->tblEdge.emplace_back( new Bone( pb->n0, pb->n1, pb->bBold ) );
+			pNew->tbl_pEdge.emplace_back( new Bone( pb->n0, pb->n1, pb->bBold ) );
 		}
 	}
 	{
@@ -457,7 +457,7 @@ void Skeleton::CopyKeyframe()
 			{
 				pNew->animations[ act ].pose.emplace_back();
 
-				for ( int j = 0 ; j < static_cast<signed>(tblPoint.size()) ; j++ )
+				for ( int j = 0 ; j < static_cast<signed>(tbl_pObj.size()) ; j++ )
 				{
 					vect3 pos = animations[ act ].pose[pose].joint[ j ].pos;
 					pNew->animations[ act ].pose[pose].joint.emplace_back( pos );
@@ -477,12 +477,12 @@ void Skeleton::PastKeyframe()
 	anim.bPlaying = false;
 
 	InsertKeyframe();
-	for ( int i = 0 ; i < static_cast<signed>(tblPoint.size()) ; i++ )
+	for ( int i = 0 ; i < static_cast<signed>(tbl_pObj.size()) ; i++ )
 	{ 
 		vect3 v = cur.pCopybuf->animations[cur.copied_act].pose[ cur.copied_pose ].joint[ i ].pos;
 	
 		animations[cur.act].pose[ cur.pose ].joint[ i ].pos = v;
-		tblPoint[ i ]->pos = v;
+		tbl_pObj[ i ]->pos = v;
 	}
 
 }
@@ -510,7 +510,7 @@ void Skeleton::CutKeyframe()
 		{
 			// キーフレーム切り替え
 			int i = 0;
-			for ( Obj* p : tblPoint )
+			for ( Obj* p : tbl_pObj )
 			{
 				p->pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 				i++;
@@ -538,7 +538,7 @@ void Skeleton::PrevAnimation()
 		{
 			// キーフレーム切り替え
 			int i = 0;
-			for ( Obj* p : tblPoint )
+			for ( Obj* p : tbl_pObj )
 			{
 				p->pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 				i++;
@@ -566,7 +566,7 @@ void Skeleton::NextAnimation()
 		{
 			// キーフレーム切り替え
 			int i = 0;
-			for ( Obj* p : tblPoint )
+			for ( Obj* p : tbl_pObj )
 			{
 			
 				p->pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
@@ -589,7 +589,7 @@ void Skeleton::AddAnimation()
 	{
 
 		animations[cur.act].pose.emplace_back();
-		for ( const Obj* p : tblPoint )
+		for ( const Obj* p : tbl_pObj )
 		{
 			animations[cur.act].pose[ cur.pose ].joint.emplace_back( p->pos );
 		}
@@ -601,7 +601,7 @@ void Skeleton::UpdateSkeleton()
 //------------------------------------------------------------------------------
 {
 	// 保管
-	for ( Obj* po : tblPoint )
+	for ( Obj* po : tbl_pObj )
 	{
 		Joint* p = dynamic_cast<Joint*>(po);
 
@@ -625,8 +625,8 @@ void Skeleton::UpdateSkeleton()
 /*
 		for ( Bone b : tblBone )
 		{
-			Joint*	p0 = dynamic_cast<Joint*>(tblPoint[b.n0]);
-			Joint*	p1 = dynamic_cast<Joint*>(tblPoint[b.n1]);
+			Joint*	p0 = dynamic_cast<Joint*>(tbl_pObj[b.n0]);
+			Joint*	p1 = dynamic_cast<Joint*>(tbl_pObj[b.n1]);
 			vect3 v = p1->pos - p0->pos;
 			float l = v.abs() - b.length;
 			vect3 va  =	v.normalize()*l;
@@ -641,12 +641,12 @@ void Skeleton::UpdateSkeleton()
 			p1->tension -= va*w1;
 		}
 */
-		for ( Edge* p : tblEdge )
+		for ( Edge* p : tbl_pEdge )
 		{
 			Bone* pb = dynamic_cast<Bone*>(p);
 			
-			Joint*	p0 = dynamic_cast<Joint*>(tblPoint[pb->n0]);
-			Joint*	p1 = dynamic_cast<Joint*>(tblPoint[pb->n1]);
+			Joint*	p0 = dynamic_cast<Joint*>(tbl_pObj[pb->n0]);
+			Joint*	p1 = dynamic_cast<Joint*>(tbl_pObj[pb->n1]);
 			vect3 v = p1->pos - p0->pos;
 			float l = v.abs() - pb->length;
 			vect3 va  =	v.normalize()*l;
@@ -662,7 +662,7 @@ void Skeleton::UpdateSkeleton()
 		}
 
 		// 張力解消
-		for ( Obj* po : tblPoint )
+		for ( Obj* po : tbl_pObj )
 		{
 			Joint* p = dynamic_cast<Joint*>(po);
 
@@ -680,7 +680,7 @@ void Skeleton::DrawSkeleton( SysGra& gra, Pers& pers )
 
 
 	// 透視投影変換
-	for ( Obj* po : tblPoint )
+	for ( Obj* po : tbl_pObj )
 	{
 		Joint* p = dynamic_cast<Joint*>(po);
 		//	右手系座標系
@@ -696,12 +696,12 @@ void Skeleton::DrawSkeleton( SysGra& gra, Pers& pers )
 	if ( stat.bShowSkin )
 	{
 //		for ( Bone b : tblBone )
-		for ( Edge* p : tblEdge )
+		for ( Edge* p : tbl_pEdge )
 		{
 			Bone* pb = dynamic_cast<Bone*>(p);
 
-			Joint*	p0 = dynamic_cast<Joint*>(tblPoint[pb->n0]);
-			Joint*	p1 = dynamic_cast<Joint*>(tblPoint[pb->n1]);
+			Joint*	p0 = dynamic_cast<Joint*>(tbl_pObj[pb->n0]);
+			Joint*	p1 = dynamic_cast<Joint*>(tbl_pObj[pb->n1]);
 
 			if ( p0->disp.z > 0 && p0->disp.z > 0 )
 			{
@@ -740,23 +740,23 @@ void Skeleton::DrawSkeleton( SysGra& gra, Pers& pers )
 /*
 	if (0)
 	{
-		Joint*	p = dynamic_cast<Joint*>(tblPoint[2]);
+		Joint*	p = dynamic_cast<Joint*>(tbl_pObj[2]);
 
 		static vect3 v = vect3(-0.2, 0, 0);
 	
-		vect3 pos0 = (tblPoint[1]->prev8-tblPoint[2]->prev8).normalize();
-		vect3 pos1 = (tblPoint[1]->pos-tblPoint[2]->pos).normalize();
+		vect3 pos0 = (tbl_pObj[1]->prev8-tbl_pObj[2]->prev8).normalize();
+		vect3 pos1 = (tbl_pObj[1]->pos-tbl_pObj[2]->pos).normalize();
 		float d = dot(pos0,pos1); 
 //cout << fixed<< d << endl;
 //if ( dot(pos0,pos1) == 1.0f ) cout << "a"<<endl;
 		vect3 pos2 = cross(pos1,pos0).normalize();
-		float a = dot( pos2, tblPoint[2]->binormal);
-		float b = dot( -pos2, tblPoint[2]->binormal);
+		float a = dot( pos2, tbl_pObj[2]->binormal);
+		float b = dot( -pos2, tbl_pObj[2]->binormal);
 		if ( a < b  ) pos2 = -pos2;
 
-//		if ( d > 0.9999999 ) pos2 = tblPoint[2]->binormal;
-//		if ( d > 0.999 ) pos2 = tblPoint[2]->binormal;
-		tblPoint[2]->binormal = pos2;
+//		if ( d > 0.9999999 ) pos2 = tbl_pObj[2]->binormal;
+//		if ( d > 0.999 ) pos2 = tbl_pObj[2]->binormal;
+		tbl_pObj[2]->binormal = pos2;
 
 		vect3 pos3 = cross(pos2,pos1);
 		mat44	m( 
@@ -806,9 +806,9 @@ void Skeleton::DrawSkeleton( SysGra& gra, Pers& pers )
 				int n3 = n+3;
 				if ( n0 < 0 ) n0 = 0;
 				if ( n3 >= static_cast<signed>(animations[cur.act].pose.size()) ) n3 = n2;
-				for ( int j = 0 ;  j < static_cast<signed>(tblPoint.size()) ; j++ )
+				for ( int j = 0 ;  j < static_cast<signed>(tbl_pObj.size()) ; j++ )
 				{
-					if ( tblPoint[ j ]->bSelected == false ) continue;
+					if ( tbl_pObj[ j ]->bSelected == false ) continue;
 				
 					vect3 P0 = animations[cur.act].pose[ n0 ].joint[ j ].pos;
 					vect3 P1 = animations[cur.act].pose[ n1 ].joint[ j ].pos;

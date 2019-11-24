@@ -89,22 +89,22 @@ delta = 1/60.0;
 		pers.axis.bAxisZ = true;
 
 		//点
-		for ( Obj* p : lab.tblObj ) delete p;
-		lab.tblObj.clear();
-		lab.tblObj.emplace_back( new Ball(vect3(  0		, 1.0,  0.0 ), vect3(0,0,0)) );
-		lab.tblObj.emplace_back( new Obj(vect3( -0.3	, 0.0,	0.0 )) );	// 平面原点
-		lab.tblObj.emplace_back( new Obj(vect3( -0.3	, 0.2,  0.0 )) );	// 平面法線
+		for ( Obj* p : lab.tbl_pObj ) delete p;
+		lab.tbl_pObj.clear();
+		lab.tbl_pObj.emplace_back( new Ball(vect3(  0		, 1.0,  0.0 ), vect3(0,0,0)) );
+		lab.tbl_pObj.emplace_back( new Obj(vect3( -0.3	, 0.0,	0.0 )) );	// 平面原点
+		lab.tbl_pObj.emplace_back( new Obj(vect3( -0.3	, 0.2,  0.0 )) );	// 平面法線
 
 		// 線
-		for ( Edge* p : lab.tblEdge ) delete p;
-		lab.tblEdge.clear();
-		lab.tblEdge.emplace_back( new Edge(1,2, col7,1) );
+		for ( Edge* p : lab.tbl_pEdge ) delete p;
+		lab.tbl_pEdge.clear();
+		lab.tbl_pEdge.emplace_back( new Edge(1,2, col7,1) );
 
 		//GUI登録
-		cp.tbls.clear();
-		cp.tbltblEdge.clear();
-		cp.tbls.emplace_back( lab.tblObj );
-		cp.tbltblEdge.emplace_back( lab.tblEdge );
+		cp.tbltbl_pObj.clear();
+		cp.tbltbl_pEdge.clear();
+		cp.tbltbl_pObj.emplace_back( lab.tbl_pObj );
+		cp.tbltbl_pEdge.emplace_back( lab.tbl_pEdge );
 
 	}
 
@@ -113,7 +113,7 @@ delta = 1/60.0;
 	{
 		lab.bInitParam = true;
 
-		Ball&	ball = *dynamic_cast<Ball*>(lab.tblObj[0]);
+		Ball&	ball = *dynamic_cast<Ball*>(lab.tbl_pObj[0]);
 		ball.pos = vect3(  0		, 1.0,  0.0 );
 		ball.vel = vect3(  0		, 0.0,  0.0 );
 		ball.flgOn = false;
@@ -128,9 +128,9 @@ delta = 1/60.0;
 
 
 	// 設定
-	vect3	plate_p = (*lab.tblObj[1]).pos;
-	vect3	plate_n = ( (*lab.tblObj[2]).pos - plate_p ).normalize();
-	Ball&	ball = *dynamic_cast<Ball*>(lab.tblObj[0]);
+	vect3	plate_p = (*lab.tbl_pObj[1]).pos;
+	vect3	plate_n = ( (*lab.tbl_pObj[2]).pos - plate_p ).normalize();
+	Ball&	ball = *dynamic_cast<Ball*>(lab.tbl_pObj[0]);
 
 	vect3	p0 = ball.pos;
 	vect3	v0 = ball.vel;

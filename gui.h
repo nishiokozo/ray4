@@ -49,17 +49,17 @@ struct Gui
 
 
 	//------------------------------------------------------------------------------
-	int EntryTbl( vector<Obj*>tbl, vector<Edge*>tblEdge )
+	int EntryTbl( vector<Obj*>tbl, vector<Edge*>tbl_pEdge )
 	//------------------------------------------------------------------------------
 	{
-		int idx =  (signed)cp.tbls.size();
-		cp.tbls.emplace_back( tbl );
-		cp.tbltblEdge.emplace_back( tblEdge );
+		int idx =  (signed)cp.tbltbl_pObj.size();
+		cp.tbltbl_pObj.emplace_back( tbl );
+		cp.tbltbl_pEdge.emplace_back( tbl_pEdge );
 		return idx;
 	}
 
 	//------------------------------------------------------------------------------
-	void TouchFirst( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbls, vect2 mpos );
+	void TouchFirst( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbltbl_pObj, vect2 mpos );
 	//------------------------------------------------------------------------------
 
 	// 矩形カーソル開始 新規選択
@@ -88,41 +88,41 @@ struct Gui
 
 	// 矩形カーソル終了（選択決定）
 	//------------------------------------------------------------------------------
-	void SelectRectEnd( vector<vector<Obj*>>& tbls );
+	void SelectRectEnd( vector<vector<Obj*>>& tbltbl_pObj );
 	//------------------------------------------------------------------------------
 
 	// 矩形カーソル選択	
 	//------------------------------------------------------------------------------
-	void SelectRectBegin( Pers& pers, vector<vector<Obj*>>& tbls , vect2 mpos );
+	void SelectRectBegin( Pers& pers, vector<vector<Obj*>>& tbltbl_pObj , vect2 mpos );
 	//------------------------------------------------------------------------------
 
 	// 単独 新規選択
 	//------------------------------------------------------------------------------
-	void SelectOneOnly( vector<vector<Obj*>>& tbls );
+	void SelectOneOnly( vector<vector<Obj*>>& tbltbl_pObj );
 	//------------------------------------------------------------------------------
 
 	// 単独 追加選択
 	//------------------------------------------------------------------------------
-	void SelectOneAdd( vector<vector<Obj*>>& tbls );
+	void SelectOneAdd( vector<vector<Obj*>>& tbltbl_pObj );
 	//------------------------------------------------------------------------------
 
 	// 単独 反転選択
 	//------------------------------------------------------------------------------
-	void SelectOneRev( vector<vector<Obj*>>& tbls );
+	void SelectOneRev( vector<vector<Obj*>>& tbltbl_pObj );
 	//------------------------------------------------------------------------------
 
 	// 単独 削除選択
 	//------------------------------------------------------------------------------
-	void SelectOneSub( vector<vector<Obj*>>& tbls );
+	void SelectOneSub( vector<vector<Obj*>>& tbltbl_pObj );
 
 	//------------------------------------------------------------------------------
 	// 選択リスト表示
 	//------------------------------------------------------------------------------
-	void DrawController( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbls, vector<vector<Edge*>>& tbltblEdge, vect2 mpos );
+	void DrawController( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbltbl_pObj, vector<vector<Edge*>>& tbltbl_pEdge, vect2 mpos );
 	//------------------------------------------------------------------------------
 
 	//------------------------------------------------------------------------------
-	void MoveObj( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbls, vect2& mpos, vect2& mprev, vect2& mmov, bool bSame, bool bByCamera, bool bByFloor, bool bByXY );
+	void MoveObj( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbltbl_pObj, vect2& mpos, vect2& mprev, vect2& mmov, bool bSame, bool bByCamera, bool bByFloor, bool bByXY );
 	//------------------------------------------------------------------------------
 
 

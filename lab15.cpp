@@ -46,8 +46,8 @@ void Lab15::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 
 
 		// 点
-		lab.tblObj.emplace_back( 	new Point3(vect3(-1.0, 0.0, 0.0 ),vect3( 0.0, 0.0, 1.0 ),vect3( 0.0, 0.0,-1.0 )) );
-		lab.tblObj.emplace_back( 	new Point3(vect3( 1.0, 0.0, 0.0 ),vect3( 0.0, 0.0,-1.0 ),vect3( 0.0, 0.0, 1.0 )) );
+		lab.tbl_pObj.emplace_back( 	new Point3(vect3(-1.0, 0.0, 0.0 ),vect3( 0.0, 0.0, 1.0 ),vect3( 0.0, 0.0,-1.0 )) );
+		lab.tbl_pObj.emplace_back( 	new Point3(vect3( 1.0, 0.0, 0.0 ),vect3( 0.0, 0.0,-1.0 ),vect3( 0.0, 0.0, 1.0 )) );
 
 		(*this).idxPoint.emplace_back( 0 );
 		(*this).idxPoint.emplace_back( 1 );
@@ -55,9 +55,9 @@ void Lab15::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 
 
 		//GUI登録
-		cp.tbls.clear();
-		cp.tbltblEdge.clear();
-		cp.tbls.emplace_back( lab.tblObj );
+		cp.tbltbl_pObj.clear();
+		cp.tbltbl_pEdge.clear();
+		cp.tbltbl_pObj.emplace_back( lab.tbl_pObj );
 
 
 
@@ -71,7 +71,7 @@ void Lab15::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 		bool bCut = mouse.L.hi;
 		bool bSerch = keys.E.on;
 
-		vector<Obj*>& tblPoint = lab.tblObj; 
+		vector<Obj*>& tbl_pObj = lab.tbl_pObj; 
 		{
 			//ベジェ計算＆描画
 			int div = 10;
@@ -94,8 +94,8 @@ void Lab15::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 				int n0 = idxPoint[n];
 				int n1 = idxPoint[n+1];
 
-				Point3* p0 = dynamic_cast<Point3*>(tblPoint[n0]);
-				Point3* p1 = dynamic_cast<Point3*>(tblPoint[n1]);
+				Point3* p0 = dynamic_cast<Point3*>(tbl_pObj[n0]);
+				Point3* p1 = dynamic_cast<Point3*>(tbl_pObj[n1]);
 
 				vect3 P0 =     p0->pos;
 				vect3 P1 = P0 +p0->b;
@@ -163,14 +163,14 @@ void Lab15::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 					// 頂点生成
 					{
 						
-						tblPoint.emplace_back( new Point3( q, -v*t0, v*t1 ) );
-						idxPoint.insert( idxPoint.begin()+minn+1, (signed)tblPoint.size()-1);
+						tbl_pObj.emplace_back( new Point3( q, -v*t0, v*t1 ) );
+						idxPoint.insert( idxPoint.begin()+minn+1, (signed)tbl_pObj.size()-1);
 					}
 
 					//	接線計算
 					{
-						Point3* p0 = dynamic_cast<Point3*>(tblPoint[idxPoint[minn+0]]);
-						Point3* p2 = dynamic_cast<Point3*>(tblPoint[idxPoint[minn+2]]);
+						Point3* p0 = dynamic_cast<Point3*>(tbl_pObj[idxPoint[minn+0]]);
+						Point3* p2 = dynamic_cast<Point3*>(tbl_pObj[idxPoint[minn+2]]);
 						p0->b *= t0;
 						p2->a *= t1;
 					}
@@ -187,8 +187,8 @@ void Lab15::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 						gui.one.idxTbl = idxTbl;
 						gui.one.idxObj = idx;
 						gui.one.bEnable = true;
-						tblPoint[ idx ]->bSelected = true;
-						tblPoint[ idx ]->bPreselect = false;
+						tbl_pObj[ idx ]->bSelected = true;
+						tbl_pObj[ idx ]->bPreselect = false;
 						gui.one.bSelected_a = false;
 						gui.one.bSelected_b = false;
 					}
@@ -212,9 +212,9 @@ void Lab15::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 		if ( bCut )
 		{
 			//GUI登録
-			cp.tbls.clear();
-			cp.tbltblEdge.clear();
-			cp.tbls.emplace_back( lab.tblObj );
+			cp.tbltbl_pObj.clear();
+			cp.tbltbl_pEdge.clear();
+			cp.tbltbl_pObj.emplace_back( lab.tbl_pObj );
 
 			// テーブルの再作成しないとうまく中身が参照できない
 ///			continue;
