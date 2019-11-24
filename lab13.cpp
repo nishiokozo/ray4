@@ -26,6 +26,7 @@
 #include "pers.h"
 
 #include "lab.h"
+#include "lab13.h"
 
 static const float	G	= -9.80665;				// 重力加速度
 static const rgb col0 = rgb( 0, 0, 0 );
@@ -42,7 +43,7 @@ static	bool	bPause = false;
 
 
 //------------------------------------------------------------------------------
-void Lab::lab13_intersect_plate_curve( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab13::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	rgb col = rgb( 1, 1, 1 );
@@ -51,7 +52,7 @@ void Lab::lab13_intersect_plate_curve( Lab& lab, SysKeys& keys, SysMouse& mouse,
 	gra.Clr(col/5);
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, col/3 );
 
-	gra.Print(1,(float)text_y++,to_string(lab.idx)+" : " + string(__func__ )); 
+	gra.Print(1,(float)text_y++,to_string(lab.idx)+" : intersect_plate_curve" ); 
 
 	// 初期化：オール
 	if ( !lab.bInitAll )

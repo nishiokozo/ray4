@@ -27,6 +27,7 @@
 #include "pers.h"
 
 #include "lab.h"
+#include "lab12.h"
 
 static const float	G	= -9.80665;				// 重力加速度
 static const rgb col0 = rgb( 0, 0, 0 );
@@ -57,7 +58,7 @@ struct Ball:Obj
 };
 
 //------------------------------------------------------------------------------
-void Lab::lab12_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab12::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 delta = 1/60.0;

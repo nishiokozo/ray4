@@ -45,7 +45,7 @@ struct Apr : public Sys
 	//------------------------------------------------------------------------------
 	{
 		lab.idx = num;
-		lab.SetIdx(lab.idx);
+		lab.SetIdx(lab.idx,gui.cp);
 		
 		//	ウィンドウ生成関数
 		auto funcOnCreate = [&]()
@@ -157,8 +157,8 @@ struct Apr : public Sys
 			//=================================
 			{
 				const float	T	= 1.0/60.0;				// 時間/frame
-				if ( keys.N.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.idx+1);gui.cp.tbls.clear();gui.cp.tbltblEdge.clear();};
-				if ( keys.B.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.idx-1);gui.cp.tbls.clear();gui.cp.tbltblEdge.clear();};
+				if ( keys.N.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.idx+1,gui.cp);};
+				if ( keys.B.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.idx-1,gui.cp);};
 				lab.Update( keys, mouse, gra, pers, T, text_y, gui.cp );
 			}
 			

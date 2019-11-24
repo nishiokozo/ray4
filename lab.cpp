@@ -25,6 +25,8 @@
 
 #include "lab.h"
 #include "lab0.h"
+#include "lab12.h"
+#include "lab13.h"
 #include "lab14.h"
 #include "lab15.h"
 #include "lab16.h"
@@ -1772,7 +1774,7 @@ static void lab1_graph( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, P
 }
 
 //------------------------------------------------------------------------------
-void Lab::SetIdx( int n )
+void Lab::SetIdx( int n, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	idx = max( n, 0 ); 
@@ -1788,6 +1790,8 @@ void Lab::SetIdx( int n )
 
 	if ( pLab ) 
 	{
+		cp.tbls.clear();
+		cp.tbltblEdge.clear();
 		delete pLab;
 		pLab=0;
 	};
@@ -1805,9 +1809,9 @@ void Lab::SetIdx( int n )
 		case 9:
 		case 10:
 		case 11:
-		case 12:
-		case 13:
 			break;
+		case 12:	pLab = new Lab12;	break;
+		case 13:	pLab = new Lab13;	break;
 		case 14:	pLab = new Lab14;	break;
 		case 15:	pLab = new Lab15;	break;
 		case 16:	pLab = new Lab16;	break;
@@ -1827,19 +1831,6 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float
 	{
 		case 10:	// 描画	色見本
 			lab10_colors( (*this), keys, mouse, gra, pers, delta, text_y, cp );
-			break;
-
-		case 15:	// 描画	2d剛体
-		case 14:	// 描画	2d剛体
-//			lab14( (*this), keys, mouse, gra, pers, delta, text_y, cp );
-			break;
-
-		case 13:	// 描画	2d剛体
-			lab13_intersect_plate_curve( (*this), keys, mouse, gra, pers, delta, text_y, cp );
-			break;
-
-		case 12:	// 描画	2d剛体
-			lab12_RidgePlateDot( (*this), keys, mouse, gra, pers, delta, text_y, cp );
 			break;
 
 		case 11:	// 描画	2d剛体
@@ -1883,11 +1874,9 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float
 			break;
 
 		default:
-//			lab0_gridonly( (*this), keys, mouse, gra, pers, delta, text_y, cp );
 
 			break;
 	}
-//	gra.Print(1,(float)text_y++,string("lab: ")+to_string(idx)); 
 }
 
 //------------------------------------------------------------------------------
