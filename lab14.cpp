@@ -29,41 +29,41 @@
 
 
 //------------------------------------------------------------------------------
-void Lab14::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab14::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
-	gra.Print(1,(float)text_y++,to_string(lab.idx)+" : " + string(__func__ )); 
+	gra.Print(1,(float)text_y++," : " + string(__func__ )); 
 
 	//初期化
-	if ( !lab.bInitAll )
+	if ( !m.bInitAll )
 	{
-		lab.bInitAll = true;
+		m.bInitAll = true;
 
 		// カメラ
 		pers.cam.pos = vect3( 0.0, 2.0, -5.0 );
 		pers.cam.at = vect3( 0,  1.0, 0 );
 
 		// 点
-		lab.tbl_pObj.emplace_back( new Obj( vect3(	-0.5,	0.12,	-0.5) ) );
-		lab.tbl_pObj.emplace_back( new Obj( vect3(	+0.5,	0.12,	-0.5) ) );
-		lab.tbl_pObj.emplace_back( new Obj( vect3(	+0.9,	0.12,	 0.5) ) );
-		lab.tbl_pObj.emplace_back( new Obj( vect3(	 0.0,	0.12,	 0.5) ) );
-		lab.tbl_pObj.emplace_back( new Obj( vect3(	-0.9,	0.12,	 0.5) ) );
+		m.tbl_pObj.emplace_back( new Obj( vect3(	-0.5,	0.12,	-0.5) ) );
+		m.tbl_pObj.emplace_back( new Obj( vect3(	+0.5,	0.12,	-0.5) ) );
+		m.tbl_pObj.emplace_back( new Obj( vect3(	+0.9,	0.12,	 0.5) ) );
+		m.tbl_pObj.emplace_back( new Obj( vect3(	 0.0,	0.12,	 0.5) ) );
+		m.tbl_pObj.emplace_back( new Obj( vect3(	-0.9,	0.12,	 0.5) ) );
 
-		lab.tbl_pObj.emplace_back( new Obj( vect3(	-0.5,	0.12,	-0.5)*1.2 ) );
-		lab.tbl_pObj.emplace_back( new Obj( vect3(	+0.5,	0.12,	-0.5)*1.2 ) );
-		lab.tbl_pObj.emplace_back( new Obj( vect3(	+0.9,	0.12,	 0.5)*1.2 ) );
-		lab.tbl_pObj.emplace_back( new Obj( vect3(	0.0,	0.12,	 0.5)*1.2 ) );
-		lab.tbl_pObj.emplace_back( new Obj( vect3(	-0.9,	0.12,	 0.5)*1.2 ) );
+		m.tbl_pObj.emplace_back( new Obj( vect3(	-0.5,	0.12,	-0.5)*1.2 ) );
+		m.tbl_pObj.emplace_back( new Obj( vect3(	+0.5,	0.12,	-0.5)*1.2 ) );
+		m.tbl_pObj.emplace_back( new Obj( vect3(	+0.9,	0.12,	 0.5)*1.2 ) );
+		m.tbl_pObj.emplace_back( new Obj( vect3(	0.0,	0.12,	 0.5)*1.2 ) );
+		m.tbl_pObj.emplace_back( new Obj( vect3(	-0.9,	0.12,	 0.5)*1.2 ) );
 
 
 		//GUI登録
 		cp.tbltbl_pObj.clear();
 		cp.tbltbl_pEdge.clear();
-		cp.tbltbl_pObj.emplace_back( lab.tbl_pObj );
+		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
 	}
 
 //				(*this).bActive = true;
@@ -85,7 +85,7 @@ void Lab14::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 				};
 				//------------------------------------------------------------------------------
 				//void drawCutmull( SysGra& gra, Pers& pers, 
-				vector<Obj*> tbl = lab.tbl_pObj; 
+				vector<Obj*> tbl = m.tbl_pObj; 
 				vector<ivect2>idx = tblIdx;
 				//------------------------------------------------------------------------------
 				{

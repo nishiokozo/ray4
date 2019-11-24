@@ -27,18 +27,18 @@
 #include "lab15.h"
 
 //------------------------------------------------------------------------------
-void Lab15::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab15::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
-	gra.Print(1,(float)text_y++,to_string(lab.idx)+" : " + string(__func__ )); 
+	gra.Print(1,(float)text_y++," : " + string(__func__ )); 
 
 	//初期化
-	if ( !lab.bInitAll )
+	if ( !m.bInitAll )
 	{
-		lab.bInitAll = true;
+		m.bInitAll = true;
 
 		// カメラ
 		pers.cam.pos = vect3( 0.0, 2.0, -5.0 );
@@ -46,8 +46,8 @@ void Lab15::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 
 
 		// 点
-		lab.tbl_pObj.emplace_back( 	new Point3(vect3(-1.0, 0.0, 0.0 ),vect3( 0.0, 0.0, 1.0 ),vect3( 0.0, 0.0,-1.0 )) );
-		lab.tbl_pObj.emplace_back( 	new Point3(vect3( 1.0, 0.0, 0.0 ),vect3( 0.0, 0.0,-1.0 ),vect3( 0.0, 0.0, 1.0 )) );
+		m.tbl_pObj.emplace_back( 	new Point3(vect3(-1.0, 0.0, 0.0 ),vect3( 0.0, 0.0, 1.0 ),vect3( 0.0, 0.0,-1.0 )) );
+		m.tbl_pObj.emplace_back( 	new Point3(vect3( 1.0, 0.0, 0.0 ),vect3( 0.0, 0.0,-1.0 ),vect3( 0.0, 0.0, 1.0 )) );
 
 		(*this).idxPoint.emplace_back( 0 );
 		(*this).idxPoint.emplace_back( 1 );
@@ -57,7 +57,7 @@ void Lab15::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 		//GUI登録
 		cp.tbltbl_pObj.clear();
 		cp.tbltbl_pEdge.clear();
-		cp.tbltbl_pObj.emplace_back( lab.tbl_pObj );
+		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
 
 
 
@@ -71,7 +71,6 @@ void Lab15::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 		bool bCut = mouse.L.hi;
 		bool bSerch = keys.E.on;
 
-		vector<Obj*>& tbl_pObj = lab.tbl_pObj; 
 		{
 			//ベジェ計算＆描画
 			int div = 10;
@@ -94,8 +93,8 @@ void Lab15::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 				int n0 = idxPoint[n];
 				int n1 = idxPoint[n+1];
 
-				Point3* p0 = dynamic_cast<Point3*>(tbl_pObj[n0]);
-				Point3* p1 = dynamic_cast<Point3*>(tbl_pObj[n1]);
+				Point3* p0 = dynamic_cast<Point3*>(m.tbl_pObj[n0]);
+				Point3* p1 = dynamic_cast<Point3*>(m.tbl_pObj[n1]);
 
 				vect3 P0 =     p0->pos;
 				vect3 P1 = P0 +p0->b;
@@ -163,14 +162,14 @@ void Lab15::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 					// 頂点生成
 					{
 						
-						tbl_pObj.emplace_back( new Point3( q, -v*t0, v*t1 ) );
-						idxPoint.insert( idxPoint.begin()+minn+1, (signed)tbl_pObj.size()-1);
+						m.tbl_pObj.emplace_back( new Point3( q, -v*t0, v*t1 ) );
+						idxPoint.insert( idxPoint.begin()+minn+1, (signed)m.tbl_pObj.size()-1);
 					}
 
 					//	接線計算
 					{
-						Point3* p0 = dynamic_cast<Point3*>(tbl_pObj[idxPoint[minn+0]]);
-						Point3* p2 = dynamic_cast<Point3*>(tbl_pObj[idxPoint[minn+2]]);
+						Point3* p0 = dynamic_cast<Point3*>(m.tbl_pObj[idxPoint[minn+0]]);
+						Point3* p2 = dynamic_cast<Point3*>(m.tbl_pObj[idxPoint[minn+2]]);
 						p0->b *= t0;
 						p2->a *= t1;
 					}
@@ -187,8 +186,8 @@ void Lab15::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 						gui.one.idxTbl = idxTbl;
 						gui.one.idxObj = idx;
 						gui.one.bEnable = true;
-						tbl_pObj[ idx ]->bSelected = true;
-						tbl_pObj[ idx ]->bPreselect = false;
+						m.tbl_pObj[ idx ]->bSelected = true;
+						m.tbl_pObj[ idx ]->bPreselect = false;
 						gui.one.bSelected_a = false;
 						gui.one.bSelected_b = false;
 					}
@@ -214,7 +213,7 @@ void Lab15::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 			//GUI登録
 			cp.tbltbl_pObj.clear();
 			cp.tbltbl_pEdge.clear();
-			cp.tbltbl_pObj.emplace_back( lab.tbl_pObj );
+			cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
 
 			// テーブルの再作成しないとうまく中身が参照できない
 ///			continue;

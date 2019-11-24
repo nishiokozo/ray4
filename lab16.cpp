@@ -42,18 +42,18 @@ Lab16::Lab16() : pImpl( new Lab16::Impl )
 }
 
 //------------------------------------------------------------------------------
-void Lab16::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab16::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
-	gra.Print(1,(float)text_y++,to_string(lab.idx)+" : Skeleton" ); 
+	gra.Print(1,(float)text_y++," : Skeleton" ); 
 
 	//初期化
-	if ( !lab.bInitAll )
+	if ( !m.bInitAll )
 	{
-		lab.bInitAll = true;
+		m.bInitAll = true;
 
 		// カメラ
 		pers.cam.pos = vect3( 0.0, 2.0, -5.0 );

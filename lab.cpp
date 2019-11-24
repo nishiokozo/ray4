@@ -33,45 +33,60 @@
 
 struct Lab1 : LabObj
 {
-	void Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
+    struct Impl;
+    std::unique_ptr<Impl> pImpl;
+	Lab1();
+	void Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
 };
+struct Lab1::Impl{};
+Lab1::Lab1() : pImpl( new Lab1::Impl ){}
+
 struct Lab2 : LabObj
 {
-	void Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
+	void Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
 };
 struct Lab3 : LabObj
 {
-	void Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
+	void Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
 };
 struct Lab4 : LabObj
 {
-	void Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
+	void Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
 };
 struct Lab5 : LabObj
 {
-	void Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
+	void Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
 };
 struct Lab6 : LabObj
 {
-	void Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
+	void Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
 };
 struct Lab7 : LabObj
 {
-	void Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
+	void Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
 };
 struct Lab8 : LabObj
 {
-	void Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
+	void Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
 };
 struct Lab9 : LabObj
 {
-	void Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
+	void Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
 };
 struct Lab10 : LabObj
 {
-	void Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
+	void Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
 };
 
+struct Lab11 : LabObj
+{
+    struct Impl;
+    std::unique_ptr<Impl> pImpl;
+	Lab11();
+	void Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
+};
+struct Lab11::Impl{};
+Lab11::Lab11() : pImpl( new Lab11::Impl ){}
 
 
 struct	Graphs
@@ -190,7 +205,7 @@ struct	Graphs
 
 
 //------------------------------------------------------------------------------
-void Lab::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str )
+void LabObj::M::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str )
 //------------------------------------------------------------------------------
 {
 	gra.SetZTest(false);
@@ -217,19 +232,19 @@ void Lab::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, flo
 };
 
 //------------------------------------------------------------------------------
-void Lab10::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab10::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	static bool bGrid = true;
 
 //	if (bGrid==false)	
 	gra.Clr(rgb(0.0,0.0,0.0));
-	gra.Print(1,(float)text_y++,string("lab10_colors")+to_string(lab.idx)); 
+	gra.Print(1,(float)text_y++,string("lab10_colors")); 
 
 	// 初期化
-	if ( !lab.bInitParam )
+	if ( !m.bInitParam )
 	{
-		lab.bInitParam = true;
+		m.bInitParam = true;
 		pers.cam.pos = vect3( -4.0, 4.0, -1.5 );
 		pers.cam.at = vect3( 0,  1.0, 0 );
 		bGrid = true;
@@ -245,7 +260,7 @@ void Lab10::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 	};
 
 	// 入力
-	if ( keys.R.hi ) lab.bInitParam = false;
+	if ( keys.R.hi ) m.bInitParam = false;
 	if ( keys.G.hi ) bGrid = !bGrid;
 
 	// 計算
@@ -388,7 +403,7 @@ void Lab10::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers&
 }
 
 //------------------------------------------------------------------------------
-static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	const float	G	= -9.80665;				// 重力加速度
@@ -405,7 +420,7 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 
-	gra.Print(1,(float)text_y++,string("lab11_RidgePlateDot")+to_string(lab.idx)); 
+	gra.Print(1,(float)text_y++,string("lab11_RidgePlateDot")); 
 
 	// 移動量d,初速v0の時の時間tを求める。
 	auto func_accelerationGetTime_DVv_t =[]( vect3 vg, float d, vect3 v0 )	// DV : Distance / Velocity
@@ -468,24 +483,24 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 	};
 
 	// 初期化
-	if ( !lab.bInitParam )
+	if ( !m.bInitParam )
 	{
-		if ( !lab.bInitAll )
+		if ( !m.bInitAll )
 		{
-			lab.bInitAll = true;
+			m.bInitAll = true;
 			pers.cam.pos = vect3(	0.0,	1.0, -3.0 );
 			pers.cam.at = vect3( 	0.0,	1.0, 0.0 );
 			//点
-			for ( Obj* p : lab.tbl_pObj ) delete p;
-			lab.tbl_pObj.clear();
-			lab.tbl_pObj.emplace_back( new Ball(vect3(  0		, 1.0,  0.0 ), vect3(0,0,0)) );
-			lab.tbl_pObj.emplace_back( new Obj(vect3( -0.4	, 0.5,	0.0 )) );	// 平面原点
-			lab.tbl_pObj.emplace_back( new Obj(vect3( -0.3	, 0.7,  0.0 )) );	// 平面法線
+			for ( Obj* p : m.tbl_pObj ) delete p;
+			m.tbl_pObj.clear();
+			m.tbl_pObj.emplace_back( new Ball(vect3(  0		, 1.0,  0.0 ), vect3(0,0,0)) );
+			m.tbl_pObj.emplace_back( new Obj(vect3( -0.4	, 0.5,	0.0 )) );	// 平面原点
+			m.tbl_pObj.emplace_back( new Obj(vect3( -0.3	, 0.7,  0.0 )) );	// 平面法線
 
 			// 線
-			for ( Edge* p : lab.tbl_pEdge ) delete p;
-			lab.tbl_pEdge.clear();
-			lab.tbl_pEdge.emplace_back( new Edge(1,2, col7,1) );
+			for ( Edge* p : m.tbl_pEdge ) delete p;
+			m.tbl_pEdge.clear();
+			m.tbl_pEdge.emplace_back( new Edge(1,2, col7,1) );
 
 			pers.axis.bAxisX = true;
 			pers.axis.bAxisY = true;
@@ -494,15 +509,15 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 			//GUI登録
 			cp.tbltbl_pObj.clear();
 			cp.tbltbl_pEdge.clear();
-			cp.tbltbl_pObj.emplace_back( lab.tbl_pObj );
-			cp.tbltbl_pEdge.emplace_back( lab.tbl_pEdge );
+			cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
+			cp.tbltbl_pEdge.emplace_back( m.tbl_pEdge );
 		}
 
-		Ball&	ball = *dynamic_cast<Ball*>(lab.tbl_pObj[0]);
+		Ball&	ball = *dynamic_cast<Ball*>(m.tbl_pObj[0]);
 		ball.pos = vect3(  0		, 1.0,  0.0 );
 		ball.vel = vect3(  0		, 0.0,  0.0 );
 
-		lab.bInitParam = true;
+		m.bInitParam = true;
 
 		graphs.Clear();
 		time = 0;
@@ -511,18 +526,18 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 
 	// 入力
 	{
-		if ( keys.R.hi ) lab.bInitParam = false;
+		if ( keys.R.hi ) m.bInitParam = false;
 		if ( keys.SPACE.hi )	bPause = !bPause ;
 		if ( keys.ENTER.rep )	{bStep = true; bPause = true; }
 
 		if ( keys.G.hi )	{if ( vg.z==G ) vg=vect3(0,0,0); else vg=vect3(0,G,0);}
-		if ( keys.A.hi )	{lab.tbl_pObj[2]->pos.z+=-1.0;}
+		if ( keys.A.hi )	{m.tbl_pObj[2]->pos.z+=-1.0;}
 	
 	}
 	
-	Ball&	ball = *dynamic_cast<Ball*>(lab.tbl_pObj[0]);
-	vect3	plate_p = lab.tbl_pObj[1]->pos;
-	vect3	plate_n = (lab.tbl_pObj[2]->pos-plate_p).normalize();
+	Ball&	ball = *dynamic_cast<Ball*>(m.tbl_pObj[0]);
+	vect3	plate_p = m.tbl_pObj[1]->pos;
+	vect3	plate_n = (m.tbl_pObj[2]->pos-plate_p).normalize();
 
 
 	//-----
@@ -638,7 +653,7 @@ static void lab11_RidgePlateDot( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGr
 }
 
 //------------------------------------------------------------------------------
-void Lab9::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab9::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	const float	G	= -9.80665;				// 重力加速度
@@ -655,7 +670,7 @@ void Lab9::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 
-	gra.Print(1,(float)text_y++,string("lab9_2dRidge")+to_string(lab.idx)); 
+	gra.Print(1,(float)text_y++,string("lab9_2dRidge")); 
 
 	static	Graphs graphs;
 
@@ -674,33 +689,33 @@ void Lab9::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 	};
 
 	// 初期化
-	if ( !lab.bInitParam )
+	if ( !m.bInitParam )
 	{
-		if ( !lab.bInitAll )
+		if ( !m.bInitAll )
 		{
-			lab.bInitAll = true;
+			m.bInitAll = true;
 			pers.cam.pos = vect3(	0.0,	4.2, 0.1 );
 			pers.cam.at = vect3( 	0.0,	0.0, 0.2 );
 		}
 	
-		lab.bInitParam = true;
+		m.bInitParam = true;
 		//点
-		for ( Obj* p : lab.tbl_pObj ) delete p;
-		lab.tbl_pObj.clear();
-		lab.tbl_pObj.emplace_back( new Car(vect3(  0		, 0.0,  1.0 ), vect3(0,0,0)) );
-		lab.tbl_pObj.emplace_back( new Obj(vect3( -0.5	, 0.0,	0.0 )) );
-		lab.tbl_pObj.emplace_back( new Obj(vect3(  0.5	, 0.0, 0.0 )) );
+		for ( Obj* p : m.tbl_pObj ) delete p;
+		m.tbl_pObj.clear();
+		m.tbl_pObj.emplace_back( new Car(vect3(  0		, 0.0,  1.0 ), vect3(0,0,0)) );
+		m.tbl_pObj.emplace_back( new Obj(vect3( -0.5	, 0.0,	0.0 )) );
+		m.tbl_pObj.emplace_back( new Obj(vect3(  0.5	, 0.0, 0.0 )) );
 
 		// 線
-		for ( Edge* p : lab.tbl_pEdge ) delete p;
-		lab.tbl_pEdge.clear();
-		lab.tbl_pEdge.emplace_back( new Edge(1,2) );
+		for ( Edge* p : m.tbl_pEdge ) delete p;
+		m.tbl_pEdge.clear();
+		m.tbl_pEdge.emplace_back( new Edge(1,2) );
 
 		//GUI登録
 		cp.tbltbl_pObj.clear();
 		cp.tbltbl_pEdge.clear();
-		cp.tbltbl_pObj.emplace_back( lab.tbl_pObj );
-		cp.tbltbl_pEdge.emplace_back( lab.tbl_pEdge );
+		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
+		cp.tbltbl_pEdge.emplace_back( m.tbl_pEdge );
 
 		pers.axis.bAxisX = true;
 		pers.axis.bAxisY = false;
@@ -718,18 +733,18 @@ void Lab9::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 
 	// 入力
 	{
-		if ( keys.R.hi ) lab.bInitParam = false;
+		if ( keys.R.hi ) m.bInitParam = false;
 		if ( keys.SPACE.hi )	bPause = !bPause ;
 		if ( keys.ENTER.rep )	{bStep = true; bPause = true; }
 
 		if ( keys.G.hi )	{if ( vg.z==G ) vg=vect3(0,0,0); else vg=vect3(0,0,G);}
-		if ( keys.A.hi )	{lab.tbl_pObj[2]->pos.z+=-1.0;}
+		if ( keys.A.hi )	{m.tbl_pObj[2]->pos.z+=-1.0;}
 	
 	}
 	
-	Car&	car = *dynamic_cast<Car*>(lab.tbl_pObj[0]);
-	vect3	st = lab.tbl_pObj[1]->pos;
-	vect3	en = lab.tbl_pObj[2]->pos;
+	Car&	car = *dynamic_cast<Car*>(m.tbl_pObj[0]);
+	vect3	st = m.tbl_pObj[1]->pos;
+	vect3	en = m.tbl_pObj[2]->pos;
 
 	//-----
 
@@ -831,7 +846,7 @@ void Lab9::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 }
 
 //------------------------------------------------------------------------------
-void Lab8::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab8::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	const float	G	= -9.80665;				// 重力加速度
@@ -848,7 +863,7 @@ void Lab8::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 
-	gra.Print(1,(float)text_y++,string("lab8_vector_six_lab8")+to_string(lab.idx)); 
+	gra.Print(1,(float)text_y++,string("lab8_vector_six_lab8")); 
 
 	const float	g = G *delta*delta;			// 重力加速度/frame
 	const vect3	vg = vect3(0,0, -g);	// 重力加速度/frame
@@ -860,31 +875,31 @@ void Lab8::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 	static float w = 0;
 
 	// 初期化
-	if ( !lab.bInitParam )
+	if ( !m.bInitParam )
 	{
-		if ( !lab.bInitAll )
+		if ( !m.bInitAll )
 		{
-			lab.bInitAll = true;
+			m.bInitAll = true;
 			pers.cam.pos = vect3(  0.0, 5.0, -1.0 );
 			pers.cam.at = vect3( 0,  0.0, 0 );
 		}
 	
-		lab.bInitParam = true;
+		m.bInitParam = true;
 		//点
-		for ( Obj* p : lab.tbl_pObj ) delete p;
-		lab.tbl_pObj.clear();
-		lab.tbl_pObj.emplace_back( new Obj(vect3( 0  , 0.1, 0 )) );
-		lab.tbl_pObj.emplace_back( new Obj(vect3( 1  , 0.1, 0 )) );
+		for ( Obj* p : m.tbl_pObj ) delete p;
+		m.tbl_pObj.clear();
+		m.tbl_pObj.emplace_back( new Obj(vect3( 0  , 0.1, 0 )) );
+		m.tbl_pObj.emplace_back( new Obj(vect3( 1  , 0.1, 0 )) );
 		// 線
-		for ( Edge* p : lab.tbl_pEdge ) delete p;
-		lab.tbl_pEdge.clear();
-		lab.tbl_pEdge.emplace_back( new Edge(0,1) );
+		for ( Edge* p : m.tbl_pEdge ) delete p;
+		m.tbl_pEdge.clear();
+		m.tbl_pEdge.emplace_back( new Edge(0,1) );
 
 		//GUI登録
 		cp.tbltbl_pObj.clear();
 		cp.tbltbl_pEdge.clear();
-		cp.tbltbl_pObj.emplace_back( lab.tbl_pObj );
-		cp.tbltbl_pEdge.emplace_back( lab.tbl_pEdge );
+		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
+		cp.tbltbl_pEdge.emplace_back( m.tbl_pEdge );
 
 		pers.axis.bAxisX = true;
 		pers.axis.bAxisY = false;
@@ -897,12 +912,12 @@ void Lab8::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 	}
 
 	// 入力
-	if ( keys.R.hi ) lab.bInitParam = false;
+	if ( keys.R.hi ) m.bInitParam = false;
 	if ( keys.SPACE.hi )	bPause = !bPause ;
 	if ( keys.ENTER.rep )	{bStep = true; bPause = true; }
 
-	vect3&	v0 = lab.tbl_pObj[0]->pos;
-	vect3&	v1 = lab.tbl_pObj[1]->pos;
+	vect3&	v0 = m.tbl_pObj[0]->pos;
+	vect3&	v1 = m.tbl_pObj[1]->pos;
 
 	vect3	bar = (v1-v0);					//	棒
 	vect3	moment = cross(-bar, vel+vg);	//	回転モーメント 仮
@@ -929,9 +944,9 @@ void Lab8::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
  		
 	}
 
-	lab.drawVect( gra, pers, text_y, v0, moment ,10	, rgb(1,0,1), "moment" );
-	lab.drawVect( gra, pers, text_y, v1, vg		,100	, rgb(1,0,0), "vg" );
-	lab.drawVect( gra, pers, text_y, v1, F		,1		, rgb(0,1,0), "F" );
+	m.drawVect( gra, pers, text_y, v0, moment ,10	, rgb(1,0,1), "moment" );
+	m.drawVect( gra, pers, text_y, v1, vg		,100	, rgb(1,0,0), "vg" );
+	m.drawVect( gra, pers, text_y, v1, F		,1		, rgb(0,1,0), "F" );
 	plot_moment.DrawPlot( gra, pers );
 	gra.Print(1,(float)text_y++,string("<<radius>>")+to_string(bar.abs())); 
 
@@ -939,14 +954,14 @@ void Lab8::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 }
 
 //------------------------------------------------------------------------------
-void Lab6::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab6::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	//画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 
-	gra.Print(1,(float)text_y++,string("<<lab6_tire3d>>")+to_string(lab.idx)); 
+	gra.Print(1,(float)text_y++,string("<<lab6_tire3d>>")); 
 
 	const vect3 G_pos = vect3(0,2.0,0);
 	const vect3 G_acc= vect3(0,0,0.0);
@@ -1056,7 +1071,7 @@ void Lab6::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 }
 
 //------------------------------------------------------------------------------
-void Lab5::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab5::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	const float	G	= -9.80665;				// 重力加速度
@@ -1073,43 +1088,43 @@ void Lab5::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 
-	gra.Print(1,(float)text_y++,string("<<lab5_furiko2d>>")+to_string(lab.idx)); 
+	gra.Print(1,(float)text_y++,string("<<lab5_furiko2d>>")); 
 
 	const float grate = 9.80665 *delta*delta;		// 重力加速度/frame
 
 	static float	rsp = 0;
 
-	if ( !lab.bInitParam )
+	if ( !m.bInitParam )
 	{
-		if ( !lab.bInitAll )
+		if ( !m.bInitAll )
 		{
-			lab.bInitAll = true;
+			m.bInitAll = true;
 			pers.cam.pos = vect3(  0.0, 2.0, -5.0 );
 			pers.cam.at = vect3( 0,  2.0, 0 );
 		}
 	
-		lab.bInitParam = true;
-		for ( Obj* p : lab.tbl_pObj ) delete p;
-		lab.tbl_pObj.clear();
-		lab.tbl_pObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
-		lab.tbl_pObj.emplace_back( new Obj(vect3(1, 2.0, 0)) );
+		m.bInitParam = true;
+		for ( Obj* p : m.tbl_pObj ) delete p;
+		m.tbl_pObj.clear();
+		m.tbl_pObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
+		m.tbl_pObj.emplace_back( new Obj(vect3(1, 2.0, 0)) );
 		// 線
-		for ( Edge* p : lab.tbl_pEdge ) delete p;
-		lab.tbl_pEdge.clear();
-		lab.tbl_pEdge.emplace_back( new Edge(0,1) );
+		for ( Edge* p : m.tbl_pEdge ) delete p;
+		m.tbl_pEdge.clear();
+		m.tbl_pEdge.emplace_back( new Edge(0,1) );
 
 		//GUI登録
 		cp.tbltbl_pObj.clear();
 		cp.tbltbl_pEdge.clear();
-		cp.tbltbl_pObj.emplace_back( lab.tbl_pObj );
-		cp.tbltbl_pEdge.emplace_back( lab.tbl_pEdge );
+		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
+		cp.tbltbl_pEdge.emplace_back( m.tbl_pEdge );
 
 		rsp=0;
 	}
-	if ( keys.R.hi )	lab.bInitParam = false;
+	if ( keys.R.hi )	m.bInitParam = false;
 
-	vect3&	v0 = lab.tbl_pObj[0]->pos;	//	barの根本
-	vect3&	v1 = lab.tbl_pObj[1]->pos;	//	barの先端
+	vect3&	v0 = m.tbl_pObj[0]->pos;	//	barの根本
+	vect3&	v1 = m.tbl_pObj[1]->pos;	//	barの先端
 
 
 //	pers.pen.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
@@ -1137,7 +1152,7 @@ void Lab5::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 	}
 }
 //------------------------------------------------------------------------------
-void Lab7::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab7::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	const float	G	= -9.80665;				// 重力加速度
@@ -1154,7 +1169,7 @@ void Lab7::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 
-	gra.Print(1,(float)text_y++,string("<<lab7_kakusokudo7>>")+to_string(lab.idx)); 
+	gra.Print(1,(float)text_y++,string("<<lab7_kakusokudo7>>")); 
 
 	const float	g = G *delta*delta;		// 重力加速度/frame
 	const vect3	vg = vect3(0,0, -g);		// 重力加速度/frame
@@ -1170,45 +1185,45 @@ void Lab7::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 	bool bStep = false;
 
 	// 初期化
-	if ( !lab.bInitParam )
+	if ( !m.bInitParam )
 	{
-		if ( !lab.bInitAll )
+		if ( !m.bInitAll )
 		{
-			lab.bInitAll = true;
+			m.bInitAll = true;
 			pers.cam.pos = vect3( 0, 5.0, -0.5 );
 			pers.cam.at = vect3( 0,  0, 0 );
 		}
-		lab.bInitParam = true;
+		m.bInitParam = true;
 
 		// 点
-		for ( Obj* p : lab.tbl_pObj ) delete p;
-		lab.tbl_pObj.clear();
-		lab.tbl_pObj.emplace_back( new Obj(vect3( 0 ,0.1, 0)) );
-		lab.tbl_pObj.emplace_back( new Obj(vect3(-1 ,0.1, 0)) );
+		for ( Obj* p : m.tbl_pObj ) delete p;
+		m.tbl_pObj.clear();
+		m.tbl_pObj.emplace_back( new Obj(vect3( 0 ,0.1, 0)) );
+		m.tbl_pObj.emplace_back( new Obj(vect3(-1 ,0.1, 0)) );
 
 		// 線
-		for ( Edge* p : lab.tbl_pEdge ) delete p;
-		lab.tbl_pEdge.clear();
-		lab.tbl_pEdge.emplace_back( new Edge(0,1) );
+		for ( Edge* p : m.tbl_pEdge ) delete p;
+		m.tbl_pEdge.clear();
+		m.tbl_pEdge.emplace_back( new Edge(0,1) );
 
 		//GUI登録
 		cp.tbltbl_pObj.clear();
 		cp.tbltbl_pEdge.clear();
-		cp.tbltbl_pObj.emplace_back( lab.tbl_pObj );
-		cp.tbltbl_pEdge.emplace_back( lab.tbl_pEdge );
+		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
+		cp.tbltbl_pEdge.emplace_back( m.tbl_pEdge );
 
 		bShot = false;
 	}
 
 
-	vect3&	v0 = lab.tbl_pObj[0]->pos;	//	barの根本
-	vect3&	v1 = lab.tbl_pObj[1]->pos;	//	barの先端
+	vect3&	v0 = m.tbl_pObj[0]->pos;	//	barの根本
+	vect3&	v1 = m.tbl_pObj[1]->pos;	//	barの先端
 
 
 	//入力
 	{
 		// リセット
-		if ( keys.R.hi )		lab.bInitParam = false ;
+		if ( keys.R.hi )		m.bInitParam = false ;
 
 		if ( keys.SPACE.hi )	bPause = !bPause ;
 
@@ -1260,7 +1275,7 @@ void Lab7::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 				v1 = (v1-v0)/(v1-v0).abs()+v0;
 				acc2 += v1-prev;
 			}
-			lab.drawVect( gra, pers, text_y, v1, vt			,100	, rgb(1,0,0), "vt" );
+			m.drawVect( gra, pers, text_y, v1, vt			,100	, rgb(1,0,0), "vt" );
 			gra.Print(1,(float)text_y++,string("radius ")+to_string(bar.abs())); 
 		}
 
@@ -1299,14 +1314,14 @@ w=deg2rad(2);
 		}
 
 		// 補助線
-		lab.drawVect( gra, pers, text_y, v1, vg			,100	, rgb(1,0,0), "vg" );
+		m.drawVect( gra, pers, text_y, v1, vg			,100	, rgb(1,0,0), "vg" );
 			
 	}
 
 }
 
 //------------------------------------------------------------------------------
-void Lab4::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab4::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	//画面クリア
@@ -1314,7 +1329,7 @@ void Lab4::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
 
 //	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
-		gra.Print(1,(float)text_y++,string("<<lab4_furiko3d>>")+to_string(lab.idx)); 
+		gra.Print(1,(float)text_y++,string("<<lab4_furiko3d>>")); 
 		// delta=J dω/dt
 		// delta：トルク J：慣性モーメント ω：回転角速度[rad]
 		//
@@ -1335,31 +1350,31 @@ void Lab4::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 
 
 	// 初期化
-	if ( !lab.bInitParam )
+	if ( !m.bInitParam )
 	{
-		if ( !lab.bInitAll )
+		if ( !m.bInitAll )
 		{
-			lab.bInitAll = true;
+			m.bInitAll = true;
 			pers.cam.pos = vect3(  0.0, 0.0, -7.0 );
 			pers.cam.at = vect3( 0,  0.0, 0 );
 		}
 
-		lab.bInitParam = true;
-		for ( Obj* p : lab.tbl_pObj ) delete p;
-		lab.tbl_pObj.clear();
-		lab.tbl_pObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
-		lab.tbl_pObj.emplace_back( new Obj(vect3(-1, 2.0, 0)) );
+		m.bInitParam = true;
+		for ( Obj* p : m.tbl_pObj ) delete p;
+		m.tbl_pObj.clear();
+		m.tbl_pObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
+		m.tbl_pObj.emplace_back( new Obj(vect3(-1, 2.0, 0)) );
 
 		//GUI登録
 		cp.tbltbl_pObj.clear();
 		cp.tbltbl_pEdge.clear();
-		cp.tbltbl_pObj.emplace_back( lab.tbl_pObj );
+		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
 		
 		vel = vect3(0,0,0);
 	}
 
-	vect3&	v0 = lab.tbl_pObj[0]->pos;	//	barの根本
-	vect3&	v1 = lab.tbl_pObj[1]->pos;	//	barの先端
+	vect3&	v0 = m.tbl_pObj[0]->pos;	//	barの根本
+	vect3&	v1 = m.tbl_pObj[1]->pos;	//	barの先端
 
 	// 入力
 	{
@@ -1370,7 +1385,7 @@ void Lab4::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 		if ( keys.ENTER.rep )	bStep = true;
 
 		// リセット
-		if ( keys.R.hi )	lab.bInitParam = false ;
+		if ( keys.R.hi )	m.bInitParam = false ;
 
 		// 縮む
 		if ( mouse.F.hi )	v1 = (v1+v0)/2;
@@ -1403,11 +1418,11 @@ mov =vel;
 
 		pers.pen.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
 
-		lab.drawVect( gra, pers, text_y, v1, vg	,100, rgb(1,0,0), "g" );
-		lab.drawVect( gra, pers, text_y, v0, moment,100, rgb(1,0,1), "moment" );
-		lab.drawVect( gra, pers, text_y, v1, F		,100, rgb(0,1,0), "F" );
-		lab.drawVect( gra, pers, text_y, v1, vel	,2	, rgb(1,1,0), "vel" );
-		lab.drawVect( gra, pers, text_y, v1, mov	,2	, rgb(0,0,1), "mov" );
+		m.drawVect( gra, pers, text_y, v1, vg	,100, rgb(1,0,0), "g" );
+		m.drawVect( gra, pers, text_y, v0, moment,100, rgb(1,0,1), "moment" );
+		m.drawVect( gra, pers, text_y, v1, F		,100, rgb(0,1,0), "F" );
+		m.drawVect( gra, pers, text_y, v1, vel	,2	, rgb(1,1,0), "vel" );
+		m.drawVect( gra, pers, text_y, v1, mov	,2	, rgb(0,0,1), "mov" );
 	}
 
 
@@ -1482,7 +1497,7 @@ mov =vel;
 //=================================
 
 //------------------------------------------------------------------------------
-void Lab3::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab3::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	const float	G	= -9.80665;				// 重力加速度
@@ -1498,7 +1513,7 @@ void Lab3::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 	//画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
-	gra.Print(1,(float)text_y++,string("<<lab3_gravityPlanet>>")+to_string(lab.idx)); 
+	gra.Print(1,(float)text_y++,string("<<lab3_gravityPlanet>>")); 
 
 	static bool	bPause = false; 
 	bool	bStep = false; 
@@ -1518,26 +1533,26 @@ void Lab3::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 	};
 
 	// 初期化
-	if ( !lab.bInitParam )
+	if ( !m.bInitParam )
 	{
-		lab.bInitParam = true;
-		if ( !lab.bInitAll )
+		m.bInitParam = true;
+		if ( !m.bInitAll )
 		{
-			lab.bInitAll = true;
+			m.bInitAll = true;
 			//上から
 			pers.cam.pos = vect3(  0.0, 0.5, -2.0 );
 			pers.cam.at = vect3( 0,  0.0, 0 );
 		}
 
-		for ( Obj* p : lab.tbl_pObj ) delete p;
-		lab.tbl_pObj.clear();
-		lab.tbl_pObj.emplace_back( new Planet(vect3(-0.5,0.1,0),vect3(0, 0, -0.02)) );
-		lab.tbl_pObj.emplace_back( new Planet(vect3( 0.5,0.1,0),vect3(0, 0, 0.02)) );
+		for ( Obj* p : m.tbl_pObj ) delete p;
+		m.tbl_pObj.clear();
+		m.tbl_pObj.emplace_back( new Planet(vect3(-0.5,0.1,0),vect3(0, 0, -0.02)) );
+		m.tbl_pObj.emplace_back( new Planet(vect3( 0.5,0.1,0),vect3(0, 0, 0.02)) );
 
 		//GUI登録
 		cp.tbltbl_pObj.clear();
 		cp.tbltbl_pEdge.clear();
-		cp.tbltbl_pObj.emplace_back( lab.tbl_pObj );
+		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
 	}
 
 	const float	g = G *delta*delta;		// 重力加速度/frame
@@ -1551,21 +1566,21 @@ void Lab3::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 		if ( keys.ENTER.rep )	bStep = true;
 
 		// リセット
-		if ( keys.R.hi )	lab.bInitParam = false ;
+		if ( keys.R.hi )	m.bInitParam = false ;
 
 		// 生成
 		if ( mouse.B.hi )
 		{
 			vect3 P = pers.calcScreenToWorld3( vect3(mouse.pos,0) );
 			vect3 I = pers.calcRayvect( P );
-			lab.tbl_pObj.emplace_back( new Planet( P, I/100.0 ) );
+			m.tbl_pObj.emplace_back( new Planet( P, I/100.0 ) );
 		}
 
 	}
 
 	
-	Planet& pl0 = *dynamic_cast<Planet*>(lab.tbl_pObj[0]);	//	太陽
-	Planet& pl1 = *dynamic_cast<Planet*>(lab.tbl_pObj[1]);	//	地球
+	Planet& pl0 = *dynamic_cast<Planet*>(m.tbl_pObj[0]);	//	太陽
+	Planet& pl1 = *dynamic_cast<Planet*>(m.tbl_pObj[1]);	//	地球
 
 	// 計算
 	if ( !bPause || bStep )
@@ -1592,7 +1607,7 @@ void Lab3::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 
 	// 描画
 	{
-		for ( Obj* p : lab.tbl_pObj ) 
+		for ( Obj* p : m.tbl_pObj ) 
 		{
 			Planet& pl = *dynamic_cast<Planet*>(p);
 			for ( int i = 0 ; i < MAX_PREV ; i++ )
@@ -1608,7 +1623,7 @@ void Lab3::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 // 描画	角速度 実験
 //=================================
 //------------------------------------------------------------------------------
-void Lab2::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab2::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	const float	G	= -9.80665;				// 重力加速度
@@ -1625,7 +1640,7 @@ void Lab2::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 
-	gra.Print(1,(float)text_y++,string("<<lab2_kakusokudo>>")+to_string(lab.idx)); 
+	gra.Print(1,(float)text_y++,string("<<lab2_kakusokudo>>")); 
 
 	const float	g = G *delta*delta;		// 重力加速度/frame
 
@@ -1638,46 +1653,46 @@ void Lab2::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 	static float 	w;	//	角速度
 
 	// 初期化
-	if ( !lab.bInitParam )
+	if ( !m.bInitParam )
 	{
-		if ( !lab.bInitAll )
+		if ( !m.bInitAll )
 		{
-			lab.bInitAll = true;
+			m.bInitAll = true;
 			pers.cam.pos = vect3( 2.0, 2.5, -2.0 );
 			pers.cam.at = vect3( 0,  0.0, 0 );
 		}
-		lab.bInitParam = true;
+		m.bInitParam = true;
 
-		for ( Obj* p : lab.tbl_pObj ) delete p;
-		lab.tbl_pObj.clear();
-		lab.tbl_pObj.emplace_back( new Obj(vect3(0  ,0.1,0)) );
-		lab.tbl_pObj.emplace_back( new Obj(vect3(1  ,0.1,0)) );
-		lab.tbl_pObj.emplace_back( new Obj(vect3(1.5,0.1,0.2)) );
+		for ( Obj* p : m.tbl_pObj ) delete p;
+		m.tbl_pObj.clear();
+		m.tbl_pObj.emplace_back( new Obj(vect3(0  ,0.1,0)) );
+		m.tbl_pObj.emplace_back( new Obj(vect3(1  ,0.1,0)) );
+		m.tbl_pObj.emplace_back( new Obj(vect3(1.5,0.1,0.2)) );
 		// 線
-		for ( Edge* p : lab.tbl_pEdge ) delete p;
-		lab.tbl_pEdge.clear();
-		lab.tbl_pEdge.emplace_back( new Edge(0,1) );
-		lab.tbl_pEdge.emplace_back( new Edge(1,2,rgb(0,1,0),1) );
+		for ( Edge* p : m.tbl_pEdge ) delete p;
+		m.tbl_pEdge.clear();
+		m.tbl_pEdge.emplace_back( new Edge(0,1) );
+		m.tbl_pEdge.emplace_back( new Edge(1,2,rgb(0,1,0),1) );
 
 		//GUI登録
 		cp.tbltbl_pObj.clear();
 		cp.tbltbl_pEdge.clear();
-		cp.tbltbl_pObj.emplace_back( lab.tbl_pObj );
-		cp.tbltbl_pEdge.emplace_back( lab.tbl_pEdge );
+		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
+		cp.tbltbl_pEdge.emplace_back( m.tbl_pEdge );
 
 		bShot = false;
 	}
 
 
-	vect3&	v0 = lab.tbl_pObj[0]->pos;	//	barの根本
-	vect3&	v1 = lab.tbl_pObj[1]->pos;	//	barの先端
-	vect3&	v2 = lab.tbl_pObj[2]->pos;	// 速度指定
+	vect3&	v0 = m.tbl_pObj[0]->pos;	//	barの根本
+	vect3&	v1 = m.tbl_pObj[1]->pos;	//	barの先端
+	vect3&	v2 = m.tbl_pObj[2]->pos;	// 速度指定
 
 
 	//入力
 	{
 		// リセット
-		if ( keys.R.hi )	lab.bInitParam = false ;
+		if ( keys.R.hi )	m.bInitParam = false ;
 
 		if ( mouse.B.hi )	bShot = !bShot ;
 	}
@@ -1726,44 +1741,44 @@ void Lab2::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& 
 		pers.pen.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );	//	棒
 		pers.pen.line3d( gra, pers, v1, v2, rgb(0,1,0), 1 );	// 外的な力
 */
-		lab.drawVect( gra, pers, text_y, v1, velocity	,1	, rgb(1,1,0), "velocity" );
-		lab.drawVect( gra, pers, text_y, v0, moment		,1	, rgb(1,0,1), "moment" );
-		lab.drawVect( gra, pers, text_y, v0, to			,1	, rgb(0,1,1), "to" );
+		m.drawVect( gra, pers, text_y, v1, velocity	,1	, rgb(1,1,0), "velocity" );
+		m.drawVect( gra, pers, text_y, v0, moment		,1	, rgb(1,0,1), "moment" );
+		m.drawVect( gra, pers, text_y, v0, to			,1	, rgb(0,1,1), "to" );
 			
 	}
 
 }
 
 //------------------------------------------------------------------------------
-void Lab1::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab1::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	//画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
 
-	gra.Print(1,(float)text_y++,string("<<lab1_graph>>")+to_string(lab.idx)); 
+	gra.Print(1,(float)text_y++,string("<<lab1_graph>>")); 
 
 	rgb	col = vect3(0.2,0.2,0.2);
 
 	// 初期化
-	if ( !lab.bInitAll )
+	if ( !m.bInitAll )
 	{
-		lab.bInitAll = true;
+		m.bInitAll = true;
 		pers.cam.pos = vect3( 0.0, 0.0, -5.0 );
 		pers.cam.at = vect3( 0,  0.0, 0 );
 	}
 
-	if ( !lab.bInitParam )
+	if ( !m.bInitParam )
 	{
-		lab.bInitParam = true;
+		m.bInitParam = true;
 	}
 
 
 	//入力
 	{
 		// リセット
-		if ( keys.R.hi )	lab.bInitParam = false ;
+		if ( keys.R.hi )	m.bInitParam = false ;
 	}
 
 
@@ -1819,15 +1834,6 @@ void Lab::SetIdx( int n, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	idx = max( n, 0 ); 
-	bInitParam=false;
-	bInitAll=false;
-
-	for ( Obj* p : (*this).tbl_pObj ) delete p;
-	tbl_pObj.clear();
-
-	for ( Edge* p : (*this).tbl_pEdge ) delete p;
-	tbl_pEdge.clear();
-
 
 	cp.tbltbl_pObj.clear();
 	cp.tbltbl_pEdge.clear();
@@ -1851,6 +1857,7 @@ void Lab::SetIdx( int n, Cp& cp )
 		case 8:		pLab = new Lab8;	break;
 		case 9:		pLab = new Lab9;	break;
 		case 10:	pLab = new Lab10;	break;
+		case 11:	pLab = new Lab11;	break;
 		case 12:	pLab = new Lab12;	break;
 		case 13:	pLab = new Lab13;	break;
 		case 14:	pLab = new Lab14;	break;
@@ -1866,7 +1873,7 @@ void Lab::SetIdx( int n, Cp& cp )
 void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
-	if ( pLab ) pLab->Update( (*this), keys, mouse, gra, pers, delta, text_y, cp );
+	if ( pLab ) pLab->Update( keys, mouse, gra, pers, delta, text_y, cp );
 }
 
 //------------------------------------------------------------------------------

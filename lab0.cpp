@@ -26,19 +26,29 @@
 #include "lab.h"
 #include "lab0.h"
 
+struct Lab0::Impl
+{
+};
+
 //------------------------------------------------------------------------------
-void Lab0::Update( Lab& lab, SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+Lab0::Lab0() : pImpl( new Lab0::Impl )
+//------------------------------------------------------------------------------
+{
+}
+
+//------------------------------------------------------------------------------
+void Lab0::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
-	gra.Print(1,(float)text_y++,to_string(lab.idx)+" : only grid" ); 
+	gra.Print(1,(float)text_y++," : only grid" ); 
 
 	//初期化
-	if ( !lab.bInitAll )
+	if ( !m.bInitAll )
 	{
-		lab.bInitAll = true;
+		m.bInitAll = true;
 
 		// カメラ
 		pers.cam.pos = vect3( 0.0, 2.0, -5.0 );
