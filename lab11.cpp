@@ -63,7 +63,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 
-	gra.Print(1,(float)text_y++,string("lab11_RidgePlateDot")); 
+	gra.Print(1,(float)text_y++,string("11 : Plate & Ball")); 
 
 	// 定数
 	vect3	vg	= vect3(0,G,0);		// 重力加速度ベクトル
@@ -74,15 +74,15 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		m.bInitAll = true;
 
 		// カメラ
-		pers.cam.pos = vect3(	1.0,	3.0, -3.0 );
-		pers.cam.at = vect3( 	0.0,	1.0, 0.0 );
+		pers.cam.pos = vect3(	1.0,	0.5, -3.0 );
+		pers.cam.at = vect3( 	0.0,	0.5, 0.0 );
 
 		//点
 		for ( Obj* p : m.tbl_pObj ) delete p;
 		m.tbl_pObj.clear();
 		m.tbl_pObj.emplace_back( new Ball(vect3(  0		, 1.0,  0.0 ), vect3(0,0,0)) );
 		m.tbl_pObj.emplace_back( new Obj(vect3( -0.3	, 0.5,	0.0 )) );	// 平面原点
-		m.tbl_pObj.emplace_back( new Obj(vect3( -0.32	, 0.7,  0.0 )) );	// 平面法線
+		m.tbl_pObj.emplace_back( new Obj(vect3( -0.30	, 0.7,  0.0 )) );	// 平面法線
 
 		// 線
 		for ( Edge* p : m.tbl_pEdge ) delete p;
@@ -141,7 +141,8 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		vn = v0 + vg*delta;	// 仮速度
 	}
 
-	auto[flg,q0,t] = func_intersect_Plate_SegCurve( plate_p, plate_n, p0, -0.0001, delta, vg, v0 );
+	vect3 vr = plate_n*ball.radius;
+	auto[flg,q0,t] = func_intersect_Plate_SegCurve( plate_p+vr, plate_n, p0, -0.0001, delta, dot(vg,plate_n)*plate_n, dot(v0,plate_n)*plate_n );
 
 	// 衝突計算
 	if ( flg )
