@@ -404,7 +404,7 @@ void Pers::Prim::DrawPlate( SysGra& gra, Pers& pers, vect3 pos, vect3 n1, int n,
 	{
 //		r = (float)(1+i)*0.25 + i*i/2.0;
 		if ( i == 0 ) r = 0.05;
-		else r = (float)(i)*0.5;
+		else r = (float)(i)*0.5+i*i*0.25;
 	
 		vect3 a;
 		for ( float th = 0 ; th <= deg2rad(360) ; th+=deg2rad(10) )

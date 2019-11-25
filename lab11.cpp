@@ -46,7 +46,7 @@ struct Ball:Obj
 	vect3	vel;	//	velocity 速度(m/s)
 	float	radius = 1.0;
 	mat33	mat = midentity();
-	mat33	matb = midentity();
+	mat33	mspin = midentity();
 	Ball( vect3 v, vect3 _vel ) : Obj(v)
 	{
 		pos = v;
@@ -62,7 +62,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 	//画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
+//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 
 	gra.Print(1,(float)text_y++,string("11 : Plate & Ball")); 
 
@@ -75,15 +75,15 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		m.bInitAll = true;
 
 		// カメラ
-		pers.cam.pos = vect3(	0.0,	0.5, -3.0 );
-		pers.cam.at = vect3( 	0.0,	0.5, 0.0 );
+		pers.cam.pos = vect3(	0.0,	4.0, -8.0 );
+		pers.cam.at = vect3( 	0.0,	1.0, 0.0 );
 
 		//点
 		for ( Obj* p : m.tbl_pObj ) delete p;
 		m.tbl_pObj.clear();
 		m.tbl_pObj.emplace_back( new Ball(vect3(  0		, 0.62,  0.0 ), vect3(0,0,0)) );
-		m.tbl_pObj.emplace_back( new Obj(vect3( -0.0	, 0.5,	0.0 )) );	// 平面原点
-		m.tbl_pObj.emplace_back( new Obj(vect3( -0.01	, 0.7,  0.0 )) );	// 平面法線
+		m.tbl_pObj.emplace_back( new Obj(vect3( -0.0	, 0.0,	0.0 )) );	// 平面原点
+		m.tbl_pObj.emplace_back( new Obj(vect3( -0.0	, 0.5,  0.0 )) );	// 平面法線
 
 		// 線
 		for ( Edge* p : m.tbl_pEdge ) delete p;
@@ -107,10 +107,10 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	{
 		m.bInitParam = true;
 		Ball&	ball = *dynamic_cast<Ball*>(m.tbl_pObj[0]);
-		ball.pos = vect3(  0		, 1.51,  0.0 );
+		ball.pos = vect3(  0		, 2.0,  0.0 );
 		ball.vel = vect3(  0		, 0.0,  0.0 );
 		ball.mat = midentity();
-		ball.matb = midentity();
+		ball.mspin = midentity();
 	}
 
 	// 入力
@@ -134,7 +134,6 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	vect3	pn;
 	vect3	vn;
 	mat33	mn = midentity();
-	mat33	mb = midentity();
 
 	//-----
 
@@ -179,11 +178,12 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		
 
 		// 回転量を移動量計算で求める
-//		if ( d.abs() > 0.01 )
 		{
 			vect3	axis = cross(d,plate_n);
-			float	th = d.abs()/ball.radius;
+			vect3	mov = d - dot(d,plate_n)*plate_n;
+			float	th = mov.abs()/ball.radius;
 			mn = mrotateByAxis( axis, th );
+			ball.mspin = mn;
 		}
 
 
@@ -195,8 +195,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	{
 		ball.pos = pn;
 		ball.vel = vn;
-		ball.mat *= mn;
-		ball.matb *= mb;
+		ball.mat *= ball.mspin;
 	}
 
 	
@@ -208,7 +207,6 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 	// ボール表示
 	pers.prim.DrawSphere( gra, pers, ball.radius, ball.pos, ball.mat );
-//	pers.prim.DrawSphere( gra, pers, ball.radius, ball.pos, ball.matb );
 
 
 
