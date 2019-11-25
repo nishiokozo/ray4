@@ -74,7 +74,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		m.bInitAll = true;
 
 		// カメラ
-		pers.cam.pos = vect3(	1.0,	0.5, -3.0 );
+		pers.cam.pos = vect3(	1.0,	1.5, -3.0 );
 		pers.cam.at = vect3( 	0.0,	0.5, 0.0 );
 
 		//点
@@ -148,8 +148,8 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	if ( flg )
 	{
 		// 衝突まで
-		vect3 d1 = q0-p0;												// 衝突までの距離(m)
-		float t1 = func_accelerationGetTime_DVv( vg.abs(), dot(d1,vg.normalize()), dot(v0,vg.normalize()) );	// 衝突までの時間(s)
+		float t1 = t;													// 衝突までの時間(s)
+		vect3 d1 = func_accelerationGetDistance_TVv( vg, t1, v0 );		// 衝突までの移動距離(m)
 		vect3 v1 = v0 + vg*t1;											// 衝突後の速度(m/s)
 
 		float rate_r	= 0.6;		// 反射係数
