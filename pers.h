@@ -76,6 +76,8 @@ struct Pers
 	float	aspect;		// 描画画面のアスペクト比
 	float	rate_w;		// 投影面未満の接近率 wバッファに書き込むレート
 
+	bool	bOrtho = false;	// 平行投影フラグ
+
 	//--------------------------------------------------------------------------
 	Pers();
 	//--------------------------------------------------------------------------
@@ -169,11 +171,11 @@ struct Pers
 
 	struct Prim
 	{
-		void DrawPlate( SysGra& gra, Pers& pers, vect3 p, vect3 q, int n, rgb col=rgb(0,1,0) );
+		void DrawPlate( SysGra& gra, Pers& pers, vect3 p, vect3 q, int n, rgb col=rgb(1,1,1) );
 		void DrawMat33(  SysGra& gra, Pers& pers, vect3 v0, mat33 m );
 		void DrawBox( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAxis = true, bool bTri = true );
 		void DrawDrum( SysGra& gra, Pers& pers,  vect3 pos, mat33 m  );
-		void DrawShpere( SysGra& gra, Pers& pers, float radius, vect3 pos, mat33 m  );
+		void DrawSphere( SysGra& gra, Pers& pers, float radius, vect3 pos, mat33 m, rgb col=rgb(1,1,1)   );
 		void DrawTire( SysGra& gra, Pers& pers, vect3 pos, float head, float bank, float radius );
 		void DrawSquare( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAxis = true, bool bTri = true );
 	} prim;

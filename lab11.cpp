@@ -44,8 +44,9 @@ static bool		bPause = false;
 struct Ball:Obj
 {
 	vect3	vel;	//	velocity 速度(m/s)
-	float	radius = 0.1;
+	float	radius = 1.0;
 	mat33	mat = midentity();
+	mat33	matb = midentity();
 	Ball( vect3 v, vect3 _vel ) : Obj(v)
 	{
 		pos = v;
@@ -74,15 +75,15 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		m.bInitAll = true;
 
 		// カメラ
-		pers.cam.pos = vect3(	1.0,	1.5, -3.0 );
+		pers.cam.pos = vect3(	0.0,	0.5, -3.0 );
 		pers.cam.at = vect3( 	0.0,	0.5, 0.0 );
 
 		//点
 		for ( Obj* p : m.tbl_pObj ) delete p;
 		m.tbl_pObj.clear();
-		m.tbl_pObj.emplace_back( new Ball(vect3(  0		, 1.0,  0.0 ), vect3(0,0,0)) );
-		m.tbl_pObj.emplace_back( new Obj(vect3( -0.3	, 0.5,	0.0 )) );	// 平面原点
-		m.tbl_pObj.emplace_back( new Obj(vect3( -0.30	, 0.7,  0.0 )) );	// 平面法線
+		m.tbl_pObj.emplace_back( new Ball(vect3(  0		, 0.62,  0.0 ), vect3(0,0,0)) );
+		m.tbl_pObj.emplace_back( new Obj(vect3( -0.0	, 0.5,	0.0 )) );	// 平面原点
+		m.tbl_pObj.emplace_back( new Obj(vect3( -0.01	, 0.7,  0.0 )) );	// 平面法線
 
 		// 線
 		for ( Edge* p : m.tbl_pEdge ) delete p;
@@ -91,8 +92,8 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 		// 移動軸
 		pers.axis.bAxisX = true;
-		pers.axis.bAxisY = true;
-		pers.axis.bAxisZ = true;
+		pers.axis.bAxisY = false;
+		pers.axis.bAxisZ = false;
 
 		//GUI登録
 		cp.tbltbl_pObj.clear();
@@ -106,9 +107,10 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	{
 		m.bInitParam = true;
 		Ball&	ball = *dynamic_cast<Ball*>(m.tbl_pObj[0]);
-		ball.pos = vect3(  0		, 1.0,  0.0 );
+		ball.pos = vect3(  0		, 1.51,  0.0 );
 		ball.vel = vect3(  0		, 0.0,  0.0 );
-
+		ball.mat = midentity();
+		ball.matb = midentity();
 	}
 
 	// 入力
@@ -119,6 +121,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 		if ( keys.G.hi )	{if ( vg.z==G ) vg=vect3(0,0,0); else vg=vect3(0,G,0);}
 		if ( keys.A.hi )	{m.tbl_pObj[2]->pos.z+=-1.0;}
+		if ( keys.O.hi )	{pers.bOrtho = !pers.bOrtho;}
 	
 	}
 	
@@ -130,6 +133,8 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	vect3	v0 = ball.vel;
 	vect3	pn;
 	vect3	vn;
+	mat33	mn = midentity();
+	mat33	mb = midentity();
 
 	//-----
 
@@ -143,6 +148,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 	vect3 vr = plate_n*ball.radius;
 	auto[flg,q0,t] = func_intersect_Plate_SegCurve( plate_p+vr, plate_n, p0, -0.0001, delta, dot(vg,plate_n)*plate_n, dot(v0,plate_n)*plate_n );
+
 
 	// 衝突計算
 	if ( flg )
@@ -160,15 +166,27 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		vect3 d2 = func_accelerationGetDistance_TVv( vg, t2, v1 );		// 衝突後の移動距離(m)
 		vect3 v2 = v1 + vg*t2;											// 衝突後の速度(m/s)
 
+
+		vect3 d = d1+d2;
 		// 接地
-		if ( dot(d2,plate_n) < 0 )
+		if ( dot(d,plate_n) < 0 )
 		{
-			d2 -= dot(d2,plate_n) * plate_n;
+			d -= dot(d,plate_n) * plate_n;
 		}
 
-		pn = p0 + d1 + d2;
+		pn = p0 + d;
 		vn = v2 ;
 		
+
+		// 回転量を移動量計算で求める
+//		if ( d.abs() > 0.01 )
+		{
+			vect3	axis = cross(d,plate_n);
+			float	th = d.abs()/ball.radius;
+			mn = mrotateByAxis( axis, th );
+		}
+
+
 	}
 
 
@@ -177,17 +195,20 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	{
 		ball.pos = pn;
 		ball.vel = vn;
+		ball.mat *= mn;
+		ball.matb *= mb;
 	}
 
 	
 	// 平面表示
 	{
-		pers.prim.DrawPlate( gra, pers, plate_p, plate_n, 8, rgb(0.5,1,1)*0.55 );
+		pers.prim.DrawPlate( gra, pers, plate_p, plate_n, 28, rgb(0.5,1,1)*0.55 );
 	}
 
 
 	// ボール表示
-	pers.prim.DrawShpere( gra, pers, ball.radius, ball.pos, ball.mat );
+	pers.prim.DrawSphere( gra, pers, ball.radius, ball.pos, ball.mat );
+//	pers.prim.DrawSphere( gra, pers, ball.radius, ball.pos, ball.matb );
 
 
 

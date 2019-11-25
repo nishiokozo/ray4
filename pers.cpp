@@ -43,7 +43,15 @@ void Pers::Update( vect2 screensize )
 float Pers::getW( float z ) const
 //--------------------------------------------------------------------------
 {
-	return 1/((fy/sz)*(z+sz));	// 投影面のz位置を0とした場合のzに対するw値を求める。
+	if ( bOrtho )
+	{
+		// 平行投影
+		return 1.0;
+	}
+	else
+	{
+		return 1/((fy/sz)*(z+sz));	// 投影面のz位置を0とした場合のzに対するw値を求める。
+	}
 }
 
 
@@ -722,11 +730,11 @@ void Pers::Prim::DrawDrum( SysGra& gra, Pers& pers,  vect3 pos, mat33 m  )
 
 // 球
 //------------------------------------------------------------------------------
-void Pers::Prim::DrawShpere( SysGra& gra, Pers& pers, float r, vect3 pos, mat33 m  )
+void Pers::Prim::DrawSphere( SysGra& gra, Pers& pers, float r, vect3 pos, mat33 m, rgb col  )
 //------------------------------------------------------------------------------
 {
 	float step = 2*pi/24.0;
-	rgb col = rgb(0,1,1);
+//	rgb col = rgb(0,1,1);
 	vect3	vx0;
 	vect3	vy0;
 	vect3	vz0;
