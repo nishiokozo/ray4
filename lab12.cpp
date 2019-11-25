@@ -61,7 +61,6 @@ struct Ball:Obj
 void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
-delta = 1/60.0;
 	bool bStep=false;
 
 	//画面クリア
