@@ -48,7 +48,7 @@ struct Ball:Obj
 	float	radius = 1.0;
 	mat33	mat = midentity();
 //	mat33	mspin = midentity();
-	vect3	vcenter;
+//	vect3	vcenter;
 	vect3	vaxis;
 	float	fspin;
 	Ball( vect3 v, vect3 _vel ) : Obj(v)
@@ -67,7 +67,6 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 	//画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 
 	gra.Print(1,(float)text_y++,string("11 : Plate & Ball")); 
 
@@ -88,7 +87,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		m.tbl_pObj.clear();
 		m.tbl_pObj.emplace_back( new Ball(vect3(  0		, 0.62,  0.0 ), vect3(0,0,0)) );
 		m.tbl_pObj.emplace_back( new Obj(vect3( -0.0	, 0.0,	0.0 )) );	// 平面原点
-		m.tbl_pObj.emplace_back( new Obj(vect3( -0.0	, 0.5,  0.0 )) );	// 平面法線
+		m.tbl_pObj.emplace_back( new Obj(vect3( -0.00	, 0.5,  0.0 )) );	// 平面法線
 
 		// 線
 		for ( Edge* p : m.tbl_pEdge ) delete p;
@@ -117,15 +116,15 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	{
 		m.bInitParam = true;
 		Ball&	ball = *dynamic_cast<Ball*>(m.tbl_pObj[0]);
-		ball.pos = vect3(  0		, 1.0,  0.0 );
+		ball.pos = vect3(  0		, 2.0,  0.0 );
 		ball.vel = vect3(  0		, 0.0,  0.0 );
 		ball.mat = midentity();
 //		ball.mspin = midentity();
 //		ball.mspin = mrotateByAxis( vect3(0,0,1), 0.1 );
 
-		ball.vcenter	= vect3(0,0,0);
+//		ball.vcenter	= vect3(0,0,0);
 		ball.vaxis		= vect3(0,0,1);
-		ball.fspin		= 0.03;
+		ball.fspin		= 0.510;
 
 	}
 
@@ -155,21 +154,19 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 	auto[flg,q0,t] = func_intersect_Plate_SegCurve_ball( plate_p, plate_n, p0, ball.radius, -0.0001, delta, dot(vg,plate_n)*plate_n, dot(v0,plate_n)*plate_n );
 
-#if 1
+#if 0
+	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 
 	if ( flg )
 	{
 //q0.dump();
-		vect3	vr = (q0-p0);
-		float	r = vr.abs();
-		vect3	vf = cross( ball.vaxis, vr);
-		
+		vect3	vr	= (q0-p0);
+		float	r	= vr.abs();
+		vect3	vf	= cross( ball.vaxis, vr);
 
 		pn = p0 + vf*ball.fspin;
 		vn = v0;
 
-		pImpl->graphs.Request( 0, (vf*ball.fspin).x*10 );
-		pImpl->graphs.Request( 1, pn.x );
 
 	}
 	else
@@ -185,7 +182,14 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	// 衝突計算
 	if ( flg )
 	{	
-	
+		// スピン
+		vect3	vr	= (q0-p0);
+		float	r	= vr.abs();
+		vect3	vf	= cross( ball.vaxis, vr);
+
+//		vect3 d3 = p0 + vf*ball.fspin;
+		//
+
 		// 衝突まで
 		float t1 = t;													// 衝突までの時間(s)
 		vect3 d1 = func_accelerationGetDistance_TVv( vg, t1, v0 );		// 衝突までの移動距離(m)
@@ -206,20 +210,22 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 			d2 -= dot(d2,plate_n) * plate_n;
 		}
 
-		pn = p0 + d1 + d2;
+		vect3 d3 = d1 + d2 + vf*ball.fspin; // 回転
+
+		pn = p0 + d3;
 		vn = v2 ;
-		
 
 		// 回転量を移動量計算で求める
 		{
-			vect3	axis = cross(d,plate_n);
-			vect3	mov = d - dot(d,plate_n)*plate_n;
+			vect3	axis = cross(d3,plate_n);
+			vect3	mov = d3 - dot(d3,plate_n)*plate_n;
 			float	th = mov.abs()/ball.radius;
 //			mn = mrotateByAxis( axis, th );
 //			ball.mspin = mn;
 			ball.vaxis = axis;
 			ball.fspin = th;
 		}
+
 
 	}
 	else
