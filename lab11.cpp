@@ -163,15 +163,14 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		vect3 d2 = func_accelerationGetDistance_TVv( vg, t2, v1 );		// 衝突後の移動距離(m)
 		vect3 v2 = v1 + vg*t2;											// 衝突後の速度(m/s)
 
-
-		vect3 d = d1+d2;
-		// 接地
-		if ( dot(d,plate_n) < 0 )
+		// 極小衝突
+		if ( dot(d2,plate_n) < 0 )
 		{
-			d -= dot(d,plate_n) * plate_n;
+			// 近似：本来はplate面での無限衝突
+			d2 -= dot(d2,plate_n) * plate_n;
 		}
 
-		pn = p0 + d;
+		pn = p0 + d1 + d2;
 		vn = v2 ;
 		
 
