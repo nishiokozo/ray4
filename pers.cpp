@@ -729,25 +729,52 @@ void Pers::Prim::DrawDrum( SysGra& gra, Pers& pers,  vect3 pos, mat33 m  )
 }
 
 // 球
-//------------------------------------------------------------------------------
-void Pers::Prim::DrawSphere( SysGra& gra, Pers& pers, float r, vect3 pos, mat33 m, rgb col  )
-//------------------------------------------------------------------------------
-{
-	float step = 2*pi/24.0;
-//	rgb col = rgb(0,1,1);
-	vect3	vx0;
-	vect3	vy0;
-	vect3	vz0;
-	for ( float th = 0 ; th < 2*pi ; th += step )
+static	tuple<vect3,vect3,vect3> func( float th, float r, mat33& m, vect3& pos )
 	{
 		float u = r*cos(th);
 		float v = r*sin(th);
 	
-		vect3	vx1= m*vect3(0,u,v)+pos;
-		vect3	vy1= m*vect3(u,0,v)+pos;
-		vect3	vz1= m*vect3(u,v,0)+pos;
+		vect3	vx1 = m*vect3(0,u,v)+pos;
+		vect3	vy1 = m*vect3(u,0,v)+pos;
+		vect3	vz1 = m*vect3(u,v,0)+pos;
+		return {vx1, vy1, vz1};
+	};
+//------------------------------------------------------------------------------
+void Pers::Prim::DrawSphere( SysGra& gra, Pers& pers, float r, vect3 pos, mat33 m, rgb col  )
+//------------------------------------------------------------------------------
+{
+//	float step = 2*pi/4/8;//48.0;
+//	rgb col = rgb(0,1,1);
+
+
+	vect3	vx0;
+	vect3	vy0;
+	vect3	vz0;
+	float fmax = 48;
+	for ( float f = 0 ; f <= fmax ; f++ )
+	{
+		float th = 	f*2*pi/fmax;
+#if 0
+		auto func = [&]( float th, float r, mat33& m, vect3& pos, vect3& vx1, vect3& vy1, vect3& vz1 )
+		{
+			float u = r*cos(th);
+			float v = r*sin(th);
 		
-		if ( th > 0 )
+			vx1 = m*vect3(0,u,v)+pos;
+			vy1 = m*vect3(u,0,v)+pos;
+			vz1 = m*vect3(u,v,0)+pos;
+		};
+		vect3 vx1, vy1, vz1;
+		func( th, r, m, pos, vx1, vy1, vz1 );
+#else
+		float u = r*cos(th);
+		float v = r*sin(th);
+
+		vect3	vx1 = m*vect3(0,u,v)+pos;
+		vect3	vy1 = m*vect3(u,0,v)+pos;
+		vect3	vz1 = m*vect3(u,v,0)+pos;
+#endif
+		if ( f > 0 )
 		{
 			pers.pen.line3d( gra, pers, vx0, vx1, col );
 			pers.pen.line3d( gra, pers, vy0, vy1, col );

@@ -73,7 +73,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		m.bInitAll = true;
 
 		// カメラ
-		pers.cam.pos = vect3(	0.0,	4.0, -8.0 );
+		pers.cam.pos = vect3(	0.0,	1.0, -8.0 );
 		pers.cam.at = vect3( 	0.0,	1.0, 0.0 );
 
 		//点
@@ -81,7 +81,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		m.tbl_pObj.clear();
 		m.tbl_pObj.emplace_back( new Ball(vect3(  0		, 0.62,  0.0 ), vect3(0,0,0)) );
 		m.tbl_pObj.emplace_back( new Obj(vect3( -0.0	, 0.0,	0.0 )) );	// 平面原点
-		m.tbl_pObj.emplace_back( new Obj(vect3( -0.0	, 0.5,  0.0 )) );	// 平面法線
+		m.tbl_pObj.emplace_back( new Obj(vect3( -0.05	, 0.5,  0.0 )) );	// 平面法線
 
 		// 線
 		for ( Edge* p : m.tbl_pEdge ) delete p;
