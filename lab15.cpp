@@ -26,6 +26,20 @@
 #include "lab.h"
 #include "lab15.h"
 
+
+
+struct Lab15::Impl
+{
+	vector<int>	idxPoint;
+};
+
+//------------------------------------------------------------------------------
+Lab15::Lab15() : pImpl( new Lab15::Impl )
+//------------------------------------------------------------------------------
+{
+}
+
+
 //------------------------------------------------------------------------------
 void Lab15::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
@@ -44,15 +58,29 @@ void Lab15::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		pers.cam.pos = vect3( 0.0, 2.0, -5.0 );
 		pers.cam.at = vect3( 0,  1.0, 0 );
 
-
+	#if 1
 		// 点
-		m.tbl_pObj.emplace_back( 	new Point3(vect3(-1.0, 0.0, 0.0 ),vect3( 0.0, 0.0, 1.0 ),vect3( 0.0, 0.0,-1.0 )) );
-		m.tbl_pObj.emplace_back( 	new Point3(vect3( 1.0, 0.0, 0.0 ),vect3( 0.0, 0.0,-1.0 ),vect3( 0.0, 0.0, 1.0 )) );
+		m.tbl_pObj.emplace_back( new Point3(vect3(-1.0, 0.0, 0.0 ),vect3( 0.0, 0.0, 0.5 ),vect3( 0.0, 0.0,-0.5 )) );
+		m.tbl_pObj.emplace_back( new Point3(vect3( 0.0, 0.0,-1.0 ),vect3(-0.5, 0.0, 0.0 ),vect3( 0.5, 0.0, 0.0 )) );
+		m.tbl_pObj.emplace_back( new Point3(vect3( 1.0, 0.0, 0.0 ),vect3( 0.0, 0.0,-0.5 ),vect3( 0.0, 0.0, 0.5 )) );
+		m.tbl_pObj.emplace_back( new Point3(vect3( 0.0, 0.0, 1.0 ),vect3( 0.5, 0.0, 0.0 ),vect3(-0.5, 0.0, 0.0 )) );
 
-		(*this).idxPoint.emplace_back( 0 );
-		(*this).idxPoint.emplace_back( 1 );
-		(*this).idxPoint.emplace_back( 0 );
+		// インデックス
+		pImpl->idxPoint.emplace_back( 0 );
+		pImpl->idxPoint.emplace_back( 1 );
+		pImpl->idxPoint.emplace_back( 2 );
+		pImpl->idxPoint.emplace_back( 3 );
+		pImpl->idxPoint.emplace_back( 0 );
+	#else
+		// 点
+		m.tbl_pObj.emplace_back( new Point3(vect3(-1.0, 0.0, 0.0 ),vect3( 0.0, 0.0, 1.0 ),vect3( 0.0, 0.0,-1.0 )) );
+		m.tbl_pObj.emplace_back( new Point3(vect3( 1.0, 0.0, 0.0 ),vect3( 0.0, 0.0,-1.0 ),vect3( 0.0, 0.0, 1.0 )) );
 
+		// インデックス
+		pImpl->idxPoint.emplace_back( 0 );
+		pImpl->idxPoint.emplace_back( 1 );
+		pImpl->idxPoint.emplace_back( 0 );
+	#endif
 
 		//GUI登録
 		cp.tbltbl_pObj.clear();
@@ -68,7 +96,8 @@ void Lab15::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		vect3 P = pers.calcScreenToWorld3( vect3(mouse.pos,0) );
 		vect3 I = pers.calcRayvect( P );
 
-		bool bCut = mouse.L.hi;
+		bool bDel = keys.D.hi;
+		bool bCut = mouse.L.hi && keys.E.on;
 		bool bSerch = keys.E.on;
 
 		{
@@ -76,7 +105,7 @@ void Lab15::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 			int div = 10;
 			float dt = 1/(float)div;
 
-			int size = static_cast<signed>(idxPoint.size());
+			int size = static_cast<signed>(pImpl->idxPoint.size());
 
 			float	mind = infinit;
 			vect3	minQ1;
@@ -90,8 +119,8 @@ void Lab15::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 			for ( int n = 0 ; n < size-1 ; n++ )
 			{
-				int n0 = idxPoint[n];
-				int n1 = idxPoint[n+1];
+				int n0 = pImpl->idxPoint[n];
+				int n1 = pImpl->idxPoint[n+1];
 
 				Point3* p0 = dynamic_cast<Point3*>(m.tbl_pObj[n0]);
 				Point3* p1 = dynamic_cast<Point3*>(m.tbl_pObj[n1]);
@@ -163,13 +192,13 @@ void Lab15::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 					{
 						
 						m.tbl_pObj.emplace_back( new Point3( q, -v*t0, v*t1 ) );
-						idxPoint.insert( idxPoint.begin()+minn+1, (signed)m.tbl_pObj.size()-1);
+						pImpl->idxPoint.insert( pImpl->idxPoint.begin()+minn+1, (signed)m.tbl_pObj.size()-1);
 					}
 
 					//	接線計算
 					{
-						Point3* p0 = dynamic_cast<Point3*>(m.tbl_pObj[idxPoint[minn+0]]);
-						Point3* p2 = dynamic_cast<Point3*>(m.tbl_pObj[idxPoint[minn+2]]);
+						Point3* p0 = dynamic_cast<Point3*>(m.tbl_pObj[pImpl->idxPoint[minn+0]]);
+						Point3* p2 = dynamic_cast<Point3*>(m.tbl_pObj[pImpl->idxPoint[minn+2]]);
 						p0->b *= t0;
 						p2->a *= t1;
 					}
@@ -179,7 +208,7 @@ void Lab15::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 					// 追加したポイントを選択状態にする
 					{
-						int idx = idxPoint[minn+1];
+						int idx = pImpl->idxPoint[minn+1];
 						vect3 v = pers.calcWorldToScreen3( minQ );
 						//
 						gui.one.w = v.z;
@@ -193,31 +222,33 @@ void Lab15::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 					}
 	*/
 	
+					//GUI登録
+					cp.tbltbl_pObj.clear();
+					cp.tbltbl_pEdge.clear();
+					cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
 				}
 
 				{
 					gra.SetZTest( false );
-					pers.pen.print3d( gra, pers, minQ, -26,-32-20, to_string(mint) ); 
+					pers.pen.print3d( gra, pers, minQ, -26,-52, to_string(mint) ); 
 					gra.SetZTest( true );
 				}
 			}
 
+			if ( bDel )
+			{
+				int idx = 1;
+				m.tbl_pObj.erase( m.tbl_pObj.begin() + idx );
+
+				//GUI登録
+				cp.tbltbl_pObj.clear();
+				cp.tbltbl_pEdge.clear();
+				cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
+			}
 
 		}
 
-		//=================================
-		//	登録 
-		//=================================
-		if ( bCut )
-		{
-			//GUI登録
-			cp.tbltbl_pObj.clear();
-			cp.tbltbl_pEdge.clear();
-			cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
 
-			// テーブルの再作成しないとうまく中身が参照できない
-///			continue;
-		}
 
 	}
 

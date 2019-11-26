@@ -39,8 +39,6 @@ static	const rgb col7 = rgb( 1, 1, 1 );
 struct Lab11::Impl{};
 Lab11::Lab11() : pImpl( new Lab11::Impl ){}
 
-static bool		bPause = false;
-
 struct Ball:Obj
 {
 	vect3	vel;	//	velocity 速度(m/s)
@@ -58,7 +56,7 @@ struct Ball:Obj
 void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
-	bool	bStep = false;
+	m.bStep = false;
 
 	//画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
@@ -116,8 +114,8 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	// 入力
 	{
 		if ( keys.R.hi ) m.bInitParam = false;
-		if ( keys.SPACE.hi )	bPause = !bPause ;
-		if ( keys.ENTER.rep )	{bStep = true; bPause = true; }
+		if ( keys.SPACE.hi )	m.bPause = !m.bPause ;
+		if ( keys.ENTER.rep )	{m.bStep = true; m.bPause = true; }
 
 		if ( keys.G.hi )	{if ( vg.z==G ) vg=vect3(0,0,0); else vg=vect3(0,G,0);}
 		if ( keys.A.hi )	{m.tbl_pObj[2]->pos.z+=-1.0;}
@@ -191,7 +189,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 
 	// 反映
-	if  ( !bPause || bStep )
+	if  ( !m.bPause || m.bStep )
 	{
 		ball.pos = pn;
 		ball.vel = vn;

@@ -5,6 +5,8 @@ struct LabObj
 	{
 		bool			bInitParam = false;
 		bool			bInitAll = false;
+		bool			bPause = false;
+		bool			bStep = false;
 		vector<Obj*>	tbl_pObj;
 		vector<Edge*>	tbl_pEdge;
 		void			drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str );
