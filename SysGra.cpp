@@ -291,22 +291,18 @@ void  SysGra::OnPaint()
 	    EndPaint(hWnd, &ps);
 	}
 
-
+#if 0
+	// glFlushに切り替えたので呼び出さない
 	{
 		HDC	hDc = GetDC( hWnd );	// GetDCに対してはReleaseDC
-		//SwapBuffers( hDc );
+		SwapBuffers( hDc );
 		ReleaseDC( hWnd, hDc );
 	}
+#endif
 
 }
 
 
-//------------------------------------------------------------------------------
-void SysGra::Flush()
-//------------------------------------------------------------------------------
-{
-	glFlush();
-}
 //------------------------------------------------------------------------------
 void SysGra::Update()
 //------------------------------------------------------------------------------
@@ -321,16 +317,16 @@ void SysGra::Update()
 		static chrono::system_clock::duration time_now;
 		static chrono::system_clock::duration time_max;
 
-		time_en = chrono::system_clock::now().time_since_epoch(); 
-		if ( time_max < time_en-time_st ) time_max = time_en-time_st;
 		// 同期(60fps)
 		{
 			int t=300;	
-			while( chrono::system_clock::now().time_since_epoch()-time_st < chrono::microseconds(16666) )	// windowsの仕組みがよくわからない。
+			while( chrono::system_clock::now().time_since_epoch()-time_st < chrono::microseconds(16000) )
 			{
  				this_thread::sleep_for(chrono::microseconds(t));
 			}
 		}
+		time_en = chrono::system_clock::now().time_since_epoch(); 
+		if ( time_max < time_en-time_st ) time_max = time_en-time_st;
 		time_st = chrono::system_clock::now().time_since_epoch();  
 
 		// 表示
@@ -340,11 +336,11 @@ void SysGra::Update()
 			time_sec = chrono::system_clock::now().time_since_epoch();
 			time_peak = chrono::duration_cast<chrono::microseconds>(time_max).count();
 			time_max = chrono::seconds(0);
-//			cout<<time_peak/1000.0<<"ms"<<endl;
+		//	cout<<time_peak/1000.0<<"ms"<<endl;
 		}
 	}
 
-	glFlush();
+	glFlush();	//SwapBufferだと定期的に処理落ちが避けられないのでglFlush
 }
 //------------------------------------------------------------------------------
 void SysGra::Clr( rgb col )

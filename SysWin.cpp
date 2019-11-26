@@ -371,7 +371,10 @@ void SysWin::OpenWindow( const char* windowname, int pos_x, int pos_y, int width
 bool SysWin::Update()
 //------------------------------------------------------------------------------
 {
-	InvalidateRect(win.hWnd , NULL , TRUE);	//	WM_PAINTを発行し再描画矩形情報を渡す
+#if 0
+	// glFlushに切り替えたので呼び出さない
+//	InvalidateRect(win.hWnd , NULL , TRUE);	//	WM_PAINTを発行し再描画矩形情報を渡す
+#endif
 
 	while(1)
 	{

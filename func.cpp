@@ -161,6 +161,18 @@ tuple<bool,vect3,float>func_intersect_Plate_SegCurve( vect3 plate_P, vect3 plate
 }
 
 //------------------------------------------------------------------------------
+tuple<bool,vect3,float>func_intersect_Plate_SegCurve_ball( vect3 plate_P, vect3 plate_N, vect3 curve_P0, float r, float curve_t0, float curve_t1, vect3 curve_A, vect3 curve_V )
+//------------------------------------------------------------------------------
+{
+	// 平面と曲線分の交差判定
+	vect3 vr = plate_N*r;
+	auto[flg,q0,t] = func_intersect_Plate_SegCurve( plate_P+vr, plate_N, curve_P0, curve_t0, curve_t1, curve_A, curve_V );
+
+	q0 -= vr;
+	return {flg,q0,t};
+}
+
+//------------------------------------------------------------------------------
 float func_intersect_Line_Point( vect3 P0, vect3 I0, vect3 P1 )
 //------------------------------------------------------------------------------
 {

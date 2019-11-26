@@ -40,8 +40,6 @@ struct SysGra
 
 	void	SetZTest( bool flg );
 
-	void	Flush(); // 実験用
-
 	SysGra();
 	~SysGra();
 
