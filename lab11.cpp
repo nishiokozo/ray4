@@ -196,7 +196,8 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		vect3 v1 = v0 + vg*t1;											// 衝突後の速度(m/s)
 
 		float rate_r	= 0.6;		// 反射係数
-		v1  = v1 - (1.0+rate_r)*dot( v1, plate_n ) * plate_n;
+//		v1  = v1 - (1.0+rate_r)*dot( v1, plate_n ) * plate_n;
+		v1  = func_reflect( v1, plate_n, rate_r );
 
 		// 衝突後
 		float t2 = delta-t1;											// 衝突後の残り時間(s)

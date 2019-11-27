@@ -15,3 +15,5 @@ extern std::tuple<bool,vect3,float>func_intersect_Plate_SegCurve_ball( vect3 pla
 
 extern float func_accelerationGetTime_DVv( float vg, float d, float v0 );
 extern vect3 func_accelerationGetDistance_TVv( vect3 vg, float t, vect3 v0 );
+
+vect3 func_reflect( const vect3& I, const vect3& N, float rate );

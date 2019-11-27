@@ -509,4 +509,12 @@ vect3 func_accelerationGetDistance_TVv( vect3 A, float t, vect3 V )	// TV : Time
 	return 0.5*A*t*t + V*t;
 };
 
-
+//------------------------------------------------------------------------------
+vect3 func_reflect( const vect3& I, const vect3& N, float rate )
+//------------------------------------------------------------------------------
+{
+	//  I 入射ベクトル
+	//  N 法線ベクトル（単位ベクトル）
+	//  rate 反射レート 1.0:正反射 0.0:法線と直行 -n:屈折反射
+	return I - (1.0+rate)*dot( I, N ) * N;
+}
