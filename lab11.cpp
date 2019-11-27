@@ -79,7 +79,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		m.bInitAll = true;
 
 		// カメラ
-		pers.cam.pos = vect3(	0.0,	1.0, -8.0 );
+		pers.cam.pos = vect3(	0.0,	1.0, -10.0 );
 		pers.cam.at = vect3( 	0.0,	1.0, 0.0 );
 
 		//点
@@ -87,7 +87,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		m.tbl_pObj.clear();
 		m.tbl_pObj.emplace_back( new Ball(vect3(  0		, 0.62,  0.0 ), vect3(0,0,0)) );
 		m.tbl_pObj.emplace_back( new Obj(vect3( -0.0	, 0.0,	0.0 )) );	// 平面原点
-		m.tbl_pObj.emplace_back( new Obj(vect3( -0.00	, 0.5,  0.0 )) );	// 平面法線
+		m.tbl_pObj.emplace_back( new Obj(vect3( -0.05	, 0.5,  0.0 )) );	// 平面法線
 
 		// 線
 		for ( Edge* p : m.tbl_pEdge ) delete p;
@@ -116,15 +116,15 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	{
 		m.bInitParam = true;
 		Ball&	ball = *dynamic_cast<Ball*>(m.tbl_pObj[0]);
-		ball.pos = vect3(  0		, 2.0,  0.0 );
+		ball.pos = vect3(  0		, 3.0,  0.0 );
 		ball.vel = vect3(  0		, 0.0,  0.0 );
 		ball.mat = midentity();
-//		ball.mspin = midentity();
-//		ball.mspin = mrotateByAxis( vect3(0,0,1), 0.1 );
-
-//		ball.vcenter	= vect3(0,0,0);
 		ball.vaxis		= vect3(0,0,1);
-		ball.fspin		= 0.510;
+		ball.fspin		= 0.0;
+#if 0
+		ball.pos = vect3(  0		, 2.0,  0.0 );
+		ball.fspin		= 0.1;
+#endif 
 
 	}
 
@@ -210,8 +210,11 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 			d2 -= dot(d2,plate_n) * plate_n;
 		}
 
-		vect3 d3 = d1 + d2 + vf*ball.fspin; // 回転
-
+		vect3 d3 = d1 + d2;
+		
+//		d3 += vf*ball.fspin; // 回転
+// 		v2 += vf*ball.fspin / delta;
+	
 		pn = p0 + d3;
 		vn = v2 ;
 
