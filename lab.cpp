@@ -85,6 +85,15 @@ struct Lab10 : LabObj
 void LabObj::M::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str )
 //------------------------------------------------------------------------------
 {
+	static const rgb col0 = rgb( 0, 0, 0 );
+	static const rgb col1 = rgb( 0, 0, 1 );
+	static const rgb col2 = rgb( 1, 0, 0 );
+	static const rgb col3 = rgb( 1, 0, 1 );
+	static const rgb col4 = rgb( 0, 1, 0 );
+	static const rgb col5 = rgb( 0, 1, 1 );
+	static const rgb col6 = rgb( 1, 1, 0 );
+	static const rgb col7 = rgb( 1, 1, 1 );
+
 	gra.SetZTest(false);
 
 	vect3 v1 = v0+v*sc;
@@ -102,6 +111,24 @@ void LabObj::M::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 
 	pers.pen.line3d( gra, pers, v0, v1, col, 1 );
 	pers.pen.pset3d( gra, pers,     v1, col, 5 );
 	pers.pen.print3d( gra, pers, 	v1,12,0, str ); 
+
+
+
+	// 矢印
+	if (0)
+	{
+
+		vect2 a = pers.calcWorldToScreen3( v0 ).xy();
+		vect2 b = pers.calcWorldToScreen3( v1 ).xy();
+//		if ( b.z > 0  ) 
+		{
+			vect2 c = (b-a).normalize()*25;
+			vect2 d = (b-a).normalize()*25;
+			gra.Line( b, b + gra.Dot(-d.x,-c.x), col, 1 );
+			gra.Line( b, b + gra.Dot(-d.x, c.x), col, 1 );
+//			gra.Line( b, b + gra.Dot(-d.x,d.y), col7, 1 );
+		}
+	}
 
 	gra.Print(1,(float)text_y++, str+": "+to_string(v.x)+" , "+to_string(v.y)+" , "+to_string(v.z));
 

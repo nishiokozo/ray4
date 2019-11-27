@@ -202,6 +202,8 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		b1.pos = b1.pn;
 		b2.pos = b2.pn;
 	}
+	
+	m.drawVect( gra, pers, text_y, b2.pos, b2.vaxis.normalize() ,1	, col3, "axis" );
 
 	
 	// 表示
