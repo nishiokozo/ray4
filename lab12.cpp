@@ -1,7 +1,5 @@
 //2019/11/17
 
-//	平面と点の衝突実験
-
 
 #include <iostream>
 #include <vector>
@@ -40,7 +38,6 @@ static const rgb col6 = rgb( 1, 1, 0 );
 static const rgb col7 = rgb( 1, 1, 1 );
 
 
-static	bool	bPause = false;
 
 // 定義
 struct Ball:Obj
@@ -115,7 +112,6 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		m.bInitParam = true;
 		{
 			b1.pos	= vect3( -2	, 1.0,  0.0 );
-//			b1.pos	= vect3( -0	, 1.0,  0.0 );
 			b1.vel	= vect3(  0	, 0.0,  0.0 );
 			b1.radius = 1.0;
 			b1.mat	= midentity();
