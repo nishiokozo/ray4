@@ -171,11 +171,8 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 			vect3	N = (b1.pos-b2.pos).normalize();
 			vect3	vel = func_reflect( b2.vel, N, 1.0 );
 
-			
-
 			b1.vel = dot(-vel,N)*N;
 			b2.vel = vel + b1.vel;
-
 		}
 	}
 	
@@ -195,7 +192,7 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 			ball.vaxis = axis;
 			ball.fspin = th;
-			ball.mat *= mrotateByAxis( ball.vaxis, ball.fspin );
+			ball.mat = mrotateByAxis( ball.vaxis, ball.fspin ) * ball.mat;
 		}; 
 		func(b1);
 		func(b2);
