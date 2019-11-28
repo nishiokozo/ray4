@@ -107,7 +107,7 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	// 初期化：パラメータ
 	if ( !m.bInitParam )
 	{
-#define NUM 3
+#define NUM 2
 #if NUM==1
 	// b2 斜め45°
 		m.bInitParam = true;
