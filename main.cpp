@@ -157,8 +157,10 @@ struct Apr : public Sys
 			//=================================
 			{
 				const float	T	= 1.0/60.0;				// 時間/frame
-				if ( keys.N.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.idx+1,gui.cp);};
-				if ( keys.B.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.idx-1,gui.cp);};
+//				if ( keys.N.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.idx+1,gui.cp);};
+//				if ( keys.B.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.idx-1,gui.cp);};
+				if ( keys.N.rep ) {gui.one.bEnable = false;lab.SetNextIdx(+1,gui.cp);};
+				if ( keys.B.rep ) {gui.one.bEnable = false;lab.SetNextIdx(-1,gui.cp);};
 				lab.Update( keys, mouse, gra, pers, T, text_y, gui.cp );
 			}
 			

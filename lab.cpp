@@ -1292,6 +1292,7 @@ void Lab1::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 void Lab::SetIdx( int n, Cp& cp )
 //------------------------------------------------------------------------------
 {
+cout << idx << endl;
 	idx = max( n, 0 ); 
 
 	cp.tbltbl_pObj.clear();
@@ -1326,6 +1327,51 @@ void Lab::SetIdx( int n, Cp& cp )
 	}
 	
 
+}
+
+static	int	tblIdxLab[] = 
+{
+	0,
+	1,
+	2,
+	3,
+	4,
+	5,
+	6,
+	7,
+	8,
+	9,
+//	10,
+	11,
+	12,
+	13,
+	14,
+	15,
+	16,
+};	
+static const int sizeIdxLab = static_cast<signed>(sizeof(tblIdxLab)/sizeof(int));
+//------------------------------------------------------------------------------
+void Lab::SetNextIdx( int val, Cp& cp )
+//------------------------------------------------------------------------------
+{
+	int num;
+	for ( num = 0 ; num < sizeIdxLab ; num++ )
+	{
+		if ( tblIdxLab[num] == idx )
+		{
+			break;
+		}
+	}
+	if ( num < sizeIdxLab ) 
+	{
+		num = max(num+val,0);
+		num = min(num+val, sizeIdxLab-1 );
+	}
+	else
+	{
+		num = idx;
+	}
+	SetIdx( num, cp );
 }
 
 //------------------------------------------------------------------------------

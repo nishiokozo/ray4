@@ -143,6 +143,7 @@ struct Lab
 
 	LabObj*	pLab = 0;
 
+	void SetNextIdx( int val, Cp& cp );
 	void SetIdx( int n, Cp& cp );
 	void Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
 
