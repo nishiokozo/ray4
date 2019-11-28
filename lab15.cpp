@@ -208,15 +208,15 @@ void Lab15::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 					// 追加したポイントを選択状態にする
 					{
-						int idx = pImpl->idxPoint[minn+1];
+						int a = pImpl->idxPoint[minn+1];
 						vect3 v = pers.calcWorldToScreen3( minQ );
 						//
 						gui.one.w = v.z;
-						gui.one.idxTbl = idxTbl;
-						gui.one.idxObj = idx;
+						gui.one.idxTbl = m.idxTbl;
+						gui.one.idxObj = a;
 						gui.one.bEnable = true;
-						m.tbl_pObj[ idx ]->bSelected = true;
-						m.tbl_pObj[ idx ]->bPreselect = false;
+						m.tbl_pObj[ a ]->bSelected = true;
+						m.tbl_pObj[ a ]->bPreselect = false;
 						gui.one.bSelected_a = false;
 						gui.one.bSelected_b = false;
 					}
@@ -237,8 +237,8 @@ void Lab15::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 			if ( bDel )
 			{
-				int idx = 1;
-				m.tbl_pObj.erase( m.tbl_pObj.begin() + idx );
+				int a = 1;
+				m.tbl_pObj.erase( m.tbl_pObj.begin() + a );
 
 				//GUI登録
 				cp.tbltbl_pObj.clear();

@@ -1292,8 +1292,8 @@ void Lab1::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 void Lab::SetIdx( int n, Cp& cp )
 //------------------------------------------------------------------------------
 {
-cout << idx << endl;
-	idx = max( n, 0 ); 
+cout << m.idxLab << ">" << n << endl;
+	m.idxLab = max( n, 0 ); 
 
 	cp.tbltbl_pObj.clear();
 	cp.tbltbl_pEdge.clear();
@@ -1304,7 +1304,7 @@ cout << idx << endl;
 		pLab=0;
 	};
 
-	switch( idx )
+	switch( m.idxLab )
 	{
 		case 0:		pLab = new Lab0;	break;
 		case 1:		pLab = new Lab1;	break;
@@ -1329,49 +1329,50 @@ cout << idx << endl;
 
 }
 
-static	int	tblIdxLab[] = 
-{
-	0,
-	1,
-	2,
-	3,
-	4,
-	5,
-	6,
-	7,
-	8,
-	9,
-//	10,
-	11,
-	12,
-	13,
-	14,
-	15,
-	16,
-};	
-static const int sizeIdxLab = static_cast<signed>(sizeof(tblIdxLab)/sizeof(int));
 //------------------------------------------------------------------------------
 void Lab::SetNextIdx( int val, Cp& cp )
 //------------------------------------------------------------------------------
 {
-	int num;
-	for ( num = 0 ; num < sizeIdxLab ; num++ )
+	static	int	tbl[] = 
 	{
-		if ( tblIdxLab[num] == idx )
+		0,
+		10,		//	カラータワー
+		14,		//	コース
+		15,		//	ベジェ
+		16,		//	スケルトンアニメーション
+		1,		//	加速度グラフ
+		2,		//	軸回り回転
+		3,		//	衛生シミュレーション
+		4,		//	角速度実験1
+		5,		//	角速度実験2
+		6,		//	タイヤ
+		7,		//	角速度実験3
+		8,		//	角速度実験4
+		9,		//	角速度実験5
+		11,		//	ボールの落下と床
+		12,		//	ボール同士の衝突
+		13,		//	曲線と平面の衝突
+	};	
+	static const int size = static_cast<signed>(sizeof(tbl)/sizeof(int));
+
+	int num = -1;
+	for ( int i = 0 ; i < size ; i++ )
+	{
+		if ( tbl[i] == m.idxLab )
 		{
+			num = i;
 			break;
 		}
 	}
-	if ( num < sizeIdxLab ) 
+
+	if ( num >= 0 )
 	{
-		num = max(num+val,0);
-		num = min(num+val, sizeIdxLab-1 );
+		num = num +val;
+		if ( num >= 0 && num < size )
+		{
+			SetIdx( tbl[num], cp );
+		}
 	}
-	else
-	{
-		num = idx;
-	}
-	SetIdx( num, cp );
 }
 
 //------------------------------------------------------------------------------
@@ -1385,6 +1386,6 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float
 Lab::Lab()
 //------------------------------------------------------------------------------
 {
-	idx = 13;
+	m.idxLab = 13;
 }
 

@@ -135,9 +135,11 @@ struct LabObj
 
 struct Lab
 {
-	int		idx = 0;	
-
-	int idxTbl;
+	struct M
+	{
+		int	idxLab = 0;	
+		int	idxTbl = 0;
+	} m;
 	
 	Lab();
 

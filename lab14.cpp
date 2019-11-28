@@ -86,29 +86,29 @@ void Lab14::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 				//------------------------------------------------------------------------------
 				//void drawCutmull( SysGra& gra, Pers& pers, 
 				vector<Obj*> tbl = m.tbl_pObj; 
-				vector<ivect2>idx = tblIdx;
+//				vector<ivect2>tblIdx = tblIdx;
 				//------------------------------------------------------------------------------
 				{
 					// 描画 カーブ
 					function<void()> func = [&]()
 					{
 						rgb	col(1,1,1);
-						int size = (signed)idx.size();
+						int size = (signed)tblIdx.size();
 						vect3	v0;
 						vect3	v2;
 						vect3	w0;
 						vect3	w2;
 						for ( int i = 0 ; i < size ; i++ )
 						{
-							int n0 = idx[i].n0;
-							int n1 = idx[(i+1)%size].n0;
-							int n2 = idx[(i+2)%size].n0;
-							int n3 = idx[(i+3)%size].n0;
+							int n0 = tblIdx[i].n0;
+							int n1 = tblIdx[(i+1)%size].n0;
+							int n2 = tblIdx[(i+2)%size].n0;
+							int n3 = tblIdx[(i+3)%size].n0;
 
-							int m0 = idx[i].n1;
-							int m1 = idx[(i+1)%size].n1;
-							int m2 = idx[(i+2)%size].n1;
-							int m3 = idx[(i+3)%size].n1;
+							int m0 = tblIdx[i].n1;
+							int m1 = tblIdx[(i+1)%size].n1;
+							int m2 = tblIdx[(i+2)%size].n1;
+							int m3 = tblIdx[(i+3)%size].n1;
 						
 							vect3 P0 = tbl[n0]->pos;
 							vect3 P1 = tbl[n1]->pos;

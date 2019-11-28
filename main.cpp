@@ -44,8 +44,8 @@ struct Apr : public Sys
 	int main( int num )
 	//------------------------------------------------------------------------------
 	{
-		lab.idx = num;
-		lab.SetIdx(lab.idx,gui.cp);
+		lab.m.idxLab = num;
+		lab.SetIdx(lab.m.idxLab,gui.cp);
 		
 		//	ウィンドウ生成関数
 		auto funcOnCreate = [&]()
@@ -157,8 +157,8 @@ struct Apr : public Sys
 			//=================================
 			{
 				const float	T	= 1.0/60.0;				// 時間/frame
-//				if ( keys.N.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.idx+1,gui.cp);};
-//				if ( keys.B.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.idx-1,gui.cp);};
+//				if ( keys.N.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.m.idxLab+1,gui.cp);};
+//				if ( keys.B.rep ) {gui.one.bEnable = false;lab.SetIdx(lab.m.idxLab-1,gui.cp);};
 				if ( keys.N.rep ) {gui.one.bEnable = false;lab.SetNextIdx(+1,gui.cp);};
 				if ( keys.B.rep ) {gui.one.bEnable = false;lab.SetNextIdx(-1,gui.cp);};
 				lab.Update( keys, mouse, gra, pers, T, text_y, gui.cp );
@@ -246,7 +246,7 @@ struct Apr : public Sys
 /*
 					if ( (*pSkeleton).bActive )
 					{
-						if ( (*pSkeleton).idxTbl == gui.one.idxTbl )
+						if ( (*pSkeleton).m.idxTbl == gui.one.idxTbl )
 						{
 							// キーフレームへ反映
 							(*pSkeleton).RefrectKeyframe();
@@ -275,7 +275,7 @@ struct Apr : public Sys
 			gra.Print(1,(float)text_y++,string("peak: ")+to_string(gra.time_peak/1000.0)+string("ms") ); 
 			if ( gui.one.bEnable )
 			{
-				gra.Print(1,(float)text_y++,string("idxTbl=")+to_string(gui.one.idxTbl)+":"+to_string(gui.one.idxObj) ); 
+				gra.Print(1,(float)text_y++,string("m.idxTbl=")+to_string(gui.one.idxTbl)+":"+to_string(gui.one.idxObj) ); 
 				Obj* p =gui.cp.tbltbl_pObj[ gui.one.idxTbl ][ gui.one.idxObj ];
 				if ( p ) gra.Print(1,(float)text_y++,string("one: ")+to_string(p->pos.x)+" , "+to_string(p->pos.y)+" , "+to_string(p->pos.z)); 
 			}
