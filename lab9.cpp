@@ -43,7 +43,7 @@ void Lab9::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 
-	gra.Print(1,(float)text_y++,string("lab9_2dRidge")); 
+	gra.Print(1,(float)text_y++,string("lab9 ball ball with bound")); 
 
 	static	Graphs graphs;
 
