@@ -121,10 +121,6 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		ball.mat = midentity();
 		ball.vaxis		= vect3(0,0,1);
 		ball.fspin		= 0.0;
-#if 0
-		ball.pos = vect3(  0		, 2.0,  0.0 );
-		ball.fspin		= 0.1;
-#endif 
 
 	}
 
@@ -154,30 +150,6 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 	auto[flg,q0,t] = func_intersect_Plate_SegCurve_ball( plate_p, plate_n, p0, ball.radius, -0.0001, delta, dot(vg,plate_n)*plate_n, dot(v0,plate_n)*plate_n );
 
-#if 0
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
-
-	if ( flg )
-	{
-//q0.dump();
-		vect3	vr	= (q0-p0);
-		float	r	= vr.abs();
-		vect3	vf	= cross( ball.vaxis, vr);
-
-		pn = p0 + vf*ball.fspin;
-		vn = v0;
-
-
-	}
-	else
-	{
-		pn = p0;
-		vn = v0;
-	}
-	
-
-#else
-
 
 	// 衝突計算
 	if ( flg )
@@ -187,16 +159,12 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		float	r	= vr.abs();
 		vect3	vf	= cross( ball.vaxis, vr);
 
-//		vect3 d3 = p0 + vf*ball.fspin;
-		//
-
 		// 衝突まで
 		float t1 = t;													// 衝突までの時間(s)
 		vect3 d1 = func_accelerationGetDistance_TVv( vg, t1, v0 );		// 衝突までの移動距離(m)
 		vect3 v1 = v0 + vg*t1;											// 衝突後の速度(m/s)
 
 		float rate_r	= 0.6;		// 反射係数
-//		v1  = v1 - (1.0+rate_r)*dot( v1, plate_n ) * plate_n;
 		v1  = func_reflect( v1, plate_n, rate_r );
 
 		// 衝突後
@@ -212,10 +180,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		}
 
 		vect3 d3 = d1 + d2;
-		
-//		d3 += vf*ball.fspin; // 回転
-// 		v2 += vf*ball.fspin / delta;
-	
+
 		pn = p0 + d3;
 		vn = v2 ;
 
@@ -224,12 +189,9 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 			vect3	axis = cross(d3,plate_n);
 			vect3	mov = d3 - dot(d3,plate_n)*plate_n;
 			float	th = mov.abs()/ball.radius;
-//			mn = mrotateByAxis( axis, th );
-//			ball.mspin = mn;
 			ball.vaxis = axis;
 			ball.fspin = th;
 		}
-
 
 	}
 	else
@@ -238,14 +200,12 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		pn = p0 + d;		// 仮移動
 		vn = v0 + vg*delta;	// 仮速度
 	}
-#endif
 
 	// 反映
 	if  ( !m.bPause || m.bStep )
 	{
 		ball.pos = pn;
 		ball.vel = vn;
-//		ball.mat *= ball.mspin;
 		ball.mat *= mrotateByAxis( ball.vaxis, ball.fspin );
 
 	}
