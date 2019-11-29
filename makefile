@@ -46,7 +46,11 @@ FLGS = \
 	-g \
 	-std=c++17 \
 	-Werror \
-	-Wall -Wno-unused -Wconversion -Wno-sign-conversion -Wno-shorten-64-to-32 -Wno-implicit-float-conversion
+	-Wall -Wno-unused -Wconversion -Wno-float-conversion -Wno-sign-conversion -Wno-implicit-float-conversion # g++/clang++
+
+#	-Wall -Wno-unused -Wconversion -Wno-sign-conversion -Wfloat-conversion -Wno-implicit-float-conversion
+#	-Wall -Wno-unused -Wconversion -Wno-sign-conversion -Wno-implicit-float-conversion
+#	-Wall -Wno-unused -Wconversion -Wno-sign-conversion -Wno-implicit-float-conversion -Wno-shorten-64-to-32 
 
 #	-m64 \
 #	-O3 \
