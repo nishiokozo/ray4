@@ -1348,10 +1348,10 @@ void Lab::SetNextIdx( int val, Cp& cp )
 		6,		//	タイヤ
 		7,		//	角速度実験3
 		8,		//	角速度実験4
-		9,		//	角速度実験5
+		13,		//	曲線と平面の衝突
 		11,		//	ボールの落下と床
 		12,		//	ボール同士の衝突
-		13,		//	曲線と平面の衝突
+		9,		//	ボール同士の衝突と落下
 	};	
 	static const int size = static_cast<signed>(sizeof(tbl)/sizeof(int));
 
