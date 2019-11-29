@@ -15,7 +15,16 @@ SRCS = \
 	gui.cpp \
 	lab.cpp \
 	lab0.cpp \
+	lab1.cpp \
+	lab2.cpp \
+	lab3.cpp \
+	lab4.cpp \
+	lab5.cpp \
+	lab6.cpp \
+	lab7.cpp \
+	lab8.cpp \
 	lab9.cpp \
+	lab10.cpp \
 	lab11.cpp \
 	lab12.cpp \
 	lab13.cpp \
