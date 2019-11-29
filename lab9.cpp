@@ -50,23 +50,13 @@ struct Ball9:Obj
 	float	fspin;
 
 	vect3	pn;
-	
+	vect3	vn;
+
 	Ball9() : Obj(vect3(0,0,0)) {}
 
 	Ball9( vect3 v, vect3 _vel ) : Obj(v)
 	{
-		pos = v;
 		vel = _vel;
-	}
-	
-	void Init(  vect3 _pos, vect3 _vel, float _radius, vect3 _vaxis, float _fspin )
-	{
-		pos		= _pos;
-		vel		= _vel;
-		radius	= _radius;
-		vaxis	= _vaxis;
-		fspin	= _fspin;
-		
 	}
 	
 };
@@ -80,7 +70,7 @@ void Lab9::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 	//画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 16, 16, 1, rgb(0.2,0.2,0.2) );
-	gra.Print(1,(float)text_y++,string("9 : Ball9 & Ball9 & Gravity")); 
+	gra.Print(1,(float)text_y++,string("9 : Ball & Ball & Gravity")); 
 
 	if ( !m.bInitAll )
 	{
@@ -110,7 +100,7 @@ void Lab9::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 	// b1 b2 正面衝突°
 		m.bInitParam = true;
 		{
-			b1.pos		= vect3( -3	, 1.0,  0.0 );
+			b1.pos		= vect3(  0	, 4.0,  0.0 );
 			b1.vel		= vect3(  0	, 0.0,  0.0 );
 			b1.radius 	= 1.0;
 			b1.mat		= midentity();
@@ -118,7 +108,7 @@ void Lab9::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 			b1.fspin	= 0.0;
 		}
 		{
-			b2.pos		= vect3(  3	, 1.0,  0.0 );
+			b2.pos		= vect3(  1	, 1.0,  0.0 );
 			b2.vel		= vect3(  0	, 0.0,  0.0 );
 			b2.radius 	= 1.0;
 			b2.mat		= midentity();
@@ -128,17 +118,18 @@ void Lab9::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 
 		// 転がり
 		{
-			float ene = 0.1;
+			float ene = 0;
 			vect3 dir = vect3(1,0,0).normalize();
 			b1.vel += ene * dir;
 		}
 		{
-			float ene = 0.1;
+			float ene = 0;
 			vect3 dir = vect3(-1,0,0).normalize();
 			b2.vel += ene * dir;
 		}
 
 	}
+//static float time = 0;cout << time << " " ;b1.pos.dump();time += delta;
 
 	// 入力
 	{
@@ -152,56 +143,92 @@ void Lab9::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 	// 移動
 	if ( keys.S.hi )
 	{
-		float ene = 0.1;
+		float ene = 6;
 		vect3 dir = vect3(-1,0,0);
 		b2.vel += ene * dir;
 	}
 
-	// 移動
-	b1.pn = b1.pos + b1.vel;
-	b2.pn = b2.pos + b2.vel;
+	// 定数
+	vect3	vg	= vect3(0,G,0);		// 重力加速度ベクトル
+	vect3	plate_p	= vect3(0,0,0);
+	vect3	plate_n	= vect3(0,1,0);
 
-	// 衝突
+	// 移動
+	b1.vn = b1.vel + vg * delta;
+	b2.vn = b2.vel + vg * delta;
+	
+	b1.pn = b1.pos + b1.vn * delta;
+	b2.pn = b2.pos + b2.vn * delta;
+
+	//衝突
+	// 回転量を移動量計算で求める
+	auto funcSpin = []( Ball9& ball, vect3& N )
+	{
+		vect3	d = ball.pn - ball.pos;
+		float	r = ball.radius;
+
+		vect3	axis = cross(d,N);
+		vect3	mov = d - dot(d,N)*N;
+		float	th = mov.abs()/r;
+
+		ball.vaxis = axis;
+		ball.fspin = th;
+	}; 
+
+	// 床との衝突
+	{
+		auto[flg,q0,t] = func_intersect_Plate_SegCurve_ball( plate_p, plate_n, b1.pos, b1.radius, -0.0001, delta, dot(vg,plate_n)*plate_n, dot(b1.vn,plate_n)*plate_n );
+		b1.flgOn = flg;
+		if ( b1.flgOn )
+		{
+			b1.pn.y =  b1.pos.y;
+			b1.vn.y = -b1.vel.y * (1.0-pow(1-0.3,2));//0.3
+			funcSpin(b1, plate_n);
+		}
+	}
+	{
+		auto[flg,q0,t] = func_intersect_Plate_SegCurve_ball( plate_p, plate_n, b2.pos, b2.radius, -0.0001, delta, dot(vg,plate_n)*plate_n, dot(b2.vn,plate_n)*plate_n );
+		b2.flgOn = flg;
+		if ( b2.flgOn )
+		{
+			b2.pn.y =  b2.pos.y;
+			b2.vn.y = -b2.vel.y * (1.0-pow(1-0.3,2));
+			funcSpin(b2, plate_n);
+		}
+	}
+
+	// ボールとの衝突
 	{
 		if ( (b1.pn-b2.pn).abs() <b1.radius+b2.radius )
 		{
-			b1.pn = b1.pos;
-			b2.pn = b2.pos;
 
 			vect3	N = (b1.pos-b2.pos).normalize();
-			vect3	vel1 = func_reflect( b1.vel, N, 1.0 );
-			vect3	vel2 = func_reflect( b2.vel, N, 1.0 );
+			vect3	vel1 = func_reflect( b1.vn, N, 1.0 );
+			vect3	vel2 = func_reflect( b2.vn, N, 1.0 );
+
+			funcSpin(b1, N);
+			funcSpin(b2, N);
 
 			vect3 v1 = dot(-vel2,N)*N;
 			vect3 v2 = dot(-vel1,N)*N;
 
-			b1.vel += v1 - v2;
-			b2.vel += v2 - v1;
+			b1.pn = b1.pos;
+			b2.pn = b2.pos;
+			b1.vn += v1 - v2;
+			b2.vn += v2 - v1;
 		}
 	}
+
 	
 	// 反映
 	if  ( !m.bPause || m.bStep )
 	{
-		// 回転量を移動量計算で求める
-		auto func = [&]( Ball9& ball )
-		{
-			vect3	plate_n(0,1,0);
-			vect3	d3 = ball.pn - ball.pos;
-			float	r = ball.radius;
-
-			vect3	axis = cross(d3,plate_n);
-			vect3	mov = d3 - dot(d3,plate_n)*plate_n;
-			float	th = mov.abs()/r;
-
-			ball.vaxis = axis;
-			ball.fspin = th;
-			ball.mat = mrotateByAxis( ball.vaxis, ball.fspin ) * ball.mat;
-		}; 
-		func(b1);
-		func(b2);
 		b1.pos = b1.pn;
 		b2.pos = b2.pn;
+		b1.vel = b1.vn;
+		b2.vel = b2.vn;
+		b1.mat = mrotateByAxis( b1.vaxis, b1.fspin ) * b1.mat;
+		b2.mat = mrotateByAxis( b2.vaxis, b2.fspin ) * b2.mat;
 	}
 	
 	m.drawVect( gra, pers, text_y, b2.pos, b2.vaxis.normalize() ,1	, col3, "axis" );
