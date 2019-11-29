@@ -42,7 +42,7 @@ struct Lab11::Impl
 };
 Lab11::Lab11() : pImpl( new Lab11::Impl ){}
 
-struct Ball:Obj
+struct Ball11:Obj
 {
 	vect3	vel;	//	velocity 速度(m/s)
 	float	radius = 1.0;
@@ -51,7 +51,7 @@ struct Ball:Obj
 //	vect3	vcenter;
 	vect3	vaxis;
 	float	fspin;
-	Ball( vect3 v, vect3 _vel ) : Obj(v)
+	Ball11( vect3 v, vect3 _vel ) : Obj(v)
 	{
 		pos = v;
 		vel = _vel;
@@ -68,7 +68,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	//画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
 
-	gra.Print(1,(float)text_y++,string("11 : Plate & Ball")); 
+	gra.Print(1,(float)text_y++,string("11 : Plate & Ball11")); 
 
 	// 定数
 	vect3	vg	= vect3(0,G,0);		// 重力加速度ベクトル
@@ -85,7 +85,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		//点
 		for ( Obj* p : m.tbl_pObj ) delete p;
 		m.tbl_pObj.clear();
-		m.tbl_pObj.emplace_back( new Ball(vect3(  0		, 0.62,  0.0 ), vect3(0,0,0)) );
+		m.tbl_pObj.emplace_back( new Ball11(vect3(  0		, 0.62,  0.0 ), vect3(0,0,0)) );
 		m.tbl_pObj.emplace_back( new Obj(vect3( -0.0	, 0.0,	0.0 )) );	// 平面原点
 		m.tbl_pObj.emplace_back( new Obj(vect3( -0.05	, 0.5,  0.0 )) );	// 平面法線
 
@@ -115,7 +115,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	if ( !m.bInitParam )
 	{
 		m.bInitParam = true;
-		Ball&	ball = *dynamic_cast<Ball*>(m.tbl_pObj[0]);
+		Ball11&	ball = *dynamic_cast<Ball11*>(m.tbl_pObj[0]);
 		ball.pos = vect3(  0		, 3.0,  0.0 );
 		ball.vel = vect3(  0		, 0.0,  0.0 );
 		ball.mat = midentity();
@@ -137,7 +137,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	}
 	
 	//変数
-	Ball&	ball	= *dynamic_cast<Ball*>(m.tbl_pObj[0]);
+	Ball11&	ball	= *dynamic_cast<Ball11*>(m.tbl_pObj[0]);
 	vect3	plate_p	= m.tbl_pObj[1]->pos;
 	vect3	plate_n	= (m.tbl_pObj[2]->pos-plate_p).normalize();
 	vect3	p0		= ball.pos;

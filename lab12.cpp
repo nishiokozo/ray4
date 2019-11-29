@@ -40,7 +40,7 @@ static const rgb col7 = rgb( 1, 1, 1 );
 
 
 // 定義
-struct Ball:Obj
+struct Ball12:Obj
 {
 	vect3	vel;	//	velocity 速度(m/s)
 	float	radius = 0.1;
@@ -51,9 +51,9 @@ struct Ball:Obj
 
 	vect3	pn;
 	
-	Ball() : Obj(vect3(0,0,0)) {}
+	Ball12() : Obj(vect3(0,0,0)) {}
 
-	Ball( vect3 v, vect3 _vel ) : Obj(v)
+	Ball12( vect3 v, vect3 _vel ) : Obj(v)
 	{
 		pos = v;
 		vel = _vel;
@@ -80,7 +80,7 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	//画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 16, 16, 1, rgb(0.2,0.2,0.2) );
-	gra.Print(1,(float)text_y++,string("12 : Ball & Ball")); 
+	gra.Print(1,(float)text_y++,string("12 : Ball12 & Ball12")); 
 
 	if ( !m.bInitAll )
 	{
@@ -93,16 +93,16 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		//点
 		for ( Obj* p : m.tbl_pObj ) delete p;
 		m.tbl_pObj.clear();
-		m.tbl_pObj.emplace_back( new Ball );
-		m.tbl_pObj.emplace_back( new Ball );
+		m.tbl_pObj.emplace_back( new Ball12 );
+		m.tbl_pObj.emplace_back( new Ball12 );
 
 		//GUI登録
 		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
 
 	}
 
-	Ball&	b1 = *dynamic_cast<Ball*>(m.tbl_pObj[0]);
-	Ball&	b2 = *dynamic_cast<Ball*>(m.tbl_pObj[1]);
+	Ball12&	b1 = *dynamic_cast<Ball12*>(m.tbl_pObj[0]);
+	Ball12&	b2 = *dynamic_cast<Ball12*>(m.tbl_pObj[1]);
 
 	// 初期化：パラメータ
 	if ( !m.bInitParam )
@@ -251,7 +251,7 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	if  ( !m.bPause || m.bStep )
 	{
 		// 回転量を移動量計算で求める
-		auto func = [&]( Ball& ball )
+		auto func = [&]( Ball12& ball )
 		{
 			vect3	plate_n(0,1,0);
 			vect3	d3 = ball.pn - ball.pos;
