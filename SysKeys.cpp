@@ -5,7 +5,7 @@
 
 using namespace std;
 
-// WinAPI�R���̏��B�\�ɏo���Ȃ����߂ɂ����Œ�`
+// WinAPI由来の情報。表に出さないためにここで定義
 static struct Winapi_key
 {
 	BYTE	state[256];
@@ -43,7 +43,7 @@ SysKeys& SysKeys::GetInstance()
 SysKeys::SysKeys()
 //-----------------------------------------------------------------------------
 {
-	Update(); // �L�[���̐��m�Ȏ擾�ɂ͈�O�̏�񂪕K�v�Ȃ̂ŁA����������Update���s��
+	Update(); // キー情報の正確な取得には一つ前の情報が必要なので、初期化時にUpdateを行う
 }
 
 //-----------------------------------------------------------------------------
@@ -58,7 +58,7 @@ void SysKeys::Update()
 {
 
 
-//�ŏ�ʃr�b�g�� 1 �̂Ƃ��̓L�[��������Ă��邱�Ƃ��A0 �̂Ƃ��̓L�[��������Ă��Ȃ����Ƃ������܂��B�ŉ��ʃr�b�g�� 1 �̂Ƃ��̓L�[���g�O����Ԃɂ��邱�Ƃ��A0 �̂Ƃ��̓g�O������������Ă��邱�Ƃ������܂��B���Ƃ��΁ACapsLock �L�[�� ON �ɂȂ��Ă���Ƃ��́A�g�O����ԂɂȂ�܂��B
+//最上位ビットが 1 のときはキーが押されていることを、0 のときはキーが押されていないことを示します。最下位ビットが 1 のときはキーがトグル状態にあることを、0 のときはトグルが解除されていることを示します。たとえば、CapsLock キーが ON になっているときは、トグル状態になります。
 	GetKeyboardState( g.state );
 
 	for ( int i = 0 ; i < 255 ; i++ )
@@ -90,10 +90,10 @@ void SysKeys::Update()
 
 
 
-	//	 �W���Ŏg����L�[�iUS�z��A���{��z��A�R���p�N�g�L�[�{�[�h���A���̃L�[�{�[�h�őΉ����Ă���L�[�̂݃A�T�C��
+	//	 標準で使えるキー（US配列、日本語配列、コンパクトキーボード等、大抵のキーボードで対応しているキーのみアサイン
 	//	
 	//	
-	//		�g�p		:	VK�L�[�}�b�v
+	//		使用		:	VKキーマップ
 	//	----------------+-----------------------------------------
 	//		-			:	00 
 	//		-			:	01 VK_LBUTTON
@@ -120,7 +120,7 @@ void SysKeys::Update()
 	//		-			:	16 
 	//		-			:	17 VK_JUNJA
 	//		-			:	18 VK_FINAL
-	//		-			:	19 VK_KANJI ���̂��펞0X80������
+	//		-			:	19 VK_KANJI 何故か常時0X80が入る
 	//		-			:	1A 
 	//		ESC			:	1B VK_ESCAPE
 	//		-			:	1C VK_CONVERT
@@ -335,18 +335,18 @@ void SysKeys::Update()
 	//		-			:	ED VK_OEM_PA3
 	//		-			:	EE VK_OEM_WSCTRL
 	//		-			:	EF VK_OEM_CUSEL
-	//		-			:	F0 VK_OEM_ATTN ���̂��펞0X80������
+	//		-			:	F0 VK_OEM_ATTN 何故か常時0X80が入る
 	//		-			:	F1 VK_OEM_FINISH
 	//		-			:	F2 VK_OEM_COPY
-	//		-			:	F3 VK_OEM_AUTO ���̂��펞0X80������
+	//		-			:	F3 VK_OEM_AUTO 何故か常時0X80が入る
 	//		-			:	F4 VK_OEM_ENLW
 	//		-			:	F5 VK_OEM_BACKTAB
-	//		-			:	F6 VK_ATTN ���̂��펞0X80������
+	//		-			:	F6 VK_ATTN 何故か常時0X80が入る
 	//		-			:	F7 VK_CRSEL
 	//		-			:	F8 VK_EXSEL
 	//		-			:	F9 VK_EREOF
 	//		-			:	FA VK_PLAY
-	//		-			:	FB VK_ZOOM ���̂��펞0X80������
+	//		-			:	FB VK_ZOOM 何故か常時0X80が入る
 	//		-			:	FC VK_NONAME
 	//		-			:	FD VK_PA1
 	//		-			:	FE VK_OEM_CLEAR
@@ -683,7 +683,7 @@ void SysKeys::Update()
 	this->PERIOD.rep	= g.tbl_rep[ VK_OEM_PERIOD ];	// BE
 
 #if 0
-	 // �L�[�R�[�h�`�F�b�N�p
+	 // キーコードチェック用
 	int i;
 	for ( i = 0 ; i < 255 ; i++ )
 	{

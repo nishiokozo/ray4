@@ -55,18 +55,7 @@ struct Ball12:Obj
 
 	Ball12( vect3 v, vect3 _vel ) : Obj(v)
 	{
-		pos = v;
 		vel = _vel;
-	}
-	
-	void Init(  vect3 _pos, vect3 _vel, float _radius, vect3 _vaxis, float _fspin )
-	{
-		pos		= _pos;
-		vel		= _vel;
-		radius	= _radius;
-		vaxis	= _vaxis;
-		fspin	= _fspin;
-		
 	}
 	
 };
