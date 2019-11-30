@@ -41,6 +41,7 @@
 #include "lab14.h"
 #include "lab15.h"
 #include "lab16.h"
+#include "lab17.h"
 
 //------------------------------------------------------------------------------
 void LabObj::M::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str )
@@ -131,6 +132,7 @@ cout << m.idxLab << ">" << n << endl;
 		case 14:	pLab = new Lab14;	break;
 		case 15:	pLab = new Lab15;	break;
 		case 16:	pLab = new Lab16;	break;
+		case 17:	pLab = new Lab17;	break;
 		default: break;
 	}
 }
@@ -158,6 +160,7 @@ void Lab::SetNextIdx( int val, Cp& cp )
 		11,		//	ボールの落下と床
 		12,		//	ボール同士の衝突
 		9,		//	ボール同士の衝突と落下
+		17,		//	ボール同士の衝突と落下
 	};	
 	static const int size = static_cast<signed>(sizeof(tbl)/sizeof(int));
 
@@ -192,6 +195,5 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float
 Lab::Lab()
 //------------------------------------------------------------------------------
 {
-	m.idxLab = 13;
 }
 
