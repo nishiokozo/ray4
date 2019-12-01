@@ -79,7 +79,7 @@ void Lab18::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 16, 16, 1, rgb(0.2,0.2,0.2) );
+//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 16, 16, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,"18 : Spin on Floor" ); 
 
 
@@ -95,6 +95,8 @@ void Lab18::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		for ( Obj* p : m.tbl_pObj ) delete p;
 		m.tbl_pObj.clear();
 		m.tbl_pObj.emplace_back( new Ball18 );
+		m.tbl_pObj.emplace_back( new Obj(vect3( 0.15	, 0.0,	0.0 )) );	// 平面原点
+		m.tbl_pObj.emplace_back( new Obj(vect3( 0.0		, 1.0,  0.0 )) );	// 平面法線
 
 		//GUI登録
 		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
@@ -103,9 +105,11 @@ void Lab18::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 	// 設定値
 	vect3	vg	= vect3(0,G,0);		// 重力加速度ベクトル
-	vect3	plate_p	= vect3(0,0,0);
-	vect3	plate_n	= vect3(0,1,0);
+//	vect3	plate_p	= vect3(0,0,0);
+//	vect3	plate_n	= vect3(0,1,0);
 	Ball18&	b1 = *dynamic_cast<Ball18*>(m.tbl_pObj[0]);
+	vect3	plate_p	= m.tbl_pObj[1]->pos;
+	vect3	plate_n	= (m.tbl_pObj[2]->pos-plate_p).normalize();
 
 	// 初期化：パラメータ
 	if ( !m.bInitParam )
@@ -127,7 +131,7 @@ void Lab18::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 			b1.vel += ene * dir;
 		}
 		b1.vaxis = vect3(0,0,-1);
-		b1.fspin = -0.01;
+		b1.fspin = -0.1;
 
 	}
 
@@ -163,13 +167,6 @@ void Lab18::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		ball.fspin = th;
 	}; 
 
-	auto funcBound = [&]( Ball18& ball, vect3& N )
-	{
-		vect3 d = ball.vn * delta;
-		ball.pn -= dot( d, N ) * N;
-		ball.vn = func_reflect( ball.vn, N, (1.0-pow(1-0.3,2)) );
-		funcSpin(ball, N);
-	};
 	// 床との衝突
 	{
 		auto[flg,q0,t] = func_intersect_Plate_SegCurve_ball( plate_p, plate_n, b1.pos, b1.radius, -0.0001, delta, dot(vg,plate_n)*plate_n, dot(b1.vn,plate_n)*plate_n );
@@ -177,29 +174,15 @@ void Lab18::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		b1.Q = q0;
 		if ( b1.flgOn )
 		{
-//			funcBound( b1, plate_n );
-
-			if (0)
-			// 移動量から回転量を求める
-			{
-				Ball18& ball = b1;
-				vect3& N = plate_n;
-				vect3 d = ball.vn * delta;
-				ball.pn -= dot( d, N ) * N;
-				ball.vn = func_reflect( ball.vn, N, (1.0-pow(1-0.3,2)) );
-				funcSpin(ball, N);
-			};
-
 			// 回転量から移動量を求める。
 			{
 				Ball18& ball = b1;
 				vect3& N = plate_n;
 				vect3 d = ball.vn * delta;
 				ball.pn -= dot( d, N ) * N;
-				ball.vn = func_reflect( ball.vn, N, (1.0-pow(1-0.3,2)) );
-	//			funcSpin(ball, N);
+				ball.vn = vect3(0,0,0);
 			};
-if(1)			{
+			{
 				vect3	vr	= (q0-b1.pos);
 				float	r	= vr.abs();
 				vect3	vf	= cross( vr, b1.vaxis.normalize() );
@@ -224,7 +207,10 @@ if(1)			{
 	m.drawVect( gra, pers, text_y, b1.pos, b1.vaxis.normalize() ,1	, col3, "axis" );
 
 
-	
+	// 平面表示
+	{
+		pers.prim.DrawPlate( gra, pers, plate_p, plate_n, 28, rgb(0.5,1,1)*0.55 );
+	}
 	
 	// 表示
 	pers.prim.DrawSphere( gra, pers, b1.radius, b1.pos, b1.mat );

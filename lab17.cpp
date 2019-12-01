@@ -129,7 +129,7 @@ void Lab17::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 			b1.vel += ene * dir;
 		}
 		b1.vaxis = vect3(0,0,-1);
-		b1.fspin = -0.01;
+		b1.fspin = -0.1;
 
 	}
 
@@ -179,9 +179,8 @@ void Lab17::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		b1.Q = q0;
 		if ( b1.flgOn )
 		{
+		#if 1
 //			funcBound( b1, plate_n );
-
-			if (0)
 			// 移動量から回転量を求める
 			{
 				Ball17& ball = b1;
@@ -191,7 +190,7 @@ void Lab17::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 				ball.vn = func_reflect( ball.vn, N, (1.0-pow(1-0.3,2)) );
 				funcSpin(ball, N);
 			};
-
+		#else
 			// 回転量から移動量を求める。
 			{
 				Ball17& ball = b1;
@@ -199,16 +198,16 @@ void Lab17::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 				vect3 d = ball.vn * delta;
 				ball.pn -= dot( d, N ) * N;
 				ball.vn = func_reflect( ball.vn, N, (1.0-pow(1-0.3,2)) );
-	//			funcSpin(ball, N);
+		//			funcSpin(ball, N);
 			};
-if(1)			{
+			{
 				vect3	vr	= (q0-b1.pos);
 				float	r	= vr.abs();
 				vect3	vf	= cross( vr, b1.vaxis.normalize() );
 				b1.pn += vf * -b1.fspin;
 
 			}
-
+		#endif
 
 		}
 	}
