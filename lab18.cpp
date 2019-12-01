@@ -24,7 +24,7 @@
 #include "pers.h"
 
 #include "lab.h"
-#include "lab17.h"
+#include "lab18.h"
 
 static const float	G	= -9.80665;				// 重力加速度
 static const rgb col0 = rgb( 0, 0, 0 );
@@ -37,18 +37,18 @@ static const rgb col6 = rgb( 1, 1, 0 );
 static const rgb col7 = rgb( 1, 1, 1 );
 
 
-struct Lab17::Impl
+struct Lab18::Impl
 {
 };
 
 //------------------------------------------------------------------------------
-Lab17::Lab17() : pImpl( new Lab17::Impl )
+Lab18::Lab18() : pImpl( new Lab18::Impl )
 //------------------------------------------------------------------------------
 {
 }
 
 // 定義
-struct Ball17:Obj
+struct Ball18:Obj
 {
 	vect3	vel;	//	velocity 速度(m/s)
 	float	radius = 0.1;
@@ -62,9 +62,9 @@ struct Ball17:Obj
 	vect3	vn;
 	mat33	mn = midentity();
 
-	Ball17() : Obj(vect3(0,0,0)) {}
+	Ball18() : Obj(vect3(0,0,0)) {}
 
-	Ball17( vect3 v, vect3 _vel ) : Obj(v)
+	Ball18( vect3 v, vect3 _vel ) : Obj(v)
 	{
 		vel = _vel;
 	}
@@ -72,15 +72,15 @@ struct Ball17:Obj
 };
 
 //------------------------------------------------------------------------------
-void Lab17::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab18::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	m.bStep = false;
 
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 16, 16, 1, rgb(0.2,0.2,0.2) );
-	gra.Print(1,(float)text_y++,"17 : Spin On Plate" ); 
+	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 16, 16, 1, rgb(0.2,0.2,0.2) );
+	gra.Print(1,(float)text_y++,"18 : Spin on Floor" ); 
 
 
 	if ( !m.bInitAll )
@@ -94,9 +94,7 @@ void Lab17::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		//点
 		for ( Obj* p : m.tbl_pObj ) delete p;
 		m.tbl_pObj.clear();
-		m.tbl_pObj.emplace_back( new Obj(vect3( 0.05	, 0.0,	0.0 )) );	// 平面原点
-		m.tbl_pObj.emplace_back( new Obj(vect3( 0.0		, 1.0,  0.0 )) );	// 平面法線
-		m.tbl_pObj.emplace_back( new Ball17 );
+		m.tbl_pObj.emplace_back( new Ball18 );
 
 		//GUI登録
 		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
@@ -105,9 +103,9 @@ void Lab17::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 	// 設定値
 	vect3	vg	= vect3(0,G,0);		// 重力加速度ベクトル
-	vect3	plate_p	= m.tbl_pObj[0]->pos;
-	vect3	plate_n	= (m.tbl_pObj[1]->pos-plate_p).normalize();
-	Ball17&	b1 = *dynamic_cast<Ball17*>(m.tbl_pObj[2]);
+	vect3	plate_p	= vect3(0,0,0);
+	vect3	plate_n	= vect3(0,1,0);
+	Ball18&	b1 = *dynamic_cast<Ball18*>(m.tbl_pObj[0]);
 
 	// 初期化：パラメータ
 	if ( !m.bInitParam )
@@ -151,7 +149,7 @@ void Lab17::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 	//衝突
 	// 回転量を移動量計算で求める
-	auto funcSpin = []( Ball17& ball, vect3& N )
+	auto funcSpin = []( Ball18& ball, vect3& N )
 	{
 		vect3	d = ball.pn - ball.pos;
 		float	r = ball.radius;
@@ -165,7 +163,7 @@ void Lab17::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		ball.fspin = th;
 	}; 
 
-	auto funcBound = [&]( Ball17& ball, vect3& N )
+	auto funcBound = [&]( Ball18& ball, vect3& N )
 	{
 		vect3 d = ball.vn * delta;
 		ball.pn -= dot( d, N ) * N;
@@ -184,7 +182,7 @@ void Lab17::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 			if (0)
 			// 移動量から回転量を求める
 			{
-				Ball17& ball = b1;
+				Ball18& ball = b1;
 				vect3& N = plate_n;
 				vect3 d = ball.vn * delta;
 				ball.pn -= dot( d, N ) * N;
@@ -194,7 +192,7 @@ void Lab17::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 			// 回転量から移動量を求める。
 			{
-				Ball17& ball = b1;
+				Ball18& ball = b1;
 				vect3& N = plate_n;
 				vect3 d = ball.vn * delta;
 				ball.pn -= dot( d, N ) * N;
@@ -226,10 +224,6 @@ if(1)			{
 	m.drawVect( gra, pers, text_y, b1.pos, b1.vaxis.normalize() ,1	, col3, "axis" );
 
 
-	// 平面表示
-	{
-		pers.prim.DrawPlate( gra, pers, plate_p, plate_n, 28, rgb(0.5,1,1)*0.55 );
-	}
 	
 	
 	// 表示
