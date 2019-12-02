@@ -421,7 +421,7 @@ public:
 			d	= max( 0.0, dot( sur.N, -L ) );
 			s	= (sur.valPower+2)/(8*pi)*pow( max( 0.0, dot( sur.R, -L ) ), sur.valPower );
 			r	= sur.valReflectance;
-			ret += r* (Raycast( sur.Q, sur.R )+s) * Lc;
+			ret += r* (Raycast( sur.Q, sur.R )+vect3(s,s,s)) * Lc;
 
 			if ( sur.valTransmittance == 0.0 )
 			{
@@ -444,7 +444,7 @@ public:
 			L = (sur.Q - lgt.P).normalize();
 			Lc = lgt.C / dot(sur.Q - lgt.P, sur.Q - lgt.P);
 			int n = 20;
-			ret += s;
+			ret += vect3(s,s,s);
 		}
 
 		return ret;

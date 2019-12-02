@@ -153,6 +153,7 @@ public:
 
 };
 
+extern	float rad( float n );
 extern	float deg2rad( float n );
 extern	float rad2deg( float n );
 extern	float atan2_360( float y, float x );
@@ -182,7 +183,7 @@ public:
 
 
 	vect3() :x(0),y(0),z(0){};
-//	vect3( float f ) :x(f), y(f), z(f){};
+//	vect3( float f ) :x(f), y(f), z(f){};	//	floatの初期化は予期しない計算になることがあるので抑制
 	vect3( float _x, float _y, float _z) :x(_x), y(_y), z(_z){};
 
 	vect3( vect2 v, float _z ) { x = v.x; y = v.y; z = _z;};
@@ -211,18 +212,18 @@ public:
 
 	void operator*=( float f ) { x *= f; y *= f; z *= f;  }
 	void operator/=( float f ) { x /= f; y /= f; z /= f;  }
-	void operator+=( float f ) { x += f; y += f; z += f;  }
-	void operator-=( float f ) { x -= f; y -= f; z -= f;  }
+//	void operator+=( float f ) { x += f; y += f; z += f;  }	// float の加減算は予期しない計算になることがあるので抑制
+//	void operator-=( float f ) { x -= f; y -= f; z -= f;  }
 
 	vect3 operator*( float f ) const { return	vect3( x * f, y * f, z * f ); }
 	vect3 operator/( float f ) const { return	vect3( x / f, y / f, z / f ); }
-	vect3 operator+( float f ) const { return	vect3( x + f, y + f, z + f ); }
-	vect3 operator-( float f ) const { return	vect3( x - f, y - f, z - f ); }
+//	vect3 operator+( float f ) const { return	vect3( x + f, y + f, z + f ); }
+//	vect3 operator-( float f ) const { return	vect3( x - f, y - f, z - f ); }
 
 	friend	vect3 operator*( float f, vect3 v )  { return vect3( f * v.x, f * v.y, f * v.z ); }
 	friend	vect3 operator/( float f, vect3 v )  { return vect3( f / v.x, f / v.y, f / v.z ); }
-	friend	vect3 operator+( float f, vect3 v )  { return vect3( f + v.x, f + v.y, f + v.z ); }
-	friend	vect3 operator-( float f, vect3 v )  { return vect3( f - v.x, f - v.y, f - v.z ); }
+//	friend	vect3 operator+( float f, vect3 v )  { return vect3( f + v.x, f + v.y, f + v.z ); }
+//	friend	vect3 operator-( float f, vect3 v )  { return vect3( f - v.x, f - v.y, f - v.z ); }
 
 	bool isZero()
 	{

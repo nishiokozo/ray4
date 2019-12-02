@@ -271,8 +271,8 @@ struct Apr : public Sys
 			//=================================
 			// 情報表示
 			//=================================
-			gra.Print(1,(float)text_y++,string("fovY:")+to_string(int(pers.fovy)));
-			gra.Print(1,(float)text_y++,string("peak: ")+to_string(gra.time_peak/1000.0)+string("ms") ); 
+		//	gra.Print(1,(float)text_y++,string("fovY:")+to_string(int(pers.fovy)));
+		//	gra.Print(1,(float)text_y++,string("peak: ")+to_string(gra.time_peak/1000.0)+string("ms") ); 
 			if ( gui.one.bEnable )
 			{
 				gra.Print(1,(float)text_y++,string("m.idxTbl=")+to_string(gui.one.idxTbl)+":"+to_string(gui.one.idxObj) ); 

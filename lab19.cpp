@@ -47,10 +47,12 @@ Lab19::Lab19() : pImpl( new Lab19::Impl )
 {
 }
 
+#define	PLATE_MAT	mrotz(rad(15))
+
 static struct
 {
 	vect3	pos	= vect3(0,0,0);
-	vect3	normal	= vect3(0,1,0);
+	vect3	nor	= vect3(0,1,0)*PLATE_MAT;
 } plate;
 
 
@@ -76,7 +78,6 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 {
 	// クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 16, 16, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,"19 : Motor Spin" ); 
 
 	// 初期化：ALL
@@ -113,7 +114,7 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	// 入力
 	if ( keys.R.hi )	m.bInitParam = false;
 	if ( mouse.F.on )	motor.power += 0.01;
-	if ( mouse.B.hi )	motor.power -= 0.04;
+	if ( mouse.B.hi )	ball.vel += vect3(0.1,0,0);
 
 
 	// 伝達
@@ -123,38 +124,52 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	}
 	motor.power *= 0.95; // 減衰ロス
 
-	ball.mat = mrotateByAxis( ball.vaxis, ball.wspin ) * ball.mat;
-
-	// 角速度を速度に変換
-	ball.vel = cross( plate.normal, ball.vaxis ) * ball.wspin;
+	// 落下
+	ball.vel += vect3(0,-0.0004,0);
 
 	// 移動
 	ball.pos += ball.vel;
 
+	// 接地
+	if ( dot(ball.pos-plate.pos,plate.nor)-ball.radius < 0) 
+	{
+		ball.pos += -(dot(ball.pos-plate.pos,plate.nor)-ball.radius)*plate.nor;
+		ball.vel = vect3(0,0,0);
+
+		// 角速度を速度に変換
+		ball.vel = cross( plate.nor, ball.vaxis ) * ball.wspin;
+	}
+	else
+	{
+	}
+
+	// モデルの回転
+	ball.mat = mrotateByAxis( ball.vaxis, ball.wspin ) * ball.mat;
+	
+
+	// 床表示
+	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), PLATE_MAT, 16, 16, 1, rgb(0.2,0.2,0.2) );
+
 	// ボール表示
 	pers.prim.DrawSphere( gra, pers, ball.radius, ball.pos, ball.mat );
 
-	// 速度表示	
-	gra.Print(1,(float)text_y++, "motor" + to_string(motor.power) );
-	gra.Print(1,(float)text_y++, "spin" + to_string(ball.wspin) );
-	gra.Print(1,(float)text_y++, "vel " + to_string(ball.vel.x) );
-
+	// メーター表示
 	{
 		int y = 0;
 		{
-			vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,40*y++);
+			vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42*y++);
 			gra.Line( v0, v0+ vect2( motor.power, 0 ), col7, 2 );
-			gra.Print( v0+gra.Dot(0,26), "power "+to_string(motor.power), col7 );
+			gra.Print( v0+gra.Dot(0,-6), "power "+to_string(motor.power), col7 );
 		}
 		{
-			vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,40*y++);
+			vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42*y++);
 			gra.Line( v0, v0+ vect2( ball.wspin, 0 ), col7, 2 );
-			gra.Print( v0+gra.Dot(0,26), "spin  "+to_string(ball.wspin), col7 );
+			gra.Print( v0+gra.Dot(0,-6), "spin  "+to_string(ball.wspin), col7 );
 		}
 		{
-			vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,40*y++);
+			vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42*y++);
 			gra.Line( v0, v0+ vect2( ball.vel.abs(), 0 ), col7, 2 );
-			gra.Print( v0+gra.Dot(0,26), "vel  "+to_string(ball.vel.abs()), col7 );
+			gra.Print( v0+gra.Dot(0,-6), "vel  "+to_string(ball.vel.abs()), col7 );
 		}
 	}
 }

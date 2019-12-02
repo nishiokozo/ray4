@@ -151,7 +151,8 @@ void Lab10::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 						{1.0,	0.6},
 						{1.0,	0.8},
 					};
-					vect3 col = rgb(r,g,b) * alu[int(n)%11][0] + alu[int(n)%11][1];
+					float a = alu[int(n)%11][1];
+					vect3 col = rgb(r,g,b) * alu[int(n)%11][0] + vect3(a,a,a);
 
 					suf(
 						q3, q0, p0, p3, 
