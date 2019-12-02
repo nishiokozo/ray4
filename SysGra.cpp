@@ -30,7 +30,8 @@ struct  wgl_Font
 	{
 		font_base = glGenLists(255);	
 
-	#if 0	
+	#if 1
+		//	固定長フォント	
 	    int   nHeight			= 14;					// 文字セルまたは文字の高さ
 	    int   nWidth			= 0;					// 平均文字幅
 	    int   nEscapement		= 0;					// 文字送りの方向とX軸との角度
@@ -45,8 +46,10 @@ struct  wgl_Font
 	    DWORD fdwQuality		= DEFAULT_QUALITY;		// 出力品質
 	    DWORD fdwPitchAndFamily = 	FIXED_PITCH 		// 固定ピッチ
 	    						//   VARIABLE_PITCH 	// 可変ピッチ
-			    					| FF_SWISS 			// "MS Sans Serif" 
-			    				//    FF_ROMAN			// "MS Serif"
+			    				//	| FF_SWISS 			// "MS Sans Serif" 
+//			    				  | FF_ROMAN			// "MS Serif" 全角日本語
+//			    				  | FF_MODERN			// 全角日本語 対応
+			    				  | FF_SCRIPT 			// 全角日本語 対応
 			    					;
 	    PCTSTR pszFaceName		= NULL;					// フォント名
 
@@ -68,11 +71,11 @@ struct  wgl_Font
 		);
 		SelectObject(hDc, hFont);
 	#else  
-//		SelectObject (hDc, GetStockObject (SYSTEM_FONT)); 		// サンセリフ 固定
-		SelectObject (hDc, GetStockObject (DEFAULT_GUI_FONT));	// サンセリフ 小
+//		SelectObject (hDc, GetStockObject (SYSTEM_FONT)); 		// サンセリフ 大
+//		SelectObject (hDc, GetStockObject (DEFAULT_GUI_FONT));	// サンセリフ 小
 
-//		SelectObject (hDc, GetStockObject (SYSTEM_FIXED_FONT)); 
-//		SelectObject (hDc, GetStockObject (ANSI_FIXED_FONT)); // セリフ
+//		SelectObject (hDc, GetStockObject (SYSTEM_FIXED_FONT)); // 固定長フォント ワイド
+		SelectObject (hDc, GetStockObject (ANSI_FIXED_FONT)); // 固定長フォント セリフ 外国製っぽい
 
 	#endif
 		wglUseFontBitmaps( hDc, 0, count, font_base); 
@@ -368,6 +371,8 @@ void SysGra::Clr( rgb col )
 void SysGra::Circle( vect2 v, float r, rgb col, float wide )
 //------------------------------------------------------------------------------
 {
+	glDepthFunc(GL_ALWAYS);
+
 	float aspect = GetAspect();
 
     glColor3f( col.r, col.g, col.b );
@@ -382,6 +387,8 @@ void SysGra::Circle( vect2 v, float r, rgb col, float wide )
 	    glVertex2f(v1.x, v1.y);
 	}
     glEnd();
+
+	glDepthFunc(GL_GEQUAL);		// depth <= 書き込み値 
 }
 
 //------------------------------------------------------------------------------
@@ -410,11 +417,15 @@ void SysGra::Circle( vect3 v, float r, rgb col, float wide )
 void SysGra::Pset( vect2 v0, rgb col, float wide )
 //------------------------------------------------------------------------------
 {
+	glDepthFunc(GL_ALWAYS);
+
 	glPointSize( wide );
     glBegin(GL_POINTS);
     glColor3f( col.r, col.g, col.b );
     glVertex2f(v0.x, v0.y);
     glEnd();
+
+	glDepthFunc(GL_GEQUAL);		// depth <= 書き込み値 
 }
 //------------------------------------------------------------------------------
 void SysGra::Pset( vect3 v0, rgb col, float wide )
@@ -430,6 +441,8 @@ void SysGra::Pset( vect3 v0, rgb col, float wide )
 void SysGra::Box( vect2 v0, vect2 v1,rgb col, float wide )
 //------------------------------------------------------------------------------
 {
+	glDepthFunc(GL_ALWAYS);
+
   	glLineWidth( wide );
 
     glBegin(GL_LINE_LOOP);
@@ -440,6 +453,7 @@ void SysGra::Box( vect2 v0, vect2 v1,rgb col, float wide )
     glVertex2f(v0.x, v0.y);
     glEnd();
 
+	glDepthFunc(GL_GEQUAL);		// depth <= 書き込み値 
 }
 //------------------------------------------------------------------------------
 void SysGra::Box( vect3 v0, vect3 v1,rgb col, float wide )
@@ -473,6 +487,8 @@ void SysGra::Fill( vect2 v0, vect2 v1,rgb col )
 void SysGra::Line( vect2 v0, vect2 v1,rgb col, float wide )
 //------------------------------------------------------------------------------
 {
+	glDepthFunc(GL_ALWAYS);
+
   	glLineWidth( wide );
   
     glBegin(GL_LINES);
@@ -480,6 +496,8 @@ void SysGra::Line( vect2 v0, vect2 v1,rgb col, float wide )
     glVertex2f(v0.x, v0.y);
     glVertex2f(v1.x, v1.y);
     glEnd();
+
+	glDepthFunc(GL_GEQUAL);		// depth <= 書き込み値 
 }
 //------------------------------------------------------------------------------
 void SysGra::Line( vect3 v0, vect3 v1,rgb col, float wide )
@@ -497,12 +515,16 @@ void SysGra::Line( vect3 v0, vect3 v1,rgb col, float wide )
 void SysGra::Tri( vect2 v0, vect2 v1, vect2 v2, rgb col )
 //------------------------------------------------------------------------------
 {
+	glDepthFunc(GL_ALWAYS);
+
     glBegin( GL_TRIANGLES );
     glColor3f( col.r, col.g, col.b );
     glVertex2f(v0.x, v0.y);
     glVertex2f(v1.x, v1.y);
     glVertex2f(v2.x, v2.y);
     glEnd();
+
+	glDepthFunc(GL_GEQUAL);		// depth <= 書き込み値 
 }
 //------------------------------------------------------------------------------
 void SysGra::Tri( vect3 v0, vect3 v1, vect3 v2, rgb col )
@@ -518,31 +540,28 @@ void SysGra::Tri( vect3 v0, vect3 v1, vect3 v2, rgb col )
     glEnd();
 }
 //------------------------------------------------------------------------------
-void SysGra::Print( vect2 v0, string str )
+void SysGra::Print( vect2 v0, string str, rgb col  )
 //------------------------------------------------------------------------------
 {
 	glDepthFunc(GL_ALWAYS);
 
 	glBegin(GL_POINTS);
-	glColor3f( 1,1,1 );
-	//glColor3f( 0,0,0 );
+	glColor3f( col.r, col.g, col.b );
 	glEnd();
 
 	glRasterPos2f(v0.x, v0.y);
 	wgl_font.DrawString( str );
 
-//	wgl_font.DrawStringW(10,120,L"こんにちは OpenGLの世界!!");
-
 	glDepthFunc(GL_GEQUAL);		// depth <= 書き込み値 
 }
 
 //------------------------------------------------------------------------------
-void SysGra::Print( float x, float y, string str )
+void SysGra::Print( float x, float y, string str, rgb col  )
 //------------------------------------------------------------------------------
 {
 	vect2 v = vect2(x*16,(y+1)*16)/vect2(GetWidth()/2,-GetHeight()/2)+vect2(-1,1);
 
-	Print( v, str );
+	Print( v, str, col );
 }
 
 //------------------------------------------------------------------------------

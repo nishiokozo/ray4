@@ -43,6 +43,7 @@
 #include "lab16.h"
 #include "lab17.h"
 #include "lab18.h"
+#include "lab19.h"
 
 //------------------------------------------------------------------------------
 void LabObj::M::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str )
@@ -135,6 +136,7 @@ cout << m.idxLab << ">" << n << endl;
 		case 16:	pLab = new Lab16;	break;
 		case 17:	pLab = new Lab17;	break;
 		case 18:	pLab = new Lab18;	break;
+		case 19:	pLab = new Lab19;	break;
 		default: break;
 	}
 }
@@ -164,6 +166,7 @@ void Lab::SetNextIdx( int val, Cp& cp )
 		9,		//	ボール同士の衝突と落下
 		17,		//	ボールと板とのスピン
 		18,		//	ボールのスピン
+		19,		//	モーター・トルク実験
 	};	
 	static const int size = static_cast<signed>(sizeof(tbl)/sizeof(int));
 

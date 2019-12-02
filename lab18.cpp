@@ -208,12 +208,11 @@ void Lab18::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 
 	// 平面表示
-	{
-		pers.prim.DrawPlate( gra, pers, plate_p, plate_n, 28, rgb(0.5,1,1)*0.55 );
-	}
+	pers.prim.DrawPlate( gra, pers, plate_p, plate_n, 28, rgb(0.5,1,1)*0.55 );
 	
-	// 表示
+	// ボール表示
 	pers.prim.DrawSphere( gra, pers, b1.radius, b1.pos, b1.mat );
+
 	// 接点表示
 	if ( b1.flgOn )	pers.pen.pset3d( gra, pers, b1.Q , col6, 9);
 
