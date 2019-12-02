@@ -154,11 +154,6 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	// 衝突計算
 	if ( flg )
 	{	
-		// スピン
-		vect3	vr	= (q0-p0);
-		float	r	= vr.abs();
-		vect3	vf	= cross( ball.vaxis, vr);
-
 		// 衝突まで
 		float t1 = t;													// 衝突までの時間(s)
 		vect3 d1 = func_accelerationGetDistance_TVv( vg, t1, v0 );		// 衝突までの移動距離(m)
@@ -184,7 +179,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		pn = p0 + d3;
 		vn = v2 ;
 
-		// 回転量を移動量計算で求める
+		// 移動量から回転量を求める
 		{
 			vect3	axis = cross(d3,plate_n);
 			vect3	mov = d3 - dot(d3,plate_n)*plate_n;

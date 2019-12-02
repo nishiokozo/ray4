@@ -51,7 +51,7 @@ Lab19::Lab19() : pImpl( new Lab19::Impl )
 
 static struct
 {
-	vect3	pos	= vect3(0,0,0);
+	vect3	pos	= vect3(0,-2,0);
 	vect3	nor	= vect3(0,1,0)*PLATE_MAT;
 } plate;
 
@@ -134,13 +134,15 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	if ( dot(ball.pos-plate.pos,plate.nor)-ball.radius < 0) 
 	{
 		ball.pos += -(dot(ball.pos-plate.pos,plate.nor)-ball.radius)*plate.nor;
-		ball.vel = vect3(0,0,0);
-
+	#if 1
+		// 速度を角速度に変換
+		ball.vel = 	ball.vel - dot( ball.vel , plate.nor ) * plate.nor;
+		ball.vaxis = cross( ball.vel, plate.nor );
+		ball.wspin = ball.vel.abs();
+	#else
 		// 角速度を速度に変換
 		ball.vel = cross( plate.nor, ball.vaxis ) * ball.wspin;
-	}
-	else
-	{
+	#endif
 	}
 
 	// モデルの回転
@@ -148,7 +150,7 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	
 
 	// 床表示
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), PLATE_MAT, 16, 16, 1, rgb(0.2,0.2,0.2) );
+	pers.grid.DrawGrid3d( gra, pers, plate.pos, PLATE_MAT, 16, 16, 1, rgb(0.2,0.2,0.2) );
 
 	// ボール表示
 	pers.prim.DrawSphere( gra, pers, ball.radius, ball.pos, ball.mat );
