@@ -76,6 +76,16 @@ struct Ball : Obj
 void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
+	int m_y = 0;
+	
+	auto funcShowBar = []( SysGra& gra, int y, float val, string str, rgb col )
+	{
+		vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42*y);
+		gra.Line( v0, v0+ vect2( val, 0 ), col, 2 );
+		gra.Print( v0+gra.Dot(0,-6), str + to_string(val), col );
+	};
+
+
 	// クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
 	gra.Print(1,(float)text_y++,"19 : Motor Spin" ); 
@@ -134,7 +144,29 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	if ( dot(ball.pos-plate.pos,plate.nor)-ball.radius < 0) 
 	{
 		ball.pos += -(dot(ball.pos-plate.pos,plate.nor)-ball.radius)*plate.nor;
-	#if 1
+	#if 0
+
+		// 設置速度を求める
+		vect3 v0 = ball.vel - dot( ball.vel , plate.nor ) * plate.nor;
+
+		// 角速度を速度に変換
+		vect3 v1 = cross( plate.nor, ball.vaxis ) * ball.wspin;
+
+
+		vect3 v2 = v0 + v1;
+
+		funcShowBar( gra, m_y++, v0.abs(), "v0 ", col1 );
+		funcShowBar( gra, m_y++, v1.abs(), "v1 ", col1 );
+		funcShowBar( gra, m_y++, v2.abs(), "v2 ", col1 );
+
+
+		ball.vaxis = cross( v2, plate.nor );
+		ball.wspin = v2.abs();
+
+		ball.vel = v1;
+
+	#else
+	#if 0
 		// 速度を角速度に変換
 		ball.vel = 	ball.vel - dot( ball.vel , plate.nor ) * plate.nor;
 		ball.vaxis = cross( ball.vel, plate.nor );
@@ -143,10 +175,11 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		// 角速度を速度に変換
 		ball.vel = cross( plate.nor, ball.vaxis ) * ball.wspin;
 	#endif
+	#endif
 	}
 
 	// モデルの回転
-	ball.mat = mrotateByAxis( ball.vaxis, ball.wspin ) * ball.mat;
+	ball.mat = mrotateByAxis( ball.vaxis , ball.wspin ) * ball.mat;
 	
 
 	// 床表示
@@ -157,21 +190,27 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 	// メーター表示
 	{
-		int y = 0;
+		funcShowBar( gra, m_y++, motor.power, "power ", col7 );
+
+		funcShowBar( gra, m_y++, ball.wspin, "spin  ", col7 );
+
+		funcShowBar( gra, m_y++, ball.vel.abs(), "vel ", col7 );
+/*
 		{
-			vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42*y++);
+			vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42*m_y++);
 			gra.Line( v0, v0+ vect2( motor.power, 0 ), col7, 2 );
 			gra.Print( v0+gra.Dot(0,-6), "power "+to_string(motor.power), col7 );
 		}
 		{
-			vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42*y++);
+			vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42*m_y++);
 			gra.Line( v0, v0+ vect2( ball.wspin, 0 ), col7, 2 );
 			gra.Print( v0+gra.Dot(0,-6), "spin  "+to_string(ball.wspin), col7 );
 		}
 		{
-			vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42*y++);
+			vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42*m_y++);
 			gra.Line( v0, v0+ vect2( ball.vel.abs(), 0 ), col7, 2 );
 			gra.Print( v0+gra.Dot(0,-6), "vel  "+to_string(ball.vel.abs()), col7 );
 		}
+*/
 	}
 }
