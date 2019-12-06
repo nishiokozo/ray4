@@ -323,6 +323,22 @@ tuple<bool,float,vect3,vect3,float,float>func_intersect_SegLine_SegLine( vect3 p
 }
 
 //------------------------------------------------------------------------------
+tuple<bool,vect3,float> func_intersect_Dualplate_Line( vect3 plate_P, vect3 plate_N, vect3 line_P, vect3 line_I )
+//------------------------------------------------------------------------------
+{
+	// 平面と直線の距離
+	float	f = dot(plate_N, line_P - plate_P);
+//	if ( f > 0 )	// 両面の表面のみ
+	{
+		float	t = -f/dot( plate_N, line_I );
+
+		vect3	Q = line_I * t + line_P;
+		return {true,Q,t};
+	}
+	return {false,vect3(0,0,0),0};
+};
+
+//------------------------------------------------------------------------------
 tuple<bool,vect3,float> func_intersect_Plate_Line( vect3 plate_P, vect3 plate_N, vect3 line_P, vect3 line_I )
 //------------------------------------------------------------------------------
 {

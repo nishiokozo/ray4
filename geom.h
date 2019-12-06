@@ -415,6 +415,19 @@ public:
 
 	}
 
+	vect3 GetVecX()
+	{
+		return vect3( m[0][0], m[0][1], m[0][2] );
+	}
+	vect3 GetVecY()
+	{
+		return vect3( m[1][0], m[1][1], m[1][2] );
+	}
+	vect3 GetVecZ()
+	{
+		return vect3( m[2][0], m[2][1], m[2][2] );
+	}
+
 	// 逆行列
 	mat33 invers();
 

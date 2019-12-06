@@ -110,6 +110,9 @@ vect3 Pers::calcScreenToWorld2( vect2 q )	// 透視変換後の画面座標か�
 //--------------------------------------------------------------------------
 {
 	return calcScreenToWorld3( vect3(q,0) );
+//	return calcScreenToWorld3( vect3(q,getW(0)) );
+//	return calcScreenToWorld3( vect3(q,1.0/getW(0)) );
+//	return calcScreenToWorld3( vect3(q,sz) );
 }
 
 //--------------------------------------------------------------------------
@@ -255,6 +258,7 @@ void Pers::Cam::Move( vect3 v )
 	mat33 mrot = mat.GetRotate();
 	v = v* mrot;
 
+v = v * vect3(1.5,1,1);
 	at += v;
 	pos += v;
 }
@@ -959,9 +963,28 @@ void Pers::Axis::DrawAxis( SysGra& gra, Pers& pers, vect2 mpos )
 // Grid
 ////////////////
 //------------------------------------------------------------------------------
-void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos, mat33 m, int NUM_U, int NUM_V, float dt, rgb col  )
+void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int NUM_U, int NUM_V, float dt, rgb col  )
 //----------------------------------------------------------------------------
-{	// ミニグリッド
+{
+	vect3 pos = pos0;
+
+	// 注視点中心に展開
+	{
+		vect3 tar = pers.cam.at;
+		vect3 nor = m.GetVecY();
+
+		auto[b0,q0,s0] = func_intersect_Dualplate_Line( pos, nor, tar, nor );
+
+		vect3 q1 = (q0-pos) * m.invers();
+
+		q1.x = int( q1.x );
+		q1.y = int( q1.y );
+		q1.z = int( q1.z );
+		pos += q1;	
+	}
+
+
+	// ミニグリッド
 	vect3 vt = vect3(0,0,0);
 	float du = (float)NUM_U*dt;
 	float dv = (float)NUM_V*dt;
@@ -1000,7 +1023,7 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos, mat33 m, int NU
 		vect3 a;
 		for ( float th = 0 ; th <= deg2rad(360) ; th+=deg2rad(20) )
 		{
-			vect3 b = vect3( r*cos(th), 0, r*sin(th) ) + pos;
+			vect3 b = vect3( r*cos(th), 0, r*sin(th) ) + pos0;
 			if ( th > 0 ) 
 			{
 				vect3 v0 = a * m;
@@ -1017,18 +1040,19 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos, mat33 m, int NU
 		{
 			if ( abs(f)<=0.11 ) continue;
 			{
-				vect3 v0 = vect3( f, 0, -0.025 ) * m;
-				vect3 v1 = vect3( f, 0,  0.025 ) * m;
+				vect3 v0 = ( vect3( f, 0, -0.025 ) + pos0 ) * m;
+				vect3 v1 = ( vect3( f, 0,  0.025 ) + pos0 ) * m;
 				pers.pen.line3d( gra, pers, v0,v1, col );
 			}
 			{
-				vect3 v0 = vect3( -0.025, 0, f ) * m;
-				vect3 v1 = vect3(  0.025, 0, f ) * m;
+				vect3 v0 = ( vect3( -0.025, 0, f ) + pos0 ) * m;
+				vect3 v1 = ( vect3(  0.025, 0, f ) + pos0 ) * m;
 				pers.pen.line3d( gra, pers, v0,v1, col );
 			}
 		}
 	}
 }
+
 //------------------------------------------------------------------------------
 void Pers::Grid::DrawGrid( SysGra& gra, Pers& pers )
 //----------------------------------------------------------------------------

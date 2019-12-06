@@ -108,6 +108,8 @@ void Lab3::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 			vect3 P = pers.calcScreenToWorld3( vect3(mouse.pos,0) );
 			vect3 I = pers.calcRayvect( P );
 			m.tbl_pObj.emplace_back( new Planet( P, I/100.0 ) );
+			cp.tbltbl_pObj.clear();
+			cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
 		}
 
 	}

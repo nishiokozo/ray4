@@ -65,9 +65,9 @@ struct Ball : Obj
 {
 	vect3	vel = vect3(0,0,0);
 	float 	radius = 1;
-	vect3	vaxis = vect3(0,0,1);
+	vect3	axis = vect3(0,0,1);
 	mat33	mat = midentity();	
-	float	wspin;	//	角速度	
+	float	spin;	//	角速度	
 
 	Ball() : Obj(vect3(0,0,0)){}
 };
@@ -114,23 +114,23 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 		ball.radius	= 1;
 		ball.pos	= vect3(-4,1,0);
-		ball.vaxis	= vect3(0,0,1);
+		ball.axis	= vect3(0,0,1);
 		ball.mat	= midentity();	
 		ball.vel	= vect3(0,0,0);
-		ball.wspin	= 0;
+		ball.spin	= 0;
 		motor.power = 0;
 	}
 
 	// 入力
 	if ( keys.R.hi )	m.bInitParam = false;
 	if ( mouse.F.on )	motor.power += 0.01;
-	if ( mouse.B.hi )	ball.vel += vect3(0.1,0,0);
+	if ( mouse.B.on )	ball.vel += vect3(0.01,0,0);
 
 
 	// 伝達
-	if ( ball.wspin < motor.power ) 
+	if ( ball.spin < motor.power ) 
 	{
-		ball.wspin = ( ball.wspin + motor.power ) /2;
+		ball.spin = ( ball.spin + motor.power ) /2;
 	}
 	motor.power *= 0.95; // 減衰ロス
 
@@ -143,74 +143,34 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	// 接地
 	if ( dot(ball.pos-plate.pos,plate.nor)-ball.radius < 0) 
 	{
-		ball.pos += -(dot(ball.pos-plate.pos,plate.nor)-ball.radius)*plate.nor;
+		ball.pos += -( dot( ball.pos - plate.pos , plate.nor ) - ball.radius ) * plate.nor;
 	#if 0
-
-		// 設置速度を求める
-		vect3 v0 = ball.vel - dot( ball.vel , plate.nor ) * plate.nor;
-
-		// 角速度を速度に変換
-		vect3 v1 = cross( plate.nor, ball.vaxis ) * ball.wspin;
-
-
-		vect3 v2 = v0 + v1;
-
-		funcShowBar( gra, m_y++, v0.abs(), "v0 ", col1 );
-		funcShowBar( gra, m_y++, v1.abs(), "v1 ", col1 );
-		funcShowBar( gra, m_y++, v2.abs(), "v2 ", col1 );
-
-
-		ball.vaxis = cross( v2, plate.nor );
-		ball.wspin = v2.abs();
-
-		ball.vel = v1;
 
 	#else
-	#if 0
+	#if 1
 		// 速度を角速度に変換
 		ball.vel = 	ball.vel - dot( ball.vel , plate.nor ) * plate.nor;
-		ball.vaxis = cross( ball.vel, plate.nor );
-		ball.wspin = ball.vel.abs();
+		ball.axis = cross( ball.vel, plate.nor );
+		ball.spin = ball.vel.abs();
 	#else
 		// 角速度を速度に変換
-		ball.vel = cross( plate.nor, ball.vaxis ) * ball.wspin;
+		ball.vel = cross( plate.nor, ball.axis ) * ball.spin;
 	#endif
 	#endif
 	}
 
 	// モデルの回転
-	ball.mat = mrotateByAxis( ball.vaxis , ball.wspin ) * ball.mat;
+	ball.mat = mrotateByAxis( ball.axis , ball.spin ) * ball.mat;
 	
 
 	// 床表示
 	pers.grid.DrawGrid3d( gra, pers, plate.pos, PLATE_MAT, 16, 16, 1, rgb(0.2,0.2,0.2) );
-
+//	pers.grid.DrawEternalGlid( gra, pers, plate.pos, PLATE_MAT, 16,16, rgb(0.2,0.2,0.2) );
 	// ボール表示
 	pers.prim.DrawSphere( gra, pers, ball.radius, ball.pos, ball.mat );
 
 	// メーター表示
-	{
-		funcShowBar( gra, m_y++, motor.power, "power ", col7 );
-
-		funcShowBar( gra, m_y++, ball.wspin, "spin  ", col7 );
-
-		funcShowBar( gra, m_y++, ball.vel.abs(), "vel ", col7 );
-/*
-		{
-			vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42*m_y++);
-			gra.Line( v0, v0+ vect2( motor.power, 0 ), col7, 2 );
-			gra.Print( v0+gra.Dot(0,-6), "power "+to_string(motor.power), col7 );
-		}
-		{
-			vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42*m_y++);
-			gra.Line( v0, v0+ vect2( ball.wspin, 0 ), col7, 2 );
-			gra.Print( v0+gra.Dot(0,-6), "spin  "+to_string(ball.wspin), col7 );
-		}
-		{
-			vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42*m_y++);
-			gra.Line( v0, v0+ vect2( ball.vel.abs(), 0 ), col7, 2 );
-			gra.Print( v0+gra.Dot(0,-6), "vel  "+to_string(ball.vel.abs()), col7 );
-		}
-*/
-	}
+	funcShowBar( gra, m_y++, motor.power, 		"power ", col7 );
+	funcShowBar( gra, m_y++, ball.spin, 		"spin  ", col7 );
+	funcShowBar( gra, m_y++, ball.vel.abs(),	"vel   ", col7 );
 }
