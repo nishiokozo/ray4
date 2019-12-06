@@ -67,7 +67,7 @@ struct Ball : Obj
 	float 	radius = 1;
 	vect3	axis = vect3(0,0,1);
 	mat33	mat = midentity();	
-	float	spin;	//	角速度	
+	float	omega;	//	角速度	
 
 	Ball() : Obj(vect3(0,0,0)){}
 };
@@ -88,7 +88,7 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 	// クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-	gra.Print(1,(float)text_y++,"19 : Motor Spin" ); 
+	gra.Print(1,(float)text_y++,"19 : Motor omega" ); 
 
 	// 初期化：ALL
 	if ( !m.bInitAll )
@@ -117,7 +117,7 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		ball.axis	= vect3(0,0,1);
 		ball.mat	= midentity();	
 		ball.vel	= vect3(0,0,0);
-		ball.spin	= 0;
+		ball.omega	= 0;
 		motor.power = 0;
 	}
 
@@ -128,9 +128,9 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 
 	// 伝達
-	if ( ball.spin < motor.power ) 
+	if ( ball.omega < motor.power ) 
 	{
-		ball.spin = ( ball.spin + motor.power ) /2;
+		ball.omega = ( ball.omega + motor.power ) /2;
 	}
 	motor.power *= 0.95; // 減衰ロス
 
@@ -143,34 +143,38 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	// 接地
 	if ( dot(ball.pos-plate.pos,plate.nor)-ball.radius < 0) 
 	{
+		// 斜面に沿って球の位置と速度を補正
 		ball.pos += -( dot( ball.pos - plate.pos , plate.nor ) - ball.radius ) * plate.nor;
-	#if 0
+		ball.vel = 	ball.vel - dot( ball.vel , plate.nor ) * plate.nor;
+
+	#if 1
+		// 斜面の速度を球の角速度に変換
+		ball.axis = cross( ball.vel, plate.nor );
+		ball.omega = ball.vel.abs();
 
 	#else
 	#if 1
-		// 速度を角速度に変換
-		ball.vel = 	ball.vel - dot( ball.vel , plate.nor ) * plate.nor;
+		// 斜面の速度を球の角速度に変換
 		ball.axis = cross( ball.vel, plate.nor );
-		ball.spin = ball.vel.abs();
+		ball.omega = ball.vel.abs();
 	#else
 		// 角速度を速度に変換
-		ball.vel = cross( plate.nor, ball.axis ) * ball.spin;
+		ball.vel = cross( plate.nor, ball.axis ) * ball.omega;
 	#endif
 	#endif
 	}
 
 	// モデルの回転
-	ball.mat = mrotateByAxis( ball.axis , ball.spin ) * ball.mat;
-	
+	ball.mat = mrotateByAxis( ball.axis , ball.omega ) * ball.mat;
 
 	// 床表示
 	pers.grid.DrawGrid3d( gra, pers, plate.pos, PLATE_MAT, 16, 16, 1, rgb(0.2,0.2,0.2) );
-//	pers.grid.DrawEternalGlid( gra, pers, plate.pos, PLATE_MAT, 16,16, rgb(0.2,0.2,0.2) );
+
 	// ボール表示
 	pers.prim.DrawSphere( gra, pers, ball.radius, ball.pos, ball.mat );
 
 	// メーター表示
 	funcShowBar( gra, m_y++, motor.power, 		"power ", col7 );
-	funcShowBar( gra, m_y++, ball.spin, 		"spin  ", col7 );
+	funcShowBar( gra, m_y++, ball.omega, 		"omega ", col7 );
 	funcShowBar( gra, m_y++, ball.vel.abs(),	"vel   ", col7 );
 }
