@@ -971,7 +971,7 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int N
 	// 注視点中心に展開
 	{
 		vect3 tar = pers.cam.at;
-		vect3 nor = m.GetVecY();
+		vect3 nor = m.GetVectY();
 
 		auto[b0,q0,s0] = func_intersect_Dualplate_Line( pos, nor, tar, nor );
 

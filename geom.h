@@ -415,15 +415,15 @@ public:
 
 	}
 
-	vect3 GetVecX()
+	vect3 GetVectX()
 	{
 		return vect3( m[0][0], m[0][1], m[0][2] );
 	}
-	vect3 GetVecY()
+	vect3 GetVectY()
 	{
 		return vect3( m[1][0], m[1][1], m[1][2] );
 	}
-	vect3 GetVecZ()
+	vect3 GetVectZ()
 	{
 		return vect3( m[2][0], m[2][1], m[2][2] );
 	}
@@ -608,19 +608,19 @@ public:
 		m[3][2] = z;
 	}
 
-	vect3 GetVecX()
+	vect3 GetVectX()
 	{
 		return vect3( m[0][0], m[0][1], m[0][2] );
 	}
-	vect3 GetVecY()
+	vect3 GetVectY()
 	{
 		return vect3( m[1][0], m[1][1], m[1][2] );
 	}
-	vect3 GetVecZ()
+	vect3 GetVectZ()
 	{
 		return vect3( m[2][0], m[2][1], m[2][2] );
 	}
-	vect3 GetVecT()
+	vect3 GetVectT()
 	{
 		return vect3( m[3][0], m[3][1], m[3][2] );
 	}
