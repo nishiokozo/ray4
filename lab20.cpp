@@ -37,6 +37,14 @@ Lab20::Lab20() : pImpl( new Lab20::Impl )
 
 }
 
+#define	PLATE_MAT	mrotz(rad(15))
+
+static struct
+{
+	vect3	pos	= vect3(0,-0.3,0);
+	vect3	nor	= vect3(0,1,0)*PLATE_MAT;
+} plate;
+
 struct Ball20 : Obj
 {
 	vect3	vel;
@@ -67,8 +75,8 @@ void Lab20::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 		// 点
 		m.tbl_pObj.emplace_back( new Ball20 );	//	球
-		m.tbl_pObj.emplace_back( new Obj(vect3( 2,  0.2, 0)) );
-		m.tbl_pObj.emplace_back( new Obj(vect3(-2, -0.2, 0)) );
+		m.tbl_pObj.emplace_back( new Obj(vect3( 4,  0.2, 0)) );
+		m.tbl_pObj.emplace_back( new Obj(vect3(-4, -0.2, 0)) );
 
 		// 線
 		m.tbl_pEdge.emplace_back( new Edge(1,2, rgb(1,1,1),1) );
@@ -85,8 +93,8 @@ void Lab20::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	Ball20&	ball	= *dynamic_cast<Ball20*>(m.tbl_pObj[0]);
 	vect3	p0		= m.tbl_pObj[1]->pos;
 	vect3	p1		= m.tbl_pObj[2]->pos;
-	vect3	plate_pos = p0;
-	vect3	plate_nor = cross( p1-p0, vect3(0,0,1) ).normalize();
+	plate.pos = p0;
+	plate.nor = cross( p1-p0, vect3(0,0,1) ).normalize();
 
 
 
@@ -108,21 +116,24 @@ void Lab20::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	if ( mouse.B.on )	ball.vel += vect3(0.01,0,0);
 
 
-	// 回転
-	ball.mat = ball.mat *  mrotz( ball.spin );
-
 	// 落下
 	ball.vel += vect3(0,-9.8*delta*delta,0);
 
 	// 移動
 	ball.pos += ball.vel;
 
-	if ( dot( ball.pos-plate_pos, plate_nor ) < ball.radius )
+	if ( dot( ball.pos-plate.pos, plate.nor ) < ball.radius )
 	{
 		ball.pos -= ball.vel;
+		ball.vel = 	func_reflect( ball.vel, plate.nor, 0.0 );
+		ball.pos += ball.vel;
 
-		ball.vel = func_reflect( ball.vel, plate_nor, 0.2 );
+		ball.spin = dot( ball.vel, p1-p0 );
+
 	}
+
+	ball.mat = ball.mat *  mrotz( ball.spin/pi/2 );
+
 
 	// 描画
 	pers.prim.DrawCircle( gra, pers, ball.pos, ball.mat, 1.0, rgb(1,1,1) );
