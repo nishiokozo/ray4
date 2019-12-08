@@ -167,7 +167,6 @@ struct Pers
 		void DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos, mat33 m, int NUM_U, int NUM_V, float dt, rgb col );
 		void DrawGrid( SysGra& gra, Pers& pers );
 		void DrawEternalGlid( SysGra& gra, Pers& pers, vect3 pos, mat33 m, float NUM_U, float NUM_V, rgb col );
-
 	} grid;
 
 
@@ -177,9 +176,10 @@ struct Pers
 		void DrawMat33(  SysGra& gra, Pers& pers, vect3 v0, mat33 m );
 		void DrawBox( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAxis = true, bool bTri = true );
 		void DrawDrum( SysGra& gra, Pers& pers,  vect3 pos, mat33 m  );
-		void DrawSphere( SysGra& gra, Pers& pers, float radius, vect3 pos, mat33 m, rgb col=rgb(1,1,1)   );
 		void DrawTire( SysGra& gra, Pers& pers, vect3 pos, float head, float bank, float radius );
 		void DrawSquare( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAxis = true, bool bTri = true );
+		void DrawCircle( SysGra& gra, Pers& pers, vect3 pos, mat33 m, float radius, rgb col=rgb(1,1,1) );
+		void DrawSphere( SysGra& gra, Pers& pers, vect3 pos, mat33 m, float radius, rgb col=rgb(1,1,1) );
 	} prim;
 
 };

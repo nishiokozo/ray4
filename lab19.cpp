@@ -61,14 +61,14 @@ static struct
 	float	power = 0.0;
 } motor;
 
-struct Ball : Obj
+struct Ball19 : Obj
 {
 	vect3	vel;
 	float 	radius;
 	vect3	moment;
 	mat33	mat = midentity();
 
-	Ball() : Obj(vect3(0,0,0)){}
+	Ball19() : Obj(vect3(0,0,0)){}
 };
 
 //------------------------------------------------------------------------------
@@ -99,12 +99,12 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		pers.cam.at = vect3( 	0.0,	1.0,   0.0 );
 
 		// 点
-		m.tbl_pObj.emplace_back( new Ball );	// ボール
+		m.tbl_pObj.emplace_back( new Ball19 );	// ボール
 
 	}
 
 	// 設定
-	Ball&	ball	= *dynamic_cast<Ball*>(m.tbl_pObj[0]);
+	Ball19&	ball	= *dynamic_cast<Ball19*>(m.tbl_pObj[0]);
 
 	// 初期化：パラメータ
 	if ( !m.bInitParam )
@@ -181,7 +181,7 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	pers.grid.DrawGrid3d( gra, pers, plate.pos, PLATE_MAT, 16, 16, 1, rgb(0.2,0.2,0.2) );
 
 	// ボール表示
-	pers.prim.DrawSphere( gra, pers, ball.radius, ball.pos, ball.mat );
+	pers.prim.DrawSphere( gra, pers, ball.pos, ball.mat, ball.radius );
 
 	// メーター表示
 	funcShowBar( gra, m_y++, motor.power, 		"power  ", col7 );

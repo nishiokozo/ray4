@@ -232,7 +232,7 @@ void Lab17::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	
 	
 	// 表示
-	pers.prim.DrawSphere( gra, pers, b1.radius, b1.pos, b1.mat );
+	pers.prim.DrawSphere( gra, pers, b1.pos, b1.mat, b1.radius );
 	// 接点表示
 	if ( b1.flgOn )	pers.pen.pset3d( gra, pers, b1.Q , col6, 9);
 

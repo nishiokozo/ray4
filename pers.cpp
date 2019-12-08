@@ -28,12 +28,12 @@ void Pers::Update( vect2 screensize )
 #if 0
 	//投影面サイズ基準
 	fy = 1;									// 投影面の高さ/2
-	sz = fy/tan(deg2rad(fovy)/2);				// 投影面までの距離
+	sz = fy/tan(rad(fovy)/2);				// 投影面までの距離
 #else
 	//投影面までの距離基準	こちらの方がニアクリップがしやすく扱いやすい。
 	sz = 1.0;								// 投影面までの距離
 	sz = 1.0/8.0;								// 投影面までの距離
-	fy = sz*tan(deg2rad(fovy)/2);				// 投影面の高さ/2
+	fy = sz*tan(rad(fovy)/2);				// 投影面の高さ/2
 #endif
 	aspect	= screensize.x/screensize.y;	// 描画画面のアスペクト比
 
@@ -228,7 +228,7 @@ void Pers::Cam::Rotation( vect3 mov )
 	l=min(l,8);
 
 	float eyeup = dot( (pos-at).normalize(), up ); // 視線ベクトルとupベクトルの織り成すcos th
-	if ( eyeup > sin(deg2rad(80)) )
+	if ( eyeup > sin(rad(80)) )
 	{
 		if ( mov.y > 0 ) mov.y = 0;
 	}
@@ -397,10 +397,10 @@ void Pers::Pen::line2d( SysGra& gra, Pers& pers, vect2 p0, vect2 p1, rgb col, fl
 // Prim
 /////////////////////
 //------------------------------------------------------------------------------
-void Pers::Prim::DrawPlate( SysGra& gra, Pers& pers, vect3 pos, vect3 n1, int n, rgb col )
+void Pers::Prim::DrawPlate( SysGra& gra, Pers& pers, vect3 pos, vect3 normal, int n, rgb col )
 //------------------------------------------------------------------------------
 {
-	mat33 m = mslerp( n1, 1.0 );
+	mat33 m = mslerp( normal, 1.0 );
 
 	//	仮想平面表示
 	float r = 0.25;
@@ -411,7 +411,7 @@ void Pers::Prim::DrawPlate( SysGra& gra, Pers& pers, vect3 pos, vect3 n1, int n,
 		else r = (float)(i)*0.5+i*i*0.25;
 	
 		vect3 a;
-		for ( float th = 0 ; th <= deg2rad(360) ; th+=deg2rad(10) )
+		for ( float th = 0 ; th <= rad(360) ; th+=rad(10) )
 		{
 			vect3 b = vect3( r*cos(th), r*sin(th), 0 ) ;
 			if ( th > 0 ) 
@@ -424,9 +424,61 @@ void Pers::Prim::DrawPlate( SysGra& gra, Pers& pers, vect3 pos, vect3 n1, int n,
 		}
 	}
 
-		pers.pen.line3d( gra, pers, pos, pos+ n1*0.2, col, 3 );
-		pers.pen.pset3d( gra, pers, pos+ n1*0.2, col, 5 );
+		pers.pen.line3d( gra, pers, pos, pos+ normal*0.2, col, 3 );
+		pers.pen.pset3d( gra, pers, pos+ normal*0.2, col, 5 );
 
+}
+
+/*
+//------------------------------------------------------------------------------
+void Pers::Prim::DrawCircle( SysGra& gra, Pers& pers, vect3 pos, vect3 normal, float radius, rgb col )
+//------------------------------------------------------------------------------
+{
+	mat33 m = mslerp( normal, 1.0 );	// 法線方向を向いたマトリクスを作成
+
+	vect3 a;
+	for ( float th = 0 ; th <= rad(360) ; th+=rad(10) )
+	{
+		vect3 b = vect3( radius*cos(th), radius*sin(th), 0 ) ;
+		if ( th > 0 ) 
+		{
+			vect3 v0 = a * m;
+			vect3 v1 = b * m;
+			pers.pen.line3d( gra, pers, v0+ pos, v1+ pos, col );
+		}
+		a = b;
+	}
+}
+*/
+
+//------------------------------------------------------------------------------
+void Pers::Prim::DrawCircle( SysGra& gra, Pers& pers, vect3 pos, mat33 m, float radius, rgb col )
+//------------------------------------------------------------------------------
+{
+//	mat33 m = mslerp( normal, 1.0 );	// 法線方向を向いたマトリクスを作成
+
+	vect3 a;
+	for ( float th = 0 ; th <= rad(360) ; th+=rad(10) )
+	{
+		vect3 b = vect3( radius*cos(th), radius*sin(th), 0 ) ;
+		if ( th > 0 ) 
+		{
+			vect3 v0 = a * m;
+			vect3 v1 = b * m;
+			pers.pen.line3d( gra, pers, v0+ pos, v1+ pos, col );
+		}
+		a = b;
+	}
+	{
+		vect3	v0 = vect3(-1,0,0) * m + pos;
+		vect3	v1 = vect3( 1,0,0) * m + pos;
+		pers.pen.line3d( gra, pers, v0, v1, col );
+	}
+	{
+		vect3	v0 = vect3( 0,-1,0) * m + pos;
+		vect3	v1 = vect3( 0, 1,0) * m + pos;
+		pers.pen.line3d( gra, pers, v0, v1, col );
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -655,8 +707,8 @@ void Pers::Prim::DrawDrum( SysGra& gra, Pers& pers,  vect3 pos, mat33 m  )
 			float w = 0.05;
 			for ( int i = 0 ; i < 360 ; i+= 30 )
 			{
-				float z = r*cos(deg2rad((float)i));
-				float y = r*sin(deg2rad((float)i));
+				float z = r*cos(rad((float)i));
+				float y = r*sin(rad((float)i));
 				vert.emplace_back(-w,y,z);
 				vert.emplace_back( w,y,z);
 				vert.emplace_back( w,y*0.5,z*0.5);
@@ -744,7 +796,7 @@ static	tuple<vect3,vect3,vect3> func( float th, float r, mat33& m, vect3& pos )
 		return {vx1, vy1, vz1};
 	};
 //------------------------------------------------------------------------------
-void Pers::Prim::DrawSphere( SysGra& gra, Pers& pers, float r, vect3 pos, mat33 m, rgb col  )
+void Pers::Prim::DrawSphere( SysGra& gra, Pers& pers, vect3 pos, mat33 m, float r, rgb col  )
 //------------------------------------------------------------------------------
 {
 //	float step = 2*pi/4/8;//48.0;
@@ -802,7 +854,7 @@ void Pers::Prim::DrawTire( SysGra& gra, Pers& pers, vect3 pos, float head, float
 	{
 		bInitParam = true;
 		float r = 1.0;
-		for ( float t = 0 ; t < 2*pi ; t+=deg2rad(5) )
+		for ( float t = 0 ; t < 2*pi ; t+=rad(5) )
 		{
 			float x = 0;
 			float y = r * sin(t);
@@ -1021,7 +1073,7 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int N
 	{//原点円表示
 		float r = 0.1;
 		vect3 a;
-		for ( float th = 0 ; th <= deg2rad(360) ; th+=deg2rad(20) )
+		for ( float th = 0 ; th <= rad(360) ; th+=rad(20) )
 		{
 			vect3 b = vect3( r*cos(th), 0, r*sin(th) ) + pos0;
 			if ( th > 0 ) 

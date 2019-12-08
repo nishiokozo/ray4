@@ -264,7 +264,7 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 	
 	// 表示
-	pers.prim.DrawSphere( gra, pers, b1.radius, b1.pos, b1.mat );
-	pers.prim.DrawSphere( gra, pers, b2.radius, b2.pos, b2.mat );
+	pers.prim.DrawSphere( gra, pers, b1.pos, b1.mat, b1.radius );
+	pers.prim.DrawSphere( gra, pers, b2.pos, b2.mat, b2.radius );
 
 }

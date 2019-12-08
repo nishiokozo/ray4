@@ -217,7 +217,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 
 	// ボール表示
-	pers.prim.DrawSphere( gra, pers, ball.radius, ball.pos, ball.mat );
+	pers.prim.DrawSphere( gra, pers, ball.pos, ball.mat, ball.radius );
 
 	// 接点表示
 	if ( flg )	pers.pen.pset3d( gra, pers, q0 , col6, 9);
