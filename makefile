@@ -36,6 +36,7 @@ SRCS = \
 	lab19.cpp \
 	lab20.cpp \
 	lab21.cpp \
+	lab22.cpp \
 	Sys.cpp \
 	Syswin.cpp \
 	SysGra.cpp \

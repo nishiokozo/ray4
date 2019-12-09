@@ -37,8 +37,17 @@ Lab21::Lab21() : pImpl( new Lab21::Impl )
 
 }
 
-static struct
+static struct Ball21
 {
+	struct Vt
+	{
+		vect2	pos;
+		vect2	vel;
+		Vt( vect2 p, vect2 v ) : pos(p), vel(v) {}
+	};
+	vector<vect2>	pos{vect2(0,0),vect2(0,0),vect2(0,0),vect2(0,0)};
+	vector<vect2>	vel{vect2(0,0),vect2(0,0),vect2(0,0),vect2(0,0)};
+	vector<Vt>		vt;
 	vect2	pos3;
 	vect2	pos1;
 	vect2	pos2;
@@ -79,7 +88,7 @@ void Lab21::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(rad(90)), 26, 26, 1, rgb(0.2,0.2,0.2) );
-	gra.Print(1,(float)text_y++,"20 : 2D Motor Spin" ); 
+	gra.Print(1,(float)text_y++,"20 : 2D Square Spin" ); 
 
 	//初期化
 	if ( !m.bInitAll )
@@ -97,14 +106,12 @@ void Lab21::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		m.bInitParam = true;
 
 		vect2 center(0,3);
-		ball.pos0 = vect2( 1, 0) + center;
-		ball.pos1 = vect2( 0, 1) + center;
-		ball.pos2 = vect2(-1, 0) + center;
-		ball.pos3 = vect2( 0,-1) + center;
-		ball.vel0 = vect2( 0, 0);
-		ball.vel1 = vect2( 0, 0);
-		ball.vel2 = vect2( 0, 0);
-		ball.vel3 = vect2( 0, 0);
+
+		ball.vt.clear();
+		ball.vt.emplace_back( vect2( 1, 0) + center, vect2(0,0) );
+		ball.vt.emplace_back( vect2( 0, 1) + center, vect2(0,0) );
+		ball.vt.emplace_back( vect2(-1, 0) + center, vect2(0,0) );
+		ball.vt.emplace_back( vect2( 0,-1) + center, vect2(0,0) );
 
 		wall.p0 = vect2(-4,-0.2 );
 		wall.p1 = vect2( 4, 0.2 );
@@ -117,13 +124,7 @@ void Lab21::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	// 入力
 	if ( keys.R.hi )	m.bInitParam = false;
 	if ( mouse.F.on )	motor.power += 0.0002;
-	if ( mouse.B.on )	
-	{
-		ball.vel0 += vect2( 0.003 , 0.0 );
-		ball.vel1 += vect2( 0.003 , 0.0 );
-		ball.vel2 += vect2( 0.003 , 0.0 );
-		ball.vel3 += vect2( 0.003 , 0.0 );
-	}
+	if ( mouse.B.on )	for ( Ball21::Vt& v : ball.vt ) { v.vel += vect2( 0.003 , 0.0 ); }
 	if ( keys._1.rep )	g_masatu -= 0.1;
 	if ( keys._2.rep )	g_masatu += 0.1;
 	g_masatu = min( max( g_masatu, 0 ), 1.0 );
@@ -131,37 +132,40 @@ void Lab21::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	// モーター回転伝達
 
 	// 落下
-	ball.vel0 += vect2( 0, -0.004 );
-	ball.vel1 += vect2( 0, -0.004 );
-	ball.vel2 += vect2( 0, -0.004 );
-	ball.vel3 += vect2( 0, -0.004 );
-	ball.pos0 += ball.vel0;
-	ball.pos1 += ball.vel1;
-	ball.pos2 += ball.vel2;
-	ball.pos3 += ball.vel3;
+	for ( Ball21::Vt& vt : ball.vt ) { vt.vel += vect2( 0, -0.004 ); }
+	for ( Ball21::Vt& vt : ball.vt ) { vt.pos += vt.vel; }
 
-	if ( 
-		dot( ball.pos0-wall.p0, wall.nor ) < 0 ||
-		dot( ball.pos1-wall.p0, wall.nor ) < 0 ||
-		dot( ball.pos2-wall.p0, wall.nor ) < 0 ||
-		dot( ball.pos3-wall.p0, wall.nor ) < 0
-	)
+	// 衝突
+	for ( Ball21::Vt& vt : ball.vt ) 
 	{
-		// 衝突前に戻す
-		ball.pos0 -= ball.vel0;
-		ball.pos1 -= ball.vel1;
-		ball.pos2 -= ball.vel2;
-		ball.pos3 -= ball.vel3;
+		if ( dot( vt.pos - wall.p0, wall.nor ) < 0 )
+		{
+			vt.pos -= vt.vel;
+			vt.vel = func_reflect( vt.vel, wall.nor, 0.3 );
+			vt.pos += vt.vel;
 
+			// 他の頂点に伝達
+			for ( Ball21::Vt& vt2 : ball.vt ) 
+			{
+				if ( &vt != &vt2 )
+				{
+					vt2.pos -= vt2.vel;
+					vt2.vel /= 2;
+				
+				}
+			}
+
+
+		}
 	}
 
 	
 
-	// 描画：ボール２
-	pers.pen.line3d( gra, pers, vect3( ball.pos0, 0 ) , vect3( ball.pos1, 0 ) );
-	pers.pen.line3d( gra, pers, vect3( ball.pos1, 0 ) , vect3( ball.pos2, 0 ) );
-	pers.pen.line3d( gra, pers, vect3( ball.pos2, 0 ) , vect3( ball.pos3, 0 ) );
-	pers.pen.line3d( gra, pers, vect3( ball.pos3, 0 ) , vect3( ball.pos0, 0 ) );
+	// 描画：ボール
+	pers.pen.line3d( gra, pers, vect3( ball.vt[0].pos, 0 ) , vect3( ball.vt[1].pos, 0 ) );
+	pers.pen.line3d( gra, pers, vect3( ball.vt[1].pos, 0 ) , vect3( ball.vt[2].pos, 0 ) );
+	pers.pen.line3d( gra, pers, vect3( ball.vt[2].pos, 0 ) , vect3( ball.vt[3].pos, 0 ) );
+	pers.pen.line3d( gra, pers, vect3( ball.vt[3].pos, 0 ) , vect3( ball.vt[0].pos, 0 ) );
 
 	
 

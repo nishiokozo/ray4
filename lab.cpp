@@ -46,6 +46,7 @@
 #include "lab19.h"
 #include "lab20.h"
 #include "lab21.h"
+#include "lab22.h"
 
 //------------------------------------------------------------------------------
 void LabObj::M::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str )
@@ -141,6 +142,7 @@ void Lab::SetIdx( int n, Cp& cp )
 		case 19:	pLab = new Lab19;	break;
 		case 20:	pLab = new Lab20;	break;
 		case 21:	pLab = new Lab21;	break;
+		case 22:	pLab = new Lab22;	break;
 		default: break;
 	}
 }
@@ -161,6 +163,7 @@ void Lab::SetNextIdx( int val, Cp& cp )
 		3,		//	衛生シミュレーション
 		4,		//	角速度実験1
 		5,		//	角速度実験2
+		22,		//	角速度実験2
 		6,		//	タイヤ
 		7,		//	角速度実験3
 		8,		//	角速度実験4
