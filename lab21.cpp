@@ -24,14 +24,14 @@
 #include "pers.h"
 
 #include "lab.h"
-#include "lab20.h"
+#include "lab21.h"
 
-struct Lab20::Impl
+struct Lab21::Impl
 {
 };
 
 //------------------------------------------------------------------------------
-Lab20::Lab20() : pImpl( new Lab20::Impl )
+Lab21::Lab21() : pImpl( new Lab21::Impl )
 //------------------------------------------------------------------------------
 {
 
@@ -39,11 +39,14 @@ Lab20::Lab20() : pImpl( new Lab20::Impl )
 
 static struct
 {
-	float 	radius;
-	vect2	pos;
-	vect2	vel;
-	float	spin;
-	float	rot;	
+	vect2	pos3;
+	vect2	pos1;
+	vect2	pos2;
+	vect2	pos0;
+	vect2	vel3;
+	vect2	vel1;
+	vect2	vel2;
+	vect2	vel0;
 } ball;
 
 static struct
@@ -61,7 +64,7 @@ static struct
 
 static 	float	g_masatu = 1.0;
 //------------------------------------------------------------------------------
-void Lab20::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab21::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	int m_y = 0;
@@ -93,11 +96,15 @@ void Lab20::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	{
 		m.bInitParam = true;
 
-		ball.radius	= 1.0;
-		ball.pos	= vect2( 0, 3.1 );
-		ball.vel	= vect2( 0, 0 );
-		ball.spin	= 0;
-		ball.rot	= 0;
+		vect2 center(0,3);
+		ball.pos0 = vect2( 1, 0) + center;
+		ball.pos1 = vect2( 0, 1) + center;
+		ball.pos2 = vect2(-1, 0) + center;
+		ball.pos3 = vect2( 0,-1) + center;
+		ball.vel0 = vect2( 0, 0);
+		ball.vel1 = vect2( 0, 0);
+		ball.vel2 = vect2( 0, 0);
+		ball.vel3 = vect2( 0, 0);
 
 		wall.p0 = vect2(-4,-0.2 );
 		wall.p1 = vect2( 4, 0.2 );
@@ -110,43 +117,60 @@ void Lab20::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	// 入力
 	if ( keys.R.hi )	m.bInitParam = false;
 	if ( mouse.F.on )	motor.power += 0.0002;
-	if ( mouse.B.on )	ball.vel += vect2( 0.003 , 0.0 );
+	if ( mouse.B.on )	
+	{
+		ball.vel0 += vect2( 0.003 , 0.0 );
+		ball.vel1 += vect2( 0.003 , 0.0 );
+		ball.vel2 += vect2( 0.003 , 0.0 );
+		ball.vel3 += vect2( 0.003 , 0.0 );
+	}
 	if ( keys._1.rep )	g_masatu -= 0.1;
 	if ( keys._2.rep )	g_masatu += 0.1;
 	g_masatu = min( max( g_masatu, 0 ), 1.0 );
 
 	// モーター回転伝達
-	ball.spin += motor.power;
 
 	// 落下
-	ball.vel += vect2( 0, -0.004 );
-	ball.pos += ball.vel;
+	ball.vel0 += vect2( 0, -0.004 );
+	ball.vel1 += vect2( 0, -0.004 );
+	ball.vel2 += vect2( 0, -0.004 );
+	ball.vel3 += vect2( 0, -0.004 );
+	ball.pos0 += ball.vel0;
+	ball.pos1 += ball.vel1;
+	ball.pos2 += ball.vel2;
+	ball.pos3 += ball.vel3;
 
-	if ( dot( ball.pos-wall.p0, wall.nor ) < ball.radius )
+	if ( 
+		dot( ball.pos0-wall.p0, wall.nor ) < 0 ||
+		dot( ball.pos1-wall.p0, wall.nor ) < 0 ||
+		dot( ball.pos2-wall.p0, wall.nor ) < 0 ||
+		dot( ball.pos3-wall.p0, wall.nor ) < 0
+	)
 	{
 		// 衝突前に戻す
-		ball.pos -= ball.vel;
-
-		// 移動ベクトルの反射
-		ball.vel = 	func_reflect( ball.vel, wall.nor, 0.0 );
-		ball.pos += ball.vel;
-
-		// 回転量を求める
-		ball.spin = dot( ball.vel, wall.tan );
+		ball.pos0 -= ball.vel0;
+		ball.pos1 -= ball.vel1;
+		ball.pos2 -= ball.vel2;
+		ball.pos3 -= ball.vel3;
 
 	}
 
-	// 描画：ボール
-	ball.rot += ball.spin;
-	pers.prim.DrawCircle( gra, pers, vect3( ball.pos, 0 ), mrotz(-ball.rot), 1.0, rgb(1,1,1) );
+	
+
+	// 描画：ボール２
+	pers.pen.line3d( gra, pers, vect3( ball.pos0, 0 ) , vect3( ball.pos1, 0 ) );
+	pers.pen.line3d( gra, pers, vect3( ball.pos1, 0 ) , vect3( ball.pos2, 0 ) );
+	pers.pen.line3d( gra, pers, vect3( ball.pos2, 0 ) , vect3( ball.pos3, 0 ) );
+	pers.pen.line3d( gra, pers, vect3( ball.pos3, 0 ) , vect3( ball.pos0, 0 ) );
+
+	
 
 	// 描画：壁
 	pers.pen.line3d( gra, pers, vect3(wall.p0,0), vect3(wall.p1,0) );
 
 	// メーター表示
 	funcShowBar( gra, m_y++, motor.power,	"power    ", rgb(1,1,1) );
-	funcShowBar( gra, m_y++, ball.vel.abs(),"vel      ", rgb(1,1,1) );
-	funcShowBar( gra, m_y++, ball.spin, 	"spin     ", rgb(1,1,1) );
+	funcShowBar( gra, m_y++, (ball.vel0+ball.vel1+ball.vel2+ball.vel3).abs(),"vel      ", rgb(1,1,1) );
 	funcShowBar( gra, m_y++, g_masatu, 		"g_masatu ", rgb(1,1,1) );
 	
 }

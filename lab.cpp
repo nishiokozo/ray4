@@ -45,6 +45,7 @@
 #include "lab18.h"
 #include "lab19.h"
 #include "lab20.h"
+#include "lab21.h"
 
 //------------------------------------------------------------------------------
 void LabObj::M::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str )
@@ -104,7 +105,7 @@ void LabObj::M::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 
 void Lab::SetIdx( int n, Cp& cp )
 //------------------------------------------------------------------------------
 {
-cout << m.idxLab << ">" << n << endl;
+//cout << m.idxLab << ">" << n << endl;
 	m.idxLab = max( n, 0 ); 
 
 	cp.tbltbl_pObj.clear();
@@ -139,6 +140,7 @@ cout << m.idxLab << ">" << n << endl;
 		case 18:	pLab = new Lab18;	break;
 		case 19:	pLab = new Lab19;	break;
 		case 20:	pLab = new Lab20;	break;
+		case 21:	pLab = new Lab21;	break;
 		default: break;
 	}
 }
@@ -170,6 +172,7 @@ void Lab::SetNextIdx( int val, Cp& cp )
 		18,		//	ボールのスピン
 		19,		//	モーター・トルク実験
 		20,		//	2D モーター・トルク実験
+		21,		//	2D ポイント・トルク実験
 	};	
 	static const int size = static_cast<signed>(sizeof(tbl)/sizeof(int));
 
