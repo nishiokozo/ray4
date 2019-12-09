@@ -26,3 +26,4 @@ extern vect3 func_accelerationGetDistance_TVv( vect3 vg, float t, vect3 v0 );
 
 // vector
 vect3 func_reflect( const vect3& I, const vect3& N, float rate );
+vect2 func_reflect( const vect2& I, const vect2& N, float rate );

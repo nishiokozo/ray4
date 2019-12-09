@@ -37,31 +37,39 @@ Lab20::Lab20() : pImpl( new Lab20::Impl )
 
 }
 
-#define	PLATE_MAT	mrotz(rad(15))
+static struct
+{
+	float 	radius;
+	vect2	pos;
+	vect2	vel;
+	float	spin;
+	float	rot;	
+} ball;
 
 static struct
 {
-	vect3	pos	= vect3(0,-0.3,0);
-	vect3	nor	= vect3(0,1,0)*PLATE_MAT;
-} plate;
-
-struct Ball20 : Obj
-{
-	vect3	vel;
-	float 	radius;
-	float	spin;
-	mat33	mat = midentity();
-
-	Ball20() : Obj(vect3(0,0,0)){}
-};
+	vect2	p0;
+	vect2	p1;
+	vect2	tan;
+	vect2	nor;
+} wall;
 
 //------------------------------------------------------------------------------
 void Lab20::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
+	int m_y = 0;
+
+	auto funcShowBar = []( SysGra& gra, int y, float val, string str, rgb col )
+	{
+		vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42*y);
+		gra.Line( v0, v0+ vect2( val, 0 ), col, 2 );
+		gra.Print( v0+gra.Dot(0,-6), str + to_string(val), col );
+	};
+
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(rad(90)), 10, 10, 1, rgb(0.2,0.2,0.2) );
+	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(rad(90)), 26, 26, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,"20 : 2D Motor Spin" ); 
 
 	//初期化
@@ -72,69 +80,59 @@ void Lab20::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		// カメラ
 		pers.cam.pos	= vect3( 0.0, 1.0, -10.0 );
 		pers.cam.at		= vect3( 0.0, 1.0, 0 );
-
-		// 点
-		m.tbl_pObj.emplace_back( new Ball20 );	//	球
-		m.tbl_pObj.emplace_back( new Obj(vect3( 4,  0.2, 0)) );
-		m.tbl_pObj.emplace_back( new Obj(vect3(-4, -0.2, 0)) );
-
-		// 線
-		m.tbl_pEdge.emplace_back( new Edge(1,2, rgb(1,1,1),1) );
-
-		//GUI登録
-		cp.tbltbl_pObj.clear();
-		cp.tbltbl_pEdge.clear();
-		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
-		cp.tbltbl_pEdge.emplace_back( m.tbl_pEdge );
-
 	}
-
-	// 設定
-	Ball20&	ball	= *dynamic_cast<Ball20*>(m.tbl_pObj[0]);
-	vect3	p0		= m.tbl_pObj[1]->pos;
-	vect3	p1		= m.tbl_pObj[2]->pos;
-	plate.pos = p0;
-	plate.nor = cross( p1-p0, vect3(0,0,1) ).normalize();
-
-
 
 	// 初期化
 	if ( !m.bInitParam )
 	{
 		m.bInitParam = true;
 
-		ball.pos	= vect3(0,3,0);
-		ball.vel	= vect3(0,0,0);
-		ball.radius	= 1;
+		ball.radius	= 1.0;
+		ball.pos	= vect2( 0, 2.1 );
+		ball.vel	= vect2( 0, 0 );
 		ball.spin	= 0;
-		ball.mat	= midentity();
+		ball.rot	= 0;
+
+		wall.p0 = vect2(-4,-0.2 );
+		wall.p1 = vect2( 4, 0.2 );
+		wall.tan = ( wall.p1 - wall.p0 ).normalize();
+		wall.nor = vect2( -wall.tan.y, wall.tan.x );
+
 	}
 
 	// 入力
 	if ( keys.R.hi )	m.bInitParam = false;
 	if ( mouse.F.on )	ball.spin += 0.01;
-	if ( mouse.B.on )	ball.vel += vect3(0.01,0,0);
+	if ( mouse.B.on )	ball.vel += vect2( 0.005 , 0.0 );
 
 
 	// 落下
-	ball.vel += vect3(0,-9.8*delta*delta,0);
+	ball.vel.y += -0.002;
+	ball.pos.y += ball.vel.y;
 
-	// 移動
-	ball.pos += ball.vel;
-
-	if ( dot( ball.pos-plate.pos, plate.nor ) < ball.radius )
+	if ( dot( ball.pos-wall.p0, wall.nor ) < ball.radius )
 	{
-		ball.pos -= ball.vel;
-		ball.vel = 	func_reflect( ball.vel, plate.nor, 0.0 );
+		// 衝突前に戻す
+		ball.pos.y -= ball.vel.y;
+
+		// 床に並行な移動量
+		ball.vel = 	func_reflect( ball.vel, wall.nor, 0.0 );
 		ball.pos += ball.vel;
 
-		ball.spin = dot( ball.vel, p1-p0 );
+		// 回転量を求める
+		ball.spin = dot( ball.vel, wall.tan );
 
 	}
+	
 
-	ball.mat = ball.mat *  mrotz( ball.spin/pi/2 );
+	// 描画：ボール
+	ball.rot += ball.spin;
+	pers.prim.DrawCircle( gra, pers, vect3( ball.pos, 0 ), mrotz(-ball.rot), 1.0, rgb(1,1,1) );
+
+	// 描画：壁
+	pers.pen.line3d( gra, pers, vect3(wall.p0,0), vect3(wall.p1,0) );
 
 
-	// 描画
-	pers.prim.DrawCircle( gra, pers, ball.pos, ball.mat, 1.0, rgb(1,1,1) );
+	funcShowBar( gra, m_y++, ball.spin, 		"spin  ", rgb(1,1,1) );
+	
 }

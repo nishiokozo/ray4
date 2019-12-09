@@ -171,6 +171,7 @@ extern mat33 mroty( float f);
 extern mat33 mrotz( float f);
 
 extern float	dot( vect3 a, vect3 b );
+extern float	dot( vect2 a, vect2 b );
 
 
 
