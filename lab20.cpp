@@ -88,7 +88,7 @@ void Lab20::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		m.bInitParam = true;
 
 		ball.radius	= 1.0;
-		ball.pos	= vect2( 0, 2.1 );
+		ball.pos	= vect2( 0, 3.1 );
 		ball.vel	= vect2( 0, 0 );
 		ball.spin	= 0;
 		ball.rot	= 0;
@@ -103,17 +103,17 @@ void Lab20::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	// 入力
 	if ( keys.R.hi )	m.bInitParam = false;
 	if ( mouse.F.on )	ball.spin += 0.01;
-	if ( mouse.B.on )	ball.vel += vect2( 0.005 , 0.0 );
+	if ( mouse.B.on )	ball.vel += vect2( 0.003 , 0.0 );
 
 
 	// 落下
-	ball.vel.y += -0.002;
-	ball.pos.y += ball.vel.y;
+	ball.vel += vect2( 0, -0.004 );
+	ball.pos += ball.vel;
 
 	if ( dot( ball.pos-wall.p0, wall.nor ) < ball.radius )
 	{
 		// 衝突前に戻す
-		ball.pos.y -= ball.vel.y;
+		ball.pos -= ball.vel;
 
 		// 床に並行な移動量
 		ball.vel = 	func_reflect( ball.vel, wall.nor, 0.0 );
