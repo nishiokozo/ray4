@@ -163,7 +163,6 @@ void Lab::SetNextIdx( int val, Cp& cp )
 		3,		//	衛生シミュレーション
 		4,		//	角速度実験1
 		5,		//	角速度実験2
-		22,		//	角速度実験2
 		6,		//	タイヤ
 		7,		//	角速度実験3
 		8,		//	角速度実験4
@@ -176,6 +175,7 @@ void Lab::SetNextIdx( int val, Cp& cp )
 		19,		//	モーター・トルク実験
 		20,		//	2D モーター・トルク実験
 		21,		//	2D ポイント・トルク実験
+		22,		//	2D 棒・トルク実験
 	};	
 	static const int size = static_cast<signed>(sizeof(tbl)/sizeof(int));
 
@@ -205,10 +205,3 @@ void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float
 {
 	if ( pLab ) pLab->Update( keys, mouse, gra, pers, delta, text_y, cp );
 }
-
-//------------------------------------------------------------------------------
-Lab::Lab()
-//------------------------------------------------------------------------------
-{
-}
-

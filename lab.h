@@ -141,8 +141,6 @@ struct Lab
 		int	idxTbl = 0;
 	} m;
 	
-	Lab();
-
 	LabObj*	pLab = 0;
 
 	void SetNextIdx( int val, Cp& cp );

@@ -28,50 +28,36 @@
 
 struct Lab21::Impl
 {
-};
-
-//------------------------------------------------------------------------------
-Lab21::Lab21() : pImpl( new Lab21::Impl )
-//------------------------------------------------------------------------------
-{
-
-}
-
-static struct Ball21
-{
 	struct Vt
 	{
 		vect2	pos;
 		vect2	vel;
 		Vt( vect2 p, vect2 v ) : pos(p), vel(v) {}
 	};
-	vector<vect2>	pos{vect2(0,0),vect2(0,0),vect2(0,0),vect2(0,0)};
-	vector<vect2>	vel{vect2(0,0),vect2(0,0),vect2(0,0),vect2(0,0)};
-	vector<Vt>		vt;
-	vect2	pos3;
-	vect2	pos1;
-	vect2	pos2;
-	vect2	pos0;
-	vect2	vel3;
-	vect2	vel1;
-	vect2	vel2;
-	vect2	vel0;
-} ball;
 
-static struct
-{
-	vect2	p0;
-	vect2	p1;
-	vect2	tan;
-	vect2	nor;
-} wall;
+	struct Ball
+	{
+		vector<Vt>		vt;
+	} ball;
 
-static struct
-{
-	float power;
-} motor;
+	struct
+	{
+		vect2	p0;
+		vect2	p1;
+		vect2	tan;
+		vect2	nor;
+	} wall;
 
-static 	float	g_masatu = 1.0;
+	struct
+	{
+		float power;
+	} motor;
+
+	float	masatu = 1.0;
+};
+
+Lab21::Lab21() : pImpl( new Lab21::Impl ){}
+
 //------------------------------------------------------------------------------
 void Lab21::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
@@ -107,45 +93,45 @@ void Lab21::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 		vect2 center(0,3);
 
-		ball.vt.clear();
-		ball.vt.emplace_back( vect2( 1, 0) + center, vect2(0,0) );
-		ball.vt.emplace_back( vect2( 0, 1) + center, vect2(0,0) );
-		ball.vt.emplace_back( vect2(-1, 0) + center, vect2(0,0) );
-		ball.vt.emplace_back( vect2( 0,-1) + center, vect2(0,0) );
+		pImpl->ball.vt.clear();
+		pImpl->ball.vt.emplace_back( vect2( 1, 0) + center, vect2(0,0) );
+		pImpl->ball.vt.emplace_back( vect2( 0, 1) + center, vect2(0,0) );
+		pImpl->ball.vt.emplace_back( vect2(-1, 0) + center, vect2(0,0) );
+		pImpl->ball.vt.emplace_back( vect2( 0,-1) + center, vect2(0,0) );
 
-		wall.p0 = vect2(-4,-0.2 );
-		wall.p1 = vect2( 4, 0.2 );
-		wall.tan = ( wall.p1 - wall.p0 ).normalize();
-		wall.nor = vect2( -wall.tan.y, wall.tan.x );
+		pImpl->wall.p0 = vect2(-4,-0.2 );
+		pImpl->wall.p1 = vect2( 4, 0.2 );
+		pImpl->wall.tan = ( pImpl->wall.p1 - pImpl->wall.p0 ).normalize();
+		pImpl->wall.nor = vect2( -pImpl->wall.tan.y, pImpl->wall.tan.x );
 
-		motor.power = 0;
+		pImpl->motor.power = 0;
 	}
 
 	// 入力
 	if ( keys.R.hi )	m.bInitParam = false;
-	if ( mouse.F.on )	motor.power += 0.0002;
-	if ( mouse.B.on )	for ( Ball21::Vt& v : ball.vt ) { v.vel += vect2( 0.003 , 0.0 ); }
-	if ( keys._1.rep )	g_masatu -= 0.1;
-	if ( keys._2.rep )	g_masatu += 0.1;
-	g_masatu = min( max( g_masatu, 0 ), 1.0 );
+	if ( mouse.F.on )	pImpl->motor.power += 0.0002;
+	if ( mouse.B.on )	for ( Impl::Vt& v : pImpl->ball.vt ) { v.vel += vect2( 0.003 , 0.0 ); }
+	if ( keys._1.rep )	pImpl->masatu -= 0.1;
+	if ( keys._2.rep )	pImpl->masatu += 0.1;
+	pImpl->masatu = min( max( pImpl->masatu, 0 ), 1.0 );
 
 	// モーター回転伝達
 
 	// 落下
-	for ( Ball21::Vt& vt : ball.vt ) { vt.vel += vect2( 0, -0.004 ); }
-	for ( Ball21::Vt& vt : ball.vt ) { vt.pos += vt.vel; }
+	for ( Impl::Vt& vt : pImpl->ball.vt ) { vt.vel += vect2( 0, -0.004 ); }
+	for ( Impl::Vt& vt : pImpl->ball.vt ) { vt.pos += vt.vel; }
 
 	// 衝突
-	for ( Ball21::Vt& vt : ball.vt ) 
+	for ( Impl::Vt& vt : pImpl->ball.vt ) 
 	{
-		if ( dot( vt.pos - wall.p0, wall.nor ) < 0 )
+		if ( dot( vt.pos - pImpl->wall.p0, pImpl->wall.nor ) < 0 )
 		{
 			vt.pos -= vt.vel;
-			vt.vel = func_reflect( vt.vel, wall.nor, 0.3 );
+			vt.vel = func_reflect( vt.vel, pImpl->wall.nor, 0.3 );
 			vt.pos += vt.vel;
 
 			// 他の頂点に伝達
-			for ( Ball21::Vt& vt2 : ball.vt ) 
+			for ( Impl::Vt& vt2 : pImpl->ball.vt ) 
 			{
 				if ( &vt != &vt2 )
 				{
@@ -162,19 +148,18 @@ void Lab21::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	
 
 	// 描画：ボール
-	pers.pen.line3d( gra, pers, vect3( ball.vt[0].pos, 0 ) , vect3( ball.vt[1].pos, 0 ) );
-	pers.pen.line3d( gra, pers, vect3( ball.vt[1].pos, 0 ) , vect3( ball.vt[2].pos, 0 ) );
-	pers.pen.line3d( gra, pers, vect3( ball.vt[2].pos, 0 ) , vect3( ball.vt[3].pos, 0 ) );
-	pers.pen.line3d( gra, pers, vect3( ball.vt[3].pos, 0 ) , vect3( ball.vt[0].pos, 0 ) );
+	pers.pen.line3d( gra, pers, vect3( pImpl->ball.vt[0].pos, 0 ) , vect3( pImpl->ball.vt[1].pos, 0 ) );
+	pers.pen.line3d( gra, pers, vect3( pImpl->ball.vt[1].pos, 0 ) , vect3( pImpl->ball.vt[2].pos, 0 ) );
+	pers.pen.line3d( gra, pers, vect3( pImpl->ball.vt[2].pos, 0 ) , vect3( pImpl->ball.vt[3].pos, 0 ) );
+	pers.pen.line3d( gra, pers, vect3( pImpl->ball.vt[3].pos, 0 ) , vect3( pImpl->ball.vt[0].pos, 0 ) );
 
 	
 
 	// 描画：壁
-	pers.pen.line3d( gra, pers, vect3(wall.p0,0), vect3(wall.p1,0) );
+	pers.pen.line3d( gra, pers, vect3(pImpl->wall.p0,0), vect3(pImpl->wall.p1,0) );
 
 	// メーター表示
-	funcShowBar( gra, m_y++, motor.power,	"power    ", rgb(1,1,1) );
-	funcShowBar( gra, m_y++, (ball.vel0+ball.vel1+ball.vel2+ball.vel3).abs(),"vel      ", rgb(1,1,1) );
-	funcShowBar( gra, m_y++, g_masatu, 		"g_masatu ", rgb(1,1,1) );
+	funcShowBar( gra, m_y++, pImpl->motor.power,	"power    ", rgb(1,1,1) );
+	funcShowBar( gra, m_y++, pImpl->masatu, 		"masatu ", rgb(1,1,1) );
 	
 }

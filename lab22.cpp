@@ -1,3 +1,5 @@
+//2019/12/10
+
 #include <iostream>
 #include <vector>
 #include <map>
@@ -23,84 +25,93 @@
 
 #include "lab.h"
 #include "lab22.h"
+
+struct Lab22::Impl
+{
+	struct Vt
+	{
+		vect2	pos;
+		vect2	vel;
+		vect2	new_pos;
+		vect2	new_vel;
+		Vt( vect2 p, vect2 v ) : pos(p), vel(v) {}
+	};
+	struct Ball
+	{
+		vector<Vt>		vt;
+	} ball;
+
+};
+
+Lab22::Lab22() : pImpl( new Lab22::Impl ){}
+
 //------------------------------------------------------------------------------
 void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
-	const float	G	= -9.80665;				// 重力加速度
-	const rgb col0 = rgb( 0, 0, 0 );
-	const rgb col1 = rgb( 0, 0, 1 );
-	const rgb col2 = rgb( 1, 0, 0 );
-	const rgb col3 = rgb( 1, 0, 1 );
-	const rgb col4 = rgb( 0, 1, 0 );
-	const rgb col5 = rgb( 0, 1, 1 );
-	const rgb col6 = rgb( 1, 1, 0 );
-	const rgb col7 = rgb( 1, 1, 1 );
-	
-	//画面クリア
+	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
+	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(rad(90)), 26, 26, 1, rgb(0.2,0.2,0.2) );
+	gra.Print(1,(float)text_y++,"22 : 2D Bar Spin" ); 
 
-	gra.Print(1,(float)text_y++,string("22 : 2d furiko")); 
+	//初期化
+	if ( !m.bInitAll )
+	{
+		m.bInitAll = true;
 
-	const float grate = 9.80665 *delta*delta;		// 重力加速度/frame
+		// カメラ
+		pers.cam.pos	= vect3( 0.0, 1.0, -10.0 );
+		pers.cam.at		= vect3( 0.0, 1.0, 0 );
+	}
 
-	static float	rsp = 0;
-
+	// 初期化
 	if ( !m.bInitParam )
 	{
-		if ( !m.bInitAll )
-		{
-			m.bInitAll = true;
-			pers.cam.pos = vect3(  0.0, 2.0, -5.0 );
-			pers.cam.at = vect3( 0,  2.0, 0 );
-		}
-	
 		m.bInitParam = true;
-		for ( Obj* p : m.tbl_pObj ) delete p;
-		m.tbl_pObj.clear();
-		m.tbl_pObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
-		m.tbl_pObj.emplace_back( new Obj(vect3(1, 2.0, 0)) );
-		// 線
-		for ( Edge* p : m.tbl_pEdge ) delete p;
-		m.tbl_pEdge.clear();
-		m.tbl_pEdge.emplace_back( new Edge(0,1) );
 
-		//GUI登録
-		cp.tbltbl_pObj.clear();
-		cp.tbltbl_pEdge.clear();
-		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
-		cp.tbltbl_pEdge.emplace_back( m.tbl_pEdge );
+		vect2 center(0,2);
 
-		rsp=0;
+		pImpl->ball.vt.clear();
+		float th = rad(45);
+		pImpl->ball.vt.emplace_back( vect2( cos(th), -sin(th) ) + center, vect2(0,0) );
+		pImpl->ball.vt.emplace_back( vect2(-cos(th),  sin(th) ) + center, vect2(0,0) );
+
 	}
+
+	// 割当
+	Impl::Vt& p0	 = pImpl->ball.vt[0];
+	Impl::Vt& p1	 = pImpl->ball.vt[1];
+
+	// 入力
 	if ( keys.R.hi )	m.bInitParam = false;
+	if ( mouse.B.on )	for ( Impl::Vt& v : pImpl->ball.vt ) { v.vel += vect2( 0.003 , 0.0 ); }
 
-	vect3&	v0 = m.tbl_pObj[0]->pos;	//	barの根本
-	vect3&	v1 = m.tbl_pObj[1]->pos;	//	barの先端
+	// 落下
+//	for ( Impl::Vt& vt : pImpl->ball.vt ) { vt.vel += vect2( 0, -0.001 ); }
+	for ( Impl::Vt& vt : pImpl->ball.vt ) { vt.pos += vt.vel; }
 
-
-//	pers.pen.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
-
-	// 縮む
-	if ( mouse.F.hi )	v1 = (v1+v0)/2;
-
-	// 伸びる
-	if ( mouse.B.hi )	v1 = (v1-v0)*2+v0;
-
+	// 計算準備
+	for ( Impl::Vt& vt : pImpl->ball.vt ) 
 	{
-		vect3 v = v1-v0;
-		float b = atan2(v.x,v.y);
-
-		// 角速度に変換
-		float tsp = -grate * sin(b);	//	接線速度
-		float r = tsp/2/pi/v.abs();		//	角加速度
-		rsp +=r;						//	角速度
-
-		// 回転
-		float x = v.x *cos(rsp) - v.y*sin(rsp); 
-		float y = v.x *sin(rsp) + v.y*cos(rsp); 
-		v1 = v0+vect3(x,y,0);
-
+		vt.new_pos = vt.pos;
+		vt.new_vel = vt.vel;
 	}
+
+	// 回転
+	
+
+	// 反映
+	for ( Impl::Vt& vt : pImpl->ball.vt ) 
+	{
+		vt.pos = vt.new_pos;
+		vt.vel = vt.new_vel;
+	}
+	
+
+	// 描画：棒
+	pers.pen.line3d( gra, pers, vect3( pImpl->ball.vt[0].pos, 0 ) , vect3( pImpl->ball.vt[1].pos, 0 ) );
+
+	
+
+	
 }
