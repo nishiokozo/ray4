@@ -5,7 +5,7 @@ struct Obj
 
 	vect3	pos;
 
-//	Obj(){};							// 定義したくないが継承すると強制的にデフォルトコンストラクタが要求される
+	Obj(){};
 	Obj( vect3 _pos ) : pos(_pos){};
 	virtual ~Obj(){};
 };

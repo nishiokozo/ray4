@@ -41,6 +41,10 @@ struct Lab22::Impl
 		vector<Vt>		vt;
 	} ball;
 
+	vector<Obj*>	tbl_pObj;
+
+	vector<unique_ptr<Obj>>	tbl;
+
 };
 
 Lab22::Lab22() : pImpl( new Lab22::Impl ){}
@@ -62,6 +66,15 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		// カメラ
 		pers.cam.pos	= vect3( 0.0, 1.0, -10.0 );
 		pers.cam.at		= vect3( 0.0, 1.0, 0 );
+
+		// GUIコントロールポイント生成
+		pImpl->tbl_pObj.emplace_back( new Obj );
+		pImpl->tbl_pObj.emplace_back( new Obj );
+		cp.tbltbl_pObj.emplace_back( pImpl->tbl_pObj );
+
+//		pImpl->tbl.emplace_back( new Obj );
+//		pImpl->tbl.emplace_back( new Obj );
+
 	}
 
 	// 初期化
@@ -70,7 +83,6 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		m.bInitParam = true;
 
 		vect2 center(0,2);
-
 		pImpl->ball.vt.clear();
 		float th = rad(45);
 		pImpl->ball.vt.emplace_back( vect2( cos(th), -sin(th) ) + center, vect2(0,0) );
