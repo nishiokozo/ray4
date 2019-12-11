@@ -31,26 +31,24 @@
 // 描画	引力実験
 //=================================
 
+struct Lab3::Impl
+{
+	bool	bPause = false; 
+};
+
+Lab3::Lab3() : pImpl( new Lab3::Impl ){}
+
 //------------------------------------------------------------------------------
 void Lab3::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	const float	G	= -9.80665;				// 重力加速度
-	const rgb col0 = rgb( 0, 0, 0 );
-	const rgb col1 = rgb( 0, 0, 1 );
-	const rgb col2 = rgb( 1, 0, 0 );
-	const rgb col3 = rgb( 1, 0, 1 );
-	const rgb col4 = rgb( 0, 1, 0 );
-	const rgb col5 = rgb( 0, 1, 1 );
-	const rgb col6 = rgb( 1, 1, 0 );
-	const rgb col7 = rgb( 1, 1, 1 );
 
 	//画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,string("<<lab3_gravityPlanet>>")); 
 
-	static bool	bPause = false; 
 	bool	bStep = false; 
 
 	#define MAX_PREV 300
@@ -94,7 +92,7 @@ void Lab3::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 	// 入力
 	{
 		// ポーズ
-		if ( keys.SPACE.hi )	bPause = !bPause;
+		if ( keys.SPACE.hi )	pImpl->bPause = !pImpl->bPause;
 
 		// ステップ再生
 		if ( keys.ENTER.rep )	bStep = true;
@@ -119,7 +117,7 @@ void Lab3::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 	Planet& pl1 = *dynamic_cast<Planet*>(m.tbl_pObj[1].get());	//	地球
 
 	// 計算
-	if ( !bPause || bStep )
+	if ( !pImpl->bPause || bStep )
 	{
 		function<void(Planet&, Planet&)> func = [&]( Planet& pl0, Planet& pl1 )
 		{

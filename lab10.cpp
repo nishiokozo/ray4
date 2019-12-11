@@ -30,9 +30,7 @@
 void Lab10::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
-	static bool bGrid = true;
 
-//	if (bGrid==false)	
 	gra.Clr(rgb(0.0,0.0,0.0));
 	gra.Print(1,(float)text_y++,string("lab10_colors")); 
 
@@ -42,7 +40,6 @@ void Lab10::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		m.bInitParam = true;
 		pers.cam.pos = vect3( -4.0, 4.0, -1.5 );
 		pers.cam.at = vect3( 0,  1.0, 0 );
-		bGrid = true;
 	}
 
 	const float s = 0.1;
@@ -56,7 +53,6 @@ void Lab10::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 	// 入力
 	if ( keys.R.hi ) m.bInitParam = false;
-	if ( keys.G.hi ) bGrid = !bGrid;
 
 	// 計算
 

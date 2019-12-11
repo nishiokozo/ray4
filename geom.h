@@ -7,10 +7,10 @@
 typedef	float	MAT4[4][4];
 typedef	float	MAT3[3][3];
 typedef	float	MAT43[4][3];
-const static float pi = 3.14159265f;//35897932384626433832795;
-const static float infinit =  FLT_MAX;//numeric_limits<float>::max();	//FLT_MAX
-const static float infinit_max =  FLT_MAX;//numeric_limits<float>::max();	//FLT_MAX
-const static float infinit_min =  FLT_MIN;
+constexpr float pi = 3.14159265f;//35897932384626433832795;
+constexpr float infinit =  FLT_MAX;//numeric_limits<float>::max();	//FLT_MAX
+constexpr float infinit_max =  FLT_MAX;//numeric_limits<float>::max();	//FLT_MAX
+constexpr float infinit_min =  FLT_MIN;
 
 
 struct	I2

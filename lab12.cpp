@@ -28,18 +28,6 @@
 #include "lab.h"
 #include "lab12.h"
 
-static const float	G	= -9.80665;				// 重力加速度
-static const rgb col0 = rgb( 0, 0, 0 );
-static const rgb col1 = rgb( 0, 0, 1 );
-static const rgb col2 = rgb( 1, 0, 0 );
-static const rgb col3 = rgb( 1, 0, 1 );
-static const rgb col4 = rgb( 0, 1, 0 );
-static const rgb col5 = rgb( 0, 1, 1 );
-static const rgb col6 = rgb( 1, 1, 0 );
-static const rgb col7 = rgb( 1, 1, 1 );
-
-
-
 // 定義
 struct Ball12:Obj
 {
@@ -260,7 +248,7 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		b2.pos = b2.pn;
 	}
 	
-	m.drawVect( gra, pers, text_y, b2.pos, b2.vaxis.normalize() ,1	, col3, "axis" );
+	m.drawVect( gra, pers, text_y, b2.pos, b2.vaxis.normalize() ,1	, rgb(1,0,1), "axis" );
 
 	
 	// 表示

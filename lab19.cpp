@@ -27,19 +27,32 @@
 #include "lab.h"
 #include "lab19.h"
 
-static const float	G	= -9.80665;				// 重力加速度
-static const rgb col0 = rgb( 0, 0, 0 );
-static const rgb col1 = rgb( 0, 0, 1 );
-static const rgb col2 = rgb( 1, 0, 0 );
-static const rgb col3 = rgb( 1, 0, 1 );
-static const rgb col4 = rgb( 0, 1, 0 );
-static const rgb col5 = rgb( 0, 1, 1 );
-static const rgb col6 = rgb( 1, 1, 0 );
-static const rgb col7 = rgb( 1, 1, 1 );
 
 
+#define	PLATE_MAT	mrotz(rad(15))
 struct Lab19::Impl
 {
+	struct
+	{
+		vect3	pos	= vect3(0,-0.3,0);
+		vect3	nor	= vect3(0,1,0)*PLATE_MAT;
+	} plate;
+
+
+	struct
+	{
+		float	power = 0.0;
+	} motor;
+
+	struct Ball19 : Obj
+	{
+		vect3	vel;
+		float 	radius;
+		vect3	moment;
+		mat33	mat = midentity();
+
+		Ball19() : Obj(vect3(0,0,0)){}
+	};
 };
 
 //------------------------------------------------------------------------------
@@ -48,29 +61,7 @@ Lab19::Lab19() : pImpl( new Lab19::Impl )
 {
 }
 
-#define	PLATE_MAT	mrotz(rad(15))
 
-static struct
-{
-	vect3	pos	= vect3(0,-0.3,0);
-	vect3	nor	= vect3(0,1,0)*PLATE_MAT;
-} plate;
-
-
-static struct
-{
-	float	power = 0.0;
-} motor;
-
-struct Ball19 : Obj
-{
-	vect3	vel;
-	float 	radius;
-	vect3	moment;
-	mat33	mat = midentity();
-
-	Ball19() : Obj(vect3(0,0,0)){}
-};
 
 //------------------------------------------------------------------------------
 void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
@@ -100,12 +91,12 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		pers.cam.at = vect3( 	0.0,	1.0,   0.0 );
 
 		// 点
-		m.tbl_pObj.emplace_back( new Ball19 );	// ボール
+		m.tbl_pObj.emplace_back( new Impl::Ball19 );	// ボール
 
 	}
 
 	// 設定
-	Ball19&	ball	= *dynamic_cast<Ball19*>(m.tbl_pObj[0].get());
+	Impl::Ball19&	ball	= *dynamic_cast<Impl::Ball19*>(m.tbl_pObj[0].get());
 
 	// 初期化：パラメータ
 	if ( !m.bInitParam )
@@ -117,12 +108,12 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		ball.moment	= vect3(0,0,0);
 		ball.mat	= midentity();
 		ball.vel	= vect3(0,0,0);
-		motor.power = 0;
+		pImpl->motor.power = 0;
 	}
 
 	// 入力
 	if ( keys.R.hi )	m.bInitParam = false;
-	if ( mouse.F.on )	motor.power += 0.01;
+	if ( mouse.F.on )	pImpl->motor.power += 0.01;
 	if ( mouse.B.on )	ball.vel += vect3(0.01,0,0);
 
 	// 落下
@@ -135,38 +126,38 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 //if ( mouse.F.on )
 	{
 		vect3 axis = ball.mat.GetVectZ();
-		vect3 v = axis * motor.power;
+		vect3 v = axis * pImpl->motor.power;
 		ball.moment += (v - ball.moment);
 	}
 	
 
 
 	// 接地
-	if ( dot(ball.pos-plate.pos,plate.nor)-ball.radius < 0)
+	if ( dot(ball.pos-pImpl->plate.pos,pImpl->plate.nor)-ball.radius < 0)
 	{
 		// 斜面に沿って球の位置と速度を補正
-		ball.pos += -( dot( ball.pos - plate.pos , plate.nor ) - ball.radius ) * plate.nor;
-		ball.vel = 	ball.vel - dot( ball.vel , plate.nor ) * plate.nor;
+		ball.pos += -( dot( ball.pos - pImpl->plate.pos , pImpl->plate.nor ) - ball.radius ) * pImpl->plate.nor;
+		ball.vel = 	ball.vel - dot( ball.vel , pImpl->plate.nor ) * pImpl->plate.nor;
 
 
 	#if 1
 		// モーメントを速度に変換
-		vect3 vel = cross( plate.nor, ball.moment );
+		vect3 vel = cross( pImpl->plate.nor, ball.moment );
 
 		ball.vel +=  vel;
 
 		// 斜面の速度を球のモーメントに変換
-		vect3 moment = cross( ball.vel, plate.nor );
+		vect3 moment = cross( ball.vel, pImpl->plate.nor );
 
 		ball.moment = moment;
 
 	#else
 	#if 0
 		// 斜面の速度を球の角速度に変換
-		ball.moment = cross( ball.vel, plate.nor );
+		ball.moment = cross( ball.vel, pImpl->plate.nor );
 	#else
 		// モーメントを速度に変換
-		ball.vel = cross( plate.nor, ball.moment );
+		ball.vel = cross( pImpl->plate.nor, ball.moment );
 	#endif
 	#endif
 	}
@@ -179,13 +170,13 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	ball.mat = mrotateByAxis( ball.moment , ball.moment.abs() ) * ball.mat;
 
 	// 床表示
-	pers.grid.DrawGrid3d( gra, pers, plate.pos, PLATE_MAT, 16, 16, 1, rgb(0.2,0.2,0.2) );
+	pers.grid.DrawGrid3d( gra, pers, pImpl->plate.pos, PLATE_MAT, 16, 16, 1, rgb(0.2,0.2,0.2) );
 
 	// ボール表示
 	pers.prim.DrawSphere( gra, pers, ball.pos, ball.mat, ball.radius );
 
 	// メーター表示
-	funcShowBar( gra, m_y++, motor.power, 		"power  ", col7 );
-	funcShowBar( gra, m_y++, ball.moment.abs(),	"moment ", col7 );
-	funcShowBar( gra, m_y++, ball.vel.abs(),	"vel    ", col7 );
+	funcShowBar( gra, m_y++, pImpl->motor.power, 		"power  ", rgb(1,1,1) );
+	funcShowBar( gra, m_y++, ball.moment.abs(),	"moment ", rgb(1,1,1) );
+	funcShowBar( gra, m_y++, ball.vel.abs(),	"vel    ", rgb(1,1,1) );
 }

@@ -34,6 +34,9 @@
 struct Lab16::Impl
 {
 	unique_ptr<Skeleton> pSkeleton;
+	mat33	mkata = midentity();
+	bool	flgInfo = true;
+
 };
 
 //------------------------------------------------------------------------------
@@ -232,7 +235,6 @@ void Lab16::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		if(1)
 		{
 			mat33	mmune = midentity();
-			static mat33	mkata = midentity();
 			mat33	mhiji = midentity();;
 			mat33	mte = midentity() ;
 			vect3	pos0 = tbl_pObj[0]->pos;
@@ -274,10 +276,10 @@ void Lab16::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 					nz.x,	nz.y,	nz.z
 				);
 
-				if ( keys.CTRL.on )		mkata.rotateByAxis( (p4-p2).normalize(), deg2rad(0.5));
-				if ( keys.SHIFT.on )	mkata.rotateByAxis( (p4-p2).normalize(), deg2rad(-0.5));
+				if ( keys.CTRL.on )		pImpl->mkata.rotateByAxis( (p4-p2).normalize(), deg2rad(0.5));
+				if ( keys.SHIFT.on )	pImpl->mkata.rotateByAxis( (p4-p2).normalize(), deg2rad(-0.5));
 				
-				pers.prim.DrawBox( gra, pers, p2, mkata, false, false );
+				pers.prim.DrawBox( gra, pers, p2, pImpl->mkata, false, false );
 			}
 			// 箱 肘
 			{
@@ -348,9 +350,8 @@ void Lab16::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 
 		{
-			static bool flgInfo = true;
-			if( keys.F2.hi ) flgInfo = !flgInfo;
-			if ( flgInfo )
+			if( keys.F2.hi ) pImpl->flgInfo = !pImpl->flgInfo;
+			if ( pImpl->flgInfo )
 			{
 
 				gra.Print(1,(float)text_y++,string("[ ")+skeleton.filename+" ]");

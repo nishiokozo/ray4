@@ -29,24 +29,13 @@
 #include "lab.h"
 #include "lab13.h"
 
-static const float	G	= -9.80665;				// 重力加速度
-static const rgb col0 = rgb( 0, 0, 0 );
-static const rgb col1 = rgb( 0, 0, 1 );
-static const rgb col2 = rgb( 1, 0, 0 );
-static const rgb col3 = rgb( 1, 0, 1 );
-static const rgb col4 = rgb( 0, 1, 0 );
-static const rgb col5 = rgb( 0, 1, 1 );
-static const rgb col6 = rgb( 1, 1, 0 );
-static const rgb col7 = rgb( 1, 1, 1 );
-
-
-static	bool	bPause = false;
 
 
 //------------------------------------------------------------------------------
 void Lab13::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
+	const float	G	= -9.80665;				// 重力加速度
 	rgb col = rgb( 1, 1, 1 );
 
 	//画面クリア
@@ -111,11 +100,11 @@ void Lab13::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 	if ( flg )
 	{
-		pers.pen.pset3d( gra, pers, Q, col2, 7 );
+		pers.pen.pset3d( gra, pers, Q, rgb(1,0,0), 7 );
 	}
 	else
 	{
-		pers.pen.pset3d( gra, pers, Q, col1, 7 );
+		pers.pen.pset3d( gra, pers, Q, rgb(0,0,1), 7 );
 	}
 	
 	

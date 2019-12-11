@@ -24,6 +24,28 @@
 
 #include "lab.h"
 #include "lab6.h"
+struct Lab6::Impl
+{
+	vect3 G_pos = vect3(0,2.0,0);
+	vect3 G_acc= vect3(0,0,0.0);
+	float G_radius = 0.5;
+	float G_head = deg2rad(35);	//	タイヤの方向
+	float G_bank = deg2rad(40);	//	回転角
+	float G_rspd = deg2rad(0);	//	角速度
+	float G = 9.80665;				// 重力加速度
+	float grate = 9.80665 / 60/60;	// 重力加速度
+
+	vect3 pos = G_pos;
+	vect3 acc1 = G_acc;
+	vect3 acc2 = G_acc;
+	float radius = G_radius;
+	float head = G_head;
+	float bank = G_bank;
+	float rspd = G_rspd;
+
+};
+Lab6::Lab6() : pImpl( new Lab6::Impl ){}
+
 //------------------------------------------------------------------------------
 void Lab6::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
@@ -34,22 +56,7 @@ void Lab6::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 
 	gra.Print(1,(float)text_y++,string("<<lab6_tire3d>>")); 
 
-	const vect3 G_pos = vect3(0,2.0,0);
-	const vect3 G_acc= vect3(0,0,0.0);
-	const float G_radius = 0.5;
-	const float G_head = deg2rad(35);	//	タイヤの方向
-	const float G_bank = deg2rad(40);	//	回転角
-	const float G_rspd = deg2rad(0);	//	角速度
-	const float G = 9.80665;				// 重力加速度
-	const float grate = 9.80665 / 60/60;	// 重力加速度
 
-	static vect3 pos = G_pos;
-	static vect3 acc1 = G_acc;
-	static vect3 acc2 = G_acc;
-	static float radius = G_radius;
-	static float head = G_head;
-	static float bank = G_bank;
-	static float rspd = G_rspd;
 
 	
 	// 動き
@@ -59,46 +66,46 @@ void Lab6::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 			// リセット
 			if ( keys.R.hi ) 
 			{
-				pos = G_pos;
-				acc1 = G_acc;
-				acc2 = G_acc;
-				radius = G_radius;
-				head = G_head;
-				bank = G_bank;
-				rspd = G_rspd;
+				pImpl->pos = pImpl->G_pos;
+				pImpl->acc1 = pImpl->G_acc;
+				pImpl->acc2 = pImpl->G_acc;
+				pImpl->radius = pImpl->G_radius;
+				pImpl->head = pImpl->G_head;
+				pImpl->bank = pImpl->G_bank;
+				pImpl->rspd = pImpl->G_rspd;
 			}
 			if ( mouse.F.hi ) 
 			{
-				acc1 += vect3( sin(head), 0, cos(head) )*0.02;
-				acc2 += vect3( sin(head), 0, cos(head) )*0.02;
+				pImpl->acc1 += vect3( sin(pImpl->head), 0, cos(pImpl->head) )*0.02;
+				pImpl->acc2 += vect3( sin(pImpl->head), 0, cos(pImpl->head) )*0.02;
 			}
-			if ( mouse.B.hi ) rspd += deg2rad(5);
-			if ( mouse.R.hi ) rspd += deg2rad(-5);
+			if ( mouse.B.hi ) pImpl->rspd += deg2rad(5);
+			if ( mouse.R.hi ) pImpl->rspd += deg2rad(-5);
 		}
 
 		// 重力
 		{
-			acc1.y -= grate;
-			acc2.y -= grate;
-//						pos += (acc1+acc2)/2 ;
+			pImpl->acc1.y -= pImpl->grate;
+			pImpl->acc2.y -= pImpl->grate;
+//						pImpl->pos += (pImpl->acc1+pImpl->acc2)/2 ;
 		}
 
 		// 回転
 		{
-			bank += rspd;
+			pImpl->bank += pImpl->rspd;
 		}
 	}
 
-	float high = abs(radius*cos(bank));
+	float high = abs(pImpl->radius*cos(pImpl->bank));
 	
 	// 衝突	地面
-	if ( high > pos.y ) 
+	if ( high > pImpl->pos.y ) 
 	{
 
-		pos.y = high;
+		pImpl->pos.y = high;
 
 		// バウンド
-		if ( bank > 0 )
+		if ( pImpl->bank > 0 )
 		{
 		}
 		else
@@ -109,34 +116,35 @@ void Lab6::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 #if 0
 		// 回転
 		{
-			float a = atan( vel.y * sin(bank) / radius );
-			rspd = a;
+			float a = atan( vel.y * sin(pImpl->bank) / pImpl->radius );
+			pImpl->rspd = a;
 		}
-		// 衝突 bank
-		if ( bank > deg2rad(90) ) bank -= deg2rad(180);
-		if ( bank < deg2rad(-90) ) bank += deg2rad(180);
+		// 衝突 pImpl->bank
+		if ( pImpl->bank > deg2rad(90) ) pImpl->bank -= deg2rad(180);
+		if ( pImpl->bank < deg2rad(-90) ) pImpl->bank += deg2rad(180);
 #endif
 	}
 	
 	// 設置地面
-	if ( high == pos.y ) 
+	if ( high == pImpl->pos.y ) 
 	{
-		// 衝突 bank
-		if ( bank > deg2rad(90) ) bank -= deg2rad(180);
-		if ( bank < deg2rad(-90) ) bank += deg2rad(180);
+		// 衝突 pImpl->bank
+		if ( pImpl->bank > deg2rad(90) ) pImpl->bank -= deg2rad(180);
+		if ( pImpl->bank < deg2rad(-90) ) pImpl->bank += deg2rad(180);
 
 		// 回転
 		{
-			float a = atan( grate * sin(bank) / radius );
-			rspd += a;
+			
+			float a = atan( pImpl->grate * sin(pImpl->bank) / pImpl->radius );
+			pImpl->rspd += a;
 		}
 	}
 
 	// 減衰	空気抵抗
 	{
-//						rspd *= 0.99;
+//						pImpl->rspd *= 0.99;
 	}
 
 	// 描画
-	pers.prim.DrawTire( gra, pers, pos, head, bank, radius );
+	pers.prim.DrawTire( gra, pers, pImpl->pos, pImpl->head, pImpl->bank, pImpl->radius );
 }

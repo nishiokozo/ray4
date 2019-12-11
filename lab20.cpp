@@ -29,38 +29,33 @@
 
 struct Lab20::Impl
 {
+	 struct
+	{
+		float 	radius;
+		vect2	pos;
+		vect2	vel;
+		float	spin;
+		float	rot;	
+	} ball;
+
+	 struct
+	{
+		vect2	p0;
+		vect2	p1;
+		vect2	tan;
+		vect2	nor;
+	} wall;
+
+	 struct
+	{
+		float power;
+	} motor;
+
+	 	float	valMasatu = 1.0;
 };
 
-//------------------------------------------------------------------------------
-Lab20::Lab20() : pImpl( new Lab20::Impl )
-//------------------------------------------------------------------------------
-{
+Lab20::Lab20() : pImpl( new Lab20::Impl ){}
 
-}
-
-static struct
-{
-	float 	radius;
-	vect2	pos;
-	vect2	vel;
-	float	spin;
-	float	rot;	
-} ball;
-
-static struct
-{
-	vect2	p0;
-	vect2	p1;
-	vect2	tan;
-	vect2	nor;
-} wall;
-
-static struct
-{
-	float power;
-} motor;
-
-static 	float	g_masatu = 1.0;
 //------------------------------------------------------------------------------
 void Lab20::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
@@ -94,60 +89,60 @@ void Lab20::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	{
 		m.bInitParam = true;
 
-		ball.radius	= 1.0;
-		ball.pos	= vect2( 0, 3.1 );
-		ball.vel	= vect2( 0, 0 );
-		ball.spin	= 0;
-		ball.rot	= 0;
+		pImpl->ball.radius	= 1.0;
+		pImpl->ball.pos	= vect2( 0, 3.1 );
+		pImpl->ball.vel	= vect2( 0, 0 );
+		pImpl->ball.spin	= 0;
+		pImpl->ball.rot	= 0;
 
-		wall.p0 = vect2(-4,-0.2 );
-		wall.p1 = vect2( 4, 0.2 );
-		wall.tan = ( wall.p1 - wall.p0 ).normalize();
-		wall.nor = vect2( -wall.tan.y, wall.tan.x );
+		pImpl->wall.p0 = vect2(-4,-0.2 );
+		pImpl->wall.p1 = vect2( 4, 0.2 );
+		pImpl->wall.tan = ( pImpl->wall.p1 - pImpl->wall.p0 ).normalize();
+		pImpl->wall.nor = vect2( -pImpl->wall.tan.y, pImpl->wall.tan.x );
 
-		motor.power = 0;
+		pImpl->motor.power = 0;
 	}
 
 	// 入力
 	if ( keys.R.hi )	m.bInitParam = false;
-	if ( mouse.F.on )	motor.power += 0.0002;
-	if ( mouse.B.on )	ball.vel += vect2( 0.003 , 0.0 );
-	if ( keys._1.rep )	g_masatu -= 0.1;
-	if ( keys._2.rep )	g_masatu += 0.1;
-	g_masatu = min( max( g_masatu, 0 ), 1.0 );
+	if ( mouse.F.on )	pImpl->motor.power += 0.0002;
+	if ( mouse.B.on )	pImpl->ball.vel += vect2( 0.003 , 0.0 );
+	if ( keys._1.rep )	pImpl->valMasatu -= 0.1;
+	if ( keys._2.rep )	pImpl->valMasatu += 0.1;
+	pImpl->valMasatu = min( max( pImpl->valMasatu, 0 ), 1.0 );
 
 	// モーター回転伝達
-	ball.spin += motor.power;
+	pImpl->ball.spin += pImpl->motor.power;
 
 	// 落下
-	ball.vel += vect2( 0, -0.004 );
-	ball.pos += ball.vel;
+	pImpl->ball.vel += vect2( 0, -0.004 );
+	pImpl->ball.pos += pImpl->ball.vel;
 
-	if ( dot( ball.pos-wall.p0, wall.nor ) < ball.radius )
+	if ( dot( pImpl->ball.pos-pImpl->wall.p0, pImpl->wall.nor ) < pImpl->ball.radius )
 	{
 		// 衝突前に戻す
-		ball.pos -= ball.vel;
+		pImpl->ball.pos -= pImpl->ball.vel;
 
 		// 移動ベクトルの反射
-		ball.vel = 	func_reflect( ball.vel, wall.nor, 0.0 );
-		ball.pos += ball.vel;
+		pImpl->ball.vel = 	func_reflect( pImpl->ball.vel, pImpl->wall.nor, 0.0 );
+		pImpl->ball.pos += pImpl->ball.vel;
 
 		// 回転量を求める
-		ball.spin = dot( ball.vel, wall.tan );
+		pImpl->ball.spin = dot( pImpl->ball.vel, pImpl->wall.tan );
 
 	}
 
 	// 描画：ボール
-	ball.rot += ball.spin;
-	pers.prim.DrawCircle( gra, pers, vect3( ball.pos, 0 ), mrotz(-ball.rot), 1.0, rgb(1,1,1) );
+	pImpl->ball.rot += pImpl->ball.spin;
+	pers.prim.DrawCircle( gra, pers, vect3( pImpl->ball.pos, 0 ), mrotz(-pImpl->ball.rot), 1.0, rgb(1,1,1) );
 
 	// 描画：壁
-	pers.pen.line3d( gra, pers, vect3(wall.p0,0), vect3(wall.p1,0) );
+	pers.pen.line3d( gra, pers, vect3(pImpl->wall.p0,0), vect3(pImpl->wall.p1,0) );
 
 	// メーター表示
-	funcShowBar( gra, m_y++, motor.power,	"power    ", rgb(1,1,1) );
-	funcShowBar( gra, m_y++, ball.vel.abs(),"vel      ", rgb(1,1,1) );
-	funcShowBar( gra, m_y++, ball.spin, 	"spin     ", rgb(1,1,1) );
-	funcShowBar( gra, m_y++, g_masatu, 		"g_masatu ", rgb(1,1,1) );
+	funcShowBar( gra, m_y++, pImpl->motor.power,	"pImpl->power    ", rgb(1,1,1) );
+	funcShowBar( gra, m_y++, pImpl->ball.vel.abs(),"vel      ", rgb(1,1,1) );
+	funcShowBar( gra, m_y++, pImpl->ball.spin, 	"spin     ", rgb(1,1,1) );
+	funcShowBar( gra, m_y++, pImpl->valMasatu, 		"pImpl->valMasatu ", rgb(1,1,1) );
 	
 }

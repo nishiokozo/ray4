@@ -218,7 +218,6 @@ void Pers::Focus( vector<vector<shared_ptr<Obj>>>& tbltbl_pObj )
 ////////////////
 // Camera
 ////////////////
-const static float g_nearist = 0.00000001f*100; 
 //------------------------------------------------------------------------------
 void Pers::Cam::Rotation( vect3 mov )
 //------------------------------------------------------------------------------
@@ -268,6 +267,7 @@ v = v * vect3(1.5,1,1);
 void Pers::Cam::Zoom( float step )
 //------------------------------------------------------------------------------
 {
+	const float varNearist = 0.00000001f*100; 
 #if 1
 	vect3	v= vect3(0,0,step);
 	mat33 mrot = mat.GetRotate();
@@ -275,7 +275,7 @@ void Pers::Cam::Zoom( float step )
 
 	vect3 p = pos;
 	pos += v;
-	if( (pos-at).abs() <= v.abs() ) pos = (p-at).normalize()*g_nearist+at;
+	if( (pos-at).abs() <= v.abs() ) pos = (p-at).normalize()*varNearist+at;
 #else
 	vect3	v= vect3(0,0,step);
 	mat33	mrot = mat.GetRotate();
@@ -288,7 +288,7 @@ void Pers::Cam::Zoom( float step )
 //		vect3 p = pos;
 //		pos += v;
 //		pos += v;
-pos = (pos-at).normalize()*g_nearist+at;
+pos = (pos-at).normalize()*varNearist+at;
 cout << "a" << endl;
 pos.dump();
 at.dump();
@@ -300,7 +300,7 @@ at.dump();
 	}
 
 
-//	if( (pos-at).abs() <= v.abs() ) pos = (p-at).normalize()*g_nearist+at;
+//	if( (pos-at).abs() <= v.abs() ) pos = (p-at).normalize()*varNearist+at;
 #endif
 }
 
@@ -508,7 +508,7 @@ void Pers::Prim::DrawBox( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAx
 	const float L = 0.03f;
 	const float M = 0.02f;
 	const float N = 0.02f;
-	static vector<vect3> vert=
+	vector<vect3> vert=
 	{
 		{	-S,		 S,		-S	},//0
 		{	 S,		 S,		-S	},//1
@@ -533,9 +533,9 @@ void Pers::Prim::DrawBox( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAx
 		{	-N,		 +N, 	S+N	},//
 		{	+N,		 +N, 	S+N	},//
 	};
-	static vector<vect3> disp;
+	vector<vect3> disp;
 
-	static vector<ivect2>	edge
+	vector<ivect2>	edge
 	{
 		{	0,	1	},
 		{	1,	3	},
@@ -566,7 +566,7 @@ void Pers::Prim::DrawBox( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAx
 #endif
 		
 	};
-	static vector<ivect3>	tri
+	vector<ivect3>	tri
 	{
 		{	8,10,9	},{	9,10,11	},	// yマーク
 		{	14,	13, 12	},	// xマーク
@@ -632,11 +632,11 @@ void Pers::Prim::DrawBox( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAx
 void Pers::Prim::DrawDrum( SysGra& gra, Pers& pers,  vect3 pos, mat33 m  )
 //------------------------------------------------------------------------------
 {
-	static const float S = 0.05f;
-	static const float L = 0.03f;
-	static const float M = 0.02f;
-	static const float N = 0.02f;
-	static vector<vect3> vert=
+	const float S = 0.05f;
+	const float L = 0.03f;
+	const float M = 0.02f;
+	const float N = 0.02f;
+	vector<vect3> vert=
 	{
 		{	-S,		 S,		-S	},
 		{	 S,		 S,		-S	},
@@ -661,9 +661,9 @@ void Pers::Prim::DrawDrum( SysGra& gra, Pers& pers,  vect3 pos, mat33 m  )
 		{	-N,	 +N, 	S+N	},
 		{	+N,	 +N, 	S+N	},
 	};
-	static vector<vect3> disp;
+	vector<vect3> disp;
 
-	static vector<ivect2>	edge
+	vector<ivect2>	edge
 	{
 /*				{	0,	1	},
 		{	1,	3	},
@@ -693,12 +693,12 @@ void Pers::Prim::DrawDrum( SysGra& gra, Pers& pers,  vect3 pos, mat33 m  )
 #endif
 		
 	};
-	static vector<ivect3>	tri
+	vector<ivect3>	tri
 	{
 //				{	14,	13, 12	},	// xマーク
 	};
 
-	static bool bInitParam = false;
+	bool bInitParam = false;
 	if ( !bInitParam )
 	{
 		{
@@ -786,7 +786,8 @@ void Pers::Prim::DrawDrum( SysGra& gra, Pers& pers,  vect3 pos, mat33 m  )
 }
 
 // 球
-static	tuple<vect3,vect3,vect3> func( float th, float r, mat33& m, vect3& pos )
+/*
+	tuple<vect3,vect3,vect3> func( float th, float r, mat33& m, vect3& pos )
 	{
 		float u = r*cos(th);
 		float v = r*sin(th);
@@ -796,6 +797,7 @@ static	tuple<vect3,vect3,vect3> func( float th, float r, mat33& m, vect3& pos )
 		vect3	vz1 = m*vect3(u,v,0)+pos;
 		return {vx1, vy1, vz1};
 	};
+*/
 //------------------------------------------------------------------------------
 void Pers::Prim::DrawSphere( SysGra& gra, Pers& pers, vect3 pos, mat33 m, float r, rgb col  )
 //------------------------------------------------------------------------------
@@ -848,9 +850,9 @@ void Pers::Prim::DrawSphere( SysGra& gra, Pers& pers, vect3 pos, mat33 m, float 
 void Pers::Prim::DrawTire( SysGra& gra, Pers& pers, vect3 pos, float head, float bank, float radius )
 //------------------------------------------------------------------------------
 {
-	static vector<vect3> vert;
-	static vector<vect3> disp;
-	static bool bInitParam = false;
+	vector<vect3> vert;
+	vector<vect3> disp;
+	bool bInitParam = false;
 	if ( !bInitParam )
 	{
 		bInitParam = true;
@@ -896,8 +898,8 @@ void Pers::Prim::DrawTire( SysGra& gra, Pers& pers, vect3 pos, float head, float
 void Pers::Prim::DrawSquare( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAxis, bool bTri )
 //------------------------------------------------------------------------------
 {
-	static const float s = 0.04f;
-	static vector<vect3> vert=
+	const float s = 0.04f;
+	vector<vect3> vert=
 	{
 		{	-s,		 s,		0	},//0
 		{	 s,		 s,		0	},//1
@@ -905,9 +907,9 @@ void Pers::Prim::DrawSquare( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool 
 		{	 s,		-s,		0	},//3
 
 	};
-	static vector<vect3> disp;
+	vector<vect3> disp;
 
-	static vector<ivect2>	edge
+	vector<ivect2>	edge
 	{
 		{	0,	1	},
 		{	1,	3	},

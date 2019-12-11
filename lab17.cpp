@@ -27,15 +27,6 @@
 #include "lab.h"
 #include "lab17.h"
 
-static const float	G	= -9.80665;				// 重力加速度
-static const rgb col0 = rgb( 0, 0, 0 );
-static const rgb col1 = rgb( 0, 0, 1 );
-static const rgb col2 = rgb( 1, 0, 0 );
-static const rgb col3 = rgb( 1, 0, 1 );
-static const rgb col4 = rgb( 0, 1, 0 );
-static const rgb col5 = rgb( 0, 1, 1 );
-static const rgb col6 = rgb( 1, 1, 0 );
-static const rgb col7 = rgb( 1, 1, 1 );
 
 
 struct Lab17::Impl
@@ -104,6 +95,7 @@ void Lab17::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	}
 
 	// 設定値
+	const float	G	= -9.80665;				// 重力加速度
 	vect3	vg	= vect3(0,G,0);		// 重力加速度ベクトル
 	vect3	plate_p	= m.tbl_pObj[0]->pos;
 	vect3	plate_n	= (m.tbl_pObj[1]->pos-plate_p).normalize();
@@ -222,7 +214,7 @@ void Lab17::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		b1.mat = mrotateByAxis( b1.vaxis, b1.fspin ) * b1.mat;
 	}
 	
-	m.drawVect( gra, pers, text_y, b1.pos, b1.vaxis.normalize() ,1	, col3, "axis" );
+	m.drawVect( gra, pers, text_y, b1.pos, b1.vaxis.normalize() ,1	, rgb(1,0,1), "axis" );
 
 
 	// 平面表示
@@ -234,7 +226,7 @@ void Lab17::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	// 表示
 	pers.prim.DrawSphere( gra, pers, b1.pos, b1.mat, b1.radius );
 	// 接点表示
-	if ( b1.flgOn )	pers.pen.pset3d( gra, pers, b1.Q , col6, 9);
+	if ( b1.flgOn )	pers.pen.pset3d( gra, pers, b1.Q , rgb(1,1,0), 9);
 
 
 }

@@ -28,41 +28,36 @@
 #include "lab.h"
 #include "lab9.h"
 
-static const float	G	= -9.80665;				// 重力加速度
-static const rgb col0 = rgb( 0, 0, 0 );
-static const rgb col1 = rgb( 0, 0, 1 );
-static const rgb col2 = rgb( 1, 0, 0 );
-static const rgb col3 = rgb( 1, 0, 1 );
-static const rgb col4 = rgb( 0, 1, 0 );
-static const rgb col5 = rgb( 0, 1, 1 );
-static const rgb col6 = rgb( 1, 1, 0 );
-static const rgb col7 = rgb( 1, 1, 1 );
 
-
-
-// 定義
-struct Ball9:Obj
+struct Lab9::Impl
 {
-	vect3	vel;	//	velocity 速度(m/s)
-	float	radius = 0.1;
-	mat33	mat = midentity();
-	bool	flgOn = false;	// 接地フラグ
-	vect3	Q;
-	vect3	vaxis;
-	float	fspin;
-
-	vect3	pn;
-	vect3	vn;
-	mat33	mn = midentity();
-
-	Ball9() : Obj(vect3(0,0,0)) {}
-
-	Ball9( vect3 v, vect3 _vel ) : Obj(v)
+	// 定義
+	struct Ball:Obj
 	{
-		vel = _vel;
-	}
-	
+		vect3	vel;	//	velocity 速度(m/s)
+		float	radius = 0.1;
+		mat33	mat = midentity();
+		bool	flgOn = false;	// 接地フラグ
+		vect3	Q;
+		vect3	vaxis;
+		float	fspin;
+
+		vect3	pn;
+		vect3	vn;
+		mat33	mn = midentity();
+
+		Ball() : Obj(vect3(0,0,0)) {}
+
+		Ball( vect3 v, vect3 _vel ) : Obj(v)
+		{
+			vel = _vel;
+		}
+		
+	};
 };
+Lab9::Lab9() : pImpl( new Lab9::Impl ){}
+
+
 
 //------------------------------------------------------------------------------
 void Lab9::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
@@ -87,8 +82,8 @@ void Lab9::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 		m.tbl_pObj.clear();
 		m.tbl_pObj.emplace_back( new Obj(vect3( 0.05	, 0.0,	0.01 )) );	// 平面原点
 		m.tbl_pObj.emplace_back( new Obj(vect3( 0.0		, 0.5,  0.0 )) );	// 平面法線
-		m.tbl_pObj.emplace_back( new Ball9 );
-		m.tbl_pObj.emplace_back( new Ball9 );
+		m.tbl_pObj.emplace_back( new Impl::Ball );
+		m.tbl_pObj.emplace_back( new Impl::Ball );
 
 		//GUI登録
 		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
@@ -96,11 +91,12 @@ void Lab9::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 	}
 
 	// 設定値
+	const float	G	= -9.80665;				// 重力加速度
 	vect3	vg	= vect3(0,G,0);		// 重力加速度ベクトル
 	vect3	plate_p	= m.tbl_pObj[0]->pos;
 	vect3	plate_n	= (m.tbl_pObj[1]->pos-plate_p).normalize();
-	Ball9&	b1 = *dynamic_cast<Ball9*>(m.tbl_pObj[2].get());
-	Ball9&	b2 = *dynamic_cast<Ball9*>(m.tbl_pObj[3].get());
+	Impl::Ball&	b1 = *dynamic_cast<Impl::Ball*>(m.tbl_pObj[2].get());
+	Impl::Ball&	b2 = *dynamic_cast<Impl::Ball*>(m.tbl_pObj[3].get());
 
 	// 初期化：パラメータ
 	if ( !m.bInitParam )
@@ -137,7 +133,6 @@ void Lab9::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 		}
 
 	}
-//static float time = 0;cout << time << " " ;b1.pos.dump();time += delta;
 
 	// 入力
 	{
@@ -165,7 +160,7 @@ void Lab9::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 
 	//衝突
 	// 回転量を移動量計算で求める
-	auto funcSpin = []( Ball9& ball, vect3& N )
+	auto funcSpin = []( Impl::Ball& ball, vect3& N )
 	{
 		vect3	d = ball.pn - ball.pos;
 		float	r = ball.radius;
@@ -179,7 +174,7 @@ void Lab9::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 	}; 
 
 	// ボールの反射
-	auto funcBound = [&]( Ball9& ball, vect3& N )
+	auto funcBound = [&]( Impl::Ball& ball, vect3& N )
 	{
 		vect3 d = ball.vn * delta;
 		ball.pn -= dot( d, N ) * N;
@@ -242,8 +237,8 @@ void Lab9::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 		b2.mat = mrotateByAxis( b2.vaxis, b2.fspin ) * b2.mat;
 	}
 	
-	m.drawVect( gra, pers, text_y, b1.pos, b1.vaxis.normalize() ,1	, col3, "axis" );
-	m.drawVect( gra, pers, text_y, b2.pos, b2.vaxis.normalize() ,1	, col3, "axis" );
+	m.drawVect( gra, pers, text_y, b1.pos, b1.vaxis.normalize() ,1	, rgb(1,0,1), "axis" );
+	m.drawVect( gra, pers, text_y, b2.pos, b2.vaxis.normalize() ,1	, rgb(1,0,1), "axis" );
 
 
 	// 平面表示
@@ -257,8 +252,8 @@ void Lab9::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 	pers.prim.DrawSphere( gra, pers, b2.pos, b2.mat, b2.radius );
 
 	// 接点表示
-	if ( b1.flgOn )	pers.pen.pset3d( gra, pers, b1.Q , col6, 9);
-	if ( b2.flgOn )	pers.pen.pset3d( gra, pers, b2.Q , col6, 9);
+	if ( b1.flgOn )	pers.pen.pset3d( gra, pers, b1.Q , rgb(1,1,0), 9);
+	if ( b2.flgOn )	pers.pen.pset3d( gra, pers, b2.Q , rgb(1,1,0), 9);
 
 
 }

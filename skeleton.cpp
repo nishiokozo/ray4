@@ -744,7 +744,7 @@ void Skeleton::DrawSkeleton( SysGra& gra, Pers& pers )
 	{
 		Joint*	p = dynamic_cast<Joint*>(tbl_pObj[2].get());
 
-		static vect3 v = vect3(-0.2, 0, 0);
+		constexpr vect3 v = vect3(-0.2, 0, 0);
 	
 		vect3 pos0 = (tbl_pObj[1]->prev8-tbl_pObj[2]->prev8).normalize();
 		vect3 pos1 = (tbl_pObj[1]->pos-tbl_pObj[2]->pos).normalize();

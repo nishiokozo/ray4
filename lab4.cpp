@@ -26,6 +26,19 @@
 
 #include "lab.h"
 #include "lab4.h"
+
+struct Lab4::Impl
+{
+	 vect3	vel;			// 運動量
+	 vect3	mov;			// 運動量
+	 bool	bPause = false; 
+
+	 float	rsp = 0;
+	 vect3	vv = vect3(0,0,0);
+};
+
+Lab4::Lab4() : pImpl( new Lab4::Impl ){}
+
 //------------------------------------------------------------------------------
 void Lab4::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
@@ -49,9 +62,6 @@ void Lab4::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 	const float g = G *delta*delta;		// 重力加速度/frame
 	const vect3 vg = vect3(0,-g,0);	// 重力加速度ベクトル/frame
 
-	static vect3	vel;			// 運動量
-	static vect3	mov;			// 運動量
-	static bool	bPause = false; 
 	bool	bStep = false; 
 
 
@@ -75,7 +85,7 @@ void Lab4::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 		cp.tbltbl_pEdge.clear();
 		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
 		
-		vel = vect3(0,0,0);
+		pImpl->vel = vect3(0,0,0);
 	}
 
 	vect3&	v0 = m.tbl_pObj[0]->pos;	//	barの根本
@@ -84,7 +94,7 @@ void Lab4::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 	// 入力
 	{
 		// ポーズ
-		if ( keys.SPACE.hi )	bPause = !bPause;
+		if ( keys.SPACE.hi )	pImpl->bPause = !pImpl->bPause;
 
 		// ステップ再生
 		if ( keys.ENTER.rep )	bStep = true;
@@ -105,16 +115,16 @@ void Lab4::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 	vect3	F = cross(vr/r, moment/r );	//	力
 
 	// 計算
-	if ( !bPause || bStep )
+	if ( !pImpl->bPause || bStep )
 	{
-		vel += F;
+		pImpl->vel += F;
 
-	 	float	w = vel.abs()/r;					//	角速度
+	 	float	w = pImpl->vel.abs()/r;					//	角速度
 
-mov =vel;
-		vel = mrotateByAxis( moment, w ) * vel;		//	回転
+pImpl->mov =pImpl->vel;
+		pImpl->vel = mrotateByAxis( moment, w ) * pImpl->vel;		//	回転
 
-		v1 += vel;
+		v1 += pImpl->vel;
 	}
 
 	// 描画
@@ -126,15 +136,13 @@ mov =vel;
 		m.drawVect( gra, pers, text_y, v1, vg	,100, rgb(1,0,0), "g" );
 		m.drawVect( gra, pers, text_y, v0, moment,100, rgb(1,0,1), "moment" );
 		m.drawVect( gra, pers, text_y, v1, F		,100, rgb(0,1,0), "F" );
-		m.drawVect( gra, pers, text_y, v1, vel	,2	, rgb(1,1,0), "vel" );
-		m.drawVect( gra, pers, text_y, v1, mov	,2	, rgb(0,0,1), "mov" );
+		m.drawVect( gra, pers, text_y, v1, pImpl->vel	,2	, rgb(1,1,0), "pImpl->vel" );
+		m.drawVect( gra, pers, text_y, v1, pImpl->mov	,2	, rgb(0,0,1), "pImpl->mov" );
 	}
 
 
 #if 0
 	{
-		static float	rsp = 0;
-		static vect3	vv = 0;
 
 		vect3 v = (v1-v0);
 
@@ -143,13 +151,13 @@ mov =vel;
 			float b = atan2(v.x,v.y);
 			float t = -g * sin(b);			//	接線速度
 			float r = t/2/pi/v.abs();		//	角加速度
-			rsp +=r;						//	角速度
+			pImpl->rsp +=r;						//	角速度
 		}
 
 		// 回転
 		{
-			float x = v.x *cos(rsp) - v.y*sin(rsp); 
-			float y = v.x *sin(rsp) + v.y*cos(rsp); 
+			float x = v.x *cos(pImpl->rsp) - v.y*sin(pImpl->rsp); 
+			float y = v.x *sin(pImpl->rsp) + v.y*cos(pImpl->rsp); 
 			vect3 a = vect3(x,y,0);
 			v1 = v0 + a;
 
@@ -167,7 +175,7 @@ mov =vel;
 
 //						pers.pen.line3d( gra, pers, v1, v1+vt*100, rgb(0,1,0) );
 			vect3 v2 = v*1.05+v0;
-//						pers.pen.line3d( gra, pers, v2, v2+vv, rgb(0,1,0) );
+//						pers.pen.line3d( gra, pers, v2, v2+pImpl->vv, rgb(0,1,0) );
 
 //						pers.pen.line3d( gra, pers, v2, v2+vg*100, rgb(1,0,0) );
 			pers.pen.line3d( gra, pers, v2, v2+vt*100, rgb(0,1,0) );
@@ -182,10 +190,10 @@ mov =vel;
 		vect3 n0 = cross( v, vg );
 		vect3 vt = cross( n0, v );
 
-		vv += vt;
+		pImpl->vv += vt;
 		v2 += vt*10;
 
-//					pers.pen.line3d( gra, pers,  0,  vv*10, rgb(0,1,1), 2 );
+//					pers.pen.line3d( gra, pers,  0,  pImpl->vv*10, rgb(0,1,1), 2 );
 		pers.pen.line3d( gra, pers,  vect3(1,0,0),  vect3(1,0,0)+vt*100, rgb(0,1,0), 1 );
 
 		pers.pen.line3d( gra, pers, v2, v2+vt*100, rgb(0,1,0) );

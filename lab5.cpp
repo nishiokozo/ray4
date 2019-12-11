@@ -24,19 +24,20 @@
 
 #include "lab.h"
 #include "lab5.h"
+
+struct Lab5::Impl
+{
+	float	rsp = 0;
+
+};
+
+Lab5::Lab5() : pImpl( new Lab5::Impl ){}
+
 //------------------------------------------------------------------------------
 void Lab5::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	const float	G	= -9.80665;				// 重力加速度
-	const rgb col0 = rgb( 0, 0, 0 );
-	const rgb col1 = rgb( 0, 0, 1 );
-	const rgb col2 = rgb( 1, 0, 0 );
-	const rgb col3 = rgb( 1, 0, 1 );
-	const rgb col4 = rgb( 0, 1, 0 );
-	const rgb col5 = rgb( 0, 1, 1 );
-	const rgb col6 = rgb( 1, 1, 0 );
-	const rgb col7 = rgb( 1, 1, 1 );
 	
 	//画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
@@ -46,7 +47,6 @@ void Lab5::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 
 	const float grate = 9.80665 *delta*delta;		// 重力加速度/frame
 
-	static float	rsp = 0;
 
 	if ( !m.bInitParam )
 	{
@@ -71,7 +71,7 @@ void Lab5::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
 		cp.tbltbl_pEdge.emplace_back( m.tbl_pEdge );
 
-		rsp=0;
+		pImpl->rsp=0;
 	}
 	if ( keys.R.hi )	m.bInitParam = false;
 
@@ -94,11 +94,11 @@ void Lab5::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 		// 角速度に変換
 		float tsp = -grate * sin(b);	//	接線速度
 		float r = tsp/2/pi/v.abs();		//	角加速度
-		rsp +=r;						//	角速度
+		pImpl->rsp +=r;						//	角速度
 
 		// 回転
-		float x = v.x *cos(rsp) - v.y*sin(rsp); 
-		float y = v.x *sin(rsp) + v.y*cos(rsp); 
+		float x = v.x *cos(pImpl->rsp) - v.y*sin(pImpl->rsp); 
+		float y = v.x *sin(pImpl->rsp) + v.y*cos(pImpl->rsp); 
 		v1 = v0+vect3(x,y,0);
 
 	}

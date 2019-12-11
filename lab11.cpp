@@ -27,16 +27,6 @@
 #include "lab.h"
 #include "lab11.h"
 
-static	const float	G	= -9.80665;				// 重力加速度
-static	const rgb col0 = rgb( 0, 0, 0 );
-static	const rgb col1 = rgb( 0, 0, 1 );
-static	const rgb col2 = rgb( 1, 0, 0 );
-static	const rgb col3 = rgb( 1, 0, 1 );
-static	const rgb col4 = rgb( 0, 1, 0 );
-static	const rgb col5 = rgb( 0, 1, 1 );
-static	const rgb col6 = rgb( 1, 1, 0 );
-static	const rgb col7 = rgb( 1, 1, 1 );
-
 struct Lab11::Impl
 {
 	Graphs graphs;
@@ -72,6 +62,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	gra.Print(1,(float)text_y++,string("11 : Plate & Ball11")); 
 
 	// 定数
+	const float	G	= -9.80665;				// 重力加速度
 	vect3	vg	= vect3(0,G,0);		// 重力加速度ベクトル
 
 	// 初期化：オール
@@ -91,7 +82,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 		// 線
 		m.tbl_pEdge.clear();
-		m.tbl_pEdge.emplace_back( new Edge(1,2, col7,1) );
+		m.tbl_pEdge.emplace_back( new Edge(1,2, rgb(1,1,1),1) );
 
 		// 移動軸
 		pers.axis.bAxisX = true;
@@ -219,7 +210,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	pers.prim.DrawSphere( gra, pers, ball.pos, ball.mat, ball.radius );
 
 	// 接点表示
-	if ( flg )	pers.pen.pset3d( gra, pers, q0 , col6, 9);
+	if ( flg )	pers.pen.pset3d( gra, pers, q0 , rgb(1,1,0), 9);
 
 
 

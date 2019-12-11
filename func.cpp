@@ -13,7 +13,7 @@
 using namespace std;
 
 //------------------------------------------------------------------------------
-static tuple<bool,float>func_intersect_Plate_Curve_t( vect3 plate_P, vect3 plate_N, vect3 curve_A, vect3 curve_V )
+tuple<bool,float>func_intersect_Plate_Curve_t( vect3 plate_P, vect3 plate_N, vect3 curve_A, vect3 curve_V )
 //------------------------------------------------------------------------------
 {
 	vect3 P = plate_P;

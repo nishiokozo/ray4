@@ -53,15 +53,6 @@
 void LabObj::M::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str )
 //------------------------------------------------------------------------------
 {
-	static const rgb col0 = rgb( 0, 0, 0 );
-	static const rgb col1 = rgb( 0, 0, 1 );
-	static const rgb col2 = rgb( 1, 0, 0 );
-	static const rgb col3 = rgb( 1, 0, 1 );
-	static const rgb col4 = rgb( 0, 1, 0 );
-	static const rgb col5 = rgb( 0, 1, 1 );
-	static const rgb col6 = rgb( 1, 1, 0 );
-	static const rgb col7 = rgb( 1, 1, 1 );
-
 	gra.SetZTest(false);
 
 	vect3 v1 = v0+v*sc;
@@ -91,8 +82,8 @@ void LabObj::M::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 
 			vect3 c = vect3((b-a).normalize(),0);
 			vect2 d = cross(c,vect3(0,0,1)).xy();
 			vect2 e = (d+(b-a))*100;
-//			gra.Line( b, b + gra.Dot(-e.x,e.y), col6, 2 );
-			gra.Line( b, b + d*1, col6, 2 );
+//			gra.Line( b, b + gra.Dot(-e.x,e.y), rgb(1,1,0), 2 );
+			gra.Line( b, b + d*1, rgb(1,1,0), 2 );
 		}
 	}
 
@@ -151,7 +142,7 @@ void Lab::SetIdx( int n, Cp& cp )
 void Lab::SetNextIdx( int val, Cp& cp )
 //------------------------------------------------------------------------------
 {
-	static	int	tbl[] = 
+	int	tbl[] = 
 	{
 		0,
 		10,		//	カラータワー
@@ -177,7 +168,7 @@ void Lab::SetNextIdx( int val, Cp& cp )
 		21,		//	2D ポイント・トルク実験
 		22,		//	2D 棒・トルク実験
 	};	
-	static const int size = static_cast<signed>(sizeof(tbl)/sizeof(int));
+	const int size = static_cast<signed>(sizeof(tbl)/sizeof(int));
 
 	int num = -1;
 	for ( int i = 0 ; i < size ; i++ )
