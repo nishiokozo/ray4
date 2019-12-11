@@ -128,11 +128,11 @@ struct SysGra::Impl
 		HGLRC hGlrc;
 	} g;
 
-		chrono::system_clock::duration time_st;
-		chrono::system_clock::duration time_en;
-		chrono::system_clock::duration time_sec;
-		chrono::system_clock::duration time_now;
-		chrono::system_clock::duration time_max;
+	chrono::system_clock::duration time_st  = chrono::seconds(0);
+	chrono::system_clock::duration time_en  = chrono::seconds(0);
+	chrono::system_clock::duration time_sec = chrono::seconds(0);
+	chrono::system_clock::duration time_now = chrono::seconds(0);
+	chrono::system_clock::duration time_max = chrono::seconds(0);
 
 };
 //------------------------------------------------------------------------------
