@@ -1,6 +1,7 @@
 //2019/10/17
 
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <map>
 #include <thread>
@@ -114,35 +115,34 @@ void Lab::SetIdx( int n, Cp& cp )
 
 	if ( pLab ) 
 	{
-		delete pLab;
-		pLab=0;
+		pLab = 0;	// 開放
 	};
 
 	switch( m.idxLab )
 	{
-		case 0:		pLab = new Lab0;	break;
-		case 1:		pLab = new Lab1;	break;
-		case 2:		pLab = new Lab2;	break;
-		case 3:		pLab = new Lab3;	break;
-		case 4:		pLab = new Lab4;	break;
-		case 5:		pLab = new Lab5;	break;
-		case 6:		pLab = new Lab6;	break;
-		case 7:		pLab = new Lab7;	break;
-		case 8:		pLab = new Lab8;	break;
-		case 9:		pLab = new Lab9;	break;
-		case 10:	pLab = new Lab10;	break;
-		case 11:	pLab = new Lab11;	break;
-		case 12:	pLab = new Lab12;	break;
-		case 13:	pLab = new Lab13;	break;
-		case 14:	pLab = new Lab14;	break;
-		case 15:	pLab = new Lab15;	break;
-		case 16:	pLab = new Lab16;	break;
-		case 17:	pLab = new Lab17;	break;
-		case 18:	pLab = new Lab18;	break;
-		case 19:	pLab = new Lab19;	break;
-		case 20:	pLab = new Lab20;	break;
-		case 21:	pLab = new Lab21;	break;
-		case 22:	pLab = new Lab22;	break;
+		case 0:		pLab = unique_ptr<LabObj>( new Lab0 );	break;
+		case 1:		pLab = unique_ptr<LabObj>( new Lab1 );	break;
+		case 2:		pLab = unique_ptr<LabObj>( new Lab2 );	break;
+		case 3:		pLab = unique_ptr<LabObj>( new Lab3 );	break;
+		case 4:		pLab = unique_ptr<LabObj>( new Lab4 );	break;
+		case 5:		pLab = unique_ptr<LabObj>( new Lab5 );	break;
+		case 6:		pLab = unique_ptr<LabObj>( new Lab6 );	break;
+		case 7:		pLab = unique_ptr<LabObj>( new Lab7 );	break;
+		case 8:		pLab = unique_ptr<LabObj>( new Lab8 );	break;
+		case 9:		pLab = unique_ptr<LabObj>( new Lab9 );	break;
+		case 10:	pLab = unique_ptr<LabObj>( new Lab10 );	break;
+		case 11:	pLab = unique_ptr<LabObj>( new Lab11 );	break;
+		case 12:	pLab = unique_ptr<LabObj>( new Lab12 );	break;
+		case 13:	pLab = unique_ptr<LabObj>( new Lab13 );	break;
+		case 14:	pLab = unique_ptr<LabObj>( new Lab14 );	break;
+		case 15:	pLab = unique_ptr<LabObj>( new Lab15 );	break;
+		case 16:	pLab = unique_ptr<LabObj>( new Lab16 );	break;
+		case 17:	pLab = unique_ptr<LabObj>( new Lab17 );	break;
+		case 18:	pLab = unique_ptr<LabObj>( new Lab18 );	break;
+		case 19:	pLab = unique_ptr<LabObj>( new Lab19 );	break;
+		case 20:	pLab = unique_ptr<LabObj>( new Lab20 );	break;
+		case 21:	pLab = unique_ptr<LabObj>( new Lab21 );	break;
+		case 22:	pLab = unique_ptr<LabObj>( new Lab22 );	break;
 		default: break;
 	}
 }

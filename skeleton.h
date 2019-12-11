@@ -159,8 +159,8 @@ struct Skeleton
 	string	filename;
 
 	vector<Joint>			tblJointForm;	// 基本フォーム
-	vector<Obj*>			tbl_pObj;		//joint	継承クラスとして使うためポインタ型
-	vector<Edge*>			tbl_pEdge;		// 継承クラスとして使うためポインタ型
+	vector<shared_ptr<Obj>>			tbl_pObj;		//joint	継承クラスとして使うためポインタ型
+	vector<shared_ptr<Edge>>			tbl_pEdge;		// 継承クラスとして使うためポインタ型
 
 	struct A
 	{
@@ -204,13 +204,6 @@ struct Skeleton
 		bool	bShowSkin = true;	//	皮
 		bool	bShowLocus = true;	//	軌跡
 	} stat;
-
-	Skeleton(){};
-	~Skeleton()
-	{
-		for ( Obj* p : tbl_pObj ) delete p;
-		for ( Edge* p : tbl_pEdge ) delete p;
-	};
 
 	void LoadSkeleton( const string filename );
 	void SaveSkeleton();

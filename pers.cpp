@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include <functional>
 #include <tuple>
 
@@ -183,7 +184,7 @@ bool Pers::calcScissorLine3d( vect3 v0, vect3 v1, vect3& va, vect3& vb )	// 3D ç
 }
 
 //------------------------------------------------------------------------------
-void Pers::Focus( vector<vector<Obj*>>& tbltbl_pObj )
+void Pers::Focus( vector<vector<shared_ptr<Obj>>>& tbltbl_pObj )
 //------------------------------------------------------------------------------
 {
 	vect3 b(-infinit,-infinit,-infinit);
@@ -191,9 +192,9 @@ void Pers::Focus( vector<vector<Obj*>>& tbltbl_pObj )
 	vect3 b2;
 	vect3 s2;
 
-	for ( vector<Obj*>& tbl_pObj : tbltbl_pObj )
+	for ( vector<shared_ptr<Obj>>& tbl_pObj : tbltbl_pObj )
 	{
-		for ( Obj* p : tbl_pObj )
+		for ( shared_ptr<Obj> p : tbl_pObj )
 		{
 			if ( p->bSelected )
 			{

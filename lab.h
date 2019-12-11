@@ -7,8 +7,8 @@ struct LabObj
 		bool			bInitAll = false;
 		bool			bPause = false;
 		bool			bStep = false;
-		vector<Obj*>	tbl_pObj;
-		vector<Edge*>	tbl_pEdge;
+		vector<shared_ptr<Obj>>	tbl_pObj;
+		vector<shared_ptr<Edge>>	tbl_pEdge;
 		void			drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str );
 	} m;
 
@@ -141,7 +141,7 @@ struct Lab
 		int	idxTbl = 0;
 	} m;
 	
-	LabObj*	pLab = 0;
+	unique_ptr<LabObj>	pLab = 0;
 
 	void SetNextIdx( int val, Cp& cp );
 	void SetIdx( int n, Cp& cp );

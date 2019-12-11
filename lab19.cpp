@@ -1,6 +1,7 @@
 //2019/12/01
 
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <map>
 #include <thread>
@@ -104,7 +105,7 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	}
 
 	// 設定
-	Ball19&	ball	= *dynamic_cast<Ball19*>(m.tbl_pObj[0]);
+	Ball19&	ball	= *dynamic_cast<Ball19*>(m.tbl_pObj[0].get());
 
 	// 初期化：パラメータ
 	if ( !m.bInitParam )

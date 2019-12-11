@@ -1,6 +1,7 @@
 //2019/12/08
 
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <map>
 #include <thread>

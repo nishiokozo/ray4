@@ -2,6 +2,7 @@
 // 2019/06/25 ray4
 
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <map>
 #include <thread>
@@ -277,8 +278,10 @@ struct Apr : public Sys
 			if ( gui.one.bEnable )
 			{
 				gra.Print(1,(float)text_y++,string("m.idxTbl=")+to_string(gui.one.idxTbl)+":"+to_string(gui.one.idxObj) ); 
-				Obj* p =gui.cp.tbltbl_pObj[ gui.one.idxTbl ][ gui.one.idxObj ];
-				if ( p ) gra.Print(1,(float)text_y++,string("one: ")+to_string(p->pos.x)+" , "+to_string(p->pos.y)+" , "+to_string(p->pos.z)); 
+//				Obj* p =gui.cp.tbltbl_pObj[ gui.one.idxTbl ][ gui.one.idxObj ];
+//				if ( p ) gra.Print(1,(float)text_y++,string("one: ")+to_string(o.pos.x)+" , "+to_string(o.pos.y)+" , "+to_string(o.pos.z)); 
+				Obj& o = *gui.cp.tbltbl_pObj[ gui.one.idxTbl ][ gui.one.idxObj ];
+				gra.Print(1,(float)text_y++,string("one: ")+to_string(o.pos.x)+" , "+to_string(o.pos.y)+" , "+to_string(o.pos.z)); 
 			}
 
 		}

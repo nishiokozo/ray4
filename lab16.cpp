@@ -1,6 +1,7 @@
 //2019/11/22
 
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <map>
 #include <thread>
@@ -186,16 +187,16 @@ void Lab16::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	if ( (*pImpl->pSkeleton).bActive == false ) return;
 	{
 		Skeleton& skeleton = (*pImpl->pSkeleton);
-		vector<Obj*> tbl_pObj = (*pImpl->pSkeleton).tbl_pObj;
+		vector<shared_ptr<Obj>> tbl_pObj = (*pImpl->pSkeleton).tbl_pObj;
 
 
 	#if 0 	//剛体実験
 		// 優先度つけ
 		{
 			int n = 0;
-			for ( Obj* po : tbl_pObj )
+			for ( shared_ptr<Obj> po : tbl_pObj )
 			{
-				Joint* p = dynamic_cast<Joint*>(po);
+				Joint* p = dynamic_cast<Joint*>(po.get());
 
 				p->weight = 0.33;
 				if ( n == 2  ) p->weight = 0.000;
@@ -210,9 +211,9 @@ void Lab16::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		// 優先度つけ
 		{
 			int n = 0;
-			for ( Obj* po : tbl_pObj )
+			for ( shared_ptr<Obj> po : tbl_pObj )
 			{
-				Joint* p = dynamic_cast<Joint*>(po);
+				Joint* p = dynamic_cast<Joint*>(po.get());
 
 				p->weight = 0.33;
 				if ( p->bSelected && mouse.L.on ) p->weight = 0.0;

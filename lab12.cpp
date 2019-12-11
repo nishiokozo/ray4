@@ -2,6 +2,7 @@
 
 
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <map>
 #include <thread>
@@ -80,7 +81,6 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		pers.cam.at = vect3( 	0.0,	1.0, 0.0 );
 
 		//点
-		for ( Obj* p : m.tbl_pObj ) delete p;
 		m.tbl_pObj.clear();
 		m.tbl_pObj.emplace_back( new Ball12 );
 		m.tbl_pObj.emplace_back( new Ball12 );
@@ -90,8 +90,8 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 	}
 
-	Ball12&	b1 = *dynamic_cast<Ball12*>(m.tbl_pObj[0]);
-	Ball12&	b2 = *dynamic_cast<Ball12*>(m.tbl_pObj[1]);
+	Ball12&	b1 = *dynamic_cast<Ball12*>(m.tbl_pObj[0].get());
+	Ball12&	b2 = *dynamic_cast<Ball12*>(m.tbl_pObj[1].get());
 
 	// 初期化：パラメータ
 	if ( !m.bInitParam )

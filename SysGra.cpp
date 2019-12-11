@@ -2,6 +2,7 @@
 
 
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <chrono>
 #include <thread>       // sleep_for

@@ -1,6 +1,7 @@
 //2019/11/25
 
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <map>
 #include <thread>
@@ -83,14 +84,12 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		pers.cam.at = vect3( 	0.0,	1.0, 0.0 );
 
 		//点
-		for ( Obj* p : m.tbl_pObj ) delete p;
 		m.tbl_pObj.clear();
 		m.tbl_pObj.emplace_back( new Ball11(vect3(  0		, 0.62,  0.0 ), vect3(0,0,0)) );
 		m.tbl_pObj.emplace_back( new Obj(vect3( -0.0	, 0.0,	0.0 )) );	// 平面原点
 		m.tbl_pObj.emplace_back( new Obj(vect3( -0.05	, 0.5,  0.0 )) );	// 平面法線
 
 		// 線
-		for ( Edge* p : m.tbl_pEdge ) delete p;
 		m.tbl_pEdge.clear();
 		m.tbl_pEdge.emplace_back( new Edge(1,2, col7,1) );
 
@@ -115,7 +114,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	if ( !m.bInitParam )
 	{
 		m.bInitParam = true;
-		Ball11&	ball = *dynamic_cast<Ball11*>(m.tbl_pObj[0]);
+		Ball11&	ball = *dynamic_cast<Ball11*>(m.tbl_pObj[0].get());
 		ball.pos = vect3(  0		, 3.0,  0.0 );
 		ball.vel = vect3(  0		, 0.0,  0.0 );
 		ball.mat = midentity();
@@ -137,7 +136,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	}
 	
 	//変数
-	Ball11&	ball	= *dynamic_cast<Ball11*>(m.tbl_pObj[0]);
+	Ball11&	ball	= *dynamic_cast<Ball11*>(m.tbl_pObj[0].get());
 	vect3	plate_p	= m.tbl_pObj[1]->pos;
 	vect3	plate_n	= (m.tbl_pObj[2]->pos-plate_p).normalize();
 	vect3	p0		= ball.pos;

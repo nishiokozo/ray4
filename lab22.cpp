@@ -1,6 +1,7 @@
 //2019/12/10
 
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <map>
 #include <thread>
@@ -41,9 +42,9 @@ struct Lab22::Impl
 		vector<Vt>		vt;
 	} ball;
 
-	vector<Obj*>	tbl_pObj;
+	vector<shared_ptr<Obj>>	tbl_pObj;
 
-	vector<unique_ptr<Obj>>	tbl;
+//	vector<unique_ptr<Obj>>	tbl;
 
 };
 
@@ -73,7 +74,7 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		cp.tbltbl_pObj.emplace_back( pImpl->tbl_pObj );
 
 //		pImpl->tbl.emplace_back( new Obj );
-//		pImpl->tbl.emplace_back( new Obj );
+//		cp.tbltbl_pObj.emplace_back( pImpl->tbl );
 
 	}
 

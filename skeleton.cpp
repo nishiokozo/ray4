@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <thread>
 #include <chrono>
@@ -48,7 +49,7 @@ void Skeleton::SaveSkeleton()
 		{
 //			fo  << "\t"<< b.n0 << "\t" << b.n1 << endl;
 		}
-		for ( Edge* p : tbl_pEdge )	// 骨
+		for ( shared_ptr<Edge> p : tbl_pEdge )	// 骨
 		{
 			fo  << "\t"<< p->n0 << "\t" << p->n1 << endl;
 		}
@@ -139,9 +140,9 @@ void Skeleton::LoadSkeleton( const string fn )
 //				Joint&	j1 = tblJointForm[b.n1];
 //				b.length = (j1.pos - j0.pos).abs();
 			}
-			for ( Edge* p  : tbl_pEdge )	// 関節の距離を決定する。
+			for ( shared_ptr<Edge> p  : tbl_pEdge )	// 関節の距離を決定する。
 			{
-				Bone* pb = dynamic_cast<Bone*>(p);
+				Bone* pb = dynamic_cast<Bone*>(p.get());
 
 				Joint&	j0 = tblJointForm[p->n0];
 				Joint&	j1 = tblJointForm[p->n1];
@@ -206,7 +207,8 @@ void Skeleton::LoadSkeleton( const string fn )
 	{
 		// キーフレーム切り替え
 		int i = 0;
-		for ( Obj* p : tbl_pObj )
+	//	for ( shared_ptr<Obj> p : tbl_pObj )
+		for ( shared_ptr<Obj> p : tbl_pObj )
 		{
 			p->pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 			i++;
@@ -307,7 +309,7 @@ void Skeleton::PrevKeyframe()
 	{
 		// キーフレーム切り替え
 		int i = 0;
-		for ( Obj* p : tbl_pObj )
+		for ( shared_ptr<Obj> p : tbl_pObj )
 		{
 			p->pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 			i++;
@@ -331,7 +333,7 @@ void Skeleton::TopKeyframe()
 	{
 		// キーフレーム切り替え
 		int i = 0;
-		for ( Obj* p : tbl_pObj )
+		for ( shared_ptr<Obj> p : tbl_pObj )
 		{
 			p->pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 			i++;
@@ -356,7 +358,7 @@ void Skeleton::NextKeyframe()
 	{
 		// キーフレーム切り替え
 		int i = 0;
-		for ( Obj* p : tbl_pObj )
+		for ( shared_ptr<Obj> p : tbl_pObj )
 		{
 			p->pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 			i++;
@@ -380,7 +382,7 @@ void Skeleton::LastKeyframe()
 	{
 		// キーフレーム切り替え
 		int i = 0;
-		for ( Obj* p : tbl_pObj )
+		for ( shared_ptr<Obj> p : tbl_pObj )
 		{
 			p->pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 			i++;
@@ -416,7 +418,7 @@ void Skeleton::InsertKeyframe()
 	}
 	
 	animations[cur.act].pose.emplace( animations[cur.act].pose.begin() + cur.pose );
-	for ( const Obj* p : tbl_pObj )
+	for ( shared_ptr<Obj> p : tbl_pObj )
 	{
 		animations[cur.act].pose[ cur.pose ].joint.emplace_back( p->pos );
 	}
@@ -429,9 +431,9 @@ void Skeleton::CopyKeyframe()
 
 	unique_ptr<Skeleton> pNew(new Skeleton);
 	{
-		for ( Obj* po : tbl_pObj )
+		for ( shared_ptr<Obj> po : tbl_pObj )
 		{
-			Joint* p = dynamic_cast<Joint*>(po);
+			Joint* p = dynamic_cast<Joint*>(po.get());
 			
 			pNew->tbl_pObj.emplace_back( new Joint( p->pos, p->weight, p->bCtrl ) );
 		}
@@ -440,9 +442,9 @@ void Skeleton::CopyKeyframe()
 		{
 //			pNew->tblBone.emplace_back( b.n0, b.n1, b.bBold );
 		}
-		for ( Edge* p : tbl_pEdge )
+		for ( shared_ptr<Edge> p : tbl_pEdge )
 		{
-			Bone* pb = dynamic_cast<Bone*>(p);
+			Bone* pb = dynamic_cast<Bone*>(p.get());
 			pNew->tbl_pEdge.emplace_back( new Bone( pb->n0, pb->n1, pb->bBold ) );
 		}
 	}
@@ -510,7 +512,7 @@ void Skeleton::CutKeyframe()
 		{
 			// キーフレーム切り替え
 			int i = 0;
-			for ( Obj* p : tbl_pObj )
+			for ( shared_ptr<Obj> p : tbl_pObj )
 			{
 				p->pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 				i++;
@@ -538,7 +540,7 @@ void Skeleton::PrevAnimation()
 		{
 			// キーフレーム切り替え
 			int i = 0;
-			for ( Obj* p : tbl_pObj )
+			for ( shared_ptr<Obj> p : tbl_pObj )
 			{
 				p->pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
 				i++;
@@ -566,7 +568,7 @@ void Skeleton::NextAnimation()
 		{
 			// キーフレーム切り替え
 			int i = 0;
-			for ( Obj* p : tbl_pObj )
+			for ( shared_ptr<Obj> p : tbl_pObj )
 			{
 			
 				p->pos = animations[cur.act].pose[ cur.pose ].joint[ i ].pos;
@@ -589,7 +591,7 @@ void Skeleton::AddAnimation()
 	{
 
 		animations[cur.act].pose.emplace_back();
-		for ( const Obj* p : tbl_pObj )
+		for ( shared_ptr<Obj> p : tbl_pObj )
 		{
 			animations[cur.act].pose[ cur.pose ].joint.emplace_back( p->pos );
 		}
@@ -601,9 +603,9 @@ void Skeleton::UpdateSkeleton()
 //------------------------------------------------------------------------------
 {
 	// 保管
-	for ( Obj* po : tbl_pObj )
+	for ( shared_ptr<Obj> po : tbl_pObj )
 	{
-		Joint* p = dynamic_cast<Joint*>(po);
+		Joint* p = dynamic_cast<Joint*>(po.get());
 
 		if ( p->prev != p->pos )
 		{
@@ -625,8 +627,8 @@ void Skeleton::UpdateSkeleton()
 /*
 		for ( Bone b : tblBone )
 		{
-			Joint*	p0 = dynamic_cast<Joint*>(tbl_pObj[b.n0]);
-			Joint*	p1 = dynamic_cast<Joint*>(tbl_pObj[b.n1]);
+			Joint*	p0 = dynamic_cast<Joint*>(tbl_pObj[b.n0].get());
+			Joint*	p1 = dynamic_cast<Joint*>(tbl_pObj[b.n1].get());
 			vect3 v = p1->pos - p0->pos;
 			float l = v.abs() - b.length;
 			vect3 va  =	v.normalize()*l;
@@ -641,12 +643,12 @@ void Skeleton::UpdateSkeleton()
 			p1->tension -= va*w1;
 		}
 */
-		for ( Edge* p : tbl_pEdge )
+		for ( shared_ptr<Edge> p : tbl_pEdge )
 		{
-			Bone* pb = dynamic_cast<Bone*>(p);
+			Bone* pb = dynamic_cast<Bone*>(p.get());
 			
-			Joint*	p0 = dynamic_cast<Joint*>(tbl_pObj[pb->n0]);
-			Joint*	p1 = dynamic_cast<Joint*>(tbl_pObj[pb->n1]);
+			Joint*	p0 = dynamic_cast<Joint*>(tbl_pObj[pb->n0].get());
+			Joint*	p1 = dynamic_cast<Joint*>(tbl_pObj[pb->n1].get());
 			vect3 v = p1->pos - p0->pos;
 			float l = v.abs() - pb->length;
 			vect3 va  =	v.normalize()*l;
@@ -662,9 +664,9 @@ void Skeleton::UpdateSkeleton()
 		}
 
 		// 張力解消
-		for ( Obj* po : tbl_pObj )
+		for ( shared_ptr<Obj> po : tbl_pObj )
 		{
-			Joint* p = dynamic_cast<Joint*>(po);
+			Joint* p = dynamic_cast<Joint*>(po.get());
 
 			p->pos += p->tension;
 			p->tension=vect3(0,0,0);
@@ -680,9 +682,9 @@ void Skeleton::DrawSkeleton( SysGra& gra, Pers& pers )
 
 
 	// 透視投影変換
-	for ( Obj* po : tbl_pObj )
+	for ( shared_ptr<Obj> po : tbl_pObj )
 	{
-		Joint* p = dynamic_cast<Joint*>(po);
+		Joint* p = dynamic_cast<Joint*>(po.get());
 		//	右手系座標系
 		//	右手ねじ周り
 		//	roll	:z	奥+
@@ -696,12 +698,12 @@ void Skeleton::DrawSkeleton( SysGra& gra, Pers& pers )
 	if ( stat.bShowSkin )
 	{
 //		for ( Bone b : tblBone )
-		for ( Edge* p : tbl_pEdge )
+		for ( shared_ptr<Edge> p : tbl_pEdge )
 		{
-			Bone* pb = dynamic_cast<Bone*>(p);
+			Bone* pb = dynamic_cast<Bone*>(p.get());
 
-			Joint*	p0 = dynamic_cast<Joint*>(tbl_pObj[pb->n0]);
-			Joint*	p1 = dynamic_cast<Joint*>(tbl_pObj[pb->n1]);
+			Joint*	p0 = dynamic_cast<Joint*>(tbl_pObj[pb->n0].get());
+			Joint*	p1 = dynamic_cast<Joint*>(tbl_pObj[pb->n1].get());
 
 			if ( p0->disp.z > 0 && p0->disp.z > 0 )
 			{
@@ -740,7 +742,7 @@ void Skeleton::DrawSkeleton( SysGra& gra, Pers& pers )
 /*
 	if (0)
 	{
-		Joint*	p = dynamic_cast<Joint*>(tbl_pObj[2]);
+		Joint*	p = dynamic_cast<Joint*>(tbl_pObj[2].get());
 
 		static vect3 v = vect3(-0.2, 0, 0);
 	

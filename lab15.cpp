@@ -1,6 +1,7 @@
 //2019/11/22
 
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <map>
 #include <thread>
@@ -122,8 +123,8 @@ void Lab15::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 				int n0 = pImpl->idxPoint[n];
 				int n1 = pImpl->idxPoint[n+1];
 
-				Point3* p0 = dynamic_cast<Point3*>(m.tbl_pObj[n0]);
-				Point3* p1 = dynamic_cast<Point3*>(m.tbl_pObj[n1]);
+				Point3* p0 = dynamic_cast<Point3*>(m.tbl_pObj[n0].get());
+				Point3* p1 = dynamic_cast<Point3*>(m.tbl_pObj[n1].get());
 
 				vect3 P0 =     p0->pos;
 				vect3 P1 = P0 +p0->b;
@@ -197,8 +198,8 @@ void Lab15::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 					//	接線計算
 					{
-						Point3* p0 = dynamic_cast<Point3*>(m.tbl_pObj[pImpl->idxPoint[minn+0]]);
-						Point3* p2 = dynamic_cast<Point3*>(m.tbl_pObj[pImpl->idxPoint[minn+2]]);
+						Point3* p0 = dynamic_cast<Point3*>(m.tbl_pObj[pImpl->idxPoint[minn+0]].get());
+						Point3* p2 = dynamic_cast<Point3*>(m.tbl_pObj[pImpl->idxPoint[minn+2]].get());
 						p0->b *= t0;
 						p2->a *= t1;
 					}

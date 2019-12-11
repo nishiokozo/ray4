@@ -1,6 +1,7 @@
 //2019/11/22
 
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <map>
 #include <thread>
@@ -85,7 +86,7 @@ void Lab14::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 				};
 				//------------------------------------------------------------------------------
 				//void drawCutmull( SysGra& gra, Pers& pers, 
-				vector<Obj*> tbl = m.tbl_pObj; 
+				vector<shared_ptr<Obj>> tbl = m.tbl_pObj; 
 //				vector<ivect2>tblIdx = tblIdx;
 				//------------------------------------------------------------------------------
 				{

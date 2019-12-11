@@ -1,6 +1,7 @@
 //2019/10/17
 
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <map>
 #include <thread>
@@ -26,22 +27,22 @@
 
 #include "gui.h"
 //------------------------------------------------------------------------------
-void Gui::TouchFirst( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbltbl_pObj, vect2 mpos )
+void Gui::TouchFirst( SysGra& gra, Pers& pers, vector<vector<shared_ptr<Obj>>>& tbltbl_pObj, vect2 mpos )
 //------------------------------------------------------------------------------
 {
 	one.clear();
 	int n2 = 0;
 	float len = infinit_max;
 	
-	for ( vector<Obj*>& tbl_pObj : tbltbl_pObj )
+	for ( vector<shared_ptr<Obj>>& tbl_pObj : tbltbl_pObj )
 	{
 		int n = 0;
-		for ( Obj* p : tbl_pObj )
+		for ( shared_ptr<Obj> p : tbl_pObj )
 		{
 			// ポインターのエレメント選択
 			if ( p->bSelected )
 			{
-				Point3* p2 = dynamic_cast<Point3*>(p);
+				Point3* p2 = dynamic_cast<Point3*>(p.get());
 				if (p2)
 				{
 					vect3 v = pers.calcWorldToScreen3( p2->pos +p2->a );
@@ -104,7 +105,7 @@ void Gui::TouchFirst( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbltbl_pObj
 		#if 0
 		{
 			// 優先度つけ
-			for ( Obj* p : tbl_pObj )
+			for ( shared_ptr<Obj> p : tbl_pObj )
 			{
 				p->priority = 999;
 			}
@@ -187,11 +188,11 @@ void Gui::calcRectMode( G_CALC rect_mode, bool& bPreselect, bool& bSelected )
 
 // 矩形カーソル終了（選択決定）
 //------------------------------------------------------------------------------
-void Gui::SelectRectEnd( vector<vector<Obj*>>& tbltbl_pObj )
+void Gui::SelectRectEnd( vector<vector<shared_ptr<Obj>>>& tbltbl_pObj )
 //------------------------------------------------------------------------------
 {
-	for ( vector<Obj*>& tbl_pObj : tbltbl_pObj )
-	for ( Obj* p : tbl_pObj )
+	for ( vector<shared_ptr<Obj>>& tbl_pObj : tbltbl_pObj )
+	for ( shared_ptr<Obj> p : tbl_pObj )
 	{
 		calcRectMode( rect_mode, p->bPreselect, p->bSelected );
 	}
@@ -202,14 +203,14 @@ void Gui::SelectRectEnd( vector<vector<Obj*>>& tbltbl_pObj )
 
 // 矩形カーソル選択	
 //------------------------------------------------------------------------------
-void Gui::SelectRectBegin( Pers& pers, vector<vector<Obj*>>& tbltbl_pObj , vect2 mpos )
+void Gui::SelectRectBegin( Pers& pers, vector<vector<shared_ptr<Obj>>>& tbltbl_pObj , vect2 mpos )
 //------------------------------------------------------------------------------
 {
 	vect2 v0 = min( rect_st, mpos );
 	vect2 v1 = max( rect_st, mpos );
 
-	for ( vector<Obj*>& tbl_pObj : tbltbl_pObj )
-	for ( Obj* p : tbl_pObj )
+	for ( vector<shared_ptr<Obj>>& tbl_pObj : tbltbl_pObj )
+	for ( shared_ptr<Obj> p : tbl_pObj )
 	{
 		p->bPreselect = false;
 
@@ -224,13 +225,13 @@ void Gui::SelectRectBegin( Pers& pers, vector<vector<Obj*>>& tbltbl_pObj , vect2
 
 // 単独 新規選択
 //------------------------------------------------------------------------------
-void Gui::SelectOneOnly( vector<vector<Obj*>>& tbltbl_pObj )
+void Gui::SelectOneOnly( vector<vector<shared_ptr<Obj>>>& tbltbl_pObj )
 //------------------------------------------------------------------------------
 {
 	// 選択クリア
-	for ( vector<Obj*>& tbl_pObj : tbltbl_pObj )
+	for ( vector<shared_ptr<Obj>>& tbl_pObj : tbltbl_pObj )
 	{
-		for ( Obj* p : tbl_pObj )
+		for ( shared_ptr<Obj> p : tbl_pObj )
 		{
 			p->bSelected = false;
 		}
@@ -241,7 +242,7 @@ void Gui::SelectOneOnly( vector<vector<Obj*>>& tbltbl_pObj )
 
 // 単独 追加選択
 //------------------------------------------------------------------------------
-void Gui::SelectOneAdd( vector<vector<Obj*>>& tbltbl_pObj )
+void Gui::SelectOneAdd( vector<vector<shared_ptr<Obj>>>& tbltbl_pObj )
 //------------------------------------------------------------------------------
 {
 	tbltbl_pObj[ one.idxTbl ][ one.idxObj ]->bSelected = true;
@@ -249,7 +250,7 @@ void Gui::SelectOneAdd( vector<vector<Obj*>>& tbltbl_pObj )
 
 // 単独 反転選択
 //------------------------------------------------------------------------------
-void Gui::SelectOneRev( vector<vector<Obj*>>& tbltbl_pObj )
+void Gui::SelectOneRev( vector<vector<shared_ptr<Obj>>>& tbltbl_pObj )
 //------------------------------------------------------------------------------
 {
 	tbltbl_pObj[ one.idxTbl ][ one.idxObj ]->bSelected = !tbltbl_pObj[ one.idxTbl ][ one.idxObj ]->bSelected;
@@ -257,7 +258,7 @@ void Gui::SelectOneRev( vector<vector<Obj*>>& tbltbl_pObj )
 
 // 単独 削除選択
 //------------------------------------------------------------------------------
-void Gui::SelectOneSub( vector<vector<Obj*>>& tbltbl_pObj )
+void Gui::SelectOneSub( vector<vector<shared_ptr<Obj>>>& tbltbl_pObj )
 //------------------------------------------------------------------------------
 {
 	tbltbl_pObj[ one.idxTbl ][ one.idxObj ]->bSelected = false;
@@ -265,7 +266,7 @@ void Gui::SelectOneSub( vector<vector<Obj*>>& tbltbl_pObj )
 
 // 選択リスト表示
 //------------------------------------------------------------------------------
-void Gui::DrawController( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbltbl_pObj, vector<vector<Edge*>>& tbltbl_pEdge, vect2 mpos )
+void Gui::DrawController( SysGra& gra, Pers& pers, vector<vector<shared_ptr<Obj>>>& tbltbl_pObj, vector<vector<shared_ptr<Edge>>>& tbltbl_pEdge, vect2 mpos )
 //------------------------------------------------------------------------------
 {
 	gra.SetZTest( false );
@@ -274,7 +275,7 @@ void Gui::DrawController( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbltbl_
 		for ( int i = 0 ; i < (signed)tbltbl_pEdge.size() ; i++ )
 		{
 			// 汎用制御点
-			for ( Edge* p : tbltbl_pEdge[i] )
+			for ( shared_ptr<Edge> p : tbltbl_pEdge[i] )
 			{
 
 				bool bPreselect = p->bPreselect;
@@ -282,13 +283,13 @@ void Gui::DrawController( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbltbl_
 
 				calcRectMode( rect_mode, bPreselect, bSelected );
 
-				Obj*	p0 = tbltbl_pObj[ i ][ p->n0 ];
-				Obj*	p1 = tbltbl_pObj[ i ][ p->n1 ];
+				Obj&	o0 = *tbltbl_pObj[ i ][ p->n0 ];
+				Obj&	o1 = *tbltbl_pObj[ i ][ p->n1 ];
 
 
 				{	// 影
-					vect3	a = p0->pos;	a.y=0;
-					vect3	b = p1->pos;	b.y=0;
+					vect3	a = o0.pos;	a.y=0;
+					vect3	b = o1.pos;	b.y=0;
 					rgb		c = (p->col+rgb(0.75,0.75,0.75))/4;
 					pers.pen.line3d( gra, pers, a, b, c, p->wide );
 				}
@@ -297,12 +298,12 @@ void Gui::DrawController( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbltbl_
 				if ( bSelected )
 				{
 					// 選択点
-					pers.pen.line3d( gra, pers, p0->pos, p1->pos, rgb(1,0,0), p->wide );
+					pers.pen.line3d( gra, pers, o0.pos, o1.pos, rgb(1,0,0), p->wide );
 				}
 				else
 				{
 					// 非選択点
-					pers.pen.line3d( gra, pers, p0->pos, p1->pos, p->col, p->wide );
+					pers.pen.line3d( gra, pers, o0.pos, o1.pos, p->col, p->wide );
 				}
 
 			}
@@ -311,13 +312,13 @@ void Gui::DrawController( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbltbl_
 
 	{
 		int n = 0;
-		for ( vector<Obj*>& tbl_pObj : tbltbl_pObj )
+		for ( vector<shared_ptr<Obj>>& tbl_pObj : tbltbl_pObj )
 		{
 
 			// ベジェ制御点
-			for ( Obj* po : tbl_pObj )
+			for ( shared_ptr<Obj> po : tbl_pObj )
 			{
-				Point3* p = dynamic_cast<Point3*>(po);
+				Point3* p = dynamic_cast<Point3*>(po.get());
 				if ( p ) 
 				{
 
@@ -344,7 +345,7 @@ void Gui::DrawController( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbltbl_
 			}
 
 			// 汎用制御点
-			for ( Obj* p : tbl_pObj )
+			for ( shared_ptr<Obj> p : tbl_pObj )
 			{
 
 				bool bPreselect = p->bPreselect;
@@ -383,7 +384,7 @@ void Gui::DrawController( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbltbl_
 }
 
 //------------------------------------------------------------------------------
-void Gui::MoveObj( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbltbl_pObj, vect2& mpos, vect2& mprev, vect2& mmov, bool bSame, bool bByCamera, bool bByFloor, bool bByXY )
+void Gui::MoveObj( SysGra& gra, Pers& pers, vector<vector<shared_ptr<Obj>>>& tbltbl_pObj, vect2& mpos, vect2& mprev, vect2& mmov, bool bSame, bool bByCamera, bool bByFloor, bool bByXY )
 //------------------------------------------------------------------------------
 {
 	bool bsel = false;
@@ -392,7 +393,7 @@ void Gui::MoveObj( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbltbl_pObj, v
 	if ( one.bEnable )
 	{
 		// タンジェントベクトル操作
-		Point3* p = dynamic_cast<Point3*>(tbltbl_pObj[ one.idxTbl ][ one.idxObj ]);
+		Point3* p = dynamic_cast<Point3*>(tbltbl_pObj[ one.idxTbl ][ one.idxObj ].get());
 		if ( p )
 		{
 
@@ -457,9 +458,9 @@ void Gui::MoveObj( SysGra& gra, Pers& pers, vector<vector<Obj*>>& tbltbl_pObj, v
 			auto[b1,Q1,s1] = func_intersect_Plate_HarfLine( vect3(0,0,0), vect3(0,1,0), P1, I1);
 			v = Q1-Q0;
 		}
-		for ( vector<Obj*>& tbl_pObj : tbltbl_pObj )
+		for ( vector<shared_ptr<Obj>>& tbl_pObj : tbltbl_pObj )
 		{
-			for ( Obj* p : tbl_pObj )
+			for ( shared_ptr<Obj> p : tbl_pObj )
 			{
 				if ( p->bSelected )
 				{

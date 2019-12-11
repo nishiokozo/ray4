@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <map>
 #include <thread>
@@ -68,13 +69,11 @@ void Lab7::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 		m.bInitParam = true;
 
 		// 点
-		for ( Obj* p : m.tbl_pObj ) delete p;
 		m.tbl_pObj.clear();
 		m.tbl_pObj.emplace_back( new Obj(vect3( 0 ,0.1, 0)) );
 		m.tbl_pObj.emplace_back( new Obj(vect3(-1 ,0.1, 0)) );
 
 		// 線
-		for ( Edge* p : m.tbl_pEdge ) delete p;
 		m.tbl_pEdge.clear();
 		m.tbl_pEdge.emplace_back( new Edge(0,1) );
 

@@ -1,6 +1,7 @@
 //2019/12/01
 
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <map>
 #include <thread>
@@ -92,7 +93,6 @@ void Lab18::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		pers.cam.at = vect3( 	0.0,	1.0,   0.0 );
 
 		//点
-		for ( Obj* p : m.tbl_pObj ) delete p;
 		m.tbl_pObj.clear();
 		m.tbl_pObj.emplace_back( new Ball18 );
 		m.tbl_pObj.emplace_back( new Obj(vect3( 0.15	, 0.0,	0.0 )) );	// 平面原点
@@ -107,7 +107,7 @@ void Lab18::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	vect3	vg	= vect3(0,G,0);		// 重力加速度ベクトル
 //	vect3	plate_p	= vect3(0,0,0);
 //	vect3	plate_n	= vect3(0,1,0);
-	Ball18&	b1 = *dynamic_cast<Ball18*>(m.tbl_pObj[0]);
+	Ball18&	b1 = *dynamic_cast<Ball18*>(m.tbl_pObj[0].get());
 	vect3	plate_p	= m.tbl_pObj[1]->pos;
 	vect3	plate_n	= (m.tbl_pObj[2]->pos-plate_p).normalize();
 

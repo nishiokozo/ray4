@@ -1,6 +1,7 @@
 //2019/10/17
 
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <map>
 #include <thread>
@@ -65,7 +66,6 @@ void Lab4::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, floa
 		}
 
 		m.bInitParam = true;
-		for ( Obj* p : m.tbl_pObj ) delete p;
 		m.tbl_pObj.clear();
 		m.tbl_pObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
 		m.tbl_pObj.emplace_back( new Obj(vect3(-1, 2.0, 0)) );
