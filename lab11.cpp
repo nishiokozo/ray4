@@ -29,7 +29,7 @@
 
 struct Lab11::Impl
 {
-	Graphs graphs;
+//	Graphs graphs;
 };
 Lab11::Lab11() : pImpl( new Lab11::Impl ){}
 
@@ -95,10 +95,10 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
 		cp.tbltbl_pEdge.emplace_back( m.tbl_pEdge );
 
-		pImpl->graphs.Clear();
-		pImpl->graphs.Create( 0.02, rgb(0,0,1) );
-		pImpl->graphs.Create( 0.02, rgb(0,1,1) );
-		pImpl->graphs.Create( 0.02, rgb(1,1,0) );
+//		pImpl->graphs.Clear();
+//		pImpl->graphs.Create( 0.02, rgb(0,0,1) );
+//		pImpl->graphs.Create( 0.02, rgb(0,1,1) );
+//		pImpl->graphs.Create( 0.02, rgb(1,1,0) );
 	}
 
 	// 初期化：パラメータ
@@ -197,7 +197,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 
 
-	pImpl->graphs.Draw( gra, pers );
+//	pImpl->graphs.Draw( gra, pers );
 
 
 	// 平面表示

@@ -28,7 +28,7 @@
 #include "lab8.h"
 struct Lab8::Impl
 {
-	Graphs::Plot plot_moment = Graphs::Plot( 0.02, rgb(1,0,1) );
+	Graphs::Plot plot_moment = Graphs::Plot( 100, 0.02, rgb(1,0,1) );
 	vect3 		vel;
 	bool		bPause = false;
 	float		w = 0;

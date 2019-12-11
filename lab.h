@@ -23,26 +23,28 @@ struct LabObj
 		{
 			//	y = 0面に座標(0,0,0)を中心にグラフ（ドット）を打ってゆく
 
-			static const int MaxPlot = 100;
-			float tblPlot[MaxPlot];
+			int MaxPlot = 100;
 			int cntPlot = 0;
 			bool	bScroll = false;
 			rgb col;
 			float step;
+
+			vector<float> tblDot;
+			int amtPlot = 0;
 			
 			//------------------------------------------------------------------------------
 			Plot( 
 			//------------------------------------------------------------------------------
+				int	_max,
 				float _step, 			// 送りステップ
 				rgb _col = rgb(1,1,1) 	// 色
 			)
 			{
+				MaxPlot = _max;
+
 				col = _col;
 				step = _step;
-				for ( int i = 0 ; i < MaxPlot ; i++ )
-				{
-					tblPlot[i] = 0;
-				}
+				tblDot.clear();
 				ResetPlot();
 			}
 
@@ -52,6 +54,9 @@ struct LabObj
 			{
 				bScroll = false;
 				cntPlot = 0 ;
+
+				amtPlot = 0 ;
+				tblDot.clear();
 			}
 			//------------------------------------------------------------------------------
 			void WritePlot( float val )
@@ -63,7 +68,18 @@ struct LabObj
 					cntPlot = 0;
 				}
 
-				tblPlot[ cntPlot++ ] = val;
+		
+				if ( amtPlot >= MaxPlot ) 
+				{
+					int idx = amtPlot % MaxPlot;
+					tblDot[idx] = val;
+				}
+				else
+				{
+					tblDot.emplace_back( val );
+				}
+				amtPlot++;
+				cntPlot++;
 			}
 			//------------------------------------------------------------------------------
 			void DrawPlot( SysGra& gra, Pers& pers )
@@ -76,16 +92,15 @@ struct LabObj
 				if ( bScroll )
 				for ( int i = cntPlot ; i < MaxPlot ; i++ )
 				{
-					pers.pen.pset3d( gra, pers, vect3( x, 0, tblPlot[i] ),  col, 2 );
+					pers.pen.pset3d( gra, pers, vect3( x, 0, tblDot[i] ),  col, 2 );
 					x += step;
 				}
 				for ( int i = 0 ; i < cntPlot-1 ; i++ )
 				{
-					pers.pen.pset3d( gra, pers, vect3( x, 0, tblPlot[i] ),  col, 2 );
+					pers.pen.pset3d( gra, pers, vect3( x, 0, tblDot[i] ),  col, 2 );
 					x += step;
 				}
-				if ( cntPlot > 0 ) pers.pen.pset3d( gra, pers, vect3( x, 0, tblPlot[cntPlot-1] ),  rgb(1,1,1), 2 );
-
+				if ( cntPlot > 0 ) pers.pen.pset3d( gra, pers, vect3( x, 0, tblDot[cntPlot-1] ),  rgb(1,1,1), 2 );
 				gra.SetZTest( true );
 			}
 
@@ -101,7 +116,7 @@ struct LabObj
 		)
 		{
 			int idx = (signed)plots.size(); 
-			plots.emplace_back( _step, _col );
+			plots.emplace_back( 100,_step, _col );
 			return idx;
 		}
 
