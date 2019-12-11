@@ -9,14 +9,6 @@
 
 using namespace std;
 
-//-----------------------------------------------------------------------------
-SysMouse& SysMouse::GetInstance()
-//-----------------------------------------------------------------------------
-{
-	static SysMouse	mouse;
-	return mouse;
-}
-
 struct SysMouse::Impl
 {
 };

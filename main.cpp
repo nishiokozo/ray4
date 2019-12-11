@@ -37,8 +37,8 @@ struct Apr : public Sys
 	Gui gui;
 	Lab lab;
 	Pers pers;
-	SysKeys&	keys = SysKeys::GetInstance();
-	SysMouse&	mouse = SysMouse::GetInstance();
+	SysKeys		keys;
+	SysMouse	mouse;
 	SysGra gra;
 
 	//------------------------------------------------------------------------------

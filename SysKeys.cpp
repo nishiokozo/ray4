@@ -34,18 +34,6 @@ struct SysKeys::Impl
 	} g;
 
 };
-//SysKeys::SysKeys() : pImpl( new SysKeys::Impl )
-//{
-//}
-
-
-//-----------------------------------------------------------------------------
-SysKeys& SysKeys::GetInstance()
-//-----------------------------------------------------------------------------
-{
-	static SysKeys	g_instance;
-	return	g_instance;
-}
 
 //-----------------------------------------------------------------------------
 SysKeys::SysKeys() : pImpl( new SysKeys::Impl )

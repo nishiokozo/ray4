@@ -18,11 +18,8 @@ class SysKeys
 		};
 	};
 
-	SysKeys();	//	間違って直接生成しないようにprivateで定義しておく
-	~SysKeys();	//	間違って直接生成しないようにprivateで定義しておく
 
 public:
-	static SysKeys& GetInstance();
 
 	void	Update();
 
@@ -95,6 +92,8 @@ public:
 	Keyobj	PERIOD;				// BE VK_OEM_PERIOD
 
 
+	SysKeys();
+	~SysKeys();
     struct Impl;
     std::unique_ptr<Impl> pImpl;
 

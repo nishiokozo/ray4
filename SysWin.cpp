@@ -17,7 +17,7 @@ using namespace std;
 
 
 
-struct SysWin::Impl
+static struct
 {
 	function<void()> funcOnCreate;
 	function<void( int width, int height)> funcOnSize;
@@ -41,15 +41,7 @@ struct SysWin::Impl
 	int	wheelAccum;	//	蓄積用
 	int	wheelResult;	//	結果出力用
 
-	static LRESULT CALLBACK WinProc
-	(
-		  HWND		hWnd
-		, UINT		uMsg
-		, WPARAM	wParam	//メッセージの付加情報
-		, LPARAM	lParam	//メッセージの付加情報
-	);
-};
-static SysWin::Impl g;
+} g;
 
 //------------------------------------------------------------------------------
 SysWin::~SysWin()
@@ -64,7 +56,7 @@ SysWin::SysWin()
 }
 
 ///------------------------------------------------------------------------------
-LRESULT CALLBACK SysWin::Impl::WinProc
+static LRESULT CALLBACK WinProc
 //------------------------------------------------------------------------------
 (
 	  HWND		hWnd
@@ -291,7 +283,7 @@ void SysWin::InitWinapi()
 	// ウインドウクラスパラメータセット
 	g.wndclass.cbSize			= sizeof( WNDCLASSEX );
 	g.wndclass.style			= CS_HREDRAW | CS_VREDRAW;
-	g.wndclass.lpfnWndProc		= SysWin::Impl::WinProc;
+	g.wndclass.lpfnWndProc		= WinProc;
 	g.wndclass.cbClsExtra		= 0;	// GetClassLong で取得可能なメモリ
 	g.wndclass.cbWndExtra		= 0;	// GetWindowLong で取得可能なメモリ
 	g.wndclass.hInstance		= g.hInstance;
