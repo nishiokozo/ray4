@@ -58,6 +58,9 @@ public:
 //	void OnSize( int width, int height );
 //	void OnMove( int pos_x, int pos_y );
 
+    struct Impl;
+    std::unique_ptr<Impl> pImpl;
+
 };
 
 

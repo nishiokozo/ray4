@@ -67,4 +67,8 @@ struct SysGra
 		// ピクセル座標数(mov)に変換したGL座標数に変換する
 		return	v*vect2(GetWidth(),GetHeight());
 	}
+
+    struct Impl;
+    std::unique_ptr<Impl> pImpl;
+
 };

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include "SysKeys.h"
 
 #include <windows.h>
@@ -30,6 +31,13 @@ static struct Winapi_key
 	}
 } g;
 
+struct SysKeys::Impl
+{
+};
+//SysKeys::SysKeys() : pImpl( new SysKeys::Impl )
+//{
+//}
+
 
 //-----------------------------------------------------------------------------
 SysKeys& SysKeys::GetInstance()
@@ -40,7 +48,7 @@ SysKeys& SysKeys::GetInstance()
 }
 
 //-----------------------------------------------------------------------------
-SysKeys::SysKeys()
+SysKeys::SysKeys() : pImpl( new SysKeys::Impl )
 //-----------------------------------------------------------------------------
 {
 	Update(); // キー情報の正確な取得には一つ前の情報が必要なので、初期化時にUpdateを行う

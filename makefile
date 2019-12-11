@@ -38,7 +38,7 @@ SRCS = \
 	lab21.cpp \
 	lab22.cpp \
 	Sys.cpp \
-	Syswin.cpp \
+	SysWin.cpp \
 	SysGra.cpp \
 	SysKeys.cpp \
 	SysMouse.cpp \

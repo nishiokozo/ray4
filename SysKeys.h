@@ -95,5 +95,7 @@ public:
 	Keyobj	PERIOD;				// BE VK_OEM_PERIOD
 
 
+    struct Impl;
+    std::unique_ptr<Impl> pImpl;
 
 } ;
