@@ -7,32 +7,32 @@
 using namespace std;
 
 // WinAPI由来の情報。表に出さないためにここで定義
-static struct Winapi_key
-{
-	BYTE	state[256];
-	bool	tbl_prev[256];
-	bool	tbl_on[256];
-	bool	tbl_hi[256];
-	bool	tbl_lo[256];
-	bool	tbl_rep[256];
-	int		tbl_lim[256];
-
-	Winapi_key()
-	{
-		for ( int i = 0 ; i < 255 ; i++ )
-		{
-			tbl_prev[i]	= 0;
-			tbl_on[i]	= 0;
-			tbl_hi[i]	= 0;
-			tbl_lo[i]	= 0;
-			tbl_rep[i]	= 0;
-			tbl_lim[i]	= 0;
-		}
-	}
-} g;
-
 struct SysKeys::Impl
 {
+	struct Winapi_key
+	{
+		BYTE	state[256];
+		bool	tbl_prev[256];
+		bool	tbl_on[256];
+		bool	tbl_hi[256];
+		bool	tbl_lo[256];
+		bool	tbl_rep[256];
+		int		tbl_lim[256];
+
+		Winapi_key()
+		{
+			for ( int i = 0 ; i < 255 ; i++ )
+			{
+				tbl_prev[i]	= 0;
+				tbl_on[i]	= 0;
+				tbl_hi[i]	= 0;
+				tbl_lo[i]	= 0;
+				tbl_rep[i]	= 0;
+				tbl_lim[i]	= 0;
+			}
+		}
+	} g;
+
 };
 //SysKeys::SysKeys() : pImpl( new SysKeys::Impl )
 //{
@@ -67,16 +67,16 @@ void SysKeys::Update()
 
 
 //最上位ビットが 1 のときはキーが押されていることを、0 のときはキーが押されていないことを示します。最下位ビットが 1 のときはキーがトグル状態にあることを、0 のときはトグルが解除されていることを示します。たとえば、CapsLock キーが ON になっているときは、トグル状態になります。
-	GetKeyboardState( g.state );
+	GetKeyboardState( pImpl->g.state );
 
 	for ( int i = 0 ; i < 255 ; i++ )
 	{
-		bool prev	= g.tbl_on[i];
-		bool on		= ((g.state[i] & 0x80)!=0);
+		bool prev	= pImpl->g.tbl_on[i];
+		bool on		= ((pImpl->g.state[i] & 0x80)!=0);
 		bool hi		= ( on && !prev);
 		bool lo		= (!on &&  prev);
 		bool rep	= hi;
-		int	lim	= g.tbl_lim[i];
+		int	lim	= pImpl->g.tbl_lim[i];
 
 		if ( hi )
 		{
@@ -88,12 +88,12 @@ void SysKeys::Update()
 			rep = true;
 		}
 
-		g.tbl_prev[i]	= prev;
-		g.tbl_on[i]		= on;
-		g.tbl_hi[i]		= hi;
-		g.tbl_lo[i]		= lo;
-		g.tbl_rep[i]	= rep;
-		g.tbl_lim[i]	= lim;
+		pImpl->g.tbl_prev[i]	= prev;
+		pImpl->g.tbl_on[i]		= on;
+		pImpl->g.tbl_hi[i]		= hi;
+		pImpl->g.tbl_lo[i]		= lo;
+		pImpl->g.tbl_rep[i]	= rep;
+		pImpl->g.tbl_lim[i]	= lim;
 	}
 
 
@@ -360,342 +360,342 @@ void SysKeys::Update()
 	//		-			:	FE VK_OEM_CLEAR
 	//		-			:	FF 
 	
-	this->BACKSPACE.on	= g.tbl_on[ VK_BACK ];			// 08
-	this->BACKSPACE.hi	= g.tbl_hi[ VK_BACK ];			// 08
-	this->BACKSPACE.lo	= g.tbl_lo[ VK_BACK ];			// 08
-	this->BACKSPACE.rep	= g.tbl_rep[ VK_BACK ];			// 08
-
-	this->TAB.on		= g.tbl_on[ VK_TAB ];			// 09
-	this->TAB.hi		= g.tbl_hi[ VK_TAB ];			// 09
-	this->TAB.lo		= g.tbl_lo[ VK_TAB ];			// 09
-	this->TAB.rep		= g.tbl_rep[ VK_TAB ];			// 09
-
-	this->ENTER.on		= g.tbl_on[ VK_RETURN ];		// 0D
-	this->ENTER.hi		= g.tbl_hi[ VK_RETURN ];		// 0D
-	this->ENTER.lo		= g.tbl_lo[ VK_RETURN ];		// 0D
-	this->ENTER.rep		= g.tbl_rep[ VK_RETURN ];		// 0D
-
-	this->SHIFT.on		= g.tbl_on[ VK_SHIFT ];			// 10
-	this->SHIFT.hi		= g.tbl_hi[ VK_SHIFT ];			// 10
-	this->SHIFT.lo		= g.tbl_lo[ VK_SHIFT ];			// 10
-	this->SHIFT.rep		= g.tbl_rep[ VK_SHIFT ];		// 10
-
-	this->CTRL.on		= g.tbl_on[ VK_CONTROL ];		// 11
-	this->CTRL.hi		= g.tbl_hi[ VK_CONTROL ];		// 11
-	this->CTRL.lo		= g.tbl_lo[ VK_CONTROL ];		// 11
-	this->CTRL.rep		= g.tbl_rep[ VK_CONTROL ];		// 11
-
-	this->ALT.on		= g.tbl_on[ VK_MENU ];			// 12
-	this->ALT.hi		= g.tbl_hi[ VK_MENU ];			// 12
-	this->ALT.lo		= g.tbl_lo[ VK_MENU ];			// 12
-	this->ALT.rep		= g.tbl_rep[ VK_MENU ];			// 12
-
-	this->CAPSLOCK.on	= g.tbl_on[ VK_CAPITAL ];		// 14
-	this->CAPSLOCK.hi	= g.tbl_hi[ VK_CAPITAL ];		// 14
-	this->CAPSLOCK.lo	= g.tbl_lo[ VK_CAPITAL ];		// 14
-	this->CAPSLOCK.rep	= g.tbl_rep[ VK_CAPITAL ];		// 14
-
-	this->ESC.on		= g.tbl_on[ VK_ESCAPE ];		// 1B
-	this->ESC.hi		= g.tbl_hi[ VK_ESCAPE ];		// 1B
-	this->ESC.lo		= g.tbl_lo[ VK_ESCAPE ];		// 1B
-	this->ESC.rep		= g.tbl_rep[ VK_ESCAPE ];		// 1B
-
-	this->SPACE.on		= g.tbl_on[ VK_SPACE ];			// 20
-	this->SPACE.hi		= g.tbl_hi[ VK_SPACE ];			// 20
-	this->SPACE.lo		= g.tbl_lo[ VK_SPACE ];			// 20
-	this->SPACE.rep		= g.tbl_rep[ VK_SPACE ];		// 20
-
-	this->PAGEUP.on		= g.tbl_on[ VK_PRIOR ];			// 21
-	this->PAGEUP.hi		= g.tbl_hi[ VK_PRIOR ];			// 21
-	this->PAGEUP.lo		= g.tbl_lo[ VK_PRIOR ];			// 21
-	this->PAGEUP.rep	= g.tbl_rep[ VK_PRIOR ];		// 21
-
-	this->PAGEDOWN.on	= g.tbl_on[ VK_NEXT ];			// 22
-	this->PAGEDOWN.hi	= g.tbl_hi[ VK_NEXT ];			// 22
-	this->PAGEDOWN.lo	= g.tbl_lo[ VK_NEXT ];			// 22
-	this->PAGEDOWN.rep	= g.tbl_rep[ VK_NEXT ];			// 22
-
-	this->END.on		= g.tbl_on[ VK_END ];			// 23
-	this->END.hi		= g.tbl_hi[ VK_END ];			// 23
-	this->END.lo		= g.tbl_lo[ VK_END ];			// 23
-	this->END.rep		= g.tbl_rep[ VK_END ];			// 23
-
-	this->HOME.on		= g.tbl_on[ VK_HOME ];			// 24
-	this->HOME.hi		= g.tbl_hi[ VK_HOME ];			// 24
-	this->HOME.lo		= g.tbl_lo[ VK_HOME ];			// 24
-	this->HOME.rep		= g.tbl_rep[ VK_HOME ];			// 24
-
-	this->LEFT.on		= g.tbl_on[ VK_LEFT ];			// 25
-	this->LEFT.hi		= g.tbl_hi[ VK_LEFT ];			// 25
-	this->LEFT.lo		= g.tbl_lo[ VK_LEFT ];			// 25
-	this->LEFT.rep		= g.tbl_rep[ VK_LEFT ];			// 25
-
-	this->UP.on			= g.tbl_on[ VK_UP ];			// 26
-	this->UP.hi			= g.tbl_hi[ VK_UP ];			// 26
-	this->UP.lo			= g.tbl_lo[ VK_UP ];			// 26
-	this->UP.rep		= g.tbl_rep[ VK_UP ];			// 26
-
-	this->RIGHT.on		= g.tbl_on[ VK_RIGHT ];			// 27
-	this->RIGHT.hi		= g.tbl_hi[ VK_RIGHT ];			// 27
-	this->RIGHT.lo		= g.tbl_lo[ VK_RIGHT ];			// 27
-	this->RIGHT.rep		= g.tbl_rep[ VK_RIGHT ];		// 27
-
-	this->DOWN.on		= g.tbl_on[ VK_DOWN ];			// 28
-	this->DOWN.hi		= g.tbl_hi[ VK_DOWN ];			// 28
-	this->DOWN.lo		= g.tbl_lo[ VK_DOWN ];			// 28
-	this->DOWN.rep		= g.tbl_rep[ VK_DOWN ];			// 28
-
-	this->A.on			= g.tbl_on[ (INT)'A'];			// 41
-	this->A.hi			= g.tbl_hi[ (INT)'A'];			// 41
-	this->A.lo			= g.tbl_lo[ (INT)'A'];			// 41
-	this->A.rep			= g.tbl_rep[ (INT)'A'];			// 41
-
-	this->B.on			= g.tbl_on[ (INT)'B'];			// 42
-	this->B.hi			= g.tbl_hi[ (INT)'B'];			// 42
-	this->B.lo			= g.tbl_lo[ (INT)'B'];			// 42
-	this->B.rep			= g.tbl_rep[ (INT)'B'];			// 42
-
-	this->C.on			= g.tbl_on[ (INT)'C'];			// 43
-	this->C.hi			= g.tbl_hi[ (INT)'C'];			// 43
-	this->C.lo			= g.tbl_lo[ (INT)'C'];			// 43
-	this->C.rep			= g.tbl_rep[ (INT)'C'];			// 43
-
-	this->D.on			= g.tbl_on[ (INT)'D'];			// 44
-	this->D.hi			= g.tbl_hi[ (INT)'D'];			// 44
-	this->D.lo			= g.tbl_lo[ (INT)'D'];			// 44
-	this->D.rep			= g.tbl_rep[ (INT)'D'];			// 44
-
-	this->E.on			= g.tbl_on[ (INT)'E'];			// 45
-	this->E.hi			= g.tbl_hi[ (INT)'E'];			// 45
-	this->E.lo			= g.tbl_lo[ (INT)'E'];			// 45
-	this->E.rep			= g.tbl_rep[ (INT)'E'];			// 45
-
-	this->F.on			= g.tbl_on[ (INT)'F'];			// 46
-	this->F.hi			= g.tbl_hi[ (INT)'F'];			// 46
-	this->F.lo			= g.tbl_lo[ (INT)'F'];			// 46
-	this->F.rep			= g.tbl_rep[ (INT)'F'];			// 46
-
-	this->G.on			= g.tbl_on[ (INT)'G'];			// 47
-	this->G.hi			= g.tbl_hi[ (INT)'G'];			// 47
-	this->G.lo			= g.tbl_lo[ (INT)'G'];			// 47
-	this->G.rep			= g.tbl_rep[ (INT)'G'];			// 47
-
-	this->H.on			= g.tbl_on[ (INT)'H'];			// 48
-	this->H.hi			= g.tbl_hi[ (INT)'H'];			// 48
-	this->H.lo			= g.tbl_lo[ (INT)'H'];			// 48
-	this->H.rep			= g.tbl_rep[ (INT)'H'];			// 48
-
-	this->I.on			= g.tbl_on[ (INT)'I'];			// 49
-	this->I.hi			= g.tbl_hi[ (INT)'I'];			// 49
-	this->I.lo			= g.tbl_lo[ (INT)'I'];			// 49
-	this->I.rep			= g.tbl_rep[ (INT)'I'];			// 49
-
-	this->J.on			= g.tbl_on[ (INT)'J'];			// 4A
-	this->J.hi			= g.tbl_hi[ (INT)'J'];			// 4A
-	this->J.lo			= g.tbl_lo[ (INT)'J'];			// 4A
-	this->J.rep			= g.tbl_rep[ (INT)'J'];			// 4A
-
-	this->K.on			= g.tbl_on[ (INT)'K'];			// 4B
-	this->K.hi			= g.tbl_hi[ (INT)'K'];			// 4B
-	this->K.lo			= g.tbl_lo[ (INT)'K'];			// 4B
-	this->K.rep			= g.tbl_rep[ (INT)'K'];			// 4B
-
-	this->L.on			= g.tbl_on[ (INT)'L'];			// 4C
-	this->L.hi			= g.tbl_hi[ (INT)'L'];			// 4C
-	this->L.lo			= g.tbl_lo[ (INT)'L'];			// 4C
-	this->L.rep			= g.tbl_rep[ (INT)'L'];			// 4C
-
-	this->M.on			= g.tbl_on[ (INT)'M'];			// 4D
-	this->M.hi			= g.tbl_hi[ (INT)'M'];			// 4D
-	this->M.lo			= g.tbl_lo[ (INT)'M'];			// 4D
-	this->M.rep			= g.tbl_rep[ (INT)'M'];			// 4D
-
-	this->N.on			= g.tbl_on[ (INT)'N'];			// 4E
-	this->N.hi			= g.tbl_hi[ (INT)'N'];			// 4E
-	this->N.lo			= g.tbl_lo[ (INT)'N'];			// 4E
-	this->N.rep			= g.tbl_rep[ (INT)'N'];			// 4E
-
-	this->O.on			= g.tbl_on[ (INT)'O'];			// 4F
-	this->O.hi			= g.tbl_hi[ (INT)'O'];			// 4F
-	this->O.lo			= g.tbl_lo[ (INT)'O'];			// 4F
-	this->O.rep			= g.tbl_rep[ (INT)'O'];			// 4F
-
-	this->P.on			= g.tbl_on[ (INT)'P'];			// 50
-	this->P.hi			= g.tbl_hi[ (INT)'P'];			// 50
-	this->P.lo			= g.tbl_lo[ (INT)'P'];			// 50
-	this->P.rep			= g.tbl_rep[ (INT)'P'];			// 50
-
-	this->Q.on			= g.tbl_on[ (INT)'Q'];			// 51
-	this->Q.hi			= g.tbl_hi[ (INT)'Q'];			// 51
-	this->Q.lo			= g.tbl_lo[ (INT)'Q'];			// 51
-	this->Q.rep			= g.tbl_rep[ (INT)'Q'];			// 51
-
-	this->R.on			= g.tbl_on[ (INT)'R'];			// 52
-	this->R.hi			= g.tbl_hi[ (INT)'R'];			// 52
-	this->R.lo			= g.tbl_lo[ (INT)'R'];			// 52
-	this->R.rep			= g.tbl_rep[ (INT)'R'];			// 52
-
-	this->S.on			= g.tbl_on[ (INT)'S'];			// 53
-	this->S.hi			= g.tbl_hi[ (INT)'S'];			// 53
-	this->S.lo			= g.tbl_lo[ (INT)'S'];			// 53
-	this->S.rep			= g.tbl_rep[ (INT)'S'];			// 53
-
-	this->T.on			= g.tbl_on[ (INT)'T'];			// 54
-	this->T.hi			= g.tbl_hi[ (INT)'T'];			// 54
-	this->T.lo			= g.tbl_lo[ (INT)'T'];			// 54
-	this->T.rep			= g.tbl_rep[ (INT)'T'];			// 54
-
-	this->U.on			= g.tbl_on[ (INT)'U'];			// 55
-	this->U.hi			= g.tbl_hi[ (INT)'U'];			// 55
-	this->U.lo			= g.tbl_lo[ (INT)'U'];			// 55
-	this->U.rep			= g.tbl_rep[ (INT)'U'];			// 55
-
-	this->V.on			= g.tbl_on[ (INT)'V'];			// 56
-	this->V.hi			= g.tbl_hi[ (INT)'V'];			// 56
-	this->V.lo			= g.tbl_lo[ (INT)'V'];			// 56
-	this->V.rep			= g.tbl_rep[ (INT)'V'];			// 56
-
-	this->W.on			= g.tbl_on[ (INT)'W'];			// 57
-	this->W.hi			= g.tbl_hi[ (INT)'W'];			// 57
-	this->W.lo			= g.tbl_lo[ (INT)'W'];			// 57
-	this->W.rep			= g.tbl_rep[ (INT)'W'];			// 57
-
-	this->X.on			= g.tbl_on[ (INT)'X'];			// 58
-	this->X.hi			= g.tbl_hi[ (INT)'X'];			// 58
-	this->X.lo			= g.tbl_lo[ (INT)'X'];			// 58
-	this->X.rep			= g.tbl_rep[ (INT)'X'];			// 58
-
-	this->Y.on			= g.tbl_on[ (INT)'Y'];			// 59
-	this->Y.hi			= g.tbl_hi[ (INT)'Y'];			// 59
-	this->Y.lo			= g.tbl_lo[ (INT)'Y'];			// 59
-	this->Y.rep			= g.tbl_rep[ (INT)'Y'];			// 59
-
-	this->Z.on			= g.tbl_on[ (INT)'Z'];			// 5A
-	this->Z.hi			= g.tbl_hi[ (INT)'Z'];			// 5A
-	this->Z.lo			= g.tbl_lo[ (INT)'Z'];			// 5A
-	this->Z.rep			= g.tbl_rep[ (INT)'Z'];			// 5A
-
-	this->F1.on			= g.tbl_on[ VK_F1 ];			// 70
-	this->F1.hi			= g.tbl_hi[ VK_F1 ];			// 70
-	this->F1.lo			= g.tbl_lo[ VK_F1 ];			// 70
-	this->F1.rep		= g.tbl_rep[ VK_F1 ];			// 70
-
-	this->F2.on			= g.tbl_on[ VK_F2 ];			// 71
-	this->F2.hi			= g.tbl_hi[ VK_F2 ];			// 71
-	this->F2.lo			= g.tbl_lo[ VK_F2 ];			// 71
-	this->F2.rep		= g.tbl_rep[ VK_F2 ];			// 71
-
-	this->F3.on			= g.tbl_on[ VK_F3 ];			// 72
-	this->F3.hi			= g.tbl_hi[ VK_F3 ];			// 72
-	this->F3.lo			= g.tbl_lo[ VK_F3 ];			// 72
-	this->F3.rep		= g.tbl_rep[ VK_F3 ];			// 72
-
-	this->F4.on			= g.tbl_on[ VK_F4 ];			// 73
-	this->F4.hi			= g.tbl_hi[ VK_F4 ];			// 73
-	this->F4.lo			= g.tbl_lo[ VK_F4 ];			// 73
-	this->F4.rep		= g.tbl_rep[ VK_F4 ];			// 73
-
-	this->F5.on			= g.tbl_on[ VK_F5 ];			// 74
-	this->F5.hi			= g.tbl_hi[ VK_F5 ];			// 74
-	this->F5.lo			= g.tbl_lo[ VK_F5 ];			// 74
-	this->F5.rep		= g.tbl_rep[ VK_F5 ];			// 74
-
-	this->F6.on			= g.tbl_on[ VK_F6 ];			// 75
-	this->F6.hi			= g.tbl_hi[ VK_F6 ];			// 75
-	this->F6.lo			= g.tbl_lo[ VK_F6 ];			// 75
-	this->F6.rep		= g.tbl_rep[ VK_F6 ];			// 75
-
-	this->F7.on			= g.tbl_on[ VK_F7 ];			// 76
-	this->F7.hi			= g.tbl_hi[ VK_F7 ];			// 76
-	this->F7.lo			= g.tbl_lo[ VK_F7 ];			// 76
-	this->F7.rep		= g.tbl_rep[ VK_F7 ];			// 76
-
-	this->F8.on			= g.tbl_on[ VK_F8 ];			// 77
-	this->F8.hi			= g.tbl_hi[ VK_F8 ];			// 77
-	this->F8.lo			= g.tbl_lo[ VK_F8 ];			// 77
-	this->F8.rep		= g.tbl_rep[ VK_F8 ];			// 77
-
-	this->F9.on			= g.tbl_on[ VK_F9 ];			// 78
-	this->F9.hi			= g.tbl_hi[ VK_F9 ];			// 78
-	this->F9.lo			= g.tbl_lo[ VK_F9 ];			// 78
-	this->F9.rep		= g.tbl_rep[ VK_F9 ];			// 78
-
-	this->F10.on		= g.tbl_on[ VK_F10 ];			// 79
-	this->F10.hi		= g.tbl_hi[ VK_F10 ];			// 79
-	this->F10.lo		= g.tbl_lo[ VK_F10 ];			// 79
-	this->F10.rep		= g.tbl_rep[ VK_F10 ];			// 79
-
-	this->_1.on			= g.tbl_on[ (int)'1' ];			// 
-	this->_1.hi			= g.tbl_hi[ (int)'1' ];			// 
-	this->_1.lo			= g.tbl_lo[ (int)'1' ];			// 
-	this->_1.rep		= g.tbl_rep[ (int)'1' ];			// 
-
-	this->_2.on			= g.tbl_on[ (int)'2' ];			// 
-	this->_2.hi			= g.tbl_hi[ (int)'2' ];			// 
-	this->_2.lo			= g.tbl_lo[ (int)'2' ];			// 
-	this->_2.rep		= g.tbl_rep[ (int)'2' ];			// 
-
-	this->_3.on			= g.tbl_on[ (int)'3' ];			// 
-	this->_3.hi			= g.tbl_hi[ (int)'3' ];			// 
-	this->_3.lo			= g.tbl_lo[ (int)'3' ];			// 
-	this->_3.rep		= g.tbl_rep[ (int)'3' ];			// 
-
-	this->_4.on			= g.tbl_on[ (int)'4' ];			// 
-	this->_4.hi			= g.tbl_hi[ (int)'4' ];			// 
-	this->_4.lo			= g.tbl_lo[ (int)'4' ];			// 
-	this->_4.rep		= g.tbl_rep[ (int)'4' ];			// 
-
-	this->_5.on			= g.tbl_on[ (int)'5' ];			// 
-	this->_5.hi			= g.tbl_hi[ (int)'5' ];			// 
-	this->_5.lo			= g.tbl_lo[ (int)'5' ];			// 
-	this->_5.rep		= g.tbl_rep[ (int)'5' ];			// 
-
-	this->_6.on			= g.tbl_on[ (int)'6' ];			// 
-	this->_6.hi			= g.tbl_hi[ (int)'6' ];			// 
-	this->_6.lo			= g.tbl_lo[ (int)'6' ];			// 
-	this->_6.rep		= g.tbl_rep[ (int)'6' ];			// 
-
-	this->_7.on			= g.tbl_on[ (int)'7' ];			// 
-	this->_7.hi			= g.tbl_hi[ (int)'7' ];			// 
-	this->_7.lo			= g.tbl_lo[ (int)'7' ];			// 
-	this->_7.rep		= g.tbl_rep[ (int)'7' ];			// 
-
-	this->_8.on			= g.tbl_on[ (int)'8' ];			// 
-	this->_8.hi			= g.tbl_hi[ (int)'8' ];			// 
-	this->_8.lo			= g.tbl_lo[ (int)'8' ];			// 
-	this->_8.rep		= g.tbl_rep[ (int)'8' ];			// 
-
-	this->_9.on			= g.tbl_on[ (int)'9' ];			// 
-	this->_9.hi			= g.tbl_hi[ (int)'9' ];			// 
-	this->_9.lo			= g.tbl_lo[ (int)'9' ];			// 
-	this->_9.rep		= g.tbl_rep[ (int)'9' ];			// 
-
-	this->_0.on			= g.tbl_on[ (int)'0' ];			// 
-	this->_0.hi			= g.tbl_hi[ (int)'0' ];			// 
-	this->_0.lo			= g.tbl_lo[ (int)'0' ];			// 
-	this->_0.rep		= g.tbl_rep[ (int)'0' ];			// 
-
-	this->SEMICOLON.on	= g.tbl_on[ VK_OEM_1 ];			// BA
-	this->SEMICOLON.hi	= g.tbl_hi[ VK_OEM_1 ];			// BA
-	this->SEMICOLON.lo	= g.tbl_lo[ VK_OEM_1 ];			// BA
-	this->SEMICOLON.rep	= g.tbl_rep[ VK_OEM_1 ];		// BA
-
-	this->COMMA.on		= g.tbl_on[ VK_OEM_COMMA ];		// BC
-	this->COMMA.hi		= g.tbl_hi[ VK_OEM_COMMA ];		// BC
-	this->COMMA.lo		= g.tbl_lo[ VK_OEM_COMMA ];		// BC
-	this->COMMA.rep		= g.tbl_rep[ VK_OEM_COMMA ];	// BC
-
-	this->PERIOD.on		= g.tbl_on[ VK_OEM_PERIOD ];	// BE
-	this->PERIOD.hi		= g.tbl_hi[ VK_OEM_PERIOD ];	// BE
-	this->PERIOD.lo		= g.tbl_lo[ VK_OEM_PERIOD ];	// BE
-	this->PERIOD.rep	= g.tbl_rep[ VK_OEM_PERIOD ];	// BE
+	this->BACKSPACE.on	= pImpl->g.tbl_on[ VK_BACK ];			// 08
+	this->BACKSPACE.hi	= pImpl->g.tbl_hi[ VK_BACK ];			// 08
+	this->BACKSPACE.lo	= pImpl->g.tbl_lo[ VK_BACK ];			// 08
+	this->BACKSPACE.rep	= pImpl->g.tbl_rep[ VK_BACK ];			// 08
+
+	this->TAB.on		= pImpl->g.tbl_on[ VK_TAB ];			// 09
+	this->TAB.hi		= pImpl->g.tbl_hi[ VK_TAB ];			// 09
+	this->TAB.lo		= pImpl->g.tbl_lo[ VK_TAB ];			// 09
+	this->TAB.rep		= pImpl->g.tbl_rep[ VK_TAB ];			// 09
+
+	this->ENTER.on		= pImpl->g.tbl_on[ VK_RETURN ];		// 0D
+	this->ENTER.hi		= pImpl->g.tbl_hi[ VK_RETURN ];		// 0D
+	this->ENTER.lo		= pImpl->g.tbl_lo[ VK_RETURN ];		// 0D
+	this->ENTER.rep		= pImpl->g.tbl_rep[ VK_RETURN ];		// 0D
+
+	this->SHIFT.on		= pImpl->g.tbl_on[ VK_SHIFT ];			// 10
+	this->SHIFT.hi		= pImpl->g.tbl_hi[ VK_SHIFT ];			// 10
+	this->SHIFT.lo		= pImpl->g.tbl_lo[ VK_SHIFT ];			// 10
+	this->SHIFT.rep		= pImpl->g.tbl_rep[ VK_SHIFT ];		// 10
+
+	this->CTRL.on		= pImpl->g.tbl_on[ VK_CONTROL ];		// 11
+	this->CTRL.hi		= pImpl->g.tbl_hi[ VK_CONTROL ];		// 11
+	this->CTRL.lo		= pImpl->g.tbl_lo[ VK_CONTROL ];		// 11
+	this->CTRL.rep		= pImpl->g.tbl_rep[ VK_CONTROL ];		// 11
+
+	this->ALT.on		= pImpl->g.tbl_on[ VK_MENU ];			// 12
+	this->ALT.hi		= pImpl->g.tbl_hi[ VK_MENU ];			// 12
+	this->ALT.lo		= pImpl->g.tbl_lo[ VK_MENU ];			// 12
+	this->ALT.rep		= pImpl->g.tbl_rep[ VK_MENU ];			// 12
+
+	this->CAPSLOCK.on	= pImpl->g.tbl_on[ VK_CAPITAL ];		// 14
+	this->CAPSLOCK.hi	= pImpl->g.tbl_hi[ VK_CAPITAL ];		// 14
+	this->CAPSLOCK.lo	= pImpl->g.tbl_lo[ VK_CAPITAL ];		// 14
+	this->CAPSLOCK.rep	= pImpl->g.tbl_rep[ VK_CAPITAL ];		// 14
+
+	this->ESC.on		= pImpl->g.tbl_on[ VK_ESCAPE ];		// 1B
+	this->ESC.hi		= pImpl->g.tbl_hi[ VK_ESCAPE ];		// 1B
+	this->ESC.lo		= pImpl->g.tbl_lo[ VK_ESCAPE ];		// 1B
+	this->ESC.rep		= pImpl->g.tbl_rep[ VK_ESCAPE ];		// 1B
+
+	this->SPACE.on		= pImpl->g.tbl_on[ VK_SPACE ];			// 20
+	this->SPACE.hi		= pImpl->g.tbl_hi[ VK_SPACE ];			// 20
+	this->SPACE.lo		= pImpl->g.tbl_lo[ VK_SPACE ];			// 20
+	this->SPACE.rep		= pImpl->g.tbl_rep[ VK_SPACE ];		// 20
+
+	this->PAGEUP.on		= pImpl->g.tbl_on[ VK_PRIOR ];			// 21
+	this->PAGEUP.hi		= pImpl->g.tbl_hi[ VK_PRIOR ];			// 21
+	this->PAGEUP.lo		= pImpl->g.tbl_lo[ VK_PRIOR ];			// 21
+	this->PAGEUP.rep	= pImpl->g.tbl_rep[ VK_PRIOR ];		// 21
+
+	this->PAGEDOWN.on	= pImpl->g.tbl_on[ VK_NEXT ];			// 22
+	this->PAGEDOWN.hi	= pImpl->g.tbl_hi[ VK_NEXT ];			// 22
+	this->PAGEDOWN.lo	= pImpl->g.tbl_lo[ VK_NEXT ];			// 22
+	this->PAGEDOWN.rep	= pImpl->g.tbl_rep[ VK_NEXT ];			// 22
+
+	this->END.on		= pImpl->g.tbl_on[ VK_END ];			// 23
+	this->END.hi		= pImpl->g.tbl_hi[ VK_END ];			// 23
+	this->END.lo		= pImpl->g.tbl_lo[ VK_END ];			// 23
+	this->END.rep		= pImpl->g.tbl_rep[ VK_END ];			// 23
+
+	this->HOME.on		= pImpl->g.tbl_on[ VK_HOME ];			// 24
+	this->HOME.hi		= pImpl->g.tbl_hi[ VK_HOME ];			// 24
+	this->HOME.lo		= pImpl->g.tbl_lo[ VK_HOME ];			// 24
+	this->HOME.rep		= pImpl->g.tbl_rep[ VK_HOME ];			// 24
+
+	this->LEFT.on		= pImpl->g.tbl_on[ VK_LEFT ];			// 25
+	this->LEFT.hi		= pImpl->g.tbl_hi[ VK_LEFT ];			// 25
+	this->LEFT.lo		= pImpl->g.tbl_lo[ VK_LEFT ];			// 25
+	this->LEFT.rep		= pImpl->g.tbl_rep[ VK_LEFT ];			// 25
+
+	this->UP.on			= pImpl->g.tbl_on[ VK_UP ];			// 26
+	this->UP.hi			= pImpl->g.tbl_hi[ VK_UP ];			// 26
+	this->UP.lo			= pImpl->g.tbl_lo[ VK_UP ];			// 26
+	this->UP.rep		= pImpl->g.tbl_rep[ VK_UP ];			// 26
+
+	this->RIGHT.on		= pImpl->g.tbl_on[ VK_RIGHT ];			// 27
+	this->RIGHT.hi		= pImpl->g.tbl_hi[ VK_RIGHT ];			// 27
+	this->RIGHT.lo		= pImpl->g.tbl_lo[ VK_RIGHT ];			// 27
+	this->RIGHT.rep		= pImpl->g.tbl_rep[ VK_RIGHT ];		// 27
+
+	this->DOWN.on		= pImpl->g.tbl_on[ VK_DOWN ];			// 28
+	this->DOWN.hi		= pImpl->g.tbl_hi[ VK_DOWN ];			// 28
+	this->DOWN.lo		= pImpl->g.tbl_lo[ VK_DOWN ];			// 28
+	this->DOWN.rep		= pImpl->g.tbl_rep[ VK_DOWN ];			// 28
+
+	this->A.on			= pImpl->g.tbl_on[ (INT)'A'];			// 41
+	this->A.hi			= pImpl->g.tbl_hi[ (INT)'A'];			// 41
+	this->A.lo			= pImpl->g.tbl_lo[ (INT)'A'];			// 41
+	this->A.rep			= pImpl->g.tbl_rep[ (INT)'A'];			// 41
+
+	this->B.on			= pImpl->g.tbl_on[ (INT)'B'];			// 42
+	this->B.hi			= pImpl->g.tbl_hi[ (INT)'B'];			// 42
+	this->B.lo			= pImpl->g.tbl_lo[ (INT)'B'];			// 42
+	this->B.rep			= pImpl->g.tbl_rep[ (INT)'B'];			// 42
+
+	this->C.on			= pImpl->g.tbl_on[ (INT)'C'];			// 43
+	this->C.hi			= pImpl->g.tbl_hi[ (INT)'C'];			// 43
+	this->C.lo			= pImpl->g.tbl_lo[ (INT)'C'];			// 43
+	this->C.rep			= pImpl->g.tbl_rep[ (INT)'C'];			// 43
+
+	this->D.on			= pImpl->g.tbl_on[ (INT)'D'];			// 44
+	this->D.hi			= pImpl->g.tbl_hi[ (INT)'D'];			// 44
+	this->D.lo			= pImpl->g.tbl_lo[ (INT)'D'];			// 44
+	this->D.rep			= pImpl->g.tbl_rep[ (INT)'D'];			// 44
+
+	this->E.on			= pImpl->g.tbl_on[ (INT)'E'];			// 45
+	this->E.hi			= pImpl->g.tbl_hi[ (INT)'E'];			// 45
+	this->E.lo			= pImpl->g.tbl_lo[ (INT)'E'];			// 45
+	this->E.rep			= pImpl->g.tbl_rep[ (INT)'E'];			// 45
+
+	this->F.on			= pImpl->g.tbl_on[ (INT)'F'];			// 46
+	this->F.hi			= pImpl->g.tbl_hi[ (INT)'F'];			// 46
+	this->F.lo			= pImpl->g.tbl_lo[ (INT)'F'];			// 46
+	this->F.rep			= pImpl->g.tbl_rep[ (INT)'F'];			// 46
+
+	this->G.on			= pImpl->g.tbl_on[ (INT)'G'];			// 47
+	this->G.hi			= pImpl->g.tbl_hi[ (INT)'G'];			// 47
+	this->G.lo			= pImpl->g.tbl_lo[ (INT)'G'];			// 47
+	this->G.rep			= pImpl->g.tbl_rep[ (INT)'G'];			// 47
+
+	this->H.on			= pImpl->g.tbl_on[ (INT)'H'];			// 48
+	this->H.hi			= pImpl->g.tbl_hi[ (INT)'H'];			// 48
+	this->H.lo			= pImpl->g.tbl_lo[ (INT)'H'];			// 48
+	this->H.rep			= pImpl->g.tbl_rep[ (INT)'H'];			// 48
+
+	this->I.on			= pImpl->g.tbl_on[ (INT)'I'];			// 49
+	this->I.hi			= pImpl->g.tbl_hi[ (INT)'I'];			// 49
+	this->I.lo			= pImpl->g.tbl_lo[ (INT)'I'];			// 49
+	this->I.rep			= pImpl->g.tbl_rep[ (INT)'I'];			// 49
+
+	this->J.on			= pImpl->g.tbl_on[ (INT)'J'];			// 4A
+	this->J.hi			= pImpl->g.tbl_hi[ (INT)'J'];			// 4A
+	this->J.lo			= pImpl->g.tbl_lo[ (INT)'J'];			// 4A
+	this->J.rep			= pImpl->g.tbl_rep[ (INT)'J'];			// 4A
+
+	this->K.on			= pImpl->g.tbl_on[ (INT)'K'];			// 4B
+	this->K.hi			= pImpl->g.tbl_hi[ (INT)'K'];			// 4B
+	this->K.lo			= pImpl->g.tbl_lo[ (INT)'K'];			// 4B
+	this->K.rep			= pImpl->g.tbl_rep[ (INT)'K'];			// 4B
+
+	this->L.on			= pImpl->g.tbl_on[ (INT)'L'];			// 4C
+	this->L.hi			= pImpl->g.tbl_hi[ (INT)'L'];			// 4C
+	this->L.lo			= pImpl->g.tbl_lo[ (INT)'L'];			// 4C
+	this->L.rep			= pImpl->g.tbl_rep[ (INT)'L'];			// 4C
+
+	this->M.on			= pImpl->g.tbl_on[ (INT)'M'];			// 4D
+	this->M.hi			= pImpl->g.tbl_hi[ (INT)'M'];			// 4D
+	this->M.lo			= pImpl->g.tbl_lo[ (INT)'M'];			// 4D
+	this->M.rep			= pImpl->g.tbl_rep[ (INT)'M'];			// 4D
+
+	this->N.on			= pImpl->g.tbl_on[ (INT)'N'];			// 4E
+	this->N.hi			= pImpl->g.tbl_hi[ (INT)'N'];			// 4E
+	this->N.lo			= pImpl->g.tbl_lo[ (INT)'N'];			// 4E
+	this->N.rep			= pImpl->g.tbl_rep[ (INT)'N'];			// 4E
+
+	this->O.on			= pImpl->g.tbl_on[ (INT)'O'];			// 4F
+	this->O.hi			= pImpl->g.tbl_hi[ (INT)'O'];			// 4F
+	this->O.lo			= pImpl->g.tbl_lo[ (INT)'O'];			// 4F
+	this->O.rep			= pImpl->g.tbl_rep[ (INT)'O'];			// 4F
+
+	this->P.on			= pImpl->g.tbl_on[ (INT)'P'];			// 50
+	this->P.hi			= pImpl->g.tbl_hi[ (INT)'P'];			// 50
+	this->P.lo			= pImpl->g.tbl_lo[ (INT)'P'];			// 50
+	this->P.rep			= pImpl->g.tbl_rep[ (INT)'P'];			// 50
+
+	this->Q.on			= pImpl->g.tbl_on[ (INT)'Q'];			// 51
+	this->Q.hi			= pImpl->g.tbl_hi[ (INT)'Q'];			// 51
+	this->Q.lo			= pImpl->g.tbl_lo[ (INT)'Q'];			// 51
+	this->Q.rep			= pImpl->g.tbl_rep[ (INT)'Q'];			// 51
+
+	this->R.on			= pImpl->g.tbl_on[ (INT)'R'];			// 52
+	this->R.hi			= pImpl->g.tbl_hi[ (INT)'R'];			// 52
+	this->R.lo			= pImpl->g.tbl_lo[ (INT)'R'];			// 52
+	this->R.rep			= pImpl->g.tbl_rep[ (INT)'R'];			// 52
+
+	this->S.on			= pImpl->g.tbl_on[ (INT)'S'];			// 53
+	this->S.hi			= pImpl->g.tbl_hi[ (INT)'S'];			// 53
+	this->S.lo			= pImpl->g.tbl_lo[ (INT)'S'];			// 53
+	this->S.rep			= pImpl->g.tbl_rep[ (INT)'S'];			// 53
+
+	this->T.on			= pImpl->g.tbl_on[ (INT)'T'];			// 54
+	this->T.hi			= pImpl->g.tbl_hi[ (INT)'T'];			// 54
+	this->T.lo			= pImpl->g.tbl_lo[ (INT)'T'];			// 54
+	this->T.rep			= pImpl->g.tbl_rep[ (INT)'T'];			// 54
+
+	this->U.on			= pImpl->g.tbl_on[ (INT)'U'];			// 55
+	this->U.hi			= pImpl->g.tbl_hi[ (INT)'U'];			// 55
+	this->U.lo			= pImpl->g.tbl_lo[ (INT)'U'];			// 55
+	this->U.rep			= pImpl->g.tbl_rep[ (INT)'U'];			// 55
+
+	this->V.on			= pImpl->g.tbl_on[ (INT)'V'];			// 56
+	this->V.hi			= pImpl->g.tbl_hi[ (INT)'V'];			// 56
+	this->V.lo			= pImpl->g.tbl_lo[ (INT)'V'];			// 56
+	this->V.rep			= pImpl->g.tbl_rep[ (INT)'V'];			// 56
+
+	this->W.on			= pImpl->g.tbl_on[ (INT)'W'];			// 57
+	this->W.hi			= pImpl->g.tbl_hi[ (INT)'W'];			// 57
+	this->W.lo			= pImpl->g.tbl_lo[ (INT)'W'];			// 57
+	this->W.rep			= pImpl->g.tbl_rep[ (INT)'W'];			// 57
+
+	this->X.on			= pImpl->g.tbl_on[ (INT)'X'];			// 58
+	this->X.hi			= pImpl->g.tbl_hi[ (INT)'X'];			// 58
+	this->X.lo			= pImpl->g.tbl_lo[ (INT)'X'];			// 58
+	this->X.rep			= pImpl->g.tbl_rep[ (INT)'X'];			// 58
+
+	this->Y.on			= pImpl->g.tbl_on[ (INT)'Y'];			// 59
+	this->Y.hi			= pImpl->g.tbl_hi[ (INT)'Y'];			// 59
+	this->Y.lo			= pImpl->g.tbl_lo[ (INT)'Y'];			// 59
+	this->Y.rep			= pImpl->g.tbl_rep[ (INT)'Y'];			// 59
+
+	this->Z.on			= pImpl->g.tbl_on[ (INT)'Z'];			// 5A
+	this->Z.hi			= pImpl->g.tbl_hi[ (INT)'Z'];			// 5A
+	this->Z.lo			= pImpl->g.tbl_lo[ (INT)'Z'];			// 5A
+	this->Z.rep			= pImpl->g.tbl_rep[ (INT)'Z'];			// 5A
+
+	this->F1.on			= pImpl->g.tbl_on[ VK_F1 ];			// 70
+	this->F1.hi			= pImpl->g.tbl_hi[ VK_F1 ];			// 70
+	this->F1.lo			= pImpl->g.tbl_lo[ VK_F1 ];			// 70
+	this->F1.rep		= pImpl->g.tbl_rep[ VK_F1 ];			// 70
+
+	this->F2.on			= pImpl->g.tbl_on[ VK_F2 ];			// 71
+	this->F2.hi			= pImpl->g.tbl_hi[ VK_F2 ];			// 71
+	this->F2.lo			= pImpl->g.tbl_lo[ VK_F2 ];			// 71
+	this->F2.rep		= pImpl->g.tbl_rep[ VK_F2 ];			// 71
+
+	this->F3.on			= pImpl->g.tbl_on[ VK_F3 ];			// 72
+	this->F3.hi			= pImpl->g.tbl_hi[ VK_F3 ];			// 72
+	this->F3.lo			= pImpl->g.tbl_lo[ VK_F3 ];			// 72
+	this->F3.rep		= pImpl->g.tbl_rep[ VK_F3 ];			// 72
+
+	this->F4.on			= pImpl->g.tbl_on[ VK_F4 ];			// 73
+	this->F4.hi			= pImpl->g.tbl_hi[ VK_F4 ];			// 73
+	this->F4.lo			= pImpl->g.tbl_lo[ VK_F4 ];			// 73
+	this->F4.rep		= pImpl->g.tbl_rep[ VK_F4 ];			// 73
+
+	this->F5.on			= pImpl->g.tbl_on[ VK_F5 ];			// 74
+	this->F5.hi			= pImpl->g.tbl_hi[ VK_F5 ];			// 74
+	this->F5.lo			= pImpl->g.tbl_lo[ VK_F5 ];			// 74
+	this->F5.rep		= pImpl->g.tbl_rep[ VK_F5 ];			// 74
+
+	this->F6.on			= pImpl->g.tbl_on[ VK_F6 ];			// 75
+	this->F6.hi			= pImpl->g.tbl_hi[ VK_F6 ];			// 75
+	this->F6.lo			= pImpl->g.tbl_lo[ VK_F6 ];			// 75
+	this->F6.rep		= pImpl->g.tbl_rep[ VK_F6 ];			// 75
+
+	this->F7.on			= pImpl->g.tbl_on[ VK_F7 ];			// 76
+	this->F7.hi			= pImpl->g.tbl_hi[ VK_F7 ];			// 76
+	this->F7.lo			= pImpl->g.tbl_lo[ VK_F7 ];			// 76
+	this->F7.rep		= pImpl->g.tbl_rep[ VK_F7 ];			// 76
+
+	this->F8.on			= pImpl->g.tbl_on[ VK_F8 ];			// 77
+	this->F8.hi			= pImpl->g.tbl_hi[ VK_F8 ];			// 77
+	this->F8.lo			= pImpl->g.tbl_lo[ VK_F8 ];			// 77
+	this->F8.rep		= pImpl->g.tbl_rep[ VK_F8 ];			// 77
+
+	this->F9.on			= pImpl->g.tbl_on[ VK_F9 ];			// 78
+	this->F9.hi			= pImpl->g.tbl_hi[ VK_F9 ];			// 78
+	this->F9.lo			= pImpl->g.tbl_lo[ VK_F9 ];			// 78
+	this->F9.rep		= pImpl->g.tbl_rep[ VK_F9 ];			// 78
+
+	this->F10.on		= pImpl->g.tbl_on[ VK_F10 ];			// 79
+	this->F10.hi		= pImpl->g.tbl_hi[ VK_F10 ];			// 79
+	this->F10.lo		= pImpl->g.tbl_lo[ VK_F10 ];			// 79
+	this->F10.rep		= pImpl->g.tbl_rep[ VK_F10 ];			// 79
+
+	this->_1.on			= pImpl->g.tbl_on[ (int)'1' ];			// 
+	this->_1.hi			= pImpl->g.tbl_hi[ (int)'1' ];			// 
+	this->_1.lo			= pImpl->g.tbl_lo[ (int)'1' ];			// 
+	this->_1.rep		= pImpl->g.tbl_rep[ (int)'1' ];			// 
+
+	this->_2.on			= pImpl->g.tbl_on[ (int)'2' ];			// 
+	this->_2.hi			= pImpl->g.tbl_hi[ (int)'2' ];			// 
+	this->_2.lo			= pImpl->g.tbl_lo[ (int)'2' ];			// 
+	this->_2.rep		= pImpl->g.tbl_rep[ (int)'2' ];			// 
+
+	this->_3.on			= pImpl->g.tbl_on[ (int)'3' ];			// 
+	this->_3.hi			= pImpl->g.tbl_hi[ (int)'3' ];			// 
+	this->_3.lo			= pImpl->g.tbl_lo[ (int)'3' ];			// 
+	this->_3.rep		= pImpl->g.tbl_rep[ (int)'3' ];			// 
+
+	this->_4.on			= pImpl->g.tbl_on[ (int)'4' ];			// 
+	this->_4.hi			= pImpl->g.tbl_hi[ (int)'4' ];			// 
+	this->_4.lo			= pImpl->g.tbl_lo[ (int)'4' ];			// 
+	this->_4.rep		= pImpl->g.tbl_rep[ (int)'4' ];			// 
+
+	this->_5.on			= pImpl->g.tbl_on[ (int)'5' ];			// 
+	this->_5.hi			= pImpl->g.tbl_hi[ (int)'5' ];			// 
+	this->_5.lo			= pImpl->g.tbl_lo[ (int)'5' ];			// 
+	this->_5.rep		= pImpl->g.tbl_rep[ (int)'5' ];			// 
+
+	this->_6.on			= pImpl->g.tbl_on[ (int)'6' ];			// 
+	this->_6.hi			= pImpl->g.tbl_hi[ (int)'6' ];			// 
+	this->_6.lo			= pImpl->g.tbl_lo[ (int)'6' ];			// 
+	this->_6.rep		= pImpl->g.tbl_rep[ (int)'6' ];			// 
+
+	this->_7.on			= pImpl->g.tbl_on[ (int)'7' ];			// 
+	this->_7.hi			= pImpl->g.tbl_hi[ (int)'7' ];			// 
+	this->_7.lo			= pImpl->g.tbl_lo[ (int)'7' ];			// 
+	this->_7.rep		= pImpl->g.tbl_rep[ (int)'7' ];			// 
+
+	this->_8.on			= pImpl->g.tbl_on[ (int)'8' ];			// 
+	this->_8.hi			= pImpl->g.tbl_hi[ (int)'8' ];			// 
+	this->_8.lo			= pImpl->g.tbl_lo[ (int)'8' ];			// 
+	this->_8.rep		= pImpl->g.tbl_rep[ (int)'8' ];			// 
+
+	this->_9.on			= pImpl->g.tbl_on[ (int)'9' ];			// 
+	this->_9.hi			= pImpl->g.tbl_hi[ (int)'9' ];			// 
+	this->_9.lo			= pImpl->g.tbl_lo[ (int)'9' ];			// 
+	this->_9.rep		= pImpl->g.tbl_rep[ (int)'9' ];			// 
+
+	this->_0.on			= pImpl->g.tbl_on[ (int)'0' ];			// 
+	this->_0.hi			= pImpl->g.tbl_hi[ (int)'0' ];			// 
+	this->_0.lo			= pImpl->g.tbl_lo[ (int)'0' ];			// 
+	this->_0.rep		= pImpl->g.tbl_rep[ (int)'0' ];			// 
+
+	this->SEMICOLON.on	= pImpl->g.tbl_on[ VK_OEM_1 ];			// BA
+	this->SEMICOLON.hi	= pImpl->g.tbl_hi[ VK_OEM_1 ];			// BA
+	this->SEMICOLON.lo	= pImpl->g.tbl_lo[ VK_OEM_1 ];			// BA
+	this->SEMICOLON.rep	= pImpl->g.tbl_rep[ VK_OEM_1 ];		// BA
+
+	this->COMMA.on		= pImpl->g.tbl_on[ VK_OEM_COMMA ];		// BC
+	this->COMMA.hi		= pImpl->g.tbl_hi[ VK_OEM_COMMA ];		// BC
+	this->COMMA.lo		= pImpl->g.tbl_lo[ VK_OEM_COMMA ];		// BC
+	this->COMMA.rep		= pImpl->g.tbl_rep[ VK_OEM_COMMA ];	// BC
+
+	this->PERIOD.on		= pImpl->g.tbl_on[ VK_OEM_PERIOD ];	// BE
+	this->PERIOD.hi		= pImpl->g.tbl_hi[ VK_OEM_PERIOD ];	// BE
+	this->PERIOD.lo		= pImpl->g.tbl_lo[ VK_OEM_PERIOD ];	// BE
+	this->PERIOD.rep	= pImpl->g.tbl_rep[ VK_OEM_PERIOD ];	// BE
 
 #if 0
 	 // キーコードチェック用
 	int i;
 	for ( i = 0 ; i < 255 ; i++ )
 	{
-		if ( g.state[i] & 0x80 )
+		if ( pImpl->g.state[i] & 0x80 )
 		{
 			if ( 
 				i!=0x19 &&

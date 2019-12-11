@@ -18,116 +18,122 @@
 
 using namespace std;
 
-struct  wgl_Font
-{
-	const DWORD count = 255;
-	GLuint font_base;
-
-	HFONT	hFont;
-	
-	//------------------------------------------------------------------------------
-	void Init( HDC& hDc )
-	//------------------------------------------------------------------------------
-	{
-		font_base = glGenLists(255);	
-
-	#if 1
-		//	固定長フォント	
-	    int   nHeight			= 14;					// 文字セルまたは文字の高さ
-	    int   nWidth			= 0;					// 平均文字幅
-	    int   nEscapement		= 0;					// 文字送りの方向とX軸との角度
-	    int   nOrientation		= 0;					// ベースラインとX軸との角度
-	    int   nWeight			= FW_REGULAR;			// フォントの太さ
-	    DWORD fdwItalic			= false;				// イタリック体指定
-	    DWORD fdwUnderline		= false;				// 下線付き指定
-	    DWORD fdwStrikeOut		= false;				// 打ち消し線付き指定
-	    DWORD fdwCharSet		= SHIFTJIS_CHARSET;		// キャラクタセット
-	    DWORD fdwOutPrecision	= OUT_DEFAULT_PRECIS;	// 出力精度
-	    DWORD fdwClipPrecision	= CLIP_DEFAULT_PRECIS;	// クリッピングの精度
-	    DWORD fdwQuality		= DEFAULT_QUALITY;		// 出力品質
-	    DWORD fdwPitchAndFamily = 	FIXED_PITCH 		// 固定ピッチ
-	    						//   VARIABLE_PITCH 	// 可変ピッチ
-			    				//	| FF_SWISS 			// "MS Sans Serif" 
-//			    				  | FF_ROMAN			// "MS Serif" 全角日本語
-//			    				  | FF_MODERN			// 全角日本語 対応
-			    				  | FF_SCRIPT 			// 全角日本語 対応
-			    					;
-	    PCTSTR pszFaceName		= NULL;					// フォント名
-
-		hFont = CreateFont(
-			nHeight,
-			nWidth,
-			nEscapement,
-			nOrientation,
-			nWeight,
-			fdwItalic,
-			fdwUnderline,
-			fdwStrikeOut,
-			fdwCharSet,
-			fdwOutPrecision,
-			fdwClipPrecision,
-			fdwQuality,
-			fdwPitchAndFamily,
-			pszFaceName
-		);
-		SelectObject(hDc, hFont);
-	#else  
-//		SelectObject (hDc, GetStockObject (SYSTEM_FONT)); 		// サンセリフ 大
-//		SelectObject (hDc, GetStockObject (DEFAULT_GUI_FONT));	// サンセリフ 小
-
-//		SelectObject (hDc, GetStockObject (SYSTEM_FIXED_FONT)); // 固定長フォント ワイド
-		SelectObject (hDc, GetStockObject (ANSI_FIXED_FONT)); // 固定長フォント セリフ 外国製っぽい
-
-	#endif
-		wglUseFontBitmaps( hDc, 0, count, font_base); 
-
-	}
-	//------------------------------------------------------------------------------
-	void Delete( )
-	//------------------------------------------------------------------------------
-	{
-		glDeleteLists( font_base, (GLsizei)count);
-	}
-
-
-	//------------------------------------------------------------------------------
-	void DrawString( string str )
-	//------------------------------------------------------------------------------
-	{
-
-		glPushAttrib(GL_LIST_BIT);
-
-		glListBase( font_base );
-
-		glCallLists( (signed)str.size(), GL_UNSIGNED_BYTE, str.c_str() );
-
-		glPopAttrib();
-
-	}
-
-} wgl_font;
-
-static struct G
-{
-	bool flgActive;
-	HDC  hdcBackbuffer;
-	HBITMAP hBitmap;
-	HFONT hfon, hfonPrev;
-	vector<string>tblString;
-	int	width;
-	int height;
-	G()
-	{
-		flgActive = false;
-	}
-
-	// gl
-	bool gl_bInitialized = false;
-	HGLRC hGlrc;
-} g;
-
 struct SysGra::Impl
 {
+	struct
+	{
+		const DWORD count = 255;
+		GLuint font_base;
+
+		HFONT	hFont;
+		
+		//------------------------------------------------------------------------------
+		void Init( HDC& hDc )
+		//------------------------------------------------------------------------------
+		{
+			font_base = glGenLists(255);	
+
+		#if 1
+			//	固定長フォント	
+		    int   nHeight			= 14;					// 文字セルまたは文字の高さ
+		    int   nWidth			= 0;					// 平均文字幅
+		    int   nEscapement		= 0;					// 文字送りの方向とX軸との角度
+		    int   nOrientation		= 0;					// ベースラインとX軸との角度
+		    int   nWeight			= FW_REGULAR;			// フォントの太さ
+		    DWORD fdwItalic			= false;				// イタリック体指定
+		    DWORD fdwUnderline		= false;				// 下線付き指定
+		    DWORD fdwStrikeOut		= false;				// 打ち消し線付き指定
+		    DWORD fdwCharSet		= SHIFTJIS_CHARSET;		// キャラクタセット
+		    DWORD fdwOutPrecision	= OUT_DEFAULT_PRECIS;	// 出力精度
+		    DWORD fdwClipPrecision	= CLIP_DEFAULT_PRECIS;	// クリッピングの精度
+		    DWORD fdwQuality		= DEFAULT_QUALITY;		// 出力品質
+		    DWORD fdwPitchAndFamily = 	FIXED_PITCH 		// 固定ピッチ
+		    						//   VARIABLE_PITCH 	// 可変ピッチ
+				    				//	| FF_SWISS 			// "MS Sans Serif" 
+	//			    				  | FF_ROMAN			// "MS Serif" 全角日本語
+	//			    				  | FF_MODERN			// 全角日本語 対応
+				    				  | FF_SCRIPT 			// 全角日本語 対応
+				    					;
+		    PCTSTR pszFaceName		= NULL;					// フォント名
+
+			hFont = CreateFont(
+				nHeight,
+				nWidth,
+				nEscapement,
+				nOrientation,
+				nWeight,
+				fdwItalic,
+				fdwUnderline,
+				fdwStrikeOut,
+				fdwCharSet,
+				fdwOutPrecision,
+				fdwClipPrecision,
+				fdwQuality,
+				fdwPitchAndFamily,
+				pszFaceName
+			);
+			SelectObject(hDc, hFont);
+		#else  
+	//		SelectObject (hDc, GetStockObject (SYSTEM_FONT)); 		// サンセリフ 大
+	//		SelectObject (hDc, GetStockObject (DEFAULT_GUI_FONT));	// サンセリフ 小
+
+	//		SelectObject (hDc, GetStockObject (SYSTEM_FIXED_FONT)); // 固定長フォント ワイド
+			SelectObject (hDc, GetStockObject (ANSI_FIXED_FONT)); // 固定長フォント セリフ 外国製っぽい
+
+		#endif
+			wglUseFontBitmaps( hDc, 0, count, font_base); 
+
+		}
+		//------------------------------------------------------------------------------
+		void Delete( )
+		//------------------------------------------------------------------------------
+		{
+			glDeleteLists( font_base, (GLsizei)count);
+		}
+
+
+		//------------------------------------------------------------------------------
+		void DrawString( string str )
+		//------------------------------------------------------------------------------
+		{
+
+			glPushAttrib(GL_LIST_BIT);
+
+			glListBase( font_base );
+
+			glCallLists( (signed)str.size(), GL_UNSIGNED_BYTE, str.c_str() );
+
+			glPopAttrib();
+
+		}
+
+	} wgl_font;
+
+	struct G
+	{
+		bool flgActive;
+		HDC  hdcBackbuffer;
+		HBITMAP hBitmap;
+		HFONT hfon, hfonPrev;
+		vector<string>tblString;
+		int	width;
+		int height;
+		G()
+		{
+			flgActive = false;
+		}
+
+		// gl
+		bool gl_bInitialized = false;
+		HGLRC hGlrc;
+	} g;
+
+		chrono::system_clock::duration time_st;
+		chrono::system_clock::duration time_en;
+		chrono::system_clock::duration time_sec;
+		chrono::system_clock::duration time_now;
+		chrono::system_clock::duration time_max;
+
 };
 //------------------------------------------------------------------------------
 SysGra::~SysGra()
@@ -207,18 +213,18 @@ void  SysGra::OnCreate()
 //------------------------------------------------------------------------------
 {
 	HWND hWnd = SysWin::GetInstance().win.hWnd;
-//	g.hfon = (HFONT) GetStockObject(OEM_FIXED_FONT); // 固定幅フォント標準
-//	g.hfon = (HFONT) GetStockObject(ANSI_FIXED_FONT); // 固定幅フォント中明朝
-	g.hfon = (HFONT) GetStockObject(DEFAULT_GUI_FONT); // 可変長小
+//	pImpl->g.hfon = (HFONT) GetStockObject(OEM_FIXED_FONT); // 固定幅フォント標準
+//	pImpl->g.hfon = (HFONT) GetStockObject(ANSI_FIXED_FONT); // 固定幅フォント中明朝
+	pImpl->g.hfon = (HFONT) GetStockObject(DEFAULT_GUI_FONT); // 可変長小
 
 	{
 		HDC	hDc = GetDC( hWnd );	// GetDCに対してはReleaseDC
 
-			if ( g.gl_bInitialized == false )
+			if ( pImpl->g.gl_bInitialized == false )
 			{// gl
-				wgl_Enable( &hDc, &g.hGlrc );
-				wgl_font.Init( hDc );
-				g.gl_bInitialized = true;
+				wgl_Enable( &hDc, &pImpl->g.hGlrc );
+				pImpl->wgl_font.Init( hDc );
+				pImpl->g.gl_bInitialized = true;
 			}
 		ReleaseDC( hWnd, hDc );
 	}
@@ -230,16 +236,16 @@ void  SysGra::OnDestroy()
 //------------------------------------------------------------------------------
 {
 
-	if( g.gl_bInitialized )
+	if( pImpl->g.gl_bInitialized )
 	{
-		wgl_font.Delete();
-		wgl_Disable( g.hGlrc );
+		pImpl->wgl_font.Delete();
+		wgl_Disable( pImpl->g.hGlrc );
 	}
 
-	DeleteDC(g.hdcBackbuffer);
-	DeleteObject(g.hBitmap);
+	DeleteDC(pImpl->g.hdcBackbuffer);
+	DeleteObject(pImpl->g.hBitmap);
 
-	DeleteObject(g.hfon);
+	DeleteObject(pImpl->g.hfon);
 
 	PostQuitMessage( 0 );
 }
@@ -252,17 +258,17 @@ void  SysGra::OnSize( int width, int height )
 	{
 		HDC	hDc = GetDC( hWnd );	// GetDCに対してはReleaseDC
 	    {
-			if ( g.flgActive == true )
+			if ( pImpl->g.flgActive == true )
 			{
-				DeleteDC(g.hdcBackbuffer);
-				DeleteObject(g.hBitmap);
+				DeleteDC(pImpl->g.hdcBackbuffer);
+				DeleteObject(pImpl->g.hBitmap);
 			}
 
-			g.hBitmap = CreateCompatibleBitmap( hDc, width, height );
+			pImpl->g.hBitmap = CreateCompatibleBitmap( hDc, width, height );
 
-		    g.hdcBackbuffer = CreateCompatibleDC( NULL );	// Create...DCに対してはDeleteDC
-		    SelectObject( g.hdcBackbuffer, g.hBitmap );
-			g.flgActive=true;
+		    pImpl->g.hdcBackbuffer = CreateCompatibleDC( NULL );	// Create...DCに対してはDeleteDC
+		    SelectObject( pImpl->g.hdcBackbuffer, pImpl->g.hBitmap );
+			pImpl->g.flgActive=true;
 		}
 		ReleaseDC( hWnd, hDc );
 	}
@@ -317,32 +323,27 @@ void SysGra::Update()
 	// 処理時間計算
 	//=================================
 	{
-		static chrono::system_clock::duration time_st;
-		static chrono::system_clock::duration time_en;
-		static chrono::system_clock::duration time_sec;
-		static chrono::system_clock::duration time_now;
-		static chrono::system_clock::duration time_max;
 
 		// 同期(60fps)
 		{
 			int t=300;	
-			while( chrono::system_clock::now().time_since_epoch()-time_st < chrono::microseconds(16000) )
+			while( chrono::system_clock::now().time_since_epoch()-pImpl->time_st < chrono::microseconds(16000) )
 			{
  				this_thread::sleep_for(chrono::microseconds(t));
 			}
 		}
-		time_en = chrono::system_clock::now().time_since_epoch(); 
-		if ( time_max < time_en-time_st ) time_max = time_en-time_st;
-		time_st = chrono::system_clock::now().time_since_epoch();  
+		pImpl->time_en = chrono::system_clock::now().time_since_epoch(); 
+		if ( pImpl->time_max < pImpl->time_en-pImpl->time_st ) pImpl->time_max = pImpl->time_en-pImpl->time_st;
+		pImpl->time_st = chrono::system_clock::now().time_since_epoch();  
 
 		// 表示
-	    time_now = chrono::system_clock::now().time_since_epoch();
-		if ( time_now-time_sec > chrono::milliseconds(500) )	// 一秒更新
+	    pImpl->time_now = chrono::system_clock::now().time_since_epoch();
+		if ( pImpl->time_now-pImpl->time_sec > chrono::milliseconds(500) )	// 一秒更新
 		{
-			time_sec = chrono::system_clock::now().time_since_epoch();
-			time_peak = chrono::duration_cast<chrono::microseconds>(time_max).count();
-			time_max = chrono::seconds(0);
-		//	cout<<time_peak/1000.0<<"ms"<<endl;
+			pImpl->time_sec = chrono::system_clock::now().time_since_epoch();
+			time_peak = chrono::duration_cast<chrono::microseconds>(pImpl->time_max).count();
+			pImpl->time_max = chrono::seconds(0);
+		//	cout<<pImpl->time_peak/1000.0<<"ms"<<endl;
 		}
 	}
 
@@ -553,7 +554,7 @@ void SysGra::Print( vect2 v0, string str, rgb col  )
 	glEnd();
 
 	glRasterPos2f(v0.x, v0.y);
-	wgl_font.DrawString( str );
+	pImpl->wgl_font.DrawString( str );
 
 	glDepthFunc(GL_GEQUAL);		// depth <= 書き込み値 
 }
