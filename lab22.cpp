@@ -40,7 +40,7 @@ struct Lab22::Impl
 	};
 	struct Ball
 	{
-		vector<Vt>		vt;
+		vector<shared_ptr<Vt>>		vt;
 	} ball;
 
 	vector<shared_ptr<Obj>>	tbl_pObj;
@@ -68,13 +68,13 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		pers.cam.at		= vect3( 0.0, 1.0, 0 );
 
 		pImpl->ball.vt.clear();
-		pImpl->ball.vt.emplace_back();
-		pImpl->ball.vt.emplace_back();
+		pImpl->ball.vt.emplace_back( new Impl::Vt() );
+		pImpl->ball.vt.emplace_back( new Impl::Vt() );
 
 		// GUIコントロールポイント生成
 		pImpl->tbl_pObj.clear();
-		pImpl->tbl_pObj.emplace_back( &pImpl->ball.vt[0] );
-		pImpl->tbl_pObj.emplace_back( &pImpl->ball.vt[1] );
+		pImpl->tbl_pObj.emplace_back( pImpl->ball.vt[0] );
+		pImpl->tbl_pObj.emplace_back( pImpl->ball.vt[1] );
 		cp.tbltbl_pObj.clear();
 		cp.tbltbl_pObj.emplace_back( pImpl->tbl_pObj );
 	}
@@ -87,38 +87,38 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		vect3 center(0,2,0);
 		float th = rad(135);
 
-		pImpl->ball.vt[0].pos = vect3( cos(th), -sin(th), 0 ) + center;
-		pImpl->ball.vt[1].pos = vect3(-cos(th),  sin(th), 0 ) + center;
+		pImpl->ball.vt[0]->pos = vect3( cos(th), -sin(th), 0 ) + center;
+		pImpl->ball.vt[1]->pos = vect3(-cos(th),  sin(th), 0 ) + center;
 	}
 
 	// GUIコントロールポイント値の取得
 
 	// 入力
 	if ( keys.R.hi )	m.bInitParam = false;
-	if ( mouse.B.on )	for ( Impl::Vt& v : pImpl->ball.vt ) { v.vel += vect3( 0.003 , 0.0, 0.0 ); }
+	if ( mouse.B.on )	for ( shared_ptr<Impl::Vt> vt : pImpl->ball.vt ) { vt->vel += vect3( 0.003 , 0.0, 0.0 ); }
 
 	// 落下
-//	for ( Impl::Vt& vt : pImpl->ball.vt ) { vt.vel += vect3( 0, -0.001, 0.0 ); }
-	for ( Impl::Vt& vt : pImpl->ball.vt ) { vt.pos += vt.vel; }
+//	for ( Impl::Vt& vt : pImpl->ball.vt ) { vt->vel += vect3( 0, -0.001, 0.0 ); }
+	for ( shared_ptr<Impl::Vt> vt : pImpl->ball.vt ) { vt->pos += vt->vel; }
 
 	// 計算準備
-	for ( Impl::Vt& vt : pImpl->ball.vt )
+	for ( shared_ptr<Impl::Vt> vt : pImpl->ball.vt )
 	{
-		vt.new_pos = vt.pos;
-		vt.new_vel = vt.vel;
+		vt->new_pos = vt->pos;
+		vt->new_vel = vt->vel;
 	}
 
 	// 回転
 	
 
 	// 反映
-	for ( Impl::Vt& vt : pImpl->ball.vt ) 
+	for ( shared_ptr<Impl::Vt> vt : pImpl->ball.vt ) 
 	{
-		vt.pos = vt.new_pos;
-		vt.vel = vt.new_vel;
+		vt->pos = vt->new_pos;
+		vt->vel = vt->new_vel;
 	}
 
 	// 描画：棒
-	pers.pen.line3d( gra, pers, pImpl->ball.vt[0].pos, pImpl->ball.vt[1].pos );
+	pers.pen.line3d( gra, pers, pImpl->ball.vt[0]->pos, pImpl->ball.vt[1]->pos );
 
 }
