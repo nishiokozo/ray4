@@ -106,7 +106,7 @@ public:
 	union { float y,h;};
 
 	vect2() :x(0),y(0){}
-	vect2( float f ) :x(f),y(f){}
+//	vect2( float f ) :x(f),y(f){}
 	vect2( float _x, float _y) :x(_x),y(_y){}
 
 	vect2 normalize() { return (*this)/abs(); }
@@ -126,21 +126,21 @@ public:
 	vect2 operator-() const { return vect2( -x, -y ); } 
 	vect2 operator+() const { return vect2(  x,  y ); } 
 
-	void operator= ( float f ) { x =  f  ; y =  f  ; }
+//	void operator= ( float f ) { x =  f  ; y =  f  ; }
 	void operator*=( float f ) { x *= f  ; y *= f  ; }
 	void operator/=( float f ) { x /= f  ; y /= f  ; }
-	void operator+=( float f ) { x += f  ; y += f  ; }
-	void operator-=( float f ) { x -= f  ; y -= f  ; }
+//	void operator+=( float f ) { x += f  ; y += f  ; }
+//	void operator-=( float f ) { x -= f  ; y -= f  ; }
 
 	vect2 operator*( float f ) const { return vect2( x * f, y * f ); } 
 	vect2 operator/( float f ) const { return vect2( x / f, y / f ); } 
-	vect2 operator+( float f ) const { return vect2( x + f, y + f ); } 
-	vect2 operator=( float f ) const { return vect2( x - f, y - f ); } 
+//	vect2 operator+( float f ) const { return vect2( x + f, y + f ); } 
+//	vect2 operator=( float f ) const { return vect2( x - f, y - f ); } 
 
 	friend	vect2 operator*( float f, vect2 v )  { return vect2( f * v.x, f * v.y ); }
 	friend	vect2 operator/( float f, vect2 v )  { return vect2( f / v.x, f / v.y ); }
-	friend	vect2 operator+( float f, vect2 v )  { return vect2( f + v.x, f + v.y ); }
-	friend	vect2 operator-( float f, vect2 v )  { return vect2( f - v.x, f - v.y ); }
+//	friend	vect2 operator+( float f, vect2 v )  { return vect2( f + v.x, f + v.y ); }
+//	friend	vect2 operator-( float f, vect2 v )  { return vect2( f - v.x, f - v.y ); }
 
 	void dump() const
 	{

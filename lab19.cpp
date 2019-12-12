@@ -38,20 +38,19 @@ struct Lab19::Impl
 		vect3	nor	= vect3(0,1,0)*PLATE_MAT;
 	} plate;
 
-
 	struct
 	{
 		float	power = 0.0;
 	} motor;
 
-	struct Ball19 : Obj
+	struct Ball : Obj
 	{
 		vect3	vel;
 		float 	radius;
 		vect3	moment;
 		mat33	mat = midentity();
 
-		Ball19() : Obj(vect3(0,0,0)){}
+		Ball() : Obj(vect3(0,0,0)){}
 	};
 };
 
@@ -91,12 +90,12 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		pers.cam.at = vect3( 	0.0,	1.0,   0.0 );
 
 		// 点
-		m.tbl_pObj.emplace_back( new Impl::Ball19 );	// ボール
+		m.tbl_pObj.emplace_back( new Impl::Ball );	// ボール
 
 	}
 
 	// 設定
-	Impl::Ball19&	ball	= *dynamic_cast<Impl::Ball19*>(m.tbl_pObj[0].get());
+	Impl::Ball&	ball	= *dynamic_cast<Impl::Ball*>(m.tbl_pObj[0].get());
 
 	// 初期化：パラメータ
 	if ( !m.bInitParam )

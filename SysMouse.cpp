@@ -39,7 +39,7 @@ SysMouse::SysMouse() : pImpl( new SysMouse::Impl )
 		gp = gp/vect2((float)win.GetWidth()/2,-(float)win.GetHeight()/2)+vect2(-1,1);
 	
 		this->prev = this->pos;
-		this->mov = 0;
+		this->mov = vect2(0,0);
 		this->pos = gp;
 	}
 

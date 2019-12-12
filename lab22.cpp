@@ -29,13 +29,14 @@
 
 struct Lab22::Impl
 {
-	struct Vt
+	struct Vt : Obj
 	{
-		vect2	pos;
-		vect2	vel;
-		vect2	new_pos;
-		vect2	new_vel;
-		Vt( vect2 p, vect2 v ) : pos(p), vel(v) {}
+		vect3	vel = vect3(0,0,0);
+		vect3	new_pos = vect3(0,0,0);
+		vect3	new_vel = vect3(0,0,0);
+		Vt() : Obj(vect3(0,0,0)){}
+		Vt( vect3 p ) : Obj(p){}
+		Vt( vect3 p, vect3 v ) : Obj(p), vel(v) {}
 	};
 	struct Ball
 	{
@@ -43,8 +44,6 @@ struct Lab22::Impl
 	} ball;
 
 	vector<shared_ptr<Obj>>	tbl_pObj;
-
-//	vector<unique_ptr<Obj>>	tbl;
 
 };
 
@@ -68,14 +67,16 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		pers.cam.pos	= vect3( 0.0, 1.0, -10.0 );
 		pers.cam.at		= vect3( 0.0, 1.0, 0 );
 
+		pImpl->ball.vt.clear();
+		pImpl->ball.vt.emplace_back();
+		pImpl->ball.vt.emplace_back();
+
 		// GUIコントロールポイント生成
-		pImpl->tbl_pObj.emplace_back( new Obj );
-		pImpl->tbl_pObj.emplace_back( new Obj );
+		pImpl->tbl_pObj.clear();
+		pImpl->tbl_pObj.emplace_back( &pImpl->ball.vt[0] );
+		pImpl->tbl_pObj.emplace_back( &pImpl->ball.vt[1] );
+		cp.tbltbl_pObj.clear();
 		cp.tbltbl_pObj.emplace_back( pImpl->tbl_pObj );
-
-//		pImpl->tbl.emplace_back( new Obj );
-//		cp.tbltbl_pObj.emplace_back( pImpl->tbl );
-
 	}
 
 	// 初期化
@@ -83,28 +84,25 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	{
 		m.bInitParam = true;
 
-		vect2 center(0,2);
-		pImpl->ball.vt.clear();
-		float th = rad(45);
-		pImpl->ball.vt.emplace_back( vect2( cos(th), -sin(th) ) + center, vect2(0,0) );
-		pImpl->ball.vt.emplace_back( vect2(-cos(th),  sin(th) ) + center, vect2(0,0) );
+		vect3 center(0,2,0);
+		float th = rad(135);
 
+		pImpl->ball.vt[0].pos = vect3( cos(th), -sin(th), 0 ) + center;
+		pImpl->ball.vt[1].pos = vect3(-cos(th),  sin(th), 0 ) + center;
 	}
 
-	// 割当
-	Impl::Vt& p0	 = pImpl->ball.vt[0];
-	Impl::Vt& p1	 = pImpl->ball.vt[1];
+	// GUIコントロールポイント値の取得
 
 	// 入力
 	if ( keys.R.hi )	m.bInitParam = false;
-	if ( mouse.B.on )	for ( Impl::Vt& v : pImpl->ball.vt ) { v.vel += vect2( 0.003 , 0.0 ); }
+	if ( mouse.B.on )	for ( Impl::Vt& v : pImpl->ball.vt ) { v.vel += vect3( 0.003 , 0.0, 0.0 ); }
 
 	// 落下
-//	for ( Impl::Vt& vt : pImpl->ball.vt ) { vt.vel += vect2( 0, -0.001 ); }
+//	for ( Impl::Vt& vt : pImpl->ball.vt ) { vt.vel += vect3( 0, -0.001, 0.0 ); }
 	for ( Impl::Vt& vt : pImpl->ball.vt ) { vt.pos += vt.vel; }
 
 	// 計算準備
-	for ( Impl::Vt& vt : pImpl->ball.vt ) 
+	for ( Impl::Vt& vt : pImpl->ball.vt )
 	{
 		vt.new_pos = vt.pos;
 		vt.new_vel = vt.vel;
@@ -119,12 +117,8 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		vt.pos = vt.new_pos;
 		vt.vel = vt.new_vel;
 	}
-	
 
 	// 描画：棒
-	pers.pen.line3d( gra, pers, vect3( pImpl->ball.vt[0].pos, 0 ) , vect3( pImpl->ball.vt[1].pos, 0 ) );
+	pers.pen.line3d( gra, pers, pImpl->ball.vt[0].pos, pImpl->ball.vt[1].pos );
 
-	
-
-	
 }
