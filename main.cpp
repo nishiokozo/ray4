@@ -17,6 +17,7 @@
 
 #include "geom.h"
 
+#include "SysSound.h"
 #include "SysKeys.h"
 #include "SysMouse.h"
 #include "SysGra.h"
@@ -39,6 +40,7 @@ struct Apr : public Sys
 	Pers pers;
 	SysKeys		keys;
 	SysMouse	mouse;
+	SysSound	sound;
 	SysGra gra;
 
 	//------------------------------------------------------------------------------
@@ -87,6 +89,11 @@ struct Apr : public Sys
 			mouse.Update();
 			gra.Update();
 		//	raytrace( gra );continue;
+
+			if ( keys._9.hi )
+			{
+				sound.mml_play( "T100v6o4c1-gcfcfgdg+c7r:v11o3g1eg+ca+c+db+d+g7r:v11o3e1ceafabgb+e7r");
+			}
 
 			text_y = 0;
 
@@ -163,7 +170,7 @@ struct Apr : public Sys
 //				if ( keys.CTRL.on && mouse.F.hi ) {gui.one.bEnable = false;lab.SetNextIdx(+1,gui.cp);};
 				if ( keys.B.rep ) {gui.one.bEnable = false;lab.SetNextIdx(-1,gui.cp);};
 				if ( keys.N.rep ) {gui.one.bEnable = false;lab.SetNextIdx(+1,gui.cp);};
-				lab.Update( keys, mouse, gra, pers, T, text_y, gui.cp );
+				lab.Update( keys, mouse, sound, gra, pers, T, text_y, gui.cp );
 			}
 			
 

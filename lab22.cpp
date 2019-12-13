@@ -17,6 +17,7 @@
 
 #include "geom.h"
 
+#include "SysSound.h"
 #include "SysKeys.h"
 #include "SysMouse.h"
 #include "SysGra.h"
@@ -54,12 +55,12 @@ struct Lab22::Impl
 Lab22::Lab22() : pImpl( new Lab22::Impl ){}
 
 //------------------------------------------------------------------------------
-void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	auto funcShowBar = []( SysGra& gra, int y, float val, string str, rgb col )
 	{
-		vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42*y);
+		vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42.0*y);
 		gra.Line( v0, v0+ vect2( val, 0 ), col, 2 );
 		gra.Print( v0+gra.Dot(0,-6), str + to_string(val), col );
 	};
@@ -121,6 +122,14 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	if ( mouse.F.on )	t0.new_vel += vect3( 0.01 , 0 , 0 );
 	if ( mouse.B.on )	t1.new_vel += vect3(-0.01 , 0 , 0 );
 
+
+//	if ( mouse.B.hi )	sound.mml_play( "T600O6V12cr");
+//	if ( mouse.F.hi )	sound.mml_play( "T100v12o4c3-g#dcfc#dcc7R:V12O3#D5F#GGG7R:V12O2G7GGR" );
+//	if ( mouse.F.hi )	sound.mml_play( "T100v12o4c3-g#dcfc#dcc7R" );
+//	if ( mouse.F.hi )	sound.mml_play( "T100V12O4#D5F#GGG7R:V12O4G7GGR" );
+//	if ( mouse.F.hi )	sound.mml_play( "T100V12O4#D5F#GGG7R" );
+//	if ( mouse.B.hi )	sound.mml_play( "T100V12O4G7GGR" );
+
 	// 衝突：計算
 	for ( shared_ptr<Impl::Vt>pa : pImpl->ball.vt )
 	{
@@ -133,6 +142,8 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 					if ( abs( pa->pos.x - pb->pos.x ) < 2.0 )
 					{
 						pa->new_vel = pa->vel - pa->vel + pb->vel;
+//						sound.mml_play( "T100v6o4c1-gcfcfgdg+c7r:v11o3g1eg+ca+c+db+d+g7r:v11o3e1ceafabgb+e7r");
+						sound.mml_play( "T600O6V12cr");
 					}
 				}
 				else
@@ -141,6 +152,7 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 					if ( abs( pa->pos.x - pb->pos.x ) < 2.0 )
 					{
 						pa->new_vel = -pa->vel;
+						sound.mml_play( "T600O6V12cr");
 					}
 				}
 			}

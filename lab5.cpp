@@ -15,6 +15,7 @@
 
 #include "geom.h"
 
+#include "SysSound.h"
 #include "SysKeys.h"
 #include "SysMouse.h"
 #include "SysGra.h"
@@ -34,7 +35,7 @@ struct Lab5::Impl
 Lab5::Lab5() : pImpl( new Lab5::Impl ){}
 
 //------------------------------------------------------------------------------
-void Lab5::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab5::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	const float	G	= -9.80665;				// 重力加速度

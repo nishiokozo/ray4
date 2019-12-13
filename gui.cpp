@@ -17,6 +17,7 @@
 #include "geom.h"
 
 
+#include "SysSound.h"
 #include "SysKeys.h"
 #include "SysMouse.h"
 #include "SysGra.h"

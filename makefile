@@ -42,10 +42,12 @@ SRCS = \
 	SysGra.cpp \
 	SysKeys.cpp \
 	SysMouse.cpp \
+	SysSound.cpp \
 
 LIBS = \
 	-lgdi32 \
 	-lopengl32 \
+	-lwinmm
 
 FLGS = \
 	-c \

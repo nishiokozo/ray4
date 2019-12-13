@@ -17,6 +17,7 @@
 
 #include "geom.h"
 
+#include "SysSound.h"
 #include "SysKeys.h"
 #include "SysMouse.h"
 #include "SysGra.h"
@@ -191,8 +192,8 @@ void Lab::SetNextIdx( int val, Cp& cp )
 }
 
 //------------------------------------------------------------------------------
-void Lab::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
-	if ( pLab ) pLab->Update( keys, mouse, gra, pers, delta, text_y, cp );
+	if ( pLab ) pLab->Update( keys, mouse, sound, gra, pers, delta, text_y, cp );
 }

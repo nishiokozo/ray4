@@ -17,6 +17,7 @@
 
 #include "geom.h"
 
+#include "SysSound.h"
 #include "SysKeys.h"
 #include "SysMouse.h"
 #include "SysGra.h"
@@ -57,14 +58,14 @@ struct Lab20::Impl
 Lab20::Lab20() : pImpl( new Lab20::Impl ){}
 
 //------------------------------------------------------------------------------
-void Lab20::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab20::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	int m_y = 0;
 
 	auto funcShowBar = []( SysGra& gra, int y, float val, string str, rgb col )
 	{
-		vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42*y);
+		vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42.0*y);
 		gra.Line( v0, v0+ vect2( val, 0 ), col, 2 );
 		gra.Print( v0+gra.Dot(0,-6), str + to_string(val), col );
 	};

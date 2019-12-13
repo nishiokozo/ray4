@@ -14,7 +14,7 @@ struct LabObj
 
 	LabObj(){};
 	virtual ~LabObj(){};
-	virtual void Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp ) = 0;
+	virtual void Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp ) = 0;
 };
 
 struct Lab
@@ -29,6 +29,6 @@ struct Lab
 
 	void SetNextIdx( int val, Cp& cp );
 	void SetIdx( int n, Cp& cp );
-	void Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
+	void Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp );
 
 };

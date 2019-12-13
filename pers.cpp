@@ -1032,9 +1032,9 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int N
 
 		vect3 q1 = (q0-pos) * m.invers();
 
-		q1.x = int( q1.x );
-		q1.y = int( q1.y );
-		q1.z = int( q1.z );
+		q1.x = (float)int( q1.x );
+		q1.y = (float)int( q1.y );
+		q1.z = (float)int( q1.z );
 		pos += q1;	
 	}
 
