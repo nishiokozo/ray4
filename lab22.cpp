@@ -135,6 +135,14 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 						pa->new_vel = pa->vel - pa->vel + pb->vel;
 					}
 				}
+				else
+				if ( pa->bMove )
+				{
+					if ( abs( pa->pos.x - pb->pos.x ) < 2.0 )
+					{
+						pa->new_vel = -pa->vel;
+					}
+				}
 			}
 		}
 	}
@@ -155,10 +163,11 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		{
 			vect3 v0 = p->pos;
 			float 	w = 1.0;
-			pers.pen.line3d( gra, pers, v0+vect3(-w,-w,0), v0+vect3( w,-w,0),rgb(1,1,1), p->bMove?1:2 );
-			pers.pen.line3d( gra, pers, v0+vect3( w,-w,0), v0+vect3( w, w,0),rgb(1,1,1), p->bMove?1:2 );
-			pers.pen.line3d( gra, pers, v0+vect3( w, w,0), v0+vect3(-w, w,0),rgb(1,1,1), p->bMove?1:2 );
-			pers.pen.line3d( gra, pers, v0+vect3(-w, w,0), v0+vect3(-w,-w,0),rgb(1,1,1), p->bMove?1:2 );
+			float	wide = 1.0;
+			pers.pen.line3d( gra, pers, v0+vect3(-w,-w,0), v0+vect3( w,-w,0),rgb(1,1,1), wide );
+			pers.pen.line3d( gra, pers, v0+vect3( w,-w,0), v0+vect3( w, w,0),rgb(1,1,1), wide );
+			pers.pen.line3d( gra, pers, v0+vect3( w, w,0), v0+vect3(-w, w,0),rgb(1,1,1), wide );
+			pers.pen.line3d( gra, pers, v0+vect3(-w, w,0), v0+vect3(-w,-w,0),rgb(1,1,1), wide );
 		}
 		gra.SetZTest(true);
 	}
