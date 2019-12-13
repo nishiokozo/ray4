@@ -164,7 +164,7 @@ struct Pers
 
 		void SetCol( const rgb& _col ) { col = _col; }
 		void SetMat( const mat33& _mat ) { mat = _mat; }
-		void DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos, mat33 m, int NUM_U, int NUM_V, float dt, rgb col );
+		void DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos, mat33 m, int NUM_U, int NUM_V, float dt, rgb col, bool bPlot = false );
 		void DrawGrid( SysGra& gra, Pers& pers );
 		void DrawEternalGlid( SysGra& gra, Pers& pers, vect3 pos, mat33 m, float NUM_U, float NUM_V, rgb col );
 

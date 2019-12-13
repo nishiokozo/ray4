@@ -1018,7 +1018,7 @@ void Pers::Axis::DrawAxis( SysGra& gra, Pers& pers, vect2 mpos )
 // Grid
 ////////////////
 //------------------------------------------------------------------------------
-void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int NUM_U, int NUM_V, float dt, rgb col  )
+void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int NUM_U, int NUM_V, float dt, rgb col, bool bPlot  )
 //----------------------------------------------------------------------------
 {
 	vect3 pos = pos0;
@@ -1108,7 +1108,7 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int N
 	}
 
 	// プロット表示
-	plot.DrawPlot( gra, pers, m );
+	if ( bPlot ) plot.DrawPlot( gra, pers, m );
 
 }
 

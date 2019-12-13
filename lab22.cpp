@@ -68,7 +68,7 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	gra.Print(1,(float)text_y++,"22 : 2D twin box" ); 
 
 	// グリッド表示
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(rad(90)), 26, 26, 1, rgb(0.2,0.2,0.2) );
+	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(rad(90)), 26, 26, 1, rgb(0.2,0.2,0.2), true );
 
 	//初期化
 	if ( !m.bInitAll )
