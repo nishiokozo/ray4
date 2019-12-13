@@ -34,6 +34,7 @@ struct Lab22::Impl
 		vect3	vel = vect3(0,0,0);
 		vect3	new_pos = vect3(0,0,0);
 		vect3	new_vel = vect3(0,0,0);
+		vect3	prev_pos = vect3(0,0,0);
 		Vt() : Obj(vect3(0,0,0)){}
 		Vt( vect3 p ) : Obj(p){}
 		Vt( vect3 p, vect3 v ) : Obj(p), vel(v) {}
@@ -53,10 +54,17 @@ Lab22::Lab22() : pImpl( new Lab22::Impl ){}
 void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
+	auto funcShowBar = []( SysGra& gra, int y, float val, string str, rgb col )
+	{
+		vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42*y);
+		gra.Line( v0, v0+ vect2( val, 0 ), col, 2 );
+		gra.Print( v0+gra.Dot(0,-6), str + to_string(val), col );
+	};
+
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(rad(90)), 26, 26, 1, rgb(0.2,0.2,0.2) );
-	gra.Print(1,(float)text_y++,"22 : 2D Bar Spin" ); 
+	gra.Print(1,(float)text_y++,"22 : 2D twin box" ); 
 
 	//初期化
 	if ( !m.bInitAll )
@@ -71,7 +79,7 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		pImpl->ball.vt.emplace_back( new Impl::Vt() );
 		pImpl->ball.vt.emplace_back( new Impl::Vt() );
 
-		// GUIコントロールポイント生成
+		// GUIコントロールポイントへの登録
 		pImpl->tbl_pObj.clear();
 		pImpl->tbl_pObj.emplace_back( pImpl->ball.vt[0] );
 		pImpl->tbl_pObj.emplace_back( pImpl->ball.vt[1] );
@@ -84,41 +92,63 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	{
 		m.bInitParam = true;
 
-		vect3 center(0,2,0);
-		float th = rad(135);
+		pImpl->ball.vt[0]->pos = vect3( -2, 1, 0 );
+		pImpl->ball.vt[0]->vel = vect3(0,0,0);
 
-		pImpl->ball.vt[0]->pos = vect3( cos(th), -sin(th), 0 ) + center;
-		pImpl->ball.vt[1]->pos = vect3(-cos(th),  sin(th), 0 ) + center;
+		pImpl->ball.vt[1]->pos = vect3(  2, 1, 0 );
+		pImpl->ball.vt[1]->vel = vect3(0,0,0);
 	}
-
-	// GUIコントロールポイント値の取得
 
 	// 入力
 	if ( keys.R.hi )	m.bInitParam = false;
-	if ( mouse.B.on )	for ( shared_ptr<Impl::Vt> vt : pImpl->ball.vt ) { vt->vel += vect3( 0.003 , 0.0, 0.0 ); }
-
-	// 落下
-//	for ( Impl::Vt& vt : pImpl->ball.vt ) { vt->vel += vect3( 0, -0.001, 0.0 ); }
+	if ( keys.S.on )	pImpl->ball.vt[0]->vel += vect3( 0.04 , 0 , 0 );
+	
+	// 計算
 	for ( shared_ptr<Impl::Vt> vt : pImpl->ball.vt ) { vt->pos += vt->vel; }
 
-	// 計算準備
-	for ( shared_ptr<Impl::Vt> vt : pImpl->ball.vt )
-	{
-		vt->new_pos = vt->pos;
-		vt->new_vel = vt->vel;
-	}
+	Impl::Vt& p0 = *pImpl->ball.vt[0];
+	Impl::Vt& p1 = *pImpl->ball.vt[1];
 
-	// 回転
+
+	// 衝突
+	if ( ( p0.pos - p1.pos ).abs() < 2.0 )
+	{
+		p0.pos -= p0.vel;
+		p0.vel = -p0.vel;
+	}
+		p0.vel *= 0.9;
+
+	
 	
 
-	// 反映
-	for ( shared_ptr<Impl::Vt> vt : pImpl->ball.vt ) 
+
+	// 描画：箱
 	{
-		vt->pos = vt->new_pos;
-		vt->vel = vt->new_vel;
+		vect3 v0 = pImpl->ball.vt[0]->pos;
+		float 	w = 1.0;
+		pers.pen.line3d( gra, pers, v0+vect3(-w,-w,0), v0+vect3( w,-w,0) );
+		pers.pen.line3d( gra, pers, v0+vect3( w,-w,0), v0+vect3( w, w,0) );
+		pers.pen.line3d( gra, pers, v0+vect3( w, w,0), v0+vect3(-w, w,0) );
+		pers.pen.line3d( gra, pers, v0+vect3(-w, w,0), v0+vect3(-w,-w,0) );
+	}
+	{
+		vect3 v0 = pImpl->ball.vt[1]->pos;
+		float 	w = 1.0;
+		pers.pen.line3d( gra, pers, v0+vect3(-w,-w,0), v0+vect3( w,-w,0) );
+		pers.pen.line3d( gra, pers, v0+vect3( w,-w,0), v0+vect3( w, w,0) );
+		pers.pen.line3d( gra, pers, v0+vect3( w, w,0), v0+vect3(-w, w,0) );
+		pers.pen.line3d( gra, pers, v0+vect3(-w, w,0), v0+vect3(-w,-w,0) );
 	}
 
-	// 描画：棒
-	pers.pen.line3d( gra, pers, pImpl->ball.vt[0]->pos, pImpl->ball.vt[1]->pos );
+	// 保存
+	for ( shared_ptr<Impl::Vt> vt : pImpl->ball.vt ) 
+	{
+		vt->prev_pos = vt->pos;
+	}
+	
+	// メーター表示
+	int m_y = 0;
+	funcShowBar( gra, m_y++, p0.vel.x,	"vel    ", rgb(1,1,1) );
+
 
 }
