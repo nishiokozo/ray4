@@ -1106,6 +1106,10 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int N
 			}
 		}
 	}
+
+	// プロット表示
+	plot.DrawPlot( gra, pers, m );
+
 }
 
 //------------------------------------------------------------------------------
@@ -1113,4 +1117,86 @@ void Pers::Grid::DrawGrid( SysGra& gra, Pers& pers )
 //----------------------------------------------------------------------------
 {
 	DrawGrid3d( gra, pers, vect3(0,0,0), mat, 10, 10, 1, col );
+}
+
+//////////////////
+// GRID::PLOT			
+//////////////////
+//------------------------------------------------------------------------------
+Pers::Grid::Plot::Plot( 
+//------------------------------------------------------------------------------
+	int	_max,		// プロット数
+	float _step,	// 送りステップ
+	rgb _col 		// 色
+)
+{
+	MaxPlot = _max;
+
+	col = _col;
+	step = _step;
+	tblDot.clear();
+	ResetPlot();
+}
+
+//------------------------------------------------------------------------------
+void Pers::Grid::Plot::ResetPlot()
+//------------------------------------------------------------------------------
+{
+	bScroll = false;
+	cntPlot = 0 ;
+
+	amtPlot = 0 ;
+	tblDot.clear();
+}
+//------------------------------------------------------------------------------
+void Pers::Grid::Plot::WritePlot( float val )
+//------------------------------------------------------------------------------
+{
+	if ( cntPlot >= MaxPlot ) 
+	{
+		bScroll = true;
+		cntPlot = 0;
+	}
+
+
+	if ( amtPlot >= MaxPlot ) 
+	{
+		int idx = amtPlot % MaxPlot;
+		tblDot[idx] = val;
+	}
+	else
+	{
+		tblDot.emplace_back( val );
+	}
+	amtPlot++;
+	cntPlot++;
+}
+//------------------------------------------------------------------------------
+void Pers::Grid::Plot::DrawPlot( SysGra& gra, Pers& pers, mat33& m )
+//------------------------------------------------------------------------------
+{
+	gra.SetZTest( false );
+	
+	float x = 0;
+	
+	if ( bScroll )
+	for ( int i = cntPlot ; i < MaxPlot ; i++ )
+	{
+		vect3 v = m*vect3( x, 0, tblDot[i] );
+		pers.pen.pset3d( gra, pers, v,  col, 2 );
+		x += step;
+	}
+	for ( int i = 0 ; i < cntPlot-1 ; i++ )
+	{
+		vect3 v = m* vect3( x, 0, tblDot[i] );
+		pers.pen.pset3d( gra, pers, v ,  col, 2 );
+		x += step;
+	}
+	if ( cntPlot > 0 ) 
+	{
+		vect3 v = m*vect3( x, 0, tblDot[cntPlot-1] );
+
+		pers.pen.pset3d( gra, pers, v,  rgb(1,1,1), 2 );
+	}
+	gra.SetZTest( true );
 }

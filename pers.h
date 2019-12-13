@@ -167,6 +167,30 @@ struct Pers
 		void DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos, mat33 m, int NUM_U, int NUM_V, float dt, rgb col );
 		void DrawGrid( SysGra& gra, Pers& pers );
 		void DrawEternalGlid( SysGra& gra, Pers& pers, vect3 pos, mat33 m, float NUM_U, float NUM_V, rgb col );
+
+		struct Plot
+		{
+			int MaxPlot = 100;
+			int cntPlot = 0;
+			bool	bScroll = false;
+			rgb col;
+			float step;
+
+			vector<float> tblDot;
+			int amtPlot = 0;
+			
+			Plot( 
+				int	_max,
+				float _step, 			// 送りステップ
+				rgb _col = rgb(1,1,1) 	// 色
+			);
+			void ResetPlot();
+			void WritePlot( float val );
+			void DrawPlot( SysGra& gra, Pers& pers, mat33& m );
+
+		} plot = Plot( 100, 0.02, rgb(1,0,1) );
+//		} plot( 100, 0.02, rgb(1,0,1) );
+
 	} grid;
 
 

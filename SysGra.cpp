@@ -18,6 +18,12 @@
 
 using namespace std;
 
+#define	DEPTHTEST_ENABLE()			glEnable( GL_DEPTH_TEST )
+#define	DEPTHTEST_DISABLE()			glDisable( GL_DEPTH_TEST )
+#define	DEPTHTEST_WRITE_GREATER()	glDepthFunc( GL_GEQUAL )	// ENABLEのときだけ depth <= 書き込み値
+#define	DEPTHTEST_WRITE_ALWAYS()	glDepthFunc( GL_ALWAYS )	// ENABLEのときだけ 必ず書く
+#define	DEPTHTEST_WRITE_NEVER()		glDepthFunc( GL_NEVER )		// ENABLEのときだけ 書き込まない
+
 struct SysGra::Impl
 {
 	struct
@@ -353,21 +359,21 @@ void SysGra::Update()
 void SysGra::Clr( rgb col )
 //------------------------------------------------------------------------------
 {
-//	カラークリア値
+	//	カラークリア値
 	glClearColor( col.r, col.g, col.b, 0.0f );
 
-//	深度クリア値
+	//	深度クリア値
 	glClearDepth(0.0);			// (デフォルト;1.0）
 
-//	深度テスト
-	glEnable(GL_DEPTH_TEST);	// (デフォルト:GL_LESS）
-	glDepthFunc(GL_GEQUAL);		// depth <= 書き込み値 
+	//	深度テスト
+	DEPTHTEST_ENABLE();
+	DEPTHTEST_WRITE_GREATER(); 
 
-//	裏面カリング
+	//	裏面カリング
 	glEnable(GL_CULL_FACE);		// 時計回りが裏、反時計回りが表
 	glCullFace(GL_BACK);		// (デフォルト:GL_BACK）
 
-//	ペイント
+	//	ペイント
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
 }
@@ -375,7 +381,7 @@ void SysGra::Clr( rgb col )
 void SysGra::Circle( vect2 v, float r, rgb col, float wide )
 //------------------------------------------------------------------------------
 {
-	glDepthFunc(GL_ALWAYS);
+	DEPTHTEST_WRITE_ALWAYS();
 
 	float aspect = GetAspect();
 
@@ -392,7 +398,7 @@ void SysGra::Circle( vect2 v, float r, rgb col, float wide )
 	}
     glEnd();
 
-	glDepthFunc(GL_GEQUAL);		// depth <= 書き込み値 
+	DEPTHTEST_WRITE_GREATER(); 
 }
 
 //------------------------------------------------------------------------------
@@ -421,7 +427,7 @@ void SysGra::Circle( vect3 v, float r, rgb col, float wide )
 void SysGra::Pset( vect2 v0, rgb col, float wide )
 //------------------------------------------------------------------------------
 {
-	glDepthFunc(GL_ALWAYS);
+	DEPTHTEST_WRITE_ALWAYS();
 
 	glPointSize( wide );
     glBegin(GL_POINTS);
@@ -429,7 +435,7 @@ void SysGra::Pset( vect2 v0, rgb col, float wide )
     glVertex2f(v0.x, v0.y);
     glEnd();
 
-	glDepthFunc(GL_GEQUAL);		// depth <= 書き込み値 
+	DEPTHTEST_WRITE_GREATER(); 
 }
 //------------------------------------------------------------------------------
 void SysGra::Pset( vect3 v0, rgb col, float wide )
@@ -445,7 +451,7 @@ void SysGra::Pset( vect3 v0, rgb col, float wide )
 void SysGra::Box( vect2 v0, vect2 v1,rgb col, float wide )
 //------------------------------------------------------------------------------
 {
-	glDepthFunc(GL_ALWAYS);
+	DEPTHTEST_WRITE_ALWAYS();
 
   	glLineWidth( wide );
 
@@ -457,7 +463,7 @@ void SysGra::Box( vect2 v0, vect2 v1,rgb col, float wide )
     glVertex2f(v0.x, v0.y);
     glEnd();
 
-	glDepthFunc(GL_GEQUAL);		// depth <= 書き込み値 
+	DEPTHTEST_WRITE_GREATER(); 
 }
 //------------------------------------------------------------------------------
 void SysGra::Box( vect3 v0, vect3 v1,rgb col, float wide )
@@ -491,7 +497,7 @@ void SysGra::Fill( vect2 v0, vect2 v1,rgb col )
 void SysGra::Line( vect2 v0, vect2 v1,rgb col, float wide )
 //------------------------------------------------------------------------------
 {
-	glDepthFunc(GL_ALWAYS);
+	DEPTHTEST_WRITE_ALWAYS();
 
   	glLineWidth( wide );
   
@@ -501,7 +507,7 @@ void SysGra::Line( vect2 v0, vect2 v1,rgb col, float wide )
     glVertex2f(v1.x, v1.y);
     glEnd();
 
-	glDepthFunc(GL_GEQUAL);		// depth <= 書き込み値 
+	DEPTHTEST_WRITE_GREATER(); 
 }
 //------------------------------------------------------------------------------
 void SysGra::Line( vect3 v0, vect3 v1,rgb col, float wide )
@@ -519,7 +525,7 @@ void SysGra::Line( vect3 v0, vect3 v1,rgb col, float wide )
 void SysGra::Tri( vect2 v0, vect2 v1, vect2 v2, rgb col )
 //------------------------------------------------------------------------------
 {
-	glDepthFunc(GL_ALWAYS);
+	DEPTHTEST_WRITE_ALWAYS();
 
     glBegin( GL_TRIANGLES );
     glColor3f( col.r, col.g, col.b );
@@ -528,14 +534,12 @@ void SysGra::Tri( vect2 v0, vect2 v1, vect2 v2, rgb col )
     glVertex2f(v2.x, v2.y);
     glEnd();
 
-	glDepthFunc(GL_GEQUAL);		// depth <= 書き込み値 
+	DEPTHTEST_WRITE_GREATER(); 
 }
 //------------------------------------------------------------------------------
 void SysGra::Tri( vect3 v0, vect3 v1, vect3 v2, rgb col )
  //------------------------------------------------------------------------------
 {
-//	glEnable(GL_DEPTH_TEST);	// (デフォルト:GL_LESS）
-
     glBegin( GL_TRIANGLES );
     glColor3f( col.r, col.g, col.b );
     glVertex3f(v0.x, v0.y, v0.z);
@@ -547,7 +551,7 @@ void SysGra::Tri( vect3 v0, vect3 v1, vect3 v2, rgb col )
 void SysGra::Print( vect2 v0, string str, rgb col  )
 //------------------------------------------------------------------------------
 {
-	glDepthFunc(GL_ALWAYS);
+	DEPTHTEST_WRITE_ALWAYS();
 
 	glBegin(GL_POINTS);
 	glColor3f( col.r, col.g, col.b );
@@ -556,7 +560,7 @@ void SysGra::Print( vect2 v0, string str, rgb col  )
 	glRasterPos2f(v0.x, v0.y);
 	pImpl->wgl_font.DrawString( str );
 
-	glDepthFunc(GL_GEQUAL);		// depth <= 書き込み値 
+	DEPTHTEST_WRITE_GREATER(); 
 }
 
 //------------------------------------------------------------------------------
@@ -574,14 +578,13 @@ void SysGra::SetZTest( bool flg )
 {
 	if ( flg )
 	{
-		glEnable(GL_DEPTH_TEST);	// (デフォルト:GL_LESS）
-		glDepthFunc(GL_GEQUAL);		// depth <= 書き込み値 
+		DEPTHTEST_ENABLE();
+		//DEPTHTEST_WRITE_GREATER(); 
 	}
 	else
 	{
-		glDisable(GL_DEPTH_TEST);
-		glDepthFunc(GL_NEVER);		// 書き込まない
-
+		DEPTHTEST_DISABLE();
+		//DEPTHTEST_WRITE_NEVER(); 
 	}
 	
 }

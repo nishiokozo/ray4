@@ -29,6 +29,8 @@
 
 struct Lab22::Impl
 {
+//	Pers::Grid::Plot plot_moment = Pers::Grid::Plot( 100, 0.02, rgb(1,0,1) );
+
 	struct Vt : Obj
 	{
 		vect3	vel = vect3(0,0,0);
@@ -63,8 +65,10 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(rad(90)), 26, 26, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,"22 : 2D twin box" ); 
+
+	// グリッド表示
+	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(rad(90)), 26, 26, 1, rgb(0.2,0.2,0.2) );
 
 	//初期化
 	if ( !m.bInitAll )
@@ -85,6 +89,10 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		pImpl->tbl_pObj.emplace_back( pImpl->ball.vt[1] );
 		cp.tbltbl_pObj.clear();
 		cp.tbltbl_pObj.emplace_back( pImpl->tbl_pObj );
+
+		// プロット
+//		pImpl->plot_moment.ResetPlot();
+		pers.grid.plot.ResetPlot();
 	}
 
 	// 初期化
@@ -101,7 +109,8 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 	// 入力
 	if ( keys.R.hi )	m.bInitParam = false;
-	if ( keys.S.on )	pImpl->ball.vt[0]->vel += vect3( 0.04 , 0 , 0 );
+	if ( mouse.F.hi )	pImpl->ball.vt[0]->vel += vect3( 0.04 , 0 , 0 );
+	if ( mouse.B.on )	pImpl->ball.vt[0]->vel += vect3( 0.01 , 0 , 0 );
 	
 	// 計算
 	for ( shared_ptr<Impl::Vt> vt : pImpl->ball.vt ) { vt->pos += vt->vel; }
@@ -109,16 +118,23 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	Impl::Vt& p0 = *pImpl->ball.vt[0];
 	Impl::Vt& p1 = *pImpl->ball.vt[1];
 
-
 	// 衝突
 	if ( ( p0.pos - p1.pos ).abs() < 2.0 )
 	{
-		p0.pos -= p0.vel;
-		p0.vel = -p0.vel;
+		vect3 vel = p0.vel;
+		p0.pos -= vel;
+		p0.vel = vel*0;
+		p1.vel = vel;
 	}
-		p0.vel *= 0.9;
+	
+//	float suberi = 0.99;
+//		p0.vel *= suberi;
+//		p1.vel *= suberi;
 
 	
+	// プロット
+//	pImpl->plot_moment.WritePlot( p0.vel.x );
+	pers.grid.plot.WritePlot( p0.vel.x);
 	
 
 
@@ -149,6 +165,10 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 	// メーター表示
 	int m_y = 0;
 	funcShowBar( gra, m_y++, p0.vel.x,	"vel    ", rgb(1,1,1) );
+
+	// プロット表示
+//	pImpl->plot_moment.DrawPlot( gra, pers );
+
 
 
 }
