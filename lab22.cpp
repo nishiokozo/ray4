@@ -107,19 +107,19 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 
 	// 入力
 	if ( keys.R.hi )	m.bInitParam = false;
-//	if ( mouse.F.hi )	t0.vel += vect3( 0.04 , 0 , 0 );
-	if ( mouse.B.on )	t0.vel += vect3( 0.01 , 0 , 0 );
-	if ( mouse.F.on )	t1.vel += vect3(-0.01 , 0 , 0 );
 	
-	// 計算
+	// 移動：計算
 	for ( shared_ptr<Impl::Vt> vt : pImpl->ball.vt ) { vt->pos += vt->vel; }
-
 
 	// 衝突：運動準備
 	for ( shared_ptr<Impl::Vt> vt : pImpl->ball.vt ) 
 	{
 		vt->new_vel = vt->vel;
 	}
+
+	// 加速
+	if ( mouse.F.on )	t0.new_vel += vect3( 0.01 , 0 , 0 );
+	if ( mouse.B.on )	t1.new_vel += vect3(-0.01 , 0 , 0 );
 
 	// 衝突：計算
 	for ( shared_ptr<Impl::Vt>pa : pImpl->ball.vt )
@@ -128,18 +128,11 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysGra& gra, Pers& pers, flo
 		{
 			if ( pa != pb )
 			{
-				if ( pa == pImpl->ball.vt[0] )
 				if ( pa->bMove && pb->bMove )
 				{
 					if ( abs( pa->pos.x - pb->pos.x ) < 2.0 )
 					{
-						vect3 va = pa->vel;
-						vect3 vb = pb->vel;
-						pa->pos -= va;
-						pb->pos -= vb;
-
-						pa->new_vel = pa->vel - va + vb;
-						pb->new_vel = pb->vel + va - vb;
+						pa->new_vel = pa->vel - pa->vel + pb->vel;
 					}
 				}
 			}
