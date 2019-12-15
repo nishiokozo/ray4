@@ -35,29 +35,16 @@ class	SysSound
 {
 public:
 
-//	double	m_volume;
-
 	SysSound();
 	~SysSound();
 
-
 	void	SetVolume( float val );
 
-	int entry( const char* name );
-	void play( int num );
-	void stop( int num );
-	void playRialtime( int num );
-	void psg_Set( int num, int val );
+	void	psg_Set( int num, int val );
 	int 	psg_Get	( int num );
 
-	void	Ring( int n );
-	void	Beep();
-
-	void	mml_play( const char*str );
 	void	mml_wait();
-
+	void	mml_play( const char*str ); // 最後がRが必要 Oは0~7 音長は0~9
 	void info();
-
-
 
 };

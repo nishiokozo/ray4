@@ -30,7 +30,6 @@
 
 struct Lab22::Impl
 {
-//	Pers::Grid::Plot plot_moment = Pers::Grid::Plot( 100, 0.02, rgb(1,0,1) );
 
 	struct Vt : Obj
 	{
@@ -53,8 +52,8 @@ struct Lab22::Impl
 
 	vector<shared_ptr<Obj>>	tbl_pObj;
 
-//	bool bPause = false;
-//	bool bStep = false;
+	bool bPause = false;
+	bool bStep = false;
 };
 
 Lab22::Lab22() : pImpl( new Lab22::Impl ){}
@@ -63,7 +62,7 @@ Lab22::Lab22() : pImpl( new Lab22::Impl ){}
 void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
-//	pImpl->bStep = false;
+	pImpl->bStep = false;
 	auto funcShowBar = []( SysGra& gra, int y, float val, string str, rgb col )
 	{
 		vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42.0*y);
@@ -106,7 +105,7 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pImpl->ball.vt[0]->vel = vect3(0,0,0);
 
 		pImpl->ball.vt[1]->pos = vect3(  3, pImpl->ball.vt[1]->radius, 0 );
-		pImpl->ball.vt[1]->vel = vect3(-0.00,0,0);
+		pImpl->ball.vt[1]->vel = vect3(-0.05,0,0);
 	}
 
 	Impl::Vt& t0 = *pImpl->ball.vt[0];
@@ -114,10 +113,15 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 	// 入力
 	if ( keys.R.hi )	m.bInitParam = false;
-//	if ( keys.SPACE.hi )	{pImpl->bPause=~pImpl->bPause;}
-//	if ( keys.ENTER.rep )	{pImpl->bStep=true;pImpl->bPause=true;}
+	if ( keys.SPACE.hi )	{pImpl->bPause=!pImpl->bPause;}
+	if ( keys.ENTER.rep )	{pImpl->bStep=true;pImpl->bPause=true;}
 	
+	// 加速
+	if ( mouse.F.on )	t0.vel += vect3( 0.005 , 0 , 0 );
+	if ( mouse.B.on )	t1.vel += vect3(-0.01 , 0 , 0 );
+
 	// 移動：計算
+	if ( !pImpl->bPause || pImpl->bStep )
 	for ( shared_ptr<Impl::Vt> vt : pImpl->ball.vt ) { vt->pos += vt->vel; }
 
 	// 衝突：運動準備
@@ -127,9 +131,6 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		vt->new_vel = vt->vel;
 	}
 
-	// 加速
-	if ( mouse.F.on )	t0.new_vel += vect3( 0.005 , 0 , 0 );
-	if ( mouse.B.on )	t1.new_vel += vect3(-0.01 , 0 , 0 );
 
 
 	// 衝突：計算
@@ -166,7 +167,7 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	}
 
 	// 衝突：運動反映
-//	if ( !pImpl->bPause == false || pImpl->bStep ) 
+	if ( !pImpl->bPause || pImpl->bStep )
 	for ( shared_ptr<Impl::Vt> vt : pImpl->ball.vt ) 
 	{
 		vt->pos = vt->new_pos;
@@ -206,6 +207,7 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	// プロット表示
 //	pImpl->plot_moment.DrawPlot( gra, pers );
 
-
+	if ( pImpl->bPause ) gra.Print(1,(float)text_y++,string("<Pause>")); 
+	if ( pImpl->bStep ) gra.Print(1,(float)text_y++,string("<Step>")); 
 
 }
