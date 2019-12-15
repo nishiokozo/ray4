@@ -131,27 +131,26 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		vt->new_vel = vt->vel;
 	}
 
-
-
 	// 衝突：計算
 	for ( shared_ptr<Impl::Vt>pa : pImpl->ball.vt )
 	{
 		for ( shared_ptr<Impl::Vt>pb : pImpl->ball.vt )
 		{
-//			if ( pa == pImpl->ball.vt[0] )
 			if ( pa != pb )
 			{
 				if ( abs( pa->pos.x - pb->pos.x ) < pa->radius+pb->radius )
 				{
+					float wa = pa->weight;
+					float wb = pb->weight;
+					vect3 va = pa->vel;
+					vect3 vb = pb->vel;
+
+					pa->new_pos = pa->prev_pos;	// 衝突前の場所に戻す簡易処理
+
 					if ( pa->bMove && pb->bMove )
 					{
-						float wa = pa->weight;
-						float wb = pb->weight;
-						vect3 va = pa->vel;
-						vect3 vb = pb->vel;
 						pa->new_vel = vb*wb/wa;
 
-						pa->new_pos = pa->prev_pos;
 
 						sound.mml_play( "T1800O5V10#cdr");
 					}
@@ -159,6 +158,7 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 					if ( pa->bMove )
 					{
 						pa->new_vel = -pa->vel;
+
 						sound.mml_play( "T1800O5V10c#cr");
 					}
 				}
