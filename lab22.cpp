@@ -35,13 +35,16 @@ struct Lab22::Impl
 	struct Vt : Obj
 	{
 		vect3	vel = vect3(0,0,0);
+		vect3	new_pos = vect3(0,0,0);
 		vect3	new_vel = vect3(0,0,0);
 		bool	bMove;
 		vect3	prev_pos = vect3(0,0,0);
 		float	weight = 0.0;
-		Vt( bool b ) : Obj(vect3(0,0,0)), bMove(b){}
-		Vt( bool b, vect3 p ) : Obj(p), bMove(b){}
-		Vt( bool b, vect3 p, vect3 v ) : Obj(p), vel(v), bMove(b) {}
+		float	radius = 0;
+		Vt( bool b, float w, vect3 p = vect3(0,0,0) ) : Obj(p), bMove(b), weight(w) 
+		{
+			radius = cbrt(w);
+		}
 	};
 	struct box
 	{
@@ -50,6 +53,8 @@ struct Lab22::Impl
 
 	vector<shared_ptr<Obj>>	tbl_pObj;
 
+	bool bPause = false;
+	bool bStep = false;
 };
 
 Lab22::Lab22() : pImpl( new Lab22::Impl ){}
@@ -58,6 +63,7 @@ Lab22::Lab22() : pImpl( new Lab22::Impl ){}
 void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
+	pImpl->bStep = false;
 	auto funcShowBar = []( SysGra& gra, int y, float val, string str, rgb col )
 	{
 		vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42.0*y);
@@ -82,10 +88,10 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pers.cam.at		= vect3( 0.0, 1.0, 0 );
 
 		pImpl->ball.vt.clear();
-		pImpl->ball.vt.emplace_back( new Impl::Vt(true) );
-		pImpl->ball.vt.emplace_back( new Impl::Vt(true) );
-		pImpl->ball.vt.emplace_back( new Impl::Vt(false,vect3(-8,1,0)) );
-		pImpl->ball.vt.emplace_back( new Impl::Vt(false,vect3( 8,1,0) ) );
+		pImpl->ball.vt.emplace_back( new Impl::Vt(true,1) );
+		pImpl->ball.vt.emplace_back( new Impl::Vt(true,4) );
+		pImpl->ball.vt.emplace_back( new Impl::Vt(false,0.2,vect3(-8,cbrt(0.2),0)) );
+		pImpl->ball.vt.emplace_back( new Impl::Vt(false,0.2,vect3( 8,cbrt(0.2),0) ) );
 
 		// プロット
 		pers.grid.plot.ResetPlot();
@@ -96,11 +102,11 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	{
 		m.bInitParam = true;
 
-		pImpl->ball.vt[0]->pos = vect3( -3, 1, 0 );
+		pImpl->ball.vt[0]->pos = vect3( -3, pImpl->ball.vt[0]->radius, 0 );
 		pImpl->ball.vt[0]->vel = vect3(0,0,0);
 
-		pImpl->ball.vt[1]->pos = vect3(  3, 1, 0 );
-		pImpl->ball.vt[1]->vel = vect3(0,0,0);
+		pImpl->ball.vt[1]->pos = vect3(  3, pImpl->ball.vt[1]->radius, 0 );
+		pImpl->ball.vt[1]->vel = vect3(-0.00,0,0);
 	}
 
 	Impl::Vt& t0 = *pImpl->ball.vt[0];
@@ -108,6 +114,8 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 	// 入力
 	if ( keys.R.hi )	m.bInitParam = false;
+	if ( keys.SPACE.hi )	{pImpl->bPause=~pImpl->bPause;}
+	if ( keys.ENTER.rep )	{pImpl->bStep=true;pImpl->bPause=true;}
 	
 	// 移動：計算
 	for ( shared_ptr<Impl::Vt> vt : pImpl->ball.vt ) { vt->pos += vt->vel; }
@@ -115,44 +123,42 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	// 衝突：運動準備
 	for ( shared_ptr<Impl::Vt> vt : pImpl->ball.vt ) 
 	{
+		vt->new_pos = vt->pos;
 		vt->new_vel = vt->vel;
 	}
 
 	// 加速
-	if ( mouse.F.on )	t0.new_vel += vect3( 0.01 , 0 , 0 );
+	if ( mouse.F.on )	t0.new_vel += vect3( 0.005 , 0 , 0 );
 	if ( mouse.B.on )	t1.new_vel += vect3(-0.01 , 0 , 0 );
 
-
-//	if ( mouse.B.hi )	sound.mml_play( "T600O6V12cr");
-//	if ( mouse.F.hi )	sound.mml_play( "T100v12o4c3-g#dcfc#dcc7R:V12O3#D5F#GGG7R:V12O2G7GGR" );
-//	if ( mouse.F.hi )	sound.mml_play( "T100v12o4c3-g#dcfc#dcc7R" );
-//	if ( mouse.F.hi )	sound.mml_play( "T100V12O4#D5F#GGG7R:V12O4G7GGR" );
-//	if ( mouse.F.hi )	sound.mml_play( "T100V12O4#D5F#GGG7R" );
-//	if ( mouse.B.hi )	sound.mml_play( "T100V12O4G7GGR" );
 
 	// 衝突：計算
 	for ( shared_ptr<Impl::Vt>pa : pImpl->ball.vt )
 	{
 		for ( shared_ptr<Impl::Vt>pb : pImpl->ball.vt )
 		{
+//			if ( pa == pImpl->ball.vt[0] )
 			if ( pa != pb )
 			{
-				if ( pa->bMove && pb->bMove )
+				if ( abs( pa->pos.x - pb->pos.x ) < pa->radius+pb->radius )
 				{
-					if ( abs( pa->pos.x - pb->pos.x ) < 2.0 )
+					if ( pa->bMove && pb->bMove )
 					{
-						pa->new_vel = pa->vel - pa->vel + pb->vel;
-//						sound.mml_play( "T100v6o4c1-gcfcfgdg+c7r:v11o3g1eg+ca+c+db+d+g7r:v11o3e1ceafabgb+e7r");
-						sound.mml_play( "T600O6V12cr");
+						float wa = pa->weight;
+						float wb = pb->weight;
+						vect3 va = pa->vel;
+						vect3 vb = pb->vel;
+						pa->new_vel = vb*wb/wa;
+
+						pa->new_pos = pa->prev_pos;
+
+						sound.mml_play( "T1800O5V10#cdr");
 					}
-				}
-				else
-				if ( pa->bMove )
-				{
-					if ( abs( pa->pos.x - pb->pos.x ) < 2.0 )
+					else
+					if ( pa->bMove )
 					{
 						pa->new_vel = -pa->vel;
-						sound.mml_play( "T600O6V12cr");
+						sound.mml_play( "T1800O5V10c#cr");
 					}
 				}
 			}
@@ -160,8 +166,10 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	}
 
 	// 衝突：運動反映
+	if ( !pImpl->bPause == false || pImpl->bStep ) 
 	for ( shared_ptr<Impl::Vt> vt : pImpl->ball.vt ) 
 	{
+		vt->pos = vt->new_pos;
 		vt->vel = vt->new_vel;
 	}
 	
@@ -174,12 +182,12 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		for ( shared_ptr<Impl::Vt>p : pImpl->ball.vt )
 		{
 			vect3 v0 = p->pos;
-			float 	w = 1.0;
+			float 	r = p->radius;
 			float	wide = 1.0;
-			pers.pen.line3d( gra, pers, v0+vect3(-w,-w,0), v0+vect3( w,-w,0),rgb(1,1,1), wide );
-			pers.pen.line3d( gra, pers, v0+vect3( w,-w,0), v0+vect3( w, w,0),rgb(1,1,1), wide );
-			pers.pen.line3d( gra, pers, v0+vect3( w, w,0), v0+vect3(-w, w,0),rgb(1,1,1), wide );
-			pers.pen.line3d( gra, pers, v0+vect3(-w, w,0), v0+vect3(-w,-w,0),rgb(1,1,1), wide );
+			pers.pen.line3d( gra, pers, v0+vect3(-r,-r,0), v0+vect3( r,-r,0),rgb(1,1,1), wide );
+			pers.pen.line3d( gra, pers, v0+vect3( r,-r,0), v0+vect3( r, r,0),rgb(1,1,1), wide );
+			pers.pen.line3d( gra, pers, v0+vect3( r, r,0), v0+vect3(-r, r,0),rgb(1,1,1), wide );
+			pers.pen.line3d( gra, pers, v0+vect3(-r, r,0), v0+vect3(-r,-r,0),rgb(1,1,1), wide );
 		}
 		gra.SetZTest(true);
 	}
