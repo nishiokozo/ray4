@@ -151,7 +151,6 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 					{
 						pa->new_vel = vb*wb/wa;
 
-
 						sound.mml_play( "T1800O5V10#cdr");
 					}
 					else
