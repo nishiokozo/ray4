@@ -5,17 +5,10 @@ class SysKeys
 
 	struct Keyobj
 	{
-		bool	on;
-		bool	hi;
-		bool	lo;
-		bool	rep;
-		Keyobj()
-		{
-			on = 0;
-			hi = 0;
-			lo = 0;
-			rep = 0;
-		};
+		bool	on= false;
+		bool	hi= false;
+		bool	lo= false;
+		bool	rep= false;
 	};
 
 

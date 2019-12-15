@@ -207,6 +207,7 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	// プロット表示
 //	pImpl->plot_moment.DrawPlot( gra, pers );
 
+	gra.Print(1,(float)text_y++,string("<ENTER on>")+to_string(keys.ENTER.on)); 
 	if ( pImpl->bPause ) gra.Print(1,(float)text_y++,string("<Pause>")); 
 	if ( pImpl->bStep ) gra.Print(1,(float)text_y++,string("<Step>")); 
 
