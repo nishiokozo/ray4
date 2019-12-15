@@ -188,7 +188,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	}
 
 	// 反映
-	if  ( !m.bPause || m.bStep )
+//	if  ( !m.bPause || m.bStep )
 	{
 		ball.pos = pn;
 		ball.vel = vn;

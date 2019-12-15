@@ -53,8 +53,8 @@ struct Lab22::Impl
 
 	vector<shared_ptr<Obj>>	tbl_pObj;
 
-	bool bPause = false;
-	bool bStep = false;
+//	bool bPause = false;
+//	bool bStep = false;
 };
 
 Lab22::Lab22() : pImpl( new Lab22::Impl ){}
@@ -63,7 +63,7 @@ Lab22::Lab22() : pImpl( new Lab22::Impl ){}
 void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
-	pImpl->bStep = false;
+//	pImpl->bStep = false;
 	auto funcShowBar = []( SysGra& gra, int y, float val, string str, rgb col )
 	{
 		vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42.0*y);
@@ -114,8 +114,8 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 	// 入力
 	if ( keys.R.hi )	m.bInitParam = false;
-	if ( keys.SPACE.hi )	{pImpl->bPause=~pImpl->bPause;}
-	if ( keys.ENTER.rep )	{pImpl->bStep=true;pImpl->bPause=true;}
+//	if ( keys.SPACE.hi )	{pImpl->bPause=~pImpl->bPause;}
+//	if ( keys.ENTER.rep )	{pImpl->bStep=true;pImpl->bPause=true;}
 	
 	// 移動：計算
 	for ( shared_ptr<Impl::Vt> vt : pImpl->ball.vt ) { vt->pos += vt->vel; }
@@ -166,7 +166,7 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	}
 
 	// 衝突：運動反映
-	if ( !pImpl->bPause == false || pImpl->bStep ) 
+//	if ( !pImpl->bPause == false || pImpl->bStep ) 
 	for ( shared_ptr<Impl::Vt> vt : pImpl->ball.vt ) 
 	{
 		vt->pos = vt->new_pos;
