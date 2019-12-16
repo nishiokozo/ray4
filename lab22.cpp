@@ -252,15 +252,18 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	{
 		stringstream ss ;
 		ss << t0.weight << "kg";
-		pers.pen.print3d( gra, pers, 	t0.pos, -0,0, ss.str() ); 
+		pers.pen.print3d( gra, pers, 	t0.pos, 0,-32, ss.str() ); 
 		ss.str("");
 		ss << t0.vel.x << "m/s";
-		m.drawVect( gra, pers, text_y, t0.pos+vect3(0,-1.5,0), t0.vel ,10	, rgb(1,0,1), ss.str(), false, false );
+		m.drawVect( gra, pers, text_y, t0.pos+vect3(-0.5,0,0), t0.vel ,10	, rgb(1,0,1), ss.str(), false, false,false );
 	}
 	{
 		stringstream ss ;
 		ss << t1.weight << "kg";
-		pers.pen.print3d( gra, pers, 	t1.pos, -0,0, ss.str() ); 
+		pers.pen.print3d( gra, pers, 	t1.pos, -0,-32, ss.str() ); 
+		ss.str("");
+		ss << t1.vel.x << "m/s";
+		m.drawVect( gra, pers, text_y, t1.pos+vect3(0-0.5,0,0), t1.vel ,10	, rgb(1,0,1), ss.str(), false, false,false );
 	}
 	
 	// メッセージ表示

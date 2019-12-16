@@ -51,7 +51,7 @@
 #include "lab22.h"
 
 //------------------------------------------------------------------------------
-void LabObj::M::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str, bool bShadow, bool bDump )
+void LabObj::M::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str, bool bShadow, bool bDump, bool bFlip )
 //------------------------------------------------------------------------------
 {
 	gra.SetZTest(false);
@@ -71,7 +71,15 @@ void LabObj::M::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 
 	// 線
 	pers.pen.line3d( gra, pers, v0, v1, col, 1 );
 //	pers.pen.pset3d( gra, pers,     v1, col, 5 );
-	pers.pen.print3d( gra, pers, 	v1,12,0, str ); 
+
+	if ( bFlip )
+	{
+		pers.pen.print3d( gra, pers, 	v1,12,0, str ); 
+	}
+	else
+	{
+		pers.pen.print3d( gra, pers, 	v0,0,36, str ); 
+	}
 
 	// 矢印
 	#if 1
