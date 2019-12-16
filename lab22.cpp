@@ -14,6 +14,7 @@
 #include <iomanip>
 #include <tuple>
 #include <random>
+#include <sstream>
 
 #include "geom.h"
 
@@ -75,7 +76,7 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	gra.Print(1,(float)text_y++,"22 : 2D twin box" ); 
 
 	// グリッド表示
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(rad(90)), 26, 26, 1, rgb(0.2,0.2,0.2), true );
+	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(rad(90)), 26, 26, 1, rgb(0.2,0.2,0.2), false );
 
 	//初期化
 	if ( !m.bInitAll )
@@ -88,7 +89,7 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 		pImpl->ball.vt.clear();
 		pImpl->ball.vt.emplace_back( new Impl::Vt(true,1) );
-		pImpl->ball.vt.emplace_back( new Impl::Vt(true,4) );
+		pImpl->ball.vt.emplace_back( new Impl::Vt(true,2) );
 		pImpl->ball.vt.emplace_back( new Impl::Vt(false,0.2,vect3(-8,cbrt(0.2),0)) );
 		pImpl->ball.vt.emplace_back( new Impl::Vt(false,0.2,vect3( 8,cbrt(0.2),0) ) );
 
@@ -101,11 +102,39 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	{
 		m.bInitParam = true;
 
-		pImpl->ball.vt[0]->pos = vect3( -3, pImpl->ball.vt[0]->radius, 0 );
-		pImpl->ball.vt[0]->vel = vect3(0,0,0);
+		pImpl->ball.vt[0]->pos = vect3( -2.5, pImpl->ball.vt[0]->radius, 0 );
+		pImpl->ball.vt[0]->vel = vect3(0.00,0,0);
 
-		pImpl->ball.vt[1]->pos = vect3(  3, pImpl->ball.vt[1]->radius, 0 );
-		pImpl->ball.vt[1]->vel = vect3(-0.05,0,0);
+		pImpl->ball.vt[1]->pos = vect3(  2.5, pImpl->ball.vt[1]->radius, 0 );
+		pImpl->ball.vt[1]->vel = vect3(0.00,0,0);
+	}
+
+	// 正面衝突
+	if ( keys._1.hi )
+	{
+		pImpl->ball.vt[0]->pos = vect3( -2.5, pImpl->ball.vt[0]->radius, 0 );
+		pImpl->ball.vt[1]->pos = vect3(  2.5, pImpl->ball.vt[1]->radius, 0 );
+
+		pImpl->ball.vt[0]->vel = vect3( 0.06,0,0);
+		pImpl->ball.vt[1]->vel = vect3(-0.01,0,0);
+	}
+	// 静止追突
+	if ( keys._2.hi )
+	{
+		pImpl->ball.vt[0]->pos = vect3( -2.5, pImpl->ball.vt[0]->radius, 0 );
+		pImpl->ball.vt[1]->pos = vect3(  2.5, pImpl->ball.vt[1]->radius, 0 );
+
+		pImpl->ball.vt[0]->vel = vect3(0.08,0,0);
+		pImpl->ball.vt[1]->vel = vect3(0.00,0,0);
+	}
+	// 追突
+	if ( keys._3.hi )
+	{
+		pImpl->ball.vt[0]->pos = vect3( -2.5, pImpl->ball.vt[0]->radius, 0 );
+		pImpl->ball.vt[1]->pos = vect3(  2.5, pImpl->ball.vt[1]->radius, 0 );
+
+		pImpl->ball.vt[0]->vel = vect3(0.08,0,0);
+		pImpl->ball.vt[1]->vel = vect3(0.01,0,0);
 	}
 
 	Impl::Vt& t0 = *pImpl->ball.vt[0];
@@ -136,6 +165,7 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	{
 		for ( shared_ptr<Impl::Vt>pb : pImpl->ball.vt )
 		{
+			if ( pa == pImpl->ball.vt[0] )
 			if ( pa != pb )
 			{
 				if ( abs( pa->pos.x - pb->pos.x ) < pa->radius+pb->radius )
@@ -146,10 +176,22 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 					vect3 vb = pb->vel;
 
 					pa->new_pos = pa->prev_pos;	// 衝突前の場所に戻す簡易処理
+					pb->new_pos = pb->prev_pos;	// 衝突前の場所に戻す簡易処理
 
 					if ( pa->bMove && pb->bMove )
 					{
+//						vect3 v = dot(va,vb);
+					#if 0
 						pa->new_vel = vb*wb/wa;
+						pb->new_vel = va*wa/wb;
+					#else
+						pa->new_vel = -va;
+						pb->new_vel = va*wa/wb + vb;
+					#endif
+
+
+//						pa->new_vel = vb*wb/wa;
+//						pb->new_vel = va*wa/wb;
 
 						sound.mml_play( "T1800O5V10#cdr");
 					}
@@ -206,8 +248,25 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	// プロット表示
 //	pImpl->plot_moment.DrawPlot( gra, pers );
 
-	gra.Print(1,(float)text_y++,string("<ENTER on>")+to_string(keys.ENTER.on)); 
+
+	{
+		stringstream ss ;
+		ss << t0.weight << "kg";
+		pers.pen.print3d( gra, pers, 	t0.pos, -0,0, ss.str() ); 
+		ss.str("");
+		ss << t0.vel.x << "m/s";
+		m.drawVect( gra, pers, text_y, t0.pos+vect3(0,-1.5,0), t0.vel ,10	, rgb(1,0,1), ss.str(), false, false );
+	}
+	{
+		stringstream ss ;
+		ss << t1.weight << "kg";
+		pers.pen.print3d( gra, pers, 	t1.pos, -0,0, ss.str() ); 
+	}
+	
+	// メッセージ表示
+//	gra.Print(1,(float)text_y++,string("<ENTER on>")+to_string(keys.ENTER.on)); 
 	if ( pImpl->bPause ) gra.Print(1,(float)text_y++,string("<Pause>")); 
-	if ( pImpl->bStep ) gra.Print(1,(float)text_y++,string("<Step>")); 
+//	if ( pImpl->bStep ) gra.Print(1,(float)text_y++,string("<Step>")); 
+
 
 }

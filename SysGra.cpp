@@ -588,3 +588,17 @@ void SysGra::SetZTest( bool flg )
 	}
 	
 }
+//------------------------------------------------------------------------------
+void SysGra::SetCulling( bool flg )
+//------------------------------------------------------------------------------
+{
+	if ( flg )
+	{
+		glEnable(GL_CULL_FACE);
+	}
+	else
+	{
+		glDisable(GL_CULL_FACE);
+	}
+	
+}

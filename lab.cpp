@@ -51,7 +51,7 @@
 #include "lab22.h"
 
 //------------------------------------------------------------------------------
-void LabObj::M::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str )
+void LabObj::M::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str, bool bShadow, bool bDump )
 //------------------------------------------------------------------------------
 {
 	gra.SetZTest(false);
@@ -59,6 +59,7 @@ void LabObj::M::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 
 	vect3 v1 = v0+v*sc;
 
 	// 影
+	if ( bShadow )
 	{
 		vect3	a = v0;	a.y=0;
 		vect3	b = v1;	b.y=0;
@@ -69,26 +70,53 @@ void LabObj::M::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 
 
 	// 線
 	pers.pen.line3d( gra, pers, v0, v1, col, 1 );
-	pers.pen.pset3d( gra, pers,     v1, col, 5 );
+//	pers.pen.pset3d( gra, pers,     v1, col, 5 );
 	pers.pen.print3d( gra, pers, 	v1,12,0, str ); 
 
 	// 矢印
-	if (0)
+	#if 1
 	{
-
-		vect2 a = pers.calcWorldToScreen3( v0 ).xy();
-		vect2 b = pers.calcWorldToScreen3( v1 ).xy();
-//		if ( b.z > 0  ) 
+		gra.SetCulling( false );
+		// 2D矢印 実験
 		{
-			vect3 c = vect3((b-a).normalize(),0);
-			vect2 d = cross(c,vect3(0,0,1)).xy();
-			vect2 e = (d+(b-a))*100;
-//			gra.Line( b, b + gra.Dot(-e.x,e.y), rgb(1,1,0), 2 );
-			gra.Line( b, b + d*1, rgb(1,1,0), 2 );
-		}
-	}
+			vect2 a0 = pers.calcWorldToScreen3( v0 ).xy();
+			vect2 a1 = pers.calcWorldToScreen3( v1 ).xy();
 
-	gra.Print(1,(float)text_y++, str+": "+to_string(v.x)+" , "+to_string(v.y)+" , "+to_string(v.z));
+			vect2 v = (a1-a0).normalize();
+			vect2 n = cross( vect3(v,0), vect3(0,0,1) ).xy();
+
+			vect2 a = a1;
+			vect2 b = a1-n*0.1/7 - v*0.2/7;
+			vect2 c = a1+n*0.1/7 - v*0.2/7;
+			gra.Tri( a,b,c, col );
+//			gra.Line( a,b, rgb(1,1,0), 1 );
+//			gra.Line( a,c, rgb(1,1,0), 1 );
+//			gra.Line( c,b, rgb(1,1,0), 1 );
+
+		}
+		gra.SetCulling( true );
+	}
+	#else
+	{
+		gra.SetCulling( false );
+		// 3D矢印 実験
+		{
+			vect3 v = v1-v0;
+			vect3 n = cross( v, vect3(0,0,1) ).normalize();
+
+			vect3 a = v1;
+			vect3 b = v1-n*0.1 - v.normalize()*0.2;
+			vect3 c = v1+n*0.1 - v.normalize()*0.2;
+			pers.pen.tri3d( gra, pers, a,b,c, col );
+		}
+		gra.SetCulling( true );
+	}
+	#endif
+	
+	if ( bDump )
+	{
+		gra.Print(1,(float)text_y++, str+": "+to_string(v.x)+" , "+to_string(v.y)+" , "+to_string(v.z));
+	}
 
 	gra.SetZTest(true);
 };

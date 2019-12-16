@@ -39,6 +39,7 @@ struct SysGra
 	void	Clr( rgb col );
 
 	void	SetZTest( bool flg );
+	void	SetCulling( bool flg );
 
 	SysGra();
 	~SysGra();

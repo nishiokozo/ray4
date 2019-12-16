@@ -85,7 +85,7 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	// 初期化：パラメータ
 	if ( !m.bInitParam )
 	{
-#define NUM 2
+#define NUM 3
 #if NUM==1
 	// b2 斜め45°
 		m.bInitParam = true;
@@ -172,13 +172,46 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 		// 転がり
 		{
-			float ene = 0.1;
+			float ene = 0.05;
 			vect3 dir = vect3(1,0,0).normalize();
 			b1.vel += ene * dir;
 		}
 		{
 			float ene = 0.1;
 			vect3 dir = vect3(-1,0,0).normalize();
+			b2.vel += ene * dir;
+		}
+#endif
+
+#if NUM==4
+	// b1 b2 追突°
+		m.bInitParam = true;
+		{
+			b1.pos	= vect3( -2	, 1.0,  0.0 );
+			b1.vel	= vect3(  0	, 0.0,  0.0 );
+			b1.radius = 1.0;
+			b1.mat	= midentity();
+			b1.vaxis	= vect3(0,0,1);
+			b1.fspin	= 0.0;
+		}
+		{
+			b2.pos	= vect3(  2	, 1.0,  0.0 );
+			b2.vel	= vect3(  0	, 0.0,  0.0 );
+			b2.radius = 1.0;
+			b2.mat	= midentity();
+			b2.vaxis	= vect3(0,0,1);
+			b2.fspin	= 0.0;
+		}
+
+		// 転がり
+		{
+			float ene = 0.1;
+			vect3 dir = vect3(1,0,0).normalize();
+			b1.vel += ene * dir;
+		}
+		{
+			float ene = 0.02;
+			vect3 dir = vect3(1,0,0).normalize();
 			b2.vel += ene * dir;
 		}
 #endif
