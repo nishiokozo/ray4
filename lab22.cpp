@@ -90,8 +90,8 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pImpl->ball.vt.clear();
 		pImpl->ball.vt.emplace_back( new Impl::Vt(true,1) );
 		pImpl->ball.vt.emplace_back( new Impl::Vt(true,2) );
-		pImpl->ball.vt.emplace_back( new Impl::Vt(false,0.2,vect3(-8,cbrt(0.2),0)) );
-		pImpl->ball.vt.emplace_back( new Impl::Vt(false,0.2,vect3( 8,cbrt(0.2),0) ) );
+//		pImpl->ball.vt.emplace_back( new Impl::Vt(false,0.2,vect3(-8,cbrt(0.2),0)) );
+//		pImpl->ball.vt.emplace_back( new Impl::Vt(false,0.2,vect3( 8,cbrt(0.2),0) ) );
 
 		// プロット
 		pers.grid.plot.ResetPlot();
@@ -133,8 +133,8 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pImpl->ball.vt[0]->pos = vect3( -2.5, pImpl->ball.vt[0]->radius, 0 );
 		pImpl->ball.vt[1]->pos = vect3(  2.5, pImpl->ball.vt[1]->radius, 0 );
 
-		pImpl->ball.vt[0]->vel = vect3(0.08,0,0);
-		pImpl->ball.vt[1]->vel = vect3(0.01,0,0);
+		pImpl->ball.vt[0]->vel = vect3(0.1,0,0);
+		pImpl->ball.vt[1]->vel = vect3(0.05,0,0);
 	}
 
 	Impl::Vt& t0 = *pImpl->ball.vt[0];
@@ -247,8 +247,8 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 	// プロット表示
 //	pImpl->plot_moment.DrawPlot( gra, pers );
-
-
+	
+	// 箱情報表示
 	{
 		stringstream ss ;
 		ss << t0.weight << "kg";
@@ -265,6 +265,9 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		ss << t1.vel.x << "m/s";
 		m.drawVect( gra, pers, text_y, t1.pos+vect3(0-0.5,0,0), t1.vel ,10	, rgb(1,0,1), ss.str(), false, false,false );
 	}
+	
+	//地面表示
+	pers.pen.line3d( gra, pers, vect3(-8,0,0), vect3( 8,0,0), rgb(1,1,1),1);	
 	
 	// メッセージ表示
 //	gra.Print(1,(float)text_y++,string("<ENTER on>")+to_string(keys.ENTER.on)); 
