@@ -291,6 +291,18 @@ void Lab23::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		gra.SetZTest(true);
 	}
 	
+	// 運動エネルギー表示
+	{
+		float f = 0;
+		for ( Impl::Box& box : pImpl->tblBox )
+		{
+			f += abs(box.vel*box.weight);
+		}
+
+		gra.Print(1,(float)text_y++,string("F=")+to_string(f)); 
+		
+	}
+	
 	// メッセージ表示
 	if ( pImpl->bPause ) gra.Print(1,(float)text_y++,string("<Pause>")); 
 }
