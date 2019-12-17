@@ -178,34 +178,34 @@ void Lab23::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 
 	// 衝突：計算
-	for ( Impl::Box& pa : pImpl->tblBox )
+	for ( Impl::Box& box1 : pImpl->tblBox )
 	{
-		for ( Impl::Box& pb : pImpl->tblBox )
+		for ( Impl::Box& box2 : pImpl->tblBox )
 		{
-			if ( &pa == &pImpl->tblBox[0] )
-			if ( &pa != &pb )
+			if ( &box1 == &pImpl->tblBox[0] )
+			if ( &box1 != &box2 )
 			{
-				if ( abs( pa.new_pos - pb.new_pos ) < pa.radius+pb.radius )
+				if ( abs( box1.new_pos - box2.new_pos ) < box1.radius+box2.radius )
 				{
-					float wa = pa.weight;
-					float wb = pb.weight;
-					float va = pa.vel;
-					float vb = pb.vel;
+					float w1 = box1.weight;
+					float w2 = box2.weight;
+					float v1 = box1.vel;
+					float v2 = box2.vel;
 
-					pa.bHit = true;
-					pb.bHit = true;
+					box1.bHit = true;
+					box2.bHit = true;
 
-					if ( pa.bMove && pb.bMove )
+					if ( box1.bMove && box2.bMove )
 					{
-						float w = min(wa,wb);
-						float	f = va*w - vb*w;	// 衝突力の差求める
-						pa.new_vel = va  - f/wa;
-						pb.new_vel = vb  + f/wb;
+						float w = min(w1,w2);		// より軽い方を使う
+						float f = v1*w - v2*w;		// 衝突力の差求める
+						box1.new_vel = v1 - f/w1;	// 反作用
+						box2.new_vel = v2 + f/w2;	// 作用
 					}
 					else
-					if ( pa.bMove )
+					if ( box1.bMove )
 					{
-						pa.new_vel = -pa.vel;
+						box1.new_vel = -box1.vel;
 					}
 				}
 			}
