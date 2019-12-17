@@ -95,12 +95,9 @@ void LabObj::M::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 
 			vect2 n = cross( vect3(v,0), vect3(0,0,1) ).xy();
 
 			vect2 a = a1;
-			vect2 b = a1-n*0.1/7 - v*0.2/7;
-			vect2 c = a1+n*0.1/7 - v*0.2/7;
+			vect2 b = a1-n*0.1/7 - v*0.2/10;
+			vect2 c = a1+n*0.1/7 - v*0.2/10;
 			gra.Tri( a,b,c, col );
-//			gra.Line( a,b, rgb(1,1,0), 1 );
-//			gra.Line( a,c, rgb(1,1,0), 1 );
-//			gra.Line( c,b, rgb(1,1,0), 1 );
 
 		}
 		gra.SetCulling( true );

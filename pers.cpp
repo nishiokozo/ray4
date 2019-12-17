@@ -1021,6 +1021,8 @@ void Pers::Axis::DrawAxis( SysGra& gra, Pers& pers, vect2 mpos )
 void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int NUM_U, int NUM_V, float dt, rgb col, bool bPlot  )
 //----------------------------------------------------------------------------
 {
+	mat = m;
+
 	vect3 pos = pos0;
 
 	// 注視点中心に展開
@@ -1117,6 +1119,34 @@ void Pers::Grid::DrawGrid( SysGra& gra, Pers& pers )
 //----------------------------------------------------------------------------
 {
 	DrawGrid3d( gra, pers, vect3(0,0,0), mat, 10, 10, 1, col );
+}
+//------------------------------------------------------------------------------
+void Pers::Grid::line( SysGra& gra, Pers& pers, vect2 p0, vect2 p1, rgb col, float wide )
+//----------------------------------------------------------------------------
+{
+	gra.SetZTest(false);
+
+	mat33 m = mat * mrotx(-rad(90));
+
+	vect3 v0 = m * vect3(p0,0);	
+	vect3 v1 = m * vect3(p1,0);	
+	pers.pen.line3d( gra, pers, v0, v1, col, wide );
+
+	gra.SetZTest(true);
+}
+//------------------------------------------------------------------------------
+void Pers::Grid::print( SysGra& gra, Pers& pers, vect2 p0, float x, float y, string str )
+//----------------------------------------------------------------------------
+{
+	gra.SetZTest(false);
+
+	mat33 m = mat * mrotx(-rad(90));
+
+	vect3 v0 = m * vect3(p0,0);	
+	pers.pen.print3d( gra, pers, v0, x,y,str );
+
+
+	gra.SetZTest(true);
 }
 
 //////////////////

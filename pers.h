@@ -189,7 +189,9 @@ struct Pers
 			void DrawPlot( SysGra& gra, Pers& pers, mat33& m );
 
 		} plot = Plot( 100, 0.02, rgb(1,0,1) );
-//		} plot( 100, 0.02, rgb(1,0,1) );
+		
+		void line( SysGra& gra, Pers& pers, vect2 v0, vect2 v1, rgb col = rgb(1,1,1), float wide = 1.0f );
+		void print( SysGra& gra, Pers& pers, vect2 p0, float x, float y, string str );
 
 	} grid;
 

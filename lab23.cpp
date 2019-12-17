@@ -78,52 +78,66 @@ void Lab23::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 		pImpl->tblBox[0].pos = -2.5;
 		pImpl->tblBox[0].vel = 0.0;
-		pImpl->tblBox[0].weight = 1.0;
-		pImpl->tblBox[0].radius = cbrt(pImpl->tblBox[0].weight);
 
 		pImpl->tblBox[1].pos =  2.5;
 		pImpl->tblBox[1].vel = 0.0;
-		pImpl->tblBox[1].weight = 2.0;
+
+		pImpl->tblBox[0].weight = 1.0;
+		pImpl->tblBox[1].weight = 1.0;
+		pImpl->tblBox[0].radius = cbrt(pImpl->tblBox[0].weight);
 		pImpl->tblBox[1].radius = cbrt(pImpl->tblBox[1].weight);
+
 	}
 
 	// 正面衝突
 	if ( keys._1.hi )
 	{
 		pImpl->tblBox[0].pos = -2.5;
-		pImpl->tblBox[0].vel = 0.06;
-		pImpl->tblBox[0].weight = 1.0;
-		pImpl->tblBox[0].radius = cbrt(pImpl->tblBox[0].weight);
+		pImpl->tblBox[0].vel = 0.08;
 
 		pImpl->tblBox[1].pos =  2.5;
-		pImpl->tblBox[1].vel = 0.01;
-		pImpl->tblBox[1].weight = 2.0;
-		pImpl->tblBox[1].radius = cbrt(pImpl->tblBox[1].weight);
+		pImpl->tblBox[1].vel = -0.01;
 	}
 	// 静止追突
 	if ( keys._2.hi )
 	{
 		pImpl->tblBox[0].pos = -2.5;
 		pImpl->tblBox[0].vel = 0.08;
-		pImpl->tblBox[0].weight = 1.0;
-		pImpl->tblBox[0].radius = cbrt(pImpl->tblBox[0].weight);
 
 		pImpl->tblBox[1].pos =  2.5;
 		pImpl->tblBox[1].vel = 0.0;
-		pImpl->tblBox[1].weight = 2.0;
-		pImpl->tblBox[1].radius = cbrt(pImpl->tblBox[1].weight);
 	}
 	// 追突
 	if ( keys._3.hi )
 	{
 		pImpl->tblBox[0].pos = -2.5;
 		pImpl->tblBox[0].vel = 0.08;
-		pImpl->tblBox[0].weight = 1.0;
-		pImpl->tblBox[0].radius = cbrt(pImpl->tblBox[0].weight);
 
 		pImpl->tblBox[1].pos =  2.5;
-		pImpl->tblBox[1].vel = 0.02;
+		pImpl->tblBox[1].vel = 0.01;
+	}
+	// 重要 1:1
+	if ( keys._4.hi )
+	{
+		pImpl->tblBox[0].weight = 1.0;
+		pImpl->tblBox[1].weight = 1.0;
+		pImpl->tblBox[0].radius = cbrt(pImpl->tblBox[0].weight);
+		pImpl->tblBox[1].radius = cbrt(pImpl->tblBox[1].weight);
+	}
+	// 重要 1:2
+	if ( keys._5.hi )
+	{
+		pImpl->tblBox[0].weight = 1.0;
 		pImpl->tblBox[1].weight = 2.0;
+		pImpl->tblBox[0].radius = cbrt(pImpl->tblBox[0].weight);
+		pImpl->tblBox[1].radius = cbrt(pImpl->tblBox[1].weight);
+	}
+	// 重要 2:1
+	if ( keys._6.hi )
+	{
+		pImpl->tblBox[0].weight = 2.0;
+		pImpl->tblBox[1].weight = 1.0;
+		pImpl->tblBox[0].radius = cbrt(pImpl->tblBox[0].weight);
 		pImpl->tblBox[1].radius = cbrt(pImpl->tblBox[1].weight);
 	}
 
@@ -168,10 +182,10 @@ void Lab23::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 						pa.new_vel = vb*wb/wa;
 						pb.new_vel = va*wa/wb;
 					#else
-						float	e = va*wa/wb;
+						float	f = wa/wb;
 					
-						pa.new_vel = -e;
-						pb.new_vel = vb + e;
+						pa.new_vel = -va*(1.0 -f) + vb*f;
+						pb.new_vel =  vb*(1.0 -f) + va*f;
 					#endif
 
 					}
@@ -201,34 +215,39 @@ void Lab23::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 	// 描画：箱
 	{
-		gra.SetZTest(false);
+//		gra.SetZTest(false);
 		for ( Impl::Box& box : pImpl->tblBox )
 		{
 			float 	r = cbrt(box.weight);
-			vect3	v0 = vect3( box.pos, r,0);
+			vect2	v0 = vect2( box.pos, r);
 			float	wide = 1.0;
-			pers.pen.line3d( gra, pers, v0+vect3(-r,-r,0), v0+vect3( r,-r,0),rgb(1,1,1), wide );
-			pers.pen.line3d( gra, pers, v0+vect3( r,-r,0), v0+vect3( r, r,0),rgb(1,1,1), wide );
-			pers.pen.line3d( gra, pers, v0+vect3( r, r,0), v0+vect3(-r, r,0),rgb(1,1,1), wide );
-			pers.pen.line3d( gra, pers, v0+vect3(-r, r,0), v0+vect3(-r,-r,0),rgb(1,1,1), wide );
+//			pers.pen.line3d( gra, pers, v0+vect3(-r,-r,0), v0+vect3( r,-r,0),rgb(1,1,1), wide );
+//			pers.pen.line3d( gra, pers, v0+vect3( r,-r,0), v0+vect3( r, r,0),rgb(1,1,1), wide );
+//			pers.pen.line3d( gra, pers, v0+vect3( r, r,0), v0+vect3(-r, r,0),rgb(1,1,1), wide );
+//			pers.pen.line3d( gra, pers, v0+vect3(-r, r,0), v0+vect3(-r,-r,0),rgb(1,1,1), wide );
+			pers.grid.line( gra, pers, v0+vect2(-r,-r), v0+vect2( r,-r),rgb(1,1,1), wide );
+			pers.grid.line( gra, pers, v0+vect2( r,-r), v0+vect2( r, r),rgb(1,1,1), wide );
+			pers.grid.line( gra, pers, v0+vect2( r, r), v0+vect2(-r, r),rgb(1,1,1), wide );
+			pers.grid.line( gra, pers, v0+vect2(-r, r), v0+vect2(-r,-r),rgb(1,1,1), wide );
 
 			// 箱情報表示
 			{
-				vect3	v1 = vect3( box.vel, 0,0);
+				vect2	v1 = vect2( box.vel, 0);
 				stringstream ss ;
 				ss << box.weight << "kg";
-				pers.pen.print3d( gra, pers, 	v0, 0,-32, ss.str() ); 
+				pers.grid.print( gra, pers, 	v0, 0,-32, ss.str() ); 
 				ss.str("");
 				ss << box.vel << "m/s";
-				m.drawVect( gra, pers, text_y, v0+vect3(-0.5,0,0), v1 ,10	, rgb(1,0,1), ss.str(), false, false,false );
+				m.drawVect( gra, pers, text_y, vect3(v0,0)+vect3(-0.5,0,0), vect3(v1,0) ,10	, rgb(1,0,1), ss.str(), false, false,false );
 			}
 
 		}
-		gra.SetZTest(true);
+//		gra.SetZTest(true);
 	}
 
 	//地面表示
-	pers.pen.line3d( gra, pers, vect3(-8,0,0), vect3( 8,0,0), rgb(1,1,1),1);	
+//	pers.pen.line3d( gra, pers, vect3(-8,0,0), vect3( 8,0,0), rgb(1,1,1),1);	
+	pers.grid.line( gra, pers, vect2(-8,0), vect2(8,0) );
 	
 	// メッセージ表示
 	if ( pImpl->bPause ) gra.Print(1,(float)text_y++,string("<Pause>")); 
