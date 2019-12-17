@@ -102,26 +102,26 @@ void Lab23::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pImpl->tblBox[0].pos = -2.5-1;
 		pImpl->tblBox[1].pos =  2.5;
 
-		pImpl->tblBox[0].vel = 0.1;
+		pImpl->tblBox[0].vel = 0.08;
 		pImpl->tblBox[1].vel = 0.0;
 	}
-	// 背面追突 1:5
+	// 背面追突 1:4
 	if ( keys._2.hi )
 	{
 		pImpl->tblBox[0].pos = -2.5-1;
 		pImpl->tblBox[1].pos =  2.5;
 
-		pImpl->tblBox[0].vel = 0.1;
+		pImpl->tblBox[0].vel = 0.08;
 		pImpl->tblBox[1].vel = 0.02;
 	}
-	// 正面衝突 速度比 5:1
+	// 正面衝突 速度比 4:1
 	if ( keys._3.hi )
 	{
 		pImpl->tblBox[0].pos = -2.5-1;
 		pImpl->tblBox[1].pos =  2.5;
 
-		pImpl->tblBox[0].vel = 0.1;
-		pImpl->tblBox[1].vel = -0.05;
+		pImpl->tblBox[0].vel = 0.08;
+		pImpl->tblBox[1].vel = -0.02;
 	}
 	// 正面衝突 速度比 1:1
 	if ( keys._4.hi )
@@ -129,8 +129,8 @@ void Lab23::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pImpl->tblBox[0].pos = -2.5-1;
 		pImpl->tblBox[1].pos =  2.5;
 
-		pImpl->tblBox[0].vel = 0.1;
-		pImpl->tblBox[1].vel = -0.1;
+		pImpl->tblBox[0].vel = 0.08;
+		pImpl->tblBox[1].vel = -0.08;
 	}
 	// 正面衝突 速度比 1:2
 	if ( keys._5.hi )
@@ -138,8 +138,8 @@ void Lab23::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pImpl->tblBox[0].pos = -2.5-1;
 		pImpl->tblBox[1].pos =  2.5;
 
-		pImpl->tblBox[0].vel = 0.1;
-		pImpl->tblBox[1].vel = -0.2;
+		pImpl->tblBox[0].vel = 0.08;
+		pImpl->tblBox[1].vel = -0.16;
 	}
 	// 重量比 1:1
 	if ( keys.Q.hi )
@@ -230,7 +230,7 @@ void Lab23::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 					if ( box1.bMove && box2.bMove )
 					{
 						float w = min(w1,w2);		// より軽い方
-						float f = v1*w - v2*w;		// 衝突力の差
+						float f = (v1*w - v2*w);		// 衝突力の差
 						box1.new_vel = v1 - f/w1;	// 反作用
 						box2.new_vel = v2 + f/w2;	// 作用
 					}
