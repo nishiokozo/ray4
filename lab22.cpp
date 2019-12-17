@@ -185,8 +185,10 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 						pa->new_vel = vb*wb/wa;
 						pb->new_vel = va*wa/wb;
 					#else
-						pa->new_vel = -va;
-						pb->new_vel = va*wa/wb + vb;
+						vect3	e = va*wa/wb;
+					
+						pa->new_vel = -e;
+						pb->new_vel = vb + e;
 					#endif
 
 

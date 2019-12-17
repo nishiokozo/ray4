@@ -49,6 +49,7 @@
 #include "lab20.h"
 #include "lab21.h"
 #include "lab22.h"
+#include "lab23.h"
 
 //------------------------------------------------------------------------------
 void LabObj::M::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str, bool bShadow, bool bDump, bool bFlip )
@@ -171,6 +172,7 @@ void Lab::SetIdx( int n, Cp& cp )
 		case 20:	pLab = unique_ptr<LabObj>( new Lab20 );	break;
 		case 21:	pLab = unique_ptr<LabObj>( new Lab21 );	break;
 		case 22:	pLab = unique_ptr<LabObj>( new Lab22 );	break;
+		case 23:	pLab = unique_ptr<LabObj>( new Lab23 );	break;
 		default: break;
 	}
 }
@@ -203,7 +205,8 @@ void Lab::SetNextIdx( int val, Cp& cp )
 		19,		//	モーター・トルク実験
 		20,		//	2D モーター・トルク実験
 		21,		//	2D ポイント・トルク実験
-		22,		//	2D 棒・トルク実験
+		22,		//	2D 箱・質量衝突実験
+		23,		//	1D 箱・質量衝突実験
 	};	
 	const int size = static_cast<signed>(sizeof(tbl)/sizeof(int));
 
