@@ -75,11 +75,14 @@ void LabObj::M::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 
 
 	if ( bFlip )
 	{
+		// 矢印の先
 		pers.pen.print3d( gra, pers, 	v1,12,0, str ); 
 	}
 	else
 	{
-		pers.pen.print3d( gra, pers, 	v0,0,36, str ); 
+		// 矢印の根本
+		float n = (str.size() * 6.0);
+		pers.pen.print3d( gra, pers, 	v0,-n,36, str ); 
 	}
 
 	// 矢印
