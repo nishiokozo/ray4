@@ -90,8 +90,8 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pImpl->ball.vt.clear();
 		pImpl->ball.vt.emplace_back( new Impl::Vt(true,1) );
 		pImpl->ball.vt.emplace_back( new Impl::Vt(true,2) );
-//		pImpl->ball.vt.emplace_back( new Impl::Vt(false,0.2,vect3(-8,cbrt(0.2),0)) );
-//		pImpl->ball.vt.emplace_back( new Impl::Vt(false,0.2,vect3( 8,cbrt(0.2),0) ) );
+		pImpl->ball.vt.emplace_back( new Impl::Vt(false,0.2,vect3(-8,cbrt(0.2),0)) );
+		pImpl->ball.vt.emplace_back( new Impl::Vt(false,0.2,vect3( 8,cbrt(0.2),0) ) );
 
 		// プロット
 		pers.grid.plot.ResetPlot();
@@ -165,7 +165,7 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	{
 		for ( shared_ptr<Impl::Vt>pb : pImpl->ball.vt )
 		{
-			if ( pa == pImpl->ball.vt[0] )
+//			if ( pa == pImpl->ball.vt[0] )
 			if ( pa != pb )
 			{
 				if ( abs( pa->pos.x - pb->pos.x ) < pa->radius+pb->radius )
@@ -181,7 +181,7 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 					if ( pa->bMove && pb->bMove )
 					{
 //						vect3 v = dot(va,vb);
-					#if 0
+					#if 1
 						pa->new_vel = vb*wb/wa;
 						pb->new_vel = va*wa/wb;
 					#else
