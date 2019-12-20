@@ -81,13 +81,13 @@ void Lab23::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		int n=0;
 		pImpl->tblBox.emplace_back();
 		pImpl->tblBox[n].def_pos = -4;
-		pImpl->tblBox[n].def_vel = 0.08;
+		pImpl->tblBox[n].def_vel = 0.09;
 		pImpl->tblBox[n].def_weight = 1.0;
 		n++;
 		pImpl->tblBox.emplace_back();
 		pImpl->tblBox[n].def_pos =  0;
 		pImpl->tblBox[n].def_vel = 0.0;
-		pImpl->tblBox[n].def_weight = 2.0;
+		pImpl->tblBox[n].def_weight = 1.0;
 		n++;
 	#if 0
 		pImpl->tblBox.emplace_back();
@@ -130,7 +130,7 @@ void Lab23::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	// 静止追突 1:0
 	if ( keys._1.hi )
 	{
-		pImpl->tblBox[0].def_vel = 0.08;
+		pImpl->tblBox[0].def_vel = 0.09;
 		pImpl->tblBox[1].def_vel = 0.0;
 		pImpl->bResetParam = true;
 		pImpl->bPause = true;
@@ -138,32 +138,32 @@ void Lab23::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	// 背面追突 1:4
 	if ( keys._2.hi )
 	{
-		pImpl->tblBox[0].def_vel = 0.08;
-		pImpl->tblBox[1].def_vel = 0.02;
+		pImpl->tblBox[0].def_vel = 0.09;
+		pImpl->tblBox[1].def_vel = 0.03;
 		pImpl->bResetParam = true;
 		pImpl->bPause = true;
 	}
 	// 正面衝突 速度比 4:1
 	if ( keys._3.hi )
 	{
-		pImpl->tblBox[0].def_vel = 0.08;
-		pImpl->tblBox[1].def_vel = -0.02;
+		pImpl->tblBox[0].def_vel = 0.09;
+		pImpl->tblBox[1].def_vel = -0.03;
 		pImpl->bResetParam = true;
 		pImpl->bPause = true;
 	}
 	// 正面衝突 速度比 1:1
 	if ( keys._4.hi )
 	{
-		pImpl->tblBox[0].def_vel = 0.08;
-		pImpl->tblBox[1].def_vel = -0.08;
+		pImpl->tblBox[0].def_vel = 0.09;
+		pImpl->tblBox[1].def_vel = -0.09;
 		pImpl->bResetParam = true;
 		pImpl->bPause = true;
 	}
 	// 正面衝突 速度比 1:2
 	if ( keys._5.hi )
 	{
-		pImpl->tblBox[0].def_vel = 0.08;
-		pImpl->tblBox[1].def_vel = -0.16;
+		pImpl->tblBox[0].def_vel = 0.09;
+		pImpl->tblBox[1].def_vel = -0.18;
 		pImpl->bResetParam = true;
 		pImpl->bPause = true;
 	}
@@ -253,17 +253,22 @@ void Lab23::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 					if ( !box1.bWall && !box2.bWall )
 					{
-					#if 1
-						float f = (v1*w1 - v2*w2);	// 衝突力の差
-						box1.new_vel = v1 - f/w1;	// 反作用
-						box2.new_vel = v2 + f/w2;	// 作用
+			if ( &box1 == &pImpl->tblBox[0] )
+			{
+					#if 0
+						// 衝突で互いの速度が入れ替わる
+						float f = (v2*w2 - v1*w1);	// 衝撃力
+						box1.new_vel = v1 + f/w1;	// 反作用
+						box2.new_vel = v2 - f/w2;	// 作用
+						// 2kg→1kgに衝突したとき全エネルギーが渡ってしまうのが変
 					#endif
 					#if 0
 						// より軽い質量を基準にする
 						float w = min(w1,w2);		// より軽い方
-						float f = (v1*w - v2*w);	// 衝突力の差
-						box1.new_vel = v1 - f/w1;	// 反作用
-						box2.new_vel = v2 + f/w2;	// 作用
+						float f = (v2*w - v1*w);	// 衝撃力
+						box1.new_vel = v1 + f/w1;	// 反作用
+						box2.new_vel = v2 - f/w2;	// 作用
+						// 正面衝突でエネルギーが減衰してしまうのが変
 					#endif
 					#if 0
 						// 静止したボールA(質量1)に対し、ボールB(質量2)をぶつけたら、
@@ -272,11 +277,33 @@ void Lab23::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 						// Bは速度0.5で飛び出し、Aは静止する。
 						float f = (v1*w1 - v2*w2);	// 衝突力
 						float f2 = f     /(w1/w2);
-						float f1 = (f-f2)/(w1);
-//cout << "f=" << f << " f1=" << f1 << " f2=" << f2 << endl;
+						float f1 = (f-f2)/(w1);		// とりあえずbox1→box2の順の衝突のみ検証
 						box1.new_vel = f1;
 						box2.new_vel = f2;
+						// 追突でエネルギーが消失してしまう。
+						
 					#endif
+					#if 0
+						// 衝突力を均等に割り振る
+						float f = (v2*w2 - v1*w1);	// 衝撃力
+						float f1 = f*w1/(w1+w2);	// 力配分
+						float f2 = f*w2/(w1+w2);	// 力配分
+						box1.new_vel =  + f1/w1;		// 速度変換
+						box2.new_vel =  - f2/w2;		// 速度変換
+						// 衝突前の状態に関わらず一定に分配サれてしまう。
+					#endif
+
+					#if 1
+						// 衝突力を均等に割り振る
+						float f = (v2*w2 - v1*w1);	// 衝撃力
+						float f1 = f*w1/(w1+w2);	// 力配分
+						float f2 = f*w2/(w1+w2);	// 力配分
+						box1.new_vel =  + f1/w1;		// 速度変換
+						box2.new_vel =  - f2/w2;		// 速度変換
+						// 衝突前の状態に関わらず一定に分配サれてしまう。
+					#endif
+
+			}
 					}
 					else
 					if ( !box1.bWall )

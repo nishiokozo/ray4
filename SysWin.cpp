@@ -173,7 +173,9 @@ static LRESULT CALLBACK WinProc
 			return 0;
 
 		case WM_KEYDOWN:
-			if ( wParam == VK_ESCAPE ) SendMessage(hWnd , WM_DESTROY , 0 , 0);	
+			// WM_DESTROY発行はウィンドウが閉じないことがあるのでWM_CLOSEに変更
+		//	if ( wParam == VK_ESCAPE ) SendMessage(hWnd , WM_DESTROY , 0 , 0);	
+			if ( wParam == VK_ESCAPE ) SendMessage(hWnd , WM_CLOSE , 0 , 0);	
 			return 0;
 
 		case WM_DESTROY:	//[x]を押すなどしたとき
