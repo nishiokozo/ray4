@@ -26,21 +26,21 @@
 #include "pers.h"
 
 #include "lab.h"
-#include "lab0.h"
+#include "lab24.h"
 
-struct Lab0::Impl
+struct Lab24::Impl
 {
 };
-Lab0::Lab0() : pImpl( new Lab0::Impl ){}
+Lab24::Lab24() : pImpl( new Lab24::Impl ){}
 
 //------------------------------------------------------------------------------
-void Lab0::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab24::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
-	gra.Print(1,(float)text_y++,"0 : only grid" ); 
+	gra.Print(1,(float)text_y++," 24 : Nurbs surface" ); 
 
 	//初期化
 	if ( !m.bInitAll )
