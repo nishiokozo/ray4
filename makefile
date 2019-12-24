@@ -60,10 +60,6 @@ FLGS = \
 	-Wall -Wconversion -Wno-float-conversion -Wno-sign-conversion -Wno-implicit-float-conversion \
 	-Wno-unused\
 
-
-#	-m64 \
-#	-O3 \
-
 FILE=main.o
 
 CC	= clang++
