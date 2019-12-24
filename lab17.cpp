@@ -158,6 +158,7 @@ void Lab17::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		ball.fspin = th;
 	}; 
 
+/*
 	auto funcBound = [&]( Ball17& ball, vect3& N )
 	{
 		vect3 d = ball.vn * delta;
@@ -165,6 +166,7 @@ void Lab17::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		ball.vn = func_reflect( ball.vn, N, (1.0-pow(1-0.3,2)) );
 		funcSpin(ball, N);
 	};
+*/
 	// 床との衝突
 	{
 		auto[flg,q0,t] = func_intersect_Plate_SegCurve_ball( plate_p, plate_n, b1.pos, b1.radius, -0.0001, delta, dot(vg,plate_n)*plate_n, dot(b1.vn,plate_n)*plate_n );

@@ -159,7 +159,7 @@ static LRESULT CALLBACK WinProc
 		
 		case WM_MOUSEWHEEL:
 			{
-				int fwKeys = GET_KEYSTATE_WPARAM(wParam);
+//				int fwKeys = GET_KEYSTATE_WPARAM(wParam);
 				int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
 				g.wheelAccum += zDelta;
 

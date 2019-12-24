@@ -176,7 +176,7 @@ public:
 			// 屈折をに非対応
 			float	aa = r*r - dot(l,l)+ b*b;
 
-			int	stat = Surface::STAT_NONE;
+//			int	stat = Surface::STAT_NONE;
 
 			if ( aa >= 0 )
 			{
@@ -335,7 +335,8 @@ public:
 		A = vect3(0,0,0);
 
 
-		float r,s,pw,e,tm,rl,rr;
+//		float r,s,pw,e,tm,rl,rr;
+		float pw,e,tm,rl,rr;
 		vect3	P,C,N;
 
 	#define	SCENE 1
@@ -413,7 +414,7 @@ public:
 		float	d;
 		float	s=0;
 		float	r=0;
-		float	t=0;
+//		float	t=0;
 		
 		if ( (sur = raycast( P, I )).flg )
 		{
@@ -444,7 +445,7 @@ public:
 		{
 			L = (sur.Q - lgt.P).normalize();
 			Lc = lgt.C / dot(sur.Q - lgt.P, sur.Q - lgt.P);
-			int n = 20;
+//			int n = 20;
 			ret += vect3(s,s,s);
 		}
 
@@ -458,7 +459,7 @@ public:
 		vect3	posScr = vect3(0,1.0,-12+8);
 		vect3	posEye = vect3(0,1.0,-17+8);
 
-		float r,s,p,e,t,rl,rr;
+//		float r,s,p,e,t,rl,rr;
 		vect3	C;
 
 		int	cntMax = 0;
@@ -472,10 +473,10 @@ public:
 				vect3	P = vect3( x, y, 0 ) + posScr;
 				vect3	I = normalize(P - posEye);
 
-				float	valRefractive = 1.0;
+//				float	valRefractive = 1.0;
 
 				m_cntRay = 0;
-				int	cntNext = 0;
+//				int	cntNext = 0;
 		 		C = Raycast( P, I );
 				if ( m_cntRay > cntMax ) cntMax = m_cntRay;
 				cntRay+= m_cntRay;

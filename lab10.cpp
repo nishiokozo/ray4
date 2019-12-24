@@ -44,6 +44,7 @@ void Lab10::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	}
 
 	const float s = 0.1;
+/*
 	vect3 vert[4] =
 	{
 		vect3(-s,-s,0),
@@ -51,7 +52,7 @@ void Lab10::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		vect3( s, s,0),
 		vect3(-s, s,0),
 	};
-
+*/
 	// 入力
 	if ( keys.R.hi ) m.bInitParam = false;
 

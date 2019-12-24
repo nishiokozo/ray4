@@ -27,7 +27,7 @@ SysMouse::SysMouse() : pImpl( new SysMouse::Impl )
 
 	GetCursorPos( &point );
 
-	SysWin& win = SysWin::GetInstance();
+//	SysWin& win = SysWin::GetInstance();
 
 	this->wheel = 0;
 

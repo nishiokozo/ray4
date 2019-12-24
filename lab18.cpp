@@ -146,6 +146,7 @@ void Lab18::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 	//衝突
 	// 回転量を移動量計算で求める
+/*
 	auto funcSpin = []( Ball18& ball, vect3& N )
 	{
 		vect3	d = ball.pn - ball.pos;
@@ -159,6 +160,7 @@ void Lab18::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		ball.vaxis = axis;
 		ball.fspin = th;
 	}; 
+*/
 
 	// 床との衝突
 	{
@@ -177,7 +179,7 @@ void Lab18::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 			};
 			{
 				vect3	vr	= (q0-b1.pos);
-				float	r	= vr.abs();
+//				float	r	= vr.abs();
 				vect3	vf	= cross( vr, b1.vaxis.normalize() );
 				b1.pn += vf * -b1.fspin;
 

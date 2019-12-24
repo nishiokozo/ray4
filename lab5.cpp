@@ -38,7 +38,7 @@ Lab5::Lab5() : pImpl( new Lab5::Impl ){}
 void Lab5::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
-	const float	G	= -9.80665;				// 重力加速度
+//	const float	G	= -9.80665;				// 重力加速度
 	
 	//画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));

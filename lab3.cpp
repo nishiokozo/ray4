@@ -43,7 +43,7 @@ Lab3::Lab3() : pImpl( new Lab3::Impl ){}
 void Lab3::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
-	const float	G	= -9.80665;				// 重力加速度
+//	const float	G	= -9.80665;				// 重力加速度
 
 	//画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
@@ -88,7 +88,7 @@ void Lab3::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
 	}
 
-	const float	g = G *delta*delta;		// 重力加速度/frame
+//	const float	g = G *delta*delta;		// 重力加速度/frame
 
 	// 入力
 	{

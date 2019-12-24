@@ -33,7 +33,7 @@ void Gui::TouchFirst( SysGra& gra, Pers& pers, vector<vector<shared_ptr<Obj>>>& 
 {
 	one.clear();
 	int n2 = 0;
-	float len = infinit_max;
+//	float len = infinit_max;
 	
 	for ( vector<shared_ptr<Obj>>& tbl_pObj : tbltbl_pObj )
 	{
@@ -323,9 +323,9 @@ void Gui::DrawController( SysGra& gra, Pers& pers, vector<vector<shared_ptr<Obj>
 				if ( p ) 
 				{
 
-					float wide = 11;
+//					float wide = 11;
 					float wide2 = 7;
-					rgb	col = rgb(0,0,1);
+//					rgb	col = rgb(0,0,1);
 					rgb	col2 = rgb(0,1,0);
 					rgb	col2a = rgb(0,1,0);
 					rgb	col2b = rgb(0,1,0);

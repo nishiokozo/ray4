@@ -83,7 +83,7 @@ void LabObj::M::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 
 	else
 	{
 		// 矢印の根本
-		float n = (str.size() * 6.0);
+		float n = ((float)str.size() * 6.0);
 		pers.pen.print3d( gra, pers, 	v0,-n,36, str ); 
 	}
 

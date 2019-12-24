@@ -46,7 +46,7 @@ Lab2::Lab2() : pImpl( new Lab2::Impl ){}
 void Lab2::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
-	const float	G	= -9.80665;				// 重力加速度
+//	const float	G	= -9.80665;				// 重力加速度
 
 	//画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
@@ -54,7 +54,7 @@ void Lab2::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 
 	gra.Print(1,(float)text_y++,string("<<lab2_kakusokudo>>")); 
 
-	const float	g = G *delta*delta;		// 重力加速度/frame
+//	const float	g = G *delta*delta;		// 重力加速度/frame
 
 	// 初期化
 	if ( !m.bInitParam )
@@ -106,7 +106,7 @@ void Lab2::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 		if ( pImpl->bShot )
 		{
 			vect3	bar = (v1-v0);							//	棒
-			float	radius = bar.abs();
+//			float	radius = bar.abs();
 
 			pImpl->to = mrotateByAxis( pImpl->moment, pImpl->w ) * bar;			//	移動計算
 

@@ -39,7 +39,7 @@ void Lab1::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 
 	gra.Print(1,(float)text_y++,string("<<lab1_graph>>")); 
 
-	rgb	col = vect3(0.2,0.2,0.2);
+//	rgb	col = vect3(0.2,0.2,0.2);
 
 	// 初期化
 	if ( !m.bInitAll )

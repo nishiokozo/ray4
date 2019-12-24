@@ -305,7 +305,7 @@ void  SysGra::OnPaint()
 	HWND hWnd = SysWin::GetInstance().win.hWnd;
 	{// WM_PAINT呼び出しのために空でも必要。
 	    PAINTSTRUCT ps;
-	    HDC hDc = BeginPaint(hWnd, &ps);
+	    BeginPaint(hWnd, &ps);
 	    EndPaint(hWnd, &ps);
 	}
 
@@ -389,7 +389,7 @@ void SysGra::Circle( vect2 v, float r, rgb col, float wide )
     glBegin(GL_LINE_LOOP);
 
 	float step = 12.0;
-	vect2 v0 = v + vect2(r/aspect,0);
+//	vect2 v0 = v + vect2(r/aspect,0);
 	for ( float th = 0 ; th < 2*pi ; th+=2.0*pi/step )
 	{
 		vect2 v1 = vect2( r*cos(th)/aspect, r*sin(th) )+v;
@@ -413,7 +413,7 @@ void SysGra::Circle( vect3 v, float r, rgb col, float wide )
     glBegin(GL_LINE_LOOP);
 
 	float step = 24.0;
-	vect3 v0 = v + vect3(r/aspect,0,0);
+//	vect3 v0 = v + vect3(r/aspect,0,0);
 	for ( float th = 0 ; th < 2*pi ; th+=2.0*pi/step )
 	{
 		vect3 v1 = vect3( r*cos(th)/aspect, r*sin(th), 0 )+v;

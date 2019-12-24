@@ -52,9 +52,9 @@ static int	mml_tblLim[10] =
 static HANDLE g_mml_hdlThread = 0;
 static int	mml_tempo = 120;
 
-static int	g_mml_flg = true;
+//static int	g_mml_flg = true;
 static int	g_sound_flg = true;
-static int	g_fin = false;
+//static int	g_fin = false;
 static HANDLE g_sound_hdlThread = 0;
 
 class Wave

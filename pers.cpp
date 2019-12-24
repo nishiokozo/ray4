@@ -149,7 +149,7 @@ bool Pers::calcScissorLine3d( vect3 v0, vect3 v1, vect3& va, vect3& vb )	// 3D ç
 
 		const float FZ = 0;
 
-		function<vect3(vect3,vect3,int)>nearclip = [ this, &nearclip, NZ, FZ ]( vect3 a, vect3 b, int n )
+		function<vect3(vect3,vect3,int)>nearclip = [ &nearclip, NZ, FZ ]( vect3 a, vect3 b, int n )
 		{
 			if (n <=0 ) return b;
 

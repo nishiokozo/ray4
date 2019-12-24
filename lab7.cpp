@@ -159,7 +159,7 @@ if (0)
 		if ( pImpl->bShot )
 		{
 			vect3	bar = (v1-v0);							//	棒
-			float	radius = bar.abs();
+		//	float	radius = bar.abs();
 pImpl->w=deg2rad(2);
 			pImpl->to = mrotateByAxis( pImpl->moment, pImpl->w ) * bar;			//	移動計算
 
