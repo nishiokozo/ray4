@@ -92,57 +92,53 @@ void Lab25::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	if ( keys.R.hi )	pImpl->bResetParam = true;
 
 	{
-		vect3 p0  = pImpl->tbl_pObj[0]->pos;
-		vect3 p0u = pImpl->tbl_pObj[1]->pos - p0;
-		vect3 p0v = pImpl->tbl_pObj[2]->pos - p0;
+		vect3 p0  = pImpl->tbl_pObj[ 0]->pos;
+		vect3 p0u = pImpl->tbl_pObj[ 1]->pos - p0;
+		vect3 p0v = pImpl->tbl_pObj[ 2]->pos - p0;
 
-		vect3 p1  = pImpl->tbl_pObj[3]->pos;
-		vect3 p1u = pImpl->tbl_pObj[4]->pos - p1;
-		vect3 p1v = pImpl->tbl_pObj[5]->pos - p1;
+		vect3 p1  = pImpl->tbl_pObj[ 3]->pos;
+		vect3 p1u = pImpl->tbl_pObj[ 4]->pos - p1;
+		vect3 p1v = pImpl->tbl_pObj[ 5]->pos - p1;
 
-		vect3 p2  = pImpl->tbl_pObj[9]->pos;
+		vect3 p2  = pImpl->tbl_pObj[ 9]->pos;
 		vect3 p2u = pImpl->tbl_pObj[10]->pos - p2;
 		vect3 p2v = pImpl->tbl_pObj[11]->pos - p2;
 
-		vect3 p3  = pImpl->tbl_pObj[6]->pos;
-		vect3 p3u = pImpl->tbl_pObj[7]->pos - p3;
-		vect3 p3v = pImpl->tbl_pObj[8]->pos - p3;
+		vect3 p3  = pImpl->tbl_pObj[ 6]->pos;
+		vect3 p3u = pImpl->tbl_pObj[ 7]->pos - p3;
+		vect3 p3v = pImpl->tbl_pObj[ 8]->pos - p3;
 
 
 
-		auto funcDrawSurface = []( SysGra& gra, Pers& pers,
-			vect3 p0,vect3 p1,vect3 p2,vect3 p3,
-			vect3 ua10, vect3 ua23, vect3 ub10, vect3 ub23,
-			vect3 va10, vect3 va23, vect3 vb10, vect3 vb23
+		auto funcDrawSurface = [](
+			SysGra& gra, Pers& pers,
+			vect3 p0 , vect3 p1 , vect3 p2 , vect3 p3,
+			vect3 p0u, vect3 p1u, vect3 p2u, vect3 p3u,
+			vect3 p0v, vect3 p1v, vect3 p2v, vect3 p3v
 		)
 		{
+			// 0--1
+			// |  |
+			// 2--3
+		
 			int udiv = pow(2,5.0);	// floatで計算誤差が出ないよう2^nにしておく
 			int vdiv = pow(2,5.0);	// floatで計算誤差が出ないよう2^nにしておく
 
 			// U
-			for ( float ut = 0 ; ut <= 1.0 ; ut +=1.0/udiv )
+			for ( float ut = 0 ; ut <= 1.0 ; ut += 1.0/udiv )
 			{
-				vect3 ua = func_bezier3( ut, p0, p0+ua10, p1+ua23, p1 );
-				vect3 ub = func_bezier3( ut, p2, p0+ub10, p3+ub23, p3 );
+				vect3 vP0 = func_bezier3( ut, p0, p0+p0u, p1+p1u, p1 );
+				vect3 vP3 = func_bezier3( ut, p2, p2+p2u, p3+p3u, p3 );
+				vect3 vP1 = vP0 + (p0v)*(1.0-ut) + (p1v)*ut;
+				vect3 vP2 = vP3 + (p2v)*(1.0-ut) + (p3v)*ut;
 
+				// V
+				for ( float vt = 0 ; vt <= 1.0 ; vt +=1.0/vdiv )
 				{
-					vect3 v10 = (va10)*(1.0-ut) + (vb10)*ut;
-					vect3 v23 = (va23)*(1.0-ut) + (vb23)*ut;
-					vect3 vP0 = ua;
-					vect3 vP1 = vP0+v10;
-					vect3 vP3 = ub;
-					vect3 vP2 = vP3+v23;
-
-					// V
-					for ( float vt = 0 ; vt <= 1.0 ; vt +=1.0/vdiv )
-					{
-						vect3 vpos = func_bezier3( vt, vP0, vP1, vP2, vP3 );
-						pers.pen.pset3d( gra, pers, vpos, rgb(1,1,1), 1 );
-
-					}
+					vect3 vpos = func_bezier3( vt, vP0, vP1, vP2, vP3 );
+					pers.pen.pset3d( gra, pers, vpos, rgb(1,1,1), 1 );
 				}
-
-
+				pers.pen.pset3d( gra, pers, vP0, rgb(1,1,0), 3 );
 			}
 		};
 
