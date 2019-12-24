@@ -56,7 +56,7 @@ void Lab25::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pImpl->bResetAll = false;
 
 		// カメラ
-		pers.cam.pos = vect3( 2.0, 4.0, -5.0 );
+		pers.cam.pos = vect3( 4.0, 4.0, -8.0 );
 		pers.cam.at = vect3( 0,  0.5, 0 );
 	}
 
@@ -67,25 +67,38 @@ void Lab25::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 		// 点
 		pImpl->tbl_pObj.clear();
-		pImpl->tbl_pObj.emplace_back( new Obj(vect3(-1.0, 1.0, 1.0 ) ) );
-		pImpl->tbl_pObj.emplace_back( new Obj(vect3(-0.5, 1.0, 1.0 ) ) );
-		pImpl->tbl_pObj.emplace_back( new Obj(vect3(-1.0, 1.0, 0.5 ) ) );
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3(-1.0, 0.0, 1.0 ) ) );	//0
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3(-0.5, 0.0, 1.0 ) ) );
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3(-1.0, 0.0, 0.5 ) ) );
 
-		pImpl->tbl_pObj.emplace_back( new Obj(vect3( 1.0, 0.0, 1.0 ) ) );
-		pImpl->tbl_pObj.emplace_back( new Obj(vect3( 1.0, 1.0, 1.0 ) ) );
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3( 1.0, 0.0, 1.0 ) ) );	//3
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3( 0.5, 0.0, 1.0 ) ) );
 		pImpl->tbl_pObj.emplace_back( new Obj(vect3( 1.0, 0.0, 0.5 ) ) );
 
-		pImpl->tbl_pObj.emplace_back( new Obj(vect3( 1.0, 0.0, -1.0 ) ) );
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3(-1.0, 0.0, -1.0 ) ) );	//6
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3(-0.5, 0.0, -1.0 ) ) );
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3(-1.0, 0.0, -0.5 ) ) );
+
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3( 1.0, 0.0, -1.0 ) ) );	//9
 		pImpl->tbl_pObj.emplace_back( new Obj(vect3( 0.5, 0.0, -1.0 ) ) );
 		pImpl->tbl_pObj.emplace_back( new Obj(vect3( 1.0, 0.0, -0.5 ) ) );
 
-		pImpl->tbl_pObj.emplace_back( new Obj(vect3(-1.0, 0.0, -1.0 ) ) );
-		pImpl->tbl_pObj.emplace_back( new Obj(vect3(-0.5, 0.0, -1.0 ) ) );
-		pImpl->tbl_pObj.emplace_back( new Obj(vect3(-1.0, 1.0, -1.0 ) ) );
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3(-1.0, 0.0, -1.5 ) ) );	//12
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3( 1.0, 0.0, -1.5 ) ) );	//13
+
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3(-1.0, 0.0, -3.0 ) ) );	//14
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3(-0.5, 0.0, -3.0 ) ) );	//u
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3(-1.0, 0.0, -2.5 ) ) );	//v
+
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3( 1.0, 0.0, -3.0 ) ) );	//17
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3( 0.5, 0.0, -3.0 ) ) );	//u
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3( 1.0, 0.0, -2.5 ) ) );	//v
+
 
 		//GUI登録
 		cp.tbltbl_pObj.clear();
 		cp.tbltbl_pObj.emplace_back( pImpl->tbl_pObj );
+
 	}
 
 	// 入力
@@ -100,15 +113,13 @@ void Lab25::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		vect3 p1u = pImpl->tbl_pObj[ 4]->pos - p1;
 		vect3 p1v = pImpl->tbl_pObj[ 5]->pos - p1;
 
-		vect3 p2  = pImpl->tbl_pObj[ 9]->pos;
-		vect3 p2u = pImpl->tbl_pObj[10]->pos - p2;
-		vect3 p2v = pImpl->tbl_pObj[11]->pos - p2;
+		vect3 p2  = pImpl->tbl_pObj[ 6]->pos;
+		vect3 p2u = pImpl->tbl_pObj[ 7]->pos - p2;
+		vect3 p2v = pImpl->tbl_pObj[ 8]->pos - p2;
 
-		vect3 p3  = pImpl->tbl_pObj[ 6]->pos;
-		vect3 p3u = pImpl->tbl_pObj[ 7]->pos - p3;
-		vect3 p3v = pImpl->tbl_pObj[ 8]->pos - p3;
-
-
+		vect3 p3  = pImpl->tbl_pObj[ 9]->pos;
+		vect3 p3u = pImpl->tbl_pObj[10]->pos - p3;
+		vect3 p3v = pImpl->tbl_pObj[11]->pos - p3;
 
 		auto funcDrawSurface = [](
 			SysGra& gra, Pers& pers,
