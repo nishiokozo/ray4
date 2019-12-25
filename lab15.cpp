@@ -65,10 +65,11 @@ void Lab15::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 	#if 1
 		// 点
-		pImpl->tbl_pObj.emplace_back( new Point3(vect3(-1.0, 0.0, 0.0 ),vect3( 0.0, 0.0, 0.5 ),vect3( 0.0, 0.0,-0.5 )) );
-		pImpl->tbl_pObj.emplace_back( new Point3(vect3( 0.0, 0.0,-1.0 ),vect3(-0.5, 0.0, 0.0 ),vect3( 0.5, 0.0, 0.0 )) );
-		pImpl->tbl_pObj.emplace_back( new Point3(vect3( 1.0, 0.0, 0.0 ),vect3( 0.0, 0.0,-0.5 ),vect3( 0.0, 0.0, 0.5 )) );
-		pImpl->tbl_pObj.emplace_back( new Point3(vect3( 0.0, 0.0, 1.0 ),vect3( 0.5, 0.0, 0.0 ),vect3(-0.5, 0.0, 0.0 )) );
+		#define	s 0.707*0.707
+		pImpl->tbl_pObj.emplace_back( new Point3(vect3(-1.0, 0.0, 0.0 ),vect3( 0.0, 0.0, s ),vect3( 0.0, 0.0,-s )) );
+		pImpl->tbl_pObj.emplace_back( new Point3(vect3( 0.0, 0.0,-1.0 ),vect3(-s, 0.0, 0.0 ),vect3( s, 0.0, 0.0 )) );
+		pImpl->tbl_pObj.emplace_back( new Point3(vect3( 1.0, 0.0, 0.0 ),vect3( 0.0, 0.0,-s ),vect3( 0.0, 0.0, s )) );
+		pImpl->tbl_pObj.emplace_back( new Point3(vect3( 0.0, 0.0, 1.0 ),vect3( s, 0.0, 0.0 ),vect3(-s, 0.0, 0.0 )) );
 
 		// インデックス
 		pImpl->idxPoint.emplace_back( 0 );

@@ -415,7 +415,7 @@ vect3 func_bezier3( float t, vect3 P0, vect3 P1, vect3 P2, vect3 P3 )
 //------------------------------------------------------------------------------
 {
 	//ベジェ 曲線
-#if 1
+#if 0
 	vect3 L0=(P1-P0)*t+P0;
 	vect3 L1=(P2-P1)*t+P1;
 	vect3 L2=(P3-P2)*t+P2;
@@ -433,6 +433,12 @@ vect3 func_bezier3( float t, vect3 P0, vect3 P1, vect3 P2, vect3 P3 )
 		+P1*( ttt*3 -tt*6 +t*3)
 		+P0*(-ttt   +tt*3 -t*3 +1)
 		;
+		/*
+			| 1  0  0  0 ||ttt|
+			|-3  3  0  0 || tt|
+			| 3 -6  3  0 ||  t|
+			|-1  3 -3  1 ||  1|
+		*/
 #endif
 
 	return Q;
