@@ -73,7 +73,7 @@ void Lab26::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 {
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
+	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 16, 16, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,"26 : Nurbus cource Edit"); 
 
 	//初期化
@@ -131,7 +131,7 @@ void Lab26::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 		}
 
-		// サーフェース
+		// サーフェース カーブ番号を入れる
 		{
 			pImpl->tblSurface.emplace_back( 12,13, 0, 6 );
 			pImpl->tblSurface.emplace_back( 13,14, 1, 7 );
@@ -185,15 +185,15 @@ void Lab26::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		);
 
 		// エッジ描画
-		pers.pen.DrawBezier( gra, pers, p0->pos, p0->pos +v0.t0, p2->pos +v0.t1, p2->pos );
-		pers.pen.DrawBezier( gra, pers, p1->pos, p1->pos +v1.t0, p3->pos +v1.t1, p3->pos );
-
+		{
+			// V
+			pers.pen.DrawBezier( gra, pers, p0->pos, p0->pos +v0.t0, p2->pos +v0.t1, p2->pos );
+			pers.pen.DrawBezier( gra, pers, p1->pos, p1->pos +v1.t0, p3->pos +v1.t1, p3->pos );
+			// U
+			pers.pen.DrawBezier( gra, pers, p0->pos, p0->pos +u0.t0, p1->pos +u0.t1, p1->pos ); // どちらも同じ
+		//	pers.pen.DrawBezier( gra, pers, p2->pos, p2->pos +u1.t0, p3->pos +u1.t1, p3->pos ); // どちらも同じ
+		}
 	}
 
 
-
-
-
-
-	
 }

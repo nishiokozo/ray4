@@ -62,7 +62,7 @@ void Lab25::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 {
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
+	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 16, 16, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,"25 : Nurbus cource"); 
 
 	//初期化
@@ -94,7 +94,7 @@ void Lab25::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 /*11*/		pImpl->tbl_pObj.emplace_back( new Impl::Puv(vect3(  -(f), 0.1, 2.0 ),vect3( 1.0, 0.0, 0.0 ),vect3(-1.0, 0.0, 0.0 ), vect3( 0.0, 0.0,-0.4)) );
 		}
 
-		// サーフェイス
+		// サーフェイス 頂点番号を入れる
 		pImpl->tblSurface.emplace_back(  2, 8, 1, 7 );
 		pImpl->tblSurface.emplace_back(  3, 9, 2, 8 );
 		pImpl->tblSurface.emplace_back(  4,10, 3, 9 );
@@ -106,8 +106,6 @@ void Lab25::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		cp.tbltbl_pObj.clear();
 		cp.tbltbl_pEdge.clear();
 		cp.tbltbl_pObj.emplace_back( pImpl->tbl_pObj );
-
-
 
 	}
 	
@@ -123,7 +121,6 @@ void Lab25::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 		pers.pen.line3d( gra, pers, p->pos, p->pos+p->u, rgb(1,1,0) );
 		pers.pen.pset3d( gra, pers, p->pos+p->u, rgb(1,1,0), 5 );
-
 
 	}
 	
@@ -149,15 +146,10 @@ void Lab25::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 			// U
 			pers.pen.DrawBezier( gra, pers, p0->pos, p0->pos +p0->u, p1->pos +p1->u, p1->pos ); // どちらも同じ
-	//		pImpl->funcDrawCurve( gra, pers, p2->pos, p2->pos +p2->u, p3->pos +p3->u, p3->pos ); // どちらも同じ
+	//		pers.pen.DrawBezier( gra, pers, p2->pos, p2->pos +p2->u, p3->pos +p3->u, p3->pos ); // どちらも同じ
 		}
 	
 
 	}
 
-	
-
-
-
-	
 }
