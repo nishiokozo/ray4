@@ -197,14 +197,6 @@ void Lab26::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 	}
 	
-	// エッジ表示
-	for ( Impl::Curve& cv : pImpl->tblCurve )
-	{
-		Obj* p0 = pImpl->tbl_pObj[cv.n0].get();
-		Obj* p1 = pImpl->tbl_pObj[cv.n1].get();
-
-		pImpl->funcDrawCurve( gra, pers, p0->pos, p0->pos+cv.t0, p1->pos+cv.t1, p1->pos );
-	} 
 
 	// 接線表示
 	for ( Impl::Curve& cv : pImpl->tblCurve )
@@ -234,11 +226,16 @@ void Lab26::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		Obj* p2 = pImpl->tbl_pObj[u1.n0].get();
 		Obj* p3 = pImpl->tbl_pObj[u1.n1].get();
 			
+		// サーフェス描画	
 		pImpl->funcDrawSurface( gra, pers, 
 			p0->pos,	p1->pos,	p2->pos,	p3->pos,
 			u0.t0,		u0.t1,		u1.t0,		u1.t1,
 			v0.t0,		v1.t0,		v0.t1,		v1.t1
 		);
+
+		// エッジ描画
+		pImpl->funcDrawCurve( gra, pers, p0->pos, p0->pos +v0.t0, p2->pos +v0.t1, p2->pos );
+		pImpl->funcDrawCurve( gra, pers, p1->pos, p1->pos +v1.t0, p3->pos +v1.t1, p3->pos );
 
 	}
 
