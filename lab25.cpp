@@ -176,7 +176,7 @@ void Lab25::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		}
 	};
 
-#if 0
+#if 1
 	{
 		//ベジェ計算＆描画
 		int div = 16;
@@ -215,7 +215,7 @@ void Lab25::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		}
 
 	}
-#else
+#endif
 	for ( ivect4 o : pImpl->tblSurface )
 	{
 		Impl::Puv* p0 = dynamic_cast<Impl::Puv*>(pImpl->tbl_pObj[o.n0].get());
@@ -234,7 +234,6 @@ void Lab25::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	}
 
 	
-#endif
 
 
 
