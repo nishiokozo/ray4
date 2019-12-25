@@ -76,6 +76,7 @@ void Lab25::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pers.cam.pos = vect3(-5.0, 8.0, -10.0 );
 		pers.cam.at = vect3(0,  0.0, 0 );
 
+		// 頂点に接線データをもたせている。扱いやすくシンプル。ただし４接線(±UV)までに制限される。
 		// 点
 		{
 			float f = 4.0;

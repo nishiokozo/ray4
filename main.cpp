@@ -282,6 +282,15 @@ struct Apr : public Sys
 			//=================================
 		//	gra.Print(1,(float)text_y++,string("fovY:")+to_string(int(pers.fovy)));
 		//	gra.Print(1,(float)text_y++,string("peak: ")+to_string(gra.time_peak/1000.0)+string("ms") ); 
+			if ( keys.ALT.on )
+			{
+				vect3	pos = pers.cam.pos;
+				vect3	at = pers.cam.at;
+				gra.Print(1,(float)text_y++,string("cam.pos: ")+to_string(pos.x)+" , "+to_string(pos.y)+" , "+to_string(pos.z)); 
+				gra.Print(1,(float)text_y++,string("cam.at : ")+to_string( at.x)+" , "+to_string( at.y)+" , "+to_string( at.z)); 
+				
+				
+			}
 			if ( gui.one.bEnable )
 			{
 				gra.Print(1,(float)text_y++,string("m.idxTbl=")+to_string(gui.one.idxTbl)+":"+to_string(gui.one.idxObj) ); 
