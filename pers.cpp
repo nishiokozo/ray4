@@ -393,6 +393,58 @@ void Pers::Pen::line2d( SysGra& gra, Pers& pers, vect2 p0, vect2 p1, rgb col, fl
 
 }
 
+//------------------------------------------------------------------------------
+void Pers::Pen::DrawBezier( SysGra& gra, Pers& pers, vect3 P0, vect3 P1, vect3 P2, vect3 P3 )
+//------------------------------------------------------------------------------
+{
+	int div = 16;
+	float dt = 1/(float)div;
+
+	float t  = dt;
+	vect3 pos0 = P0;
+	for ( int i = 0 ; i < div ; i++ )
+	{
+		vect3 pos1 = func_bezier3( t, P0, P1, P2, P3 );
+		pers.pen.line3d( gra, pers, pos0, pos1, rgb(1,1,1) );
+
+		pos0=pos1;
+		t+=dt;
+	}
+}
+
+//------------------------------------------------------------------------------
+void Pers::Pen::DrawNurbs(
+//------------------------------------------------------------------------------
+	SysGra& gra, Pers& pers,
+	vect3 p0 , vect3 p1 , vect3 p2 , vect3 p3,
+	vect3 p0u, vect3 p1u, vect3 p2u, vect3 p3u,
+	vect3 p0v, vect3 p1v, vect3 p2v, vect3 p3v
+)
+{
+	// 0--1
+	// |  |
+	// 2--3
+
+	int udiv = pow(2,5.0);	// floatで計算誤差が出ないよう2^nにしておく
+	int vdiv = pow(2,5.0);	// floatで計算誤差が出ないよう2^nにしておく
+
+	// U
+	for ( float ut = 0 ; ut <= 1.0 ; ut += 1.0/udiv )
+	{
+		vect3 vP0 = func_bezier3( ut, p0, p0+p0u, p1+p1u, p1 );
+		vect3 vP3 = func_bezier3( ut, p2, p2+p2u, p3+p3u, p3 );
+		vect3 vP1 = vP0 + (p0v)*(1.0-ut) + (p1v)*ut;
+		vect3 vP2 = vP3 + (p2v)*(1.0-ut) + (p3v)*ut;
+
+		// V
+		for ( float vt = 0 ; vt <= 1.0 ; vt +=1.0/vdiv )
+		{
+			vect3 vpos = func_bezier3( vt, vP0, vP1, vP2, vP3 );
+			pers.pen.pset3d( gra, pers, vpos, rgb(1,1,1), 1 );
+		}
+	}
+}
+
 
 /////////////////////
 // Prim

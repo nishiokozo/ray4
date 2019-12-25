@@ -32,54 +32,6 @@
 
 struct Lab25::Impl
 {
-	void funcDrawCurve( SysGra& gra, Pers& pers, vect3 P0, vect3 P1, vect3 P2, vect3 P3 )
-	{
-		int div = 16;
-		float dt = 1/(float)div;
-
-		float t  = dt;
-		vect3 pos0 = P0;
-		for ( int i = 0 ; i < div ; i++ )
-		{
-			vect3 pos1 = func_bezier3( t, P0, P1, P2, P3 );
-			pers.pen.line3d( gra, pers, pos0, pos1, rgb(1,1,1) );
-
-			pos0=pos1;
-			t+=dt;
-		}
-	}
-	void funcDrawSurface(
-		SysGra& gra, Pers& pers,
-		vect3 p0 , vect3 p1 , vect3 p2 , vect3 p3,
-		vect3 p0u, vect3 p1u, vect3 p2u, vect3 p3u,
-		vect3 p0v, vect3 p1v, vect3 p2v, vect3 p3v
-	)
-	{
-		// 0--1
-		// |  |
-		// 2--3
-	
-		int udiv = pow(2,5.0);	// floatで計算誤差が出ないよう2^nにしておく
-		int vdiv = pow(2,5.0);	// floatで計算誤差が出ないよう2^nにしておく
-
-		// U
-		for ( float ut = 0 ; ut <= 1.0 ; ut += 1.0/udiv )
-		{
-			vect3 vP0 = func_bezier3( ut, p0, p0+p0u, p1+p1u, p1 );
-			vect3 vP3 = func_bezier3( ut, p2, p2+p2u, p3+p3u, p3 );
-			vect3 vP1 = vP0 + (p0v)*(1.0-ut) + (p1v)*ut;
-			vect3 vP2 = vP3 + (p2v)*(1.0-ut) + (p3v)*ut;
-
-			// V
-			for ( float vt = 0 ; vt <= 1.0 ; vt +=1.0/vdiv )
-			{
-				vect3 vpos = func_bezier3( vt, vP0, vP1, vP2, vP3 );
-				pers.pen.pset3d( gra, pers, vpos, rgb(1,1,1), 1 );
-			}
-		}
-	}
-
-
 	bool	bResetAll = true;
 	bool	bResetParam = true;
 	bool	bPause = false;
@@ -183,7 +135,7 @@ void Lab25::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		Impl::Puv* p3 = dynamic_cast<Impl::Puv*>(pImpl->tbl_pObj[o.n3].get());
 
 		// サーフェス描画
-		pImpl->funcDrawSurface( gra, pers, 
+		pers.pen.DrawNurbs( gra, pers, 
 			p0->pos,	p1->pos,	p2->pos,	p3->pos,
 			p0->u,		p1->u,		p2->u,		p3->u,
 			p0->va,		p1->va,		p2->vb,		p3->vb
@@ -192,11 +144,11 @@ void Lab25::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		// エッジ描画
 		{
 			// V
-			pImpl->funcDrawCurve( gra, pers, p0->pos, p0->pos +p0->va, p2->pos +p2->vb, p2->pos );
-			pImpl->funcDrawCurve( gra, pers, p1->pos, p1->pos +p1->va, p3->pos +p3->vb, p3->pos );
+			pers.pen.DrawBezier( gra, pers, p0->pos, p0->pos +p0->va, p2->pos +p2->vb, p2->pos );
+			pers.pen.DrawBezier( gra, pers, p1->pos, p1->pos +p1->va, p3->pos +p3->vb, p3->pos );
 
 			// U
-			pImpl->funcDrawCurve( gra, pers, p0->pos, p0->pos +p0->u, p1->pos +p1->u, p1->pos ); // どちらも同じ
+			pers.pen.DrawBezier( gra, pers, p0->pos, p0->pos +p0->u, p1->pos +p1->u, p1->pos ); // どちらも同じ
 	//		pImpl->funcDrawCurve( gra, pers, p2->pos, p2->pos +p2->u, p3->pos +p3->u, p3->pos ); // どちらも同じ
 		}
 	
