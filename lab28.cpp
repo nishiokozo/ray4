@@ -92,36 +92,16 @@ void Lab28::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	// N2(t) 二次基底関数 
 	function<double(double)> N2 = [&]( double t )
 	{
-		double a1 = N1(t);
-		double b1 = fa(t,3.0);
-		double y1 = a1 * b1;
-
-		double a2 = N1(t-1);
-		double b2 = fb(t,3.0);
-		double y2 = a2 * b2;
-
-		double y3 = y1 + y2;
-		return y3; 
+		return N1(t) * fa(t,3.0) + N1(t-1) * fb(t,3.0);
 	};
 	// N3(t) 三次基底関数 
 	function<double(double)> N3 = [&]( double t )
 	{
-		double a1 = N2(t);
-		double b1 = fa(t,4);
-		double y1 = a1 * b1;
-
-		double a2 = N2(t-1);
-		double b2 = fb(t,4);
-		double y2 = a2 * b2;
-
-		double y3 = y1 + y2;
-		return y3; 
+		return N2(t) * fa(t,4) + N2(t-1) * fb(t,4);
 	};
 
 	for ( double t = 0 ; t <= 4.0  ; t+=0.01 )
 	{
-
-
 		// 左3/4
 		pers.pen.pset3d( gra, pers, vect3(t, 4+ N2(t)			, 0), rgb(1,1,0), 1 );
 		pers.pen.pset3d( gra, pers, vect3(t, 4+ fa(t,4)			, 0), rgb(1,0,0), 1 );

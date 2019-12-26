@@ -197,7 +197,7 @@ void Lab::SetNextIdx( int val, Cp& cp )
 		10,		//	カラータワー
 		14,		//	Catmull
 		15,		//	Bezier
-		27,		//	B-Spline 2次
+		27,		//	B-Spline 2次 3次(uniform)
 		28,		//	B-Spline 3次
 		16,		//	スケルトンアニメーション
 		1,		//	加速度グラフ
