@@ -53,6 +53,7 @@
 #include "lab24.h"
 #include "lab25.h"
 #include "lab26.h"
+#include "lab27.h"
 
 //------------------------------------------------------------------------------
 void LabObj::M::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str, bool bShadow, bool bDump, bool bFlip )
@@ -179,6 +180,7 @@ void Lab::SetIdx( int n, Cp& cp )
 		case 24:	pLab = unique_ptr<LabObj>( new Lab24 );	break;
 		case 25:	pLab = unique_ptr<LabObj>( new Lab25 );	break;
 		case 26:	pLab = unique_ptr<LabObj>( new Lab26 );	break;
+		case 27:	pLab = unique_ptr<LabObj>( new Lab27 );	break;
 		default: break;
 	}
 }
@@ -191,8 +193,9 @@ void Lab::SetNextIdx( int val, Cp& cp )
 	{
 		0,
 		10,		//	カラータワー
-		14,		//	コース
-		15,		//	ベジェ
+		14,		//	Catmull
+		15,		//	Bezier
+		27,		//	B-Spline
 		16,		//	スケルトンアニメーション
 		1,		//	加速度グラフ
 		2,		//	軸回り回転
@@ -213,9 +216,9 @@ void Lab::SetNextIdx( int val, Cp& cp )
 		21,		//	2D ポイント・トルク実験
 		22,		//	2D 箱・質量衝突実験
 		23,		//	1D 箱・質量衝突実験
-		24,		//	Nurbs surface(one)
-		25,		//	Nurbs surfaces Cource
-		26,		//	Nurbs surfaces Edit
+		24,		//	Bezier Surface surface(one)
+		25,		//	Bezier Surface Cource
+		26,		//	Bezier Surface Edit
 	};	
 	const int size = static_cast<signed>(sizeof(tbl)/sizeof(int));
 

@@ -413,7 +413,7 @@ void Pers::Pen::DrawBezier( SysGra& gra, Pers& pers, vect3 P0, vect3 P1, vect3 P
 }
 
 //------------------------------------------------------------------------------
-void Pers::Pen::DrawNurbs(
+void Pers::Pen::DrawBezierSurface(
 //------------------------------------------------------------------------------
 	SysGra& gra, Pers& pers,
 	vect3 p0 , vect3 p1 , vect3 p2 , vect3 p3,

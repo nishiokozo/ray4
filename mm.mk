@@ -11,7 +11,7 @@ lab.o: lab.cpp geom.h SysSound.h SysKeys.h SysMouse.h SysGra.h func.h \
   pers.h lab.h lab0.h lab1.h lab2.h lab3.h lab4.h lab5.h lab6.h lab7.h \
   lab8.h lab9.h lab10.h lab11.h lab12.h lab13.h lab14.h lab15.h lab16.h \
   lab17.h lab18.h lab19.h lab20.h lab21.h lab22.h lab23.h lab24.h \
-  lab25.h
+  lab25.h lab26.h lab27.h
 lab0.o: lab0.cpp geom.h SysSound.h SysKeys.h SysMouse.h SysGra.h func.h \
   pers.h lab.h lab0.h
 lab1.o: lab1.cpp geom.h SysSound.h SysKeys.h SysMouse.h SysGra.h func.h \
@@ -64,6 +64,10 @@ lab24.o: lab24.cpp geom.h SysSound.h SysKeys.h SysMouse.h SysGra.h func.h \
   pers.h lab.h lab24.h
 lab25.o: lab25.cpp geom.h SysSound.h SysKeys.h SysMouse.h SysGra.h func.h \
   pers.h lab.h lab25.h
+lab26.o: lab26.cpp geom.h SysSound.h SysKeys.h SysMouse.h SysGra.h func.h \
+  pers.h lab.h lab26.h
+lab27.o: lab27.cpp geom.h SysSound.h SysKeys.h SysMouse.h SysGra.h func.h \
+  pers.h lab.h lab27.h
 Sys.o: Sys.cpp SysKeys.h SysMouse.h geom.h SysGra.h Sys.h SysWin.h
 SysWin.o: SysWin.cpp SysWin.h
 SysGra.o: SysGra.cpp SysGra.h geom.h SysWin.h

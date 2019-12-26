@@ -144,7 +144,7 @@ struct Pers
 		void print2d( SysGra& gra, Pers& pers, vect2 p0, float x, float y, string str );
 
 		void DrawBezier( SysGra& gra, Pers& pers, vect3 P0, vect3 P1, vect3 P2, vect3 P3 );
-		void DrawNurbs(
+		void DrawBezierSurface(
 			SysGra& gra, Pers& pers,
 			vect3 p0 , vect3 p1 , vect3 p2 , vect3 p3,
 			vect3 p0u, vect3 p1u, vect3 p2u, vect3 p3u,

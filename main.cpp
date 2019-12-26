@@ -12,7 +12,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-#include <iomanip>
+#include <iomanip> // for setprecision
 #include <tuple>
 
 #include "geom.h"

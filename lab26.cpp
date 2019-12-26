@@ -74,7 +74,7 @@ void Lab26::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 16, 16, 1, rgb(0.2,0.2,0.2) );
-	gra.Print(1,(float)text_y++,"26 : Nurbus cource Edit"); 
+	gra.Print(1,(float)text_y++,"26 : Bezier Surface Edit"); 
 
 	//初期化
 	if ( pImpl->bResetAll )
@@ -178,7 +178,7 @@ void Lab26::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		Obj* p3 = pImpl->tbl_pObj[u1.n1].get();
 			
 		// サーフェス描画	
-		pers.pen.DrawNurbs( gra, pers, 
+		pers.pen.DrawBezierSurface( gra, pers, 
 			p0->pos,	p1->pos,	p2->pos,	p3->pos,
 			u0.t0,		u0.t1,		u1.t0,		u1.t1,
 			v0.t0,		v1.t0,		v0.t1,		v1.t1
