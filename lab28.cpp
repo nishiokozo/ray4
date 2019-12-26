@@ -1,4 +1,4 @@
-//2019/11/22
+//2019/12/26
 
 #include <iostream>
 #include <memory>
@@ -26,11 +26,11 @@
 #include "pers.h"
 
 #include "lab.h"
-#include "lab27.h"
+#include "lab28.h"
 
 
 
-struct Lab27::Impl
+struct Lab28::Impl
 {
 	bool	bResetAll = true;
 	bool	bResetParam = true;
@@ -42,17 +42,17 @@ struct Lab27::Impl
 	vector<int>	idxPoint;
 };
 
-Lab27::Lab27() : pImpl( new Lab27::Impl ){}
+Lab28::Lab28() : pImpl( new Lab28::Impl ){}
 
 
 //------------------------------------------------------------------------------
-void Lab27::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab28::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(rad(90)), 10, 10, 1, rgb(0.2,0.2,0.2) );
-	gra.Print(1,(double)text_y++,"27 : 2D B-Spline"); 
+	gra.Print(1,(double)text_y++,"28 : 3D B-Spline"); 
 
 	//初期化
 	if ( pImpl->bResetAll )
@@ -71,6 +71,7 @@ void Lab27::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	}
 	
 	
+
 	// fa(t) 右肩上がり
 	function<double(double,double)> fa = []( double t, double tmax )
 	{
@@ -102,22 +103,37 @@ void Lab27::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		double y3 = y1 + y2;
 		return y3; 
 	};
+	// N3(t) 三次基底関数 
+	function<double(double)> N3 = [&]( double t )
+	{
+		double a1 = N2(t);
+		double b1 = fa(t,4);
+		double y1 = a1 * b1;
 
-	for ( double t = 0 ; t <= 3  ; t+=0.01 )
+		double a2 = N2(t-1);
+		double b2 = fb(t,4);
+		double y2 = a2 * b2;
+
+		double y3 = y1 + y2;
+		return y3; 
+	};
+
+	for ( double t = 0 ; t <= 4.0  ; t+=0.01 )
 	{
 
-		// 左2/3
-		pers.pen.pset3d( gra, pers, vect3(t, 4+ N1(t), 0), rgb(1,1,0), 1 );
-		pers.pen.pset3d( gra, pers, vect3(t, 4+ fa(t,3), 0), rgb(1,0,0), 1 );
-		pers.pen.pset3d( gra, pers, vect3(t, 4+ N1(t)*fa(t,3), 0), rgb(1,1,1), 2 );
 
-		// 右2/3
-		pers.pen.pset3d( gra, pers, vect3(t, 2+ N1(t-1), 0), rgb(1,1,0), 1 );
-		pers.pen.pset3d( gra, pers, vect3(t, 2+ fb(t,3), 0), rgb(1,0,0), 1 );
-		pers.pen.pset3d( gra, pers, vect3(t, 2+ N1(t-1)*fb(t,3), 0 ), rgb(1,1,1), 2 );
+		// 左3/4
+		pers.pen.pset3d( gra, pers, vect3(t, 4+ N2(t)			, 0), rgb(1,1,0), 1 );
+		pers.pen.pset3d( gra, pers, vect3(t, 4+ fa(t,4)			, 0), rgb(1,0,0), 1 );
+		pers.pen.pset3d( gra, pers, vect3(t, 4+ N2(t)*fa(t,4)	, 0), rgb(1,1,1), 2 );
+
+		// 右3/4
+		pers.pen.pset3d( gra, pers, vect3(t, 2+ N2(t-1)			, 0), rgb(1,1,0), 1 );
+		pers.pen.pset3d( gra, pers, vect3(t, 2+ fb(t,4)			, 0), rgb(1,0,0), 1 );
+		pers.pen.pset3d( gra, pers, vect3(t, 2+ N2(t-1)*fb(t,4)	, 0), rgb(1,1,1), 2 );
 
 		// 左右合成
-		pers.pen.pset3d( gra, pers, vect3(t, N2(t) ,0), rgb(1,1,1), 2 );
+		pers.pen.pset3d( gra, pers, vect3(t, N3(t) ,0), rgb(1,1,1), 2 );
 	}
 	
 	

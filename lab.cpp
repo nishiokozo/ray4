@@ -54,6 +54,7 @@
 #include "lab25.h"
 #include "lab26.h"
 #include "lab27.h"
+#include "lab28.h"
 
 //------------------------------------------------------------------------------
 void LabObj::M::drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str, bool bShadow, bool bDump, bool bFlip )
@@ -181,6 +182,7 @@ void Lab::SetIdx( int n, Cp& cp )
 		case 25:	pLab = unique_ptr<LabObj>( new Lab25 );	break;
 		case 26:	pLab = unique_ptr<LabObj>( new Lab26 );	break;
 		case 27:	pLab = unique_ptr<LabObj>( new Lab27 );	break;
+		case 28:	pLab = unique_ptr<LabObj>( new Lab28 );	break;
 		default: break;
 	}
 }
@@ -195,7 +197,8 @@ void Lab::SetNextIdx( int val, Cp& cp )
 		10,		//	カラータワー
 		14,		//	Catmull
 		15,		//	Bezier
-		27,		//	B-Spline
+		27,		//	B-Spline 2次
+		28,		//	B-Spline 3次
 		16,		//	スケルトンアニメーション
 		1,		//	加速度グラフ
 		2,		//	軸回り回転
