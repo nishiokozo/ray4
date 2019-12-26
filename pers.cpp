@@ -17,7 +17,7 @@ using namespace std;
 Pers::Pers()
 //--------------------------------------------------------------------------
 {
-	fovy=90/2;
+	fovy=rad(45);
 	rate_w = 1.0f/64;	// wバッファに書き込むレート
 
 }
@@ -29,12 +29,12 @@ void Pers::Update( vect2 screensize )
 #if 0
 	//投影面サイズ基準
 	fy = 1;									// 投影面の高さ/2
-	sz = fy/tan(rad(fovy)/2);				// 投影面までの距離
+	sz = fy/tan(fovy/2);				// 投影面までの距離
 #else
 	//投影面までの距離基準	こちらの方がニアクリップがしやすく扱いやすい。
 	sz = 1.0;								// 投影面までの距離
 	sz = 1.0/8.0;								// 投影面までの距離
-	fy = sz*tan(rad(fovy)/2);				// 投影面の高さ/2
+	fy = sz*tan(fovy/2);				// 投影面の高さ/2
 #endif
 	aspect	= screensize.x/screensize.y;	// 描画画面のアスペクト比
 
