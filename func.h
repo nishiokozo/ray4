@@ -1,7 +1,7 @@
 // curve
 extern vect3 func_bezier3( float t, vect3 P0, vect3 P1, vect3 P2, vect3 P3 );
 extern vect3 func_bezier3_delta( float t, vect3 P0, vect3 P1, vect3 P2, vect3 P3 );
-extern vect3 func_catmull3( float t, const vect3 P0, const vect3 P1, const vect3 P2, const vect3 P3 );
+extern vect3 func_catmull_rom_spline( float t, const vect3 P0, const vect3 P1, const vect3 P2, const vect3 P3 );
 
 // line and line
 extern float func_intersect_Line_Point( vect3 P0, vect3 I0, vect3 P1 );

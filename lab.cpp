@@ -195,7 +195,7 @@ void Lab::SetNextIdx( int val, Cp& cp )
 	{
 		0,
 		10,		//	カラータワー
-		14,		//	Catmull
+		14,		//	Catmull rom spline
 		15,		//	Bezier
 		27,		//	B-Spline 2次 3次(uniform)
 		28,		//	B-Spline 3次

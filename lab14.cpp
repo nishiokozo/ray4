@@ -47,7 +47,7 @@ void Lab14::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
-	gra.Print(1,(float)text_y++,"14 : Catmull"); 
+	gra.Print(1,(float)text_y++,"14 : Catmull Rom Spline"); 
 
 	//初期化
 	if ( pImpl->bResetAll )
@@ -104,7 +104,7 @@ void Lab14::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 				for ( float t = 0.0 ; t < 1.0 ; t+=0.1 )
 				{
-					vect3 v1 = func_catmull3(t, P0,P1,P2,P3 );
+					vect3 v1 = func_catmull_rom_spline(t, P0,P1,P2,P3 );
 					if ( (i==0 && t==0) ) 
 					{
 						v2=v1;
