@@ -30,6 +30,13 @@
 
 struct Lab21::Impl
 {
+	bool	bResetAll = true;
+	bool	bResetParam = true;
+	bool	bPause = false;
+	bool	bStep = false;
+
+	vector<shared_ptr<Obj>>	tbl_pObj;
+
 	struct Vt
 	{
 		vect2	pos;
@@ -79,9 +86,9 @@ void Lab21::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	gra.Print(1,(float)text_y++,"21 : 2D Square Spin" ); 
 
 	//初期化
-	if ( !m.bInitAll )
+	if ( pImpl->bResetAll )
 	{
-		m.bInitAll = true;
+		pImpl->bResetAll = false;
 
 		// カメラ
 		pers.cam.pos	= vect3( 0.0, 1.0, -10.0 );
@@ -89,9 +96,9 @@ void Lab21::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	}
 
 	// 初期化
-	if ( !m.bInitParam )
+	if ( pImpl->bResetParam )
 	{
-		m.bInitParam = true;
+		pImpl->bResetParam = false;
 
 		vect2 center(0,3);
 
@@ -110,7 +117,7 @@ void Lab21::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	}
 
 	// 入力
-	if ( keys.R.hi )	m.bInitParam = false;
+	if ( keys.R.hi )	pImpl->bResetParam = true;
 	if ( mouse.F.on )	pImpl->motor.power += 0.0002;
 	if ( mouse.B.on )	for ( Impl::Vt& v : pImpl->ball.vt ) { v.vel += vect2( 0.003 , 0.0 ); }
 	if ( keys._1.rep )	pImpl->masatu -= 0.1;

@@ -27,7 +27,15 @@
 
 #include "lab.h"
 #include "lab1.h"
-struct Lab1::Impl{};
+struct Lab1::Impl
+{
+	bool	bResetAll = true;
+	bool	bResetParam = true;
+	bool	bPause = false;
+	bool	bStep = false;
+
+	vector<shared_ptr<Obj>>	tbl_pObj;
+};
 Lab1::Lab1() : pImpl( new Lab1::Impl ){}
 //------------------------------------------------------------------------------
 void Lab1::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
@@ -42,23 +50,23 @@ void Lab1::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 //	rgb	col = vect3(0.2,0.2,0.2);
 
 	// 初期化
-	if ( !m.bInitAll )
+	if ( pImpl->bResetAll )
 	{
-		m.bInitAll = true;
+		pImpl->bResetAll = true;
 		pers.cam.pos = vect3( 0.0, 0.0, -5.0 );
 		pers.cam.at = vect3( 0,  0.0, 0 );
 	}
 
-	if ( !m.bInitParam )
+	if ( pImpl->bResetParam )
 	{
-		m.bInitParam = true;
+		pImpl->bResetParam = false;
 	}
 
 
 	//入力
 	{
 		// リセット
-		if ( keys.R.hi )	m.bInitParam = false ;
+		if ( keys.R.hi )	pImpl->bResetParam = true;
 	}
 
 

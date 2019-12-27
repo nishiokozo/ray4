@@ -49,46 +49,56 @@ struct Ball12:Obj
 	}
 	
 };
+struct Lab12::Impl
+{
+	bool	bResetAll = true;
+	bool	bResetParam = true;
+	bool	bPause = false;
+	bool	bStep = false;
+
+	vector<shared_ptr<Obj>>	tbl_pObj;
+};
+Lab12::Lab12() : pImpl( new Lab12::Impl ){}
 
 //------------------------------------------------------------------------------
 void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
-	m.bStep = false;
+	pImpl->bStep = false;
 
 	//画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 16, 16, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,string("12 : Ball12 & Ball12")); 
 
-	if ( !m.bInitAll )
+	if ( pImpl->bResetAll )
 	{
-		m.bInitAll = true;
+		pImpl->bResetAll = false;
 
 		// カメラ
 		pers.cam.pos = vect3(	0.0,	20.0, -2.0 );
 		pers.cam.at = vect3( 	0.0,	1.0, 0.0 );
 
 		//点
-		m.tbl_pObj.clear();
-		m.tbl_pObj.emplace_back( new Ball12 );
-		m.tbl_pObj.emplace_back( new Ball12 );
+		pImpl->tbl_pObj.clear();
+		pImpl->tbl_pObj.emplace_back( new Ball12 );
+		pImpl->tbl_pObj.emplace_back( new Ball12 );
 
 		//GUI登録
-		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
+		cp.tbltbl_pObj.emplace_back( pImpl->tbl_pObj );
 
 	}
 
-	Ball12&	b1 = *dynamic_cast<Ball12*>(m.tbl_pObj[0].get());
-	Ball12&	b2 = *dynamic_cast<Ball12*>(m.tbl_pObj[1].get());
+	Ball12&	b1 = *dynamic_cast<Ball12*>(pImpl->tbl_pObj[0].get());
+	Ball12&	b2 = *dynamic_cast<Ball12*>(pImpl->tbl_pObj[1].get());
 
 	// 初期化：パラメータ
-	if ( !m.bInitParam )
+	if ( pImpl->bResetParam )
 	{
 #define NUM 3
 #if NUM==1
 	// b2 斜め45°
-		m.bInitParam = true;
+		pImpl->bResetParam = false;
 		{
 			b1.pos	= vect3( -2	, 1.0,  0.0 );
 			b1.vel	= vect3(  0	, 0.0,  0.0 );
@@ -120,7 +130,7 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 #endif
 #if NUM==2
 	// b1 b2 斜め90°
-		m.bInitParam = true;
+		pImpl->bResetParam = false;
 		{
 			b1.pos	= vect3( -3	, 1.0, -3.0 );
 			b1.vel	= vect3(  0	, 0.0,  0.0 );
@@ -152,7 +162,7 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 #endif
 #if NUM==3
 	// b1 b2 正面衝突°
-		m.bInitParam = true;
+		pImpl->bResetParam = false;
 		{
 			b1.pos	= vect3( -3	, 1.0,  0.0 );
 			b1.vel	= vect3(  0	, 0.0,  0.0 );
@@ -185,7 +195,7 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 #if NUM==4
 	// b1 b2 追突°
-		m.bInitParam = true;
+		pImpl->bResetParam = false;
 		{
 			b1.pos	= vect3( -2	, 1.0,  0.0 );
 			b1.vel	= vect3(  0	, 0.0,  0.0 );
@@ -220,9 +230,9 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 	// 入力
 	{
-		if ( keys.R.hi )		m.bInitParam = false;
-		if ( keys.SPACE.hi )	m.bPause = !m.bPause ;
-		if ( keys.ENTER.rep )	{m.bStep = true; m.bPause = true; }
+		if ( keys.R.hi )	pImpl->bResetParam = true;
+		if ( keys.SPACE.hi )	pImpl->bPause = !pImpl->bPause ;
+		if ( keys.ENTER.rep )	{pImpl->bStep = true; pImpl->bPause = true; }
 		if ( keys.O.hi )	{pers.bOrtho = !pers.bOrtho;}
 	}
 
@@ -259,7 +269,7 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	}
 	
 	// 反映
-	if  ( !m.bPause || m.bStep )
+	if  ( !pImpl->bPause || pImpl->bStep )
 	{
 		// 回転量を移動量計算で求める
 		auto func = [&]( Ball12& ball )
@@ -282,7 +292,7 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		b2.pos = b2.pn;
 	}
 	
-	m.drawVect( gra, pers, text_y, b2.pos, b2.vaxis.normalize() ,1	, rgb(1,0,1), "axis" );
+	pers.prim.DrawVect( gra, pers, text_y, b2.pos, b2.vaxis.normalize() ,1	, rgb(1,0,1), "axis" );
 
 	
 	// 表示

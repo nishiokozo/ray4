@@ -1,17 +1,6 @@
 struct Lab;
 struct LabObj
 {
-	struct M
-	{
-		bool			bInitParam = false;
-		bool			bInitAll = false;
-		bool			bPause = false;
-		bool			bStep = false;
-		vector<shared_ptr<Obj>>	tbl_pObj;
-		vector<shared_ptr<Edge>>	tbl_pEdge;
-		void			drawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str, bool bShadow = true, bool bDump=true, bool bFlip=true );
-	} m;
-
 	LabObj(){};
 	virtual ~LabObj(){};
 	virtual void Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp ) = 0;

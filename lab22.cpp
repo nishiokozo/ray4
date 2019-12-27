@@ -31,6 +31,12 @@
 
 struct Lab22::Impl
 {
+	bool	bResetAll = true;
+	bool	bResetParam = true;
+	bool	bPause = false;
+	bool	bStep = false;
+
+	vector<shared_ptr<Obj>>	tbl_pObj;
 
 	struct Vt : Obj
 	{
@@ -51,10 +57,6 @@ struct Lab22::Impl
 		vector<shared_ptr<Vt>>		vt;
 	} ball;
 
-	vector<shared_ptr<Obj>>	tbl_pObj;
-
-	bool bPause = false;
-	bool bStep = false;
 };
 
 Lab22::Lab22() : pImpl( new Lab22::Impl ){}
@@ -79,9 +81,9 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(rad(90)), 26, 26, 1, rgb(0.2,0.2,0.2), false );
 
 	//初期化
-	if ( !m.bInitAll )
+	if ( pImpl->bResetAll )
 	{
-		m.bInitAll = true;
+		pImpl->bResetAll = false;
 
 		// カメラ
 		pers.cam.pos	= vect3( 0.0, 1.0, -16.0 );
@@ -98,9 +100,9 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	}
 
 	// 初期化
-	if ( !m.bInitParam )
+	if ( pImpl->bResetParam )
 	{
-		m.bInitParam = true;
+		pImpl->bResetParam = false;
 
 		pImpl->ball.vt[0]->pos = vect3( -2.5, pImpl->ball.vt[0]->radius, 0 );
 		pImpl->ball.vt[0]->vel = vect3(0.00,0,0);
@@ -141,7 +143,7 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	Impl::Vt& t1 = *pImpl->ball.vt[1];
 
 	// 入力
-	if ( keys.R.hi )	m.bInitParam = false;
+	if ( keys.R.hi )	pImpl->bResetParam = true;
 	if ( keys.SPACE.hi )	{pImpl->bPause=!pImpl->bPause;}
 	if ( keys.ENTER.rep )	{pImpl->bStep=true;pImpl->bPause=true;}
 	
@@ -257,7 +259,7 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pers.pen.print3d( gra, pers, 	t0.pos, 0,-32, ss.str() ); 
 		ss.str("");
 		ss << t0.vel.x << "m/s";
-		m.drawVect( gra, pers, text_y, t0.pos+vect3(-0.5,0,0), t0.vel ,10	, rgb(1,0,1), ss.str(), false, false,false );
+		pers.prim.DrawVect( gra, pers, text_y, t0.pos+vect3(-0.5,0,0), t0.vel ,10	, rgb(1,0,1), ss.str(), false, false,false );
 	}
 	{
 		stringstream ss ;
@@ -265,7 +267,7 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pers.pen.print3d( gra, pers, 	t1.pos, -0,-32, ss.str() ); 
 		ss.str("");
 		ss << t1.vel.x << "m/s";
-		m.drawVect( gra, pers, text_y, t1.pos+vect3(0-0.5,0,0), t1.vel ,10	, rgb(1,0,1), ss.str(), false, false,false );
+		pers.prim.DrawVect( gra, pers, text_y, t1.pos+vect3(0-0.5,0,0), t1.vel ,10	, rgb(1,0,1), ss.str(), false, false,false );
 	}
 	
 	//地面表示

@@ -28,6 +28,14 @@
 
 struct Lab5::Impl
 {
+	bool	bResetAll = true;
+	bool	bResetParam = true;
+	bool	bPause = false;
+	bool	bStep = false;
+
+	vector<shared_ptr<Obj>>	tbl_pObj;
+	vector<shared_ptr<Edge>>	tbl_pEdge;
+
 	float	rsp = 0;
 
 };
@@ -49,35 +57,35 @@ void Lab5::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 	const float grate = 9.80665 *delta*delta;		// 重力加速度/frame
 
 
-	if ( !m.bInitParam )
+	if ( pImpl->bResetParam )
 	{
-		if ( !m.bInitAll )
+		if ( pImpl->bResetAll )
 		{
-			m.bInitAll = true;
+			pImpl->bResetAll = false;
 			pers.cam.pos = vect3(  0.0, 2.0, -5.0 );
 			pers.cam.at = vect3( 0,  2.0, 0 );
 		}
 	
-		m.bInitParam = true;
-		m.tbl_pObj.clear();
-		m.tbl_pObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
-		m.tbl_pObj.emplace_back( new Obj(vect3(1, 2.0, 0)) );
+		pImpl->bResetParam = false;
+		pImpl->tbl_pObj.clear();
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3(1, 2.0, 0)) );
 		// 線
-		m.tbl_pEdge.clear();
-		m.tbl_pEdge.emplace_back( new Edge(0,1) );
+		pImpl->tbl_pEdge.clear();
+		pImpl->tbl_pEdge.emplace_back( new Edge(0,1) );
 
 		//GUI登録
 		cp.tbltbl_pObj.clear();
 		cp.tbltbl_pEdge.clear();
-		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
-		cp.tbltbl_pEdge.emplace_back( m.tbl_pEdge );
+		cp.tbltbl_pObj.emplace_back( pImpl->tbl_pObj );
+		cp.tbltbl_pEdge.emplace_back( pImpl->tbl_pEdge );
 
 		pImpl->rsp=0;
 	}
-	if ( keys.R.hi )	m.bInitParam = false;
+	if ( keys.R.hi )	pImpl->bResetParam = true;
 
-	vect3&	v0 = m.tbl_pObj[0]->pos;	//	barの根本
-	vect3&	v1 = m.tbl_pObj[1]->pos;	//	barの先端
+	vect3&	v0 = pImpl->tbl_pObj[0]->pos;	//	barの根本
+	vect3&	v1 = pImpl->tbl_pObj[1]->pos;	//	barの先端
 
 
 //	pers.pen.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );

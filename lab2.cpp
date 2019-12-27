@@ -30,12 +30,21 @@
 		
 struct Lab2::Impl
 {
-	 bool bShot = false;
-	 vect3	velocity;
-	 vect3	moment;
-	 vect3	to;
-	 vect3	add;
-	 float 	w;	//	角速度
+	bool	bResetAll = true;
+	bool	bResetParam = true;
+	bool	bPause = false;
+	bool	bStep = false;
+
+	vector<shared_ptr<Obj>>	tbl_pObj;
+	vector<shared_ptr<Edge>>	tbl_pEdge;
+
+
+	bool bShot = false;
+	vect3	velocity;
+	vect3	moment;
+	vect3	to;
+	vect3	add;
+	float 	w;	//	角速度
 };	
 Lab2::Lab2() : pImpl( new Lab2::Impl ){}
 
@@ -57,44 +66,45 @@ void Lab2::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 //	const float	g = G *delta*delta;		// 重力加速度/frame
 
 	// 初期化
-	if ( !m.bInitParam )
+	if ( pImpl->bResetAll )
 	{
-		if ( !m.bInitAll )
-		{
-			m.bInitAll = true;
-			pers.cam.pos = vect3( 2.0, 2.5, -2.0 );
-			pers.cam.at = vect3( 0,  0.0, 0 );
-		}
-		m.bInitParam = true;
+		pImpl->bResetAll = false;
+		pers.cam.pos = vect3( 2.0, 2.5, -2.0 );
+		pers.cam.at = vect3( 0,  0.0, 0 );
+	}
 
-		m.tbl_pObj.clear();
-		m.tbl_pObj.emplace_back( new Obj(vect3(0  ,0.1,0)) );
-		m.tbl_pObj.emplace_back( new Obj(vect3(1  ,0.1,0)) );
-		m.tbl_pObj.emplace_back( new Obj(vect3(1.5,0.1,0.2)) );
+	if ( pImpl->bResetParam )
+	{
+		pImpl->bResetParam = false;
+
+		pImpl->tbl_pObj.clear();
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3(0  ,0.1,0)) );
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3(1  ,0.1,0)) );
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3(1.5,0.1,0.2)) );
 		// 線
-		m.tbl_pEdge.clear();
-		m.tbl_pEdge.emplace_back( new Edge(0,1) );
-		m.tbl_pEdge.emplace_back( new Edge(1,2,rgb(0,1,0),1) );
+		pImpl->tbl_pEdge.clear();
+		pImpl->tbl_pEdge.emplace_back( new Edge(0,1) );
+		pImpl->tbl_pEdge.emplace_back( new Edge(1,2,rgb(0,1,0),1) );
 
 		//GUI登録
 		cp.tbltbl_pObj.clear();
 		cp.tbltbl_pEdge.clear();
-		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
-		cp.tbltbl_pEdge.emplace_back( m.tbl_pEdge );
+		cp.tbltbl_pObj.emplace_back( pImpl->tbl_pObj );
+		cp.tbltbl_pEdge.emplace_back( pImpl->tbl_pEdge );
 
 		pImpl->bShot = false;
 	}
 
 
-	vect3&	v0 = m.tbl_pObj[0]->pos;	//	barの根本
-	vect3&	v1 = m.tbl_pObj[1]->pos;	//	barの先端
-	vect3&	v2 = m.tbl_pObj[2]->pos;	// 速度指定
+	vect3&	v0 = pImpl->tbl_pObj[0]->pos;	//	barの根本
+	vect3&	v1 = pImpl->tbl_pObj[1]->pos;	//	barの先端
+	vect3&	v2 = pImpl->tbl_pObj[2]->pos;	// 速度指定
 
 
 	//入力
 	{
 		// リセット
-		if ( keys.R.hi )	m.bInitParam = false ;
+		if ( keys.R.hi )	pImpl->bResetParam = true ;
 
 		if ( mouse.B.hi )	pImpl->bShot = !pImpl->bShot ;
 	}
@@ -143,9 +153,9 @@ void Lab2::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 		pers.pen.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );	//	棒
 		pers.pen.line3d( gra, pers, v1, v2, rgb(0,1,0), 1 );	// 外的な力
 */
-		m.drawVect( gra, pers, text_y, v1, pImpl->velocity	,1	, rgb(1,1,0), "pImpl->velocity" );
-		m.drawVect( gra, pers, text_y, v0, pImpl->moment		,1	, rgb(1,0,1), "pImpl->moment" );
-		m.drawVect( gra, pers, text_y, v0, pImpl->to			,1	, rgb(0,1,1), "pImpl->to" );
+		pers.prim.DrawVect( gra, pers, text_y, v1, pImpl->velocity	,1	, rgb(1,1,0), "pImpl->velocity" );
+		pers.prim.DrawVect( gra, pers, text_y, v0, pImpl->moment		,1	, rgb(1,0,1), "pImpl->moment" );
+		pers.prim.DrawVect( gra, pers, text_y, v0, pImpl->to			,1	, rgb(0,1,1), "pImpl->to" );
 			
 	}
 

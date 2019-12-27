@@ -34,7 +34,13 @@
 
 struct Lab3::Impl
 {
-	bool	bPause = false; 
+	bool	bResetAll = true;
+	bool	bResetParam = true;
+	bool	bPause = false;
+	bool	bStep = false;
+
+	vector<shared_ptr<Obj>>	tbl_pObj;
+
 };
 
 Lab3::Lab3() : pImpl( new Lab3::Impl ){}
@@ -67,25 +73,25 @@ void Lab3::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 	};
 
 	// 初期化
-	if ( !m.bInitParam )
+	if ( pImpl->bResetParam )
 	{
-		m.bInitParam = true;
-		if ( !m.bInitAll )
+		pImpl->bResetParam = false;
+		if ( pImpl->bResetAll )
 		{
-			m.bInitAll = true;
+			pImpl->bResetAll = false;
 			//上から
 			pers.cam.pos = vect3(  0.0, 0.5, -2.0 );
 			pers.cam.at = vect3( 0,  0.0, 0 );
 		}
 
-		m.tbl_pObj.clear();
-		m.tbl_pObj.emplace_back( new Planet(vect3(-0.5,0.1,0),vect3(0, 0, -0.02)) );
-		m.tbl_pObj.emplace_back( new Planet(vect3( 0.5,0.1,0),vect3(0, 0, 0.02)) );
+		pImpl->tbl_pObj.clear();
+		pImpl->tbl_pObj.emplace_back( new Planet(vect3(-0.5,0.1,0),vect3(0, 0, -0.02)) );
+		pImpl->tbl_pObj.emplace_back( new Planet(vect3( 0.5,0.1,0),vect3(0, 0, 0.02)) );
 
 		//GUI登録
 		cp.tbltbl_pObj.clear();
 		cp.tbltbl_pEdge.clear();
-		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
+		cp.tbltbl_pObj.emplace_back( pImpl->tbl_pObj );
 	}
 
 //	const float	g = G *delta*delta;		// 重力加速度/frame
@@ -99,23 +105,23 @@ void Lab3::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 		if ( keys.ENTER.rep )	bStep = true;
 
 		// リセット
-		if ( keys.R.hi )	m.bInitParam = false ;
+		if ( keys.R.hi )	pImpl->bResetParam = true;
 
 		// 生成
 		if ( mouse.B.hi )
 		{
 			vect3 P = pers.calcScreenToWorld3( vect3(mouse.pos,0) );
 			vect3 I = pers.calcRayvect( P );
-			m.tbl_pObj.emplace_back( new Planet( P, I/100.0 ) );
+			pImpl->tbl_pObj.emplace_back( new Planet( P, I/100.0 ) );
 			cp.tbltbl_pObj.clear();
-			cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
+			cp.tbltbl_pObj.emplace_back( pImpl->tbl_pObj );
 		}
 
 	}
 
 	
-	Planet& pl0 = *dynamic_cast<Planet*>(m.tbl_pObj[0].get());	//	太陽
-	Planet& pl1 = *dynamic_cast<Planet*>(m.tbl_pObj[1].get());	//	地球
+	Planet& pl0 = *dynamic_cast<Planet*>(pImpl->tbl_pObj[0].get());	//	太陽
+	Planet& pl1 = *dynamic_cast<Planet*>(pImpl->tbl_pObj[1].get());	//	地球
 
 	// 計算
 	if ( !pImpl->bPause || bStep )
@@ -142,7 +148,7 @@ void Lab3::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 
 	// 描画
 	{
-		for ( shared_ptr<Obj> p : m.tbl_pObj ) 
+		for ( shared_ptr<Obj> p : pImpl->tbl_pObj ) 
 		{
 			Planet& pl = *dynamic_cast<Planet*>(p.get());
 			for ( int i = 0 ; i < MAX_PREV ; i++ )

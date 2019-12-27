@@ -215,6 +215,7 @@ struct Pers
 		void DrawSquare( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAxis = true, bool bTri = true );
 		void DrawCircle( SysGra& gra, Pers& pers, vect3 pos, mat33 m, float radius, rgb col=rgb(1,1,1) );
 		void DrawSphere( SysGra& gra, Pers& pers, vect3 pos, mat33 m, float radius, rgb col=rgb(1,1,1) );
+		void DrawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str, bool bShadow = true, bool bDump=true, bool bFlip=true );
 	} prim;
 
 };

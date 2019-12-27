@@ -27,6 +27,17 @@
 
 #include "lab.h"
 #include "lab10.h"
+struct Lab10::Impl
+{
+	bool	bResetAll = true;
+	bool	bResetParam = true;
+	bool	bPause = false;
+	bool	bStep = false;
+
+	vector<shared_ptr<Obj>>	tbl_pObj;
+};
+Lab10::Lab10() : pImpl( new Lab10::Impl ){}
+
 //------------------------------------------------------------------------------
 void Lab10::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
@@ -36,9 +47,9 @@ void Lab10::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	gra.Print(1,(float)text_y++,string("lab10_colors")); 
 
 	// 初期化
-	if ( !m.bInitParam )
+	if ( pImpl->bResetAll )
 	{
-		m.bInitParam = true;
+		pImpl->bResetAll = false;
 		pers.cam.pos = vect3( -4.0, 4.0, -1.5 );
 		pers.cam.at = vect3( 0,  1.0, 0 );
 	}
@@ -54,7 +65,7 @@ void Lab10::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	};
 */
 	// 入力
-	if ( keys.R.hi ) m.bInitParam = false;
+	if ( keys.R.hi ) pImpl->bResetAll = true;
 
 	// 計算
 

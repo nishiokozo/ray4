@@ -30,6 +30,13 @@
 
 struct Lab11::Impl
 {
+	bool	bResetAll = true;
+	bool	bResetParam = true;
+	bool	bPause = false;
+	bool	bStep = false;
+
+	vector<shared_ptr<Obj>>	tbl_pObj;
+	vector<shared_ptr<Edge>>	tbl_pEdge;
 //	Graphs graphs;
 };
 Lab11::Lab11() : pImpl( new Lab11::Impl ){}
@@ -55,7 +62,7 @@ struct Ball11:Obj
 void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
-	m.bStep = false;
+	pImpl->bStep = false;
 
 	//画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
@@ -67,23 +74,23 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	vect3	vg	= vect3(0,G,0);		// 重力加速度ベクトル
 
 	// 初期化：オール
-	if ( !m.bInitAll )
+	if ( pImpl->bResetAll )
 	{
-		m.bInitAll = true;
+		pImpl->bResetAll = false;
 
 		// カメラ
 		pers.cam.pos = vect3(	0.0,	1.0, -10.0 );
 		pers.cam.at = vect3( 	0.0,	1.0, 0.0 );
 
 		//点
-		m.tbl_pObj.clear();
-		m.tbl_pObj.emplace_back( new Ball11(vect3(  0		, 0.62,  0.0 ), vect3(0,0,0)) );
-		m.tbl_pObj.emplace_back( new Obj(vect3( -0.0	, 0.0,	0.0 )) );	// 平面原点
-		m.tbl_pObj.emplace_back( new Obj(vect3( -0.05	, 0.5,  0.0 )) );	// 平面法線
+		pImpl->tbl_pObj.clear();
+		pImpl->tbl_pObj.emplace_back( new Ball11(vect3(  0		, 0.62,  0.0 ), vect3(0,0,0)) );
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3( -0.0	, 0.0,	0.0 )) );	// 平面原点
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3( -0.05	, 0.5,  0.0 )) );	// 平面法線
 
 		// 線
-		m.tbl_pEdge.clear();
-		m.tbl_pEdge.emplace_back( new Edge(1,2, rgb(1,1,1),1) );
+		pImpl->tbl_pEdge.clear();
+		pImpl->tbl_pEdge.emplace_back( new Edge(1,2, rgb(1,1,1),1) );
 
 		// 移動軸
 		pers.axis.bAxisX = true;
@@ -93,8 +100,8 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		//GUI登録
 		cp.tbltbl_pObj.clear();
 		cp.tbltbl_pEdge.clear();
-		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
-		cp.tbltbl_pEdge.emplace_back( m.tbl_pEdge );
+		cp.tbltbl_pObj.emplace_back( pImpl->tbl_pObj );
+		cp.tbltbl_pEdge.emplace_back( pImpl->tbl_pEdge );
 
 //		pImpl->graphs.Clear();
 //		pImpl->graphs.Create( 0.02, rgb(0,0,1) );
@@ -103,10 +110,10 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	}
 
 	// 初期化：パラメータ
-	if ( !m.bInitParam )
+	if ( pImpl->bResetParam )
 	{
-		m.bInitParam = true;
-		Ball11&	ball = *dynamic_cast<Ball11*>(m.tbl_pObj[0].get());
+		pImpl->bResetParam = false;
+		Ball11&	ball = *dynamic_cast<Ball11*>(pImpl->tbl_pObj[0].get());
 		ball.pos = vect3(  0		, 3.0,  0.0 );
 		ball.vel = vect3(  0		, 0.0,  0.0 );
 		ball.mat = midentity();
@@ -117,20 +124,20 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 	// 入力
 	{
-		if ( keys.R.hi ) m.bInitParam = false;
-		if ( keys.SPACE.hi )	m.bPause = !m.bPause ;
-		if ( keys.ENTER.rep )	{m.bStep = true; m.bPause = true; }
+		if ( keys.R.hi )	pImpl->bResetParam = true;
+		if ( keys.SPACE.hi )	pImpl->bPause = !pImpl->bPause ;
+		if ( keys.ENTER.rep )	{pImpl->bStep = true; pImpl->bPause = true; }
 
 		if ( keys.G.hi )	{if ( vg.z==G ) vg=vect3(0,0,0); else vg=vect3(0,G,0);}
-		if ( keys.A.hi )	{m.tbl_pObj[2]->pos.z+=-1.0;}
+		if ( keys.A.hi )	{pImpl->tbl_pObj[2]->pos.z+=-1.0;}
 		if ( keys.O.hi )	{pers.bOrtho = !pers.bOrtho;}
 	
 	}
 	
 	//変数
-	Ball11&	ball	= *dynamic_cast<Ball11*>(m.tbl_pObj[0].get());
-	vect3	plate_p	= m.tbl_pObj[1]->pos;
-	vect3	plate_n	= (m.tbl_pObj[2]->pos-plate_p).normalize();
+	Ball11&	ball	= *dynamic_cast<Ball11*>(pImpl->tbl_pObj[0].get());
+	vect3	plate_p	= pImpl->tbl_pObj[1]->pos;
+	vect3	plate_n	= (pImpl->tbl_pObj[2]->pos-plate_p).normalize();
 	vect3	p0		= ball.pos;
 	vect3	v0		= ball.vel;
 	vect3	pn;
@@ -188,7 +195,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	}
 
 	// 反映
-//	if  ( !m.bPause || m.bStep )
+//	if  ( !pImpl->bPause || pImpl->bStep )
 	{
 		ball.pos = pn;
 		ball.vel = vn;

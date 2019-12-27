@@ -30,6 +30,12 @@
 
 struct Lab0::Impl
 {
+	bool	bResetAll = true;
+	bool	bResetParam = true;
+	bool	bPause = false;
+	bool	bStep = false;
+
+	vector<shared_ptr<Obj>>	tbl_pObj;
 };
 Lab0::Lab0() : pImpl( new Lab0::Impl ){}
 
@@ -43,9 +49,9 @@ void Lab0::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 	gra.Print(1,(float)text_y++,"0 : only grid" ); 
 
 	//初期化
-	if ( !m.bInitAll )
+	if ( pImpl->bResetAll )
 	{
-		m.bInitAll = true;
+		pImpl->bResetAll = false;
 
 		// カメラ
 		pers.cam.pos = vect3( 0.0, 2.0, -5.0 );

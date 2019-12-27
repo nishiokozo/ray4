@@ -33,6 +33,13 @@
 #define	PLATE_MAT	mrotz(rad(15))
 struct Lab19::Impl
 {
+	bool	bResetAll = true;
+	bool	bResetParam = true;
+	bool	bPause = false;
+	bool	bStep = false;
+
+	vector<shared_ptr<Obj>>	tbl_pObj;
+
 	struct
 	{
 		vect3	pos	= vect3(0,-0.3,0);
@@ -82,26 +89,26 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	gra.Print(1,(float)text_y++,"19 : ball Moment" );
 
 	// 初期化：ALL
-	if ( !m.bInitAll )
+	if ( pImpl->bResetAll )
 	{
-		m.bInitAll = true;
+		pImpl->bResetAll = false;
 
 		// カメラ
 		pers.cam.pos = vect3(	0.0,	1.0, -10.0 );
 		pers.cam.at = vect3( 	0.0,	1.0,   0.0 );
 
 		// 点
-		m.tbl_pObj.emplace_back( new Impl::Ball );	// ボール
+		pImpl->tbl_pObj.emplace_back( new Impl::Ball );	// ボール
 
 	}
 
 	// 設定
-	Impl::Ball&	ball	= *dynamic_cast<Impl::Ball*>(m.tbl_pObj[0].get());
+	Impl::Ball&	ball	= *dynamic_cast<Impl::Ball*>(pImpl->tbl_pObj[0].get());
 
 	// 初期化：パラメータ
-	if ( !m.bInitParam )
+	if ( pImpl->bResetParam )
 	{
-		m.bInitParam = true;
+		pImpl->bResetParam = false;
 
 		ball.radius	= 1;
 		ball.pos	= vect3(-4,2,0);
@@ -112,7 +119,7 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	}
 
 	// 入力
-	if ( keys.R.hi )	m.bInitParam = false;
+	if ( keys.R.hi )	pImpl->bResetParam = true;
 	if ( mouse.F.on )	pImpl->motor.power += 0.01;
 	if ( mouse.B.on )	ball.vel += vect3(0.01,0,0);
 

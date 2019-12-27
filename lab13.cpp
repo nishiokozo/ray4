@@ -30,6 +30,16 @@
 #include "lab.h"
 #include "lab13.h"
 
+struct Lab13::Impl
+{
+	bool	bResetAll = true;
+	bool	bResetParam = true;
+	bool	bPause = false;
+	bool	bStep = false;
+
+	vector<shared_ptr<Obj>>	tbl_pObj;
+};
+Lab13::Lab13() : pImpl( new Lab13::Impl ){}
 
 
 //------------------------------------------------------------------------------
@@ -46,35 +56,35 @@ void Lab13::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	gra.Print(1,(float)text_y++,"13 : intersect_plate_curve" ); 
 
 	// 初期化：オール
-	if ( !m.bInitAll )
+	if ( pImpl->bResetAll )
 	{
-		m.bInitAll = true;
+		pImpl->bResetAll = false;
 
 		//カメラ
 		pers.cam.pos = vect3(	0.0,	4.3, -8.0 );
 		pers.cam.at = vect3( 	0.0,	2.3, 0.0 );
 
 		//点
-		m.tbl_pObj.emplace_back( new Obj( vect3(  0,	1,	0	 ) ) );
-		m.tbl_pObj.emplace_back( new Obj( vect3(  2, 4.0,  2.0 ) ) );
-		m.tbl_pObj.emplace_back( new Obj( vect3(  0, G,  0 ) ) );
+		pImpl->tbl_pObj.emplace_back( new Obj( vect3(  0,	1,	0	 ) ) );
+		pImpl->tbl_pObj.emplace_back( new Obj( vect3(  2, 4.0,  2.0 ) ) );
+		pImpl->tbl_pObj.emplace_back( new Obj( vect3(  0, G,  0 ) ) );
 		//平面
-		m.tbl_pObj.emplace_back( new Obj(vect3(  2.1	, 0.5,	2.0 )) );	// 平面原点
-		m.tbl_pObj.emplace_back( new Obj(vect3(  2.0	, 0.7,  2.0 )) );	// 平面法線
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3(  2.1	, 0.5,	2.0 )) );	// 平面原点
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3(  2.0	, 0.7,  2.0 )) );	// 平面法線
 
 		//GUI登録
 		cp.tbltbl_pObj.clear();
 		cp.tbltbl_pEdge.clear();
-		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
+		cp.tbltbl_pObj.emplace_back( pImpl->tbl_pObj );
 	}
 
 	// 設定
 	int n = 0;
-	vect3	p0 = m.tbl_pObj[n++]->pos ;
-	vect3	v0 = m.tbl_pObj[n++]->pos -p0;
-	vect3	vg = m.tbl_pObj[n++]->pos -p0;
-	vect3	plate_p = (*m.tbl_pObj[n++]).pos;
-	vect3	plate_n = ( (*m.tbl_pObj[n++]).pos - plate_p ).normalize();
+	vect3	p0 = pImpl->tbl_pObj[n++]->pos ;
+	vect3	v0 = pImpl->tbl_pObj[n++]->pos -p0;
+	vect3	vg = pImpl->tbl_pObj[n++]->pos -p0;
+	vect3	plate_p = (*pImpl->tbl_pObj[n++]).pos;
+	vect3	plate_n = ( (*pImpl->tbl_pObj[n++]).pos - plate_p ).normalize();
 
 	// 描画
 	for ( float t = 0 ; t < 1.0 ; t += 0.001 )
@@ -110,8 +120,8 @@ void Lab13::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	
 	
 	
-	m.drawVect( gra, pers, text_y, p0, v0	,1	, col, "v" );
-	m.drawVect( gra, pers, text_y, p0, vg	,1	, col, "a" );
+	pers.prim.DrawVect( gra, pers, text_y, p0, v0	,1	, col, "v" );
+	pers.prim.DrawVect( gra, pers, text_y, p0, vg	,1	, col, "a" );
 	pers.prim.DrawPlate( gra, pers, plate_p, plate_n, 5, col/2.0 );
 
 }

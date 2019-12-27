@@ -27,6 +27,14 @@
 #include "lab7.h"
 struct Lab7::Impl
 {
+	bool	bResetAll = true;
+	bool	bResetParam = true;
+	bool	bPause = false;
+	bool	bStep = false;
+
+	vector<shared_ptr<Obj>>	tbl_pObj;
+	vector<shared_ptr<Edge>>	tbl_pEdge;
+
 	 bool		bShot = false;
 	 vect3	velocity;
 	 vect3	moment;
@@ -34,7 +42,6 @@ struct Lab7::Impl
 	 vect3	add;
 	
 	 float 	w;	//	角速度
-	 bool		bPause = false;
 
 	vect3	acc2;
 
@@ -58,43 +65,43 @@ void Lab7::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 	bool bStep = false;
 
 	// 初期化
-	if ( !m.bInitParam )
+	if ( pImpl->bResetParam )
 	{
-		if ( !m.bInitAll )
+		if ( pImpl->bResetAll )
 		{
-			m.bInitAll = true;
+			pImpl->bResetAll = false;
 			pers.cam.pos = vect3( 0, 5.0, -0.5 );
 			pers.cam.at = vect3( 0,  0, 0 );
 		}
-		m.bInitParam = true;
+		pImpl->bResetParam = false;
 
 		// 点
-		m.tbl_pObj.clear();
-		m.tbl_pObj.emplace_back( new Obj(vect3( 0 ,0.1, 0)) );
-		m.tbl_pObj.emplace_back( new Obj(vect3(-1 ,0.1, 0)) );
+		pImpl->tbl_pObj.clear();
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3( 0 ,0.1, 0)) );
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3(-1 ,0.1, 0)) );
 
 		// 線
-		m.tbl_pEdge.clear();
-		m.tbl_pEdge.emplace_back( new Edge(0,1) );
+		pImpl->tbl_pEdge.clear();
+		pImpl->tbl_pEdge.emplace_back( new Edge(0,1) );
 
 		//GUI登録
 		cp.tbltbl_pObj.clear();
 		cp.tbltbl_pEdge.clear();
-		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
-		cp.tbltbl_pEdge.emplace_back( m.tbl_pEdge );
+		cp.tbltbl_pObj.emplace_back( pImpl->tbl_pObj );
+		cp.tbltbl_pEdge.emplace_back( pImpl->tbl_pEdge );
 
 		pImpl->bShot = false;
 	}
 
 
-	vect3&	v0 = m.tbl_pObj[0]->pos;	//	barの根本
-	vect3&	v1 = m.tbl_pObj[1]->pos;	//	barの先端
+	vect3&	v0 = pImpl->tbl_pObj[0]->pos;	//	barの根本
+	vect3&	v1 = pImpl->tbl_pObj[1]->pos;	//	barの先端
 
 
 	//入力
 	{
 		// リセット
-		if ( keys.R.hi )		m.bInitParam = false ;
+		if ( keys.R.hi )	pImpl->bResetParam = true;
 
 		if ( keys.SPACE.hi )	pImpl->bPause = !pImpl->bPause ;
 
@@ -145,7 +152,7 @@ void Lab7::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 				v1 = (v1-v0)/(v1-v0).abs()+v0;
 				pImpl->acc2 += v1-prev;
 			}
-			m.drawVect( gra, pers, text_y, v1, vt			,100	, rgb(1,0,0), "vt" );
+			pers.prim.DrawVect( gra, pers, text_y, v1, vt			,100	, rgb(1,0,0), "vt" );
 			gra.Print(1,(float)text_y++,string("radius ")+to_string(bar.abs())); 
 		}
 
@@ -184,7 +191,7 @@ pImpl->w=deg2rad(2);
 		}
 
 		// 補助線
-		m.drawVect( gra, pers, text_y, v1, vg			,100	, rgb(1,0,0), "vg" );
+		pers.prim.DrawVect( gra, pers, text_y, v1, vg			,100	, rgb(1,0,0), "vg" );
 			
 	}
 

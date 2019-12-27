@@ -30,9 +30,15 @@
 
 struct Lab4::Impl
 {
+	bool	bResetAll = true;
+	bool	bResetParam = true;
+	bool	bPause = false;
+	bool	bStep = false;
+
+	vector<shared_ptr<Obj>>	tbl_pObj;
+
 	 vect3	vel;			// 運動量
 	 vect3	mov;			// 運動量
-	 bool	bPause = false; 
 
 	 float	rsp = 0;
 	 vect3	vv = vect3(0,0,0);
@@ -67,30 +73,30 @@ void Lab4::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 
 
 	// 初期化
-	if ( !m.bInitParam )
+	if ( pImpl->bResetParam )
 	{
-		if ( !m.bInitAll )
+		if ( pImpl->bResetAll )
 		{
-			m.bInitAll = true;
+			pImpl->bResetAll = false;
 			pers.cam.pos = vect3(  0.0, 0.0, -7.0 );
 			pers.cam.at = vect3( 0,  0.0, 0 );
 		}
 
-		m.bInitParam = true;
-		m.tbl_pObj.clear();
-		m.tbl_pObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
-		m.tbl_pObj.emplace_back( new Obj(vect3(-1, 2.0, 0)) );
+		pImpl->bResetParam = false;
+		pImpl->tbl_pObj.clear();
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3(0, 2.0, 0)) );
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3(-1, 2.0, 0)) );
 
 		//GUI登録
 		cp.tbltbl_pObj.clear();
 		cp.tbltbl_pEdge.clear();
-		cp.tbltbl_pObj.emplace_back( m.tbl_pObj );
+		cp.tbltbl_pObj.emplace_back( pImpl->tbl_pObj );
 		
 		pImpl->vel = vect3(0,0,0);
 	}
 
-	vect3&	v0 = m.tbl_pObj[0]->pos;	//	barの根本
-	vect3&	v1 = m.tbl_pObj[1]->pos;	//	barの先端
+	vect3&	v0 = pImpl->tbl_pObj[0]->pos;	//	barの根本
+	vect3&	v1 = pImpl->tbl_pObj[1]->pos;	//	barの先端
 
 	// 入力
 	{
@@ -101,7 +107,7 @@ void Lab4::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 		if ( keys.ENTER.rep )	bStep = true;
 
 		// リセット
-		if ( keys.R.hi )	m.bInitParam = false ;
+		if ( keys.R.hi )	pImpl->bResetParam = true;
 
 		// 縮む
 		if ( mouse.F.hi )	v1 = (v1+v0)/2;
@@ -134,11 +140,11 @@ pImpl->mov =pImpl->vel;
 
 		pers.pen.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
 
-		m.drawVect( gra, pers, text_y, v1, vg	,100, rgb(1,0,0), "g" );
-		m.drawVect( gra, pers, text_y, v0, moment,100, rgb(1,0,1), "moment" );
-		m.drawVect( gra, pers, text_y, v1, F		,100, rgb(0,1,0), "F" );
-		m.drawVect( gra, pers, text_y, v1, pImpl->vel	,2	, rgb(1,1,0), "pImpl->vel" );
-		m.drawVect( gra, pers, text_y, v1, pImpl->mov	,2	, rgb(0,0,1), "pImpl->mov" );
+		pers.prim.DrawVect( gra, pers, text_y, v1, vg	,100, rgb(1,0,0), "g" );
+		pers.prim.DrawVect( gra, pers, text_y, v0, moment,100, rgb(1,0,1), "moment" );
+		pers.prim.DrawVect( gra, pers, text_y, v1, F		,100, rgb(0,1,0), "F" );
+		pers.prim.DrawVect( gra, pers, text_y, v1, pImpl->vel	,2	, rgb(1,1,0), "pImpl->vel" );
+		pers.prim.DrawVect( gra, pers, text_y, v1, pImpl->mov	,2	, rgb(0,0,1), "pImpl->mov" );
 	}
 
 
