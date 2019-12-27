@@ -151,7 +151,7 @@ void Lab27::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	}
 
 
-	// 二次B-スプライン
+	// 二次B-スプライン 合成グラフ
 	{
 		float tmax = 4+1;
 		vect3 v0 = vect3(5,3,0);
@@ -170,7 +170,7 @@ void Lab27::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		}
 			pers.pen.print3d( gra, pers, v0+vect3( 2,0,0), 0,64, "B-Spline(2)" ); 
 	}
-	// 三次B-スプライン
+	// 三次B-スプライン 合成グラフ
 	{
 		vect3 v0 = vect3(5,0,0);
 		float tmax = 4+3;
