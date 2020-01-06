@@ -30,7 +30,7 @@
 
 
 
-#define	PLATE_MAT	mrotz(rad(15))
+#define	PLATE_MAT	mat33::mrotz(rad(15))
 struct Lab19::Impl
 {
 	bool	bResetAll = true;
@@ -56,7 +56,7 @@ struct Lab19::Impl
 		vect3	vel;
 		float 	radius;
 		vect3	moment;
-		mat33	mat = midentity();
+		mat33	mat = mat33::midentity();
 
 		Ball() : Obj(vect3(0,0,0)){}
 	};
@@ -114,7 +114,7 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		ball.radius	= 1;
 		ball.pos	= vect3(-4,2,0);
 		ball.moment	= vect3(0,0,0);
-		ball.mat	= midentity();
+		ball.mat	= mat33::midentity();
 		ball.vel	= vect3(0,0,0);
 		pImpl->motor.power = 0;
 	}

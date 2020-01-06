@@ -53,7 +53,7 @@ void Lab6::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 {
 	//画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
+	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 
 	gra.Print(1,(float)text_y++,string("<<lab6_tire3d>>")); 
 

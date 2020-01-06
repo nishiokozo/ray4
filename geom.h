@@ -165,10 +165,12 @@ class vect3;
 
 typedef vect3 rgb;
 
+/*
 extern mat33 midentity();
 extern mat33 mrotx( float f);
 extern mat33 mroty( float f);
 extern mat33 mrotz( float f);
+*/
 
 extern float	dot( vect3 a, vect3 b );
 extern float	dot( vect2 a, vect2 b );
@@ -438,6 +440,11 @@ public:
 	// 行列式の値
 	float det();
 
+	static mat33 midentity();
+	static mat33 mrotx( float f);
+	static mat33 mroty( float f);
+	static mat33 mrotz( float f);
+
 	void dumpDetail( const char* str )
 	{
 		printf("mat33(detail):%s\n", str);
@@ -491,16 +498,16 @@ public:
 	}
 
 
-	vect3 operator*( vect3 v ) const
+/*	vect3 operator*( vect3 v ) const
 	{
-		//	m[行][列] x v[列]
+		//	m[行][列] x v[列]	※ 移動行列は反映されない	
 		return vect3(
 			m[0][0]*v.x + m[0][1]*v.y + m[0][2]*v.z + m[0][3] ,
 			m[1][0]*v.x + m[1][1]*v.y + m[1][2]*v.z + m[1][3] ,
 			m[2][0]*v.x + m[2][1]*v.y + m[2][2]*v.z + m[2][3] 
 		);
 	}
-
+*/
 	friend	vect3 operator*( vect3 v, const mat44 m )
 	{
 		//	v[行] x m[行][列]
@@ -548,72 +555,10 @@ public:
 		return *this;
 	}
 
-//	float* GetArray(){ return m_array; };
-
-/*
-*/
 	static mat44 midentity();
 	static mat44 mrotx( float f );
 	static mat44 mroty( float f );
 	static mat44 mrotz( float f );
-
-
-/*
-	void identity()
-	{
-		m[0][0] = 1.0f;	m[0][1] = 0.0f;	m[0][2] = 0.0f;	m[0][3] = 0.0f;
-		m[1][0] = 0.0f;	m[1][1] = 1.0f;	m[1][2] = 0.0f;	m[1][3] = 0.0f;
-		m[2][0] = 0.0f;	m[2][1] = 0.0f;	m[2][2] = 1.0f;	m[2][3] = 0.0f;
-		m[3][0] = 0.0f;	m[3][1] = 0.0f;	m[3][2] = 0.0f;	m[3][3] = 1.0f;
-	}
-	void setRotateX( float rx )
-	{
-		float c=cos(rx);
-		float s=sin(rx);
-		m[0][0] = 1.0f;	m[0][1] = 0.0f;	m[0][2] = 0.0f;	m[0][3] = 0.0f;
-		m[1][0] = 0.0f;	m[1][1] = c;	m[1][2] = -s;	m[1][3] = 0.0f;
-		m[2][0] = 0.0f;	m[2][1] = s;	m[2][2] = c;	m[2][3] = 0.0f;
-		m[3][0] = 0.0f;	m[3][1] = 0.0f;	m[3][2] = 0.0f;	m[3][3] = 1.0f;
-	}
-	void setRotateY( float ry )
-	{
-		float c=cos(ry);
-		float s=sin(ry);
-		m[0][0] = c;	m[0][1] = 0.0f;	m[0][2] = s;	m[0][3] = 0.0f;
-		m[1][0] = 0.0f;	m[1][1] = 1.0f;	m[1][2] = 0.0;	m[1][3] = 0.0f;
-		m[2][0] = -s;	m[2][1] = 0.0;	m[2][2] = c;	m[2][3] = 0.0f;
-		m[3][0] = 0.0f;	m[3][1] = 0.0f;	m[3][2] = 0.0f;	m[3][3] = 1.0f;
-	}
-	void setRotateZ( float rz )
-	{
-		float c=cos(rz);
-		float s=sin(rz);
-		m[0][0] = c;	m[0][1] = -s;	m[0][2] = 0.0f;	m[0][3] = 0.0f;
-		m[1][0] = s;	m[1][1] =  c;	m[1][2] = 0.0f;	m[1][3] = 0.0f;
-		m[2][0] = 0.0f;	m[2][1] = 0.0f;	m[2][2] = 1.0f;	m[2][3] = 0.0f;
-		m[3][0] = 0.0f;	m[3][1] = 0.0f;	m[3][2] = 0.0f;	m[3][3] = 1.0f;
-	}
-*/	
-/*
-	void AddTranslate( vect3 pos )
-	{
-		m[3][0] += pos.x;
-		m[3][1] += pos.y;
-		m[3][2] += pos.z;
-	}
-	void SetTranslate( vect3 pos )
-	{
-		m[3][0] = pos.x;
-		m[3][1] = pos.y;
-		m[3][2] = pos.z;
-	}
-	void SetTranslate( float x, float y, float z )
-	{
-		m[3][0] = x;
-		m[3][1] = y;
-		m[3][2] = z;
-	}
-*/
 
 	vect3 GetVectX()
 	{
@@ -667,7 +612,6 @@ public:
 		m[2][0] =z.x;	m[2][1] =z.y;	m[2][2] =z.z;	m[2][3] = 0.0f;
 		m[3][0] =pos.x;	m[3][1] =pos.y;	m[3][2] =pos.z;	m[3][3] = 1.0f;
 	}
-/*
 	void LookFor( vect3 pos, vect3 z, vect3 up )
 	{
 		vect3	x = cross( up, z );
@@ -678,68 +622,14 @@ public:
 		m[2][0] =z.x;	m[2][1] =z.y;	m[2][2] =z.z;	m[2][3] = 0.0f;
 		m[3][0] =pos.x;	m[3][1] =pos.y;	m[3][2] =pos.z;	m[3][3] = 1.0f;
 	}
-*/
-/*	void RotateXYZ( vect3 rot )
-	{
-		this->RotateX( rot.x );
-		this->RotateY( rot.y );
-		this->RotateZ( rot.z );
-	}
-	void RotateX( float f)
-	{
-		float	c = cos(f);
-		float	s = sin(f);
-		*this *= mat44(
-			1,  0,  0,  0,
-			0,  c, -s,  0,
-			0,  s,  c,  0,
-			0,  0,  0,  1
-		);
-	}
-	void RotateY( float f)
-	{
-		float	c = cos(f);
-		float	s = sin(f);
-		*this *= mat44(
-			c,  0, -s,  0,
-			0,  1,  0,  0,
-			s,  0,  c,  0,
-			0,  0,  0,  1
-		);
-	}
-	void RotateZ( float f)
-	{
-		float	c = cos(f);
-		float	s = sin(f);
-		*this *= mat44(
-			c, -s,  0,  0,
-			s,	c,  0,  0,
-			0,  0,  1,  0,
-			0,  0,  0,  1
-		);
-	}
-*/
+
 	void Tlanslate( vect3 vec )
 	{
 		m[3][0] += vec.x;
 		m[3][1] += vec.y;
 		m[3][2] += vec.z;
 	}
-/*
-	void Tlanslate( float x, float y, float z )
-	{
-		m[3][0] += x;
-		m[3][1] += y;
-		m[3][2] += z;
-	}
-	
-	void Scale( float x, float y, float z )
-	{
-		m[0][0] *= x;
-		m[1][1] *= y;
-		m[2][2] *= z;
-	}
-*/
+
 	void Scale( vect3 scale )
 	{
 		m[0][0] *= scale.x;
@@ -747,9 +637,7 @@ public:
 		m[2][2] *= scale.z;
 	}
 
-	//-----------------------------------------------------------------------------
 	mat33 GetRotate()
-	//-----------------------------------------------------------------------------
 	{
 		return mat33(
 			m[0][0],	m[0][1],	m[0][2],
@@ -758,9 +646,7 @@ public:
 		);
 	}
 
-	//-----------------------------------------------------------------------------
 	mat44 invers();
-	//-----------------------------------------------------------------------------
 
 	void dump()
 	{

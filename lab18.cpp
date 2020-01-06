@@ -51,7 +51,7 @@ struct Ball18:Obj
 {
 	vect3	vel;	//	velocity 速度(m/s)
 	float	radius = 0.1;
-	mat33	mat = midentity();
+	mat33	mat = mat33::midentity();
 	bool	flgOn = false;	// 接地フラグ
 	vect3	Q;
 	vect3	vaxis;
@@ -59,7 +59,7 @@ struct Ball18:Obj
 
 	vect3	pn;
 	vect3	vn;
-	mat33	mn = midentity();
+	mat33	mn = mat33::midentity();
 
 	Ball18() : Obj(vect3(0,0,0)) {}
 
@@ -78,7 +78,7 @@ void Lab18::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 16, 16, 1, rgb(0.2,0.2,0.2) );
+//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::midentity(), 16, 16, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,"18 : Spin on Floor" ); 
 
 
@@ -120,7 +120,7 @@ void Lab18::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 			b1.pos		= vect3(  0	, 2.0,  0.0 );
 			b1.vel		= vect3(  0	, 0.0,  0.0 );
 			b1.radius 	= 1.0;
-			b1.mat		= midentity();
+			b1.mat		= mat33::midentity();
 			b1.vaxis	= vect3(0,0,1);
 			b1.fspin	= 0.0;
 		}

@@ -169,7 +169,7 @@ struct Pers
 	struct Grid
 	{
 		rgb		col = rgb(0.2,0.2,0.2);
-		mat33	mat =  midentity();
+		mat33	mat =  mat33::midentity();
 
 		void SetCol( const rgb& _col ) { col = _col; }
 		void SetMat( const mat33& _mat ) { mat = _mat; }

@@ -919,7 +919,7 @@ void Pers::Prim::DrawTire( SysGra& gra, Pers& pers, vect3 pos, float head, float
 		}
 	}
 	
-	mat33 m = mrotz(bank) * mroty(head);
+	mat33 m = mat33::mrotz(bank) * mat33::mroty(head);
 
 	rgb col(0,1,1);
 	int i = 0;
@@ -1257,7 +1257,7 @@ void Pers::Grid::line( SysGra& gra, Pers& pers, vect2 p0, vect2 p1, rgb col, flo
 {
 	gra.SetZTest(false);
 
-	mat33 m = mat * mrotx(-rad(90));
+	mat33 m = mat * mat33::mrotx(-rad(90));
 
 	vect3 v0 = m * vect3(p0,0);	
 	vect3 v1 = m * vect3(p1,0);	
@@ -1271,7 +1271,7 @@ void Pers::Grid::print( SysGra& gra, Pers& pers, vect2 p0, float x, float y, str
 {
 	gra.SetZTest(false);
 
-	mat33 m = mat * mrotx(-rad(90));
+	mat33 m = mat * mat33::mrotx(-rad(90));
 
 	vect3 v0 = m * vect3(p0,0);	
 	pers.pen.print3d( gra, pers, v0, x,y,str );

@@ -43,7 +43,7 @@ struct Lab16::Impl
 	vector<shared_ptr<Edge>>	tbl_pEdge;
 
 	unique_ptr<Skeleton> pSkeleton;
-	mat33	mkata = midentity();
+	mat33	mkata = mat33::midentity();
 	bool	flgInfo = true;
 
 };
@@ -60,7 +60,7 @@ void Lab16::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 {
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
+	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,"16 : Skeleton" ); 
 
 	//初期化
@@ -244,9 +244,9 @@ void Lab16::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 		if(1)
 		{
-			mat33	mmune = midentity();
-			mat33	mhiji = midentity();;
-			mat33	mte = midentity() ;
+			mat33	mmune = mat33::midentity();
+			mat33	mhiji = mat33::midentity();;
+			mat33	mte = mat33::midentity() ;
 			vect3	pos0 = tbl_pObj[0]->pos;
 			vect3	pos1 = tbl_pObj[1]->pos;
 			vect3	p2 = tbl_pObj[2]->pos;

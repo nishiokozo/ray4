@@ -45,8 +45,8 @@ struct Ball11:Obj
 {
 	vect3	vel;	//	velocity 速度(m/s)
 	float	radius = 1.0;
-	mat33	mat = midentity();
-//	mat33	mspin = midentity();
+	mat33	mat = mat33::midentity();
+//	mat33	mspin = mat33::midentity();
 //	vect3	vcenter;
 	vect3	vaxis;
 	float	fspin;
@@ -117,7 +117,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		Ball11&	ball = *dynamic_cast<Ball11*>(pImpl->tbl_pObj[0].get());
 		ball.pos = vect3(  0		, 3.0,  0.0 );
 		ball.vel = vect3(  0		, 0.0,  0.0 );
-		ball.mat = midentity();
+		ball.mat = mat33::midentity();
 		ball.vaxis		= vect3(0,0,1);
 		ball.fspin		= 0.0;
 

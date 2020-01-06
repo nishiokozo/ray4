@@ -307,14 +307,14 @@ mat33 mrotateByAxis( vect3 axis, float th )
 	float ry	= atan2( axis.x , axis.z);
 	float lxz	= sqrt( axis.z * axis.z + axis.x * axis.x );
 	float rz	= atan2( axis.y, lxz );
-	mat33 mr = midentity();
-	mr *= mrotx(-rz);
-	mr *= mroty(ry);
+	mat33 mr = mat33::midentity();
+	mr *= mat33::mrotx(-rz);
+	mr *= mat33::mroty(ry);
 
-	mat33 m = midentity();
+	mat33 m = mat33::midentity();
 	// 作成した行列のz軸で回転
 	m *= mr.invers();
-	m *= mrotz(th);
+	m *= mat33::mrotz(th);
 	m *= mr;
 
 	return m;
@@ -903,7 +903,7 @@ float	rad2deg( float n)
 }
 
 //-----------------------------------------------------------------------------
-mat33 midentity()
+mat33 mat33::midentity()
 //-----------------------------------------------------------------------------
 {
 	return mat33(
@@ -930,7 +930,7 @@ mat33 midentity()
 ///////////////////////////////////////
 
 //-----------------------------------------------------------------------------
-mat33 mrotx( float f )
+mat33 mat33::mrotx( float f )
 //-----------------------------------------------------------------------------
 {
 	// f : atan2(Z,Y)=atan2(0,1)=0	Y->Zへ回転
@@ -945,7 +945,7 @@ mat33 mrotx( float f )
 }
 
 //-----------------------------------------------------------------------------
-mat33 mroty( float f )
+mat33 mat33::mroty( float f )
 //-----------------------------------------------------------------------------
 {
 	// f : atan2(X,Z)=atan2(0,1)=0	Z->Xへ回転
@@ -960,7 +960,7 @@ mat33 mroty( float f )
 }
 
 //-----------------------------------------------------------------------------
-mat33 mrotz( float f )
+mat33 mat33::mrotz( float f )
 //-----------------------------------------------------------------------------
 {
 	// f : atan2(Y,X)=atan2(0,1)=0	X->Yへ回転

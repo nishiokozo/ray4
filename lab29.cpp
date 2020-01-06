@@ -423,8 +423,8 @@ void Lab29::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 //------------------------------------------------------------------------------
 {
 	// 画面クリア
-	gra.Clr(rgb(0.3,0.3,0.3));
-//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
+	gra.Clr(rgb(0.0,0.0,0.0));
+//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,"29 : raytrace" ); 
 
 	//初期化
@@ -433,7 +433,7 @@ void Lab29::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pImpl->bResetAll = false;
 
 		// カメラ
-		pers.cam.pos = vect3( 0.0, 2.0, -5.0 );
+		pers.cam.pos = vect3( 0.0, 1.0, -5.0 );
 		pers.cam.at = vect3( 0,  1.0, 0 );
 		pers.cam.Update();
 
@@ -443,6 +443,9 @@ void Lab29::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	{
 		pImpl->bResetParam = false;
 	}
+
+
+static float py = 0;
 
 	{
 		Impl::Renderer ren;
@@ -455,8 +458,8 @@ void Lab29::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 			float	aspect = width / height;
 		
-			vect3	posScr = vect3(0,1.0,-4);
-			vect3	posEye = vect3(0,1.0,-9);
+			vect3	posScr = vect3(0,0.0,0);
+			vect3	posEye = vect3(0,0.0,-5);
 
 
 			for( float py = 0 ; py < height ; py += step )
@@ -465,18 +468,21 @@ void Lab29::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 				{
 					float	x = (px /  width) *2.0-1.0;
 					float	y = (py / height) *2.0-1.0;
-					vect3	P = vect3( x*aspect, y, 0 ) + posScr;
-					vect3	I = normalize(P - posEye);
+					vect3	P = vect3( x*aspect, y, 0 ) + posScr;	// P : 投影面
+					vect3	I = normalize(P - posEye);				// I : 視線ベクトル
 
-P = pers.cam.mat.invers() * P;
-I = pers.cam.mat.invers() * I;
+					P = P* pers.cam.mat;
+					I = I* pers.cam.mat.GetRotate();
 
 			 		rgb C = ren.Raytrace( P, I, 5 );
 					gra.Pset( vect2(x,y) ,C);
 				}
 			}
+			py += step;
+			if ( py >= height ) py = 0;
 			
 		}
+
 
 	}
 }

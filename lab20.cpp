@@ -79,7 +79,7 @@ void Lab20::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mrotx(rad(90)), 26, 26, 1, rgb(0.2,0.2,0.2) );
+	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::mrotx(rad(90)), 26, 26, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,"20 : 2D Motor Spin" ); 
 
 	//初期化
@@ -143,7 +143,7 @@ void Lab20::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 	// 描画：ボール
 	pImpl->ball.rot += pImpl->ball.spin;
-	pers.prim.DrawCircle( gra, pers, vect3( pImpl->ball.pos, 0 ), mrotz(-pImpl->ball.rot), 1.0, rgb(1,1,1) );
+	pers.prim.DrawCircle( gra, pers, vect3( pImpl->ball.pos, 0 ), mat33::mrotz(-pImpl->ball.rot), 1.0, rgb(1,1,1) );
 
 	// 描画：壁
 	pers.pen.line3d( gra, pers, vect3(pImpl->wall.p0,0), vect3(pImpl->wall.p1,0) );

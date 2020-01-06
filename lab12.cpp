@@ -34,7 +34,7 @@ struct Ball12:Obj
 {
 	vect3	vel;	//	velocity 速度(m/s)
 	float	radius = 0.1;
-	mat33	mat = midentity();
+	mat33	mat = mat33::midentity();
 	bool	flgOn = false;	// 接地フラグ
 	vect3	vaxis;
 	float	fspin;
@@ -68,7 +68,7 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 	//画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 16, 16, 1, rgb(0.2,0.2,0.2) );
+	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::midentity(), 16, 16, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,string("12 : Ball12 & Ball12")); 
 
 	if ( pImpl->bResetAll )
@@ -104,7 +104,7 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 			b1.pos	= vect3( -2	, 1.0,  0.0 );
 			b1.vel	= vect3(  0	, 0.0,  0.0 );
 			b1.radius = 1.0;
-			b1.mat	= midentity();
+			b1.mat	= mat33::midentity();
 			b1.vaxis	= vect3(0,0,1);
 			b1.fspin	= 0.0;
 		}
@@ -112,7 +112,7 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 			b2.pos	= vect3(  3	, 1.0, -3.0 );
 			b2.vel	= vect3(  0	, 0.0,  0.0 );
 			b2.radius = 1.0;
-			b2.mat	= midentity();
+			b2.mat	= mat33::midentity();
 			b2.vaxis	= vect3(0,0,1);
 			b2.fspin	= 0.0;
 		}
@@ -136,7 +136,7 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 			b1.pos	= vect3( -3	, 1.0, -3.0 );
 			b1.vel	= vect3(  0	, 0.0,  0.0 );
 			b1.radius = 1.0;
-			b1.mat	= midentity();
+			b1.mat	= mat33::midentity();
 			b1.vaxis	= vect3(0,0,1);
 			b1.fspin	= 0.0;
 		}
@@ -144,7 +144,7 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 			b2.pos	= vect3(  3	, 1.0, -3.0 );
 			b2.vel	= vect3(  0	, 0.0,  0.0 );
 			b2.radius = 1.0;
-			b2.mat	= midentity();
+			b2.mat	= mat33::midentity();
 			b2.vaxis	= vect3(0,0,1);
 			b2.fspin	= 0.0;
 		}
@@ -168,7 +168,7 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 			b1.pos	= vect3( -3	, 1.0,  0.0 );
 			b1.vel	= vect3(  0	, 0.0,  0.0 );
 			b1.radius = 1.0;
-			b1.mat	= midentity();
+			b1.mat	= mat33::midentity();
 			b1.vaxis	= vect3(0,0,1);
 			b1.fspin	= 0.0;
 		}
@@ -176,7 +176,7 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 			b2.pos	= vect3(  3	, 1.0,  0.0 );
 			b2.vel	= vect3(  0	, 0.0,  0.0 );
 			b2.radius = 1.0;
-			b2.mat	= midentity();
+			b2.mat	= mat33::midentity();
 			b2.vaxis	= vect3(0,0,1);
 			b2.fspin	= 0.0;
 		}
@@ -201,7 +201,7 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 			b1.pos	= vect3( -2	, 1.0,  0.0 );
 			b1.vel	= vect3(  0	, 0.0,  0.0 );
 			b1.radius = 1.0;
-			b1.mat	= midentity();
+			b1.mat	= mat33::midentity();
 			b1.vaxis	= vect3(0,0,1);
 			b1.fspin	= 0.0;
 		}
@@ -209,7 +209,7 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 			b2.pos	= vect3(  2	, 1.0,  0.0 );
 			b2.vel	= vect3(  0	, 0.0,  0.0 );
 			b2.radius = 1.0;
-			b2.mat	= midentity();
+			b2.mat	= mat33::midentity();
 			b2.vaxis	= vect3(0,0,1);
 			b2.fspin	= 0.0;
 		}
