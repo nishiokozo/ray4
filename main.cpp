@@ -27,8 +27,6 @@
 #include "pers.h"
 #include "gui.h"
 
-#include "raytrace.h"
-
 #include "lab.h"
 
 using namespace std;

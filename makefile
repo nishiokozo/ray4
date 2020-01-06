@@ -8,7 +8,6 @@ TAR = main.exe
 SRCS = \
 	main.cpp \
 	skeleton.cpp \
-	raytrace.cpp \
 	pers.cpp \
 	func.cpp \
 	geom.cpp \
@@ -43,6 +42,7 @@ SRCS = \
 	lab26.cpp \
 	lab27.cpp \
 	lab28.cpp \
+	lab29.cpp \
 	Sys.cpp \
 	SysWin.cpp \
 	SysGra.cpp \

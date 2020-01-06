@@ -55,6 +55,7 @@
 #include "lab26.h"
 #include "lab27.h"
 #include "lab28.h"
+#include "lab29.h"
 
 //------------------------------------------------------------------------------
 void Lab::SetIdx( int n, Cp& cp )
@@ -102,6 +103,7 @@ void Lab::SetIdx( int n, Cp& cp )
 		case 26:	pLab = unique_ptr<LabObj>( new Lab26 );	break;
 		case 27:	pLab = unique_ptr<LabObj>( new Lab27 );	break;
 		case 28:	pLab = unique_ptr<LabObj>( new Lab28 );	break;
+		case 29:	pLab = unique_ptr<LabObj>( new Lab29 );	break;
 		default: break;
 	}
 }
@@ -114,6 +116,7 @@ void Lab::SetNextIdx( int val, Cp& cp )
 	{
 		0,
 		10,		//	カラータワー
+		29,		//	レイトレーシング
 		14,		//	Catmull rom spline
 		15,		//	Bezier
 		27,		//	B-Spline 2次 3次(uniform)
