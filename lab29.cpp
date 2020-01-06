@@ -296,11 +296,11 @@ struct Lab29::Impl
 		{
 			A = vect3(0,0,0);
 
-			float pw,e,tm,rl,rr;
 			vect3	P,C,N;
 
-		#define	SCENE 1
+		#define	SCENE 5
 		#if SCENE==1
+			float pw,e,tm,rl,rr;
 			m_tblPlate.push_back( PrimPlate( P=vect3( 0  ,  0 ,0.0),N=vect3(0,1,0),C=vect3(0.8,0.8,0.8),rl=0.5,rr=1.0 ,pw=20,e= 0.0,tm=0.0 ) );
 			m_tblSphere.push_back( PrimSphere(vect3( 0.0 , 1.25, -2       ),   0.5 , vect3(1  , 0.2, 0.2), 0.5, 1.0, 20, 0.0, 0.0 ) );
 			m_tblSphere.push_back( PrimSphere(vect3( 0.0 , 0.5 , -2-0.433 ),   0.5 , vect3(0.0, 0.0, 0.0), 1.0, 1.0, 20, 0.0, 0.0 ) );
@@ -310,6 +310,7 @@ struct Lab29::Impl
 			A = vect3( 0.2,0.4,0.6)*0.0;
 		#endif
 		#if SCENE==2 //5 balls
+			float pw,e,tm,rl,rr;
 			m_tblPlate.push_back( PrimPlate( P=vect3( 0  ,  0 ,0.0),N=vect3(0,1,0),C=vect3(0.8,0.8,0.8),rl=0.5,rr=1.0 ,pw=20,e= 0.0,tm=0.0 ) );
 			m_tblSphere.push_back( PrimSphere(vect3(-2.0 , 0.5 , -2 ),   0.5 , vect3(0.0, 0.0, 0.0), 1.0 , 1.0, 20, 0.0, 0.0 ) );
 			m_tblSphere.push_back( PrimSphere(vect3(-1.0 , 0.5 , -2 ),   0.5 , vect3(0.0, 0.0, 0.0), 0.75, 1.0, 20, 0.0, 0.0 ) );
@@ -320,6 +321,7 @@ struct Lab29::Impl
 			A = vect3( 0.2,0.4,0.6)*1.0;
 		#endif
 		#if SCENE==3 // ring
+			float pw,e,tm,rl,rr,r;
 			m_tblPlate.push_back( PrimPlate( P=vect3( 0  ,  0 ,0.0),N=vect3(0,1,0),C=vect3(0.8,0.8,0.8),rl=0.5,rr=1.0 ,pw=20,e= 0.0,tm=0.0 ) );
 			m_tblSphere.push_back( PrimSphere(  vect3( 0 , 1.0 , 0 ),   0.5 ,  vect3(0.0, 0.0, 0.0),   0.5,   1.0 ,  100,  0.0,  0.0 ) );
 			int	max = 16*3;
@@ -347,6 +349,7 @@ struct Lab29::Impl
 			A = vect3( 0.2,0.4,0.6)*1.0;
 		#endif
 		#if SCENE==5//2 balls
+			float pw,e,tm,rl,rr,r;
 			m_tblPlate.push_back( PrimPlate( P=vect3(0  , 0 ,0.0),N=vect3(0,1,0),C=vect3(0.8,0.8,0.8),rl=0.5,rr=1.0 ,pw=20,e= 0.0,tm=0.0 ) );
 			m_tblSphere.push_back( PrimSphere(P=vect3( 0.5,1.0,3.0),r=0.5       ,C=vect3(0.0,0.0,1.0),rl=0.5,rr=1.0 ,pw=20,e=10.0,tm=0.0 ) );
 			m_tblSphere.push_back( PrimSphere(P=vect3(-0.5,1.0,3.0),r=0.5       ,C=vect3(0.0,1.0,0.0),rl=0.5,rr=1.0 ,pw=20,e=10.0,tm=0.0 ) );
@@ -423,7 +426,7 @@ void Lab29::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 //------------------------------------------------------------------------------
 {
 	// 画面クリア
-	gra.Clr(rgb(0.0,0.0,0.0));
+//	gra.Clr(rgb(0.0,0.0,0.0));
 //	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,"29 : raytrace" ); 
 
@@ -451,7 +454,7 @@ static float py = 0;
 		Impl::Renderer ren;
 
 
-		float step = 2.0;
+		float step = 1.0;
 		{
 			float width		= gra.GetWidth(); 
 			float height	= gra.GetHeight(); 

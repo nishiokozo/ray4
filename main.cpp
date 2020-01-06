@@ -86,7 +86,6 @@ struct Apr : public Sys
 			keys.Update();
 			mouse.Update();
 			gra.Update();
-		//	raytrace( gra );continue;
 
 			if ( keys._9.hi )
 			{
