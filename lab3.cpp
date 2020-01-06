@@ -82,6 +82,7 @@ void Lab3::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 			//上から
 			pers.cam.pos = vect3(  0.0, 0.5, -2.0 );
 			pers.cam.at = vect3( 0,  0.0, 0 );
+			pers.cam.Update();
 		}
 
 		pImpl->tbl_pObj.clear();

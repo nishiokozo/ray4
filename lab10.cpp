@@ -52,6 +52,7 @@ void Lab10::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pImpl->bResetAll = false;
 		pers.cam.pos = vect3( -4.0, 4.0, -1.5 );
 		pers.cam.at = vect3( 0,  1.0, 0 );
+		pers.cam.Update();
 	}
 
 	const float s = 0.1;

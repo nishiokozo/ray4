@@ -71,6 +71,7 @@ void Lab2::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 		pImpl->bResetAll = false;
 		pers.cam.pos = vect3( 2.0, 2.5, -2.0 );
 		pers.cam.at = vect3( 0,  0.0, 0 );
+		pers.cam.Update();
 	}
 
 	if ( pImpl->bResetParam )

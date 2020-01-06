@@ -476,99 +476,8 @@ struct Lab29::Impl
 
 			return ret;
 		}
-		//------------------------------------------------------------------------------
-		void	Paint( unsigned char* to, int height, int width, int psize )
-		//------------------------------------------------------------------------------
-		{
-
-			vect3	posScr = vect3(0,1.0,-12+8);
-			vect3	posEye = vect3(0,1.0,-17+8);
-
-	//		float r,s,p,e,t,rl,rr;
-			vect3	C;
-
-			int	cntMax = 0;
-			int	cntRay = 0;
-			for( int py = 0 ; py < height ; py++ )
-			{
-				for( int px = 0 ; px < width ; px++ )
-				{
-					float x = ((float)px / (float)width) *2.0-1.0;
-					float y = ((float)py / (float)height) *2.0-1.0;
-					vect3	P = vect3( x, y, 0 ) + posScr;
-					vect3	I = normalize(P - posEye);
-
-	//				float	valRefractive = 1.0;
-
-					m_cntRay = 0;
-	//				int	cntNext = 0;
-			 		C = Raycast( P, I );
-					if ( m_cntRay > cntMax ) cntMax = m_cntRay;
-					cntRay+= m_cntRay;
-
-					int r = min( 255, (int)(255*C.r) );
-					int g = min( 255, (int)(255*C.g) );
-					int b = min( 255, (int)(255*C.b) );
-
-					to[(py*width + px)*psize +0] = (unsigned char)b;
-					to[(py*width + px)*psize +1] = (unsigned char)r;
-					to[(py*width + px)*psize +2] = (unsigned char)g;
-				}
-			}
-			
-		}
-
 	};
 
-	//------------------------------------------------------------------------------
-	void	raytrace( SysGra& gra )
-	//------------------------------------------------------------------------------
-	{
-		Renderer ren;
-
-		{
-			float width		= gra.GetWidth(); 
-			float height	= gra.GetHeight(); 
-
-			float	aspect = width / height;
-		
-			vect3	posScr = vect3(0,1.0,-12+8);
-			vect3	posEye = vect3(0,1.0,-17+8);
-
-
-	//		float r,s,p,e,t,rl,rr;
-	///		rgb	C;
-
-			int	cntMax = 0;
-			int	cntRay = 0;
-			for( float py = 0 ; py < height ; py += 1.0 )
-			{
-				for( float px = 0 ; px < width ; px += 1.0 )
-				{
-					float	x = (px /  width) *2.0-1.0;
-					float	y = (py / height) *2.0-1.0;
-					vect3	P = vect3( x*aspect, y, 0 ) + posScr;
-					vect3	I = normalize(P - posEye);
-
-					ren.m_cntRay = 0;
-			 		rgb C = ren.Raycast( P, I );
-					if ( ren.m_cntRay > cntMax ) cntMax = ren.m_cntRay;
-					cntRay+= ren.m_cntRay;
-				/*
-					if (C.r<0 ) C.r = 0;
-					if (C.r>1.0 ) C.r = 1.0;
-					if (C.g<0 ) C.g = 0;
-					if (C.g>1.0 ) C.g = 1.0;
-					if (C.b<0 ) C.b = 0;
-					if (C.b>1.0 ) C.b = 1.0;
-				*/
-					gra.Pset( vect2(x,y) ,C);
-				}
-			}
-			
-		}
-
-	}
 
 };
 Lab29::Lab29() : pImpl( new Lab29::Impl ){}
@@ -580,7 +489,7 @@ void Lab29::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 //------------------------------------------------------------------------------
 {
 	// 画面クリア
-//	gra.Clr(rgb(0.3,0.3,0.3));
+	gra.Clr(rgb(0.3,0.3,0.3));
 //	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,"29 : raytrace" ); 
 
@@ -590,14 +499,59 @@ void Lab29::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pImpl->bResetAll = false;
 
 		// カメラ
-//		pers.cam.pos = vect3( 0.0, 2.0, -5.0 );
-//		pers.cam.at = vect3( 0,  1.0, 0 );
+		pers.cam.pos = vect3( 0.0, 2.0, -5.0 );
+		pers.cam.at = vect3( 0,  1.0, 0 );
+		pers.cam.Update();
 
 	}
 
 	if ( pImpl->bResetParam )
 	{
 		pImpl->bResetParam = false;
-		pImpl->raytrace( gra );
+	//	pImpl->raytrace( gra );
+
+
+
+	}
+
+	//------------------------------------------------------------------------------
+//	void	raytrace( SysGra& gra )
+	//------------------------------------------------------------------------------
+	{
+		Impl::Renderer ren;
+
+
+		float step = 2.0;
+		{
+			float width		= gra.GetWidth(); 
+			float height	= gra.GetHeight(); 
+
+			float	aspect = width / height;
+		
+			vect3	posScr = vect3(0,1.0,-12+8);
+			vect3	posEye = vect3(0,1.0,-17+8);
+
+
+			int	cntMax = 0;
+			int	cntRay = 0;
+			for( float py = 0 ; py < height ; py += step )
+			{
+				for( float px = 0 ; px < width ; px += step )
+				{
+					float	x = (px /  width) *2.0-1.0;
+					float	y = (py / height) *2.0-1.0;
+					vect3	P = vect3( x*aspect, y, 0 ) + posScr;
+					vect3	I = normalize(P - posEye);
+
+					ren.m_cntRay = 0;
+			 		rgb C = ren.Raycast( P, I );
+					if ( ren.m_cntRay > cntMax ) cntMax = ren.m_cntRay;
+					cntRay+= ren.m_cntRay;
+					gra.Pset( vect2(x,y) ,C);
+				}
+			}
+			
+		}
+
 	}
 }

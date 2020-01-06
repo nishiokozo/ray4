@@ -84,6 +84,7 @@ void Lab26::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		// カメラ
 		pers.cam.pos = vect3(-9.0, 3.0, 3.0 );
 		pers.cam.at = vect3(0,  0.0, 0 );
+		pers.cam.Update();
 
 		// カーブ線に接線データをもたせている。より自由な（複雑な）造形が可能
 		// 点

@@ -63,6 +63,7 @@ void Lab13::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		//カメラ
 		pers.cam.pos = vect3(	0.0,	4.3, -8.0 );
 		pers.cam.at = vect3( 	0.0,	2.3, 0.0 );
+		pers.cam.Update();
 
 		//点
 		pImpl->tbl_pObj.emplace_back( new Obj( vect3(  0,	1,	0	 ) ) );

@@ -71,6 +71,7 @@ void Lab16::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		// カメラ
 		pers.cam.pos = vect3( 0.0, 2.0, -5.0 );
 		pers.cam.at = vect3( 0,  1.0, 0 );
+		pers.cam.Update();
 
 		{
 			//gui.one.bEnable = false;
