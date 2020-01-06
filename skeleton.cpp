@@ -720,10 +720,10 @@ void Skeleton::DrawSkeleton( SysGra& gra, Pers& pers )
 					float rx = acos(dot(vect3(0,1,0),v));
 					float ry = atan2(v.x,v.z);
 					{
-						mat44	mx;
-						mat44	my;
-						my.setRotateY(-ry);
-						mx.setRotateX(-rx);
+						mat44	mx = mat44::mrotx(-rx);
+						mat44	my = mat44::mroty(-ry);
+//						my.setRotateY(-ry);
+//						mx.setRotateX(-rx);
 						mat44 m = mx * my;
 						skin.ring_DrawMat( gra, pers, pos, m );
 					}

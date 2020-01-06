@@ -466,11 +466,7 @@ class	mat44
 {
 public:
 
-//	union
-//	{
-	//	float	m_array[16];
 	MAT4	m;
-//	};
 	mat44()
 	{
 		//	m[行][列]
@@ -554,6 +550,15 @@ public:
 
 //	float* GetArray(){ return m_array; };
 
+/*
+*/
+	static mat44 midentity();
+	static mat44 mrotx( float f );
+	static mat44 mroty( float f );
+	static mat44 mrotz( float f );
+
+
+/*
 	void identity()
 	{
 		m[0][0] = 1.0f;	m[0][1] = 0.0f;	m[0][2] = 0.0f;	m[0][3] = 0.0f;
@@ -561,7 +566,6 @@ public:
 		m[2][0] = 0.0f;	m[2][1] = 0.0f;	m[2][2] = 1.0f;	m[2][3] = 0.0f;
 		m[3][0] = 0.0f;	m[3][1] = 0.0f;	m[3][2] = 0.0f;	m[3][3] = 1.0f;
 	}
-
 	void setRotateX( float rx )
 	{
 		float c=cos(rx);
@@ -589,7 +593,8 @@ public:
 		m[2][0] = 0.0f;	m[2][1] = 0.0f;	m[2][2] = 1.0f;	m[2][3] = 0.0f;
 		m[3][0] = 0.0f;	m[3][1] = 0.0f;	m[3][2] = 0.0f;	m[3][3] = 1.0f;
 	}
-	
+*/	
+/*
 	void AddTranslate( vect3 pos )
 	{
 		m[3][0] += pos.x;
@@ -608,6 +613,7 @@ public:
 		m[3][1] = y;
 		m[3][2] = z;
 	}
+*/
 
 	vect3 GetVectX()
 	{
@@ -661,6 +667,7 @@ public:
 		m[2][0] =z.x;	m[2][1] =z.y;	m[2][2] =z.z;	m[2][3] = 0.0f;
 		m[3][0] =pos.x;	m[3][1] =pos.y;	m[3][2] =pos.z;	m[3][3] = 1.0f;
 	}
+/*
 	void LookFor( vect3 pos, vect3 z, vect3 up )
 	{
 		vect3	x = cross( up, z );
@@ -671,7 +678,8 @@ public:
 		m[2][0] =z.x;	m[2][1] =z.y;	m[2][2] =z.z;	m[2][3] = 0.0f;
 		m[3][0] =pos.x;	m[3][1] =pos.y;	m[3][2] =pos.z;	m[3][3] = 1.0f;
 	}
-	void RotateXYZ( vect3 rot )
+*/
+/*	void RotateXYZ( vect3 rot )
 	{
 		this->RotateX( rot.x );
 		this->RotateY( rot.y );
@@ -710,12 +718,14 @@ public:
 			0,  0,  0,  1
 		);
 	}
+*/
 	void Tlanslate( vect3 vec )
 	{
 		m[3][0] += vec.x;
 		m[3][1] += vec.y;
 		m[3][2] += vec.z;
 	}
+/*
 	void Tlanslate( float x, float y, float z )
 	{
 		m[3][0] += x;
@@ -729,6 +739,7 @@ public:
 		m[1][1] *= y;
 		m[2][2] *= z;
 	}
+*/
 	void Scale( vect3 scale )
 	{
 		m[0][0] *= scale.x;
@@ -748,98 +759,8 @@ public:
 	}
 
 	//-----------------------------------------------------------------------------
-	mat44 invers()
+	mat44 invers();
 	//-----------------------------------------------------------------------------
-	{
-	#if 1
-
-		mat44 A(*this);
-		mat44 I(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1);
-		
-		int z1=4;  //配列の次数
-
-		//掃き出し法
-		for( int i = 0 ; i < z1 ; i++ )
-		{
-			float f =1/A.m[i][i];
-			for( int j = 0 ; j < z1 ; j++ )
-			{
-				A.m[i][j] *= f;
-				I.m[i][j] *= f;
-			}
-			for( int j = 0 ; j < z1 ; j++ )
-			{
-				if( i !=j )
-				{
-					f= A.m[j][i];
-					for( int k = 0 ; k < z1 ; k++ )
-					{
-						A.m[j][k] -= A.m[i][k]*f;
-						I.m[j][k] -= I.m[i][k]*f;
-					}
-				}
-			}
-		}
-		return I;
-	#else
-		float a[4][4];
-
-		a[0][0] = m[0][0];
-		a[0][1] = m[0][1]; 
-		a[0][2] = m[0][2]; 
-		a[0][3] = m[0][3]; 
-		a[1][0] = m[1][0]; 
-		a[1][1] = m[1][1]; 
-		a[1][2] = m[1][2]; 
-		a[1][3] = m[1][3]; 
-		a[2][0] = m[2][0]; 
-		a[2][1] = m[2][1]; 
-		a[2][2] = m[2][2]; 
-		a[2][3] = m[2][3]; 
-		a[3][0] = m[3][0]; 
-		a[3][1] = m[3][1]; 
-		a[3][2] = m[3][2]; 
-		a[3][3] = m[3][3]; 
-
-		mat44 inv_a;
-		
-		float buf; //一時的なデータを蓄える
-		int i,j,k; //カウンタ
-		int z1=4;  //配列の次数
-
-		//単位行列を作る
-		for(i=0;i<z1;i++)
-		{
-			for(j=0;j<z1;j++)
-			{
-				inv_a.m[i][j]=(i==j)?1.0:0.0;
-			}
-		}
-		//掃き出し法
-		for(i=0;i<z1;i++)
-		{
-			buf=1/a[i][i];
-			for(j=0;j<z1;j++)
-			{
-				a[i][j]*=buf;
-				inv_a.m[i][j]*=buf;
-			}
-			for(j=0;j<z1;j++)
-			{
-				if(i!=j)
-				{
-					buf=a[j][i];
-					for(k=0;k<z1;k++)
-					{
-						a[j][k]-=a[i][k]*buf;
-						inv_a.m[j][k]-=inv_a.m[i][k]*buf;
-					}
-				}
-			}
-		}
-		return inv_a;
-	#endif
-	}
 
 	void dump()
 	{
@@ -947,51 +868,8 @@ public:
 	}
 
 	//-----------------------------------------------------------------------------
-	mat43 invers()
+	mat43 invers();
 	//-----------------------------------------------------------------------------
-	{
-
-		mat44 A(
-			m[0][0],	m[0][1],	m[0][2],	0.0,
-			m[1][0],	m[1][1],	m[1][2],	0.0,
-			m[2][0],	m[2][1],	m[2][2],	0.0,
-			pos[0],		pos[1],		pos[2],		1.0
-		);
-		mat44 I(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1);
-		
-		int z1=4;  //配列の次数
-
-		//掃き出し法
-		for( int i = 0 ; i < z1 ; i++ )
-		{
-			float f =1/A.m[i][i];
-			for( int j = 0 ; j < z1 ; j++ )
-			{
-				A.m[i][j] *= f;
-				I.m[i][j] *= f;
-			}
-			for( int j = 0 ; j < z1 ; j++ )
-			{
-				if( i !=j )
-				{
-					f= A.m[j][i];
-					for( int k = 0 ; k < z1 ; k++ )
-					{
-						A.m[j][k] -= A.m[i][k]*f;
-						I.m[j][k] -= I.m[i][k]*f;
-					}
-				}
-			}
-		}
-		return mat43
-		(
-			I.m[0][0],	I.m[0][1],	I.m[0][2],
-			I.m[1][0],	I.m[1][1],	I.m[1][2],
-			I.m[2][0],	I.m[2][1],	I.m[2][2],
-			I.m[3][0],	I.m[3][1],	I.m[3][2]
-		);
-		
-	}
 
 	void dump()
 	{

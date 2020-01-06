@@ -144,7 +144,6 @@ struct Lab29::Impl
 		vect3	A;
 
 	public:
-		int m_cntRay;
 
 
 		//------------------------------------------------------------------------------
@@ -197,11 +196,7 @@ struct Lab29::Impl
 
 				vect3	l = P-O;
 				float	b = dot( I, l );
-	#if 1
-				// 屈折をに非対応
 				float	aa = r*r - dot(l,l)+ b*b;
-
-	//			int	stat = Surface::STAT_NONE;
 
 				if ( aa >= 0 )
 				{
@@ -238,58 +233,7 @@ struct Lab29::Impl
 						}
 					}
 				}
-	#else
-				// 屈折を一部対応した記憶があるが、内容が読めない
-				float	aa = r*r - dot(l,l)+ b*b;
 
-				int	stat = Surface::STAT_NONE;
-
-				if ( aa >= 0 )
-				{
-					float t = - sqrt( aa ) - b;
-					if ( t < 0 )
-					{
-						t = + sqrt( aa ) - b;
-						stat++;	//STAT_OUT
-					}
-
-					if ( sur.t >= t && t >= 0 )
-					{
-						stat += 2;	// t<0 ? STAT_BACK : STAT_FRONT
-
-						sur.stat = stat;
-
-						sur.t = t; 
-
-						sur.Q = I * t + P;
-
-						if ( stat == Surface::STAT_BACK )
-						{
-							sur.N = -normalize(sur.Q - O);
-						}
-						else
-						{
-							sur.N = normalize(sur.Q - O);
-						}
-
-						sur.C = obj.C;
-
-						sur.R = reflect( I, sur.N );
-
-						sur.valReflectance = obj.valReflectance;
-
-						sur.valRefractive   = obj.valRefractive;
-
-						sur.valPower = obj.valPower;
-
-						sur.valEmissive = obj.valEmissive;
-
-						sur.valTransmittance = obj.valTransmittance;
-
-						sur.flg = true;
-					}
-				}
-	#endif
 			}
 
 			//	床
@@ -347,20 +291,11 @@ struct Lab29::Impl
 		}
 
 		//------------------------------------------------------------------------------
-		~Renderer()
-		//------------------------------------------------------------------------------
-		{
-		}
-
-		//------------------------------------------------------------------------------
 		Renderer()
 		//------------------------------------------------------------------------------
 		{
-			m_cntRay = 0;
 			A = vect3(0,0,0);
 
-
-	//		float r,s,pw,e,tm,rl,rr;
 			float pw,e,tm,rl,rr;
 			vect3	P,C,N;
 
@@ -424,13 +359,12 @@ struct Lab29::Impl
 		}
 
 		//------------------------------------------------------------------------------
-		vect3 Raycast( vect3 P, vect3 I )
+		vect3 Raytrace( vect3 P, vect3 I, int nest )
 		//------------------------------------------------------------------------------g
 		{
 			vect3 ret = vect3(0,0,0);
 
-			if ( m_cntRay > 5 ) return ret;
-			m_cntRay++;
+			if ( nest<=0 ) return ret;
 
 			Surface sur;
 			PrimLight&	lgt = m_tblLight[0];
@@ -439,7 +373,6 @@ struct Lab29::Impl
 			float	d;
 			float	s=0;
 			float	r=0;
-	//		float	t=0;
 			
 			if ( (sur = raycast( P, I )).flg )
 			{
@@ -448,7 +381,7 @@ struct Lab29::Impl
 				d	= max( 0.0, dot( sur.N, -L ) );
 				s	= (sur.valPower+2)/(8*pi)*pow( max( 0.0, dot( sur.R, -L ) ), sur.valPower );
 				r	= sur.valReflectance;
-				ret += r* (Raycast( sur.Q, sur.R )+vect3(s,s,s)) * Lc;
+				ret += r* (Raytrace( sur.Q, sur.R, nest-1 )+vect3(s,s,s)) * Lc;
 
 				if ( sur.valTransmittance == 0.0 )
 				{
@@ -462,7 +395,7 @@ struct Lab29::Impl
 
 
 					I = refract( I, sur.N, 1.0/sur.valRefractive );
-					ret += (1-r)*Raycast( sur.Q, I );
+					ret += (1-r)*Raytrace( sur.Q, I, nest-1 );
 				}
 
 			}
@@ -470,12 +403,13 @@ struct Lab29::Impl
 			{
 				L = (sur.Q - lgt.P).normalize();
 				Lc = lgt.C / dot(sur.Q - lgt.P, sur.Q - lgt.P);
-	//			int n = 20;
 				ret += vect3(s,s,s);
 			}
 
 			return ret;
 		}
+
+
 	};
 
 
@@ -508,15 +442,8 @@ void Lab29::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	if ( pImpl->bResetParam )
 	{
 		pImpl->bResetParam = false;
-	//	pImpl->raytrace( gra );
-
-
-
 	}
 
-	//------------------------------------------------------------------------------
-//	void	raytrace( SysGra& gra )
-	//------------------------------------------------------------------------------
 	{
 		Impl::Renderer ren;
 
@@ -528,12 +455,10 @@ void Lab29::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 			float	aspect = width / height;
 		
-			vect3	posScr = vect3(0,1.0,-12+8);
-			vect3	posEye = vect3(0,1.0,-17+8);
+			vect3	posScr = vect3(0,1.0,-4);
+			vect3	posEye = vect3(0,1.0,-9);
 
 
-			int	cntMax = 0;
-			int	cntRay = 0;
 			for( float py = 0 ; py < height ; py += step )
 			{
 				for( float px = 0 ; px < width ; px += step )
@@ -543,10 +468,10 @@ void Lab29::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 					vect3	P = vect3( x*aspect, y, 0 ) + posScr;
 					vect3	I = normalize(P - posEye);
 
-					ren.m_cntRay = 0;
-			 		rgb C = ren.Raycast( P, I );
-					if ( ren.m_cntRay > cntMax ) cntMax = ren.m_cntRay;
-					cntRay+= ren.m_cntRay;
+P = pers.cam.mat.invers() * P;
+I = pers.cam.mat.invers() * I;
+
+			 		rgb C = ren.Raytrace( P, I, 5 );
 					gra.Pset( vect2(x,y) ,C);
 				}
 			}
