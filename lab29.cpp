@@ -68,8 +68,8 @@ struct Lab29::Impl
 			// 2:front
 			// 3:inside
 
-		vect3	Q;
-		vect3	N;
+		vect3	Q;	//  Q point
+		vect3	N;	//  Normal
 		vect3	R;	//	Reflectionion
 		vect3	Rr;	//	Refractive	
 
@@ -86,6 +86,26 @@ struct Lab29::Impl
 	};
 
 
+	struct PrimTriangle : public Material
+	{
+		vect3	v0;
+		vect3	v1;
+		vect3	v2;
+
+		PrimTriangle( vect3 _v0, vect3 _v1, vect3 _v2, vect3 _c, float _valReflection, float _valRefractive, float _valPower, float _valEmissive, float _valTransmittance )
+		{
+			v0 = _v0;
+			v1 = _v1;
+			v2 = _v2;
+			C = max(0.0,min(1.0,_c));
+			valReflectance	= _valReflection;
+			valRefractive	= _valRefractive;
+			valPower= _valPower;
+			valEmissive	= _valEmissive;
+			valTransmittance	= _valTransmittance;
+		};
+
+	};
 
 	struct PrimSphere : public Material
 	{
@@ -138,6 +158,7 @@ struct Lab29::Impl
 	class	Renderer 
 	////////////////////////////////////////////////////////////////////////////////
 	{
+		vector<PrimTriangle>	m_tblTriangle;
 		vector<PrimSphere>	m_tblSphere;
 		vector<PrimPlate>	m_tblPlate;
 		vector<PrimLight>	m_tblLight;
@@ -160,6 +181,51 @@ struct Lab29::Impl
 			sur.t  = infinit;
 			sur.stat  = Surface::STAT_NONE;
 			
+			//	三角形
+			for ( int i = 0 ; i < (signed)m_tblTriangle.size() ; i++ )
+			{
+				PrimTriangle&	obj = m_tblTriangle[i];
+
+				vect3 e1 = obj.v1-obj.v0;
+				vect3 e2 = obj.v2-obj.v0;
+
+				vect3 N = cross(e1,e2).normalize();
+
+				auto[flg,Q,t] = func_intersect_Plate_Line( obj.v0, N, P, I );
+
+		//		float	f = dot(N, I );
+				
+				if ( flg )
+				{
+//					if ( dot(N,e1)*dot(N,e2 )<0 )
+					{
+							sur.stat = Surface::STAT_FRONT;
+
+							sur.t = t; 
+
+							sur.Q = I * t + P;
+
+							sur.N = N;
+
+							sur.C = obj.C;
+
+							sur.R = reflect( I, sur.N );
+
+							sur.valReflectance = obj.valReflectance;
+
+							sur.valRefractive   = obj.valRefractive;
+
+							sur.valPower = obj.valPower;
+
+							sur.valEmissive = obj.valEmissive;
+
+							sur.valTransmittance = obj.valTransmittance;
+
+							sur.flg = true;
+					}
+				}
+
+			}
 			//	球
 			for ( int i = 0 ; i < (signed)m_tblSphere.size() ; i++ )
 			{
@@ -205,9 +271,7 @@ struct Lab29::Impl
 					{
 						if ( sur.t >= t )
 						{
-							int	stat = Surface::STAT_FRONT;
-		
-							sur.stat = stat;
+							sur.stat = Surface::STAT_FRONT;
 
 							sur.t = t; 
 
@@ -298,8 +362,29 @@ struct Lab29::Impl
 
 			vect3	P,C,N;
 
-		#define	SCENE 5
-		#if SCENE==1
+		#define	SCENE 6
+		#if SCENE==6
+			float pw,e,em, tm,rl,rr;
+			m_tblPlate.push_back( PrimPlate( P=vect3( 0  ,  0 ,0.0),N=vect3(0,1,0),C=vect3(0.8,0.8,0.8),rl=0.5,rr=1.0 ,pw=20,e= 0.0,tm=0.0 ) );
+			m_tblTriangle.push_back( 
+				PrimTriangle(
+					vect3( 0.0 , 0.0,  2),   
+					vect3(-1.0 , 1.0,  1),   
+					vect3( 1.0 , 1.0,  3),   
+					C = vect3(1  , 0.2, 0.2), 
+					rl = 0.0, 
+					rr = 0.0, 
+					pw = 20, 
+					em = 0.0, 
+					tm = 0.0
+				) 
+			);
+			m_tblLight.push_back( PrimLight( vect3( 0   ,  1 ,  0 ), vect3(1,1,1)*4 )  );
+			A = vect3( 0.2,0.4,0.6)*0.0;
+
+
+		#endif
+		#if SCENE==1	// 3 Balls Pilamid
 			float pw,e,tm,rl,rr;
 			m_tblPlate.push_back( PrimPlate( P=vect3( 0  ,  0 ,0.0),N=vect3(0,1,0),C=vect3(0.8,0.8,0.8),rl=0.5,rr=1.0 ,pw=20,e= 0.0,tm=0.0 ) );
 			m_tblSphere.push_back( PrimSphere(vect3( 0.0 , 1.25, -2       ),   0.5 , vect3(1  , 0.2, 0.2), 0.5, 1.0, 20, 0.0, 0.0 ) );
