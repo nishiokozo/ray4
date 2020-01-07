@@ -59,17 +59,19 @@ void Lab28::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	{
 		pImpl->bResetAll = false;
 
+	}
+
+	if ( pImpl->bResetParam )
+	{
+		pImpl->bResetParam = false;
+
 		// カメラ
 		pers.cam.pos	= vect3( 3.0, 3.0, -12.0 );
 		pers.cam.at		= vect3( 3.0, 3.0, 0 );
 		pers.cam.Update();
 		pers.fovy=rad(45);
 	}
-
-	if ( pImpl->bResetParam )
-	{
-		pImpl->bResetParam = false;
-	}
+	if ( keys.R.hi )	pImpl->bResetParam = true;
 
 
 	// fa(t) 右肩上がり

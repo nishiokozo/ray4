@@ -190,29 +190,32 @@ struct Lab29::Impl
 				const vect3& v1 = obj.v1;
 				const vect3& v2 = obj.v2;
 
-				// ①平面(v0,v1,v2)の法線Nを求める
+				// ①平面(v0,v1,v2)の表（CW)の法線Nを求める
 				vect3 N = cross(v1-v0,v2-v0).normalize();
 
 				// ②視点Pと平面との距離f を求める
 				float f = dot( N, P-obj.v0 );  
 			
 				// ③表面（視点Pが平面の表側にあるとき）だけ衝突判定を行う
-				//	if ( f > 0 ) 
+				if ( f > 0 ) 
 				{
 					// ④衝突距離t（視線I方向の距離）を求める
-					float	t = f / dot( N, -I );
+					float	t = f / -dot( N, I );
 
 					// ⑤衝突座標Q（平面上の座標）を求める
 					vect3	Q = I * t + P;
 
 					// ⑥衝突座標Q がポリゴン(v0,v1,v2)内かどうかの判定する
-					float z = (Q.x-v0.x)*(v1.y-v0.y)-(Q.y-v0.y)*(v1.x-v0.x);
+					float z = dot( cross(Q-v0,v1-v0), I );
+//					float z = (Q.x-v0.x)*(v1.y-v0.y)-(Q.y-v0.y)*(v1.x-v0.x);
 					if ( z > 0 )
 					{
-						float z = (Q.x-v1.x)*(v2.y-v1.y)-(Q.y-v1.y)*(v2.x-v1.x);
+//						float z = (Q.x-v1.x)*(v2.y-v1.y)-(Q.y-v1.y)*(v2.x-v1.x);
+						float z = dot( cross(Q-v1,v2-v1), I );
 						if ( z >0 )
 						{
-							float z = (Q.x-v2.x)*(v0.y-v2.y)-(Q.y-v2.y)*(v0.x-v2.x);
+//							float z = (Q.x-v2.x)*(v0.y-v2.y)-(Q.y-v2.y)*(v0.x-v2.x);
+							float z = dot( cross(Q-v2,v0-v2), I );
 							if ( z >0 )
 							{
 								sur.stat = Surface::STAT_FRONT;
@@ -385,22 +388,68 @@ struct Lab29::Impl
 			float pw,e,em, tm,rl,rr;
 			m_tblPlate.push_back( PrimPlate( P=vect3( 0  ,  0 ,0.0),N=vect3(0,1,0),C=vect3(0.8,0.8,0.8),rl=0.5,rr=1.0 ,pw=20,e= 0.0,tm=0.0 ) );
 
-			mat33 m = mat33::mroty(rad(45))*mat33::mrotx(rad(45));
+			mat33 m = mat33::mroty(rad(23))*mat33::mrotx(rad(-15));
+
+			vect3	tblCube[8]=
+			{
+				vect3(-0.5, 0.5+1,-0.5),
+				vect3( 0.5, 0.5+1,-0.5),
+				vect3(-0.5,-0.5+1,-0.5),
+				vect3( 0.5,-0.5+1,-0.5),
+				vect3(-0.5, 0.5+1, 0.5),
+				vect3( 0.5, 0.5+1, 0.5),
+				vect3(-0.5,-0.5+1, 0.5),
+				vect3( 0.5,-0.5+1, 0.5),
+			};
+			
+			struct Suf
+			{
+				ivect3	idx1;
+				ivect3	idx2;
+				vect3	C;
+			};
+			Suf	tblQuad[]=
+			{
+				// 時計回りが表
+				{{0,1,2},{2,1,3}, rgb(1, 0.2, 0.2)},
+				{{5,4,6},{6,7,5}, rgb(1, 1.0, 0.2)},
+				{{4,5,0},{0,5,1}, rgb(1, 0.2, 1.0)},
+				{{2,3,6},{6,3,7}, rgb(0.2, 1.0, 0.2)},
+				{{4,0,6},{6,0,2}, rgb(0.2, 0.2, 1.0)},
+				{{1,5,3},{3,5,7}, rgb(0.2, 1.0, 1.0)},
+
+			};
+			for ( Suf i : tblQuad )
+			{
+				m_tblTriangle.push_back( 
+					PrimTriangle(
+						tblCube[ i.idx1.n0 ] * m,   
+						tblCube[ i.idx1.n1 ] * m,   
+						tblCube[ i.idx1.n2 ] * m,   
+						C = i.C, rl = 0.0,rr = 0.0,pw = 20, em = 0.0, tm = 0.0
+					) 
+				);
+				m_tblTriangle.push_back( 
+					PrimTriangle(
+						tblCube[ i.idx2.n0 ] * m,   
+						tblCube[ i.idx2.n1 ] * m,   
+						tblCube[ i.idx2.n2 ] * m,   
+						C = i.C, rl = 0.0,rr = 0.0,pw = 20, em = 0.0, tm = 0.0
+					) 
+				);
+				
+			}
+			/*
 			m_tblTriangle.push_back( 
 				PrimTriangle(
 					vect3( 0.0 ,         0.0 ,  0) * m,   
 					vect3(-0.5 , cos(rad(30)),  0) * m,   
 					vect3( 0.5 , cos(rad(30)),  0) * m,   
-					C = vect3(1  , 0.2, 0.2), 
-					rl = 0.0, 
-					rr = 0.0, 
-					pw = 20, 
-					em = 0.0, 
-					tm = 0.0
+					C = vect3(1  , 0.2, 0.2), rl = 0.0,rr = 0.0,pw = 20, em = 0.0, tm = 0.0
 				) 
 			);
-			m_tblLight.push_back( PrimLight( vect3( 0   ,  2 ,  0 ), vect3(1,1,1)*16 )  );
-			A = vect3( 0.2,0.4,0.6)*0.0;
+			*/
+			m_tblLight.push_back( PrimLight( vect3( 18   ,  18,  -18 ), vect3(1,1,1)*1300 )  );
 
 
 		#endif
@@ -412,7 +461,6 @@ struct Lab29::Impl
 			m_tblSphere.push_back( PrimSphere(vect3( 0.5 , 0.5 , -2+0.433 ),   0.5 , vect3(0.2, 0.2, 1.0), 0.5, 1.0, 20, 0.0, 0.0 ) );
 			m_tblSphere.push_back( PrimSphere(vect3(-0.5 , 0.5 , -2+0.433 ),   0.5 , vect3(0.0, 1.0, 0.0), 0.5, 1.0, 20, 0.0, 0.0 ) );
 			m_tblLight.push_back( PrimLight( vect3( 0   ,  30 ,  0 ), vect3(1,1,1)*1300 )  );
-			A = vect3( 0.2,0.4,0.6)*0.0;
 		#endif
 		#if SCENE==2 //5 balls
 			float pw,e,tm,rl,rr;
@@ -423,7 +471,6 @@ struct Lab29::Impl
 			m_tblSphere.push_back( PrimSphere(vect3( 1.0 , 0.5 , -2 ),   0.5 , vect3(0.0, 0.0, 0.0), 0.25, 1.0, 20, 0.0, 0.0 ) );
 			m_tblSphere.push_back( PrimSphere(vect3( 2.0 , 0.5 , -2 ),   0.5 , vect3(0.0, 0.0, 0.0), 0.0 , 1.0, 20, 0.0, 0.0 ) );
 			m_tblLight.push_back( PrimLight( vect3( 0   ,  20 ,  -2 ), vect3(1.0, 1.0, 1.0)*800 ) );
-			A = vect3( 0.2,0.4,0.6)*1.0;
 		#endif
 		#if SCENE==3 // ring
 			float pw,e,tm,rl,rr,r;
@@ -444,14 +491,12 @@ struct Lab29::Impl
 			m_tblLight.push_back( PrimLight( vect3(-30   ,  30 ,  0 ), vect3(0.5,1,1)*1800 )  );
 			m_tblLight.push_back( PrimLight( vect3(60   ,  80 ,  0 ), vect3(1,1,0.5)*4800 )  );
 			m_tblLight.push_back( PrimLight( vect3(-60   ,  80 , 0 ), vect3(1,0.5,1)*4800 )  );
-			A = vect3( 0.2,0.4,0.6)*0.0;
 		#endif
 		#if SCENE==4 //twin balls
 			m_tblPlate.push_back( PrimPlate( vect3( 0   ,  0 ,  0    ), normalize(vect3(0, 1,0))  , vect3(0.8, 0.8, 0.8), 0.5, 1.0, 20, 0.0, 0.0 ) );
 			m_tblSphere.push_back( PrimSphere(vect3(-1.0 , 1.0 , -2 ),   1.0 , vect3(1.0, 0.5, 0.5), 0.2, 1.0, 20, 0.0, 0.0 ) );
 			m_tblSphere.push_back( PrimSphere(vect3( 1.0 , 1.0 , -2 ),   1.0 , vect3(0.0, 0.0, 0.0), 0.2, 1.0, 20, 0.0, 0.0 ) );
 			m_tblLight.push_back( PrimLight( vect3( 0   ,  20 ,  -2 ), vect3(1.0, 1.0, 1.0)*1800 ) );
-			A = vect3( 0.2,0.4,0.6)*1.0;
 		#endif
 		#if SCENE==5//2 balls
 			float pw,e,tm,rl,rr,r;
@@ -462,7 +507,6 @@ struct Lab29::Impl
 			m_tblSphere.push_back( PrimSphere(P=vect3( 0.0,0.5,3.0),r=0.5       ,C=vect3(1.0,1.0,0.0),rl=0.5,rr=1.0 ,pw=20,e=10.0,tm=0.0 ) );
 			m_tblSphere.push_back( PrimSphere(P=vect3( 0.0,1.0,2.75),r=0.25      ,C=vect3(1.0,1.0,1.0),rl=0.5,rr=1.0 ,pw=20,e=10.0,tm=0.0 ) );
 			m_tblLight.push_back( PrimLight( P=vect3( 1.0 ,15, 0 )          ,C=vect3(1,1,1)*360 )  );
-			A = vect3( 0.2,0.4,0.6)*0.5;
 		#endif
 		}
 
@@ -475,43 +519,45 @@ struct Lab29::Impl
 			if ( nest<=0 ) return ret;
 
 			Surface sur;
-			PrimLight&	lgt = m_tblLight[0];
-			vect3	Lc;
-			vect3	L;
-			float	d;
-			float	s=0;
-			float	r=0;
-			
-			if ( (sur = raycast( P, I )).flg )
+			for ( PrimLight& lgt : m_tblLight )
 			{
-				L	= normalize(sur.Q - lgt.P);
-				Lc	= lgt.C / dot(sur.Q - lgt.P, sur.Q - lgt.P);
-				d	= max( 0.0, dot( sur.N, -L ) );
-				s	= (sur.valPower+2)/(8*pi)*pow( max( 0.0, dot( sur.R, -L ) ), sur.valPower );
-				r	= sur.valReflectance;
-				ret += r* (Raytrace( sur.Q, sur.R, nest-1 )+vect3(s,s,s)) * Lc;
-
-				if ( sur.valTransmittance == 0.0 )
+				vect3	Lc;
+				vect3	L;
+				float	d;
+				float	s=0;
+				float	r=0;
+				
+				if ( (sur = raycast( P, I )).flg )
 				{
-					ret += (1-r)*( d * sur.C ) * Lc;
+					L	= normalize(sur.Q - lgt.P);
+					Lc	= lgt.C / dot(sur.Q - lgt.P, sur.Q - lgt.P);
+					d	= max( 0.0, dot( sur.N, -L ) );
+					s	= (sur.valPower+2)/(8*pi)*pow( max( 0.0, dot( sur.R, -L ) ), sur.valPower );
+					r	= sur.valReflectance;
+					ret += r* (Raytrace( sur.Q, sur.R, nest-1 )+vect3(s,s,s)) * Lc;
+
+					if ( sur.valTransmittance == 0.0 )
+					{
+						ret += (1-r)*( d * sur.C ) * Lc;
+					}
+					else
+					{
+						I = refract( I, sur.N, sur.valRefractive/1.0 );
+						sur = raycast( sur.Q, I );
+
+
+
+						I = refract( I, sur.N, 1.0/sur.valRefractive );
+						ret += (1-r)*Raytrace( sur.Q, I, nest-1 );
+					}
+
 				}
 				else
 				{
-					I = refract( I, sur.N, sur.valRefractive/1.0 );
-					sur = raycast( sur.Q, I );
-
-
-
-					I = refract( I, sur.N, 1.0/sur.valRefractive );
-					ret += (1-r)*Raytrace( sur.Q, I, nest-1 );
+					L = (sur.Q - lgt.P).normalize();
+					Lc = lgt.C / dot(sur.Q - lgt.P, sur.Q - lgt.P);
+					ret += vect3(s,s,s);
 				}
-
-			}
-			else
-			{
-				L = (sur.Q - lgt.P).normalize();
-				Lc = lgt.C / dot(sur.Q - lgt.P, sur.Q - lgt.P);
-				ret += vect3(s,s,s);
 			}
 
 			return ret;
@@ -541,7 +587,7 @@ void Lab29::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pImpl->bResetAll = false;
 
 		// カメラ
-		pers.cam.pos = vect3( 0.0, 1.0, -5.0 );
+		pers.cam.pos = vect3( 2.0, 2.0, -5.0 );
 		pers.cam.at = vect3( 0,  1.0, 0 );
 		pers.cam.Update();
 
@@ -570,7 +616,7 @@ static float py = 0;
 			vect3	posEye = vect3(0,0.0,-5);
 
 
-//			for( float py = 0 ; py < height ; py += step )
+			for( float py = 0 ; py < height ; py += step )
 			{
 				for( float px = 0 ; px < width ; px += step )
 				{

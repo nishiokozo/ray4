@@ -52,15 +52,15 @@ void Lab1::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 	// 初期化
 	if ( pImpl->bResetAll )
 	{
-		pImpl->bResetAll = true;
-		pers.cam.pos = vect3( 0.0, 0.0, -5.0 );
-		pers.cam.at = vect3( 0,  0.0, 0 );
-		pers.cam.Update();
+		pImpl->bResetAll = false;
 	}
 
 	if ( pImpl->bResetParam )
 	{
 		pImpl->bResetParam = false;
+		pers.cam.pos = vect3( 0.0, 0.0, -5.0 );
+		pers.cam.at = vect3( 0,  0.0, 0 );
+		pers.cam.Update();
 	}
 
 

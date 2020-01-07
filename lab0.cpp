@@ -65,10 +65,6 @@ void Lab0::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 	vect3 vz = vect3(0,0,1);
 	{
 		vect3 p0 = vect3(-1,1,0);
-//		pers.pen.line3d(gra,pers, p0,p0+vx, rgb(1,0,0));
-//		pers.pen.line3d(gra,pers, p0,p0+vy, rgb(0,1,0));
-///		pers.pen.line3d(gra,pers, p0,p0+vz, rgb(0,0,1));
-
 		pers.prim.DrawVect( gra, pers, text_y, p0, vx ,1	, rgb(1,0,0), "+x" );
 		pers.prim.DrawVect( gra, pers, text_y, p0, vy ,1	, rgb(0,1,0), "+y" );
 		pers.prim.DrawVect( gra, pers, text_y, p0, vz ,1	, rgb(0,0,1), "+z" );
@@ -79,10 +75,6 @@ void Lab0::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 		vect3 xy = cross(vx,vy);
 		vect3 yz = cross(vy,vz);
 		vect3 zx = cross(vz,vx);
-//		pers.pen.line3d(gra,pers, p0,p0+yz, rgb(1,0,0),2);
-//		pers.pen.line3d(gra,pers, p0,p0+zx, rgb(0,1,0),2);
-//		pers.pen.line3d(gra,pers, p0,p0+xy, rgb(0,0,1),2);
-
 		pers.prim.DrawVect( gra, pers, text_y, p0, yz ,1	, rgb(1,0,0), "cross y*z" );
 		pers.prim.DrawVect( gra, pers, text_y, p0, zx ,1	, rgb(0,1,0), "cross z*x" );
 		pers.prim.DrawVect( gra, pers, text_y, p0, xy ,1	, rgb(0,0,1), "cross x*y" );
