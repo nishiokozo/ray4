@@ -300,4 +300,6 @@ void Lab12::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	pers.prim.DrawSphere( gra, pers, b1.pos, b1.mat, b1.radius );
 	pers.prim.DrawSphere( gra, pers, b2.pos, b2.mat, b2.radius );
 
+	// 1/60sec 待
+	gra.Wait();
 }

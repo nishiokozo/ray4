@@ -382,4 +382,8 @@ void Lab23::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	
 	// メッセージ表示
 	if ( pImpl->bPause ) gra.Print(1,(float)text_y++,string("<Pause>")); 
+
+
+	// 1/60sec 待
+	gra.Wait();
 }

@@ -211,4 +211,6 @@ pImpl->mov =pImpl->vel;
 #endif
 
 	
+	// 1/60sec 待
+	gra.Wait();
 }

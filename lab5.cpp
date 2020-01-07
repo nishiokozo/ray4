@@ -112,4 +112,7 @@ void Lab5::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 		v1 = v0+vect3(x,y,0);
 
 	}
+
+	// 1/60sec 待
+	gra.Wait();
 }

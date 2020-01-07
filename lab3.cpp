@@ -159,4 +159,7 @@ void Lab3::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 		}
 	}
 
+	// 1/60sec 待
+	gra.Wait();
+
 }

@@ -264,5 +264,7 @@ void Lab8::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 	pImpl->plot_moment.DrawPlot( gra, pers );
 	gra.Print(1,(float)text_y++,string("<<radius>>")+to_string(bar.abs())); 
 
+	// 1/60sec 待
+	gra.Wait();
 
 }

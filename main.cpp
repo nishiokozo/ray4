@@ -85,7 +85,6 @@ struct Apr : public Sys
 		{
 			keys.Update();
 			mouse.Update();
-			gra.Update();
 
 			if ( keys._9.hi )
 			{
@@ -99,8 +98,8 @@ struct Apr : public Sys
 			//=================================
 			{
 				// パースペクティブ
-				if (keys.Y.rep) {pers.fovy-=2;cout << pers.fovy <<" "<<1/tan(deg2rad(pers.fovy)) << endl; }
-				if (keys.H.rep) {pers.fovy+=2;cout << pers.fovy <<" "<<1/tan(deg2rad(pers.fovy)) << endl; }
+				if (keys.Y.hi) {pers.fovy-=2;cout << pers.fovy <<" "<<1/tan(deg2rad(pers.fovy)) << endl; }
+				if (keys.H.hi) {pers.fovy+=2;cout << pers.fovy <<" "<<1/tan(deg2rad(pers.fovy)) << endl; }
 
 				// パース更新
 				pers.Update( vect2( gra.GetWidth(), gra.GetHeight() ) );
@@ -165,8 +164,8 @@ struct Apr : public Sys
 
 //				if ( keys.CTRL.on && mouse.B.hi ) {gui.one.bEnable = false;lab.SetNextIdx(-1,gui.cp);};
 //				if ( keys.CTRL.on && mouse.F.hi ) {gui.one.bEnable = false;lab.SetNextIdx(+1,gui.cp);};
-				if ( keys.B.rep ) {gui.one.bEnable = false;lab.SetNextIdx(-1,gui.cp);};
-				if ( keys.N.rep ) {gui.one.bEnable = false;lab.SetNextIdx(+1,gui.cp);};
+				if ( keys.B.hi ) {gui.one.bEnable = false;lab.SetNextIdx(-1,gui.cp);};
+				if ( keys.N.hi ) {gui.one.bEnable = false;lab.SetNextIdx(+1,gui.cp);};
 				lab.Update( keys, mouse, sound, gra, pers, T, text_y, gui.cp );
 			}
 			
@@ -296,6 +295,9 @@ struct Apr : public Sys
 				Obj& o = *gui.cp.tbltbl_pObj[ gui.one.idxTbl ][ gui.one.idxObj ];
 				gra.Print(1,(float)text_y++,string("one: ")+to_string(o.pos.x)+" , "+to_string(o.pos.y)+" , "+to_string(o.pos.z)); 
 			}
+
+			// 描画
+			gra.Flush();
 
 		}
 

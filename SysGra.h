@@ -20,7 +20,9 @@ struct SysGra
 	void OnCreate();
 	void OnPaint();
 
-	void	Update();
+//	void	Update();
+	void	Wait();
+	void	Flush();
 
 	void	Print( vect2 v, string str, rgb col=rgb(1,1,1) );
 	void	Print( float x, float y, string str, rgb col=rgb(1,1,1) );

@@ -153,5 +153,8 @@ void Lab20::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	funcShowBar( gra, m_y++, pImpl->ball.vel.abs(),"vel      ", rgb(1,1,1) );
 	funcShowBar( gra, m_y++, pImpl->ball.spin, 	"spin     ", rgb(1,1,1) );
 	funcShowBar( gra, m_y++, pImpl->valMasatu, 		"pImpl->valMasatu ", rgb(1,1,1) );
+
+	// 1/60sec 待
+	gra.Wait();
 	
 }

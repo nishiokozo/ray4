@@ -539,7 +539,7 @@ static float py = 0;
 		Impl::Renderer ren;
 
 
-		float step = 4.0;
+		float step = 1.0;
 		{
 			float width		= gra.GetWidth(); 
 			float height	= gra.GetHeight(); 
@@ -550,7 +550,7 @@ static float py = 0;
 			vect3	posEye = vect3(0,0.0,-5);
 
 
-			for( float py = 0 ; py < height ; py += step )
+//			for( float py = 0 ; py < height ; py += step )
 			{
 				for( float px = 0 ; px < width ; px += step )
 				{
@@ -562,9 +562,18 @@ static float py = 0;
 					P = P* pers.cam.mat;
 					I = I* pers.cam.mat.GetRotate();
 
-			 		rgb C = ren.Raytrace( P, I, 3 );
-///					gra.Pset( vect2(x,y) ,C);
-					gra.Fill( vect2(x,y),vect2(x+step-1,y+step-1) ,C);
+			 		rgb C = ren.Raytrace( P, I, 5 );
+				
+					if ( step == 1.0 )
+					{
+						gra.Pset( vect2(x,y) ,C);
+					}
+					else
+					{
+						float	x2 = ((px+step) /  width) *2.0-1.0;
+						float	y2 = ((py+step) / height) *2.0-1.0;
+						gra.Fill( vect2(x,y),vect2(x2,y2) ,C);
+					}
 				}
 			}
 			py += step;

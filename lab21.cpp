@@ -172,4 +172,7 @@ void Lab21::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	funcShowBar( gra, m_y++, pImpl->motor.power,	"power    ", rgb(1,1,1) );
 	funcShowBar( gra, m_y++, pImpl->masatu, 		"masatu ", rgb(1,1,1) );
 	
+
+	// 1/60sec 待
+	gra.Wait();
 }

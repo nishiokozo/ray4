@@ -240,4 +240,6 @@ void Lab17::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	if ( b1.flgOn )	pers.pen.pset3d( gra, pers, b1.Q , rgb(1,1,0), 9);
 
 
+	// 1/60sec 待
+	gra.Wait();
 }

@@ -222,5 +222,7 @@ void Lab11::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	if ( flg )	pers.pen.pset3d( gra, pers, q0 , rgb(1,1,0), 9);
 
 
+	// 1/60sec 待
+	gra.Wait();
 
 }

@@ -280,4 +280,6 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 //	if ( pImpl->bStep ) gra.Print(1,(float)text_y++,string("<Step>")); 
 
 
+	// 1/60sec 待
+	gra.Wait();
 }

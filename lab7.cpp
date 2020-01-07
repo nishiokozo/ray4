@@ -196,4 +196,6 @@ pImpl->w=deg2rad(2);
 			
 	}
 
+	// 1/60sec 待
+	gra.Wait();
 }

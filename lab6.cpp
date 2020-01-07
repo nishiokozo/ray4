@@ -148,4 +148,8 @@ void Lab6::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 
 	// 描画
 	pers.prim.DrawTire( gra, pers, pImpl->pos, pImpl->head, pImpl->bank, pImpl->radius );
+
+
+	// 1/60sec 待
+	gra.Wait();
 }
