@@ -110,8 +110,8 @@ void Lab28::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		{1,2+2,0},
 		{3,2+3,0},
 		{4,2+1,0},
-//		{6,2+1,0},
-//		{6,2+3,0},
+		{6,2+1,0},
+		{6,2+3,0},
 	};
 	int cntVert = (signed)pos.size();
 
@@ -162,14 +162,13 @@ if(0)
 
 
 	// ベースライン
-//if(0)
 	for ( int  i = 0 ; i < cntVert ; i++ )
 	{
 		pers.pen.pset3d( gra, pers, pos[i], rgb(0,1,0), 5 );
 		if ( i > 0 ) pers.pen.line3d( gra, pers, pos[i-1], pos[i], rgb(0,1,0), 1 );
 	}
 
-//if(0)
+	// 答え
 	{ 
 		auto Coefficent = [](double t) 
 		{
@@ -212,9 +211,11 @@ if(0)
 
 	// 3次スプラインは、基底関数の山の幅が4(3+1)あるので、4つの山を1.0づつずらしてウェイトとして頂点に掛けて足し合わせる。
 	// ノットベクトルが、[0,1,2,3,4,5,6,7] のように、等間隔の整数の時、ユニフォームBスプライン
-	
-	for( double t = 0.0 ; t < 5.0 ; t += 0.01/4 ) 
+//cout << endl;
+	float step = 0.01/4;
+	for( double t = 0.0 ; t < cntVert ; t += step ) 
 	{
+/*
 		int n0 = 0;
 		int n1 = 1;
 		int n2 = 2;
@@ -228,9 +229,38 @@ if(0)
 		vect3 v3 = pos[n3] * N3( t-3 );
 
 		vect3 v = v0+v1+v2+v3;
+*/
+
+		vect3 v = vect3(0,0,0);
+		for( int i = 0 ; i < cntVert ; i++ )
+		{
+
+			v += pos[i] * N3( t-i );
+		}
+
+
 
 		float f = t/5.0;
 		pers.pen.pset3d( gra, pers, v, rgb(1-f,f,0), 2 );
+
+		float l; 
+		l = 1.0;
+		if ( t>l-step/2 &&  t<l+step/2 ) pers.pen.pset3d( gra, pers, v, rgb(1,1,0), 8 );
+		l=2.0;
+		if ( t>l-step/2 &&  t<l+step/2 ) pers.pen.pset3d( gra, pers, v, rgb(1,1,0), 8 );
+		l=3.0;
+		if ( t>l-step/2 &&  t<l+step/2 ) pers.pen.pset3d( gra, pers, v, rgb(1,1,0), 8 );
+		l=4.0;
+		if ( t>l-step/2 &&  t<l+step/2 ) pers.pen.pset3d( gra, pers, v, rgb(1,1,0), 8 );
+		l=5.0;
+		if ( t>l-step/2 &&  t<l+step/2 ) pers.pen.pset3d( gra, pers, v, rgb(1,1,0), 8 );
+		l=6.0;
+		if ( t>l-step/2 &&  t<l+step/2 ) pers.pen.pset3d( gra, pers, v, rgb(1,1,0), 8 );
+		l=7.0;
+		if ( t>l-step/2 &&  t<l+step/2 ) pers.pen.pset3d( gra, pers, v, rgb(1,1,0), 8 );
+		l=8.0;
+		if ( t>l-step/2 &&  t<l+step/2 ) pers.pen.pset3d( gra, pers, v, rgb(1,1,0), 8 );
+//cout << t << endl;
 	}
 
 
