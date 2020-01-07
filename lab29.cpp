@@ -186,42 +186,60 @@ struct Lab29::Impl
 			{
 				PrimTriangle&	obj = m_tblTriangle[i];
 
-				vect3 e1 = obj.v1-obj.v0;
-				vect3 e2 = obj.v2-obj.v0;
+				const vect3& v0 = obj.v0;
+				const vect3& v1 = obj.v1;
+				const vect3& v2 = obj.v2;
 
-				vect3 N = cross(e1,e2).normalize();
+				// ①平面(v0,v1,v2)の法線Nを求める
+				vect3 N = cross(v1-v0,v2-v0).normalize();
 
-				auto[flg,Q,t] = func_intersect_Plate_Line( obj.v0, N, P, I );
-
-		//		float	f = dot(N, I );
-				
-				if ( flg )
+				// ②視点Pと平面との距離f を求める
+				float f = dot( N, P-obj.v0 );  
+			
+				// ③表面（視点Pが平面の表側にあるとき）だけ衝突判定を行う
+				//	if ( f > 0 ) 
 				{
-//					if ( dot(N,e1)*dot(N,e2 )<0 )
+					// ④衝突距離t（視線I方向の距離）を求める
+					float	t = f / dot( N, -I );
+
+					// ⑤衝突座標Q（平面上の座標）を求める
+					vect3	Q = I * t + P;
+
+					// ⑥衝突座標Q がポリゴン(v0,v1,v2)内かどうかの判定する
+					float z = (Q.x-v0.x)*(v1.y-v0.y)-(Q.y-v0.y)*(v1.x-v0.x);
+					if ( z > 0 )
 					{
-							sur.stat = Surface::STAT_FRONT;
+						float z = (Q.x-v1.x)*(v2.y-v1.y)-(Q.y-v1.y)*(v2.x-v1.x);
+						if ( z >0 )
+						{
+							float z = (Q.x-v2.x)*(v0.y-v2.y)-(Q.y-v2.y)*(v0.x-v2.x);
+							if ( z >0 )
+							{
+								sur.stat = Surface::STAT_FRONT;
 
-							sur.t = t; 
+								sur.t = t; 
 
-							sur.Q = I * t + P;
+								sur.Q = Q;
 
-							sur.N = N;
+								sur.N = N;
 
-							sur.C = obj.C;
+								sur.C = obj.C;
 
-							sur.R = reflect( I, sur.N );
+								sur.R = reflect( I, sur.N );
 
-							sur.valReflectance = obj.valReflectance;
+								sur.valReflectance = obj.valReflectance;
 
-							sur.valRefractive   = obj.valRefractive;
+								sur.valRefractive   = obj.valRefractive;
 
-							sur.valPower = obj.valPower;
+								sur.valPower = obj.valPower;
 
-							sur.valEmissive = obj.valEmissive;
+								sur.valEmissive = obj.valEmissive;
 
-							sur.valTransmittance = obj.valTransmittance;
+								sur.valTransmittance = obj.valTransmittance;
 
-							sur.flg = true;
+								sur.flg = true;
+							}
+						}
 					}
 				}
 
@@ -362,15 +380,17 @@ struct Lab29::Impl
 
 			vect3	P,C,N;
 
-		#define	SCENE 1
+		#define	SCENE 6
 		#if SCENE==6
 			float pw,e,em, tm,rl,rr;
 			m_tblPlate.push_back( PrimPlate( P=vect3( 0  ,  0 ,0.0),N=vect3(0,1,0),C=vect3(0.8,0.8,0.8),rl=0.5,rr=1.0 ,pw=20,e= 0.0,tm=0.0 ) );
+
+			mat33 m = mat33::mroty(rad(45))*mat33::mrotx(rad(45));
 			m_tblTriangle.push_back( 
 				PrimTriangle(
-					vect3( 0.0 , 0.0,  2),   
-					vect3(-1.0 , 1.0,  1),   
-					vect3( 1.0 , 1.0,  3),   
+					vect3( 0.0 ,         0.0 ,  0) * m,   
+					vect3(-0.5 , cos(rad(30)),  0) * m,   
+					vect3( 0.5 , cos(rad(30)),  0) * m,   
 					C = vect3(1  , 0.2, 0.2), 
 					rl = 0.0, 
 					rr = 0.0, 
@@ -379,7 +399,7 @@ struct Lab29::Impl
 					tm = 0.0
 				) 
 			);
-			m_tblLight.push_back( PrimLight( vect3( 0   ,  1 ,  0 ), vect3(1,1,1)*4 )  );
+			m_tblLight.push_back( PrimLight( vect3( 0   ,  2 ,  0 ), vect3(1,1,1)*16 )  );
 			A = vect3( 0.2,0.4,0.6)*0.0;
 
 
@@ -564,16 +584,7 @@ static float py = 0;
 
 			 		rgb C = ren.Raytrace( P, I, 5 );
 				
-					if ( step == 1.0 )
-					{
-						gra.Pset( vect2(x,y) ,C);
-					}
-					else
-					{
-						float	x2 = ((px+step) /  width) *2.0-1.0;
-						float	y2 = ((py+step) / height) *2.0-1.0;
-						gra.Fill( vect2(x,y),vect2(x2,y2) ,C);
-					}
+					gra.Pset( vect2(x,y) ,C);
 				}
 			}
 			py += step;
