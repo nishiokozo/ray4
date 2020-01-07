@@ -362,7 +362,7 @@ struct Lab29::Impl
 
 			vect3	P,C,N;
 
-		#define	SCENE 6
+		#define	SCENE 1
 		#if SCENE==6
 			float pw,e,em, tm,rl,rr;
 			m_tblPlate.push_back( PrimPlate( P=vect3( 0  ,  0 ,0.0),N=vect3(0,1,0),C=vect3(0.8,0.8,0.8),rl=0.5,rr=1.0 ,pw=20,e= 0.0,tm=0.0 ) );
@@ -539,7 +539,7 @@ static float py = 0;
 		Impl::Renderer ren;
 
 
-		float step = 1.0;
+		float step = 4.0;
 		{
 			float width		= gra.GetWidth(); 
 			float height	= gra.GetHeight(); 
@@ -562,8 +562,9 @@ static float py = 0;
 					P = P* pers.cam.mat;
 					I = I* pers.cam.mat.GetRotate();
 
-			 		rgb C = ren.Raytrace( P, I, 5 );
-					gra.Pset( vect2(x,y) ,C);
+			 		rgb C = ren.Raytrace( P, I, 3 );
+///					gra.Pset( vect2(x,y) ,C);
+					gra.Fill( vect2(x,y),vect2(x+step-1,y+step-1) ,C);
 				}
 			}
 			py += step;
