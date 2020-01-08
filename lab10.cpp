@@ -27,6 +27,9 @@
 
 #include "lab.h"
 #include "lab10.h"
+
+using namespace std;
+
 struct Lab10::Impl
 {
 	bool	bResetAll = true;

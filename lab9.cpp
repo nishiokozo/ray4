@@ -29,6 +29,7 @@
 #include "lab.h"
 #include "lab9.h"
 
+using namespace std;
 
 struct Lab9::Impl
 {

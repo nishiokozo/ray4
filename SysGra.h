@@ -2,8 +2,6 @@
 #include <string>
 #include "geom.h"
 
-using namespace std;
-
 struct SysGra
 {
 	uint64_t	time_peak = 0;
@@ -24,8 +22,8 @@ struct SysGra
 	void	Wait();
 	void	Flush();
 
-	void	Print( vect2 v, string str, rgb col=rgb(1,1,1) );
-	void	Print( float x, float y, string str, rgb col=rgb(1,1,1) );
+	void	Print( vect2 v, std::string str, rgb col=rgb(1,1,1) );
+	void	Print( float x, float y, std::string str, rgb col=rgb(1,1,1) );
 
 	void	Tri( vect2 v0, vect2 v1, vect2 v2, rgb col);
 	void	Tri( vect3 v0, vect3 v1, vect3 v2, rgb col);

@@ -8,16 +8,16 @@ public:
 
 
 	void InitWinapi(
-		function<void()> funcOnCreate,
-		function<void( int width, int height )> funcOnSize,
-		function<void()> funcOnPaint,
-		function<void()> funcDestroy
+		std::function<void()> funcOnCreate,
+		std::function<void( int width, int height )> funcOnSize,
+		std::function<void()> funcOnPaint,
+		std::function<void()> funcDestroy
 	);
 	void OpenWindow( const char* name, int pos_x, int pos_y, int width, int height  );
-//	void SetOnPaint( function<void()> func );
-//	void SetOnSize( function<void( int width, int height )> func );
-//	void SetOnDestroy( function<void()> func );
-//	void SetOnCreate( function<void()> func );
+//	void SetOnPaint( std::function<void()> func );
+//	void SetOnSize( std::function<void( int width, int height )> func );
+//	void SetOnDestroy( std::function<void()> func );
+//	void SetOnCreate( std::function<void()> func );
 
 
 };

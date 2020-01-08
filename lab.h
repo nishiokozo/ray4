@@ -14,7 +14,7 @@ struct Lab
 		int	idxTbl = 0;
 	} m;
 	
-	unique_ptr<LabObj>	pLab = 0;
+	std::unique_ptr<LabObj>	pLab = 0;
 
 	void SetNextIdx( int val, Cp& cp );
 	void SetIdx( int n, Cp& cp );

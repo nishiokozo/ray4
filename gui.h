@@ -49,7 +49,7 @@ struct Gui
 
 
 	//------------------------------------------------------------------------------
-	int EntryTbl( vector<shared_ptr<Obj>>tbl, vector<shared_ptr<Edge>>tbl_pEdge )
+	int EntryTbl( std::vector<std::shared_ptr<Obj>>tbl, std::vector<std::shared_ptr<Edge>>tbl_pEdge )
 	//------------------------------------------------------------------------------
 	{
 		int idx =  (signed)cp.tbltbl_pObj.size();
@@ -59,7 +59,7 @@ struct Gui
 	}
 
 	//------------------------------------------------------------------------------
-	void TouchFirst( SysGra& gra, Pers& pers, vector<vector<shared_ptr<Obj>>>& tbltbl_pObj, vect2 mpos );
+	void TouchFirst( SysGra& gra, Pers& pers, std::vector<std::vector<std::shared_ptr<Obj>>>& tbltbl_pObj, vect2 mpos );
 	//------------------------------------------------------------------------------
 
 	// 矩形カーソル開始 新規選択
@@ -88,41 +88,41 @@ struct Gui
 
 	// 矩形カーソル終了（選択決定）
 	//------------------------------------------------------------------------------
-	void SelectRectEnd( vector<vector<shared_ptr<Obj>>>& tbltbl_pObj );
+	void SelectRectEnd( std::vector<std::vector<std::shared_ptr<Obj>>>& tbltbl_pObj );
 	//------------------------------------------------------------------------------
 
 	// 矩形カーソル選択	
 	//------------------------------------------------------------------------------
-	void SelectRectBegin( Pers& pers, vector<vector<shared_ptr<Obj>>>& tbltbl_pObj , vect2 mpos );
+	void SelectRectBegin( Pers& pers, std::vector<std::vector<std::shared_ptr<Obj>>>& tbltbl_pObj , vect2 mpos );
 	//------------------------------------------------------------------------------
 
 	// 単独 新規選択
 	//------------------------------------------------------------------------------
-	void SelectOneOnly( vector<vector<shared_ptr<Obj>>>& tbltbl_pObj );
+	void SelectOneOnly( std::vector<std::vector<std::shared_ptr<Obj>>>& tbltbl_pObj );
 	//------------------------------------------------------------------------------
 
 	// 単独 追加選択
 	//------------------------------------------------------------------------------
-	void SelectOneAdd( vector<vector<shared_ptr<Obj>>>& tbltbl_pObj );
+	void SelectOneAdd( std::vector<std::vector<std::shared_ptr<Obj>>>& tbltbl_pObj );
 	//------------------------------------------------------------------------------
 
 	// 単独 反転選択
 	//------------------------------------------------------------------------------
-	void SelectOneRev( vector<vector<shared_ptr<Obj>>>& tbltbl_pObj );
+	void SelectOneRev( std::vector<std::vector<std::shared_ptr<Obj>>>& tbltbl_pObj );
 	//------------------------------------------------------------------------------
 
 	// 単独 削除選択
 	//------------------------------------------------------------------------------
-	void SelectOneSub( vector<vector<shared_ptr<Obj>>>& tbltbl_pObj );
+	void SelectOneSub( std::vector<std::vector<std::shared_ptr<Obj>>>& tbltbl_pObj );
 
 	//------------------------------------------------------------------------------
 	// 選択リスト表示
 	//------------------------------------------------------------------------------
-	void DrawController( SysGra& gra, Pers& pers, vector<vector<shared_ptr<Obj>>>& tbltbl_pObj, vector<vector<shared_ptr<Edge>>>& tbltbl_pEdge, vect2 mpos );
+	void DrawController( SysGra& gra, Pers& pers, std::vector<std::vector<std::shared_ptr<Obj>>>& tbltbl_pObj, std::vector<std::vector<std::shared_ptr<Edge>>>& tbltbl_pEdge, vect2 mpos );
 	//------------------------------------------------------------------------------
 
 	//------------------------------------------------------------------------------
-	void MoveObj( SysGra& gra, Pers& pers, vector<vector<shared_ptr<Obj>>>& tbltbl_pObj, vect2& mpos, vect2& mprev, vect2& mmov, bool bSame, bool bByCamera, bool bByFloor, bool bByXY );
+	void MoveObj( SysGra& gra, Pers& pers, std::vector<std::vector<std::shared_ptr<Obj>>>& tbltbl_pObj, vect2& mpos, vect2& mprev, vect2& mmov, bool bSame, bool bByCamera, bool bByFloor, bool bByXY );
 	//------------------------------------------------------------------------------
 
 

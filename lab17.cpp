@@ -28,6 +28,7 @@
 #include "lab.h"
 #include "lab17.h"
 
+using namespace std;
 
 
 struct Lab17::Impl

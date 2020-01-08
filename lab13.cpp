@@ -30,6 +30,8 @@
 #include "lab.h"
 #include "lab13.h"
 
+using namespace std;
+
 struct Lab13::Impl
 {
 	bool	bResetAll = true;

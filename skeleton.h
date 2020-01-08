@@ -30,12 +30,12 @@ struct Skin
 	    }
 
 	};
-	vector<PrimTrigon>	trigons;
+	std::vector<PrimTrigon>	trigons;
 
 
 	const float h = 0.05;
 	const float w = 0.08;
-	vector<vect3> tbl_vert=
+	std::vector<vect3> tbl_vert=
 	{
 		{	-w,	 h,	-w	},
 		{	 w,	 h,	-w	},
@@ -47,7 +47,7 @@ struct Skin
 		{	 w,	-h,	 w	},
 	};
 
-	vector<ivect3>	tbl_faces =
+	std::vector<ivect3>	tbl_faces =
 	{
 		{2,3,0},{3,1,0},
 		{3,7,1},{1,7,5},
@@ -124,7 +124,7 @@ struct Joint : Obj
 	vect3 prev8;
 	vect3 binormal;
 	
-//	vector<reference_wrapper<Joint>>	relative;
+//	std::vector<reference_wrapper<Joint>>	relative;
 	virtual ~Joint(){}
 	Joint( vect3 v, float _weight, bool _bCtrl ) :Obj(v)
 	{
@@ -156,11 +156,11 @@ struct Skeleton
 	int		idxTbl = 0;
 
 
-	string	filename;
+	std::string	filename;
 
-	vector<Joint>			tblJointForm;	// 基本フォーム
-	vector<shared_ptr<Obj>>			tbl_pObj;		//joint	継承クラスとして使うためポインタ型
-	vector<shared_ptr<Edge>>			tbl_pEdge;		// 継承クラスとして使うためポインタ型
+	std::vector<Joint>			tblJointForm;	// 基本フォーム
+	std::vector<std::shared_ptr<Obj>>			tbl_pObj;		//joint	継承クラスとして使うためポインタ型
+	std::vector<std::shared_ptr<Edge>>			tbl_pEdge;		// 継承クラスとして使うためポインタ型
 
 	struct A
 	{
@@ -171,11 +171,11 @@ struct Skeleton
 				vect3		pos;
 				J( const vect3& _pos ) : pos(_pos) {};
 			};
-			vector<J>		joint;
+			std::vector<J>		joint;
 		};
-		vector<P>		pose;
+		std::vector<P>		pose;
 	};
-	vector<A>		animations;	// アニメーションキーフレーム
+	std::vector<A>		animations;	// アニメーションキーフレーム
 
 	struct
 	{
@@ -183,7 +183,7 @@ struct Skeleton
 		int	pose = 0;	//	キーフレームカーソル位置
 		int copied_act = 0;
 		int copied_pose = 0;
-		unique_ptr<Skeleton> pCopybuf;
+		std::unique_ptr<Skeleton> pCopybuf;
 
 		bool	bSelecting = false;
 		int 	selecting_act = 0;
@@ -205,7 +205,7 @@ struct Skeleton
 		bool	bShowLocus = true;	//	軌跡
 	} stat;
 
-	void LoadSkeleton( const string filename );
+	void LoadSkeleton( const std::string filename );
 	void SaveSkeleton();
 	void AddAnimation();
 	void NextAnimation();

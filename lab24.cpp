@@ -28,6 +28,8 @@
 #include "lab.h"
 #include "lab24.h"
 
+using namespace std;
+
 struct Lab24::Impl
 {
 	bool	bResetAll = true;

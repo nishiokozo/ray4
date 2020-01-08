@@ -29,6 +29,8 @@
 #include "lab.h"
 #include "lab12.h"
 
+using namespace std;
+
 // 定義
 struct Ball12:Obj
 {

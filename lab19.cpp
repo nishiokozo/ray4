@@ -28,6 +28,7 @@
 #include "lab.h"
 #include "lab19.h"
 
+using namespace std;
 
 
 #define	PLATE_MAT	mat33::mrotz(rad(15))

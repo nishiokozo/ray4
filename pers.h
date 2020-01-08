@@ -35,8 +35,8 @@ struct Edge
 
 struct Cp
 {
-	vector<vector<shared_ptr<Obj>>> tbltbl_pObj;
-	vector<vector<shared_ptr<Edge>>> tbltbl_pEdge;
+	std::vector<std::vector<std::shared_ptr<Obj>>> tbltbl_pObj;
+	std::vector<std::vector<std::shared_ptr<Edge>>> tbltbl_pEdge;
 };
 
 
@@ -119,7 +119,7 @@ struct Pers
 	//--------------------------------------------------------------------------
 
 	//--------------------------------------------------------------------------
-	tuple<bool,vect3> calcScreenToGround( vect2 q );	// 透視変換後の画面座標から『床』上の座標を求める。
+	std::tuple<bool,vect3> calcScreenToGround( vect2 q );	// 透視変換後の画面座標から『床』上の座標を求める。
 	//--------------------------------------------------------------------------
 
 	//--------------------------------------------------------------------------
@@ -127,7 +127,7 @@ struct Pers
 	//--------------------------------------------------------------------------
 
 	//------------------------------------------------------------------------------
-	void Focus( vector<vector<shared_ptr<Obj>>>& tbltbl_pObj );
+	void Focus( std::vector<std::vector<std::shared_ptr<Obj>>>& tbltbl_pObj );
 	//------------------------------------------------------------------------------
 
 
@@ -140,8 +140,8 @@ struct Pers
 		void line3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col = rgb(1,1,1), float wide = 1.0f );
 		void line3d_scissor( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col = rgb(1,1,1), float wide = 1.0f );
 		void circle3d( SysGra& gra, Pers& pers, vect3 p0, float radius, rgb col, float wide=1.0f );
-		void print3d( SysGra& gra, Pers& pers, vect3 p0, float x, float y, string str );
-		void print2d( SysGra& gra, Pers& pers, vect2 p0, float x, float y, string str );
+		void print3d( SysGra& gra, Pers& pers, vect3 p0, float x, float y, std::string str );
+		void print2d( SysGra& gra, Pers& pers, vect2 p0, float x, float y, std::string str );
 
 		void DrawBezier( SysGra& gra, Pers& pers, vect3 P0, vect3 P1, vect3 P2, vect3 P3 );
 		void DrawBezierSurface(
@@ -185,7 +185,7 @@ struct Pers
 			rgb col;
 			float step;
 
-			vector<float> tblDot;
+			std::vector<float> tblDot;
 			int amtPlot = 0;
 			
 			Plot( 
@@ -200,7 +200,7 @@ struct Pers
 		} plot = Plot( 100, 0.02, rgb(1,0,1) );
 		
 		void line( SysGra& gra, Pers& pers, vect2 v0, vect2 v1, rgb col = rgb(1,1,1), float wide = 1.0f );
-		void print( SysGra& gra, Pers& pers, vect2 p0, float x, float y, string str );
+		void print( SysGra& gra, Pers& pers, vect2 p0, float x, float y, std::string str );
 
 	} grid;
 
@@ -215,7 +215,7 @@ struct Pers
 		void DrawSquare( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAxis = true, bool bTri = true );
 		void DrawCircle( SysGra& gra, Pers& pers, vect3 pos, mat33 m, float radius, rgb col=rgb(1,1,1) );
 		void DrawSphere( SysGra& gra, Pers& pers, vect3 pos, mat33 m, float radius, rgb col=rgb(1,1,1) );
-		void DrawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str, bool bShadow = true, bool bDump=true, bool bFlip=true );
+		void DrawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, std::string str, bool bShadow = true, bool bDump=true, bool bFlip=true );
 	} prim;
 
 };

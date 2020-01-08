@@ -27,6 +27,9 @@
 #include "pers.h"
 
 #include "gui.h"
+
+using namespace std;
+
 //------------------------------------------------------------------------------
 void Gui::TouchFirst( SysGra& gra, Pers& pers, vector<vector<shared_ptr<Obj>>>& tbltbl_pObj, vect2 mpos )
 //------------------------------------------------------------------------------

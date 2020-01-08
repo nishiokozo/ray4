@@ -30,6 +30,7 @@
 #include "lab16.h"
 #include "skeleton.h"
 
+using namespace std;
 
 
 struct Lab16::Impl

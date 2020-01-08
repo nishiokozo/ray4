@@ -71,6 +71,8 @@ lab28.o: lab28.cpp geom.h SysSound.h SysKeys.h SysMouse.h SysGra.h func.h \
   pers.h lab.h lab28.h
 lab29.o: lab29.cpp geom.h SysSound.h SysKeys.h SysMouse.h SysGra.h func.h \
   pers.h lab.h lab29.h
+lab30.o: lab30.cpp geom.h SysSound.h SysKeys.h SysMouse.h SysGra.h func.h \
+  pers.h lab.h lab30.h
 Sys.o: Sys.cpp SysKeys.h SysMouse.h geom.h SysGra.h Sys.h SysWin.h
 SysWin.o: SysWin.cpp SysWin.h
 SysGra.o: SysGra.cpp SysGra.h geom.h SysWin.h

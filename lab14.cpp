@@ -28,6 +28,8 @@
 #include "lab.h"
 #include "lab14.h"
 
+using namespace std;
+
 
 struct Lab14::Impl
 {

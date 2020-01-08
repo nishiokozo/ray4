@@ -15,6 +15,8 @@
 #include <tuple>
 #include <random>
 
+
+
 #include "geom.h"
 
 #include "SysSound.h"
@@ -26,11 +28,11 @@
 #include "pers.h"
 
 #include "lab.h"
-#include "lab0.h"
+#include "lab30.h"
 
 using namespace std;
 
-struct Lab0::Impl
+struct Lab30::Impl
 {
 	bool	bResetAll = true;
 	bool	bResetParam = true;
@@ -39,16 +41,17 @@ struct Lab0::Impl
 
 	vector<shared_ptr<Obj>>	tbl_pObj;
 };
-Lab0::Lab0() : pImpl( new Lab0::Impl ){}
+Lab30::Lab30() : pImpl( new Lab30::Impl ){}
+
 
 //------------------------------------------------------------------------------
-void Lab0::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
+void Lab30::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers, float delta, int& text_y, Cp& cp )
 //------------------------------------------------------------------------------
 {
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
-	gra.Print(1,(float)text_y++,"0 : only grid" ); 
+	gra.Print(1,(float)text_y++,"30 : only grid" ); 
 
 	//初期化
 	if ( pImpl->bResetAll )

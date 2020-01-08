@@ -28,6 +28,7 @@
 #include "lab.h"
 #include "lab25.h"
 
+using namespace std;
 
 
 struct Lab25::Impl

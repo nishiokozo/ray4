@@ -25,6 +25,9 @@
 
 #include "lab.h"
 #include "lab6.h"
+
+using namespace std;
+
 struct Lab6::Impl
 {
 	vect3 G_pos = vect3(0,2.0,0);
