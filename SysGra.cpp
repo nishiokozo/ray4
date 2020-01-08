@@ -385,6 +385,7 @@ void SysGra::Clr( rgb col )
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
 }
+
 //------------------------------------------------------------------------------
 void SysGra::Circle( vect2 v, float r, rgb col, float wide )
 //------------------------------------------------------------------------------
@@ -494,9 +495,9 @@ void SysGra::Fill( vect2 v0, vect2 v1,rgb col )
 {
     glBegin(GL_QUADS);
     glColor3f( col.r, col.g, col.b );
-    glVertex2f(v1.x, v1.y);
-    glVertex2f(v1.x, v0.y);
     glVertex2f(v0.x, v0.y);
+    glVertex2f(v1.x, v0.y);
+    glVertex2f(v1.x, v1.y);
     glVertex2f(v0.x, v1.y);
     glEnd();
 
