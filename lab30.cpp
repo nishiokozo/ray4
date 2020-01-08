@@ -122,6 +122,8 @@ void Lab30::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
    	}
 
+	static int cnt = 0;
+
 	// リアルタイムにテクスチャ生成
 	GLubyte image[checkImageHeight][checkImageWidth][4];
 	{
@@ -133,11 +135,12 @@ void Lab30::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	      {
 	         image[i][j][0] = (GLubyte) j*4;
 	         image[i][j][1] = (GLubyte) i*4;
-	         image[i][j][2] = (GLubyte) 128;
+	         image[i][j][2] = (GLubyte) cnt;
 	         image[i][j][3] = (GLubyte) 255;
 	      }
 	   }
 	}
+	cnt++;
 
 	// リアルタイムにテクスチャ転送
 	pImpl->pTexture->loadRGBA( image );
@@ -160,4 +163,6 @@ void Lab30::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pImpl->pTexture->Disable();
 
 	}
+	
+	gra.Wait();
 }
