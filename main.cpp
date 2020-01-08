@@ -77,6 +77,7 @@ struct Apr : public Sys
 			funcOnDestroy
 		);
 		OpenWindow( "Ray4 " __DATE__, 300,300,768, 512 );
+//		OpenWindow( "Ray4 " __DATE__, 300,300,512, 512 );
 
 		int text_y = 0;
 

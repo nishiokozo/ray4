@@ -15,7 +15,6 @@
 #include <tuple>
 #include <random>
 
-#include <GL/gl.h>
 #include "geom.h"
 
 #include "SysSound.h"
@@ -28,6 +27,8 @@
 
 #include "lab.h"
 #include "lab30.h"
+
+#include <GL/gl.h>
 
 using namespace std;
 
@@ -86,7 +87,7 @@ struct Lab30::Impl
 		}
 	};
 
-	Texture	*pTexture = 0;
+	unique_ptr<Texture> pTexture;
 };
 Lab30::Lab30() : pImpl( new Lab30::Impl ){}
 
@@ -105,8 +106,8 @@ void Lab30::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 	static GLuint texName = 0;
 
-		#define checkImageWidth 64
-		#define checkImageHeight 64
+	static GLubyte* pImage = 0;
+
 
 	//初期化
 	if ( pImpl->bResetAll )
@@ -118,32 +119,51 @@ void Lab30::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pers.cam.at = vect3( 0,  1.0, 0 );
 		pers.cam.Update();
 
-		pImpl->pTexture = new Impl::Texture(64,64);
+		unique_ptr<Impl::Texture> pTmp(new Impl::Texture(gra.GetWidth(),gra.GetHeight()));
+		pImpl->pTexture = move(pTmp);
+
+		pImage = new GLubyte[gra.GetWidth()*gra.GetHeight()*4];
 
    	}
 
 	static int cnt = 0;
 
+
 	// リアルタイムにテクスチャ生成
-	GLubyte image[checkImageHeight][checkImageWidth][4];
+//	GLubyte image[height][width][4];
 	{
 	   int i, j, c;
+
+		float step = 1.0;
+		{
+			float width		= gra.GetWidth(); 
+			float height	= gra.GetHeight(); 
+
 	    
-	   for (i = 0; i < checkImageHeight; i++) 
-	   {
-	      for (j = 0; j < checkImageWidth; j++) 
-	      {
-	         image[i][j][0] = (GLubyte) j*4;
-	         image[i][j][1] = (GLubyte) i*4;
-	         image[i][j][2] = (GLubyte) cnt;
-	         image[i][j][3] = (GLubyte) 255;
-	      }
+			for( float py = 0 ; py < height ; py += step )
+			{
+				for( float px = 0 ; px < width ; px += step )
+				{
+
+						int tx = px;
+						int ty = py;
+						int idx= (ty*width+tx)*4;
+					
+						unsigned char* adr = &pImage[idx];
+						adr[0] = (unsigned char)(tx % 256);
+						adr[1] = (unsigned char)(ty % 256);
+						adr[2] = (unsigned char)(128);
+						adr[3] = 255;
+
+
+		      }
+		   }
 	   }
 	}
 	cnt++;
 
 	// リアルタイムにテクスチャ転送
-	pImpl->pTexture->loadRGBA( image );
+	pImpl->pTexture->loadRGBA( pImage );
 
 	rgb	col(1,0,0);
 	vect2 v0(-0.5,-0.5);

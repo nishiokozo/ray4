@@ -28,6 +28,8 @@
 #include "lab.h"
 #include "lab29.h"
 
+#include <GL/gl.h>
+
 using namespace std;
 
 struct Lab29::Impl
@@ -385,7 +387,7 @@ struct Lab29::Impl
 
 			vect3	P,C,N;
 
-		#define	SCENE 6
+		#define	SCENE 1
 		#if SCENE==6
 			float pw,e,em, tm,rl,rr;
 			m_tblPlate.push_back( PrimPlate( P=vect3( 0  ,  0 ,0.0),N=vect3(0,1,0),C=vect3(0.8,0.8,0.8),rl=0.5,rr=1.0 ,pw=20,e= 0.0,tm=0.0 ) );
@@ -569,6 +571,52 @@ struct Lab29::Impl
 	};
 
 
+	struct	Texture
+	{
+		GLuint	texname;
+		int	width;
+		int height;
+
+		Texture( int _width, int _height ) : width(_width), height(_height)
+		{
+			glGenTextures( 1, &texname );
+			glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+			glBindTexture( GL_TEXTURE_2D, texname );
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0 );
+			glBindTexture( GL_TEXTURE_2D, 0 );	// Bindを開放
+		}
+
+		~Texture()
+		{
+			glDeleteTextures( 1, &texname );
+		}
+
+		void loadRGBA( void* pBuf )
+		{
+			glBindTexture( GL_TEXTURE_2D, texname );
+			glTexSubImage2D( GL_TEXTURE_2D, 0, 0,0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pBuf );
+			glBindTexture( GL_TEXTURE_2D, 0 );	// Bindを外す
+		}
+
+		void Enable()
+		{
+			glEnable(GL_TEXTURE_2D);
+			glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+			glBindTexture(GL_TEXTURE_2D, texname);
+		}
+		void Disable()
+		{
+			//glBindTexture( GL_TEXTURE_2D, 0 );	// Bindを外す
+			glDisable(GL_TEXTURE_2D);
+		}
+	};
+
+	unique_ptr<Texture>pTexture = 0;
+
 };
 Lab29::Lab29() : pImpl( new Lab29::Impl ){}
 
@@ -579,9 +627,11 @@ void Lab29::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 //------------------------------------------------------------------------------
 {
 	// 画面クリア
-//	gra.Clr(rgb(0.0,0.0,0.0));
+	gra.Clr(rgb(0.0,0.0,0.0));
 //	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,"29 : raytrace" ); 
+
+	static GLubyte* pImage = 0;
 
 	//初期化
 	if ( pImpl->bResetAll )
@@ -592,6 +642,12 @@ void Lab29::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pers.cam.pos = vect3( 2.0, 2.0, -5.0 );
 		pers.cam.at = vect3( 0,  1.0, 0 );
 		pers.cam.Update();
+
+//		pImpl->pTexture = new Impl::Texture(64,64);
+		unique_ptr<Impl::Texture> pTmp(new Impl::Texture(gra.GetWidth(),gra.GetHeight()));
+		pImpl->pTexture = move(pTmp);
+
+		pImage = new GLubyte[gra.GetWidth()*gra.GetHeight()*4];
 
 	}
 
@@ -607,7 +663,7 @@ static float py = 0;
 		Impl::Renderer ren;
 
 
-		float step = 1.0;
+		float step = 2.0;
 		{
 			float width		= gra.GetWidth(); 
 			float height	= gra.GetHeight(); 
@@ -631,15 +687,60 @@ static float py = 0;
 					I = I* pers.cam.mat.GetRotate();
 
 			 		rgb C = ren.Raytrace( P, I, 5 );
+
+#define TST	1
 				
+#if TST
 					gra.Pset( vect2(x,y) ,C);
+#else
+					unsigned char cr = min(255,C.r*255.0);
+					unsigned char cg = min(255,C.g*255.0);
+					unsigned char cb = min(255,C.b*255.0);
+					
+						int tx = px;
+						int ty = py;
+						int idx= (ty*width+tx)*4;
+					
+						unsigned char* adr = &pImage[idx];
+						adr[0] = (unsigned char)(cr % 256);
+						adr[1] = (unsigned char)(cg % 256);
+						adr[2] = (unsigned char)(cb);
+						adr[3] = 255;
+#endif
 				}
 			}
 			py += step;
 			if ( py >= height ) py = 0;
 			
+//		gra.Print( 0,10, to_string(width)+" x "+to_string(height) );
 		}
 
 
 	}
+
+#if TST
+#else
+	// リアルタイムにテクスチャ転送
+	pImpl->pTexture->loadRGBA( pImage );
+
+
+	vect2 v0(-0.5,-0.5);
+	vect2 v1( 0.5, 0.5);
+	{
+		glDepthFunc( GL_ALWAYS );	// ENABLEのときだけ 必ず書く
+	
+		pImpl->pTexture->Enable();
+
+	    glBegin(GL_QUADS);
+	    glTexCoord2f(0.0, 0.0); glVertex2f(v0.x, v0.y);
+	    glTexCoord2f(1.0, 0.0); glVertex2f(v1.x, v0.y);
+	    glTexCoord2f(1.0, 1.0); glVertex2f(v1.x, v1.y);
+	    glTexCoord2f(0.0, 1.0); glVertex2f(v0.x, v1.y);
+	    glEnd();
+
+		pImpl->pTexture->Disable();
+
+	}
+#endif
+
 }
