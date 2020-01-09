@@ -58,6 +58,7 @@
 #include "lab29.h"
 #include "lab30.h"
 #include "lab31.h"
+#include "lab32.h"
 
 using namespace std;
 
@@ -109,7 +110,9 @@ void Lab::SetIdx( int n, Cp& cp )
 		case 27:	pLab = unique_ptr<LabObj>( new Lab27 );	break;
 		case 28:	pLab = unique_ptr<LabObj>( new Lab28 );	break;
 		case 29:	pLab = unique_ptr<LabObj>( new Lab29 );	break;
+		case 30:	pLab = unique_ptr<LabObj>( new Lab30 );	break;
 		case 31:	pLab = unique_ptr<LabObj>( new Lab31 );	break;
+		case 32:	pLab = unique_ptr<LabObj>( new Lab32 );	break;
 		default: break;
 	}
 }
@@ -151,7 +154,8 @@ void Lab::SetNextIdx( int val, Cp& cp )
 		24,		//	Bezier Surface surface(one)
 		25,		//	Bezier Surface Cource
 		26,		//	Bezier Surface Edit
-		31,		//	Bezier Surface Edit
+		31,		//	point rendering
+		32,		//	interpreter
 	};	
 	const int size = static_cast<signed>(sizeof(tbl)/sizeof(int));
 
