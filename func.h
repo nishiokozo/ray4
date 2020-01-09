@@ -27,3 +27,6 @@ extern vect3 func_accelerationGetDistance_TVv( vect3 vg, float t, vect3 v0 );
 // vector
 extern vect3 func_reflect( const vect3& I, const vect3& N, float rate );
 extern vect2 func_reflect( const vect2& I, const vect2& N, float rate );
+
+//string
+std::vector<std::string> func_split( std::string buf, char ch );

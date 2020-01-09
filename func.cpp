@@ -2,11 +2,11 @@
 #include <functional>
 #include <tuple>
 
+#include <string>
+#include <sstream>
+#include <vector>
+
 #include "geom.h"
-
-//#include "SysGra.h"
-
-//#include "pers.h"
 
 #include "func.h"
 
@@ -548,4 +548,22 @@ vect2 func_reflect( const vect2& I, const vect2& N, float rate )
 	//  N 法線ベクトル（単位ベクトル）
 	//  rate 反射レート 1.0:正反射 0.0:法線と直行 -n:屈折反射
 	return I - (1.0+rate)*dot( I, N ) * N;
+}
+
+
+
+//------------------------------------------------------------------------------
+vector<string> func_split( string buf, char ch )
+//------------------------------------------------------------------------------
+{
+	// 文字列のsplit関数
+	vector<string> ret;
+
+	stringstream ss(buf);
+	string s;
+	while( getline( ss, s, ch ) )
+	{
+		ret.push_back(s);
+	}
+	return ret;				
 }

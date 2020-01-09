@@ -1,11 +1,9 @@
-obj
 *.exe.stackdump
 *.exe
-a.txt
+*.txt
 *.o
 *.s
 *.bak
-*.obj
 *.1
 *.2
 *.3

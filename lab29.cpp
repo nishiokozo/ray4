@@ -647,7 +647,13 @@ void Lab29::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		unique_ptr<Impl::Texture> pTmp(new Impl::Texture(gra.GetWidth(),gra.GetHeight()));
 		pImpl->pTexture = move(pTmp);
 
-		pImage = new GLubyte[gra.GetWidth()*gra.GetHeight()*4];
+		int size= gra.GetWidth()*gra.GetHeight()*4;
+		pImage = new GLubyte[size];
+		for ( int i = 0 ; i < size ; i++ )
+		{
+			pImage[i]=0;
+		}
+		
 
 	}
 
@@ -663,7 +669,7 @@ static float py = 0;
 		Impl::Renderer ren;
 
 
-		float step = 2.0;
+		float step = 3.0;
 		{
 			float width		= gra.GetWidth(); 
 			float height	= gra.GetHeight(); 
@@ -671,7 +677,7 @@ static float py = 0;
 			float	aspect = width / height;
 		
 			vect3	posScr = vect3(0,0.0,0);
-			vect3	posEye = vect3(0,0.0,-5);
+			vect3	posView = vect3(0,0.0,-5);
 
 
 			for( float py = 0 ; py < height ; py += step )
@@ -681,8 +687,9 @@ static float py = 0;
 					float	x = (px /  width) *2.0-1.0;
 					float	y = (py / height) *2.0-1.0;
 					vect3	P = vect3( x*aspect, y, 0 ) + posScr;	// P : 投影面
-					vect3	I = normalize(P - posEye);				// I : 視線ベクトル
+					vect3	I = normalize(P - posView);				// I : 視線ベクトル
 
+					// カメラマトリクスでビューを回転
 					P = P* pers.cam.mat;
 					I = I* pers.cam.mat.GetRotate();
 
@@ -696,16 +703,16 @@ static float py = 0;
 					unsigned char cr = min(255,C.r*255.0);
 					unsigned char cg = min(255,C.g*255.0);
 					unsigned char cb = min(255,C.b*255.0);
-					
-						int tx = px;
-						int ty = py;
-						int idx= (ty*width+tx)*4;
-					
-						unsigned char* adr = &pImage[idx];
-						adr[0] = (unsigned char)(cr % 256);
-						adr[1] = (unsigned char)(cg % 256);
-						adr[2] = (unsigned char)(cb);
-						adr[3] = 255;
+				
+					int tx = px;
+					int ty = py;
+					int idx= (ty*width+tx)*4;
+				
+					unsigned char* adr = &pImage[idx];
+					adr[0] = cr;
+					adr[1] = cg;
+					adr[2] = cb;
+					adr[3] = 255;
 #endif
 				}
 			}
@@ -724,8 +731,8 @@ static float py = 0;
 	pImpl->pTexture->loadRGBA( pImage );
 
 
-	vect2 v0(-0.5,-0.5);
-	vect2 v1( 0.5, 0.5);
+	vect2 v0=vect2(-0.5,-0.5)*2;
+	vect2 v1=vect2( 0.5, 0.5)*2;
 	{
 		glDepthFunc( GL_ALWAYS );	// ENABLEのときだけ 必ず書く
 	
