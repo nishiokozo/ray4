@@ -37,7 +37,7 @@ struct Lab31::Impl
 	bool	bPause = false;
 	bool	bStep = false;
 
-//	vector<shared_ptr<Obj>>	tbl_pObj;
+	vector<shared_ptr<Obj>>	tbl_pObj;
 
 	struct PN
 	{
@@ -55,7 +55,7 @@ void Lab31::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 {
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
+//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,"31 : .obj point rendering" ); 
 
 	//初期化
@@ -65,8 +65,12 @@ void Lab31::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 		// カメラ
 		pers.cam.pos = vect3( -4.0, 4.0, -5.0 );
-		pers.cam.at = vect3( 0,  2.0, 0 );
+		pers.cam.at = vect3( 0,  1.0, 0 );
 		pers.cam.Update();
+
+		pImpl->tbl_pObj.clear();
+		pImpl->tbl_pObj.emplace_back( new Obj(vect3(  0, 3,  0.0 )) );
+		cp.tbltbl_pObj.emplace_back( pImpl->tbl_pObj );
 
 		{
 			fstream fi( "bunny.obj", ios::in );
@@ -103,17 +107,18 @@ void Lab31::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		}
 	}
 	
-	vect3	light = vect3(0,1,0).normalize();
+	vect3	light = pImpl->tbl_pObj[0]->pos.normalize();
 	
 	for ( const Impl::PN& v : pImpl->tblVert )
 	{
-		float d = max(0,dot(light,v.norm));
-//cout << d <<endl;
+		vect3 n = v.norm-vect3(1,1,1);
+		float a = dot(light,n);
+		float d = max(0,a);
 		rgb	col=rgb(d,d,d);
-
+//	col = n;
+		if ( a >0 )
 		pers.pen.pset3d( gra, pers, v.pos, col,3 );
 
-//		v.norm.dump();
 	}
 
 }
