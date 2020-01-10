@@ -76,12 +76,10 @@ void Lab32::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		cout << text << endl;
 		cout << "--" << endl;
 
-
-		
-
-
 	
-		enum
+	
+	
+		enum Type
 		{
 			TYPE_NONE,
 			TYPE_CTRL,	// /n /r	...
@@ -91,18 +89,19 @@ void Lab32::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 			TYPE_CALC,	// ispunct	+,*,
 			TYPE_STR,	// "..."
 		};
-		
-		int	type = TYPE_NONE;
+
+				
 		
 		string token;
+		Type	type = TYPE_NONE;
+		
 		for ( int i =0 ; i < text.length() ; i++ )
 		{
 			char c = text[i]; 
 
-
 			auto func = []( char c )
 			{
-				int	type = TYPE_NONE;
+				Type	type = TYPE_NONE;
 				     if ( c<=  8 )	type = TYPE_CTRL;
 				else if ( c<=  9 )	type = TYPE_SPACE;
 				else if ( c<= 31 )	type = TYPE_CTRL;
@@ -120,61 +119,45 @@ void Lab32::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 				return type;
 			};
 
-
-			if ( type == TYPE_STR )
-			{
-				int t = func(c);
-				if ( t == TYPE_STR )
-				{
-					// トークン完成
-					cout << type << ":" << token << endl;
-					token.clear();
-					type = TYPE_NONE;
-					continue;
-				}
-				else
-				{
-					// 文字列継続
-					token += c;
-					continue;
-				}
-			}
-			else
 			if ( token.length() == 0 )
 			{
 				type = func(c);
+				if ( type == TYPE_STR ) continue;
 				if ( type == TYPE_CTRL ) continue;
 				if ( type == TYPE_SPACE ) continue;
-				if ( type == TYPE_STR ) continue;
 				token = c;
 				continue;
 			}
 			else
 			{
-				int type2 = func(c);
+				Type type2 = func(c);
 
-				bool bCon = false;
-				bool bComp = false;	// トークン完成フラグ
+				bool bAbandon = false;	// c 放棄フラグ
+				bool bComp = false;		// トークン完成フラグ
 
-				{
-					     if ( type2 == TYPE_CTRL )		{bComp = true;bCon = true;}
-					else if ( type2 == TYPE_SPACE )		{bComp = true;bCon = true;}
-					else if ( type2 == TYPE_CALC && type == TYPE_CALC )	{bComp = true;}
-					else if ( type2 != type )			bComp = true;
-				}
+				     if ( type2 == TYPE_STR )		{bComp = true;bAbandon = true;}	
+				else if ( type2 == TYPE_CTRL )		{bComp = true;bAbandon = true;}
+				else if ( type2 == TYPE_SPACE )		{bComp = true;bAbandon = true;}
+				else if ( type2 == TYPE_CALC && type == TYPE_CALC )	{bComp = true;}
+				else if ( type2 != type )			bComp = true;
 
 				if ( bComp )
 				{
 					// トークン完成
 					cout << type << ":" << token << endl;
-					token.clear();
 
-					// トークン完成＆再スタート
-					if ( bCon ) continue;
-
-					// トークン完成＆即再スタート
-					token = c;
-					type = type2;
+					if ( bAbandon ) 
+					{
+						// 放棄
+						token.clear();
+						type = TYPE_NONE;
+					}
+					else
+					{
+						// 採用
+						token = c;
+						type = type2;
+					}
 				}
 				else
 				{
@@ -187,6 +170,6 @@ void Lab32::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	}
 	
 
-
+	if ( keys.R.hi ) pImpl->bResetAll = true;
 
 }
