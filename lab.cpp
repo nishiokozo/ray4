@@ -59,6 +59,7 @@
 #include "lab30.h"
 #include "lab31.h"
 #include "lab32.h"
+#include "lab33.h"
 
 using namespace std;
 
@@ -113,6 +114,7 @@ void Lab::SetIdx( int n, Cp& cp )
 		case 30:	pLab = unique_ptr<LabObj>( new Lab30 );	break;
 		case 31:	pLab = unique_ptr<LabObj>( new Lab31 );	break;
 		case 32:	pLab = unique_ptr<LabObj>( new Lab32 );	break;
+		case 33:	pLab = unique_ptr<LabObj>( new Lab33 );	break;
 		default: break;
 	}
 }
@@ -156,6 +158,7 @@ void Lab::SetNextIdx( int val, Cp& cp )
 		26,		//	Bezier Surface Edit
 		31,		//	point rendering
 		32,		//	interpreter
+		33,		//	golf
 	};	
 	const int size = static_cast<signed>(sizeof(tbl)/sizeof(int));
 
