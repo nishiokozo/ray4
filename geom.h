@@ -102,8 +102,8 @@ struct	ivect4 : public I4
 class vect2
 {
 public:
-	union { float x,w;};
-	union { float y,h;};
+	union { float x,w,u;};
+	union { float y,h,v;};
 
 	vect2() :x(0),y(0){}
 //	vect2( float f ) :x(f),y(f){}
@@ -161,9 +161,11 @@ extern	float atan2_180( float y, float x );
 
 class mat44;
 class mat33;
+class vect4;
 class vect3;
 
 typedef vect3 rgb;
+typedef vect4 rgba;
 
 /*
 extern mat33 midentity();
@@ -292,6 +294,68 @@ extern float	mod( float a, float b );
 extern float	length( vect3 a );
 extern float	length( vect3 a, vect3 b );
 extern vect3	normalize( vect3 a );
+
+class vect4
+{
+public:
+	union { float	x, r; };
+	union { float	y, g; }; 
+	union {	float	z, b; };
+	union {	float	w, a; };
+
+
+	vect4() :x(0),y(0),z(0),w(0){};
+	vect4( float _x, float _y, float _z, float _w) :x(_x), y(_y), z(_z), w(_w){};
+
+	vect4( vect3 v, float _w ) { x = v.x; y = v.y; z = v.z; w = _w;};
+
+	vect4 operator-() const { return vect4( -x, -y, -z, -w ); } 
+	vect4 operator+() const { return vect4(  x,  y,  z, -w ); } 
+
+	bool operator==( vect4 v ) { return  ( x == v.x &&  y == v.y &&  z == v.z &&  w == v.w); }
+	bool operator!=( vect4 v ) { return !( x == v.x &&  y == v.y &&  z == v.z &&  w == v.w); }
+
+	void operator*=( vect4 v ) { x *= v.x; y *= v.y; z *= v.z; w *= v.w;  }
+	void operator/=( vect4 v ) { x /= v.x; y /= v.y; z /= v.z; w /= v.w;  }
+	void operator+=( vect4 v ) { x += v.x; y += v.y; z += v.z; w += v.w;  }
+	void operator-=( vect4 v ) { x -= v.x; y -= v.y; z -= v.z; w -= v.w;  }
+
+	vect4 operator*( vect4 v ) const { return vect4( x * v.x , y * v.y , z * v.z , w * v.w );}
+	vect4 operator/( vect4 v ) const { return vect4( x / v.x , y / v.y , z / v.z , w / v.w );}
+	vect4 operator+( vect4 v ) const { return vect4( x + v.x , y + v.y , z + v.z , w + v.w );}
+	vect4 operator-( vect4 v ) const { return vect4( x - v.x , y - v.y , z - v.z , w - v.w );}
+
+	void operator*=( float f ) { x *= f; y *= f; z *= f; w *= f;  }
+	void operator/=( float f ) { x /= f; y /= f; z /= f; w /= f;  }
+
+	vect4 operator*( float f ) const { return	vect4( x * f, y * f, z * f, w * f ); }
+	vect4 operator/( float f ) const { return	vect4( x / f, y / f, z / f, z / f ); }
+
+	friend	vect4 operator*( float f, vect4 v )  { return vect4( f * v.x, f * v.y, f * v.z, f * v.w ); }
+	friend	vect4 operator/( float f, vect4 v )  { return vect4( f / v.x, f / v.y, f / v.z, f * v.w ); }
+
+
+	void dumpDetail( const char* str ) const
+	{
+		std::cout << str << "<" << x << " " << y << " " << z << " " << w << ">" <<std::endl;
+	}
+
+	void dump( const char* str ) const
+	{
+		printf("%s%9.6f %9.6f %9.6f %9.6f\n", str, x, y, z, w );
+	}
+
+	void dumpDetail() const
+	{
+		dumpDetail("");
+	}
+	void dump() const
+	{
+		dump("");
+	}
+
+
+};
 
 
 class	mat33

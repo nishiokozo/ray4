@@ -317,7 +317,7 @@ int main( int argc, char* argv[] )
 	if ( argc > 0 )
 	{
 		num = atoi(argv[1]);
-		cout << num << endl;
+		cout << "lab["<<num<<"]" << endl;
 	}
 
 	cout<<fixed<<setprecision(24);	// 浮動小数出力桁数
