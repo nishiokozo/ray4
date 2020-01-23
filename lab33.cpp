@@ -80,7 +80,7 @@ struct Lab33::Impl
 		{
 			struct	Face
 			{
-				int				cnt;	//	頂点数
+//				int				cnt;	//	頂点数
 				vector<int>		V;
 				int				M;
 				vector<vect2>	UV;
@@ -111,33 +111,33 @@ struct Lab33::Impl
 		//------------------------------------------------------------------------------
 		{
 			// Scene
-			cout << "Scene.pos       " << scene.pos.x << " , " << scene.pos.y << " , " << scene.pos.z << endl;
-			cout << "Scene.lookat    " << scene.lookat.x << " , " << scene.lookat.y << " , " << scene.lookat.z << endl;
+			cout << "Scene.pos       " << scene.pos.x << "," << scene.pos.y << "," << scene.pos.z << endl;
+			cout << "Scene.lookat    " << scene.lookat.x << "," << scene.lookat.y << "," << scene.lookat.z << endl;
 			cout << "Scene.head      " << scene.head << endl;
 			cout << "Scene.pich      " << scene.pich << endl;
 			cout << "Scene.bank      " << scene.bank << endl;
 			cout << "Scene.ortho     " << scene.ortho << endl;
 			cout << "Scene.zoom2     " << scene.zoom2 << endl;
-			cout << "Scene.amb       " << scene.amb.x << " , " << scene.amb.y << " , " << scene.amb.z << endl;
+			cout << "Scene.amb       " << scene.amb.x << "," << scene.amb.y << "," << scene.amb.z << endl;
 			cout << "Scene.frontclip " << scene.frontclip << endl;
 			cout << "Scene.backclip  " << scene.backclip << endl;
 			for ( unsigned int i = 0 ; i < scene.tbl_dirlights.size() ; i++ )
 			{
-				cout << "Scene.dirlight[" << to_string(i) << "]" << "dir   " <<scene.tbl_dirlights[i].dir.x << " , " <<scene.tbl_dirlights[i].dir.y << " , " <<scene.tbl_dirlights[i].dir.z << endl;
-				cout << "Scene.dirlight[" << to_string(i) << "]" << "color " <<scene.tbl_dirlights[i].color.x << " , " <<scene.tbl_dirlights[i].color.y << " , " <<scene.tbl_dirlights[i].color.z << endl;
+				cout << "Scene.dirlight[" << to_string(i) << "]" << "dir   " <<scene.tbl_dirlights[i].dir.x << "," <<scene.tbl_dirlights[i].dir.y << "," <<scene.tbl_dirlights[i].dir.z << endl;
+				cout << "Scene.dirlight[" << to_string(i) << "]" << "color " <<scene.tbl_dirlights[i].color.x << "," <<scene.tbl_dirlights[i].color.y << "," <<scene.tbl_dirlights[i].color.z << endl;
 			}
 
 			// Material
 			for ( unsigned int i = 0 ; i < tbl_material.size() ; i++ )
 			{
-				cout << "Material[" << to_string(i) << "]" << ".name   " << tbl_material[i].name << endl;
-				cout << "Material[" << to_string(i) << "]" << ".shader " << to_string(tbl_material[i].shader) << endl;
-				cout << "Material[" << to_string(i) << "]" << ".rgba   " << to_string(tbl_material[i].col.r) << " , " << to_string(tbl_material[i].col.g) << " , " << to_string(tbl_material[i].col.b) << " , " << to_string(tbl_material[i].col.a) << endl;
-				cout << "Material[" << to_string(i) << "]" << ".dif " << to_string(tbl_material[i].dif) << endl;
-				cout << "Material[" << to_string(i) << "]" << ".amb " << to_string(tbl_material[i].amb) << endl;
-				cout << "Material[" << to_string(i) << "]" << ".emi " << to_string(tbl_material[i].emi) << endl;
-				cout << "Material[" << to_string(i) << "]" << ".spc " << to_string(tbl_material[i].spc) << endl;
-				cout << "Material[" << to_string(i) << "]" << ".power " << to_string(tbl_material[i].power) << endl;
+				cout << "Material[" << to_string(i) << "]" << ".name      " << tbl_material[i].name << endl;
+				cout << "Material[" << to_string(i) << "]" << ".shader    " << to_string(tbl_material[i].shader) << endl;
+				cout << "Material[" << to_string(i) << "]" << ".rgba      " << to_string(tbl_material[i].col.r) << "," << to_string(tbl_material[i].col.g) << "," << to_string(tbl_material[i].col.b) << "," << to_string(tbl_material[i].col.a) << endl;
+				cout << "Material[" << to_string(i) << "]" << ".dif       " << to_string(tbl_material[i].dif) << endl;
+				cout << "Material[" << to_string(i) << "]" << ".amb       " << to_string(tbl_material[i].amb) << endl;
+				cout << "Material[" << to_string(i) << "]" << ".emi       " << to_string(tbl_material[i].emi) << endl;
+				cout << "Material[" << to_string(i) << "]" << ".spc       " << to_string(tbl_material[i].spc) << endl;
+				cout << "Material[" << to_string(i) << "]" << ".power     " << to_string(tbl_material[i].power) << endl;
 			}
 
 			// Object
@@ -146,15 +146,45 @@ struct Lab33::Impl
 				cout << "Object[" << to_string(i) << "]" << ".name        " << tbl_object[i].name << endl;
 				cout << "Object[" << to_string(i) << "]" << ".depth       " << tbl_object[i].depth << endl;
 				cout << "Object[" << to_string(i) << "]" << ".folding     " << tbl_object[i].folding << endl;
-				cout << "Object[" << to_string(i) << "]" << ".scale       " << to_string(tbl_object[i].scale.x) << " , " << to_string(tbl_object[i].scale.y) << " , " << to_string(tbl_object[i].scale.z) << endl;
-				cout << "Object[" << to_string(i) << "]" << ".rotation    " << to_string(tbl_object[i].rotation.x) << " , " << to_string(tbl_object[i].rotation.y) << " , " << to_string(tbl_object[i].rotation.z) << endl;
-				cout << "Object[" << to_string(i) << "]" << ".translation " << to_string(tbl_object[i].translation.x) << " , " << to_string(tbl_object[i].translation.y) << " , " << to_string(tbl_object[i].translation.z) << endl;
+				cout << "Object[" << to_string(i) << "]" << ".scale       " << to_string(tbl_object[i].scale.x) << "," << to_string(tbl_object[i].scale.y) << "," << to_string(tbl_object[i].scale.z) << endl;
+				cout << "Object[" << to_string(i) << "]" << ".rotation    " << to_string(tbl_object[i].rotation.x) << "," << to_string(tbl_object[i].rotation.y) << "," << to_string(tbl_object[i].rotation.z) << endl;
+				cout << "Object[" << to_string(i) << "]" << ".translation " << to_string(tbl_object[i].translation.x) << "," << to_string(tbl_object[i].translation.y) << "," << to_string(tbl_object[i].translation.z) << endl;
 				cout << "Object[" << to_string(i) << "]" << ".visible     " << tbl_object[i].visible << endl;
 				cout << "Object[" << to_string(i) << "]" << ".locking     " << tbl_object[i].locking << endl;
 				cout << "Object[" << to_string(i) << "]" << ".shading     " << tbl_object[i].shading << endl;
 				cout << "Object[" << to_string(i) << "]" << ".facet       " << tbl_object[i].facet << endl;
-				cout << "Object[" << to_string(i) << "]" << ".color       " << to_string(tbl_object[i].color.r) << " , " << to_string(tbl_object[i].color.g) << " , " << to_string(tbl_object[i].color.b) << endl;
+				cout << "Object[" << to_string(i) << "]" << ".color       " << to_string(tbl_object[i].color.r) << "," << to_string(tbl_object[i].color.g) << "," << to_string(tbl_object[i].color.b) << endl;
 				cout << "Object[" << to_string(i) << "]" << ".color_type  " << tbl_object[i].color_type << endl;
+
+				for ( unsigned int j = 0 ; j < tbl_object[i].tbl_vertex.size() ; j++ )
+				{
+					cout << "Object[" << to_string(i) << "]" << ".vertex["<<to_string(j)<<"]   " << tbl_object[i].tbl_vertex[j].x << "," << tbl_object[i].tbl_vertex[j].y << "," << tbl_object[i].tbl_vertex[j].z << endl;
+				}
+				for ( unsigned int j = 0 ; j < tbl_object[i].tbl_face.size() ; j++ )
+				{
+					// V
+					cout << "Object[" << to_string(i) << "]" << ".face["<<to_string(j)<<"].V   ";
+					for ( unsigned int k = 0 ; k < tbl_object[i].tbl_face[j].V.size() ; k++ )
+					{
+						cout << tbl_object[i].tbl_face[j].V[k] <<" ";
+					}
+					cout << endl;
+
+					// M
+					cout << "Object[" << to_string(i) << "]" << ".face["<<to_string(j)<<"].M   ";
+					cout << tbl_object[i].tbl_face[j].M << " "; 
+					cout << endl;
+
+					// UV
+					cout << "Object[" << to_string(i) << "]" << ".face["<<to_string(j)<<"].UV  ";
+					for ( unsigned int k = 0 ; k < tbl_object[i].tbl_face[j].UV.size() ; k++ )
+					{
+						cout << tbl_object[i].tbl_face[j].UV[k].x << ",";
+						cout << tbl_object[i].tbl_face[j].UV[k].y << " ";
+					}
+					cout << endl;
+
+				}
 			}
 
 		}
