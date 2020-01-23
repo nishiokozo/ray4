@@ -1,4 +1,4 @@
-//2020/01/23
+//2019/11/22
 
 #include <iostream>
 #include <memory>
@@ -37,7 +37,131 @@ struct Lab33::Impl
 	bool	bPause = false;
 	bool	bStep = false;
 
-	vector<shared_ptr<Obj>>	tbl_pObj;
+//	vector<shared_ptr<Obj>>	tbl_pObj;
+
+	struct TokenMQO
+	{
+		string text;
+
+		enum Type
+		{
+			TYPE_NONE,	// 0:
+			TYPE_ALPHA,	// 1:	isalpha	abcd..
+			TYPE_NUM,	// 2:	1234..
+			TYPE_SPACE,	// 3:	0x20, \t, ..
+			TYPE_CALC,	// 4:	ispunct	+,*,
+			TYPE_STR,	// 5:	"..."
+		//	TYPE_CTRL,	// 6:	/n /r	...
+		};
+
+		string	word;
+		Type	type;
+		int		idx;
+		bool	bComplete;
+
+		//-----------------------------------------------------------------------------------------
+		TokenMQO( string filename )
+		//-----------------------------------------------------------------------------------------
+		{
+			fstream fi( filename, ios::in );
+			string buf;
+			while ( getline( fi, buf ) )
+			{
+				text += buf+" ";
+			}
+
+			idx	= 0;
+			type = TYPE_NONE;
+			word = "";
+			bComplete = false;
+		}
+		
+		//-----------------------------------------------------------------------------------------
+		bool GetWord()
+		//-----------------------------------------------------------------------------------------
+		{
+			if ( bComplete )
+			{
+				bComplete = false;
+				type = TYPE_NONE;
+				word = "";
+			}
+			
+			while( idx < text.length() )
+			{
+				char c = text[idx++]; 
+
+				auto func = []( char c )
+				{
+					Type	t = TYPE_NONE;
+						 if ( c=='"' )				t = TYPE_STR;
+					else if ( c==' ' || c=='\t')	t = TYPE_SPACE;
+					else if ( c>='a' && c<='z')		t = TYPE_ALPHA;
+					else if ( c>='A' && c<='Z')		t = TYPE_ALPHA;
+					else if ( c>='0' && c<='9')		t = TYPE_NUM;
+					else if ( c>='.')				t = TYPE_NUM;
+					else if ( c>='-')				t = TYPE_NUM;
+					else if ( c=='{' || c=='}') 	t = TYPE_CALC;
+					else if ( c=='(' || c==')') 	t = TYPE_CALC;
+					else t = TYPE_ALPHA;
+					return t;
+				};
+
+				// トークンの始まり
+				if ( type == TYPE_NONE )
+				{
+					Type t = func(c);
+					if ( t==TYPE_SPACE ) {}
+					else
+					if ( t==TYPE_STR ) 
+					{
+						type=t;
+					}
+					else
+					{
+						type = t;
+						word = c;
+					}
+				}
+				else
+				// 文字列トークン
+				if ( type == TYPE_STR )
+				{
+					Type t = func(c);
+
+					if ( t==TYPE_STR ) 
+					{
+						// トークン完成
+						bComplete = true;
+						break;
+					}
+					else
+					{
+						word += c;
+					}
+				}
+				else
+				// 通常トークン
+				{
+					Type t = func(c);
+					if ( t==type )
+					{
+						word += c;
+					}
+					else
+					{
+						// トークン完成
+						bComplete = true;
+						idx--;
+						break;
+					}
+				}
+			}
+		
+			return ( idx < text.length() );
+		}
+	};
+
 };
 Lab33::Lab33() : pImpl( new Lab33::Impl ){}
 
@@ -48,7 +172,7 @@ void Lab33::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
 	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
-	gra.Print(1,(float)text_y++,"0 : only grid" ); 
+	gra.Print(1,(float)text_y++,"33 : .mqo reader" ); 
 
 	//初期化
 	if ( pImpl->bResetAll )
@@ -59,28 +183,22 @@ void Lab33::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pers.cam.pos = vect3( 0.0, 2.0, -5.0 );
 		pers.cam.at = vect3( 0,  1.0, 0 );
 		pers.cam.Update();
+
+
+		Impl::TokenMQO token( "tst.mqo" );
+		
+//		cout << text << endl;
+		cout << "--" << endl;
+
+		while( token.GetWord() )
+		{
+			cout << token.type << ":" << token.word << endl;
+		}
+
+	
 	}
+	
 
-
-	vect3 vx = vect3(1,0,0);
-	vect3 vy = vect3(0,1,0);
-	vect3 vz = vect3(0,0,1);
-	{
-		vect3 p0 = vect3(-1,1,0);
-		pers.prim.DrawVect( gra, pers, text_y, p0, vx ,1	, rgb(1,0,0), "+x" );
-		pers.prim.DrawVect( gra, pers, text_y, p0, vy ,1	, rgb(0,1,0), "+y" );
-		pers.prim.DrawVect( gra, pers, text_y, p0, vz ,1	, rgb(0,0,1), "+z" );
-	}
-
-	{
-		vect3 p0 = vect3(1,1,0);
-		vect3 xy = cross(vx,vy);
-		vect3 yz = cross(vy,vz);
-		vect3 zx = cross(vz,vx);
-		pers.prim.DrawVect( gra, pers, text_y, p0, yz ,1	, rgb(1,0,0), "cross y*z" );
-		pers.prim.DrawVect( gra, pers, text_y, p0, zx ,1	, rgb(0,1,0), "cross z*x" );
-		pers.prim.DrawVect( gra, pers, text_y, p0, xy ,1	, rgb(0,0,1), "cross x*y" );
-
-	}
+	if ( keys.R.hi ) pImpl->bResetAll = true;
 
 }
