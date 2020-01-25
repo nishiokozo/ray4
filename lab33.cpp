@@ -41,9 +41,9 @@ struct Lab33::Impl
 
 
 
-	struct Parsar_MQO_1_1
+	struct Parsar_MQO
 	{
-		struct MQO_1_1
+		struct MQO
 		{
 			struct Scene
 			{
@@ -107,8 +107,10 @@ struct Lab33::Impl
 			map<string,Material> 	tbl_material;
 			map<string,Object>		tbl_object;
 
+			map<int,string> 	tbl_material_name;	// 番号から名前を引き当てる
+
 			//------------------------------------------------------------------------------
-			void	show()
+			void	dump()
 			//------------------------------------------------------------------------------
 			{
 				// Scene
@@ -179,7 +181,7 @@ struct Lab33::Impl
 						for ( unsigned int k = 0 ; k < a.second.tbl_face[j].UV.size() ; k++ )
 						{
 							cout << a.second.tbl_face[j].UV[k].x << ",";
-							cout << a.second.tbl_face[j].UV[k].y << " ";
+							cout << a.second.tbl_face[j].UV[k].y << ",";
 						}
 						cout << endl;
 
@@ -314,10 +316,10 @@ struct Lab33::Impl
 			}
 		};
 
-		MQO_1_1 mqo;	// 保存先
+		MQO mqo;	// 保存先
 
 		//------------------------------------------------------------------------------
-		Parsar_MQO_1_1( string filename )
+		void LoadFile( string filename )	// 定型フォーマットを順に読み込む方式の、簡易実装
 		//------------------------------------------------------------------------------
 		{
 			Token_MQO token( filename );	// 読み込み元
@@ -333,6 +335,7 @@ struct Lab33::Impl
 
 				if ( token.word=="Format" )
 				{
+					// バージョンチェック	Ver 1.1のみ
 					token.GetWord();	// "Text
 					token.GetWord();	// "Ver"
 					token.GetWord();	if ( token.word != "1.1" ) { cout<< ".mqo Ver "<<token.word<< " is not support" << endl; exit(1);};
@@ -385,7 +388,7 @@ struct Lab33::Impl
 
 					for ( int i=0 ; i < cnt ; i++ )
 					{
-						vector<MQO_1_1::Scene::Dirlights>& tbl = mqo.scene.tbl_dirlights;
+						vector<MQO::Scene::Dirlights>& tbl = mqo.scene.tbl_dirlights;
 						tbl.emplace_back();
 						token.GetWord();	// "light"
 						token.GetWord();	// "{"
@@ -413,11 +416,13 @@ struct Lab33::Impl
 
 					for ( int i=0 ; i < cnt ; i++ )
 					{
-						map<string,MQO_1_1::Material>& tbl = mqo.tbl_material;
+						map<string,MQO::Material>& tbl = mqo.tbl_material;
 
 						//	(name)
 						string	name;
 						token.GetWord();	name = token.word;
+
+						mqo.tbl_material_name[i] = name;	
 
 						token.GetWord();	// "shader"
 						token.GetWord();	// "("
@@ -463,7 +468,7 @@ struct Lab33::Impl
 				{
 					int i = cntObject++;
 
-					map<string,MQO_1_1::Object>& tbl = mqo.tbl_object;
+					map<string,MQO::Object>& tbl = mqo.tbl_object;
 
 					//	(name)
 					string	name;
@@ -535,7 +540,7 @@ struct Lab33::Impl
 						token.GetWord();	// "{"
 						for ( int j=0 ; j < cnt_face ; j++ )
 						{
-							vector<MQO_1_1::Object::Face>& tbl = mqo.tbl_object[name].tbl_face;
+							vector<MQO::Object::Face>& tbl = mqo.tbl_object[name].tbl_face;
 							tbl.emplace_back();
 
 							// verttex index counter
@@ -576,6 +581,8 @@ struct Lab33::Impl
 	};
 
 
+//	unique_ptr<Parsar_MQO> mdl = 0;
+	Parsar_MQO mdl;
 };
 Lab33::Lab33() : pImpl( new Lab33::Impl ){}
 
@@ -585,7 +592,7 @@ void Lab33::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 {
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
+//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,"33 : .mqo reader" ); 
 
 	//初期化
@@ -594,17 +601,51 @@ void Lab33::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pImpl->bResetAll = false;
 
 		// カメラ
-		pers.cam.pos = vect3( 0.0, 2.0, -5.0 );
+		pers.cam.pos = vect3( 0.0, 2.0,  5.0 );
 		pers.cam.at = vect3( 0, 1.0, 0 );
 		pers.cam.Update();
 
 		cout<<fixed<<setprecision(8);	// 浮動小数出力桁数
 
-		Impl::Parsar_MQO_1_1 pars( "tst.mqo" );
-		pars.mqo.show();
+//		pImpl->mdl = unique_ptr<Impl::Parsar_MQO>( new Impl::Parsar_MQO( "tst.mqo" ) );
+
+//		pImpl->mdl.LoadFile( "tst.mqo" );
+		pImpl->mdl.LoadFile( "golf.mqo" );
+//		pImpl->mdl.mqo.dump();
+		
 
 	}
 
 	if ( keys.R.hi ) pImpl->bResetAll = true;
+
+//		Impl::Parsar_MQO::MQO::Object& obj = pImpl->mdl.mqo.tbl_object["obj2"];
+		Impl::Parsar_MQO::MQO::Object& obj = pImpl->mdl.mqo.tbl_object["hole01"];
+
+		for ( Impl::Parsar_MQO::MQO::Object::Face face : obj.tbl_face )
+		{
+			if ( face.V.size() == 3 ) // 三角形ポリゴンのみ処理
+			{
+//				Impl::Parsar_MQO::MQO::Material	m = pImpl->mdl.mqo.tbl_material[ "green" ];//pImpl->mdl.mqo.tbl_material_name[ face.M ] ];
+				Impl::Parsar_MQO::MQO::Material	m = pImpl->mdl.mqo.tbl_material[ pImpl->mdl.mqo.tbl_material_name[ face.M ] ];
+
+				for ( int a : face.V )
+				{
+					vect3 v0 = obj.tbl_vertex[ face.V[0] ];
+					vect3 v1 = obj.tbl_vertex[ face.V[1] ];
+					vect3 v2 = obj.tbl_vertex[ face.V[2] ];
+					
+					
+					pers.pen.tri3d( gra, pers, v0, v1 ,v2 , m.col.rgb() );
+//					pers.pen.line3d( gra, pers, v0, v1, rgb(1,1,1) );
+//					pers.pen.line3d( gra, pers, v0, v2, rgb(1,1,1) );
+
+				}
+			}
+		}
+
+
+//	pImpl->mdl.mqo.dump();
+
+
 
 }

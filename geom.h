@@ -309,6 +309,8 @@ public:
 
 	vect4( vect3 v, float _w ) { x = v.x; y = v.y; z = v.z; w = _w;};
 
+	vect3 rgb() {return vect3(r,g,b);}
+
 	vect4 operator-() const { return vect4( -x, -y, -z, -w ); } 
 	vect4 operator+() const { return vect4(  x,  y,  z, -w ); } 
 
