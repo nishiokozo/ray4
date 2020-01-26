@@ -61,12 +61,13 @@ void Lab1::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 	if ( pImpl->bResetParam )
 	{
 		pImpl->bResetParam = false;
-		pers.cam.pos = vect3( 0.0, 0.0, -5.0 );
-		pers.cam.at = vect3( 0,  0.0, 0 );
+		pers.cam.pos = vect3( 2.0, 0.0, -5.0 );
+		pers.cam.at = vect3( 2,  0.0, 0 );
 		pers.cam.Update();
 	}
 
 
+#if 0	// 当加速グラフ
 	//入力
 	{
 		// リセット
@@ -118,5 +119,22 @@ void Lab1::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 
 		}
 	}
+#endif
+#if 1
 
+	// cosh グラフ
+	for ( float t = 0 ; t < pi*2 ; t+=0.1 )
+	{
+		float y1 = cosh(t);
+		float y2 = sinh(t);
+		pers.pen.pset2d( gra, pers, vect2(t,y1), rgb(1,1,0), 3 );
+		pers.pen.pset2d( gra, pers, vect2(t,y2), rgb(1,0,1), 3 );
+//		pers.pen.pset2d( gra, pers, vect2(t,y2/y1), rgb(1,1,1), 3 );
+
+		pers.pen.print3d( gra, pers, vect3(0,0,0), 0, -32  , "cosh()", rgb(1,1,0) ); 
+		pers.pen.print3d( gra, pers, vect3(0,0,0), 0, -32*2, "sin()", rgb(1,0,1) ); 
+//		pers.pen.print3d( gra, pers, vect3(0,0,0), 0, -32*3, "cos()/cosh()", rgb(1,1,1) ); 
+
+	}
+#endif	
 }

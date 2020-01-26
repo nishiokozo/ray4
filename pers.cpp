@@ -352,11 +352,11 @@ void Pers::Pen::pset3d( SysGra& gra, Pers& pers, vect3 p0, rgb col, float wide )
 }
 
 //------------------------------------------------------------------------------
-void Pers::Pen::print3d( SysGra& gra, Pers& pers, vect3 p0, float x, float y, string str )
+void Pers::Pen::print3d( SysGra& gra, Pers& pers, vect3 p0, float x, float y, string str, rgb col )
 //------------------------------------------------------------------------------
 {
 	vect3 v0 = pers.calcWorldToScreen3( p0 );
-	if ( v0.z > 0 ) gra.Print( v0.xy() + gra.Dot(x,y), str ); 
+	if ( v0.z > 0 ) gra.Print( v0.xy() + gra.Dot(x,y), str, col ); 
 }
 
 //------------------------------------------------------------------------------
@@ -379,10 +379,10 @@ void Pers::Pen::pset2d( SysGra& gra, Pers& pers, vect2 p0, rgb col, float wide )
 }
 
 //------------------------------------------------------------------------------
-void Pers::Pen::print2d( SysGra& gra, Pers& pers, vect2 p0, float x, float y, string str )
+void Pers::Pen::print2d( SysGra& gra, Pers& pers, vect2 p0, float x, float y, string str, rgb col )
 //------------------------------------------------------------------------------
 {
-	(*this).print3d( gra, pers, vect3(p0,0), 0, 0, str );
+	(*this).print3d( gra, pers, vect3(p0,0), 0, 0, str, col );
 
 }
 //------------------------------------------------------------------------------
