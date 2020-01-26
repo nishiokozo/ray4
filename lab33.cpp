@@ -643,8 +643,8 @@ if(1)
 					v2.z = w*pers.rate_w;	// 三次元ベクトルで返す都合上、ZにW値を入れている。
 
 
-					if ( keys.Q.hi ) pers.cam.pos.z+=0.0001;
-					if ( keys.A.hi ) pers.cam.pos.z-=0.0001;
+					if ( keys.Q.hi ) pers.cam.pos.z+=0.001;
+					if ( keys.A.hi ) pers.cam.pos.z-=0.001;
 					if ( keys.S.hi )
 					{
 						cout <<"--" << endl;
@@ -656,9 +656,15 @@ if(1)
 v0.z=0;
 v1.z=0;
 v2.z=0;
+gra.SetCulling(false);
 					gra.Tri( v0.xy(), v1.xy(), v2.xy(), rgb(1,0,0) );
 					gra.Pset(v1.xy(),rgb(1,1,0),5);
-					pers.pen.print2d( gra, pers, vect2(0,0),0,0, to_string(v1.x)+" "+ to_string(v1.y)+" "+ to_string(v1.z) );
+					pers.pen.print2d( gra, pers, vect2(0,0),0,0,  to_string(pers.cam.pos.z) );
+					pers.pen.print2d( gra, pers, vect2(0,0),0,32*1, to_string(v0.x)+" "+ to_string(v0.y)+" "+ to_string(v0.z) );
+					pers.pen.print2d( gra, pers, vect2(0,0),0,32*2, to_string(v1.x)+" "+ to_string(v1.y)+" "+ to_string(v1.z) );
+					pers.pen.print2d( gra, pers, vect2(0,0),0,32*3, to_string(v2.x)+" "+ to_string(v2.y)+" "+ to_string(v2.z) );
+
+					gra.Tri( vect2(0.7,0), vect2(0.6,0), vect2(0,-30000000),rgb(0,1,0));
 }
 else
 		for ( Impl::Parsar_MQO::MQO::Object::Face face : obj.tbl_face )

@@ -33,7 +33,7 @@ void Pers::Update( vect2 screensize )
 #else
 	//投影面までの距離基準	こちらの方がニアクリップがしやすく扱いやすい。
 	sz = 1.0;								// 投影面までの距離
-	sz = 1.0/8.0;								// 投影面までの距離
+//	sz = 1.0/8.0;								// 投影面までの距離
 	fy = sz*tan(fovy/2);				// 投影面の高さ/2
 #endif
 	aspect	= screensize.x/screensize.y;	// 描画画面のアスペクト比
@@ -382,7 +382,7 @@ void Pers::Pen::pset2d( SysGra& gra, Pers& pers, vect2 p0, rgb col, float wide )
 void Pers::Pen::print2d( SysGra& gra, Pers& pers, vect2 p0, float x, float y, string str, rgb col )
 //------------------------------------------------------------------------------
 {
-	(*this).print3d( gra, pers, vect3(p0,0), 0, 0, str, col );
+	(*this).print3d( gra, pers, vect3(p0,0), x, y, str, col );
 
 }
 //------------------------------------------------------------------------------
