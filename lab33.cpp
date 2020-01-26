@@ -581,7 +581,6 @@ struct Lab33::Impl
 	};
 
 
-//	unique_ptr<Parsar_MQO> mdl = 0;
 	Parsar_MQO mdl;
 };
 Lab33::Lab33() : pImpl( new Lab33::Impl ){}
@@ -592,7 +591,6 @@ void Lab33::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 {
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-//	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,"33 : .mqo reader" ); 
 
 	//初期化
@@ -601,51 +599,55 @@ void Lab33::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pImpl->bResetAll = false;
 
 		// カメラ
-		pers.cam.pos = vect3( 0.0, 2.0,  5.0 );
+		pers.cam.pos = vect3( 0.0, 7.0,  20.0 );
 		pers.cam.at = vect3( 0, 1.0, 0 );
 		pers.cam.Update();
 
 		cout<<fixed<<setprecision(8);	// 浮動小数出力桁数
 
-//		pImpl->mdl = unique_ptr<Impl::Parsar_MQO>( new Impl::Parsar_MQO( "tst.mqo" ) );
-
-//		pImpl->mdl.LoadFile( "tst.mqo" );
 		pImpl->mdl.LoadFile( "golf.mqo" );
-//		pImpl->mdl.mqo.dump();
-		
 
 	}
 
 	if ( keys.R.hi ) pImpl->bResetAll = true;
 
-//		Impl::Parsar_MQO::MQO::Object& obj = pImpl->mdl.mqo.tbl_object["obj2"];
+	// モデル表示
+	{
+//		int cnt = 0;
+
 		Impl::Parsar_MQO::MQO::Object& obj = pImpl->mdl.mqo.tbl_object["hole01"];
 
+if(1)
+{					vect3 v(-13,0,0);
+					vect3 v0 = v+vect3(25.306232, 0, -25.365538);//obj.tbl_vertex[ 38 ];
+					vect3 v1 = v+vect3(13.745749, 0, 20.423058);//obj.tbl_vertex[ 42 ];
+					vect3 v2 = v+vect3(5, 0, 2);//obj.tbl_vertex[ 46 ];
+					
+					pers.pen.tri3d( gra, pers, v0, v1 ,v2, rgb(1,1,1) );
+}
+else
 		for ( Impl::Parsar_MQO::MQO::Object::Face face : obj.tbl_face )
 		{
 			if ( face.V.size() == 3 ) // 三角形ポリゴンのみ処理
 			{
-//				Impl::Parsar_MQO::MQO::Material	m = pImpl->mdl.mqo.tbl_material[ "green" ];//pImpl->mdl.mqo.tbl_material_name[ face.M ] ];
 				Impl::Parsar_MQO::MQO::Material	m = pImpl->mdl.mqo.tbl_material[ pImpl->mdl.mqo.tbl_material_name[ face.M ] ];
 
-				for ( int a : face.V )
+				//for ( int a : face.V )
+//				if ( face.V[0]==41 && face.V[1]==39 &&face.V[0]==41 )
 				{
 					vect3 v0 = obj.tbl_vertex[ face.V[0] ];
 					vect3 v1 = obj.tbl_vertex[ face.V[1] ];
 					vect3 v2 = obj.tbl_vertex[ face.V[2] ];
 					
-					
 					pers.pen.tri3d( gra, pers, v0, v1 ,v2 , m.col.rgb() );
-//					pers.pen.line3d( gra, pers, v0, v1, rgb(1,1,1) );
-//					pers.pen.line3d( gra, pers, v0, v2, rgb(1,1,1) );
-
+					pers.pen.line3d( gra, pers, v0, v1 );
+					pers.pen.line3d( gra, pers, v0, v2 );
+					pers.pen.line3d( gra, pers, v2, v1 );
+//if ( cnt++ < 100 ) break;
 				}
 			}
 		}
-
-
-//	pImpl->mdl.mqo.dump();
-
+	}
 
 
 }
