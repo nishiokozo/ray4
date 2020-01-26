@@ -599,7 +599,7 @@ void Lab33::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pImpl->bResetAll = false;
 
 		// カメラ
-		pers.cam.pos = vect3( 0.0, 7.0,  20.0 );
+		pers.cam.pos = vect3( 0.0, 5.0,  7 );
 		pers.cam.at = vect3( 0, 1.0, 0 );
 		pers.cam.Update();
 
@@ -618,12 +618,47 @@ void Lab33::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		Impl::Parsar_MQO::MQO::Object& obj = pImpl->mdl.mqo.tbl_object["hole01"];
 
 if(1)
-{					vect3 v(-13,0,0);
-					vect3 v0 = v+vect3(25.306232, 0, -25.365538);//obj.tbl_vertex[ 38 ];
-					vect3 v1 = v+vect3(13.745749, 0, 20.423058);//obj.tbl_vertex[ 42 ];
-					vect3 v2 = v+vect3(5, 0, 2);//obj.tbl_vertex[ 46 ];
-					
-					pers.pen.tri3d( gra, pers, v0, v1 ,v2, rgb(1,1,1) );
+{					vect3 v(0,0,0);
+					vect3 v0 = v+vect3( 3, 0, 0);//obj.tbl_vertex[ 38 ];
+					vect3 v1 = v+vect3( 0, 0, 10);//obj.tbl_vertex[ 42 ];
+					vect3 v2 = v+vect3(-3, 0, 0);//obj.tbl_vertex[ 46 ];
+
+					float w;					
+					v0 = v0 * pers.cam.mat.invers();
+					w = pers.getW(v0.z);
+					v0.x = v0.x* w / pers.aspect;
+					v0.y = v0.y* w 	;
+					v0.z = w*pers.rate_w;	// 三次元ベクトルで返す都合上、ZにW値を入れている。
+
+					v1 = v1 * pers.cam.mat.invers();
+					w = pers.getW(v1.z);
+					v1.x = v1.x* w / pers.aspect;
+					v1.y = v1.y* w 	;
+					v1.z = w*pers.rate_w;	// 三次元ベクトルで返す都合上、ZにW値を入れている。
+
+					v2 = v2 * pers.cam.mat.invers();
+					w = pers.getW(v2.z);
+					v2.x = v2.x* w / pers.aspect;
+					v2.y = v2.y* w 	;
+					v2.z = w*pers.rate_w;	// 三次元ベクトルで返す都合上、ZにW値を入れている。
+
+
+					if ( keys.Q.hi ) pers.cam.pos.z+=0.0001;
+					if ( keys.A.hi ) pers.cam.pos.z-=0.0001;
+					if ( keys.S.hi )
+					{
+						cout <<"--" << endl;
+						v0.dump();
+						v1.dump();
+						v2.dump();
+					}
+				//	if ( v0.z > 0 && v1.z > 0 && v2.z > 0 ) 
+v0.z=0;
+v1.z=0;
+v2.z=0;
+					gra.Tri( v0.xy(), v1.xy(), v2.xy(), rgb(1,0,0) );
+					gra.Pset(v1.xy(),rgb(1,1,0),5);
+					pers.pen.print2d( gra, pers, vect2(0,0),0,0, to_string(v1.x)+" "+ to_string(v1.y)+" "+ to_string(v1.z) );
 }
 else
 		for ( Impl::Parsar_MQO::MQO::Object::Face face : obj.tbl_face )
