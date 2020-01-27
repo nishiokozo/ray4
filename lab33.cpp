@@ -599,7 +599,7 @@ void Lab33::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pImpl->bResetAll = false;
 
 		// カメラ
-		pers.cam.pos = vect3( 0.0, 5.0,  7 );
+		pers.cam.pos = vect3( 0.0, 1.1,  8.988 );
 		pers.cam.at = vect3( 0, 1.0, 0 );
 		pers.cam.Update();
 
@@ -642,16 +642,13 @@ if(1)
 					v2.y = v2.y* w 	;
 					v2.z = w*pers.rate_w;	// 三次元ベクトルで返す都合上、ZにW値を入れている。
 
-
+					if ( keys.E.rep ) pers.cam.pos.z+=0.01;
+					if ( keys.D.rep ) pers.cam.pos.z-=0.01;
+					if ( keys.W.hi ) pers.cam.pos.z+=0.01;
+					if ( keys.S.hi ) pers.cam.pos.z-=0.01;
 					if ( keys.Q.hi ) pers.cam.pos.z+=0.001;
 					if ( keys.A.hi ) pers.cam.pos.z-=0.001;
-					if ( keys.S.hi )
-					{
-						cout <<"--" << endl;
-						v0.dump();
-						v1.dump();
-						v2.dump();
-					}
+
 				//	if ( v0.z > 0 && v1.z > 0 && v2.z > 0 ) 
 v0.z=0;
 v1.z=0;
@@ -659,7 +656,8 @@ v2.z=0;
 gra.SetCulling(false);
 					gra.Tri( v0.xy(), v1.xy(), v2.xy(), rgb(1,0,0) );
 					gra.Pset(v1.xy(),rgb(1,1,0),5);
-					pers.pen.print2d( gra, pers, vect2(0,0),0,0,  to_string(pers.cam.pos.z) );
+//					pers.pen.print2d( gra, pers, vect2(0,0),0,0,  to_string(pers.cam.pos.z) );
+					pers.pen.print2d( gra, pers, vect2(0,0),0,32*0, "cam "+to_string(pers.cam.pos.x)+" "+ to_string(pers.cam.pos.y)+" "+ to_string(pers.cam.pos.z) );
 					pers.pen.print2d( gra, pers, vect2(0,0),0,32*1, to_string(v0.x)+" "+ to_string(v0.y)+" "+ to_string(v0.z) );
 					pers.pen.print2d( gra, pers, vect2(0,0),0,32*2, to_string(v1.x)+" "+ to_string(v1.y)+" "+ to_string(v1.z) );
 					pers.pen.print2d( gra, pers, vect2(0,0),0,32*3, to_string(v2.x)+" "+ to_string(v2.y)+" "+ to_string(v2.z) );
