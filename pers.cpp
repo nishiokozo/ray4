@@ -225,7 +225,7 @@ void Pers::Cam::Rotation( vect3 mov )
 	float len = (pos-at).abs();
 	float l = (pos-at).abs()/10;
 	l=max(l,0.0000001*2);
-	l=min(l,8);
+//	l=min(l,8);
 
 	float eyeup = dot( (pos-at).normalize(), up ); // 視線ベクトルとupベクトルの織り成すcos th
 	if ( eyeup > sin(rad(80)) )
