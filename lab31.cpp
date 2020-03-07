@@ -116,8 +116,15 @@ void Lab31::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		float d = max(0,a);
 		rgb	col=rgb(d,d,d);
 //	col = n;
-		if ( a >0 )
-		pers.pen.pset3d( gra, pers, v.pos, col,3 );
+
+		if ( dot((pers.cam.pos-pers.cam.at).normalize(),n) > 0 ) 
+		{
+			if ( a >0 )
+			pers.pen.pset3d( gra, pers, v.pos, col,3 );
+//			else
+//			pers.pen.pset3d( gra, pers, v.pos, rgb(0,0,0),3 );
+		}
+		
 
 	}
 
