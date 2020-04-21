@@ -157,11 +157,11 @@ void Lab26::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		Obj* p0 = pImpl->tbl_pObj[cv.n0].get();
 		Obj* p1 = pImpl->tbl_pObj[cv.n1].get();
 		
-		pers.pen.line3d( gra, pers, p0->pos, p0->pos+cv.t0, rgb(0,1,0) );
-		pers.pen.pset3d( gra, pers, p0->pos+cv.t0, rgb(0,1,0), 5 );
+		pers.pen.Line3d( gra, pers, p0->pos, p0->pos+cv.t0, rgb(0,1,0) );
+		pers.pen.Pset3d( gra, pers, p0->pos+cv.t0, rgb(0,1,0), 5 );
 
-		pers.pen.line3d( gra, pers, p1->pos, p1->pos+cv.t1, rgb(0,1,0) );
-		pers.pen.pset3d( gra, pers, p1->pos+cv.t1, rgb(0,1,0), 5 );
+		pers.pen.Line3d( gra, pers, p1->pos, p1->pos+cv.t1, rgb(0,1,0) );
+		pers.pen.Pset3d( gra, pers, p1->pos+cv.t1, rgb(0,1,0), 5 );
 
 	}
 

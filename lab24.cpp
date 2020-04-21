@@ -139,9 +139,9 @@ void Lab24::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 				for ( float vt = 0 ; vt <= 1.0 ; vt +=1.0/vdiv )
 				{
 					vect3 vpos = func_bezier3( vt, vP0, vP1, vP2, vP3 );
-					pers.pen.pset3d( gra, pers, vpos, rgb(1,1,1), 1 );
+					pers.pen.Pset3d( gra, pers, vpos, rgb(1,1,1), 1 );
 				}
-//				pers.pen.pset3d( gra, pers, vP0, rgb(1,1,0), 3 );
+//				pers.pen.Pset3d( gra, pers, vP0, rgb(1,1,0), 3 );
 			}
 		};
 

@@ -78,7 +78,7 @@ void Lab21::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	auto funcShowBar = []( SysGra& gra, int y, float val, string str, rgb col )
 	{
 		vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42.0*y);
-		gra.Line( v0, v0+ vect2( val, 0 ), col, 2 );
+		gra.Line2d( v0, v0+ vect2( val, 0 ), col, 2 );
 		gra.Print( v0+gra.Dot(0,-6), str + to_string(val), col );
 	};
 
@@ -160,15 +160,15 @@ void Lab21::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	
 
 	// 描画：ボール
-	pers.pen.line3d( gra, pers, vect3( pImpl->ball.vt[0].pos, 0 ) , vect3( pImpl->ball.vt[1].pos, 0 ) );
-	pers.pen.line3d( gra, pers, vect3( pImpl->ball.vt[1].pos, 0 ) , vect3( pImpl->ball.vt[2].pos, 0 ) );
-	pers.pen.line3d( gra, pers, vect3( pImpl->ball.vt[2].pos, 0 ) , vect3( pImpl->ball.vt[3].pos, 0 ) );
-	pers.pen.line3d( gra, pers, vect3( pImpl->ball.vt[3].pos, 0 ) , vect3( pImpl->ball.vt[0].pos, 0 ) );
+	pers.pen.Line3d( gra, pers, vect3( pImpl->ball.vt[0].pos, 0 ) , vect3( pImpl->ball.vt[1].pos, 0 ) );
+	pers.pen.Line3d( gra, pers, vect3( pImpl->ball.vt[1].pos, 0 ) , vect3( pImpl->ball.vt[2].pos, 0 ) );
+	pers.pen.Line3d( gra, pers, vect3( pImpl->ball.vt[2].pos, 0 ) , vect3( pImpl->ball.vt[3].pos, 0 ) );
+	pers.pen.Line3d( gra, pers, vect3( pImpl->ball.vt[3].pos, 0 ) , vect3( pImpl->ball.vt[0].pos, 0 ) );
 
 	
 
 	// 描画：壁
-	pers.pen.line3d( gra, pers, vect3(pImpl->wall.p0,0), vect3(pImpl->wall.p1,0) );
+	pers.pen.Line3d( gra, pers, vect3(pImpl->wall.p0,0), vect3(pImpl->wall.p1,0) );
 
 	// メーター表示
 	funcShowBar( gra, m_y++, pImpl->motor.power,	"power    ", rgb(1,1,1) );

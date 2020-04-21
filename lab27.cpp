@@ -111,19 +111,19 @@ void Lab27::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		{
 
 			// 左2/3
-			pers.pen.pset3d( gra, pers, v+vect3(t, 4+ N1(t), 0), rgb(1,1,0), 1 );
-			pers.pen.pset3d( gra, pers, v+vect3(t, 4+ fa(t,3), 0), rgb(1,0,0), 1 );
-			pers.pen.pset3d( gra, pers, v+vect3(t, 4+ N1(t)*fa(t,3), 0), rgb(1,1,1), wide );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, 4+ N1(t), 0), rgb(1,1,0), 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, 4+ fa(t,3), 0), rgb(1,0,0), 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, 4+ N1(t)*fa(t,3), 0), rgb(1,1,1), wide );
 
 			// 右2/3
-			pers.pen.pset3d( gra, pers, v+vect3(t, 2+ N1(t-1), 0), rgb(1,1,0), 1 );
-			pers.pen.pset3d( gra, pers, v+vect3(t, 2+ fb(t,3), 0), rgb(1,0,0), 1 );
-			pers.pen.pset3d( gra, pers, v+vect3(t, 2+ N1(t-1)*fb(t,3), 0 ), rgb(1,1,1), wide );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, 2+ N1(t-1), 0), rgb(1,1,0), 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, 2+ fb(t,3), 0), rgb(1,0,0), 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, 2+ N1(t-1)*fb(t,3), 0 ), rgb(1,1,1), wide );
 
 			// 左右合成
-			pers.pen.pset3d( gra, pers, v+vect3(t, N2(t) ,0), rgb(1,1,1), wide );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N2(t) ,0), rgb(1,1,1), wide );
 		}
-			pers.pen.print3d( gra, pers, vect3(-4,-0.5,0), 0,32, "B-Spline(2) " ); 
+			pers.pen.Print3d( gra, pers, vect3(-4,-0.5,0), 0,32, "B-Spline(2) " ); 
 	}
 
 
@@ -134,24 +134,24 @@ void Lab27::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		{
 			// 左3/4
 			v = vect3(0,4,0);
-			pers.pen.pset3d( gra, pers, v+vect3(t, N2(t)			, 0), rgb(1,1,0), 1 );
-			pers.pen.pset3d( gra, pers, v+vect3(t, fa(t,4)			, 0), rgb(1,0,0), 1 );
-			pers.pen.pset3d( gra, pers, v+vect3(t, N2(t)*fa(t,4)	, 0), rgb(1,1,1), wide );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N2(t)			, 0), rgb(1,1,0), 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, fa(t,4)			, 0), rgb(1,0,0), 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N2(t)*fa(t,4)	, 0), rgb(1,1,1), wide );
 
 
 			// 右3/4
 			v = vect3(0,2,0);
-			pers.pen.pset3d( gra, pers, v+vect3(t, N2(t-1)			, 0), rgb(1,1,0), 1 );
-			pers.pen.pset3d( gra, pers, v+vect3(t, fb(t,4)			, 0), rgb(1,0,0), 1 );
-			pers.pen.pset3d( gra, pers, v+vect3(t, N2(t-1)*fb(t,4)	, 0), rgb(1,1,1), wide );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N2(t-1)			, 0), rgb(1,1,0), 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, fb(t,4)			, 0), rgb(1,0,0), 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N2(t-1)*fb(t,4)	, 0), rgb(1,1,1), wide );
 			
 			// 左右合成
 			v = vect3(0,0,0);
-			pers.pen.pset3d( gra, pers, v+vect3(t, N2(t)*fa(t,4)	, 0), rgb(1,1,0), 1 );
-			pers.pen.pset3d( gra, pers, v+vect3(t, N2(t-1)*fb(t,4)	, 0), rgb(1,1,0), 1 );
-			pers.pen.pset3d( gra, pers, v+vect3(t, N3(t) ,0)			, rgb(1,1,1), wide );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N2(t)*fa(t,4)	, 0), rgb(1,1,0), 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N2(t-1)*fb(t,4)	, 0), rgb(1,1,0), 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N3(t) ,0)			, rgb(1,1,1), wide );
 		}
-			pers.pen.print3d( gra, pers, vect3( 0,-0.5,0), 0,32, "B-Spline(3)" ); 
+			pers.pen.Print3d( gra, pers, vect3( 0,-0.5,0), 0,32, "B-Spline(3)" ); 
 	}
 
 
@@ -162,17 +162,17 @@ void Lab27::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		for ( double t = 0 ; t <= tmax  ; t+=0.01 )
 		{
 			vect3 v = v0;
-			pers.pen.pset3d( gra, pers, v+vect3(t, N2(t  ) ,0), rgb(1,1,0), 1 );
-			pers.pen.pset3d( gra, pers, v+vect3(t, N2(t-1) ,0), rgb(0,1,1), 1 );
-			pers.pen.pset3d( gra, pers, v+vect3(t, N2(t-2) ,0), rgb(1,0,1), 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N2(t  ) ,0), rgb(1,1,0), 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N2(t-1) ,0), rgb(0,1,1), 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N2(t-2) ,0), rgb(1,0,1), 1 );
 
-			pers.pen.pset3d( gra, pers, v+vect3(t, N2(t-0)+N2(t-1)+N2(t-2) ,0), rgb(1,1,1), 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N2(t-0)+N2(t-1)+N2(t-2) ,0), rgb(1,1,1), 1 );
 		}
 		for ( int t = 0 ; t <= tmax ; t++ )
 		{
-			pers.pen.print3d( gra, pers, v0+vect3( t,0,0), 0,32, to_string(t) ); 
+			pers.pen.Print3d( gra, pers, v0+vect3( t,0,0), 0,32, to_string(t) ); 
 		}
-			pers.pen.print3d( gra, pers, v0+vect3( 2,0,0), 0,64, "B-Spline(2)" ); 
+			pers.pen.Print3d( gra, pers, v0+vect3( 2,0,0), 0,64, "B-Spline(2)" ); 
 	}
 	// 三次B-スプライン 合成グラフ
 	{
@@ -181,18 +181,18 @@ void Lab27::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		for ( double t = 0 ; t <= tmax  ; t+=0.01 )
 		{
 			vect3 v = v0;
-			pers.pen.pset3d( gra, pers, v+vect3(t, N3(t  ) ,0), rgb(1,1,0), 1 );
-			pers.pen.pset3d( gra, pers, v+vect3(t, N3(t-1) ,0), rgb(0,1,1), 1 );
-			pers.pen.pset3d( gra, pers, v+vect3(t, N3(t-2) ,0), rgb(1,0,1), 1 );
-			pers.pen.pset3d( gra, pers, v+vect3(t, N3(t-3) ,0), rgb(0,0,1), 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N3(t  ) ,0), rgb(1,1,0), 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N3(t-1) ,0), rgb(0,1,1), 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N3(t-2) ,0), rgb(1,0,1), 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N3(t-3) ,0), rgb(0,0,1), 1 );
 
-			pers.pen.pset3d( gra, pers, v+vect3(t, N3(t-0)+N3(t-1)+N3(t-2)+N3(t-3) ,0), rgb(1,1,1), 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N3(t-0)+N3(t-1)+N3(t-2)+N3(t-3) ,0), rgb(1,1,1), 1 );
 		}
 		for ( int t = 0 ; t <= tmax ; t++ )
 		{
-			pers.pen.print3d( gra, pers, v0+vect3( t,0,0), 0,32, to_string(t) ); 
+			pers.pen.Print3d( gra, pers, v0+vect3( t,0,0), 0,32, to_string(t) ); 
 		}
-			pers.pen.print3d( gra, pers, v0+vect3( 2,0,0), 0,64, "B-Spline(3)" ); 
+			pers.pen.Print3d( gra, pers, v0+vect3( 2,0,0), 0,64, "B-Spline(3)" ); 
 	}
 
 }

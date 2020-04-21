@@ -25,7 +25,7 @@ struct Edge
 	bool	bPreselect	= false;		//	仮選択
 	int		n0;
 	int		n1;
-	rgb		col	= rgb(1,1,1);
+	rgb col=rgb(1,1,1);
 	float	wide = 2.0;
 
 	Edge( int _n0, int _n1 ) : n0(_n0),n1(_n1){};
@@ -133,15 +133,16 @@ struct Pers
 
 	struct Pen
 	{
-		void tri3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, vect3 p2, rgb col );
-		void pset2d( SysGra& gra, Pers& pers, vect2 p0, rgb col = rgb(1,1,1), float wide = 1.0f );
-		void pset3d( SysGra& gra, Pers& pers, vect3 p0, rgb col = rgb(1,1,1), float wide = 1.0f );
-		void line2d( SysGra& gra, Pers& pers, vect2 p0, vect2 p1, rgb col = rgb(1,1,1), float wide=1.0f );
-		void line3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col = rgb(1,1,1), float wide = 1.0f );
-		void line3d_scissor( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col = rgb(1,1,1), float wide = 1.0f );
-		void circle3d( SysGra& gra, Pers& pers, vect3 p0, float radius, rgb col, float wide=1.0f );
-		void print3d( SysGra& gra, Pers& pers, vect3 p0, float x, float y, std::string str, rgb col=rgb(1,1,1) );
-		void print2d( SysGra& gra, Pers& pers, vect2 p0, float x, float y, std::string str, rgb col=rgb(1,1,1) );
+		void Tri3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, vect3 p2, rgb col=rgb(1,1,1) );
+		void Pset2d( SysGra& gra, Pers& pers, vect2 p0, rgb col=rgb(1,1,1), float wide=1.0f );
+		void Pset3d( SysGra& gra, Pers& pers, vect3 p0, rgb col=rgb(1,1,1), float wide=1.0f );
+		void Line2d( SysGra& gra, Pers& pers, vect2 p0, vect2 p1, rgb col=rgb(1,1,1), float wide=1.0f );
+		void Line3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col=rgb(1,1,1), float wide=1.0f );
+		void Line3d_scissor( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col=rgb(1,1,1), float wide=1.0f );
+		void Circle3d( SysGra& gra, Pers& pers, vect3 p0, float radius, float step=24, rgb col=rgb(1,1,1), float wide=1.0f );
+		void Circle2d( SysGra& gra, Pers& pers, vect2 p0, float radius, float step=24, rgb col=rgb(1,1,1), float wide=1.0f );
+		void Print3d( SysGra& gra, Pers& pers, vect3 p0, float x, float y, std::string str, rgb col=rgb(1,1,1) );
+		void Print2d( SysGra& gra, Pers& pers, vect2 p0, float x, float y, std::string str, rgb col=rgb(1,1,1) );
 
 		void DrawBezier( SysGra& gra, Pers& pers, vect3 P0, vect3 P1, vect3 P2, vect3 P3 );
 		void DrawBezierSurface(
@@ -168,21 +169,21 @@ struct Pers
 
 	struct Grid
 	{
-		rgb		col = rgb(0.2,0.2,0.2);
+		rgb col=rgb(0.2,0.2,0.2);
 		mat33	mat =  mat33::midentity();
 
-		void SetCol( const rgb& _col ) { col = _col; }
+		void SetCol( const rgb& _col ) { col =_col; }
 		void SetMat( const mat33& _mat ) { mat = _mat; }
-		void DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos, mat33 m, int NUM_U, int NUM_V, float dt, rgb col, bool bPlot = false );
+		void DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos, mat33 m, int NUM_U, int NUM_V, float dt, rgb col=rgb(1,1,1), bool bPlot = false );
 		void DrawGrid( SysGra& gra, Pers& pers );
-		void DrawEternalGlid( SysGra& gra, Pers& pers, vect3 pos, mat33 m, float NUM_U, float NUM_V, rgb col );
+		void DrawEternalGlid( SysGra& gra, Pers& pers, vect3 pos, mat33 m, float NUM_U, float NUM_V, rgb col=rgb(1,1,1) );
 
 		struct Plot
 		{
 			int MaxPlot = 100;
 			int cntPlot = 0;
 			bool	bScroll = false;
-			rgb col;
+			rgb col=rgb(1,1,1);
 			float step;
 
 			std::vector<float> tblDot;
@@ -199,8 +200,9 @@ struct Pers
 
 		} plot = Plot( 100, 0.02, rgb(1,0,1) );
 		
-		void line( SysGra& gra, Pers& pers, vect2 v0, vect2 v1, rgb col = rgb(1,1,1), float wide = 1.0f );
-		void print( SysGra& gra, Pers& pers, vect2 p0, float x, float y, std::string str );
+		void Circle( SysGra& gra, Pers& pers, vect2 p0, float radius, float step=24, rgb col=rgb(1,1,1), float wide=1.0f );
+		void Line( SysGra& gra, Pers& pers, vect2 v0, vect2 v1, rgb col=rgb(1,1,1), float wide=1.0f );
+		void Print( SysGra& gra, Pers& pers, vect2 p0, float x, float y, std::string str );
 
 	} grid;
 
@@ -215,7 +217,7 @@ struct Pers
 		void DrawSquare( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAxis = true, bool bTri = true );
 		void DrawCircle( SysGra& gra, Pers& pers, vect3 pos, mat33 m, float radius, rgb col=rgb(1,1,1) );
 		void DrawSphere( SysGra& gra, Pers& pers, vect3 pos, mat33 m, float radius, rgb col=rgb(1,1,1) );
-		void DrawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, std::string str, bool bShadow = true, bool bDump=true, bool bFlip=true );
+		void DrawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col=rgb(1,1,1), std::string str="?", bool bShadow = true, bool bDump=true, bool bFlip=true );
 	} prim;
 
 };

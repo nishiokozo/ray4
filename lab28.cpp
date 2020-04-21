@@ -125,17 +125,17 @@ if(0)
 		for ( double t = 0 ; t <= tmax  ; t+=0.01 )
 		{
 			vect3 v = v0;
-			pers.pen.pset3d( gra, pers, v+vect3(t, N2(t  ) ,0), rgb(1,1,0), 1 );
-			pers.pen.pset3d( gra, pers, v+vect3(t, N2(t-1) ,0), rgb(0,1,1), 1 );
-			pers.pen.pset3d( gra, pers, v+vect3(t, N2(t-2) ,0), rgb(1,0,1), 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N2(t  ) ,0), rgb(1,1,0), 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N2(t-1) ,0), rgb(0,1,1), 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N2(t-2) ,0), rgb(1,0,1), 1 );
 
-			pers.pen.pset3d( gra, pers, v+vect3(t, N2(t-0)+N2(t-1)+N2(t-2) ,0), rgb(1,1,1), 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N2(t-0)+N2(t-1)+N2(t-2) ,0), rgb(1,1,1), 1 );
 		}
 		for ( int t = 0 ; t <= tmax ; t++ )
 		{
-			pers.pen.print3d( gra, pers, v0+vect3( t,0,0), 0,32, to_string(t) ); 
+			pers.pen.Print3d( gra, pers, v0+vect3( t,0,0), 0,32, to_string(t) ); 
 		}
-			pers.pen.print3d( gra, pers, v0+vect3( 2,0,0), 0,64, "B-Spline(2)" ); 
+			pers.pen.Print3d( gra, pers, v0+vect3( 2,0,0), 0,64, "B-Spline(2)" ); 
 	}
 	// 三次B-スプライン 合成グラフ
 	{
@@ -147,26 +147,26 @@ if(0)
 		//	c = ( t < 2.0 || t > cntVert+1 )?0.5:1.0;
 		
 			vect3 v = v0;
-			pers.pen.pset3d( gra, pers, v+vect3(t, N3(t  ) ,0), rgb(1,1,0)*c, 1 );
-			pers.pen.pset3d( gra, pers, v+vect3(t, N3(t-1) ,0), rgb(0,1,1)*c, 1 );
-			pers.pen.pset3d( gra, pers, v+vect3(t, N3(t-2) ,0), rgb(1,0,1)*c, 1 );
-			pers.pen.pset3d( gra, pers, v+vect3(t, N3(t-3) ,0), rgb(0,0,1)*c, 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N3(t  ) ,0), rgb(1,1,0)*c, 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N3(t-1) ,0), rgb(0,1,1)*c, 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N3(t-2) ,0), rgb(1,0,1)*c, 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N3(t-3) ,0), rgb(0,0,1)*c, 1 );
 
-			pers.pen.pset3d( gra, pers, v+vect3(t, N3(t-0)+N3(t-1)+N3(t-2)+N3(t-3) ,0), rgb(1,1,1)*c, 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(t, N3(t-0)+N3(t-1)+N3(t-2)+N3(t-3) ,0), rgb(1,1,1)*c, 1 );
 		}
 		for ( int t = 0 ; t <= tmax ; t++ )
 		{
-			pers.pen.print3d( gra, pers, v0+vect3( t,0,0), 0,32, to_string(t) ); 
+			pers.pen.Print3d( gra, pers, v0+vect3( t,0,0), 0,32, to_string(t) ); 
 		}
-			pers.pen.print3d( gra, pers, v0+vect3( 0,0,0), 0,64, "B-Spline(3)" ); 
+			pers.pen.Print3d( gra, pers, v0+vect3( 0,0,0), 0,64, "B-Spline(3)" ); 
 	}
 
 
 	// ベースライン
 	for ( int  i = 0 ; i < cntVert ; i++ )
 	{
-		pers.pen.pset3d( gra, pers, pos[i], rgb(0,1,0), 5 );
-		if ( i > 0 ) pers.pen.line3d( gra, pers, pos[i-1], pos[i], rgb(0,1,0), 1 );
+		pers.pen.Pset3d( gra, pers, pos[i], rgb(0,1,0), 5 );
+		if ( i > 0 ) pers.pen.Line3d( gra, pers, pos[i-1], pos[i], rgb(0,1,0), 1 );
 	}
 
 	// 答え
@@ -206,7 +206,7 @@ if(0)
 				if(j > cntVert-1) k = cntVert-1;
 				v += pos[k] * Coefficent(t - j);
 			}
-			pers.pen.pset3d( gra, pers, v+vect3(0.1,0,0), rgb(0,1,1)/0.8, 1 );
+			pers.pen.Pset3d( gra, pers, v+vect3(0.1,0,0), rgb(0,1,1)/0.8, 1 );
 		}
 	}
 
@@ -242,25 +242,25 @@ if(0)
 
 
 		float f = t/5.0;
-		pers.pen.pset3d( gra, pers, v, rgb(1-f,f,0), 2 );
+		pers.pen.Pset3d( gra, pers, v, rgb(1-f,f,0), 2 );
 
 		float l; 
 		l = 1.0;
-		if ( t>l-step/2 &&  t<l+step/2 ) pers.pen.pset3d( gra, pers, v, rgb(1,1,0), 8 );
+		if ( t>l-step/2 &&  t<l+step/2 ) pers.pen.Pset3d( gra, pers, v, rgb(1,1,0), 8 );
 		l=2.0;
-		if ( t>l-step/2 &&  t<l+step/2 ) pers.pen.pset3d( gra, pers, v, rgb(1,1,0), 8 );
+		if ( t>l-step/2 &&  t<l+step/2 ) pers.pen.Pset3d( gra, pers, v, rgb(1,1,0), 8 );
 		l=3.0;
-		if ( t>l-step/2 &&  t<l+step/2 ) pers.pen.pset3d( gra, pers, v, rgb(1,1,0), 8 );
+		if ( t>l-step/2 &&  t<l+step/2 ) pers.pen.Pset3d( gra, pers, v, rgb(1,1,0), 8 );
 		l=4.0;
-		if ( t>l-step/2 &&  t<l+step/2 ) pers.pen.pset3d( gra, pers, v, rgb(1,1,0), 8 );
+		if ( t>l-step/2 &&  t<l+step/2 ) pers.pen.Pset3d( gra, pers, v, rgb(1,1,0), 8 );
 		l=5.0;
-		if ( t>l-step/2 &&  t<l+step/2 ) pers.pen.pset3d( gra, pers, v, rgb(1,1,0), 8 );
+		if ( t>l-step/2 &&  t<l+step/2 ) pers.pen.Pset3d( gra, pers, v, rgb(1,1,0), 8 );
 		l=6.0;
-		if ( t>l-step/2 &&  t<l+step/2 ) pers.pen.pset3d( gra, pers, v, rgb(1,1,0), 8 );
+		if ( t>l-step/2 &&  t<l+step/2 ) pers.pen.Pset3d( gra, pers, v, rgb(1,1,0), 8 );
 		l=7.0;
-		if ( t>l-step/2 &&  t<l+step/2 ) pers.pen.pset3d( gra, pers, v, rgb(1,1,0), 8 );
+		if ( t>l-step/2 &&  t<l+step/2 ) pers.pen.Pset3d( gra, pers, v, rgb(1,1,0), 8 );
 		l=8.0;
-		if ( t>l-step/2 &&  t<l+step/2 ) pers.pen.pset3d( gra, pers, v, rgb(1,1,0), 8 );
+		if ( t>l-step/2 &&  t<l+step/2 ) pers.pen.Pset3d( gra, pers, v, rgb(1,1,0), 8 );
 //cout << t << endl;
 	}
 

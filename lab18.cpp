@@ -217,7 +217,7 @@ void Lab18::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	pers.prim.DrawSphere( gra, pers, b1.pos, b1.mat, b1.radius );
 
 	// 接点表示
-	if ( b1.flgOn )	pers.pen.pset3d( gra, pers, b1.Q , rgb(1,1,0), 9);
+	if ( b1.flgOn )	pers.pen.Pset3d( gra, pers, b1.Q , rgb(1,1,0), 9);
 
 
 	// 1/60sec 待

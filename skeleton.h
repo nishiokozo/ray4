@@ -94,7 +94,7 @@ struct Skin
 			v2 = pers.calcViewScreen3( v2 );
 
 
-					gra.Tri( v0, v1, v2, rgb(d,d,d) );
+					gra.Tri3d( v0, v1, v2, rgb(d,d,d) );
 		}
 
 	}

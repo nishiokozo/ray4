@@ -114,11 +114,11 @@ void Lab14::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 					}
 					else 
 					{
-						pers.pen.line3d( gra, pers, v0, v1, col);
+						pers.pen.Line3d( gra, pers, v0, v1, col);
 						{
 							vect3 a = v0;a.y=0;
 							vect3 b = v1;b.y=0;
-							pers.pen.line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
+							pers.pen.Line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
 						}
 
 					}
@@ -142,11 +142,11 @@ void Lab14::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 					v0 = v1;
 				}
 			}
-			pers.pen.line3d( gra, pers, v0, v2, col);
+			pers.pen.Line3d( gra, pers, v0, v2, col);
 			{
 				vect3 a = v0;a.y=0;
 				vect3 b = v2;b.y=0;
-				pers.pen.line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
+				pers.pen.Line3d( gra, pers, a, b, rgb(0.2,0.2,0.2));
 			}
 		};
 		func();

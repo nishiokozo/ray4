@@ -313,7 +313,7 @@ void Pers::Cam::Update()
 
 
 //------------------------------------------------------------------------------
-void Pers::Pen::line3d_scissor( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col, float wide )
+void Pers::Pen::Line3d_scissor( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col, float wide )
 //------------------------------------------------------------------------------
 {
 	vect3 a = p0* pers.cam.mat.invers();
@@ -321,38 +321,38 @@ void Pers::Pen::line3d_scissor( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb
 	vect3 v0;
 	vect3 v1;
 	bool flg = pers.calcScissorLine3d( a, b, v0, v1 );
-	if ( flg ) gra.Line( v0, v1, col, wide );
+	if ( flg ) gra.Line3d( v0, v1, col, wide );
 }
 
 //------------------------------------------------------------------------------
-void Pers::Pen::line3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col, float wide )
+void Pers::Pen::Line3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, rgb col, float wide )
 //------------------------------------------------------------------------------
 {
 	vect3 v0 = pers.calcWorldToScreen3( p0 );
 	vect3 v1 = pers.calcWorldToScreen3( p1 );
-	if ( v0.z > 0 && v1.z > 0 ) gra.Line( v0, v1, col, wide );
+	if ( v0.z > 0 && v1.z > 0 ) gra.Line3d( v0, v1, col, wide );
 }
 
 //------------------------------------------------------------------------------
-void Pers::Pen::tri3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, vect3 p2, rgb col )
+void Pers::Pen::Tri3d( SysGra& gra, Pers& pers, vect3 p0, vect3 p1, vect3 p2, rgb col )
 //------------------------------------------------------------------------------
 {
 	vect3 v0 = pers.calcWorldToScreen3( p0 );
 	vect3 v1 = pers.calcWorldToScreen3( p1 );
 	vect3 v2 = pers.calcWorldToScreen3( p2 );
-	if ( v0.z > 0 && v1.z > 0 && v2.z > 0 ) gra.Tri( v0, v1, v2, col );
+	if ( v0.z > 0 && v1.z > 0 && v2.z > 0 ) gra.Tri3d( v0, v1, v2, col );
 }
 
 //------------------------------------------------------------------------------
-void Pers::Pen::pset3d( SysGra& gra, Pers& pers, vect3 p0, rgb col, float wide )
+void Pers::Pen::Pset3d( SysGra& gra, Pers& pers, vect3 p0, rgb col, float wide )
 //------------------------------------------------------------------------------
 {
 	vect3 v0 = pers.calcWorldToScreen3( p0 );
-	if ( v0.z > 0 ) gra.Pset( v0, col, wide);
+	if ( v0.z > 0 ) gra.Pset3d( v0, col, wide);
 }
 
 //------------------------------------------------------------------------------
-void Pers::Pen::print3d( SysGra& gra, Pers& pers, vect3 p0, float x, float y, string str, rgb col )
+void Pers::Pen::Print3d( SysGra& gra, Pers& pers, vect3 p0, float x, float y, string str, rgb col )
 //------------------------------------------------------------------------------
 {
 	vect3 v0 = pers.calcWorldToScreen3( p0 );
@@ -360,38 +360,43 @@ void Pers::Pen::print3d( SysGra& gra, Pers& pers, vect3 p0, float x, float y, st
 }
 
 //------------------------------------------------------------------------------
-void Pers::Pen::circle3d( SysGra& gra, Pers& pers, vect3 p0, float radius, rgb col, float wide )
+void Pers::Pen::Circle3d( SysGra& gra, Pers& pers, vect3 p0, float radius, float step, rgb col, float wide )
 //------------------------------------------------------------------------------
 {
 	vect3 v0 = pers.calcWorldToScreen3( p0 );
 	float r = radius*v0.z;
 
-	if ( v0.z > 0 ) gra.Circle( v0, r, col, wide );
+	if ( v0.z > 0 ) gra.Circle3d( v0, r, step, col, wide );
 
 }
 
 // ~2d関数はXY平面、z=0に描画する。
 //------------------------------------------------------------------------------
-void Pers::Pen::pset2d( SysGra& gra, Pers& pers, vect2 p0, rgb col, float wide )
+void Pers::Pen::Pset2d( SysGra& gra, Pers& pers, vect2 p0, rgb col, float wide )
 //------------------------------------------------------------------------------
 {
-	(*this).pset3d( gra, pers, vect3(p0,0), col, wide );
+	(*this).Pset3d( gra, pers, vect3(p0,0), col, wide );
 }
 
 //------------------------------------------------------------------------------
-void Pers::Pen::print2d( SysGra& gra, Pers& pers, vect2 p0, float x, float y, string str, rgb col )
+void Pers::Pen::Print2d( SysGra& gra, Pers& pers, vect2 p0, float x, float y, string str, rgb col )
 //------------------------------------------------------------------------------
 {
-	(*this).print3d( gra, pers, vect3(p0,0), x, y, str, col );
-
+	(*this).Print3d( gra, pers, vect3(p0,0), x, y, str, col );
 }
 //------------------------------------------------------------------------------
-void Pers::Pen::line2d( SysGra& gra, Pers& pers, vect2 p0, vect2 p1, rgb col, float wide )
+void Pers::Pen::Line2d( SysGra& gra, Pers& pers, vect2 p0, vect2 p1, rgb col, float wide )
 //------------------------------------------------------------------------------
 {
-	(*this).line3d( gra, pers, vect3(p0,0), vect3(p1,0), col, wide );
-
+	(*this).Line3d( gra, pers, vect3(p0,0), vect3(p1,0), col, wide );
 }
+//------------------------------------------------------------------------------
+void Pers::Pen::Circle2d( SysGra& gra, Pers& pers, vect2 p0, float radius, float step, rgb col, float wide )
+//------------------------------------------------------------------------------
+{
+	(*this).Circle3d( gra, pers, vect3(p0,0), radius, step, col, wide );
+}
+
 
 //------------------------------------------------------------------------------
 void Pers::Pen::DrawBezier( SysGra& gra, Pers& pers, vect3 P0, vect3 P1, vect3 P2, vect3 P3 )
@@ -405,7 +410,7 @@ void Pers::Pen::DrawBezier( SysGra& gra, Pers& pers, vect3 P0, vect3 P1, vect3 P
 	for ( int i = 0 ; i < div ; i++ )
 	{
 		vect3 pos1 = func_bezier3( t, P0, P1, P2, P3 );
-		pers.pen.line3d( gra, pers, pos0, pos1, rgb(1,1,1) );
+		pers.pen.Line3d( gra, pers, pos0, pos1, rgb(1,1,1) );
 
 		pos0=pos1;
 		t+=dt;
@@ -440,7 +445,7 @@ void Pers::Pen::DrawBezierSurface(
 		for ( float vt = 0 ; vt <= 1.0 ; vt +=1.0/vdiv )
 		{
 			vect3 vpos = func_bezier3( vt, vP0, vP1, vP2, vP3 );
-			pers.pen.pset3d( gra, pers, vpos, rgb(1,1,1), 1 );
+			pers.pen.Pset3d( gra, pers, vpos, rgb(1,1,1), 1 );
 		}
 	}
 }
@@ -471,14 +476,14 @@ void Pers::Prim::DrawPlate( SysGra& gra, Pers& pers, vect3 pos, vect3 normal, in
 			{
 				vect3 v0 = a * m;
 				vect3 v1 = b * m;
-				pers.pen.line3d( gra, pers, v0+ pos, v1+ pos, col );
+				pers.pen.Line3d( gra, pers, v0+ pos, v1+ pos, col );
 			}
 			a = b;
 		}
 	}
 
-		pers.pen.line3d( gra, pers, pos, pos+ normal*0.2, col, 3 );
-		pers.pen.pset3d( gra, pers, pos+ normal*0.2, col, 5 );
+		pers.pen.Line3d( gra, pers, pos, pos+ normal*0.2, col, 3 );
+		pers.pen.Pset3d( gra, pers, pos+ normal*0.2, col, 5 );
 
 }
 
@@ -497,7 +502,7 @@ void Pers::Prim::DrawCircle( SysGra& gra, Pers& pers, vect3 pos, vect3 normal, f
 		{
 			vect3 v0 = a * m;
 			vect3 v1 = b * m;
-			pers.pen.line3d( gra, pers, v0+ pos, v1+ pos, col );
+			pers.pen.Line3d( gra, pers, v0+ pos, v1+ pos, col );
 		}
 		a = b;
 	}
@@ -518,19 +523,19 @@ void Pers::Prim::DrawCircle( SysGra& gra, Pers& pers, vect3 pos, mat33 m, float 
 		{
 			vect3 v0 = a * m;
 			vect3 v1 = b * m;
-			pers.pen.line3d( gra, pers, v0+ pos, v1+ pos, col );
+			pers.pen.Line3d( gra, pers, v0+ pos, v1+ pos, col );
 		}
 		a = b;
 	}
 	{
 		vect3	v0 = vect3(-1,0,0) * m + pos;
 		vect3	v1 = vect3( 1,0,0) * m + pos;
-		pers.pen.line3d( gra, pers, v0, v1, col );
+		pers.pen.Line3d( gra, pers, v0, v1, col );
 	}
 	{
 		vect3	v0 = vect3( 0,-1,0) * m + pos;
 		vect3	v1 = vect3( 0, 1,0) * m + pos;
-		pers.pen.line3d( gra, pers, v0, v1, col );
+		pers.pen.Line3d( gra, pers, v0, v1, col );
 	}
 }
 
@@ -542,12 +547,12 @@ void Pers::Prim::DrawMat33(  SysGra& gra, Pers& pers, vect3 v0, mat33 m )
 	vect3 b = {m.m[1][0],m.m[1][1],m.m[1][2]};
 	vect3 c = {m.m[2][0],m.m[2][1],m.m[2][2]};
 
-	pers.pen.line3d( gra, pers, v0		, v0+a/2, rgb(1,0,0), 1 );
-	pers.pen.line3d( gra, pers, v0		, v0+b/2, rgb(0,1,0), 1 );
-	pers.pen.line3d( gra, pers, v0		, v0+c/2, rgb(0,0,1), 1 );
-	pers.pen.line3d( gra, pers, v0+a/2	, v0+c/2, rgb(0.5,0.5,0.5), 1 );
-	pers.pen.line3d( gra, pers, v0+b/2	, v0+c/2, rgb(0.5,0.5,0.5), 1 );
-	pers.pen.line3d( gra, pers, v0+b/2	, v0+a/2, rgb(0.5,0.5,0.5), 1 );
+	pers.pen.Line3d( gra, pers, v0		, v0+a/2, rgb(1,0,0), 1 );
+	pers.pen.Line3d( gra, pers, v0		, v0+b/2, rgb(0,1,0), 1 );
+	pers.pen.Line3d( gra, pers, v0		, v0+c/2, rgb(0,0,1), 1 );
+	pers.pen.Line3d( gra, pers, v0+a/2	, v0+c/2, rgb(0.5,0.5,0.5), 1 );
+	pers.pen.Line3d( gra, pers, v0+b/2	, v0+c/2, rgb(0.5,0.5,0.5), 1 );
+	pers.pen.Line3d( gra, pers, v0+b/2	, v0+a/2, rgb(0.5,0.5,0.5), 1 );
 
 }
 
@@ -648,9 +653,9 @@ void Pers::Prim::DrawBox( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAx
 		vect3	nx = vect3( m.m[0][0], m.m[0][1], m.m[0][2] );
 		vect3	ny = vect3( m.m[1][0], m.m[1][1], m.m[1][2] );
 		vect3	nz = vect3( m.m[2][0], m.m[2][1], m.m[2][2] );
-		pers.pen.line3d( gra, pers, pos, pos+nx*0.2, rgb(1,0,0) );
-		pers.pen.line3d( gra, pers, pos, pos+ny*0.2, rgb(0,1,0) );
-		pers.pen.line3d( gra, pers, pos, pos+nz*0.2, rgb(0,0,1) );
+		pers.pen.Line3d( gra, pers, pos, pos+nx*0.2, rgb(1,0,0) );
+		pers.pen.Line3d( gra, pers, pos, pos+ny*0.2, rgb(0,1,0) );
+		pers.pen.Line3d( gra, pers, pos, pos+nz*0.2, rgb(0,0,1) );
 	}
 	
 	// Tri
@@ -663,8 +668,8 @@ void Pers::Prim::DrawBox( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAx
 			vect3 v2 = pers.calcWorldToScreen3( disp[t.n2] );
 //					if ( v0.z>0 )
 			{
-				gra.Tri( v0,v1,v2, rgb(1,0,1));
-				gra.Tri( v2,v1,v0, rgb(1,0,1)/2);
+				gra.Tri3d( v0,v1,v2, rgb(1,0,1));
+				gra.Tri3d( v2,v1,v0, rgb(1,0,1)/2);
 			}
 
 		}
@@ -675,7 +680,7 @@ void Pers::Prim::DrawBox( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAx
 		const vect3& b = disp[e.n];
 		const rgb col = rgb(0,1,1);
 
-		pers.pen.line3d( gra, pers, a, b, col, false );
+		pers.pen.Line3d( gra, pers, a, b, col, false );
 
 	}
 }
@@ -809,9 +814,9 @@ void Pers::Prim::DrawDrum( SysGra& gra, Pers& pers,  vect3 pos, mat33 m  )
 		vect3	nx = vect3( m.m[0][0], m.m[0][1], m.m[0][2] );
 		vect3	ny = vect3( m.m[1][0], m.m[1][1], m.m[1][2] );
 		vect3	nz = vect3( m.m[2][0], m.m[2][1], m.m[2][2] );
-		pers.pen.line3d( gra, pers, pos, pos+nx*0.2, rgb(1,0,0) );
-		pers.pen.line3d( gra, pers, pos, pos+ny*0.2, rgb(0,1,0) );
-		pers.pen.line3d( gra, pers, pos, pos+nz*0.2, rgb(0,0,1) );
+		pers.pen.Line3d( gra, pers, pos, pos+nx*0.2, rgb(1,0,0) );
+		pers.pen.Line3d( gra, pers, pos, pos+ny*0.2, rgb(0,1,0) );
+		pers.pen.Line3d( gra, pers, pos, pos+nz*0.2, rgb(0,0,1) );
 	}
 	
 	// Tri
@@ -822,8 +827,8 @@ void Pers::Prim::DrawDrum( SysGra& gra, Pers& pers,  vect3 pos, mat33 m  )
 		vect3 v2 = pers.calcWorldToScreen3( disp[t.n2] );
 		if ( v0.z>0 )
 		{
-			gra.Tri( v0,v1,v2, rgb(1,0,1));
-			gra.Tri( v2,v1,v0, rgb(1,0,1)/2);
+			gra.Tri3d( v0,v1,v2, rgb(1,0,1));
+			gra.Tri3d( v2,v1,v0, rgb(1,0,1)/2);
 		}
 
 	}
@@ -833,7 +838,7 @@ void Pers::Prim::DrawDrum( SysGra& gra, Pers& pers,  vect3 pos, mat33 m  )
 		const vect3& b = disp[e.n];
 		const rgb col = rgb(0,1,1);
 
-		pers.pen.line3d( gra, pers, a, b, col, false );
+		pers.pen.Line3d( gra, pers, a, b, col, false );
 	}
 }
 
@@ -887,9 +892,9 @@ void Pers::Prim::DrawSphere( SysGra& gra, Pers& pers, vect3 pos, mat33 m, float 
 #endif
 		if ( f > 0 )
 		{
-			pers.pen.line3d( gra, pers, vx0, vx1, col );
-			pers.pen.line3d( gra, pers, vy0, vy1, col );
-			pers.pen.line3d( gra, pers, vz0, vz1, col );
+			pers.pen.Line3d( gra, pers, vx0, vx1, col );
+			pers.pen.Line3d( gra, pers, vy0, vy1, col );
+			pers.pen.Line3d( gra, pers, vz0, vz1, col );
 		}
 		vx0 = vx1;
 		vy0 = vy1;
@@ -930,14 +935,14 @@ void Pers::Prim::DrawTire( SysGra& gra, Pers& pers, vect3 pos, float head, float
 
 		if ( i > 0 ) 
 		{
-			pers.pen.line3d( gra, pers, v0, v1, col, 2 );
+			pers.pen.Line3d( gra, pers, v0, v1, col, 2 );
 
 			// 影
 			vect3 a0= v0;
 			vect3 a1= v1;
 			a0.y=0;
 			a1.y=0;
-			pers.pen.line3d( gra, pers, a0, a1, col/4, 2 );
+			pers.pen.Line3d( gra, pers, a0, a1, col/4, 2 );
 		}
 
 		v0 = v1;
@@ -992,9 +997,9 @@ void Pers::Prim::DrawSquare( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool 
 		vect3	nx = vect3( m.m[0][0], m.m[0][1], m.m[0][2] );
 		vect3	ny = vect3( m.m[1][0], m.m[1][1], m.m[1][2] );
 		vect3	nz = vect3( m.m[2][0], m.m[2][1], m.m[2][2] );
-		pers.pen.line3d( gra, pers, pos, pos+nx*0.2, rgb(1,0,0) );
-		pers.pen.line3d( gra, pers, pos, pos+ny*0.2, rgb(0,1,0) );
-		pers.pen.line3d( gra, pers, pos, pos+nz*0.2, rgb(0,0,1) );
+		pers.pen.Line3d( gra, pers, pos, pos+nx*0.2, rgb(1,0,0) );
+		pers.pen.Line3d( gra, pers, pos, pos+ny*0.2, rgb(0,1,0) );
+		pers.pen.Line3d( gra, pers, pos, pos+nz*0.2, rgb(0,0,1) );
 	}
 	
 	int cnt = 0;
@@ -1006,7 +1011,7 @@ void Pers::Prim::DrawSquare( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool 
 		if ( cnt == 0 ) col = rgb(1,0,0);
 		//if ( cnt == 1 ) col = rgb(0,1,0);
 		cnt++;
-		pers.pen.line3d( gra, pers, a, b, col, false );
+		pers.pen.Line3d( gra, pers, a, b, col, false );
 
 	}
 }
@@ -1025,24 +1030,24 @@ void Pers::Prim::DrawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3
 		vect3	a = v0;	a.y=0;
 		vect3	b = v1;	b.y=0;
 		rgb		c = (col+rgb(0.75,0.75,0.75))/4;
-		pers.pen.line3d( gra, pers, a, b, c, 1 );
-		pers.pen.pset3d( gra, pers,    b, c, 5 );
+		pers.pen.Line3d( gra, pers, a, b, c, 1 );
+		pers.pen.Pset3d( gra, pers,    b, c, 5 );
 	}
 
 	// 線
-	pers.pen.line3d( gra, pers, v0, v1, col, 1 );
-//	pers.pen.pset3d( gra, pers,     v1, col, 5 );
+	pers.pen.Line3d( gra, pers, v0, v1, col, 1 );
+//	pers.pen.Pset3d( gra, pers,     v1, col, 5 );
 
 	if ( bFlip )
 	{
 		// 矢印の先
-		pers.pen.print3d( gra, pers, 	v1,12,0, str ); 
+		pers.pen.Print3d( gra, pers, 	v1,12,0, str ); 
 	}
 	else
 	{
 		// 矢印の根本
 		float n = ((float)str.size() * 6.0);
-		pers.pen.print3d( gra, pers, 	v0,-n,36, str ); 
+		pers.pen.Print3d( gra, pers, 	v0,-n,36, str ); 
 	}
 
 	// 矢印
@@ -1060,7 +1065,7 @@ void Pers::Prim::DrawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3
 			vect2 a = a1;
 			vect2 b = a1-n*0.1/7 - v*0.2/10;
 			vect2 c = a1+n*0.1/7 - v*0.2/10;
-			gra.Tri( a,b,c, col );
+			gra.Tri2d( a,b,c, col );
 
 		}
 		gra.SetCulling( true );
@@ -1076,7 +1081,7 @@ void Pers::Prim::DrawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3
 			vect3 a = v1;
 			vect3 b = v1-n*0.1 - v.normalize()*0.2;
 			vect3 c = v1+n*0.1 - v.normalize()*0.2;
-			pers.pen.tri3d( gra, pers, a,b,c, col );
+			pers.pen.Tri2d( gra, pers, a,b,c, col );
 		}
 		gra.SetCulling( true );
 	}
@@ -1113,7 +1118,7 @@ void Pers::Axis::DrawAxis( SysGra& gra, Pers& pers, vect2 mpos )
 			pers.cam.mat.m[1][0],
 			pers.cam.mat.m[2][0]
 		) * l;
-		gra.Line( v0, v1, rgb(0.8,0.2,0.2), 2.0 );
+		gra.Line3d( v0, v1, rgb(0.8,0.2,0.2), 2.0 );
 	}
 	if ( bAxisY  )
 	{
@@ -1122,7 +1127,7 @@ void Pers::Axis::DrawAxis( SysGra& gra, Pers& pers, vect2 mpos )
 			pers.cam.mat.m[1][1],
 			pers.cam.mat.m[2][1]
 		) * l;
-		gra.Line( v0, v1, rgb(0.2,0.8,0.2), 2.0 );
+		gra.Line3d( v0, v1, rgb(0.2,0.8,0.2), 2.0 );
 	}
 	if ( bAxisZ )
 	{
@@ -1131,7 +1136,7 @@ void Pers::Axis::DrawAxis( SysGra& gra, Pers& pers, vect2 mpos )
 			pers.cam.mat.m[1][2],
 			pers.cam.mat.m[2][2]
 		) * l;
-		gra.Line( v0, v1, rgb(0.1,0.3,1), 2.0 );
+		gra.Line3d( v0, v1, rgb(0.1,0.3,1), 2.0 );
 
 	}
 
@@ -1139,7 +1144,7 @@ void Pers::Axis::DrawAxis( SysGra& gra, Pers& pers, vect2 mpos )
 	gra.Print( mpos+gra.Dot(16,-12),string("")+(bAxisX?"X":"")+(bAxisY?"Y":"")+(bAxisZ?"Z":"") ); 
 
 
-	gra.Pset( v0, rgb(1,1,1),3 );
+	gra.Pset3d( v0, rgb(1,1,1),3 );
 
 	gra.SetZTest( true );
 
@@ -1186,7 +1191,7 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int N
 		{
 			vect3 v0 = a * m;
 			vect3 v1 = b * m;
-			pers.pen.line3d_scissor( gra, pers, v0, v1, col );
+			pers.pen.Line3d_scissor( gra, pers, v0, v1, col );
 			a+=vt;
 			b+=vt;
 		}
@@ -1200,7 +1205,7 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int N
 		{
 			vect3 v0 = a * m;
 			vect3 v1 = b * m;
-			pers.pen.line3d_scissor( gra, pers, v0, v1, col );
+			pers.pen.Line3d_scissor( gra, pers, v0, v1, col );
 			a+=vt;
 			b+=vt;
 		}
@@ -1216,7 +1221,7 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int N
 			{
 				vect3 v0 = a * m;
 				vect3 v1 = b * m;
-				pers.pen.line3d( gra, pers, v0,v1, col );
+				pers.pen.Line3d( gra, pers, v0,v1, col );
 			}
 			a = b;
 		}
@@ -1230,12 +1235,12 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int N
 			{
 				vect3 v0 = ( vect3( f, 0, -0.025 ) + pos0 ) * m;
 				vect3 v1 = ( vect3( f, 0,  0.025 ) + pos0 ) * m;
-				pers.pen.line3d( gra, pers, v0,v1, col );
+				pers.pen.Line3d( gra, pers, v0,v1, col );
 			}
 			{
 				vect3 v0 = ( vect3( -0.025, 0, f ) + pos0 ) * m;
 				vect3 v1 = ( vect3(  0.025, 0, f ) + pos0 ) * m;
-				pers.pen.line3d( gra, pers, v0,v1, col );
+				pers.pen.Line3d( gra, pers, v0,v1, col );
 			}
 		}
 	}
@@ -1252,7 +1257,35 @@ void Pers::Grid::DrawGrid( SysGra& gra, Pers& pers )
 	DrawGrid3d( gra, pers, vect3(0,0,0), mat, 10, 10, 1, col );
 }
 //------------------------------------------------------------------------------
-void Pers::Grid::line( SysGra& gra, Pers& pers, vect2 p0, vect2 p1, rgb col, float wide )
+void Pers::Grid::Circle( SysGra& gra, Pers& pers, vect2 p0, float radius, float step, rgb col, float wide )
+//----------------------------------------------------------------------------
+{
+	gra.SetZTest(false);
+
+	// 平面上の円
+	mat33 m = mat * mat33::mrotx(-rad(90));
+
+	vect3 v0 = m * vect3(p0,0);	
+	vect3 pos = vect3(p0,0);	
+
+	vect3 a;
+	for ( float th = 0 ; th <= rad(360) ; th+=rad(10) )
+	{
+		vect3 b = vect3( radius*cos(th), radius*sin(th), 0 ) ;
+		if ( th > 0 ) 
+		{
+			vect3 v0 = a * m;
+			vect3 v1 = b * m;
+			pers.pen.Line3d( gra, pers, v0+ pos, v1+ pos, col );
+		}
+		a = b;
+	}
+
+
+	gra.SetZTest(true);
+}
+//------------------------------------------------------------------------------
+void Pers::Grid::Line( SysGra& gra, Pers& pers, vect2 p0, vect2 p1, rgb col, float wide )
 //----------------------------------------------------------------------------
 {
 	gra.SetZTest(false);
@@ -1261,12 +1294,12 @@ void Pers::Grid::line( SysGra& gra, Pers& pers, vect2 p0, vect2 p1, rgb col, flo
 
 	vect3 v0 = m * vect3(p0,0);	
 	vect3 v1 = m * vect3(p1,0);	
-	pers.pen.line3d( gra, pers, v0, v1, col, wide );
+	pers.pen.Line3d( gra, pers, v0, v1, col, wide );
 
 	gra.SetZTest(true);
 }
 //------------------------------------------------------------------------------
-void Pers::Grid::print( SysGra& gra, Pers& pers, vect2 p0, float x, float y, string str )
+void Pers::Grid::Print( SysGra& gra, Pers& pers, vect2 p0, float x, float y, string str )
 //----------------------------------------------------------------------------
 {
 	gra.SetZTest(false);
@@ -1274,7 +1307,7 @@ void Pers::Grid::print( SysGra& gra, Pers& pers, vect2 p0, float x, float y, str
 	mat33 m = mat * mat33::mrotx(-rad(90));
 
 	vect3 v0 = m * vect3(p0,0);	
-	pers.pen.print3d( gra, pers, v0, x,y,str );
+	pers.pen.Print3d( gra, pers, v0, x,y,str );
 
 
 	gra.SetZTest(true);
@@ -1344,20 +1377,20 @@ void Pers::Grid::Plot::DrawPlot( SysGra& gra, Pers& pers, mat33& m )
 	for ( int i = cntPlot ; i < MaxPlot ; i++ )
 	{
 		vect3 v = m*vect3( x, 0, tblDot[i] );
-		pers.pen.pset3d( gra, pers, v,  col, 2 );
+		pers.pen.Pset3d( gra, pers, v,  col, 2 );
 		x += step;
 	}
 	for ( int i = 0 ; i < cntPlot-1 ; i++ )
 	{
 		vect3 v = m* vect3( x, 0, tblDot[i] );
-		pers.pen.pset3d( gra, pers, v ,  col, 2 );
+		pers.pen.Pset3d( gra, pers, v ,  col, 2 );
 		x += step;
 	}
 	if ( cntPlot > 0 ) 
 	{
 		vect3 v = m*vect3( x, 0, tblDot[cntPlot-1] );
 
-		pers.pen.pset3d( gra, pers, v,  rgb(1,1,1), 2 );
+		pers.pen.Pset3d( gra, pers, v,  rgb(1,1,1), 2 );
 	}
 	gra.SetZTest( true );
 }

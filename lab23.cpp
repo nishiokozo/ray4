@@ -337,10 +337,10 @@ void Lab23::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 			float 	r = box.radius;
 			vect3	v0 = vect3( box.pos, r,0);
 			float	wide = 1.0;
-			pers.pen.line3d( gra, pers, v0+vect3(-r,-r,0), v0+vect3( r,-r,0),rgb(1,1,1), wide );
-			pers.pen.line3d( gra, pers, v0+vect3( r,-r,0), v0+vect3( r, r,0),rgb(1,1,1), wide );
-			pers.pen.line3d( gra, pers, v0+vect3( r, r,0), v0+vect3(-r, r,0),rgb(1,1,1), wide );
-			pers.pen.line3d( gra, pers, v0+vect3(-r, r,0), v0+vect3(-r,-r,0),rgb(1,1,1), wide );
+			pers.pen.Line3d( gra, pers, v0+vect3(-r,-r,0), v0+vect3( r,-r,0),rgb(1,1,1), wide );
+			pers.pen.Line3d( gra, pers, v0+vect3( r,-r,0), v0+vect3( r, r,0),rgb(1,1,1), wide );
+			pers.pen.Line3d( gra, pers, v0+vect3( r, r,0), v0+vect3(-r, r,0),rgb(1,1,1), wide );
+			pers.pen.Line3d( gra, pers, v0+vect3(-r, r,0), v0+vect3(-r,-r,0),rgb(1,1,1), wide );
 
 			// 箱情報表示
 			if ( box.bWall == false )
@@ -348,7 +348,7 @@ void Lab23::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 				vect3	v1 = vect3( box.vel, 0,0);
 				stringstream ss ;
 				ss << box.weight << "kg";
-				pers.grid.print( gra, pers, 	v0.xy(), 0,-32, ss.str() ); 
+				pers.grid.Print( gra, pers, 	v0.xy(), 0,-32, ss.str() ); 
 				ss.str("");
 				ss << box.vel << "m/s";
 				pers.prim.DrawVect( gra, pers, text_y, v0, v1 ,5	, rgb(1,0,1), ss.str(), false, false,false );
@@ -361,7 +361,7 @@ void Lab23::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	//地面表示
 	{
 		gra.SetZTest(false);
-		pers.pen.line3d( gra, pers, vect3(-8,0,0), vect3( 8,0,0), rgb(1,1,1),1);	
+		pers.pen.Line3d( gra, pers, vect3(-8,0,0), vect3( 8,0,0), rgb(1,1,1),1);	
 		gra.SetZTest(true);
 	}
 	

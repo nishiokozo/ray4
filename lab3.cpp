@@ -156,7 +156,7 @@ void Lab3::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 			Planet& pl = *dynamic_cast<Planet*>(p.get());
 			for ( int i = 0 ; i < MAX_PREV ; i++ )
 			{
-				pers.pen.pset3d( gra, pers, pl.tblPrev[i], rgb(0,1,1),2 );
+				pers.pen.Pset3d( gra, pers, pl.tblPrev[i], rgb(0,1,1),2 );
 			}
 		}
 	}

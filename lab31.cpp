@@ -120,9 +120,9 @@ void Lab31::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		if ( dot((pers.cam.pos-pers.cam.at).normalize(),n) > 0 ) 
 		{
 			if ( a >0 )
-			pers.pen.pset3d( gra, pers, v.pos, col,3 );
+			pers.pen.Pset3d( gra, pers, v.pos, col,3 );
 //			else
-//			pers.pen.pset3d( gra, pers, v.pos, rgb(0,0,0),3 );
+//			pers.pen.Pset3d( gra, pers, v.pos, rgb(0,0,0),3 );
 		}
 		
 

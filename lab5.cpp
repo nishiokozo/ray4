@@ -91,7 +91,7 @@ void Lab5::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 	vect3&	v1 = pImpl->tbl_pObj[1]->pos;	//	barの先端
 
 
-//	pers.pen.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
+//	pers.pen.Line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
 
 	// 縮む
 	if ( mouse.F.hi )	v1 = (v1+v0)/2;

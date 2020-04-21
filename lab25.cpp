@@ -116,13 +116,13 @@ void Lab25::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	{
 		Impl::Puv* p = dynamic_cast<Impl::Puv*>(po.get());
 
-		pers.pen.line3d( gra, pers, p->pos, p->pos+p->va, rgb(0,1,0) );
-		pers.pen.pset3d( gra, pers, p->pos+p->va, rgb(0,1,0), 5 );
-		pers.pen.line3d( gra, pers, p->pos, p->pos+p->vb, rgb(0,1,0) );
-		pers.pen.pset3d( gra, pers, p->pos+p->vb, rgb(0,1,0), 5 );
+		pers.pen.Line3d( gra, pers, p->pos, p->pos+p->va, rgb(0,1,0) );
+		pers.pen.Pset3d( gra, pers, p->pos+p->va, rgb(0,1,0), 5 );
+		pers.pen.Line3d( gra, pers, p->pos, p->pos+p->vb, rgb(0,1,0) );
+		pers.pen.Pset3d( gra, pers, p->pos+p->vb, rgb(0,1,0), 5 );
 
-		pers.pen.line3d( gra, pers, p->pos, p->pos+p->u, rgb(1,1,0) );
-		pers.pen.pset3d( gra, pers, p->pos+p->u, rgb(1,1,0), 5 );
+		pers.pen.Line3d( gra, pers, p->pos, p->pos+p->u, rgb(1,1,0) );
+		pers.pen.Pset3d( gra, pers, p->pos+p->u, rgb(1,1,0), 5 );
 
 	}
 	

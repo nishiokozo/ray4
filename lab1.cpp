@@ -87,7 +87,7 @@ void Lab1::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 			v += a;
 			s += v;
 
-			pers.pen.pset2d( gra, pers, vect2(t,s), rgb(1,0,0), 3 );
+			pers.pen.Pset2d( gra, pers, vect2(t,s), rgb(1,0,0), 3 );
 		}
 	}
 
@@ -105,12 +105,12 @@ void Lab1::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 			v = a * t;
 			s = v * t * 0.5f;
 
-			pers.pen.line2d( gra, pers, vect2(t0,s0), vect2(t,s), rgb(0,0.5,1), 1 );
-			pers.pen.line2d( gra, pers, vect2(t0,v0), vect2(t,v), rgb(0,1,0), 1 );
+			pers.pen.Line2d( gra, pers, vect2(t0,s0), vect2(t,s), rgb(0,0.5,1), 1 );
+			pers.pen.Line2d( gra, pers, vect2(t0,v0), vect2(t,v), rgb(0,1,0), 1 );
 
-			pers.pen.pset2d( gra, pers, vect2(t,s), rgb(0,0.5,1), 3 );
-			pers.pen.pset2d( gra, pers, vect2(t,v), rgb(0,1,0), 3 );
-			pers.pen.print2d( gra, pers, vect2(t,s),0,0, to_string(s) );
+			pers.pen.Pset2d( gra, pers, vect2(t,s), rgb(0,0.5,1), 3 );
+			pers.pen.Pset2d( gra, pers, vect2(t,v), rgb(0,1,0), 3 );
+			pers.pen.Print2d( gra, pers, vect2(t,s),0,0, to_string(s) );
 		
 			t0 = t;
 			v0 = v;
@@ -127,13 +127,13 @@ void Lab1::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 	{
 		float y1 = cosh(t);
 		float y2 = sinh(t);
-		pers.pen.pset2d( gra, pers, vect2(t,y1), rgb(1,1,0), 3 );
-		pers.pen.pset2d( gra, pers, vect2(t,y2), rgb(1,0,1), 3 );
-//		pers.pen.pset2d( gra, pers, vect2(t,y2/y1), rgb(1,1,1), 3 );
+		pers.pen.Pset2d( gra, pers, vect2(t,y1), rgb(1,1,0), 3 );
+		pers.pen.Pset2d( gra, pers, vect2(t,y2), rgb(1,0,1), 3 );
+//		pers.pen.Pset2d( gra, pers, vect2(t,y2/y1), rgb(1,1,1), 3 );
 
-		pers.pen.print3d( gra, pers, vect3(0,0,0), 0, -32  , "cosh()", rgb(1,1,0) ); 
-		pers.pen.print3d( gra, pers, vect3(0,0,0), 0, -32*2, "sin()", rgb(1,0,1) ); 
-//		pers.pen.print3d( gra, pers, vect3(0,0,0), 0, -32*3, "cos()/cosh()", rgb(1,1,1) ); 
+		pers.pen.Print3d( gra, pers, vect3(0,0,0), 0, -32  , "cosh()", rgb(1,1,0) ); 
+		pers.pen.Print3d( gra, pers, vect3(0,0,0), 0, -32*2, "sin()", rgb(1,0,1) ); 
+//		pers.pen.Print3d( gra, pers, vect3(0,0,0), 0, -32*3, "cos()/cosh()", rgb(1,1,1) ); 
 
 	}
 #endif	

@@ -61,6 +61,7 @@
 #include "lab32.h"
 #include "lab33.h"
 #include "lab34.h"
+#include "lab35.h"
 
 using namespace std;
 
@@ -117,6 +118,7 @@ void Lab::SetIdx( int n, Cp& cp )
 		case 32:	pLab = unique_ptr<LabObj>( new Lab32 );	break;
 		case 33:	pLab = unique_ptr<LabObj>( new Lab33 );	break;
 		case 34:	pLab = unique_ptr<LabObj>( new Lab34 );	break;
+		case 35:	pLab = unique_ptr<LabObj>( new Lab35 );	break;
 		default: break;
 	}
 }
@@ -162,6 +164,7 @@ void Lab::SetNextIdx( int val, Cp& cp )
 		34,		//	point rendering ue
 		32,		//	interpreter
 		33,		//	golf
+		35,		//	カーリング
 	};	
 	const int size = static_cast<signed>(sizeof(tbl)/sizeof(int));
 

@@ -144,7 +144,7 @@ void Lab15::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 				for ( int i = 0 ; i < div ; i++ )
 				{
 					vect3 pos1 = func_bezier3( t, P0, P1, P2, P3 );
-					pers.pen.line3d( gra, pers, pos0, pos1, rgb(1,1,1) );
+					pers.pen.Line3d( gra, pers, pos0, pos1, rgb(1,1,1) );
 
 					// マウスベクトルとの最近点
 					if ( bSerch )
@@ -181,7 +181,7 @@ void Lab15::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 			gra.SetZTest( false );
 			if ( minb ) 
 			{
-				pers.pen.pset3d( gra, pers, minQ, rgb(1,0,0), 5 );
+				pers.pen.Pset3d( gra, pers, minQ, rgb(1,0,0), 5 );
 			}
 			gra.SetZTest( true );
 
@@ -239,7 +239,7 @@ void Lab15::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 				{
 					gra.SetZTest( false );
-					pers.pen.print3d( gra, pers, minQ, -26,-52, to_string(mint) ); 
+					pers.pen.Print3d( gra, pers, minQ, -26,-52, to_string(mint) ); 
 					gra.SetZTest( true );
 				}
 			}

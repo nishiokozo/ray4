@@ -141,7 +141,7 @@ pImpl->mov =pImpl->vel;
 	{
 
 
-		pers.pen.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
+		pers.pen.Line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
 
 		pers.prim.DrawVect( gra, pers, text_y, v1, vg	,100, rgb(1,0,0), "g" );
 		pers.prim.DrawVect( gra, pers, text_y, v0, moment,100, rgb(1,0,1), "moment" );
@@ -171,11 +171,11 @@ pImpl->mov =pImpl->vel;
 			vect3 a = vect3(x,y,0);
 			v1 = v0 + a;
 
-			pers.pen.line3d( gra, pers, v1, v1+(a-v)*10, rgb(1,0,0),2 );
+			pers.pen.Line3d( gra, pers, v1, v1+(a-v)*10, rgb(1,0,0),2 );
 			
 		}
 
-		pers.pen.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
+		pers.pen.Line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
 
 		// 加速ベクトルの実験
 		{
@@ -183,13 +183,13 @@ pImpl->mov =pImpl->vel;
 			vect3 n0 = cross( v, vg );
 			vect3 vt = cross( n0, v );
 
-//						pers.pen.line3d( gra, pers, v1, v1+vt*100, rgb(0,1,0) );
+//						pers.pen.Line3d( gra, pers, v1, v1+vt*100, rgb(0,1,0) );
 			vect3 v2 = v*1.05+v0;
-//						pers.pen.line3d( gra, pers, v2, v2+pImpl->vv, rgb(0,1,0) );
+//						pers.pen.Line3d( gra, pers, v2, v2+pImpl->vv, rgb(0,1,0) );
 
-//						pers.pen.line3d( gra, pers, v2, v2+vg*100, rgb(1,0,0) );
-			pers.pen.line3d( gra, pers, v2, v2+vt*100, rgb(0,1,0) );
-			pers.pen.line3d( gra, pers, v2, v2+n0*100, rgb(0,0,1) );					}
+//						pers.pen.Line3d( gra, pers, v2, v2+vg*100, rgb(1,0,0) );
+			pers.pen.Line3d( gra, pers, v2, v2+vt*100, rgb(0,1,0) );
+			pers.pen.Line3d( gra, pers, v2, v2+n0*100, rgb(0,0,1) );					}
 
 	}
 #endif
@@ -203,11 +203,11 @@ pImpl->mov =pImpl->vel;
 		pImpl->vv += vt;
 		v2 += vt*10;
 
-//					pers.pen.line3d( gra, pers,  0,  pImpl->vv*10, rgb(0,1,1), 2 );
-		pers.pen.line3d( gra, pers,  vect3(1,0,0),  vect3(1,0,0)+vt*100, rgb(0,1,0), 1 );
+//					pers.pen.Line3d( gra, pers,  0,  pImpl->vv*10, rgb(0,1,1), 2 );
+		pers.pen.Line3d( gra, pers,  vect3(1,0,0),  vect3(1,0,0)+vt*100, rgb(0,1,0), 1 );
 
-		pers.pen.line3d( gra, pers, v2, v2+vt*100, rgb(0,1,0) );
-		pers.pen.line3d( gra, pers, v0, v2, rgb(0,1,1), 2 );
+		pers.pen.Line3d( gra, pers, v2, v2+vt*100, rgb(0,1,0) );
+		pers.pen.Line3d( gra, pers, v0, v2, rgb(0,1,1), 2 );
 
 	}
 #endif

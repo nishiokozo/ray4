@@ -698,7 +698,7 @@ static float py = 0;
 #define TST	1
 				
 #if TST
-					gra.Pset( vect2(x,y) ,C);
+					gra.Pset2d( vect2(x,y) ,C);
 #else
 					unsigned char cr = min(255,C.r*255.0);
 					unsigned char cg = min(255,C.g*255.0);

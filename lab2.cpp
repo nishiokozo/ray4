@@ -145,16 +145,16 @@ void Lab2::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 		{// 影 描画
 			vect3	va = v0;va.y = 0;
 			vect3	vb = v1;vb.y = 0;
-			pers.pen.line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
+			pers.pen.Line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
 		}
 		{// 影 描画
 			vect3	va = v1;va.y = 0;
 			vect3	vb = v2;vb.y = 0;
-			pers.pen.line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
+			pers.pen.Line3d( gra, pers, va, vb, rgb(1,1,1)/4, 2 );
 		}
 
-		pers.pen.line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );	//	棒
-		pers.pen.line3d( gra, pers, v1, v2, rgb(0,1,0), 1 );	// 外的な力
+		pers.pen.Line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );	//	棒
+		pers.pen.Line3d( gra, pers, v1, v2, rgb(0,1,0), 1 );	// 外的な力
 */
 		pers.prim.DrawVect( gra, pers, text_y, v1, pImpl->velocity	,1	, rgb(1,1,0), "pImpl->velocity" );
 		pers.prim.DrawVect( gra, pers, text_y, v0, pImpl->moment		,1	, rgb(1,0,1), "pImpl->moment" );

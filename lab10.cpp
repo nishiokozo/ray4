@@ -110,23 +110,23 @@ void Lab10::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 					if ( n == 10 ) top = rgb(0.70,0.70,0.70);
 				
 					// 右面
-					pers.pen.tri3d( gra, pers, v0, v1 ,v2 , col );
-					pers.pen.tri3d( gra, pers, v0 ,v2, v3 , col );
+					pers.pen.Tri3d( gra, pers, v0, v1 ,v2 , col );
+					pers.pen.Tri3d( gra, pers, v0 ,v2, v3 , col );
 
 					// 右面
-					pers.pen.tri3d( gra, pers, w0, w1 ,w2 , col );
-					pers.pen.tri3d( gra, pers, w0 ,w2, w3 , col );
+					pers.pen.Tri3d( gra, pers, w0, w1 ,w2 , col );
+					pers.pen.Tri3d( gra, pers, w0 ,w2, w3 , col );
 
 					// 先
-					pers.pen.tri3d( gra, pers, v1, v0, w0, col );
-					pers.pen.tri3d( gra, pers, w1, w0, v0, col );
+					pers.pen.Tri3d( gra, pers, v1, v0, w0, col );
+					pers.pen.Tri3d( gra, pers, w1, w0, v0, col );
 
 					// 上面
-					pers.pen.tri3d( gra, pers, v0, v3 ,w2 , top );
-					pers.pen.tri3d( gra, pers, w2, w1 ,v0 , top );
+					pers.pen.Tri3d( gra, pers, v0, v3 ,w2 , top );
+					pers.pen.Tri3d( gra, pers, w2, w1 ,v0 , top );
 
 					// 蓋
-					pers.pen.tri3d( gra, pers, w2, v3, vect3(0,y+s,0), top );
+					pers.pen.Tri3d( gra, pers, w2, v3, vect3(0,y+s,0), top );
 					
 				};
 			
@@ -180,15 +180,15 @@ void Lab10::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 			{
 				rgb c1(1,1,1);
 				float wide = 2;
-				pers.pen.line3d( gra, pers, p0, q0, c1, wide );
-				pers.pen.line3d( gra, pers, p1, q1, c1, wide );
-				pers.pen.line3d( gra, pers, p2, q2, c1, wide );
-				pers.pen.line3d( gra, pers, p3, q3, c1, wide );
+				pers.pen.Line3d( gra, pers, p0, q0, c1, wide );
+				pers.pen.Line3d( gra, pers, p1, q1, c1, wide );
+				pers.pen.Line3d( gra, pers, p2, q2, c1, wide );
+				pers.pen.Line3d( gra, pers, p3, q3, c1, wide );
 
-				pers.pen.line3d( gra, pers, q0, q1, c1, wide );
-				pers.pen.line3d( gra, pers, q1, q2, c1, wide );
-				pers.pen.line3d( gra, pers, q2, q3, c1, wide );
-				pers.pen.line3d( gra, pers, q3, q0, c1, wide );
+				pers.pen.Line3d( gra, pers, q0, q1, c1, wide );
+				pers.pen.Line3d( gra, pers, q1, q2, c1, wide );
+				pers.pen.Line3d( gra, pers, q2, q3, c1, wide );
+				pers.pen.Line3d( gra, pers, q3, q0, c1, wide );
 			}
 
 		};

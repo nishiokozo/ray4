@@ -71,7 +71,7 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	auto funcShowBar = []( SysGra& gra, int y, float val, string str, rgb col )
 	{
 		vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42.0*y);
-		gra.Line( v0, v0+ vect2( val, 0 ), col, 2 );
+		gra.Line2d( v0, v0+ vect2( val, 0 ), col, 2 );
 		gra.Print( v0+gra.Dot(0,-6), str + to_string(val), col );
 	};
 
@@ -233,10 +233,10 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 			vect3 v0 = p->pos;
 			float 	r = p->radius;
 			float	wide = 1.0;
-			pers.pen.line3d( gra, pers, v0+vect3(-r,-r,0), v0+vect3( r,-r,0),rgb(1,1,1), wide );
-			pers.pen.line3d( gra, pers, v0+vect3( r,-r,0), v0+vect3( r, r,0),rgb(1,1,1), wide );
-			pers.pen.line3d( gra, pers, v0+vect3( r, r,0), v0+vect3(-r, r,0),rgb(1,1,1), wide );
-			pers.pen.line3d( gra, pers, v0+vect3(-r, r,0), v0+vect3(-r,-r,0),rgb(1,1,1), wide );
+			pers.pen.Line3d( gra, pers, v0+vect3(-r,-r,0), v0+vect3( r,-r,0),rgb(1,1,1), wide );
+			pers.pen.Line3d( gra, pers, v0+vect3( r,-r,0), v0+vect3( r, r,0),rgb(1,1,1), wide );
+			pers.pen.Line3d( gra, pers, v0+vect3( r, r,0), v0+vect3(-r, r,0),rgb(1,1,1), wide );
+			pers.pen.Line3d( gra, pers, v0+vect3(-r, r,0), v0+vect3(-r,-r,0),rgb(1,1,1), wide );
 		}
 		gra.SetZTest(true);
 	}
@@ -259,7 +259,7 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	{
 		stringstream ss ;
 		ss << t0.weight << "kg";
-		pers.pen.print3d( gra, pers, 	t0.pos, 0,-32, ss.str() ); 
+		pers.pen.Print3d( gra, pers, 	t0.pos, 0,-32, ss.str() ); 
 		ss.str("");
 		ss << t0.vel.x << "m/s";
 		pers.prim.DrawVect( gra, pers, text_y, t0.pos+vect3(-0.5,0,0), t0.vel ,10	, rgb(1,0,1), ss.str(), false, false,false );
@@ -267,14 +267,14 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	{
 		stringstream ss ;
 		ss << t1.weight << "kg";
-		pers.pen.print3d( gra, pers, 	t1.pos, -0,-32, ss.str() ); 
+		pers.pen.Print3d( gra, pers, 	t1.pos, -0,-32, ss.str() ); 
 		ss.str("");
 		ss << t1.vel.x << "m/s";
 		pers.prim.DrawVect( gra, pers, text_y, t1.pos+vect3(0-0.5,0,0), t1.vel ,10	, rgb(1,0,1), ss.str(), false, false,false );
 	}
 	
 	//地面表示
-	pers.pen.line3d( gra, pers, vect3(-8,0,0), vect3( 8,0,0), rgb(1,1,1),1);	
+	pers.pen.Line3d( gra, pers, vect3(-8,0,0), vect3( 8,0,0), rgb(1,1,1),1);	
 	
 	// メッセージ表示
 //	gra.Print(1,(float)text_y++,string("<ENTER on>")+to_string(keys.ENTER.on)); 

@@ -387,7 +387,7 @@ void SysGra::Clr( rgb col )
 }
 
 //------------------------------------------------------------------------------
-void SysGra::Circle( vect2 v, float r, rgb col, float wide )
+void SysGra::Circle2d( vect2 v, float r, float step, rgb col, float wide )
 //------------------------------------------------------------------------------
 {
 	DEPTHTEST_WRITE_ALWAYS();
@@ -397,8 +397,6 @@ void SysGra::Circle( vect2 v, float r, rgb col, float wide )
     glColor3f( col.r, col.g, col.b );
     glBegin(GL_LINE_LOOP);
 
-	float step = 12.0;
-//	vect2 v0 = v + vect2(r/aspect,0);
 	for ( float th = 0 ; th < 2*pi ; th+=2.0*pi/step )
 	{
 		vect2 v1 = vect2( r*cos(th)/aspect, r*sin(th) )+v;
@@ -411,7 +409,7 @@ void SysGra::Circle( vect2 v, float r, rgb col, float wide )
 }
 
 //------------------------------------------------------------------------------
-void SysGra::Circle( vect3 v, float r, rgb col, float wide )
+void SysGra::Circle3d( vect3 v, float r, float step, rgb col, float wide )
 //------------------------------------------------------------------------------
 {
 	float aspect = GetAspect();
@@ -421,8 +419,6 @@ void SysGra::Circle( vect3 v, float r, rgb col, float wide )
 
     glBegin(GL_LINE_LOOP);
 
-	float step = 24.0;
-//	vect3 v0 = v + vect3(r/aspect,0,0);
 	for ( float th = 0 ; th < 2*pi ; th+=2.0*pi/step )
 	{
 		vect3 v1 = vect3( r*cos(th)/aspect, r*sin(th), 0 )+v;
@@ -433,7 +429,7 @@ void SysGra::Circle( vect3 v, float r, rgb col, float wide )
 }
 
 //------------------------------------------------------------------------------
-void SysGra::Pset( vect2 v0, rgb col, float wide )
+void SysGra::Pset2d( vect2 v0, rgb col, float wide )
 //------------------------------------------------------------------------------
 {
 	DEPTHTEST_WRITE_ALWAYS();
@@ -447,7 +443,7 @@ void SysGra::Pset( vect2 v0, rgb col, float wide )
 	DEPTHTEST_WRITE_GREATER(); 
 }
 //------------------------------------------------------------------------------
-void SysGra::Pset( vect3 v0, rgb col, float wide )
+void SysGra::Pset3d( vect3 v0, rgb col, float wide )
 //------------------------------------------------------------------------------
 {
 	glPointSize( wide );
@@ -457,7 +453,7 @@ void SysGra::Pset( vect3 v0, rgb col, float wide )
     glEnd();
 }
 //------------------------------------------------------------------------------
-void SysGra::Box( vect2 v0, vect2 v1,rgb col, float wide )
+void SysGra::Box2d( vect2 v0, vect2 v1,rgb col, float wide )
 //------------------------------------------------------------------------------
 {
 	DEPTHTEST_WRITE_ALWAYS();
@@ -475,7 +471,7 @@ void SysGra::Box( vect2 v0, vect2 v1,rgb col, float wide )
 	DEPTHTEST_WRITE_GREATER(); 
 }
 //------------------------------------------------------------------------------
-void SysGra::Box( vect3 v0, vect3 v1,rgb col, float wide )
+void SysGra::Box3d( vect3 v0, vect3 v1,rgb col, float wide )
 //------------------------------------------------------------------------------
 {
   	glLineWidth( wide );
@@ -490,7 +486,7 @@ void SysGra::Box( vect3 v0, vect3 v1,rgb col, float wide )
 
 }
 //------------------------------------------------------------------------------
-void SysGra::Fill( vect2 v0, vect2 v1,rgb col )
+void SysGra::Fill2d( vect2 v0, vect2 v1,rgb col )
 //------------------------------------------------------------------------------
 {
     glBegin(GL_QUADS);
@@ -503,7 +499,7 @@ void SysGra::Fill( vect2 v0, vect2 v1,rgb col )
 
 }
 //------------------------------------------------------------------------------
-void SysGra::Line( vect2 v0, vect2 v1,rgb col, float wide )
+void SysGra::Line2d( vect2 v0, vect2 v1,rgb col, float wide )
 //------------------------------------------------------------------------------
 {
 	DEPTHTEST_WRITE_ALWAYS();
@@ -519,7 +515,7 @@ void SysGra::Line( vect2 v0, vect2 v1,rgb col, float wide )
 	DEPTHTEST_WRITE_GREATER(); 
 }
 //------------------------------------------------------------------------------
-void SysGra::Line( vect3 v0, vect3 v1,rgb col, float wide )
+void SysGra::Line3d( vect3 v0, vect3 v1,rgb col, float wide )
 //------------------------------------------------------------------------------
 {
   	glLineWidth( wide );
@@ -531,7 +527,7 @@ void SysGra::Line( vect3 v0, vect3 v1,rgb col, float wide )
     glEnd();
 }
 //------------------------------------------------------------------------------
-void SysGra::Tri( vect2 v0, vect2 v1, vect2 v2, rgb col )
+void SysGra::Tri2d( vect2 v0, vect2 v1, vect2 v2, rgb col )
 //------------------------------------------------------------------------------
 {
 	DEPTHTEST_WRITE_ALWAYS();
@@ -546,7 +542,7 @@ void SysGra::Tri( vect2 v0, vect2 v1, vect2 v2, rgb col )
 	DEPTHTEST_WRITE_GREATER(); 
 }
 //------------------------------------------------------------------------------
-void SysGra::Tri( vect3 v0, vect3 v1, vect3 v2, rgb col )
+void SysGra::Tri3d( vect3 v0, vect3 v1, vect3 v2, rgb col )
  //------------------------------------------------------------------------------
 {
     glBegin( GL_TRIANGLES );

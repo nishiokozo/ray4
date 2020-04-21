@@ -80,7 +80,7 @@ void Lab19::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	auto funcShowBar = []( SysGra& gra, int y, float val, string str, rgb col )
 	{
 		vect2 v0 = vect2(0.0,0.75)+gra.Dot(0,42.0*y);
-		gra.Line( v0, v0+ vect2( val, 0 ), col, 2 );
+		gra.Line2d( v0, v0+ vect2( val, 0 ), col, 2 );
 		gra.Print( v0+gra.Dot(0,-6), str + to_string(val), col );
 	};
 

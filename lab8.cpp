@@ -115,15 +115,15 @@ struct Lab8::Impl
 				if ( bScroll )
 				for ( int i = cntPlot ; i < MaxPlot ; i++ )
 				{
-					pers.pen.pset3d( gra, pers, vect3( x, 0, tblDot[i] ),  col, 2 );
+					pers.pen.Pset3d( gra, pers, vect3( x, 0, tblDot[i] ),  col, 2 );
 					x += step;
 				}
 				for ( int i = 0 ; i < cntPlot-1 ; i++ )
 				{
-					pers.pen.pset3d( gra, pers, vect3( x, 0, tblDot[i] ),  col, 2 );
+					pers.pen.Pset3d( gra, pers, vect3( x, 0, tblDot[i] ),  col, 2 );
 					x += step;
 				}
-				if ( cntPlot > 0 ) pers.pen.pset3d( gra, pers, vect3( x, 0, tblDot[cntPlot-1] ),  rgb(1,1,1), 2 );
+				if ( cntPlot > 0 ) pers.pen.Pset3d( gra, pers, vect3( x, 0, tblDot[cntPlot-1] ),  rgb(1,1,1), 2 );
 				gra.SetZTest( true );
 			}
 

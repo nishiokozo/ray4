@@ -98,11 +98,11 @@ void Lab13::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 		if ( d >0 ) 
 		{
-			pers.pen.pset3d( gra, pers, p, col, 2 );
+			pers.pen.Pset3d( gra, pers, p, col, 2 );
 		}
 		else
 		{
-			pers.pen.pset3d( gra, pers, p, col/2, 1 );
+			pers.pen.Pset3d( gra, pers, p, col/2, 1 );
 		}
 
 	}
@@ -114,11 +114,11 @@ void Lab13::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 	if ( flg )
 	{
-		pers.pen.pset3d( gra, pers, Q, rgb(1,0,0), 7 );
+		pers.pen.Pset3d( gra, pers, Q, rgb(1,0,0), 7 );
 	}
 	else
 	{
-		pers.pen.pset3d( gra, pers, Q, rgb(0,0,1), 7 );
+		pers.pen.Pset3d( gra, pers, Q, rgb(0,0,1), 7 );
 	}
 	
 	

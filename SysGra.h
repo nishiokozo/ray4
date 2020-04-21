@@ -18,25 +18,24 @@ struct SysGra
 	void OnCreate();
 	void OnPaint();
 
-//	void	Update();
 	void	Wait();
 	void	Flush();
 
 	void	Print( vect2 v, std::string str, rgb col=rgb(1,1,1) );
 	void	Print( float x, float y, std::string str, rgb col=rgb(1,1,1) );
 
-	void	Tri( vect2 v0, vect2 v1, vect2 v2, rgb col);
-	void	Tri( vect3 v0, vect3 v1, vect3 v2, rgb col);
-	void	Box( vect2 v0, vect2 v1, rgb col, float wide=1.0f);
-	void	Box( vect3 v0, vect3 v1, rgb col, float wide=1.0f);
-	void	Fill( vect2 v0, vect2 v1, rgb col);
-	void	Line( vect2 v0, vect2 v1, rgb col, float wide=1.0f);
-	void	Line( vect3 v0, vect3 v1, rgb col, float wide=1.0f);
-	void	Pset( vect2 v0, rgb col, float wide=1.0f);
-	void	Pset( vect3 v0, rgb col, float wide=1.0f);
-	void	Circle( vect2 v, float r, rgb col, float wide=1.0f );
-	void	Circle( vect3 v, float r, rgb col, float wide=1.0f );
-	void	Clr( rgb col );
+	void	Tri2d( vect2 v0, vect2 v1, vect2 v2, rgb col=rgb(1,1,1));
+	void	Tri3d( vect3 v0, vect3 v1, vect3 v2, rgb col=rgb(1,1,1));
+	void	Box2d( vect2 v0, vect2 v1, rgb col=rgb(1,1,1), float wide=1.0f);
+	void	Box3d( vect3 v0, vect3 v1, rgb col=rgb(1,1,1), float wide=1.0f);
+	void	Fill2d( vect2 v0, vect2 v1, rgb col=rgb(1,1,1));
+	void	Line2d( vect2 v0, vect2 v1, rgb col=rgb(1,1,1), float wide=1.0f);
+	void	Line3d( vect3 v0, vect3 v1, rgb col=rgb(1,1,1), float wide=1.0f);
+	void	Pset2d( vect2 v0, rgb col=rgb(1,1,1), float wide=1.0f);
+	void	Pset3d( vect3 v0, rgb col=rgb(1,1,1), float wide=1.0f);
+	void	Circle2d( vect2 v, float r, float step=12, rgb col=rgb(1,1,1), float wide=1.0f );
+	void	Circle3d( vect3 v, float r, float step=24, rgb col=rgb(1,1,1), float wide=1.0f );
+	void	Clr( rgb col=rgb(1,1,1) );
 
 	void	SetZTest( bool flg );
 	void	SetCulling( bool flg );

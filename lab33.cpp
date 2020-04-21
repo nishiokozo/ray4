@@ -654,15 +654,15 @@ v0.z=0;
 v1.z=0;
 v2.z=0;
 gra.SetCulling(false);
-					gra.Tri( v0.xy(), v1.xy(), v2.xy(), rgb(1,0,0) );
-					gra.Pset(v1.xy(),rgb(1,1,0),5);
-//					pers.pen.print2d( gra, pers, vect2(0,0),0,0,  to_string(pers.cam.pos.z) );
-					pers.pen.print2d( gra, pers, vect2(0,0),0,32*0, "cam "+to_string(pers.cam.pos.x)+" "+ to_string(pers.cam.pos.y)+" "+ to_string(pers.cam.pos.z) );
-					pers.pen.print2d( gra, pers, vect2(0,0),0,32*1, to_string(v0.x)+" "+ to_string(v0.y)+" "+ to_string(v0.z) );
-					pers.pen.print2d( gra, pers, vect2(0,0),0,32*2, to_string(v1.x)+" "+ to_string(v1.y)+" "+ to_string(v1.z) );
-					pers.pen.print2d( gra, pers, vect2(0,0),0,32*3, to_string(v2.x)+" "+ to_string(v2.y)+" "+ to_string(v2.z) );
+					gra.Tri2d( v0.xy(), v1.xy(), v2.xy(), rgb(1,0,0) );
+					gra.Pset2d(v1.xy(),rgb(1,1,0),5);
+//					pers.pen.Print2d( gra, pers, vect2(0,0),0,0,  to_string(pers.cam.pos.z) );
+					pers.pen.Print2d( gra, pers, vect2(0,0),0,32*0, "cam "+to_string(pers.cam.pos.x)+" "+ to_string(pers.cam.pos.y)+" "+ to_string(pers.cam.pos.z) );
+					pers.pen.Print2d( gra, pers, vect2(0,0),0,32*1, to_string(v0.x)+" "+ to_string(v0.y)+" "+ to_string(v0.z) );
+					pers.pen.Print2d( gra, pers, vect2(0,0),0,32*2, to_string(v1.x)+" "+ to_string(v1.y)+" "+ to_string(v1.z) );
+					pers.pen.Print2d( gra, pers, vect2(0,0),0,32*3, to_string(v2.x)+" "+ to_string(v2.y)+" "+ to_string(v2.z) );
 
-					gra.Tri( vect2(0.7,0), vect2(0.6,0), vect2(0,-30000000),rgb(0,1,0));
+					gra.Tri2d( vect2(0.7,0), vect2(0.6,0), vect2(0,-30000000),rgb(0,1,0));
 }
 else
 		for ( Impl::Parsar_MQO::MQO::Object::Face face : obj.tbl_face )
@@ -678,10 +678,10 @@ else
 					vect3 v1 = obj.tbl_vertex[ face.V[1] ];
 					vect3 v2 = obj.tbl_vertex[ face.V[2] ];
 					
-					pers.pen.tri3d( gra, pers, v0, v1 ,v2 , m.col.rgb() );
-					pers.pen.line3d( gra, pers, v0, v1 );
-					pers.pen.line3d( gra, pers, v0, v2 );
-					pers.pen.line3d( gra, pers, v2, v1 );
+					pers.pen.Tri3d( gra, pers, v0, v1 ,v2 , m.col.rgb() );
+					pers.pen.Line3d( gra, pers, v0, v1 );
+					pers.pen.Line3d( gra, pers, v0, v2 );
+					pers.pen.Line3d( gra, pers, v2, v1 );
 //if ( cnt++ < 100 ) break;
 				}
 			}

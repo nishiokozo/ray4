@@ -341,17 +341,17 @@ void Lab16::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 					vect2 v = vect2( (float)x, (float)y )*vect2( 4, 8 ) + vect2(400,16);
 					{
-						gra.Fill( gra.Conv(v), gra.Conv(v+vect2(3,7)), rgb(1,1,1) );
+						gra.Fill2d( gra.Conv(v), gra.Conv(v+vect2(3,7)), rgb(1,1,1) );
 					}
 
 					if ( y == skeleton.cur.act && x == skeleton.cur.pose )
 					{
-						gra.Fill( gra.Conv(v+vect2(0,4)), gra.Conv(v+vect2(3,7)), rgb(1,0,0) );
+						gra.Fill2d( gra.Conv(v+vect2(0,4)), gra.Conv(v+vect2(3,7)), rgb(1,0,0) );
 					}
 					
 					if ( flg )
 					{
-						gra.Fill( gra.Conv(v+vect2(0,4)), gra.Conv(v+vect2(3,7)), rgb(1,0,0) );
+						gra.Fill2d( gra.Conv(v+vect2(0,4)), gra.Conv(v+vect2(3,7)), rgb(1,0,0) );
 					}
 				}
 			}

@@ -111,7 +111,7 @@ void Lab34::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	for ( const Impl::PN& v : pImpl->tblVert )
 	{
 	
-		pers.pen.pset3d( gra, pers, v.pos, v.col,2 );
+		pers.pen.Pset3d( gra, pers, v.pos, v.col,2 );
 
 	}
 

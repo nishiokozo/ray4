@@ -295,19 +295,19 @@ void Gui::DrawController( SysGra& gra, Pers& pers, vector<vector<shared_ptr<Obj>
 					vect3	a = o0.pos;	a.y=0;
 					vect3	b = o1.pos;	b.y=0;
 					rgb		c = (p->col+rgb(0.75,0.75,0.75))/4;
-					pers.pen.line3d( gra, pers, a, b, c, p->wide );
+					pers.pen.Line3d( gra, pers, a, b, c, p->wide );
 				}
 
 
 				if ( bSelected )
 				{
 					// 選択点
-					pers.pen.line3d( gra, pers, o0.pos, o1.pos, rgb(1,0,0), p->wide );
+					pers.pen.Line3d( gra, pers, o0.pos, o1.pos, rgb(1,0,0), p->wide );
 				}
 				else
 				{
 					// 非選択点
-					pers.pen.line3d( gra, pers, o0.pos, o1.pos, p->col, p->wide );
+					pers.pen.Line3d( gra, pers, o0.pos, o1.pos, p->col, p->wide );
 				}
 
 			}
@@ -340,10 +340,10 @@ void Gui::DrawController( SysGra& gra, Pers& pers, vector<vector<shared_ptr<Obj>
 
 					if ( bSelected )
 					{
-						pers.pen.line3d( gra, pers, p->pos, p->pos +p->a, col2 );
-						pers.pen.line3d( gra, pers, p->pos, p->pos +p->b, col2 );
-						pers.pen.pset3d( gra, pers, p->pos+p->a, col2a, wide2 ); 
-						pers.pen.pset3d( gra, pers, p->pos+p->b, col2b, wide2 ); 
+						pers.pen.Line3d( gra, pers, p->pos, p->pos +p->a, col2 );
+						pers.pen.Line3d( gra, pers, p->pos, p->pos +p->b, col2 );
+						pers.pen.Pset3d( gra, pers, p->pos+p->a, col2a, wide2 ); 
+						pers.pen.Pset3d( gra, pers, p->pos+p->b, col2b, wide2 ); 
 					}
 				}
 			}
@@ -362,16 +362,16 @@ void Gui::DrawController( SysGra& gra, Pers& pers, vector<vector<shared_ptr<Obj>
 					if ( bSelected )
 					{
 						// 選択点
-						pers.pen.pset3d( gra, pers, p->pos, rgb(1,0,0), 11 );
+						pers.pen.Pset3d( gra, pers, p->pos, rgb(1,0,0), 11 );
 					}
 					else
 					{
 						// 非選択点
-						pers.pen.pset3d( gra, pers, p->pos, rgb(0,0,1), 11 );
+						pers.pen.Pset3d( gra, pers, p->pos, rgb(0,0,1), 11 );
 					}
 
 					{
-						pers.pen.print3d( gra, pers, p->pos, -14, 0, to_string(n++) ); 
+						pers.pen.Print3d( gra, pers, p->pos, -14, 0, to_string(n++) ); 
 					}
 				}
 			}
@@ -381,7 +381,7 @@ void Gui::DrawController( SysGra& gra, Pers& pers, vector<vector<shared_ptr<Obj>
 	// 矩形カーソル 表示
 	if (  rect_mode != G_CALC::NONE )
 	{
-		gra.Box( rect_st, mpos, rgb(1,1,1)*0.5f);
+		gra.Box2d( rect_st, mpos, rgb(1,1,1)*0.5f);
 	}
 
 	gra.SetZTest( true );
