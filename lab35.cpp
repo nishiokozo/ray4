@@ -38,6 +38,8 @@ struct Lab35::Impl
 	bool	bStep = false;
 
 	vector<shared_ptr<Obj>>	tbl_pObj;
+	
+	mat33	mat = mat33::mrotx(rad(-90));
 };
 Lab35::Lab35() : pImpl( new Lab35::Impl ){}
 
@@ -47,7 +49,7 @@ void Lab35::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 {
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::mrotx(rad(90)), 10, 10, 1, rgb(0.2,0.2,0.2) );
+	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), pImpl->mat, 10, 10, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,"35 : Curing" ); 
 
 	//初期化
@@ -83,6 +85,18 @@ void Lab35::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 	}
 */
+		if ( keys.Q.hi )	pImpl->mat *= mat33::mrotx(rad(-5));
+		if ( keys.A.hi )	pImpl->mat *= mat33::mrotx(rad(5));
+
+		{
+			vect3 P1 = pers.calcScreenToWorld3( vect3(mouse.pos,0) );
+			vect3 I1 = pers.calcRayvect( P1 );
+			auto[b1,Q1,s1] = func_intersect_Plate_HarfLine( vect3(0,0,0), pImpl->mat.GetVectZ(), P1, I1);
+
+pers.pen.Pset3d( gra, pers, Q1, rgb(1,1,0), 11 );
+pers.pen.Print3d( gra, pers, Q1, -26,-52, to_string(Q1.x) + " " +to_string(Q1.y) + " "+to_string(Q1.z) ); 
+		}
+
 	pers.grid.Circle( gra, pers,vect2( 0, 0 ), 1, 24, rgb(1,1,1) );
 //	pers.prim.DrawCircle( gra, pers, vect3( 0,0, 0 ), mat33::mrotz(0.0), 1.0, rgb(1,1,1) );
 
