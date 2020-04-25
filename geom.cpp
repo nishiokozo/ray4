@@ -551,10 +551,10 @@ float	dot( vect3 a, vect3 b )
 			{
 				vect3 a,b;
 
-				float	ao = deg2rad(10+32);
+				float	ao = rad(10+32);
 				float	ar = 1.0;
 
-				float	bo = deg2rad(10+0);
+				float	bo = rad(10+0);
 				float	br = 1.0;
 
 				a.x = ar * cos(ao);
@@ -579,10 +579,10 @@ float	dot( vect3 a, vect3 b )
 			{
 				vect3 a,b;
 
-				float	ao = deg2rad(10+45);
+				float	ao = rad(10+45);
 				float	ar = 2.0;
 
-				float	bo = deg2rad(10+0);
+				float	bo = rad(10+0);
 				float	br = 1.0;
 
 				a.x = ar * cos(ao);
@@ -616,7 +616,7 @@ float	dot( vect3 a, vect3 b )
 			{
 				vect3 a,b;
 
-				float	ao = deg2rad(10+32);
+				float	ao = rad(10+32);
 				float	ar = 123.45;
 
 				a.x = ar * cos(ao);
@@ -882,18 +882,12 @@ float atan2_360( float y, float x )
 }
 
 //-----------------------------------------------------------------------------
-float deg2rad( float n )
-//-----------------------------------------------------------------------------
-{
-	return	((n)*pi/180.0f);
-}
-
-//-----------------------------------------------------------------------------
 float rad( float n )
 //-----------------------------------------------------------------------------
 {
 	return	((n)*pi/180.0f);
 }
+
 
 //-----------------------------------------------------------------------------
 float	rad2deg( float n)

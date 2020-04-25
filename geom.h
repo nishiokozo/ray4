@@ -154,7 +154,7 @@ public:
 };
 
 extern	float rad( float n );
-extern	float deg2rad( float n );
+//extern	float rad( float n );
 extern	float rad2deg( float n );
 extern	float atan2_360( float y, float x );
 extern	float atan2_180( float y, float x );

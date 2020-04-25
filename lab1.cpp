@@ -46,7 +46,7 @@ void Lab1::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 {
 	//画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::mrotx(deg2rad(90)), 100, 100, 1, vect3(0.2,0.2,0.2) );
+	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::mrotx(rad(0)), 100, 100, 1, vect3(0.2,0.2,0.2) );
 
 	gra.Print(1,(float)text_y++,string("<<lab1_graph>>")); 
 

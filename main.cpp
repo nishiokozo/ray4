@@ -99,8 +99,8 @@ struct Apr : public Sys
 			//=================================
 			{
 				// パースペクティブ
-				if (keys.Y.hi) {pers.fovy-=2;cout << pers.fovy <<" "<<1/tan(deg2rad(pers.fovy)) << endl; }
-				if (keys.H.hi) {pers.fovy+=2;cout << pers.fovy <<" "<<1/tan(deg2rad(pers.fovy)) << endl; }
+				if (keys.Y.hi) {pers.fovy-=2;cout << pers.fovy <<" "<<1/tan(rad(pers.fovy)) << endl; }
+				if (keys.H.hi) {pers.fovy+=2;cout << pers.fovy <<" "<<1/tan(rad(pers.fovy)) << endl; }
 
 				// パース更新
 				pers.Update( vect2( gra.GetWidth(), gra.GetHeight() ) );

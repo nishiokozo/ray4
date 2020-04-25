@@ -61,7 +61,7 @@ void Lab16::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 {
 	// 画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
+	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::mrotx(rad(90)), 10, 10, 1, rgb(0.2,0.2,0.2) );
 	gra.Print(1,(float)text_y++,"16 : Skeleton" ); 
 
 	//初期化
@@ -247,7 +247,7 @@ void Lab16::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		{
 			mat33	mmune = mat33::midentity();
 			mat33	mhiji = mat33::midentity();;
-			mat33	mte = mat33::midentity() ;
+			mat33	mte = mat33::midentity();
 			vect3	pos0 = tbl_pObj[0]->pos;
 			vect3	pos1 = tbl_pObj[1]->pos;
 			vect3	p2 = tbl_pObj[2]->pos;
@@ -287,8 +287,8 @@ void Lab16::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 					nz.x,	nz.y,	nz.z
 				);
 
-				if ( keys.CTRL.on )		pImpl->mkata.rotateByAxis( (p4-p2).normalize(), deg2rad(0.5));
-				if ( keys.SHIFT.on )	pImpl->mkata.rotateByAxis( (p4-p2).normalize(), deg2rad(-0.5));
+				if ( keys.CTRL.on )		pImpl->mkata.rotateByAxis( (p4-p2).normalize(), rad(0.5));
+				if ( keys.SHIFT.on )	pImpl->mkata.rotateByAxis( (p4-p2).normalize(), rad(-0.5));
 				
 				pers.prim.DrawBox( gra, pers, p2, pImpl->mkata, false, false );
 			}

@@ -58,7 +58,7 @@ void Lab7::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 	
 	//画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
+	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::mrotx(rad(90)), 10, 10, 1, rgb(0.2,0.2,0.2) );
 
 	gra.Print(1,(float)text_y++,string("<<lab7_kakusokudo7>>")); 
 
@@ -171,7 +171,7 @@ if (0)
 		{
 			vect3	bar = (v1-v0);							//	棒
 		//	float	radius = bar.abs();
-pImpl->w=deg2rad(2);
+pImpl->w=rad(2);
 			pImpl->to = mrotateByAxis( pImpl->moment, pImpl->w ) * bar;			//	移動計算
 
 			vect3 add  = pImpl->to - bar;

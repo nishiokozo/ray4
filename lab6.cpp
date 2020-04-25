@@ -33,9 +33,9 @@ struct Lab6::Impl
 	vect3 G_pos = vect3(0,2.0,0);
 	vect3 G_acc= vect3(0,0,0.0);
 	float G_radius = 0.5;
-	float G_head = deg2rad(35);	//	タイヤの方向
-	float G_bank = deg2rad(40);	//	回転角
-	float G_rspd = deg2rad(0);	//	角速度
+	float G_head = rad(35);	//	タイヤの方向
+	float G_bank = rad(40);	//	回転角
+	float G_rspd = rad(0);	//	角速度
 	float G = 9.80665;				// 重力加速度
 	float grate = 9.80665 / 60/60;	// 重力加速度
 
@@ -56,7 +56,7 @@ void Lab6::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 {
 	//画面クリア
 	gra.Clr(rgb(0.3,0.3,0.3));
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::midentity(), 10, 10, 1, rgb(0.2,0.2,0.2) );
+	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::mrotx(rad(90)), 10, 10, 1, rgb(0.2,0.2,0.2) );
 
 	gra.Print(1,(float)text_y++,string("<<lab6_tire3d>>")); 
 
@@ -83,8 +83,8 @@ void Lab6::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 				pImpl->acc1 += vect3( sin(pImpl->head), 0, cos(pImpl->head) )*0.02;
 				pImpl->acc2 += vect3( sin(pImpl->head), 0, cos(pImpl->head) )*0.02;
 			}
-			if ( mouse.B.hi ) pImpl->rspd += deg2rad(5);
-			if ( mouse.R.hi ) pImpl->rspd += deg2rad(-5);
+			if ( mouse.B.hi ) pImpl->rspd += rad(5);
+			if ( mouse.R.hi ) pImpl->rspd += rad(-5);
 		}
 
 		// 重力
@@ -124,8 +124,8 @@ void Lab6::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 			pImpl->rspd = a;
 		}
 		// 衝突 pImpl->bank
-		if ( pImpl->bank > deg2rad(90) ) pImpl->bank -= deg2rad(180);
-		if ( pImpl->bank < deg2rad(-90) ) pImpl->bank += deg2rad(180);
+		if ( pImpl->bank > rad(90) ) pImpl->bank -= rad(180);
+		if ( pImpl->bank < rad(-90) ) pImpl->bank += rad(180);
 #endif
 	}
 	
@@ -133,8 +133,8 @@ void Lab6::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 	if ( high == pImpl->pos.y ) 
 	{
 		// 衝突 pImpl->bank
-		if ( pImpl->bank > deg2rad(90) ) pImpl->bank -= deg2rad(180);
-		if ( pImpl->bank < deg2rad(-90) ) pImpl->bank += deg2rad(180);
+		if ( pImpl->bank > rad(90) ) pImpl->bank -= rad(180);
+		if ( pImpl->bank < rad(-90) ) pImpl->bank += rad(180);
 
 		// 回転
 		{

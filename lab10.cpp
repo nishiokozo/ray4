@@ -133,23 +133,23 @@ void Lab10::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 				{
 					auto colfunc = [&]( float th )
 					{
-						th = fmodf( th, deg2rad(360) );
+						th = fmodf( th, rad(360) );
 
 						float f = 0; 
-						if ( th < deg2rad(60) ) f = th/deg2rad(60);
+						if ( th < rad(60) ) f = th/rad(60);
 						else
-						if ( th < deg2rad(180) ) f = 1.0;
+						if ( th < rad(180) ) f = 1.0;
 						else
-						if ( th < deg2rad(240) ) f = (deg2rad(240)-th)/deg2rad(60);
+						if ( th < rad(240) ) f = (rad(240)-th)/rad(60);
 						else
 						f = 0.0;
 						return f;
 					};
 
-					th += deg2rad(60);
+					th += rad(60);
 					float r = colfunc(th);
-					float g = colfunc(th + deg2rad(120));
-					float b = colfunc(th + deg2rad(240));
+					float g = colfunc(th + rad(120));
+					float b = colfunc(th + rad(240));
 
 					float alu[11][2] =
 					{
@@ -194,10 +194,10 @@ void Lab10::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		};
 		{
 			mt19937    foo(0);
-			for ( float th = 0 ; th < pi*2 ; th+=deg2rad(30) )
+			for ( float th = 0 ; th < pi*2 ; th+=rad(30) )
 			{
 				float n = 0;
-				for ( float th2 = 0 ; th2 < pi ; th2+=deg2rad(18) )
+				for ( float th2 = 0 ; th2 < pi ; th2+=rad(18) )
 				{
 					float a = 1.75*sin(th2)-0.5;
 					float r = (float)(foo()%10)/10.0*a/5;

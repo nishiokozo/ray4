@@ -1157,23 +1157,25 @@ void Pers::Axis::DrawAxis( SysGra& gra, Pers& pers, vect2 mpos )
 void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int NUM_U, int NUM_V, float dt, rgb col, bool bPlot  )
 //----------------------------------------------------------------------------
 {
+///m = m * mat33::mrotx(rad(90));
+
 	mat = m;
 
-	vect3 pos = pos0;
+	vect3 pos;
 
-	// 注視点中心に展開
+	// 注視点中心(pos)を計算
 	{
 		vect3 tar = pers.cam.at;
-		vect3 nor = m.GetVectY();
+		vect3 nor = m.GetVectZ();
 
-		auto[b0,q0,s0] = func_intersect_Dualplate_Line( pos, nor, tar, nor );
+		auto[b0,q0,s0] = func_intersect_Dualplate_Line( pos0, nor, tar, nor );
 
-		vect3 q1 = (q0-pos) * m.invers();
+		vect3 q1 = (q0-pos0) * m.invers();
 
 		q1.x = (float)int( q1.x );
 		q1.y = (float)int( q1.y );
 		q1.z = (float)int( q1.z );
-		pos += q1;	
+		pos = pos0 + q1;	
 	}
 
 
@@ -1184,9 +1186,9 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int N
 	vect3 a;
 	vect3 b;
 	{
-		a = pos+vect3(-du, 0,-du);
-		b = pos+vect3( du, 0,-du);
-		vt = vect3(0,0,dt);
+		a = pos+vect3(-du,-du, 0);
+		b = pos+vect3( du,-du, 0);
+		vt = vect3(0,dt,0);
 		for ( int i = 0 ; i < NUM_V*2+1 ; i++ )
 		{
 			vect3 v0 = a * m;
@@ -1198,8 +1200,8 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int N
 	}			
 	{
 
-		a = pos+vect3(-dv, 0, dv);
-		b = pos+vect3(-dv, 0,-dv);
+		a = pos+vect3(-dv, dv, 0);
+		b = pos+vect3(-dv,-dv, 0);
 		vt = vect3(dt,0,0);
 		for ( int i = 0 ; i < NUM_U*2+1 ; i++ )
 		{
@@ -1216,7 +1218,7 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int N
 		vect3 a;
 		for ( float th = 0 ; th <= rad(360) ; th+=rad(20) )
 		{
-			vect3 b = vect3( r*cos(th), 0, r*sin(th) ) + pos0;
+			vect3 b = vect3( r*cos(th), r*sin(th), 0 ) + pos0;
 			if ( th > 0 ) 
 			{
 				vect3 v0 = a * m;
@@ -1233,13 +1235,13 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int N
 		{
 			if ( abs(f)<=0.11 ) continue;
 			{
-				vect3 v0 = ( vect3( f, 0, -0.025 ) + pos0 ) * m;
-				vect3 v1 = ( vect3( f, 0,  0.025 ) + pos0 ) * m;
+				vect3 v0 = ( vect3( f, -0.025, 0 ) + pos0 ) * m;
+				vect3 v1 = ( vect3( f,  0.025, 0 ) + pos0 ) * m;
 				pers.pen.Line3d( gra, pers, v0,v1, col );
 			}
 			{
-				vect3 v0 = ( vect3( -0.025, 0, f ) + pos0 ) * m;
-				vect3 v1 = ( vect3(  0.025, 0, f ) + pos0 ) * m;
+				vect3 v0 = ( vect3( -0.025, f, 0 ) + pos0 ) * m;
+				vect3 v1 = ( vect3(  0.025, f, 0 ) + pos0 ) * m;
 				pers.pen.Line3d( gra, pers, v0,v1, col );
 			}
 		}
@@ -1251,11 +1253,11 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int N
 }
 
 //------------------------------------------------------------------------------
-void Pers::Grid::DrawGrid( SysGra& gra, Pers& pers )
+//void Pers::Grid::DrawGrid( SysGra& gra, Pers& pers )
 //----------------------------------------------------------------------------
-{
-	DrawGrid3d( gra, pers, vect3(0,0,0), mat, 10, 10, 1, col );
-}
+//{
+//	DrawGrid3d( gra, pers, vect3(0,0,0), mat, 10, 10, 1, col );
+//}
 //------------------------------------------------------------------------------
 void Pers::Grid::Circle( SysGra& gra, Pers& pers, vect2 p0, float radius, float step, rgb col, float wide )
 //----------------------------------------------------------------------------
@@ -1263,7 +1265,8 @@ void Pers::Grid::Circle( SysGra& gra, Pers& pers, vect2 p0, float radius, float 
 	gra.SetZTest(false);
 
 	// 平面上の円
-	mat33 m = mat * mat33::mrotx(-rad(90));
+//	mat33 m = mat * mat33::mrotx(-rad(90));
+	mat33 m = mat;
 
 	vect3 v0 = m * vect3(p0,0);	
 	vect3 pos = vect3(p0,0);	
@@ -1290,7 +1293,8 @@ void Pers::Grid::Line( SysGra& gra, Pers& pers, vect2 p0, vect2 p1, rgb col, flo
 {
 	gra.SetZTest(false);
 
-	mat33 m = mat * mat33::mrotx(-rad(90));
+//	mat33 m = mat * mat33::mrotx(-rad(90));
+	mat33 m = mat;
 
 	vect3 v0 = m * vect3(p0,0);	
 	vect3 v1 = m * vect3(p1,0);	

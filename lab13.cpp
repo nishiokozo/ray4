@@ -53,7 +53,7 @@ void Lab13::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 	//画面クリア
 	gra.Clr(col/5);
-	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::midentity(), 10, 10, 1, col/3 );
+	pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), mat33::mrotx(rad(90)), 10, 10, 1, col/3 );
 
 	gra.Print(1,(float)text_y++,"13 : intersect_plate_curve" ); 
 
