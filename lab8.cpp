@@ -261,9 +261,9 @@ void Lab8::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
  		
 	}
 
-	pers.prim.DrawVect( gra, pers, text_y, v0, moment ,10	, rgb(1,0,1), "moment" );
-	pers.prim.DrawVect( gra, pers, text_y, v1, vg		,100	, rgb(1,0,0), "vg" );
-	pers.prim.DrawVect( gra, pers, text_y, v1, F		,1		, rgb(0,1,0), "F" );
+	pers.prim.DrawArrow( gra, pers, text_y, v0, moment ,10	, rgb(1,0,1), "moment" );
+	pers.prim.DrawArrow( gra, pers, text_y, v1, vg		,100	, rgb(1,0,0), "vg" );
+	pers.prim.DrawArrow( gra, pers, text_y, v1, F		,1		, rgb(0,1,0), "F" );
 	pImpl->plot_moment.DrawPlot( gra, pers );
 	gra.Print(1,(float)text_y++,string("<<radius>>")+to_string(bar.abs())); 
 

@@ -156,9 +156,9 @@ void Lab2::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 		pers.pen.Line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );	//	棒
 		pers.pen.Line3d( gra, pers, v1, v2, rgb(0,1,0), 1 );	// 外的な力
 */
-		pers.prim.DrawVect( gra, pers, text_y, v1, pImpl->velocity	,1	, rgb(1,1,0), "pImpl->velocity" );
-		pers.prim.DrawVect( gra, pers, text_y, v0, pImpl->moment		,1	, rgb(1,0,1), "pImpl->moment" );
-		pers.prim.DrawVect( gra, pers, text_y, v0, pImpl->to			,1	, rgb(0,1,1), "pImpl->to" );
+		pers.prim.DrawArrow( gra, pers, text_y, v1, pImpl->velocity	,1	, rgb(1,1,0), "pImpl->velocity" );
+		pers.prim.DrawArrow( gra, pers, text_y, v0, pImpl->moment		,1	, rgb(1,0,1), "pImpl->moment" );
+		pers.prim.DrawArrow( gra, pers, text_y, v0, pImpl->to			,1	, rgb(0,1,1), "pImpl->to" );
 			
 	}
 

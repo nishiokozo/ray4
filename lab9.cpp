@@ -247,8 +247,8 @@ void Lab9::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 		b2.mat = mrotateByAxis( b2.vaxis, b2.fspin ) * b2.mat;
 	}
 	
-	pers.prim.DrawVect( gra, pers, text_y, b1.pos, b1.vaxis.normalize() ,1	, rgb(1,0,1), "axis" );
-	pers.prim.DrawVect( gra, pers, text_y, b2.pos, b2.vaxis.normalize() ,1	, rgb(1,0,1), "axis" );
+	pers.prim.DrawArrow( gra, pers, text_y, b1.pos, b1.vaxis.normalize() ,1	, rgb(1,0,1), "axis" );
+	pers.prim.DrawArrow( gra, pers, text_y, b2.pos, b2.vaxis.normalize() ,1	, rgb(1,0,1), "axis" );
 
 
 	// 平面表示

@@ -194,6 +194,7 @@ public:
 	vect3( vect2 v, float _z ) { x = v.x; y = v.y; z = _z;};
 
 	vect2 xy() {return vect2(x,y);}
+	vect2 xz() {return vect2(x,z);}
 	
 	vect3 normalize() { return (*this)/abs(); }
 	vect3 reflect( vect3 I ) { return I - 2* dot(I,(*this))*(*this);}

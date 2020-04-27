@@ -123,8 +123,8 @@ void Lab13::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	
 	
 	
-	pers.prim.DrawVect( gra, pers, text_y, p0, v0	,1	, col, "v" );
-	pers.prim.DrawVect( gra, pers, text_y, p0, vg	,1	, col, "a" );
+	pers.prim.DrawArrow( gra, pers, text_y, p0, v0	,1	, col, "v" );
+	pers.prim.DrawArrow( gra, pers, text_y, p0, vg	,1	, col, "a" );
 	pers.prim.DrawPlate( gra, pers, plate_p, plate_n, 5, col/2.0 );
 
 }

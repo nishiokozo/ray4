@@ -143,11 +143,11 @@ pImpl->mov =pImpl->vel;
 
 		pers.pen.Line3d( gra, pers, v0, v1, rgb(1,1,1), 2 );
 
-		pers.prim.DrawVect( gra, pers, text_y, v1, vg	,100, rgb(1,0,0), "g" );
-		pers.prim.DrawVect( gra, pers, text_y, v0, moment,100, rgb(1,0,1), "moment" );
-		pers.prim.DrawVect( gra, pers, text_y, v1, F		,100, rgb(0,1,0), "F" );
-		pers.prim.DrawVect( gra, pers, text_y, v1, pImpl->vel	,2	, rgb(1,1,0), "pImpl->vel" );
-		pers.prim.DrawVect( gra, pers, text_y, v1, pImpl->mov	,2	, rgb(0,0,1), "pImpl->mov" );
+		pers.prim.DrawArrow( gra, pers, text_y, v1, vg	,100, rgb(1,0,0), "g" );
+		pers.prim.DrawArrow( gra, pers, text_y, v0, moment,100, rgb(1,0,1), "moment" );
+		pers.prim.DrawArrow( gra, pers, text_y, v1, F		,100, rgb(0,1,0), "F" );
+		pers.prim.DrawArrow( gra, pers, text_y, v1, pImpl->vel	,2	, rgb(1,1,0), "pImpl->vel" );
+		pers.prim.DrawArrow( gra, pers, text_y, v1, pImpl->mov	,2	, rgb(0,0,1), "pImpl->mov" );
 	}
 
 

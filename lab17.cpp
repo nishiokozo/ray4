@@ -226,7 +226,7 @@ void Lab17::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		b1.mat = mrotateByAxis( b1.vaxis, b1.fspin ) * b1.mat;
 	}
 	
-	pers.prim.DrawVect( gra, pers, text_y, b1.pos, b1.vaxis.normalize() ,1	, rgb(1,0,1), "axis" );
+	pers.prim.DrawArrow( gra, pers, text_y, b1.pos, b1.vaxis.normalize() ,1	, rgb(1,0,1), "axis" );
 
 
 	// 平面表示

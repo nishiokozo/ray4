@@ -156,7 +156,7 @@ void Lab7::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra,
 				v1 = (v1-v0)/(v1-v0).abs()+v0;
 				pImpl->acc2 += v1-prev;
 			}
-			pers.prim.DrawVect( gra, pers, text_y, v1, vt			,100	, rgb(1,0,0), "vt" );
+			pers.prim.DrawArrow( gra, pers, text_y, v1, vt			,100	, rgb(1,0,0), "vt" );
 			gra.Print(1,(float)text_y++,string("radius ")+to_string(bar.abs())); 
 		}
 
@@ -195,7 +195,7 @@ pImpl->w=rad(2);
 		}
 
 		// 補助線
-		pers.prim.DrawVect( gra, pers, text_y, v1, vg			,100	, rgb(1,0,0), "vg" );
+		pers.prim.DrawArrow( gra, pers, text_y, v1, vg			,100	, rgb(1,0,0), "vg" );
 			
 	}
 

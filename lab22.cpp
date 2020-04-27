@@ -262,7 +262,7 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pers.pen.Print3d( gra, pers, 	t0.pos, 0,-32, ss.str() ); 
 		ss.str("");
 		ss << t0.vel.x << "m/s";
-		pers.prim.DrawVect( gra, pers, text_y, t0.pos+vect3(-0.5,0,0), t0.vel ,10	, rgb(1,0,1), ss.str(), false, false,false );
+		pers.prim.DrawArrow( gra, pers, text_y, t0.pos+vect3(-0.5,0,0), t0.vel ,10	, rgb(1,0,1), ss.str(), false, false,false );
 	}
 	{
 		stringstream ss ;
@@ -270,7 +270,7 @@ void Lab22::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pers.pen.Print3d( gra, pers, 	t1.pos, -0,-32, ss.str() ); 
 		ss.str("");
 		ss << t1.vel.x << "m/s";
-		pers.prim.DrawVect( gra, pers, text_y, t1.pos+vect3(0-0.5,0,0), t1.vel ,10	, rgb(1,0,1), ss.str(), false, false,false );
+		pers.prim.DrawArrow( gra, pers, text_y, t1.pos+vect3(0-0.5,0,0), t1.vel ,10	, rgb(1,0,1), ss.str(), false, false,false );
 	}
 	
 	//地面表示

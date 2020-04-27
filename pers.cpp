@@ -127,6 +127,7 @@ vect3 Pers::calcRayvect( vect3 v1 )
 	return v;
 }
 
+#if 0
 //--------------------------------------------------------------------------
 tuple<bool,vect3> Pers::calcScreenToGround( vect2 q )	// 透視変換後の画面座標から『床』上の座標を求める。
 //--------------------------------------------------------------------------
@@ -136,6 +137,7 @@ tuple<bool,vect3> Pers::calcScreenToGround( vect2 q )	// 透視変換後の画�
 	auto[b,Q,s] = func_intersect_Plate_HarfLine( vect3(0,0,0), vect3(0,1,0), P, I );
 	return {b,Q};
 }
+#endif
 
 //--------------------------------------------------------------------------
 bool Pers::calcScissorLine3d( vect3 v0, vect3 v1, vect3& va, vect3& vb )	// 3D 空間座標のままシザリングを行う。
@@ -1017,7 +1019,7 @@ void Pers::Prim::DrawSquare( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool 
 }
 
 //------------------------------------------------------------------------------
-void Pers::Prim::DrawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str, bool bShadow, bool bDump, bool bFlip )
+void Pers::Prim::DrawArrow( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col, string str, bool bShadow, bool bDump, bool bFlip )
 //------------------------------------------------------------------------------
 {
 	gra.SetZTest(false);
@@ -1159,23 +1161,26 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int N
 {
 ///m = m * mat33::mrotx(rad(90));
 
-	mat = m;
+	this->mat = m;
+	this->pos = pos0;
 
-	vect3 pos;
+	vect3 center;
 
-	// 注視点中心(pos)を計算
+	// 注視点中心(center)を計算
+	if(0)
 	{
 		vect3 tar = pers.cam.at;
 		vect3 nor = m.GetVectZ();
 
 		auto[b0,q0,s0] = func_intersect_Dualplate_Line( pos0, nor, tar, nor );
 
-		vect3 q1 = (q0-pos0) * m.invers();
+		vect3 q1 = (q0) * m.invers();
 
+		// 1m 単位に丸める
 		q1.x = (float)int( q1.x );
 		q1.y = (float)int( q1.y );
 		q1.z = (float)int( q1.z );
-		pos = pos0 + q1;	
+		center = q1;	
 	}
 
 
@@ -1186,8 +1191,8 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int N
 	vect3 a;
 	vect3 b;
 	{
-		a = pos+vect3(-du,-du, 0);
-		b = pos+vect3( du,-du, 0);
+		a = center+vect3(-du,-du, 0);
+		b = center+vect3( du,-du, 0);
 		vt = vect3(0,dt,0);
 		for ( int i = 0 ; i < NUM_V*2+1 ; i++ )
 		{
@@ -1200,8 +1205,8 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int N
 	}			
 	{
 
-		a = pos+vect3(-dv, dv, 0);
-		b = pos+vect3(-dv,-dv, 0);
+		a = center+vect3(-dv, dv, 0);
+		b = center+vect3(-dv,-dv, 0);
 		vt = vect3(dt,0,0);
 		for ( int i = 0 ; i < NUM_U*2+1 ; i++ )
 		{
@@ -1218,12 +1223,12 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int N
 		vect3 a;
 		for ( float th = 0 ; th <= rad(360) ; th+=rad(20) )
 		{
-			vect3 b = vect3( r*cos(th), r*sin(th), 0 ) + pos0;
+			vect3 b = vect3( r*cos(th), r*sin(th), 0 );
 			if ( th > 0 ) 
 			{
 				vect3 v0 = a * m;
 				vect3 v1 = b * m;
-				pers.pen.Line3d( gra, pers, v0,v1, col );
+				pers.pen.Line3d( gra, pers, v0,v1, col/2 );
 			}
 			a = b;
 		}
@@ -1235,15 +1240,28 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int N
 		{
 			if ( abs(f)<=0.11 ) continue;
 			{
-				vect3 v0 = ( vect3( f, -0.025, 0 ) + pos0 ) * m;
-				vect3 v1 = ( vect3( f,  0.025, 0 ) + pos0 ) * m;
+				vect3 v0 = ( vect3( f, -0.025, 0 ) ) * m;
+				vect3 v1 = ( vect3( f,  0.025, 0 ) ) * m;
 				pers.pen.Line3d( gra, pers, v0,v1, col );
 			}
 			{
-				vect3 v0 = ( vect3( -0.025, f, 0 ) + pos0 ) * m;
-				vect3 v1 = ( vect3(  0.025, f, 0 ) + pos0 ) * m;
+				vect3 v0 = ( vect3( -0.025, f, 0 ) ) * m;
+				vect3 v1 = ( vect3(  0.025, f, 0 ) ) * m;
 				pers.pen.Line3d( gra, pers, v0,v1, col );
 			}
+		}
+	}
+
+	{// XYベクトル表示
+		{//X
+			vect3 v0 = ( vect3(  0,     0, 0 ) ) * m;
+			vect3 v1 = ( vect3(  0.2, 0, 0 ) ) * m;
+			pers.pen.Line3d( gra, pers, v0,v1, rgb(1,0,0) );
+		}
+		{//Y
+			vect3 v0 = ( vect3( 0,  0    , 0 ) ) * m;
+			vect3 v1 = ( vect3( 0,  0.2, 0 ) ) * m;
+			pers.pen.Line3d( gra, pers, v0,v1, rgb(0,1,0) );
 		}
 	}
 
@@ -1252,12 +1270,7 @@ void Pers::Grid::DrawGrid3d( SysGra& gra, Pers& pers, vect3 pos0, mat33 m, int N
 
 }
 
-//------------------------------------------------------------------------------
-//void Pers::Grid::DrawGrid( SysGra& gra, Pers& pers )
-//----------------------------------------------------------------------------
-//{
-//	DrawGrid3d( gra, pers, vect3(0,0,0), mat, 10, 10, 1, col );
-//}
+
 //------------------------------------------------------------------------------
 void Pers::Grid::Circle( SysGra& gra, Pers& pers, vect2 p0, float radius, float step, rgb col, float wide )
 //----------------------------------------------------------------------------
@@ -1265,11 +1278,8 @@ void Pers::Grid::Circle( SysGra& gra, Pers& pers, vect2 p0, float radius, float 
 	gra.SetZTest(false);
 
 	// 平面上の円
-//	mat33 m = mat * mat33::mrotx(-rad(90));
-	mat33 m = mat;
 
-	vect3 v0 = m * vect3(p0,0);	
-	vect3 pos = vect3(p0,0);	
+	vect3 cen = vect3(p0,0) * mat ;	
 
 	vect3 a;
 	for ( float th = 0 ; th <= rad(360) ; th+=rad(10) )
@@ -1277,9 +1287,9 @@ void Pers::Grid::Circle( SysGra& gra, Pers& pers, vect2 p0, float radius, float 
 		vect3 b = vect3( radius*cos(th), radius*sin(th), 0 ) ;
 		if ( th > 0 ) 
 		{
-			vect3 v0 = a * m;
-			vect3 v1 = b * m;
-			pers.pen.Line3d( gra, pers, v0+ pos, v1+ pos, col );
+			vect3 v0 = a * mat;
+			vect3 v1 = b * mat;
+			pers.pen.Line3d( gra, pers, cen + v0, cen + v1, col );
 		}
 		a = b;
 	}
@@ -1293,12 +1303,22 @@ void Pers::Grid::Line( SysGra& gra, Pers& pers, vect2 p0, vect2 p1, rgb col, flo
 {
 	gra.SetZTest(false);
 
-//	mat33 m = mat * mat33::mrotx(-rad(90));
-	mat33 m = mat;
-
-	vect3 v0 = m * vect3(p0,0);	
-	vect3 v1 = m * vect3(p1,0);	
+	vect3 v0 = vect3(p0,0) * mat;	
+	vect3 v1 = vect3(p1,0) * mat;	
 	pers.pen.Line3d( gra, pers, v0, v1, col, wide );
+
+	gra.SetZTest(true);
+}
+//------------------------------------------------------------------------------
+void Pers::Grid::Pset( SysGra& gra, Pers& pers, vect2 p0, rgb col, float wide )
+//----------------------------------------------------------------------------
+{
+	gra.SetZTest(false);
+
+	vect3 v0 = vect3(p0,0) *mat;	
+	pers.pen.Pset3d( gra, pers, v0, col, wide );
+
+	pers.pen.Line3d( gra, pers, v0, v0*1.1, rgb(1,0,0), 2 );
 
 	gra.SetZTest(true);
 }
@@ -1308,14 +1328,31 @@ void Pers::Grid::Print( SysGra& gra, Pers& pers, vect2 p0, float x, float y, str
 {
 	gra.SetZTest(false);
 
-	mat33 m = mat * mat33::mrotx(-rad(90));
-
-	vect3 v0 = m * vect3(p0,0);	
+	vect3 v0 = vect3(p0,0) * mat;	
 	pers.pen.Print3d( gra, pers, v0, x,y,str );
 
 
 	gra.SetZTest(true);
 }
+//------------------------------------------------------------------------------
+tuple<bool,vect2>  Pers::Grid::IntersectOn(vect3 P, vect3 I )
+//----------------------------------------------------------------------------
+{
+	// 三次元ベクトルからGrid上の二次元座標系を求める
+
+	P = (P)	* this->mat.invers() ;	// Grid空間上のへ変換するため視点を逆回転
+	I = I 				* this->mat.invers() ;	// Grid空間上のへ変換するため視線を逆回転
+	vect3 N = vect3(0,0,-1)  ;				// Grid空間上の法線は<0,0,-1>に決めてあるので
+	float	f = dot(N, P);
+	float	t = -f/dot( N, I );
+	vect3	v = I * t + P;
+	vect2	Q = v.xy();	//		// Grid空間上で求めているので、zは必ず0になる
+
+//	auto [b,Q,t] = func_intersect_Plate_Line( vect3(0,0,0), N, P, I );
+
+	return {true,Q};
+}
+
 
 //////////////////
 // GRID::PLOT			

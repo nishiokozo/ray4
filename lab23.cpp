@@ -351,7 +351,7 @@ void Lab23::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 				pers.grid.Print( gra, pers, 	v0.xy(), 0,-32, ss.str() ); 
 				ss.str("");
 				ss << box.vel << "m/s";
-				pers.prim.DrawVect( gra, pers, text_y, v0, v1 ,5	, rgb(1,0,1), ss.str(), false, false,false );
+				pers.prim.DrawArrow( gra, pers, text_y, v0, v1 ,5	, rgb(1,0,1), ss.str(), false, false,false );
 			}
 
 		}

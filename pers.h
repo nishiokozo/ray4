@@ -119,7 +119,7 @@ struct Pers
 	//--------------------------------------------------------------------------
 
 	//--------------------------------------------------------------------------
-	std::tuple<bool,vect3> calcScreenToGround( vect2 q );	// 透視変換後の画面座標から『床』上の座標を求める。
+//	std::tuple<bool,vect3> calcScreenToGround( vect2 q );	// 透視変換後の画面座標から『床』上の座標を求める。
 	//--------------------------------------------------------------------------
 
 	//--------------------------------------------------------------------------
@@ -171,6 +171,7 @@ struct Pers
 	{
 		rgb col=rgb(0.2,0.2,0.2);
 		mat33	mat =  mat33::midentity();
+		vect3	pos = vect3(0,0,0);
 
 		void SetCol( const rgb& _col ) { col =_col; }
 		void SetMat( const mat33& _mat ) { mat = _mat; }
@@ -202,7 +203,10 @@ struct Pers
 		
 		void Circle( SysGra& gra, Pers& pers, vect2 p0, float radius, float step=24, rgb col=rgb(1,1,1), float wide=1.0f );
 		void Line( SysGra& gra, Pers& pers, vect2 v0, vect2 v1, rgb col=rgb(1,1,1), float wide=1.0f );
+		void Pset( SysGra& gra, Pers& pers, vect2 p0, rgb col, float wide );
 		void Print( SysGra& gra, Pers& pers, vect2 p0, float x, float y, std::string str );
+
+		std::tuple<bool,vect2>  IntersectOn(vect3 P, vect3 I );
 
 	} grid;
 
@@ -217,7 +221,7 @@ struct Pers
 		void DrawSquare( SysGra& gra, Pers& pers, vect3 pos, mat33 m , bool bAxis = true, bool bTri = true );
 		void DrawCircle( SysGra& gra, Pers& pers, vect3 pos, mat33 m, float radius, rgb col=rgb(1,1,1) );
 		void DrawSphere( SysGra& gra, Pers& pers, vect3 pos, mat33 m, float radius, rgb col=rgb(1,1,1) );
-		void DrawVect( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col=rgb(1,1,1), std::string str="?", bool bShadow = true, bool bDump=true, bool bFlip=true );
+		void DrawArrow( SysGra& gra, Pers& pers, int& text_y, vect3 v0, vect3 v, float sc, rgb col=rgb(1,1,1), std::string str="?", bool bShadow = true, bool bDump=true, bool bFlip=true );
 	} prim;
 
 };
