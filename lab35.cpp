@@ -39,8 +39,8 @@ struct Lab35::Impl
 
 	vector<shared_ptr<Obj>>	tbl_pObj;
 	
-//	mat33	mat = mat33::mrotx(rad(-90));
-	mat33	mat = mat33::mrotx(rad(0));
+	mat33	mat = mat33::mrotx(rad(90));
+//	mat33	mat = mat33::mrotx(rad(0));
 };
 Lab35::Lab35() : pImpl( new Lab35::Impl ){}
 
