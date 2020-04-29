@@ -37,10 +37,22 @@ struct Lab35::Impl
 	bool	bPause = false;
 	bool	bStep = false;
 
-	vector<shared_ptr<Obj>>	tbl_pObj;
+//	vector<shared_ptr<Obj>>	tbl_pObj;
+	struct Stone
+	{
+		vect2	prev_pos;
+		vect2	pos;
+		float	radius;
+		vect2	vel;
+		
+		Stone( vect2 _pos, float _r ) :  pos(_pos), radius(_r) {}
+		Stone( vect2 _pos, float _r, vect2 _mov ) :  pos(_pos), radius(_r), vel(_mov) {}
+	};
+
+	vector<Stone>	tblStones;
 	
-	mat33	mat = mat33::mrotx(rad(90));
-//	mat33	mat = mat33::mrotx(rad(0));
+//	mat33	mat = mat33::mrotx(rad(90));
+	mat33	mat = mat33::mrotx(rad(0));
 };
 Lab35::Lab35() : pImpl( new Lab35::Impl ){}
 
@@ -59,11 +71,15 @@ void Lab35::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		pImpl->bResetAll = false;
 
 		// カメラ
-		pers.cam.pos = vect3( 0.0, 1.0, -5.0 );
-		pers.cam.at = vect3( 0,  1.0, 0 );
+		pers.cam.pos = vect3( 0.0, 0.0, -15.0 );
+		pers.cam.at = vect3( 0,  0.0, 0 );
 		pers.cam.Update();
-	}
 
+		// ストーン
+		pImpl->tblStones.emplace_back( Impl::Stone(vect2(1,0),0.5) );
+		pImpl->tblStones.emplace_back( Impl::Stone(vect2(0,1),0.5) );
+
+	}
 /*
 	vect3 vx = vect3(1,0,0);
 	vect3 vy = vect3(0,1,0);
@@ -86,25 +102,77 @@ void Lab35::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 
 	}
 */
-		if ( keys.Q.hi )	pImpl->mat *= mat33::mrotx(rad(-30));
-		if ( keys.A.hi )	pImpl->mat *= mat33::mrotx(rad(30));
+	if ( keys.R.hi )	pImpl->bResetAll = true;
+	if ( keys.Q.hi )	pImpl->mat *= mat33::mrotx(rad(-30));
+	if ( keys.A.hi )	pImpl->mat *= mat33::mrotx(rad(30));
 
+	{
+		vect3 P1 = pers.calcScreenToWorld3( vect3(mouse.pos,0) );
+		vect3 I1 = pers.calcRayvect( P1 );
+
+		auto[b,Q] = pers.grid.IntersectOn( P1, I1 );	// Grid空間座標を求める。
+
+		pers.grid.Circle( gra, pers,Q, 0.5, 24, rgb(0,1,0) );
+		pers.grid.Pset( gra, pers, Q, rgb(0,1,0), 12 );
+		pers.grid.Print( gra, pers, Q, -26,-52, to_string(Q.x) + " " +to_string(Q.y)  ); 
+//			pers.grid.Line( gra, pers, vect2(1,1), vect2(-1,-1), rgb(0,1,1), 2 );
+
+
+		if ( mouse.L.lo ) pImpl->tblStones.emplace_back( Q, 0.5, vect2(0,0.01) );
+
+	}
+
+
+	// 移動
+	for ( auto& o : pImpl->tblStones )
+	{
+		o.prev_pos = o.pos;
+		o.pos += o.vel;
+		o.vel *= 0.9999;
+	}
+
+	// 衝突
+	for ( auto& b1 : pImpl->tblStones )
+	{
+		for ( auto& b2 : pImpl->tblStones )
 		{
-			vect3 P1 = pers.calcScreenToWorld3( vect3(mouse.pos,0) );
-			vect3 I1 = pers.calcRayvect( P1 );
+			if ( &b1 != &b2 )
+			{
+				vect2	v = (b2.pos-b1.pos);
+				float	len = v.abs();
+				float	bor = b1.radius + b2.radius;
+				if ( len < bor )
+				{
+					b1.pos = b1.prev_pos;
+					b2.pos = b2.prev_pos;
 
-			auto[b,Q] = pers.grid.IntersectOn( P1, I1 );	// Grid空間座標を求める。
+					v = v * (bor-len);
+					vect2	N = v.normalize();
+					vect2	vel1 = func_reflect( b1.vel, N, 1.0 );
+					vect2	vel2 = func_reflect( b2.vel, N, 1.0 );
 
-			pers.grid.Circle( gra, pers,Q, 0.5, 24, rgb(0,1,0) );
-			pers.grid.Pset( gra, pers, Q, rgb(0,1,0), 12 );
-			pers.grid.Print( gra, pers, Q, -26,-52, to_string(Q.x) + " " +to_string(Q.y)  ); 
-			pers.grid.Line( gra, pers, vect2(1,1), vect2(-1,-1), rgb(0,1,1), 2 );
+					vect2	v1 = dot(-vel2,N)*N;
+					vect2	v2 = dot(-vel1,N)*N;
 
+					b1.vel += v1 - v2;
+					b2.vel += v2 - v1;
 
+				}
+			}
 		}
+	}
 
+	// 減衰
+	for ( auto& o : pImpl->tblStones )
+	{
+		o.vel *= 0.999;
+	}
 
-	pers.grid.Circle( gra, pers,vect2( 0, 0 ), 1, 24, rgb(1,1,1) );
+	// 表示
+	for ( auto o : pImpl->tblStones )
+	{
+		pers.grid.Circle( gra, pers,o.pos, o.radius, 24, rgb(1,1,1) );
+	}
 //	pers.prim.DrawCircle( gra, pers, vect3( 0,0, 0 ), mat33::mrotz(0.0), 1.0, rgb(1,1,1) );
 
 
