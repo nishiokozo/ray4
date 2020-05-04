@@ -42,6 +42,8 @@ struct Cp
 
 struct Pers
 {
+	bool flgUseGui = true;
+
 
 	// カメラ
 	struct Cam

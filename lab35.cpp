@@ -83,16 +83,20 @@ struct Lab35::Impl
 //		pImpl->tblStone.emplace_back( Impl::Stone(vect2(1,0),0.5) );
 //		pImpl->tblStone.emplace_back( Impl::Stone(vect2(0,1),0.5) );
 		this->tblStone.clear();
-		float step = 5;
-		for ( float x = -RINGSIZE+step/2 ; x < RINGSIZE-1 ; x += step )
-		{
-			for ( float y = -RINGSIZE+step/2 ; y < RINGSIZE-1 ; y += step )
+		#if 0
+			float step = 5;
+			for ( float x = -RINGSIZE+step/2 ; x < RINGSIZE-1 ; x += step )
 			{
-				this->tblStone.emplace_back( Stone(vect2(x,y),0.5) );
+				for ( float y = -RINGSIZE+step/2 ; y < RINGSIZE-1 ; y += step )
+				{
+					this->tblStone.emplace_back( Stone(vect2(x,y),0.5) );
+				}
 			}
-		}
+		#endif
 		this->valState = State::Title;
 		this->timeState = 0.0;
+
+		pers.flgUseGui = false;
 	}
 
 	//------------------------------------------------------------------------------
@@ -116,8 +120,10 @@ struct Lab35::Impl
 	void StatePlay( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers )
 	//------------------------------------------------------------------------------
 	{
-		// 画面クリア
-		pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), this->mat, this->RINGSIZE,this->RINGSIZE, 1, rgb(0.2,0.2,0.2) );
+//		// 画面クリア
+//		pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), this->mat, this->RINGSIZE,this->RINGSIZE, 1, rgb(0.2,0.2,0.2) );
+
+		static vect2 posCursor;
 
 		{
 			vect3 P1 = pers.calcScreenToWorld3( vect3(mouse.pos,0) );
@@ -125,16 +131,18 @@ struct Lab35::Impl
 
 			auto[b,Q] = pers.grid.IntersectOn( P1, I1 );	// Grid空間座標を求める。
 
-			pers.grid.Circle( gra, pers,Q, 0.5, 24, rgb(0,1,0) );
-			pers.grid.Pset( gra, pers, Q, rgb(0,1,0), 12 );
-			pers.grid.Print( gra, pers, Q, -26,-52, to_string(Q.x) + " " +to_string(Q.y)  ); 
+	//		pers.grid.Circle( gra, pers,Q, 0.5, 24, rgb(0,1,0) );
+	//		pers.grid.Pset( gra, pers, Q, rgb(0,1,0), 12 );
+	//		pers.grid.Print( gra, pers, Q, -26,-52, to_string(Q.x) + " " +to_string(Q.y)  ); 
 	//			pers.grid.Line( gra, pers, vect2(1,1), vect2(-1,-1), rgb(0,1,1), 2 );
 
+
+			if ( b ) posCursor = Q;
 
 			if ( timeState > 1.0 )
 			{
 
-				if ( mouse.L.lo ) this->tblStone.emplace_back( Q, 0.5, vect2(0,0.1) );
+//				if ( mouse.L.lo ) this->tblStone.emplace_back( Q, 0.5, vect2(0,0.1) );
 				if ( mouse.F.lo ) this->tblStone.emplace_back( Q, 0.5, vect2(0,0.4) );
 				if ( mouse.B.lo ) this->tblStone.emplace_back( Q, 0.5, vect2(0,0.8) );
 			}
@@ -142,12 +150,45 @@ struct Lab35::Impl
 		}
 
 
+		static	bool	flgHippari = false;
+		static	vect2	posHippari;
+		
+		if ( mouse.L.hi ) 
+		{
+			if ( flgHippari == false )
+			{
+				flgHippari = true;
+			
+				posHippari = posCursor;
+			}
+		}
+
+		if ( mouse.L.on == false ) 
+		{
+			if ( flgHippari )	// ショット
+			{
+				
+				vect2 v = posHippari-posCursor ;
+
+				this->tblStone.emplace_back( posCursor, 0.5, v*0.1 );
+			
+			}
+			flgHippari = false;
+		}
+		
+		if ( flgHippari )
+		{
+			pers.grid.Line( gra, pers, posHippari, posCursor, rgb(1,1,1), 2 );
+		}
+
+		
+
 		// 移動
 		for ( auto& o : this->tblStone )
 		{
 			o.prev_pos = o.pos;
 			o.pos += o.vel;
-		//	o.vel *= 0.9999;
+			o.vel *= 0.99;
 		}
 
 		// 衝突：壁
@@ -214,14 +255,29 @@ struct Lab35::Impl
 			o.vel *= 0.999;
 		}
 
-		// 表示
-		for ( auto o : this->tblStone )
+		// 表示：カーソル
 		{
-			pers.grid.Circle( gra, pers,o.pos, o.radius, 24, rgb(1,1,1) );
+			pers.grid.Circle( gra, pers, posCursor, 0.5, 24, rgb(0,1,0),2 );
+
+//			gra.Pset2d( mouse.pos, rgb(0,1,1), 4 );
+		}
+
+		// 表示：ステージ
+		{
 			pers.grid.Line( gra, pers, vect2(-RINGSIZE,-RINGSIZE), vect2(-RINGSIZE, RINGSIZE), rgb(1,1,1), 2 );
 			pers.grid.Line( gra, pers, vect2( RINGSIZE,-RINGSIZE), vect2( RINGSIZE, RINGSIZE), rgb(1,1,1), 2 );
 			pers.grid.Line( gra, pers, vect2(-RINGSIZE,-RINGSIZE), vect2( RINGSIZE,-RINGSIZE), rgb(1,1,1), 2 );
 			pers.grid.Line( gra, pers, vect2(-RINGSIZE, RINGSIZE), vect2( RINGSIZE, RINGSIZE), rgb(1,1,1), 2 );
+
+			pers.grid.Circle( gra, pers, vect2(0,0), 1, 24, rgb(1,1,0) );
+			pers.grid.Circle( gra, pers, vect2(0,0), 3, 24, rgb(1,1,0) );
+			pers.grid.Circle( gra, pers, vect2(0,0), 5, 24, rgb(1,1,0) );
+		}
+
+		// 表示：ストーン
+		for ( auto o : this->tblStone )
+		{
+			pers.grid.Circle( gra, pers,o.pos, o.radius, 24, rgb(1,1,1) );
 
 		}
 	}

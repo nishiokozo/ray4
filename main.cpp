@@ -174,6 +174,8 @@ struct Apr : public Sys
 			//=================================
 			//	GUI操作
 			//=================================
+//			if( keys.CTRL.on )
+			if ( pers.flgUseGui )
 			{
 
 				// 最近点検索
@@ -266,13 +268,19 @@ struct Apr : public Sys
 			//=================================
 			// 表示 矩形カーソル、制御点
 			//=================================
-			gui.DrawController( gra, pers, gui.cp.tbltbl_pObj, gui.cp.tbltbl_pEdge, mouse.pos );
+			if ( pers.flgUseGui )
+			{
+				gui.DrawController( gra, pers, gui.cp.tbltbl_pObj, gui.cp.tbltbl_pEdge, mouse.pos );
+			}
 			
 
 			//=================================
 			// 描画	マニュピレーター
 			//=================================
-			pers.axis.DrawAxis( gra, pers, mouse.pos );
+			if ( pers.flgUseGui )
+			{
+				pers.axis.DrawAxis( gra, pers, mouse.pos );
+			}
 
 			//=================================
 			// 情報表示
