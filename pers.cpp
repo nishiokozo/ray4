@@ -1323,13 +1323,13 @@ void Pers::Grid::Pset( SysGra& gra, Pers& pers, vect2 p0, rgb col, float wide )
 	gra.SetZTest(true);
 }
 //------------------------------------------------------------------------------
-void Pers::Grid::Print( SysGra& gra, Pers& pers, vect2 p0, float x, float y, string str )
+void Pers::Grid::Print( SysGra& gra, Pers& pers, vect2 p0, float x, float y, string str, rgb col )
 //----------------------------------------------------------------------------
 {
 	gra.SetZTest(false);
 
 	vect3 v0 = vect3(p0,0) * mat;	
-	pers.pen.Print3d( gra, pers, v0, x,y,str );
+	pers.pen.Print3d( gra, pers, v0, x,y,str, col );
 
 
 	gra.SetZTest(true);

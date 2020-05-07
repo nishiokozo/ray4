@@ -62,6 +62,8 @@ struct Lab35::Impl
 		
 		Stone( vect2 _pos, float _r ) :  pos(_pos), radius(_r) {}
 		Stone( vect2 _pos, float _r, vect2 _mov ) :  pos(_pos), radius(_r), vel(_mov) {}
+	
+		int point = 0;
 	};
 
 	vector<Stone>	tblStone;
@@ -108,13 +110,18 @@ struct Lab35::Impl
 //		pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), pImpl->mat, pImpl->RINGSIZE,pImpl->RINGSIZE, 1, rgb(0.2,0.2,0.2) );
 //		gra.Print(1,(float)text_y++,"35 : Curing(Title)" ); 
 
-		gra.Print(16,10," Curing Game" ); 
+		gra.Print(22,15," Curing Game" ); 
 
 		
-		gra.Print(16,20," Push Mouse.L Button " ); 
+		gra.Print(20,20," Push Mouse.L Button " ); 
 		
 		if ( mouse.L.hi ) this->valState = State::Play;
 	}
+
+		static const	int MaxRound = 9;
+		int numRound = 0;
+		int numPlayer = 0;
+		int tblScore[MaxRound];
 	
 	//------------------------------------------------------------------------------
 	void StatePlay( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers )
@@ -122,6 +129,50 @@ struct Lab35::Impl
 	{
 //		// 画面クリア
 //		pers.grid.DrawGrid3d( gra, pers, vect3(0,0,0), this->mat, this->RINGSIZE,this->RINGSIZE, 1, rgb(0.2,0.2,0.2) );
+
+
+
+
+		
+		{
+			int x = 10;
+			int y = 2;
+//			gra.Print(x,y++,"        | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | score " ); 
+//			gra.Print(x,y++,"--------+---+---+---+---+---+---+---+---+---+-------" ); 
+//			gra.Print(x,y++,"player  |   |   |   |   |   |   |   |   |   |       " ); 
+//			gra.Print(x,y++,"--------+---+---+---+---+---+---+---+---+---+-------" ); 
+//			gra.Print(x,y++,"com     |   |   |   |   |   |   |   |   |   |       " ); 
+//			gra.Print(x,y++,"--------+---+---+---+---+---+---+---+---+---+-------" ); 
+
+			gra.Print(40,3,"Round :"+to_string(numRound+1) ); 
+//			gra.Print(x,1,"Player:"+to_string(numPlayer+1) ); 
+
+
+			
+			{
+					int total = 0;
+				for ( int i = 0 ; i < MaxRound ; i++ )
+				{
+
+					int x = 14;
+					int y = 2;
+					int score = tblScore[i];
+					gra.Print(x+i*2,y++, to_string(i+1));
+					gra.Print(x+i*2,y++, "--" );
+					gra.Print(x+i*2,y++, to_string( score ) );
+					total += score;
+					
+				}
+				{
+					int x= 14+MaxRound*2;
+					int y=2;
+					gra.Print(x,y++, "total");
+					gra.Print(x,y++, "-----" );
+					gra.Print(x,y++, to_string( total ) );
+				}
+			}
+		}
+
 
 		static vect2 posCursor;
 
@@ -150,10 +201,11 @@ struct Lab35::Impl
 		}
 
 
+		static	bool	flgInMove = false;
 		static	bool	flgHippari = false;
 		static	vect2	posHippari;
 		
-		if ( mouse.L.hi ) 
+		if ( mouse.L.hi && flgInMove == false) 
 		{
 			if ( flgHippari == false )
 			{
@@ -165,12 +217,18 @@ struct Lab35::Impl
 
 		if ( mouse.L.on == false ) 
 		{
-			if ( flgHippari )	// ショット
+			if ( flgHippari )
 			{
+				// ショット
 				
 				vect2 v = posHippari-posCursor ;
+				
+				if ( v.abs() > 0.1 )
+				{
 
-				this->tblStone.emplace_back( posCursor, 0.5, v*0.1 );
+					this->tblStone.emplace_back( posCursor, 0.5, v*0.1 );
+					sound.mml_play( "T1800O5V10c#cr");
+				}
 			
 			}
 			flgHippari = false;
@@ -181,7 +239,76 @@ struct Lab35::Impl
 			pers.grid.Line( gra, pers, posHippari, posCursor, rgb(1,1,1), 2 );
 		}
 
+		// メッセージ
+		if ( flgInMove == true )
+		{
+			gra.Print(15,25,"In Move.." ); 
+		}
+		else
+		if ( flgHippari == false )
+		{
+			gra.Print(15,25,"Click L-button and drag mouse." ); 
+		}
+		else
+		if ( flgHippari == true )
+		{
+			gra.Print(15,25,"Release L-button to shot" ); 
+		}
 		
+		// チェック：動いてる途中かどうか
+		{
+			bool isMove = false;
+			for ( auto& o : this->tblStone )
+			{
+				if ( o.vel.abs() > 0.01 ) isMove = true;
+			}
+
+			if ( flgInMove == true )
+			{
+				if ( isMove == false )
+				{
+					// 今止まった
+						sound.mml_play( "T1800O5V10c#cr");
+
+
+					// 点数計算
+					int total_score = 0;
+					for ( auto& o : this->tblStone )
+					{
+						vect2 posCenter(0,0);
+						
+						float len = (o.pos - posCenter ).abs(); 
+						
+						
+						int score = 0;
+						if ( len < 2.0 ) score = 3;
+						else
+						if ( len < 4.0 ) score = 2;
+						else
+						if ( len < 6.0 ) score = 1;
+						else
+						{
+//						score += 1;
+						sound.mml_play( "T1800O5V10e#e");
+						}
+						o.point = score;
+						total_score += score;
+
+					}
+						
+					tblScore[ numRound ] = total_score;
+
+		
+					// ラウンドアップ
+					numRound++;
+					if ( numRound > MaxRound ) numRound=0;
+					
+				}
+			}
+			flgInMove = isMove;
+
+		}
+	
 
 		// 移動
 		for ( auto& o : this->tblStone )
@@ -256,10 +383,19 @@ struct Lab35::Impl
 		}
 
 		// 表示：カーソル
+		if ( flgInMove == false )
 		{
 			pers.grid.Circle( gra, pers, posCursor, 0.5, 24, rgb(0,1,0),2 );
-
 //			gra.Pset2d( mouse.pos, rgb(0,1,1), 4 );
+		}
+		{
+			rgb		col = rgb(1,1,0);
+			vect2 v0 = posCursor;
+			vect2 v1 = posCursor + vect2(1.0,-0.5);
+			vect2 v2 = posCursor + vect2(0.5,-1.0);
+			pers.grid.Line( gra, pers, v0,v1, col, 1 );
+			pers.grid.Line( gra, pers, v0,v2, col, 1 );
+			pers.grid.Line( gra, pers, v2,v1, col, 1 );
 		}
 
 		// 表示：ステージ
@@ -278,6 +414,10 @@ struct Lab35::Impl
 		for ( auto o : this->tblStone )
 		{
 			pers.grid.Circle( gra, pers,o.pos, o.radius, 24, rgb(1,1,1) );
+			if ( o.point > 0 )
+			{
+				pers.grid.Print( gra, pers, o.pos,-4,4, to_string(o.point), rgb(1,1,1) );
+			}
 
 		}
 	}

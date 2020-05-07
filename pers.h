@@ -206,7 +206,7 @@ struct Pers
 		void Circle( SysGra& gra, Pers& pers, vect2 p0, float radius, float step=24, rgb col=rgb(1,1,1), float wide=1.0f );
 		void Line( SysGra& gra, Pers& pers, vect2 v0, vect2 v1, rgb col=rgb(1,1,1), float wide=1.0f );
 		void Pset( SysGra& gra, Pers& pers, vect2 p0, rgb col, float wide );
-		void Print( SysGra& gra, Pers& pers, vect2 p0, float x, float y, std::string str );
+		void Print( SysGra& gra, Pers& pers, vect2 p0, float x, float y, std::string str, rgb col=rgb(1,1,1) );
 
 		std::tuple<bool,vect2>  IntersectOn(vect3 P, vect3 I );
 
