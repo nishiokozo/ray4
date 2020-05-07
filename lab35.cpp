@@ -52,6 +52,14 @@ struct Lab35::Impl
 	State	valState = State::Reset;
 	float	timeState = 0.0;
 
+		static const	int MaxRound = 3;
+		int numRound = 0;
+		int numPlayer = 0;
+		int tblScore[MaxRound];
+	
+		int	 hiscore = 0;
+		bool	flgClear = false;
+
 //	vector<shared_ptr<Obj>>	tbl_pObj;
 	struct Stone
 	{
@@ -99,6 +107,7 @@ struct Lab35::Impl
 		this->timeState = 0.0;
 
 		pers.flgUseGui = false;
+
 	}
 
 	//------------------------------------------------------------------------------
@@ -115,14 +124,17 @@ struct Lab35::Impl
 		
 		gra.Print(20,20," Push Mouse.L Button " ); 
 		
-		if ( mouse.L.hi ) this->valState = State::Play;
+		if ( mouse.L.hi ) 
+		{
+			this->valState = State::Play;
+			this->numRound=0;
+			this->tblScore[0]=0;
+			this->tblStone.clear();
+		}
+
 	}
 
-		static const	int MaxRound = 9;
-		int numRound = 0;
-		int numPlayer = 0;
-		int tblScore[MaxRound];
-	
+
 	//------------------------------------------------------------------------------
 	void StatePlay( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers )
 	//------------------------------------------------------------------------------
@@ -132,43 +144,57 @@ struct Lab35::Impl
 
 
 
-
+		float	timeDelay = 0;
 		
 		{
 			int x = 10;
 			int y = 2;
-//			gra.Print(x,y++,"        | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | score " ); 
-//			gra.Print(x,y++,"--------+---+---+---+---+---+---+---+---+---+-------" ); 
-//			gra.Print(x,y++,"player  |   |   |   |   |   |   |   |   |   |       " ); 
-//			gra.Print(x,y++,"--------+---+---+---+---+---+---+---+---+---+-------" ); 
-//			gra.Print(x,y++,"com     |   |   |   |   |   |   |   |   |   |       " ); 
-//			gra.Print(x,y++,"--------+---+---+---+---+---+---+---+---+---+-------" ); 
 
-			gra.Print(40,3,"Round :"+to_string(numRound+1) ); 
-//			gra.Print(x,1,"Player:"+to_string(numPlayer+1) ); 
+			if ( flgClear == false )
+			{
+				gra.Print(40,3,"Round :"+to_string(numRound+1) ); 
+			}
 
 
 			
 			{
+					int ox = 14;
+					int oy = 2;
 					int total = 0;
+
 				for ( int i = 0 ; i < MaxRound ; i++ )
 				{
+					int x = ox;
+					int y = oy;
 
-					int x = 14;
-					int y = 2;
-					int score = tblScore[i];
 					gra.Print(x+i*2,y++, to_string(i+1));
 					gra.Print(x+i*2,y++, "--" );
+					
+				}
+
+				for ( int i = 0 ; i < numRound ; i++ )
+				{
+					int x = ox;
+					int y = oy+2;
+
+					int score = tblScore[i];
 					gra.Print(x+i*2,y++, to_string( score ) );
 					total += score;
 					
 				}
 				{
-					int x= 14+MaxRound*2;
-					int y=2;
+					int x = ox+MaxRound*2;;
+					int y = oy;
 					gra.Print(x,y++, "total");
 					gra.Print(x,y++, "-----" );
 					gra.Print(x,y++, to_string( total ) );
+				}
+
+				if ( flgClear == false )
+				{
+					int x = ox+numRound*2;
+					int y = oy+3;
+					gra.Print(x,y++, "^^" );
 				}
 			}
 		}
@@ -194,18 +220,19 @@ struct Lab35::Impl
 			{
 
 //				if ( mouse.L.lo ) this->tblStone.emplace_back( Q, 0.5, vect2(0,0.1) );
-				if ( mouse.F.lo ) this->tblStone.emplace_back( Q, 0.5, vect2(0,0.4) );
-				if ( mouse.B.lo ) this->tblStone.emplace_back( Q, 0.5, vect2(0,0.8) );
+//				if ( mouse.F.lo ) this->tblStone.emplace_back( Q, 0.5, vect2(0,0.4) );
+//				if ( mouse.B.lo ) this->tblStone.emplace_back( Q, 0.5, vect2(0,0.8) );
 			}
 
 		}
+
 
 
 		static	bool	flgInMove = false;
 		static	bool	flgHippari = false;
 		static	vect2	posHippari;
 		
-		if ( mouse.L.hi && flgInMove == false) 
+		if ( mouse.L.hi && flgInMove == false && flgClear == false ) 
 		{
 			if ( flgHippari == false )
 			{
@@ -240,6 +267,23 @@ struct Lab35::Impl
 		}
 
 		// メッセージ
+		if ( flgClear == true )
+		{
+			gra.Print(20,6,"   C L E A R !   " ); 
+			gra.Print(20,7,"C O M P L E A T !" ); 
+
+			gra.Print(15,25,"Click L-button to New Game" ); 
+			
+
+ 			if ( mouse.L.hi )
+ 			{
+	 			flgClear = false;
+				this->valState = State::Title;
+ 			}
+ 
+ 
+		}
+		else
 		if ( flgInMove == true )
 		{
 			gra.Print(15,25,"In Move.." ); 
@@ -293,6 +337,7 @@ struct Lab35::Impl
 						}
 						o.point = score;
 						total_score += score;
+						
 
 					}
 						
@@ -301,7 +346,22 @@ struct Lab35::Impl
 		
 					// ラウンドアップ
 					numRound++;
-					if ( numRound > MaxRound ) numRound=0;
+					if ( numRound >= MaxRound ) 
+					{
+						// クリア
+						flgClear = true;
+
+						if ( hiscore < total_score )
+						{
+							hiscore = total_score;
+							sound.mml_play( "T100v6o4c1-gcfcfgdg+c7r:v9o3g1eg+ca+c+db+d+g7r:v9o3e1ceafabgb+e7r");
+						
+//							this->limWaitInput = 10;
+						}
+						
+
+//						numRound=0;
+					}
 					
 				}
 			}
@@ -382,6 +442,7 @@ struct Lab35::Impl
 			o.vel *= 0.999;
 		}
 
+
 		// 表示：カーソル
 		if ( flgInMove == false )
 		{
@@ -431,8 +492,9 @@ void Lab35::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 //------------------------------------------------------------------------------
 {
 		gra.Clr(rgb(0.3,0.3,0.3));
-		gra.Print(1,(float)text_y++,"35 : Curing " + to_string(pImpl->timeState) ); 
+		gra.Print(0,(float)text_y++,"35:Curing"  ); 
 
+		gra.Print(30,0,"HI SCORE " + to_string(pImpl->hiscore) ); 
 
 
 	//初期化
