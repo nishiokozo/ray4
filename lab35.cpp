@@ -110,6 +110,9 @@ struct Lab35::Impl
 
 	}
 
+		float sizeNextStone = 0.5;
+		float sizeCursorStone = 0.5;
+
 	//------------------------------------------------------------------------------
 	void StateTitle( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers )
 	//------------------------------------------------------------------------------
@@ -130,6 +133,8 @@ struct Lab35::Impl
 			this->numRound=0;
 			this->tblScore[0]=0;
 			this->tblStone.clear();
+			sizeNextStone = 0.5;
+			sizeCursorStone = 0.5;
 		}
 
 	}
@@ -145,6 +150,7 @@ struct Lab35::Impl
 
 
 		float	timeDelay = 0;
+
 		
 		{
 			int x = 10;
@@ -152,7 +158,18 @@ struct Lab35::Impl
 
 			if ( flgClear == false )
 			{
-				gra.Print(40,3,"Round :"+to_string(numRound+1) ); 
+				gra.Print(40,2,"Round :"+to_string(numRound+1) ); 
+
+
+			}
+
+			{
+				vect2 pos = vect2(12,5);
+				pers.grid.Print( gra, pers, pos, -30,-52, "NextStone" ); 
+				if ( sizeNextStone > 0 )
+				{
+					pers.grid.Circle( gra, pers, pos, sizeNextStone, 24, rgb(0,1,0) );
+				}
 			}
 
 
@@ -252,9 +269,13 @@ struct Lab35::Impl
 				
 				if ( v.abs() > 0.1 )
 				{
-
-					this->tblStone.emplace_back( posCursor, 0.5, v*0.1 );
+					// ストーン生成
+					this->tblStone.emplace_back( posCursor, sizeCursorStone, v*0.1 );
 					sound.mml_play( "T1800O5V10c#cr");
+
+					// カーソルストーンに、ネクストストーンを設定
+					sizeCursorStone = sizeNextStone;
+					
 				}
 			
 			}
@@ -269,8 +290,8 @@ struct Lab35::Impl
 		// メッセージ
 		if ( flgClear == true )
 		{
-			gra.Print(20,6,"   C L E A R !   " ); 
-			gra.Print(20,7,"C O M P L E A T !" ); 
+			gra.Print(21,6,"   C L E A R !   " ); 
+			gra.Print(21,7,"C O M P L E A T !" ); 
 
 			gra.Print(15,25,"Click L-button to New Game" ); 
 			
@@ -325,9 +346,15 @@ struct Lab35::Impl
 						
 						
 						int score = 0;
-						if ( len < 2.0 ) score = 3;
+						if ( len < 1.0 ) score = 6;
 						else
-						if ( len < 4.0 ) score = 2;
+						if ( len < 2.0 ) score = 5;
+						else
+						if ( len < 3.0 ) score = 4;
+						else
+						if ( len < 4.0 ) score = 3;
+						else
+						if ( len < 5.0 ) score = 2;
 						else
 						if ( len < 6.0 ) score = 1;
 						else
@@ -343,6 +370,7 @@ struct Lab35::Impl
 						
 					tblScore[ numRound ] = total_score;
 
+
 		
 					// ラウンドアップ
 					numRound++;
@@ -351,16 +379,32 @@ struct Lab35::Impl
 						// クリア
 						flgClear = true;
 
-						if ( hiscore < total_score )
+						// ハイスコア計算
+						int point = 0;
+						for ( auto a : tblScore ) point += a;
+
+						if ( hiscore < point )
 						{
-							hiscore = total_score;
-							sound.mml_play( "T100v6o4c1-gcfcfgdg+c7r:v9o3g1eg+ca+c+db+d+g7r:v9o3e1ceafabgb+e7r");
+							hiscore = point;
+							sound.mml_play( "T100v5o4c1-gcfcfgdg+c7r:v8o3g1eg+ca+c+db+d+g7r:v8o3e1ceafabgb+e7r");
 						
 //							this->limWaitInput = 10;
 						}
 						
 
-//						numRound=0;
+					}
+
+					// ネクストストーンをランダムで決定
+					sizeNextStone = 0.0;
+					if ( numRound < MaxRound-1 ) 
+					{
+				        std::random_device seed;
+				        std::mt19937    foo(seed());
+				        if ( (foo() % 3) == 0 ) sizeNextStone = 0.5;
+				        else
+				        if ( (foo() % 3) == 1 ) sizeNextStone = 1.5;
+				        else
+				        sizeNextStone = 1.0;
 					}
 					
 				}
@@ -446,7 +490,7 @@ struct Lab35::Impl
 		// 表示：カーソル
 		if ( flgInMove == false )
 		{
-			pers.grid.Circle( gra, pers, posCursor, 0.5, 24, rgb(0,1,0),2 );
+			pers.grid.Circle( gra, pers, posCursor, sizeCursorStone, 24, rgb(0,1,0),2 );
 //			gra.Pset2d( mouse.pos, rgb(0,1,1), 4 );
 		}
 		{
