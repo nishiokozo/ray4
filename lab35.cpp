@@ -52,13 +52,14 @@ struct Lab35::Impl
 	State	valState = State::Reset;
 	float	timeState = 0.0;
 
-		static const	int MaxRound = 3;
-		int numRound = 0;
-		int numPlayer = 0;
-		int tblScore[MaxRound];
-	
-		int	 hiscore = 0;
-		bool	flgClear = false;
+	static const	int MaxRound = 3;
+	static const	int MaxPlayer = 2;
+	int numRound = 0;
+	int numPlayer = 0;
+	int tblScore[MaxPlayer][MaxRound];
+
+	int	 hiscore = 0;
+	bool	flgClear = false;
 
 //	vector<shared_ptr<Obj>>	tbl_pObj;
 	struct Stone
@@ -66,12 +67,15 @@ struct Lab35::Impl
 		vect2	prev_pos;
 		vect2	pos;
 		float	radius;
+//		rgb	col;
+		int		id;
 		vect2	vel;
 		
-		Stone( vect2 _pos, float _r ) :  pos(_pos), radius(_r) {}
-		Stone( vect2 _pos, float _r, vect2 _mov ) :  pos(_pos), radius(_r), vel(_mov) {}
+//		Stone( vect2 _pos, float _r, rgb _col ) :  pos(_pos), radius(_r), col(_col) {}
+		Stone( vect2 _pos, float _r, int _id, vect2 _mov ) :  pos(_pos), radius(_r), id(_id), vel(_mov) {}
 	
 		int point = 0;
+
 	};
 
 	vector<Stone>	tblStone;
@@ -110,8 +114,9 @@ struct Lab35::Impl
 
 	}
 
-		float sizeNextStone = 0.5;
-		float sizeCursorStone = 0.5;
+		float sizeNextStone[MaxPlayer];
+		float sizeCursorStone =0;
+		rgb colStone[MaxPlayer] ={rgb(1,0,0),rgb(0,0,1)};
 
 	//------------------------------------------------------------------------------
 	void StateTitle( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers )
@@ -131,15 +136,41 @@ struct Lab35::Impl
 		{
 			this->valState = State::Play;
 			this->numRound=0;
-			this->tblScore[0]=0;
+			for ( int p = 0 ; p < MaxPlayer ; p++ )
+			{
+				for ( int i = 0 ; i < MaxRound ; i++ )
+				{
+					this->tblScore[p][i]=0;
+				}
+				sizeNextStone[p] = this->GenStone();
+			}
 			this->tblStone.clear();
-			sizeNextStone = 0.5;
+//cout << sizeNextStone << endl;
 			sizeCursorStone = 0.5;
+
+//			colStone[0] = rgb(1,0,0);
+//			colStone[1] = rgb(0,0,1);
 		}
 
 	}
+	//------------------------------------------------------------------------------
+	float GenStone()	// ストーン生成
+	//------------------------------------------------------------------------------
+	{
+		float size=5;;
+		std::random_device seed;
+		std::mt19937    foo(seed());
+		int a = (foo() % 3);
+		if ( a == 1 ) size = 0.25;
+		else
+		if ( a == 2 ) size = 1.0;
+		else
+		size = 0.5;
+		
 
-
+cout << "size " << size << endl;
+		return size;
+	}
 	//------------------------------------------------------------------------------
 	void StatePlay( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra, Pers& pers )
 	//------------------------------------------------------------------------------
@@ -163,21 +194,23 @@ struct Lab35::Impl
 
 			}
 
+			for ( int p = 0 ; p < MaxPlayer; p++ )
 			{
-				vect2 pos = vect2(12,5);
-				pers.grid.Print( gra, pers, pos, -30,-52, "NextStone" ); 
-				if ( sizeNextStone > 0 )
 				{
-					pers.grid.Circle( gra, pers, pos, sizeNextStone, 24, rgb(0,1,0) );
+					vect2 pos = vect2(12,4-p*4);
+					pers.grid.Print( gra, pers, pos, -30,-52, "NextStone" ); 
+					if ( sizeNextStone[p] > 0 )
+					{
+						pers.grid.Circle( gra, pers, pos, sizeNextStone[p], 24, colStone[p] );
+					}
 				}
-			}
 
+			}
 
 			
 			{
 					int ox = 14;
 					int oy = 2;
-					int total = 0;
 
 				for ( int i = 0 ; i < MaxRound ; i++ )
 				{
@@ -188,31 +221,38 @@ struct Lab35::Impl
 					gra.Print(x+i*2,y++, "--" );
 					
 				}
-
-				for ( int i = 0 ; i < numRound ; i++ )
-				{
-					int x = ox;
-					int y = oy+2;
-
-					int score = tblScore[i];
-					gra.Print(x+i*2,y++, to_string( score ) );
-					total += score;
+					{
+						int x = ox+MaxRound*2;;
+						int y = oy;
+						gra.Print(x,y++, "total");
+						gra.Print(x,y++, "-----" );
+					}
 					
-				}
+				for ( int p = 0 ; p < MaxPlayer ; p++ )
 				{
-					int x = ox+MaxRound*2;;
-					int y = oy;
-					gra.Print(x,y++, "total");
-					gra.Print(x,y++, "-----" );
-					gra.Print(x,y++, to_string( total ) );
-				}
+					int total = 0;
+					for ( int i = 0 ; i <= numRound ; i++ )
+					{
+						int x = ox;
+						int y = oy+2+p*2;
 
-				if ( flgClear == false )
-				{
-					int x = ox+numRound*2;
-					int y = oy+3;
-					gra.Print(x,y++, "^^" );
+						int score = tblScore[p][i];
+						gra.Print(x+i*2,y++, to_string( score ) );
+						total += score;
+						
+					}
+					{
+						int x = ox+MaxRound*2;;
+						int y = oy+p*2+2;
+						gra.Print(x,y++, to_string( total ) );
+					}
 				}
+					if ( flgClear == false )
+					{
+						int x = ox+numRound*2;
+						int y = oy+6;
+						gra.Print(x,y++, "^^" );
+					}
 			}
 		}
 
@@ -270,11 +310,11 @@ struct Lab35::Impl
 				if ( v.abs() > 0.1 )
 				{
 					// ストーン生成
-					this->tblStone.emplace_back( posCursor, sizeCursorStone, v*0.1 );
+					this->tblStone.emplace_back( posCursor, sizeCursorStone, numPlayer, v*0.1 );
 					sound.mml_play( "T1800O5V10c#cr");
 
 					// カーソルストーンに、ネクストストーンを設定
-					sizeCursorStone = sizeNextStone;
+					sizeCursorStone = sizeNextStone[numPlayer];
 					
 				}
 			
@@ -364,48 +404,56 @@ struct Lab35::Impl
 						}
 						o.point = score;
 						total_score += score;
-						
-
 					}
-						
-					tblScore[ numRound ] = total_score;
+					
+					for ( int p = 0 ; p < MaxPlayer ; p++ )
+					{
+						int score = 0;
+						for ( auto& o : this->tblStone )
+						{
+							if ( o.id == p ) score += o.point;
+						}
+						tblScore[p][ numRound ] = score;
+					}
 
+					//プレイヤーチェンジ
+					numPlayer++;
+
+					if ( numPlayer >= MaxPlayer )
+					{
+						numPlayer = 0;
+
+						// ラウンドアップ
+						numRound++;
+						if ( numRound >= MaxRound ) 
+						{
+							// クリア
+							flgClear = true;
+
+							// ハイスコア計算
+							int point = 0;
+							for ( auto a : tblScore[numPlayer] ) point += a;
+
+							if ( hiscore < point )
+							{
+								hiscore = point;
+								sound.mml_play( "T100v5o4c1-gcfcfgdg+c7r:v8o3g1eg+ca+c+db+d+g7r:v8o3e1ceafabgb+e7r");
+							
+	//							this->limWaitInput = 10;
+							}
+							
+
+						}
+
+						// ネクストストーンをランダムで決定
+						sizeNextStone[numPlayer] = 0.0;
+						if ( numRound < MaxRound-1 ) 
+						{
+							sizeNextStone[numPlayer] = this->GenStone();
+						}
+					}
 
 		
-					// ラウンドアップ
-					numRound++;
-					if ( numRound >= MaxRound ) 
-					{
-						// クリア
-						flgClear = true;
-
-						// ハイスコア計算
-						int point = 0;
-						for ( auto a : tblScore ) point += a;
-
-						if ( hiscore < point )
-						{
-							hiscore = point;
-							sound.mml_play( "T100v5o4c1-gcfcfgdg+c7r:v8o3g1eg+ca+c+db+d+g7r:v8o3e1ceafabgb+e7r");
-						
-//							this->limWaitInput = 10;
-						}
-						
-
-					}
-
-					// ネクストストーンをランダムで決定
-					sizeNextStone = 0.0;
-					if ( numRound < MaxRound-1 ) 
-					{
-				        std::random_device seed;
-				        std::mt19937    foo(seed());
-				        if ( (foo() % 3) == 0 ) sizeNextStone = 0.5;
-				        else
-				        if ( (foo() % 3) == 1 ) sizeNextStone = 1.5;
-				        else
-				        sizeNextStone = 1.0;
-					}
 					
 				}
 			}
@@ -490,7 +538,7 @@ struct Lab35::Impl
 		// 表示：カーソル
 		if ( flgInMove == false )
 		{
-			pers.grid.Circle( gra, pers, posCursor, sizeCursorStone, 24, rgb(0,1,0),2 );
+			pers.grid.Circle( gra, pers, posCursor, sizeCursorStone, 24, colStone[numPlayer],2 );
 //			gra.Pset2d( mouse.pos, rgb(0,1,1), 4 );
 		}
 		{
@@ -518,10 +566,10 @@ struct Lab35::Impl
 		// 表示：ストーン
 		for ( auto o : this->tblStone )
 		{
-			pers.grid.Circle( gra, pers,o.pos, o.radius, 24, rgb(1,1,1) );
+			pers.grid.Circle( gra, pers,o.pos, o.radius, 24, colStone[o.id],2 );
 			if ( o.point > 0 )
 			{
-				pers.grid.Print( gra, pers, o.pos,-4,4, to_string(o.point), rgb(1,1,1) );
+				pers.grid.Print( gra, pers, o.pos,-4,4, to_string(o.point), rgb(1,1,1)  );
 			}
 
 		}
