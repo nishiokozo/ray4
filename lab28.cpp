@@ -131,7 +131,7 @@ if(0)
 
 			pers.pen.Pset3d( gra, pers, v+vect3(t, N2(t-0)+N2(t-1)+N2(t-2) ,0), rgb(1,1,1), 1 );
 		}
-		for ( int t = 0 ; t <= tmax ; t++ )
+		for ( double t = 0 ; t <= tmax ; t++ )
 		{
 			pers.pen.Print3d( gra, pers, v0+vect3( t,0,0), 0,32, to_string(t) ); 
 		}
@@ -154,7 +154,7 @@ if(0)
 
 			pers.pen.Pset3d( gra, pers, v+vect3(t, N3(t-0)+N3(t-1)+N3(t-2)+N3(t-3) ,0), rgb(1,1,1)*c, 1 );
 		}
-		for ( int t = 0 ; t <= tmax ; t++ )
+		for ( double t = 0 ; t <= tmax ; t++ )
 		{
 			pers.pen.Print3d( gra, pers, v0+vect3( t,0,0), 0,32, to_string(t) ); 
 		}

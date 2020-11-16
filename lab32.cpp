@@ -95,7 +95,7 @@ void Lab32::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		string token;
 		Type	type = TYPE_NONE;
 		
-		for ( int i =0 ; i < text.length() ; i++ )
+		for ( int i =0 ; i < (signed)text.length() ; i++ )
 		{
 			char c = text[i]; 
 

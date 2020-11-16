@@ -122,7 +122,8 @@ void Lab30::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 		unique_ptr<Impl::Texture> pTmp(new Impl::Texture(gra.GetWidth(),gra.GetHeight()));
 		pImpl->pTexture = move(pTmp);
 
-		pImage = new GLubyte[gra.GetWidth()*gra.GetHeight()*4];
+		int adr =  gra.GetWidth()*gra.GetHeight()*4;
+		pImage = new GLubyte[adr];
 
    	}
 
@@ -134,15 +135,15 @@ void Lab30::Update( SysKeys& keys, SysMouse& mouse, SysSound& sound, SysGra& gra
 	{
 	   int i, j, c;
 
-		float step = 1.0;
+		int step = 1.0;
 		{
-			float width		= gra.GetWidth(); 
-			float height	= gra.GetHeight(); 
+			int width		= gra.GetWidth(); 
+			int height	= gra.GetHeight(); 
 
 	    
-			for( float py = 0 ; py < height ; py += step )
+			for( int py = 0 ; py < height ; py += step )
 			{
-				for( float px = 0 ; px < width ; px += step )
+				for( int px = 0 ; px < width ; px += step )
 				{
 
 						int tx = px;

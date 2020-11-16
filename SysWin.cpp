@@ -126,7 +126,7 @@ static LRESULT CALLBACK WinProc
 		case WM_CREATE:
 
 			//WM_TOUCH有効、迅速反応、1回タッチで1マウスクリック相当に是正される。必須。
-			RegisterTouchWindow( hWnd, TWF_WANTPALM );
+//			RegisterTouchWindow( hWnd, TWF_WANTPALM );
 
 			return 0;
 

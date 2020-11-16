@@ -67,12 +67,13 @@ FLGS = \
 	-std=c++17 \
 	-Werror \
 	-Wall -Wconversion -Wno-float-conversion -Wno-sign-conversion -Wno-implicit-float-conversion \
+	-Wno-conversion\
 	-Wno-unused\
 
 FILE=main.o
 
-CC	= clang++
-#CC	= g++
+#CC	= clang++
+CC	= g++
 
 $(TAR)	:	$(SRCS:.cpp=.o)
 	$(CC) -o $(TAR) $^ $(LIBS)

@@ -60,7 +60,7 @@ struct SysGra::Impl
 	//			    				  | FF_MODERN			// 全角日本語 対応
 				    				  | FF_SCRIPT 			// 全角日本語 対応
 				    					;
-		    PCTSTR pszFaceName		= NULL;					// フォント名
+		    LPCTSTR pszFaceName		= NULL;					// フォント名
 
 			hFont = CreateFont(
 				nHeight,
@@ -336,7 +336,7 @@ void SysGra::Wait()
 			int t=300;	
 			while( chrono::system_clock::now().time_since_epoch()-pImpl->time_st < chrono::microseconds(16000) )
 			{
- 				this_thread::sleep_for(chrono::microseconds(t));
+// 				this_thread::sleep_for(chrono::microseconds(t));
 			}
 		}
 		pImpl->time_en = chrono::system_clock::now().time_since_epoch(); 

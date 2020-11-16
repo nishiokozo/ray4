@@ -239,7 +239,7 @@ struct Lab33::Impl
 					word = "";
 				}
 				
-				while( idx < text.length() )
+				while( idx < (signed)text.length() )
 				{
 					char c = text[idx++]; 
 
@@ -312,7 +312,7 @@ struct Lab33::Impl
 					}
 				}
 			
-				return ( idx < text.length() );
+				return ( idx < (signed)text.length() );
 			}
 		};
 
